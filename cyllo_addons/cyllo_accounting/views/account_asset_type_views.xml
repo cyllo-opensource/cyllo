@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Deferred Revenue Types: Form view -->
+    <record id="view_account_asset_type_deferred_revenue_form" model="ir.ui.view">
+        <field name="name">view.account.asset.type.deferred.revenue.form</field>
+        <field name="model">account.asset.type</field>
+        <field name="arch" type="xml">
+            <form string="Deferred Revenue types">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name">Deferred Revenue Type</label>
+                        <h1>
+                            <field name="name" string="Deferred Revenue Type"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="account_id" help="Account for deferred revenue"
+                                   string="Deferred Revenue Account"
+                                   domain="[('account_type', '=', 'liability_current')]"/>
+                            <field name="expense_account_id" help="Account for recognizing the revenue"
+                                   string="Revenue Account"
+                                   domain="[('account_type', 'in', ('income', 'income_other'))]"/>
+                        </group>
+                        <group>
+                            <field name="computation_method"/>
+                            <field name="company_id" readonly="1"/>
+                            <field name="number_of_entries"/>
+                            <field name="period"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Deferred Revenue Types: Tree view -->
+    <record id="view_account_asset_type_deferred_revenue_tree" model="ir.ui.view">
+        <field name="name">view.account.asset.type.deferred.revenue.tree</field>
+        <field name="model">account.asset.type</field>
+        <field name="arch" type="xml">
+            <tree string="Deferred Revenue Types">
+                <field name="name" string="Deferred Revenue Type"/>
+                <field name="journal_id"/>
+                <field name="company_id"/>
+                <field name="account_id" string="Deferred Revenue Account"/>
+                <field name="expense_account_id" string="Revenue Account"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Deferred Revenue Types: Search view -->
+    <record id="view_account_asset_type_deferred_revenue_search" model="ir.ui.view">
+        <field name="name">view.account.asset.type.deferred.revenue.search</field>
+        <field name="model">account.asset.type</field>
+        <field name="arch" type="xml">
+            <search string="Deferred Revenue Types">
+                <field name="name"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Deferred Revenue Account" name="account_id"
+                            context="{'group_by':'account_id'}"/>
+                    <filter string="Revenue Account" name="expense_account_id"
+                            context="{'group_by':'expense_account_id'}"/>
+                    <filter string="Journal" name="journal_id" context="{'group_by':'journal_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Deferred Revenue Types: Window action -->
+    <record id="action_view_deferred_revenue_types" model="ir.actions.act_window">
+        <field name="name">Deferred Revenue types</field>
+        <field name="res_model">account.asset.type</field>
+        <field name="search_view_id" ref="view_account_asset_type_deferred_revenue_search"/>
+        <field name="domain">[('type', '=', 'revenue')]</field>
+        <field name="context">{'type': 'revenue', 'default_type': 'revenue'}</field>
+        <field name="view_ids" eval="[Command.clear(),
+            Command.create({'view_mode': 'tree', 'view_id': ref('view_account_asset_type_deferred_revenue_tree')}),
+            Command.create({'view_mode': 'form', 'view_id': ref('view_account_asset_type_deferred_revenue_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new deferred revenue type
+            </p>
+        </field>
+    </record>
+
+    <!-- Deferred Expense Types: Tree view -->
+    <record id="view_account_asset_type_deferred_expense_form" model="ir.ui.view">
+        <field name="name">view.account.asset.type.deferred.expense.form</field>
+        <field name="model">account.asset.type</field>
+        <field name="arch" type="xml">
+            <form string="Deferred Expense types">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name">Deferred Expense Type</label>
+                        <h1>
+                            <field name="name" string="Deferred Expense Type"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="account_id"
+                                   string="Deferred Expense Account"
+                                   help="Account for deferred expense"
+                                   domain="[('account_type', 'in', ('asset_current', 'asset_prepayments'))]"/>
+                            <field name="expense_account_id"
+                                   help="Account for recognizing the expense"
+                                   string="Expense Account"
+                                   domain="[('account_type', '=', 'expense')]"/>
+                        </group>
+                        <group>
+                            <field name="computation_method"/>
+                            <field name="company_id" readonly="1"/>
+                            <field name="number_of_entries"/>
+                            <field name="period"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Deferred Expense Types: Form view -->
+    <record id="view_account_asset_type_deferred_expense_tree" model="ir.ui.view">
+        <field name="name">view.account.asset.type.deferred.expense.tree</field>
+        <field name="model">account.asset.type</field>
+        <field name="arch" type="xml">
+            <tree string="Deferred Expense Types">
+                <field name="name" string="Deferred Expense Type"/>
+                <field name="journal_id"/>
+                <field name="company_id"/>
+                <field name="account_id" string="Deferred Expense Account"/>
+                <field name="expense_account_id" string="Deferred Expense Account"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Deferred Expense Types: Search view -->
+    <record id="view_account_asset_type_deferred_expense_search" model="ir.ui.view">
+        <field name="name">view.account.asset.type.deferred.expense.search</field>
+        <field name="model">account.asset.type</field>
+        <field name="arch" type="xml">
+            <search string="Deferred Expense Types">
+                <field name="name"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Deferred Expense Account" name="account_id"
+                            context="{'group_by':'account_id'}"/>
+                    <filter string="Expense Account" name="expense_account_id"
+                            context="{'group_by':'expense_account_id'}"/>
+                    <filter string="Journal" name="journal_id" context="{'group_by':'journal_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Deferred Expense Types: Window action -->
+    <record id="action_view_deferred_expense_types" model="ir.actions.act_window">
+        <field name="name">Deferred Expense types</field>
+        <field name="res_model">account.asset.type</field>
+        <field name="search_view_id" ref="view_account_asset_type_deferred_expense_search"/>
+        <field name="domain">[('type', '=', 'expense')]</field>
+        <field name="context">{'type': 'expense', 'default_type': 'expense'}</field>
+        <field name="view_ids" eval="[Command.clear(),
+            Command.create({'view_mode': 'tree', 'view_id': ref('view_account_asset_type_deferred_expense_tree')}),
+            Command.create({'view_mode': 'form', 'view_id': ref('view_account_asset_type_deferred_expense_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new deferred expense type
+            </p>
+        </field>
+    </record>
+</odoo>

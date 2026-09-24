@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <t t-name="trial_balanceReport"
+       t-inherit="cyllo_accounting.AccountingReportBase"
+       t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('cy_accounting_filters_sub')]"
+               position="inside">
+            <t t-call="trial_balanceHeaderButtons"/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_table_main-view')]" position="inside">
+            <div>
+                <div class="table_view_dfr table_view_dfr_tbr">
+                    <div>
+                        <div class="table_main_view">
+                             <table class="table cy_accounting_report_table">
+                                 <thead>
+                                    <tr class="o_heading">
+                                        <th colspan="6"/>
+                                        <th class="text-center">Initial Balance</th>
+                                        <th t-foreach="periodData" t-as="period" t-key="period_index"
+                                            class="text-center"
+                                            t-out="period"/>
+                                        <th class="text-center">End Balance</th>
+
+                                    </tr>
+                                     <tr class="h-1-rem o_heading">
+                                        <th colspan="6"/>
+                                         <th class="text-center">
+                                            <div class="row">
+                                                <div class="col-6">Debit</div>
+                                                <div class="col-6">Credit</div>
+                                            </div>
+                                        </th>
+                                         <th t-foreach="periodData" t-as="period" t-key="period_index"
+                                             class="text-center">
+                                            <div class="row">
+                                                <div class="col-6">Debit</div>
+                                                <div class="col-6">Credit</div>
+                                            </div>
+                                        </th>
+                                         <th class="text-center">
+                                            <div class="row">
+                                                <div class="col-6">Debit</div>
+                                                <div class="col-6">Credit</div>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                 <tbody>
+                                     <t t-foreach="state.data" t-as="data" t-key="data_index">
+                                         <t t-set="annotation"
+                                            t-value="data.account.annotations and data.account.annotations.hasOwnProperty(ledgerId) ? data.account.annotations[ledgerId] : ''"/>
+                                         <tr class="h-2-rem">
+                                             <th>
+                                                 <div class="d-flex">
+                                                     <t t-esc="data.account.name"/>
+                                                     <Dropdown class="'border_unset_button'">
+                                                         <t t-set-slot="toggler">
+                                                            <span class="mx-2 fa fa-caret-down"/>
+                                                         </t>
+                                                         <DropdownItem
+                                                                 onSelected="() => this.openGeneralLedger(data.account.id)">
+                                                                View General Ledger
+                                                         </DropdownItem>
+                                                         <DropdownItem
+                                                                 onSelected="() => this.onClickJournal(data.account.id)">
+                                                                View Items
+                                                         </DropdownItem>
+                                                         <DropdownItem
+                                                                 onSelected="() => this.openAnnotation(data.account.id, annotation, data.account.name)">
+                                                                Annotation
+                                                         </DropdownItem>
+                                                     </Dropdown>
+                                                     <div t-on-click="() => this.openAnnotation(data.account.id, annotation, data.account.name)"
+                                                          t-if="annotation" class="mx-2 cursor-pointer position-relative">
+                                                         <div class="cy-annotation-tooltip">
+                                                            <span class="ri-ball-pen-line"/>
+                                                         </div>
+                                                         <div class="cy-annotation-tooltip-content justify-content-around modal_background position-absolute"
+                                                              t-out="annotation"/>
+                                                     </div>
+                                                     <div class="mx-1 delete-on-h-show ri-delete-bin-6-line on-h-red cursor-pointer"
+                                                          t-if="annotation"
+                                                          t-on-click="() => this.removeAnnotation(data.account.id, data.account.name)"/>
+                                                 </div>
+                                             </th>
+                                             <th colspan="5"/>
+
+                                             <th class="text-center">
+                                                 <div class="row">
+                                                     <div class="col-6"><t t-esc="formatCurrency(data.initial_data.debit)"/></div>
+                                                     <div class="col-6"><t t-esc="formatCurrency(data.initial_data.credit)"/></div>
+                                                 </div>
+                                             </th>
+
+                                             <t t-foreach="data.values" t-as="value" t-key="value_index">
+                                                 <th class="text-center">
+                                                     <div class="row">
+                                                         <div class="col-6"><t t-esc="formatCurrency(value.debit)"/></div>
+                                                         <div class="col-6"><t t-esc="formatCurrency(value.credit)"/></div>
+                                                     </div>
+                                                 </th>
+                                             </t>
+                                             <th class="text-center">
+                                                 <div class="row">
+                                                     <div class="col-6"><t t-esc="formatCurrency(data.end_data.debit)"/></div>
+                                                     <div class="col-6"><t t-esc="formatCurrency(data.end_data.credit)"/></div>
+                                                 </div>
+                                             </th>
+                                         </tr>
+                                     </t>
+                                     <tr class="border-bottom cy-report-line-acc" style="border-spacing: 0 10px;">
+                                        <th>
+                                        <t/>
+                                            <b>Total</b>
+                                        </th>
+                                         <th colspan="5"/>
+                                         <th class="text-center">
+                                             <div class="row">
+                                                 <div class="col-6"><b><t t-esc="formatCurrency(state.total_common_data['initial_debit_sum'])"/></b></div>
+                                                 <div class="col-6"><b><t t-esc="formatCurrency(state.total_common_data['initial_credit_sum'])"/></b></div>
+                                             </div>
+                                         </th>
+                                         <t t-foreach="state.total_data" t-as="value" t-key="value_index">
+                                            <th class="text-center">
+                                                <div class="row">
+                                                    <div class="col-6"><b><t t-esc="formatCurrency(value.debit)"/></b></div>
+                                                    <div class="col-6"><b><t t-esc="formatCurrency(value.credit)"/></b></div>
+                                                </div>
+                                            </th>
+                                        </t>
+                                         <th class="text-center">
+                                             <div class="row">
+                                                 <div class="col-6"><b><t t-esc="formatCurrency(state.total_common_data['end_debit_sum'])"/></b></div>
+                                                 <div class="col-6"><b><t t-esc="formatCurrency(state.total_common_data['end_credit_sum'])"/></b></div>
+                                             </div>
+                                         </th>
+                                    </tr>
+                                 </tbody>
+                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

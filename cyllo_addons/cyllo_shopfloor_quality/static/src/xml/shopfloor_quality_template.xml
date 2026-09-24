@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="cyllo_shopfloor.ShopfloorTemplate"
+       owl="1"
+       t-inherit="cyllo_shopfloor.ShopfloorTemplate"
+       t-inherit-mode="extension">
+
+        <xpath expr="//div[hasclass('o_shopfloor_screen')]" position="inside">
+            <t t-if="qcState.showSidebar and qcState.activeMoId">
+                <QualityCheck resId="qcState.activeMoId" qualityCheckIds="qcState.activeCheckIds"/>
+            </t>
+        </xpath>
+
+        <xpath expr="//div[hasclass('card-footer')]" position="inside">
+            <t t-set="qc" t-value="qcState.byMo[group.production_id]"/>
+
+            <t t-if="(group.production_state == 'to_close' or group.production_state == 'done') and qc">
+
+                <t t-if="qc.qc_count">
+                    <button t-attf-class="btn btn-sm fw-bold me-2 {{ qc.qc_checked_count >= qc.qc_count ? 'btn-success' : (qc.qc_checked_count > 0 ? 'btn-warning text-dark' : 'btn-danger') }}"
+                            title="Open Quality Checks"
+                            t-on-click.stop="(ev) => this.openQualityCheck(group.production_id, ev)">
+                        <i class="fa fa-check-square-o me-1"/>
+                        QC<t t-esc="qc.qc_checked_count"/>/
+                        <t t-esc="qc.qc_count"/>
+                    </button>
+                </t>
+
+                <t t-elif="qc.is_quality_check">
+                    <button class="btn btn-sm btn-warning fw-bold me-2"
+                            title="Run Quality Check"
+                            t-on-click.stop="(ev) => this.openQualityCheck(group.production_id, ev)">
+                        <i class="fa fa-shield me-1"/>Quality Check
+                    </button>
+                </t>
+
+            </t>
+        </xpath>
+
+        <xpath expr="//div[hasclass('card-body')]//div[hasclass('dropdown')]/ul[hasclass('dropdown-menu')]"
+               position="inside">
+
+            <li t-if="group.production_state == 'to_close' or group.production_state == 'done' or group.production_state == 'progress'">
+                <button class="dropdown-item py-2"
+                        t-on-click="() => this.actionCreateQualityAlert(group.production_id)">
+                    <i class="fa fa-bell me-2 text-warning"/>
+                    Create Quality Alert
+                </button>
+            </li>
+
+        </xpath>
+
+    </t>
+
+</templates>

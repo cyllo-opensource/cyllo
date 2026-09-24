@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--    Category for Quality Module-->
+    <record id="ir_module_category_cyllo_quality_access" model="ir.module.category">
+        <field name="name">Quality</field>
+        <field name="description">Category for Cyllo Quality module</field>
+        <field name="sequence">26</field>
+    </record>
+    <!--  Quality User-->
+    <record id="group_cyllo_quality_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="cyllo_quality.ir_module_category_cyllo_quality_access"/>
+        <field name="implied_ids" eval="[Command.link(ref('base.group_user')),Command.link(ref('stock.group_stock_user'))]"/>
+    </record>
+
+    <!--    Quality Manger-->
+    <record id="group_cyllo_quality_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="cyllo_quality.ir_module_category_cyllo_quality_access"/>
+        <field name="implied_ids" eval="[Command.link(ref('cyllo_quality.group_cyllo_quality_user'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_admin'))]"/>
+    </record>
+
+    <!--    Record Rules for Multi Company on Quality Control Point-->
+    <record id="rule_quality_control_point_company" model="ir.rule">
+        <field name="name">Quality Control Point multi-company</field>
+        <field name="model_id" ref="model_quality_control_point"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_quality_check_company" model="ir.rule">
+        <field name="name">Quality Check multi-company</field>
+        <field name="model_id" ref="model_quality_check"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_quality_alert_company" model="ir.rule">
+        <field name="name">Quality Alert multi-company</field>
+        <field name="model_id" ref="model_quality_alert"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_quality_team_company" model="ir.rule">
+        <field name="name">Quality Team multi-company</field>
+        <field name="model_id" ref="model_quality_team"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+        <!--Record Rule for Quality Control Point Admin-->
+    <record id="rule_quality_check_admin" model="ir.rule">
+        <field name="name">Quality Check Admin Access</field>
+        <field name="model_id" ref="model_quality_check"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_quality.group_cyllo_quality_manager'))]"/>
+    </record>
+    <!--Record Rule for Quality Check-->
+    <record id="rule_quality_check_user_public" model="ir.rule">
+        <field name="name">Quality Check User Access</field>
+        <field name="model_id" ref="model_quality_check"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_quality.group_cyllo_quality_user'))]"/>
+    </record>
+    <!--Record Rule for Quality Alert-->
+    <record id="rule_quality_alert_admin" model="ir.rule">
+        <field name="name">Quality Alert Admin Access</field>
+        <field name="model_id" ref="model_quality_alert"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_quality.group_cyllo_quality_manager'))]"/>
+    </record>
+
+    <record id="rule_quality_alert_user_alert" model="ir.rule">
+        <field name="name">Quality Alert User Access</field>
+        <field name="model_id" ref="model_quality_alert"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_quality.group_cyllo_quality_user'))]"/>
+    </record>
+</odoo>

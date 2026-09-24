@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="subscription_shop_item" inherit_id="website_sale.products_item">
+        <xpath expr="//div[hasclass('product_price')]/span" position="attributes">
+            <attribute name="t-attf-class" add="{{'d-none' if product.is_subscription else ''}}" separator=" "/>
+        </xpath>
+
+        <xpath expr="//div[hasclass('product_price')]" position="inside">
+            <t t-if="product.is_subscription and product.sudo().time_based_ids">
+                <t t-set="sub_pricing" t-value="product.sudo().time_based_ids[0]"/>
+
+                <t t-set="converted_cost" t-value="sub_pricing.currency_id._convert(
+                sub_pricing.cost,
+                website.currency_id,
+                product.env.company,
+                datetime.date.today()
+            )"/>
+
+                <t t-set="final_price" t-value="converted_cost"/>
+                <t t-if="website.show_line_subtotals_tax_selection == 'tax_included'">
+                    <t t-set="taxes" t-value="product.taxes_id._filter_taxes_by_company(product.env.company)"/>
+                    <t t-set="final_price"
+                       t-value="taxes.compute_all(converted_cost, website.currency_id, 1, product=product)['total_included']"/>
+                </t>
+
+                <div class="subscription_price_display d-inline-block">
+                    <span class="h6 mb-0"
+                          t-out="final_price"
+                          t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                </div>
+            </t>
+        </xpath>
+    </template>
+    <template id="website_sale_subscription_options" inherit_id="website_sale.product">
+        <xpath expr="//form[@action='/shop/cart/update']" position="inside">
+            <t t-if="product.is_subscription">
+                <div class="mb-3">
+                    <t t-set="default_plan" t-value="product.sudo().time_based_ids[0] if product.sudo().time_based_ids else False"/>
+
+                    <div class="js_subscription_trial_container">
+                        <t t-foreach="product.sudo().time_based_ids" t-as="t_price">
+                            <t t-set="trial_history" t-value="website.env['subscription.trial.history'].sudo().search([
+                                            ('partner_id', '=', website.env.user.partner_id.id),
+                                            ('time_based_price_id', '=', t_price.id)
+                                        ], limit=1)"/>
+
+                            <div t-if="not trial_history and t_price.trial_period>0"
+                                 t-attf-class="alert alert-info py-2 mb-2 js_trial_highlight_box {{'d-none' if default_plan and t_price.id != default_plan.id else ''}}"
+                                 t-att-data-plan-id="t_price.id"
+                                 role="alert">
+                                <i class="fa fa-clock-o me-1"/>
+                                Includes
+                                <strong>
+                                    <t t-out="t_price.trial_period"/>
+                                    <t t-out="t_price.trial_unit"/>
+                                </strong>
+                                <t t-if="t_price.trial_pricing_type == 'percentage_discount'">
+                                    trial at <strong><t t-out="t_price.trial_percentage"/>%</strong> discount!
+                                </t>
+                                <t t-else="">
+                                    <t t-set="final_trial_price" t-value="t_price.trial_value"/>
+                                    <t t-if="final_trial_price == 0.00">
+                                      free trial!
+                                    </t>
+                                    <t t-else="">
+                                        trial for only
+                                        <strong>
+                                            <span t-out="final_trial_price"
+                                                  t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                                        </strong>!
+                                    </t>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                    <t t-set="curr_website_currency" t-value="website.currency_id"/>
+                    <t t-set="today" t-value="datetime.date.today()"/>
+                    <select name="time_based_price_id"
+                            class="form-select form-select-sm js_subscription_plan_select" required="True">
+                        <t t-foreach="product.sudo().time_based_ids" t-as="t_price">
+                            <t t-set="converted_cost"
+                               t-value="t_price.currency_id._convert(t_price.cost, curr_website_currency, product.env.company, today)"/>
+                            <t t-set="display_cost" t-value="converted_cost"/>
+                            <t t-if="website.show_line_subtotals_tax_selection == 'tax_included'">
+                                <t t-set="taxes"
+                                   t-value="product.taxes_id._filter_taxes_by_company(product.env.company)"/>
+                                <t t-set="display_cost"
+                                   t-value="taxes.compute_all(converted_cost, curr_website_currency, 1, product=product)['total_included']"/>
+                            </t>
+
+                            <option t-att-value="t_price.id"
+                                    t-att-data-price="display_cost"
+                                    t-att-data-duration="t_price.duration"
+                                    t-att-data-unit="t_price.subscription_unit">
+                                <t t-out="t_price.name"/>
+                                (
+                                <t t-out="display_cost"
+                                   t-options="{'widget': 'monetary', 'display_currency': curr_website_currency}"/>/
+                                <t t-if="t_price.duration>1">
+                                    <t t-out="t_price.duration"/>
+                                </t>
+                                <t t-out="t_price.subscription_unit"/>
+                                )
+                            </option>
+                        </t>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date"
+                           name="end_date"
+                           class="form-control"
+                           required="required"
+                           t-att-min="datetime.date.today().strftime('%Y-%m-%d')"/>
+                </div>
+                <input type="hidden" name="add_qty" value="1"/>
+            </t>
+        </xpath>
+    </template>
+    <template id="subscription_product_price" inherit_id="website_sale.product_price">
+        <xpath expr="//h3[hasclass('css_editable_mode_hidden')]" position="inside">
+            <t t-if="product.is_subscription and product.sudo().time_based_ids">
+                <t t-set="default_plan" t-value="product.sudo().time_based_ids[0]"/>
+                <span class="subscription_duration_label_container oe_currency_value">
+                    /
+                    <t t-if="default_plan.duration > 1"><t t-out="default_plan.duration"/> </t>
+                    <t t-if="default_plan.subscription_unit == 'months'">Month<t t-if="default_plan.duration > 1">s</t></t>
+                    <t t-elif="default_plan.subscription_unit == 'years'">Year<t t-if="default_plan.duration > 1">s</t></t>
+                    <t t-elif="default_plan.subscription_unit == 'weeks'">Week<t t-if="default_plan.duration > 1">s</t></t>
+                    <t t-elif="default_plan.subscription_unit == 'days'">Day<t t-if="default_plan.duration > 1">s</t></t>
+                </span>
+            </t>
+        </xpath>
+    </template>
+    <template id="cart_lines_subscription" inherit_id="website_sale.cart_lines">
+        <xpath expr="//t[@t-call='website_sale.cart_line_product_link']" position="after">
+            <t t-if="line.time_based_price_id">
+                <div class="text-muted small mt-1">
+                    Plan:
+                    <t t-out="line.time_based_price_id.name"/>
+                </div>
+                <t t-set="is_trial"
+               t-value="line.trial_end and line.trial_end &gt; datetime.datetime.now()"/>
+
+                <t t-if="is_trial and line.time_based_price_id.trial_period &gt; 0">
+                    <t t-set="plan" t-value="line.time_based_price_id"/>
+                    
+                    <t t-set="trial_price" t-value="0.0"/>
+                    <t t-if="not plan.trial_pricing_type or plan.trial_pricing_type == 'free'">
+                        <t t-set="trial_price" t-value="0.0"/>
+                    </t>
+                    <t t-elif="plan.trial_pricing_type == 'fixed_price'">
+                        <t t-set="trial_price" t-value="plan.trial_value"/>
+                    </t>
+                    <t t-elif="plan.trial_pricing_type == 'percentage_discount'">
+                        <t t-set="trial_price"
+                           t-value="line.price_unit * (1 - plan.trial_percentage / 100.0)"/>
+                    </t>
+
+                    <!-- Show tax-inclusive trial price if website is tax included -->
+                    <t t-if="website.show_line_subtotals_tax_selection == 'tax_included'">
+                        <t t-set="taxes"
+                           t-value="line.tax_id.compute_all(
+                               trial_price,
+                               currency=website.currency_id,
+                               quantity=1,
+                               product=line.product_id,
+                               partner=website_sale_order.partner_id
+                           )"/>
+                        <t t-set="trial_price" t-value="taxes['total_included']"/>
+                    </t>
+
+                    <div class="text-success small mt-1">
+                        Trial Price (1 Qty):
+                        <span t-out="trial_price"
+                              t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                    </div>
+                </t>
+            </t>
+        </xpath>
+        <xpath expr="//div[@name='website_sale_cart_line_price']" position="inside">
+            <t t-if="line.time_based_price_id">
+                <span class="text-muted small d-inline-block ms-1" style="font-weight: normal;">
+                    / <t t-if="line.time_based_price_id.duration > 1"><t t-out="line.time_based_price_id.duration"/> </t>
+                    <t t-if="line.time_based_price_id.subscription_unit == 'months'">Month<t t-if="line.time_based_price_id.duration > 1">s</t></t>
+                    <t t-elif="line.time_based_price_id.subscription_unit == 'years'">Year<t t-if="line.time_based_price_id.duration > 1">s</t></t>
+                    <t t-elif="line.time_based_price_id.subscription_unit == 'weeks'">Week<t t-if="line.time_based_price_id.duration > 1">s</t></t>
+                    <t t-elif="line.time_based_price_id.subscription_unit == 'days'">Day<t t-if="line.time_based_price_id.duration > 1">s</t></t>
+                </span>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="total_trial_mask" inherit_id="website_sale.total">
+        <xpath expr="//tr[@id='order_total_untaxed']//span[@t-field='website_sale_order.amount_untaxed']"
+               position="replace">
+            <t t-set="trial_data" t-value="website_sale_order._get_subscription_trial_offset()"/>
+            <span class="monetary_field" style="white-space: nowrap;">
+                   <t t-out="website_sale_order.amount_untaxed + trial_data[2]"
+                   t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
+            </span>
+        </xpath>
+        <xpath expr="//tr[@id='order_total_taxes']" position="before">
+            <t t-set="trial_data" t-value="website_sale_order._get_subscription_trial_offset()"/>
+            <t t-set="trial_product"
+               t-value="website.env.ref('cyllo_subscription.product_trial_discount', raise_if_not_found=False)"/>
+            <tr t-if="trial_data[2] &gt; 0" id="order_total_trial_discount" class="text-success">
+                <td colspan="2" class="border-0 ps-0 pt-0 pb-3">
+                    Trial Discount
+                </td>
+                <td class="text-end border-0 pe-0 pt-0 pb-3">
+                    -
+                    <span t-esc="trial_data[2]"
+                          t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+
+    <template id="cart_summary_express_checkout_hide" inherit_id="website_sale.checkout_layout">
+        <xpath expr="//t[@t-call='payment.express_checkout']" position="replace">
+            <t t-if="website_sale_order.amount_total &gt; 0">
+                <t t-call="payment.express_checkout"/>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>
+
+
+
+

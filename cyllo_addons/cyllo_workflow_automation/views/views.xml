@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form view -->
+        <record id="view_work_function_form" model="ir.ui.view">
+            <field name="name">work.function.form</field>
+            <field name="model">work.function</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="model_id"/>
+                            <field name="func_name" widget="charSelection"/>
+                            <field name="decorator" invisible="1"/>
+                            <field name="has_return" invisible="1"/>
+                            <field name="mode" readonly="1"/>
+                            <field name="trigger_type"/>
+                            <field name="company_id"/>
+                            <field name="icon"/>
+                        </group>
+                        <notebook>
+                            <page string="Manual" invisible="1">
+                                <field name="make_function"
+                                       widget="code"
+                                       options="{'mode': 'python'}"/>
+                            </page>
+                            <page string="Auto" invisible="trigger_type in ['field_change', 'time']">
+                                <field name="c_make_function"
+                                       widget="code"
+                                       options="{'mode': 'python'}"/>
+                            </page>
+                            <page string="Args" invisible="1">
+                                <field name="arg_ids">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="ttype"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Process Args" invisible="1">
+                                <field name="process_ids">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="value"/>
+                                        <field name="is_before"/>
+                                        <field name="is_after"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree view -->
+        <record id="view_work_function_tree" model="ir.ui.view">
+            <field name="name">work.function.tree</field>
+            <field name="model">work.function</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="func_name"/>
+                    <field name="model_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_work_function" model="ir.actions.act_window">
+            <field name="name">Work Functions</field>
+            <field name="res_model">work.function</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_work_function_tree"/>
+        </record>
+        <!-- Form view -->
+        <record id="view_work_auto_form" model="ir.ui.view">
+            <field name="name">work.auto.form</field>
+            <field name="model">work.auto</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="function_id"/>
+                            <field name="model_id"/>
+                            <field name="ttype"/>
+                            <field name="trigger_type"/>
+                            <field name="company_id"/>
+                            <field name="active" invisible="1"/>
+                            <field name="is_reusable"/>
+                        </group>
+                        <notebook>
+                            <page string="Code">
+                                <field name="code"
+                                       widget="code"
+                                       options="{'mode': 'python'}"/>
+                            </page>
+                            <page string="On Change" invisible="trigger_type != 'field_change'">
+                                <field name="field_id"/>
+                            </page>
+                            <page string="Time" invisible="trigger_type != 'time'">
+                                <group>
+                                    <field name="time_trigger_mode"/>
+                                    <field name="time_trigger_month" invisible="time_trigger_mode != 'year'"/>
+                                    <field name="time_trigger_weekday" invisible="time_trigger_mode != 'week'"/>
+                                    <field name="time_trigger_day" invisible="time_trigger_mode in ['day', 'hour', 'week']"/>
+                                    <field name="time_trigger_time" help="Enter time as decimal hours (e.g. 14.5 = 14:30)"/>
+                                    <field name="schedule_id" readonly="1"
+                                           help="Linked scheduled action. Created automatically on save."/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree view -->
+        <record id="view_work_auto_workflowCard" model="ir.ui.view">
+            <field name="name">work.auto.workflowCard</field>
+            <field name="model">work.auto</field>
+            <field name="arch" type="xml">
+                <workflowCard>
+                    <field name="name"/>
+                    <field name="function_id"/>
+                    <field name="model_id"/>
+                    <field name="trigger_function_ids"/>
+                    <field name="is_record_saved"/>
+                    <field name="active"/>
+                    <field name="is_reusable"/>
+                    <field name="reuse_scope"/>
+                </workflowCard>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_work_auto" model="ir.actions.act_window">
+            <field name="name">Automation Rules</field>
+            <field name="res_model">work.auto</field>
+            <field name="view_mode">workflowCard,tree,form</field>
+            <field name="view_id" ref="view_work_auto_workflowCard"/>
+        </record>
+
+        <!-- Menu item -->
+        <menuitem id="menu_workflow" web_icon="cyllo_workflow_automation,static/description/workflow-beta.svg"
+                  name="WorkFlow Automation" sequence="20" groups="group_workflow_automation_admin"/>
+        <menuitem id="menu_work_function_list" name="Triggers" sequence="22" parent="menu_workflow"
+                  action="action_work_function"/>
+        <menuitem id="menu_work_auto_list" name="Automations" parent="menu_workflow" sequence="21"
+                  action="action_work_auto"/>
+
+        <!--    Search view    -->
+        <record id="work_auto_search_view" model="ir.ui.view">
+            <field name="name">work.auto.search</field>
+            <field name="model">work.auto</field>
+            <field name="arch" type="xml">
+                <search string="name">
+                    <field name="name" string="Name"/>
+                    <field name="model_id" string="Model"/>
+                    <filter string="Archived" name="state"
+                            domain="[('active','=', False)]"/>
+                    <filter string="UnArchived" name="state"
+                            domain="[('active','=', True)]"/>
+                    <filter string="Function" name="function"
+                        context="{'group_by':'function_id'}"/>
+                </search>
+            </field>
+        </record>
+    </data>
+</odoo>

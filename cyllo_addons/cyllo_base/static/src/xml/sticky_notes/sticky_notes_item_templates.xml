@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template xml:space="preserve">
+    <!-- Create sticky note template from systray-->
+    <t t-name="StickyNotesItem" owl="1">
+        <div class="sticky" id="sticky_note"
+             t-att-style="'position: relative;padding: 25px; border-radius: 10px; min-height: 160px; word-wrap: break-word; background-color: ' + this.state.edit_color">
+            <div class="note-date"
+                 style="position: absolute; top: 8px; left: 10px; cursor: pointer;">
+                <p style="float: right;padding-top:3px;">
+                    <span t-esc="props.create_date"/>
+                </p>
+            </div>
+            <div t-if="props.show_remove" class="o_remove"
+                 t-on-click="() => this._remove(props.id)"
+                 style="position: absolute; top: 8px; right: 10px; cursor: pointer;">
+                <i class="fa fa-times"/>
+            </div>
+            <div t-if="props.is_edit" class="o_cancel_edit"
+                 t-on-click="() => this._cancel_edit(props.id)"
+                 style="position: absolute; top: 8px; right: 10px; cursor: pointer;">
+                <i class="fa fa-times-circle"
+                   style="color: red; font-size: 18px;"/>
+            </div>
+            <h2 class="note-heading mt-3">
+                <input type="text" t-ref="titleRef"
+                       t-att-value="this.state.title"
+                       t-on-input="(ev) => this.state.title = ev.target.value"
+                       t-att-readonly="props.is_edit ? null : 'readonly'"
+                       class="form-control"
+                       t-att-style="'background-color: ' + this.state.edit_color + ';border: ' + (props.is_edit ? '1px solid #fff' : 'none') + ';'"/>
+            </h2>
+            <p class="note-description">
+                <textarea t-ref="descRef" class="form-control"
+                          t-att-readonly="props.is_edit ? null : 'readonly'"
+                          t-att-style="'background-color: ' + this.state.edit_color + ';border: ' + (props.is_edit ? '1px solid #fff' : 'none') + ';'">
+                    <t t-esc="props.description"/>
+                </textarea>
+            </p>
+            <div t-if="props.is_edit" t-ref="colorRef"
+                 class="d-flex p-3 text-white color_pallets">
+                <div class="p-2 o_pallet_block" role="button"
+                     style="background-color: #fddcb4;"
+                     t-on-click="(ev) => this.click_pallet(ev)"/>
+                <div class="p-2 o_pallet_block" role="button"
+                     style="background-color: #a1ef9b;"
+                     t-on-click="(ev) => this.click_pallet(ev)"/>
+                <div class="p-2 o_pallet_block" role="button"
+                     style="background-color: #ffafdf;"
+                     t-on-click="(ev) => this.click_pallet(ev)"/>
+                <div class="p-2 o_pallet_block" role="button"
+                     style="background-color: #d7afff;"
+                     t-on-click="(ev) => this.click_pallet(ev)"/>
+                <div class="p-2 o_pallet_block" role="button"
+                     style="background-color: #9edfff;"
+                     t-on-click="(ev) => this.click_pallet(ev)"/>
+                <div class="p-2 o_pallet_block" role="button"
+                     style="background-color: #e0e0e0;"
+                     t-on-click="(ev) => this.click_pallet(ev)"/>
+                <div class="p-2 o_pallet_block" role="button"
+                     style="background-color: #bc7bf5;"
+                     t-on-click="(ev) => this.click_pallet(ev)"/>
+            </div>
+            <div style="display:flex;margin-top:40px;">
+                <div t-if="!props.is_edit"
+                     class="o_edit border bg-white sticky"
+                     t-on-click="() => this._item_edit(props.id)"
+                     style="width:35px;height:35px;position: absolute; bottom: 10px; right: 0px; cursor: pointer;padding:5px;border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="ri-pencil-line"
+                       t-att-style="'font-weight: bold;color:red;font-size:15px;color: ' + this.state.edit_color + ';'"/>
+                </div>
+                <div t-else="" class="o_edit border bg-white sticky"
+                     t-on-click="() => this._item_save(props.id)"
+                     style="width:35px;height:35px;position: absolute; bottom: 10px; right: 0px; cursor: pointer;padding:5px;border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa fa-cloud-upload fa-fw"
+                       t-att-style="'font-weight: bold;color:red;font-size:15px;color: #080808;'"/>
+                </div>
+            </div>
+        </div>
+        <br/>
+    </t>
+</template>

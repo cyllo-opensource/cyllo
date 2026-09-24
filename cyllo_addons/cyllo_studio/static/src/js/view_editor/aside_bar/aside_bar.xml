@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.AsideBar">
+        <div class="cy-side-menu view_overall_light" t-ref="sideMenu"
+            t-att-class="(state.entering ? 'cy-entering' : '')">
+            <!-- Inner wrapper: fixed 320px, slides/fades. Outer drives layout reflow. -->
+            <div class="cy-side-menu-inner">
+                <div class="cy-tab-header">
+                    <div class="cy-tab-pill">
+                        <div t-if="!(props.ButtonDetails and props.ButtonDetails.newButton)"
+                            class="cy-window-view">
+                            <button t-on-click="(ev)=> this.props.handleView(ev)"
+                                t-att-disabled="props.ButtonDetails and props.ButtonDetails.newButton"
+                                class="cy-nav__link"
+                                t-att-class="state.type === 'View' ? 'active' : ''">View</button>
+                        </div>
+                        <div t-if="propsType">
+                            <button class="cy-nav__link" t-att-class="propsType ? 'active' : ''">
+                                <t t-if="props.ButtonDetails and props.ButtonDetails.newButton">Add</t>
+                                <t t-else="">Properties</t>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="cy-close-pill" t-on-click="() => this.closeSidebar()">
+                        <i class="ri-close-line"></i>
+                    </div>
+                </div>
+                <div t-if="propsType and showTypeDropdown" class="dropdown-checkbox-container"
+                    style="margin: 16px 16px 0">
+                    <label class="cy-navbar_label customCheckbox-label" for="onStyle">Type
+                    </label>
+                    <div class="cy-studio-custom-dropdown">
+                        <CylloStudioDropdown onChange="(value) => this.FieldTypeChange(value)"
+                            options="fieldType" defaultValue="defaultFieldType" />
+                    </div>
+                </div>
+                <t t-if="state.type === 'Properties'">
+                    <FieldProperties t-props="fieldPropertiesProps" />
+                </t>
+                <t t-if="state.type === 'View'">
+                    <OverallView t-props="OverallProps" />
+                </t>
+                <t t-if="state.type === 'ButtonProperties'">
+                    <ButtonProperties t-props="ButtonPropertiesProps"/>
+                </t>
+                <t t-if="state.type === 'KanbanFieldProperties'">
+                    <KanbanFieldProperties t-props="KanbanFieldPropertiesProps" />
+                </t>
+                <t t-if="state.type === 'ribbon' and props.viewDetails.viewType === 'form'">
+                    <RibbonProperties t-props="FormRibbonProps" />
+                </t>
+                <t t-if="state.type === 'ribbon' and props.viewDetails.viewType === 'kanban'">
+                    <RibbonProperties t-props="KanbanComponentProps" />
+                </t>
+                <t t-if="state.type === 'button'">
+                    <ButtonProperties t-props="KanbanComponentProps" />
+                </t>
+                <t
+                    t-if="state.type === 'text' and props.viewDetails.viewType === 'form' and !props.kanbanComponent">
+                    <TextProperties t-props="SiblingTextProps" />
+                </t>
+                <t t-elif="state.type === 'text'">
+                    <TextProperties t-props="KanbanSpanProps" />
+                </t>
+                <t t-if="state.type === 'notebook_details'">
+                    <PageProperties t-props="noteBookPropertiesProps" />
+                </t>
+                <t t-if="state.type === 'SmartButtonProperties'">
+                    <SmartButtonProperties t-props="SmartButtonPropertiesProps" />
+                </t>
+                <t t-if="props.type === 'ExistingFieldProperties'">
+                    <ExistingFieldProperties t-props="ExistingFieldPropertiesProps" />
+                </t>
+                <t t-if="props.type === 'KanbanDivProperties'">
+                    <DivProperties t-props="KanbanDivPropertiesProps" />
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

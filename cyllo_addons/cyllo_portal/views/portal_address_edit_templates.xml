@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="request_submit_template" name="Submit Request">
+        <t t-call="portal.frontend_layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <section class="s_text_block pt40 pb40 o_colored_level "
+                         data-snippet="s_text_block">
+                    <div class="container s_allow_columns">
+                        <div class="row d-flex justify-content-center">
+                            <center>
+                                <div>
+                                    <span class="d-block fa fa-4x fa-thumbs-up mx-auto rounded-circle bg-primary"/>
+                                    <br/>
+                                    <h1 class="text-center">Thank You!</h1>
+                                    <div class="pb16 pt16 s_hr"
+                                         data-snippet="s_hr"
+                                         data-name="Separator">
+                                        <hr class="mx-auto border-top w-50 border-dark text-center"/>
+                                    </div>
+                                    <p class="lead">Your request has been
+                                        successfully submitted.
+                                    </p>
+                                    <a t-att-href="url" t-if="url">Back to
+                                        Requests
+                                    </a>
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+    <!-- Template to Edit Added Address-->
+    <template id="portal_address_edit_template">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container oe_website_sale py-2">
+                    <div class="row">
+                        <div class="col-12"/>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-lg-8 order-xl-1 oe_cart">
+                            <div class="portal_address_add_temp">
+                                <h2 class="o_page_header mt8">Edit your
+                                    Address
+                                </h2>
+                                <form t-attf-action="/address/save_changes?res_id={{partner.id}}"
+                                      method="post">
+                                    <div class="row">
+                                        <div class="mb-3 col-lg-12 div_name">
+                                            <label class="col-form-label"
+                                                   for="name">Name
+                                            </label>
+                                            <input type="text"
+                                                   name="name_address"
+                                                   class="form-control"
+                                                   required="1"
+                                                   t-att-value="partner.name"/>
+                                        </div>
+                                        <div class="w-100"/>
+                                        <div class="mb-3 col-lg-6"
+                                             id="div_email">
+                                            <label class="col-form-label"
+                                                   for="email">Email
+                                            </label>
+                                            <input type="email" name="email"
+                                                   class="form-control"
+                                                   t-att-value="partner.email"/>
+                                        </div>
+                                        <div class="mb-3 col-lg-6"
+                                             id="div_phone">
+                                            <label class="col-form-label"
+                                                   for="phone">Phone
+                                            </label>
+                                            <input type="tel" name="phone"
+                                                   class="form-control"
+                                                   t-att-value="partner.phone"/>
+                                        </div>
+                                        <div class="w-100"/>
+                                        <div class="mb-3 col-lg-12 div_street">
+                                            <label class="col-form-label"
+                                                   for="street">Street
+                                                <span class="d-none d-md-inline">
+                                                    and Number
+                                                </span>
+                                            </label>
+                                            <input type="text"
+                                                   name="street_and_number"
+                                                   class="form-control"
+                                                   t-att-value="partner.street"/>
+                                        </div>
+                                        <div class="mb-3 col-lg-12 div_street2">
+                                            <label class="col-form-label label-optional"
+                                                   for="street2">Street 2
+                                            </label>
+                                            <input type="text" name="street2"
+                                                   class="form-control"
+                                                   t-att-value="partner.street2"/>
+                                        </div>
+                                        <div class="w-100"/>
+                                        <div class="mb-3 col-md-4 div_zip">
+                                            <label class="col-form-label label-optional"
+                                                   for="zip">Zip Code
+                                            </label>
+                                            <input type="text" name="zipcode"
+                                                   class="form-control"
+                                                   t-att-value="partner.zip"/>
+                                        </div>
+                                        <div class="mb-3 col-md-8 div_city">
+                                            <label class="col-form-label"
+                                                   for="city">City
+                                            </label>
+                                            <input type="text" name="city"
+                                                   class="form-control"
+                                                   t-att-value="partner.city"/>
+                                        </div>
+                                        <div class="w-100"/>
+                                        <div class="mb-3 col-lg-6 div_country">
+                                            <label class="col-form-label"
+                                                   for="country_id">Country
+                                            </label>
+                                            <select id="country"
+                                                    name="country_id"
+                                                    class="form-select country">
+                                                <option value="">Country...
+                                                </option>
+                                                <t t-foreach="countries or []"
+                                                   t-as="c">
+                                                    <option t-att-value="c.id"
+                                                            t-att-selected="c.id == partner.country_id.id">
+                                                        <t t-esc="c.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3 col-lg-6 div_state">
+                                            <label class="col-form-label"
+                                                   for="state_id">State /
+                                                Province
+                                            </label>
+                                            <select id="state" name="state_id"
+                                                    class="form-select">
+                                                <option value="">State /
+                                                    Province...
+                                                </option>
+                                                <t t-foreach="states or []"
+                                                   t-as="s">
+                                                    <option t-att-value="s.id"
+                                                            t-att-selected="s.id == partner.state_id.id">
+                                                        <t t-esc="s.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="w-100"/>
+                                        <div class="d-flex justify-content-between">
+                                            <a role="button"
+                                               href="/your_address"
+                                               class="btn btn-secondary mb32">
+                                                <i class="oi oi-chevron-left"/>
+                                                <span>Back</span>
+                                            </a>
+                                            <button type="submit"
+                                                    t-attf-class="btn btn-primary mb32 a-submit a-submit-disable a-submit-loading">
+                                                <span>Save Changes</span>
+                                                <i class="oi oi-chevron-right"/>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

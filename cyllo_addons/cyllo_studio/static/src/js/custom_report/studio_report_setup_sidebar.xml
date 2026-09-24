@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="custom_report.preview_sidebar">
+        <div class="modern-preview-sidebar d-flex flex-column">
+            <!-- Report Identity -->
+            <div class="props-group mt-2">
+                <label class="modern-label mb-2 d-block">Report Name</label>
+                <div class="modern-input-wrapper mb-3">
+                    <i class="ri-article-line input-icon"/>
+                    <input type="text" class="modern-input form-control"
+                        placeholder="Report Name..."
+                        t-att-value="state.reportInfo.name"
+                        t-on-change="(ev) => this.onReportPropertyChange('name', ev.target.value)"/>
+                </div>
+
+                <label class="modern-label mb-2 d-block mt-3">Paper Format</label>
+                <div class="modern-input-wrapper cy-studio-custom-dropdown">
+                    <CylloStudioDropdown
+                            options="paperFormatOptions"
+                            defaultValue="state.reportInfo.paperformat_id"
+                            onChange="(value) => this.onReportPropertyChange('paperformat_id', value)"
+                            searchable="true"
+                            width="'100%'"
+                    />
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div class="props-group">
+                <label class="modern-label mt-3 mb-2 d-block">Options</label>
+
+                <div class="modern-toggle-card mb-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="modern-toggle-card-heading">Print Menu</div>
+                            <div class="modern-toggle-card-subtitle" style="font-size: 10px;">Visible in standard menu</div>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input custom-switch" type="checkbox" id="showPrintMenu"
+                                   t-att-checked="true" disabled="1"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modern-toggle-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="modern-toggle-card-heading">Save Attachment</div>
+                            <div class="modern-toggle-card-subtitle" style="font-size: 10px;">Cache rendered PDF logic</div>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input custom-switch" type="checkbox" id="reloadAttach"
+                                   t-att-checked="state.reportInfo.attachment_use"
+                                   t-on-change="(ev) => this.onReportPropertyChange('attachment_use', ev.target.checked)"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Action Buttons -->
+            <div class="action-buttons d-flex flex-column gap-2">
+                <button class="btn btn-primary w-100" t-on-click="onEditSources">
+                    <i class="ri-code-s-slash-line me-1"/>
+                    <span>Edit Sources</span>
+                </button>
+                <button class="btn btn-danger w-100" t-on-click="onResetReport">
+                    <i class="ri-refresh-line me-1"/>
+                    <span>Reset Report</span>
+                </button>
+            </div>
+
+            <div class="flex-grow-1"/>
+        </div>
+    </t>
+</templates>

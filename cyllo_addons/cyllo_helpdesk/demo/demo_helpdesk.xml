@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================
+             Demo: helpdesk.category
+        ============================================================ -->
+
+        <record id="demo_category_technical" model="helpdesk.category">
+            <field name="name">Technical Issue</field>
+            <field name="description">&lt;p&gt;Software bugs, API failures, and platform-related technical problems.&lt;/p&gt;</field>
+        </record>
+
+        <record id="demo_category_billing" model="helpdesk.category">
+            <field name="name">Billing &amp; Payments</field>
+            <field name="description">&lt;p&gt;Invoice disputes, refund requests, duplicate charges, and payment issues.&lt;/p&gt;</field>
+        </record>
+
+        <record id="demo_category_account" model="helpdesk.category">
+            <field name="name">Account &amp; Access</field>
+            <field name="description">&lt;p&gt;Login issues, password resets, and user permission management.&lt;/p&gt;</field>
+        </record>
+
+        <record id="demo_category_general" model="helpdesk.category">
+            <field name="name">General Inquiry</field>
+            <field name="description">&lt;p&gt;General questions, feature requests, and feedback.&lt;/p&gt;</field>
+        </record>
+
+        <record id="demo_helpdesk_customer" model="res.partner">
+            <field name="name">Helpdesk Demo Customer</field>
+            <field name="email">helpdesk.demo@example.com</field>
+        </record>
+
+        <!-- ============================================================
+             Demo: helpdesk.team
+        ============================================================ -->
+
+        <record id="demo_team_customer_support" model="helpdesk.team">
+            <field name="name">Customer Support</field>
+            <field name="description">&lt;p&gt;General customer support team handling all incoming queries and complaints.&lt;/p&gt;</field>
+            <field name="color">1</field>
+            <field name="assignment_method">round_robin</field>
+            <field name="customer_rating" eval="True"/>
+            <field name="use_sla" eval="True"/>
+            <field name="use_timesheet" eval="True"/>
+            <field name="use_email_alias" eval="True"/>
+            <field name="use_website_ticket_creation" eval="True"/>
+            <field name="use_confirmation_email" eval="True"/>
+            <field name="auto_close_days">15</field>
+            <field name="auto_close_reminder_days">3</field>
+        </record>
+
+        <record id="demo_team_technical_support" model="helpdesk.team">
+            <field name="name">Technical Support</field>
+            <field name="description">&lt;p&gt;Handles technical issues, bugs, and integration problems reported by customers.&lt;/p&gt;</field>
+            <field name="color">3</field>
+            <field name="assignment_method">skill</field>
+            <field name="customer_rating" eval="True"/>
+            <field name="use_sla" eval="True"/>
+            <field name="use_timesheet" eval="True"/>
+            <field name="use_email_alias" eval="True"/>
+            <field name="use_website_ticket_creation" eval="True"/>
+            <field name="use_confirmation_email" eval="True"/>
+            <field name="auto_close_days">10</field>
+            <field name="auto_close_reminder_days">2</field>
+        </record>
+
+        <record id="demo_team_billing_support" model="helpdesk.team">
+            <field name="name">Billing &amp; Accounts</field>
+            <field name="description">&lt;p&gt;Dedicated team for billing inquiries, invoice disputes, and payment issues.&lt;/p&gt;</field>
+            <field name="color">5</field>
+            <field name="assignment_method">manual</field>
+            <field name="customer_rating" eval="False"/>
+            <field name="use_sla" eval="True"/>
+            <field name="use_timesheet" eval="False"/>
+            <field name="use_email_alias" eval="True"/>
+            <field name="auto_close_days">7</field>
+            <field name="auto_close_reminder_days">1</field>
+        </record>
+
+        <record id="demo_team_onboarding" model="helpdesk.team">
+            <field name="name">Onboarding</field>
+            <field name="description">&lt;p&gt;Assists new customers during onboarding and initial setup phases.&lt;/p&gt;</field>
+            <field name="color">7</field>
+            <field name="assignment_method">random</field>
+            <field name="customer_rating" eval="True"/>
+            <field name="use_sla" eval="False"/>
+            <field name="use_timesheet" eval="True"/>
+            <field name="use_website_ticket_creation" eval="False"/>
+            <field name="auto_close_days">30</field>
+            <field name="auto_close_reminder_days">5</field>
+        </record>
+
+        <!-- ============================================================
+             Demo: helpdesk.ticket
+        ============================================================ -->
+
+        <!-- Team: Customer Support — Normal Priority -->
+        <record id="demo_ticket_001" model="helpdesk.ticket">
+            <field name="name">Unable to reset password</field>
+            <field name="team_id" ref="demo_team_customer_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.new_ticket"/>
+            <field name="priority">0</field>
+            <field name="source">email</field>
+            <field name="email">john.doe@example.com</field>
+            <field name="phone">+1-202-555-0101</field>
+            <field name="description">&lt;p&gt;Customer is unable to reset their password using the "Forgot Password" link. The reset email is not being received.&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Customer Support — Low Priority, In Progress -->
+        <record id="demo_ticket_002" model="helpdesk.ticket">
+            <field name="name">Request to update billing address</field>
+            <field name="team_id" ref="demo_team_customer_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.in_progress_ticket"/>
+            <field name="priority">1</field>
+            <field name="source">manual</field>
+            <field name="email">alice.smith@example.com</field>
+            <field name="phone">+1-202-555-0102</field>
+            <field name="description">&lt;p&gt;Customer Alice Smith is requesting an update to her billing address from 123 Main St to 456 Oak Ave, Springfield, IL 62704.&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Customer Support — High Priority, On Hold -->
+        <record id="demo_ticket_003" model="helpdesk.ticket">
+            <field name="name">Product delivered in damaged condition</field>
+            <field name="team_id" ref="demo_team_customer_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.on_hold_ticket"/>
+            <field name="priority">2</field>
+            <field name="source">website</field>
+            <field name="email">bob.jones@example.com</field>
+            <field name="phone">+1-202-555-0103</field>
+            <field name="description">&lt;p&gt;Customer received a damaged product (Order #ORD-2026-00123). Packaging was torn and the item had visible dents. Customer has attached photos. Awaiting warehouse confirmation before proceeding with replacement.&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Customer Support — Very High Priority, Solved -->
+        <record id="demo_ticket_004" model="helpdesk.ticket">
+            <field name="name">Account suspended without notice</field>
+            <field name="team_id" ref="demo_team_customer_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.solved_ticket"/>
+            <field name="priority">3</field>
+            <field name="source">email</field>
+            <field name="email">carol.white@example.com</field>
+            <field name="phone">+1-202-555-0104</field>
+            <field name="description">&lt;p&gt;Customer's account was suspended unexpectedly. No prior warning or email was sent. Customer has an active subscription and is losing business. Issue has been escalated and resolved by re-activating the account.&lt;/p&gt;</field>
+            <field name="website_published" eval="False"/>
+        </record>
+
+        <!-- Team: Technical Support — High Priority, New -->
+        <record id="demo_ticket_005" model="helpdesk.ticket">
+            <field name="name">API returning 500 Internal Server Error on /v1/orders endpoint</field>
+            <field name="team_id" ref="demo_team_technical_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.new_ticket"/>
+            <field name="priority">2</field>
+            <field name="source">email</field>
+            <field name="email">dev.team@clientcorp.com</field>
+            <field name="phone">+1-202-555-0201</field>
+            <field name="description">&lt;p&gt;The &lt;code&gt;/v1/orders&lt;/code&gt; API endpoint is returning a 500 Internal Server Error when a POST request is made with a payload containing more than 50 line items. This has been reproducible since 2026-06-10.&lt;/p&gt;&lt;p&gt;Environment: Production&lt;br/&gt;Auth: Bearer Token&lt;br/&gt;Payload size: &gt;50 items&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Technical Support — Very High Priority, In Progress -->
+        <record id="demo_ticket_006" model="helpdesk.ticket">
+            <field name="name">Login page blank after latest update</field>
+            <field name="team_id" ref="demo_team_technical_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.in_progress_ticket"/>
+            <field name="priority">3</field>
+            <field name="source">livechat</field>
+            <field name="email">support@techstart.io</field>
+            <field name="phone">+1-202-555-0202</field>
+            <field name="description">&lt;p&gt;After the v2.4.1 update deployed on June 13, the login page renders completely blank for users on Chrome 125+. Firefox and Safari are unaffected. JavaScript console shows: &lt;code&gt;Uncaught TypeError: Cannot read properties of undefined (reading 'init')&lt;/code&gt;.&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Technical Support — Normal Priority, On Hold -->
+        <record id="demo_ticket_007" model="helpdesk.ticket">
+            <field name="name">PDF export generates incorrect totals</field>
+            <field name="team_id" ref="demo_team_technical_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.on_hold_ticket"/>
+            <field name="priority">0</field>
+            <field name="source">manual</field>
+            <field name="email">finance@greenleaf.com</field>
+            <field name="description">&lt;p&gt;When exporting invoices to PDF, the subtotal and tax columns show incorrect values if multiple tax rates are applied to the same invoice. Expected: line-by-line tax breakdown. Actual: all taxes summed into one line.&lt;/p&gt;&lt;p&gt;On hold pending fix from the dev team (Jira TECH-4421).&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Technical Support — Low Priority, Solved -->
+        <record id="demo_ticket_008" model="helpdesk.ticket">
+            <field name="name">Dark mode toggle not persisting after logout</field>
+            <field name="team_id" ref="demo_team_technical_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.solved_ticket"/>
+            <field name="priority">1</field>
+            <field name="source">website</field>
+            <field name="email">user42@sampleuser.net</field>
+            <field name="description">&lt;p&gt;User's dark mode preference is reset to light mode every time they log out and log back in. Expected behavior: preference should be saved in the user profile and restored on next login. Resolved in v2.4.2 hotfix.&lt;/p&gt;</field>
+            <field name="website_published" eval="False"/>
+        </record>
+
+        <!-- Team: Billing & Accounts — High Priority, New -->
+        <record id="demo_ticket_009" model="helpdesk.ticket">
+            <field name="name">Duplicate charge on invoice INV-2026-0567</field>
+            <field name="team_id" ref="demo_team_billing_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.new_ticket"/>
+            <field name="priority">2</field>
+            <field name="source">email</field>
+            <field name="email">accounts@bigretail.com</field>
+            <field name="phone">+1-202-555-0301</field>
+            <field name="description">&lt;p&gt;Customer was charged twice for invoice INV-2026-0567 (Amount: $4,250.00). Both transactions appear on their bank statement dated June 12, 2026. Please investigate and initiate a refund for the duplicate charge.&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Billing & Accounts — Normal Priority, In Progress -->
+        <record id="demo_ticket_010" model="helpdesk.ticket">
+            <field name="name">Request for VAT invoice for Q1 2026</field>
+            <field name="team_id" ref="demo_team_billing_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.in_progress_ticket"/>
+            <field name="priority">0</field>
+            <field name="source">manual</field>
+            <field name="email">tax@eurocorp.de</field>
+            <field name="phone">+49-30-1234567</field>
+            <field name="description">&lt;p&gt;Customer requires VAT-compliant invoices for all transactions in Q1 2026 (January–March) for their EU tax filing. Please generate and share the relevant invoices with the correct VAT number: DE123456789.&lt;/p&gt;</field>
+            <field name="website_published" eval="False"/>
+        </record>
+
+        <!-- Team: Billing & Accounts — Canceled -->
+        <record id="demo_ticket_011" model="helpdesk.ticket">
+            <field name="name">Subscription cancellation and pro-rata refund</field>
+            <field name="team_id" ref="demo_team_billing_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.canceled_ticket"/>
+            <field name="priority">1</field>
+            <field name="source">website</field>
+            <field name="email">cancel@smallbiz.io</field>
+            <field name="description">&lt;p&gt;Customer requested cancellation of their annual subscription with 7 months remaining. Ticket was canceled as the customer changed their mind and decided to continue the subscription.&lt;/p&gt;</field>
+            <field name="website_published" eval="False"/>
+        </record>
+
+        <!-- Team: Onboarding — Normal Priority, New -->
+        <record id="demo_ticket_012" model="helpdesk.ticket">
+            <field name="name">Help needed to import product catalogue via CSV</field>
+            <field name="team_id" ref="demo_team_onboarding"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.new_ticket"/>
+            <field name="priority">0</field>
+            <field name="source">manual</field>
+            <field name="email">setup@newclient.com</field>
+            <field name="phone">+1-202-555-0401</field>
+            <field name="description">&lt;p&gt;New customer needs assistance importing their product catalogue using the CSV import tool. They have approximately 2,000 SKUs. The provided template does not seem to match the expected format in the import wizard.&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Onboarding — Low Priority, In Progress -->
+        <record id="demo_ticket_013" model="helpdesk.ticket">
+            <field name="name">Configure SMTP settings for outgoing email</field>
+            <field name="team_id" ref="demo_team_onboarding"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.in_progress_ticket"/>
+            <field name="priority">1</field>
+            <field name="source">email</field>
+            <field name="email">it@freshstart.co</field>
+            <field name="description">&lt;p&gt;Customer needs guidance to configure their Google Workspace SMTP server (smtp.gmail.com:587) for outgoing emails. They have enabled 2FA and need to use an App Password. Currently getting an authentication error.&lt;/p&gt;</field>
+            <field name="website_published" eval="True"/>
+        </record>
+
+        <!-- Team: Onboarding — High Priority, Solved -->
+        <record id="demo_ticket_014" model="helpdesk.ticket">
+            <field name="name">User roles and permissions setup for 15 team members</field>
+            <field name="team_id" ref="demo_team_onboarding"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.solved_ticket"/>
+            <field name="priority">2</field>
+            <field name="source">manual</field>
+            <field name="email">admin@enterpriseclient.org</field>
+            <field name="phone">+1-202-555-0402</field>
+            <field name="description">&lt;p&gt;Customer requires help setting up role-based access for 15 users across 3 departments: Sales (5 users), Finance (4 users), and Operations (6 users). Each department should have distinct access levels. Resolved after a 1-hour onboarding call on June 10, 2026.&lt;/p&gt;</field>
+            <field name="website_published" eval="False"/>
+        </record>
+
+        <!-- Sub-ticket: child of demo_ticket_005 -->
+        <record id="demo_ticket_015" model="helpdesk.ticket">
+            <field name="name">Investigate DB timeout on large order payloads</field>
+            <field name="team_id" ref="demo_team_technical_support"/>
+            <field name="customer_id" ref="demo_helpdesk_customer"/>
+            <field name="stage_id" ref="cyllo_helpdesk.in_progress_ticket"/>
+            <field name="priority">2</field>
+            <field name="source">manual</field>
+            <field name="parent_id" ref="demo_ticket_005"/>
+            <field name="email">dev.team@clientcorp.com</field>
+            <field name="description">&lt;p&gt;Sub-ticket to investigate a possible database connection timeout when processing order payloads with more than 50 line items. The primary suspect is missing index on &lt;code&gt;order_lines.product_id&lt;/code&gt;.&lt;/p&gt;</field>
+            <field name="website_published" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

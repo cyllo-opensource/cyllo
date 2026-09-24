@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Defines the Inherited Form View of Crm Team Member-->
+    <record id="view_crm_team_member_form_inherit_budget" model="ir.ui.view">
+        <field name="name">view.crm.team.member.form.inherit.budget</field>
+        <field name="model">crm.team.member</field>
+        <field name="inherit_id" ref="sales_team.crm_team_member_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Target">
+                        <group>
+                            <group>
+                                <field name="start_date"
+                                       readonly="compute_group == False"
+                                       required="target_amount"/>
+                                <field name="end_date"
+                                       readonly="compute_group == False"
+                                       required="target_amount"/>
+                                <field name="compute_group" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="currency_id" invisible="1"/>
+                                <field name="target_amount" widget="monetary"
+                                       readonly="compute_group == False"/>
+                                <field name="state" string="Budget Target"
+                                       decoration-danger="state == 'not_achieved'"
+                                       decoration-success="state == 'achieved'"
+                                       widget="badge"/>
+                            </group>
+                            <field name="budget_line_ids" readonly="1">
+                                <tree editable="bottom">
+                                    <field name="display_name"
+                                           string="Budget Line"/>
+                                    <field name="budget_id"/>
+                                    <field name="account_ids"
+                                           widget="many2many_tags"/>
+                                    <field name="analytic_account_id"/>
+                                    <field name="currency_id"
+                                           column_invisible="1"/>
+                                    <field name="crm_achievement" sum="Total"
+                                           string="Achievement"
+                                           widget="monetary"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+    <!--    Defines the Inherited Tree View of Crm Team Member-->
+    <record id="view_crm_team_member_tree_inherit_budget" model="ir.ui.view">
+        <field name="name">view.crm.team.member.tree.inherit.budget</field>
+        <field name="model">crm.team.member</field>
+        <field name="inherit_id" ref="sales_team.crm_team_member_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='lead_month_count']" position="after">
+                <field name="state" string="Budget Target"
+                       decoration-danger="state == 'not_achieved'"
+                       decoration-success="state == 'achieved'" widget="badge"/>
+            </xpath>
+        </field>
+    </record>
+    <!--    Defines the Inherited Kanban View of Crm Team Member-->
+    <record id="view_crm_team_member_kanban_inherit_budget" model="ir.ui.view">
+        <field name="name">view.crm.team.member.kanban.inherit.budget</field>
+        <field name="model">crm.team.member</field>
+        <field name="inherit_id" ref="sales_team.crm_team_member_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//templates" position="before">
+                <field name="state"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_kanban_details')]" position="after">
+                <div class="o_kanban_record_bottom mt-3">
+                    <div class="oe_kanban_bottom_right"
+                         style="padding-top: 100px;">
+                        <span t-att-class="record.state.value === 'Achieved' ? 'o_status_bubble mx-0 o_color_bubble_10' : 'o_status_bubble mx-0 o_color_bubble_23'"
+                              t-att-title="record.state.value"
+                              style="color:'red';"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

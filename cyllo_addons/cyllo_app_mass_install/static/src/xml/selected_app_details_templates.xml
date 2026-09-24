@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <!-- Template for selected app details -->
+    <t t-name="cyllo_app_mass_install.selected_app_details" owl="1">
+        <div class="cy-app-install-appbar__header">
+            <span class="cy-app-install-appbar__count">
+                <span class="cy-appbar__count-label">
+                    <t t-esc="props.SelectedAppsCount.length"/>
+                    Apps selected.
+                </span>
+            </span>
+            <p class="cy-app-install-appbar__lead">Select apps of your choice to
+                continue.
+            </p>
+        </div>
+        <div class="cy-app-install-appbar__body">
+            <t t-foreach="props.SelectedAppsCount" t-as="apps"
+               t-key="props.SelectedAppsCount.id">
+                <ul class="cy-app-install-appbar__items">
+                    <li class="cy-app-install-appbar__item">
+                        <div class="cy-app-install-appbar__item-icon-container">
+                            <img class="cy-app-install-appbar__item-icon"
+                                 t-att-src="apps.icon"/>
+                        </div>
+                        <span class="cy-app-install-appbar__item-label">
+                            <t t-esc="apps.shortdesc"/>
+                        </span>
+                        <span class="cy-app-install-appbar__item-delete"
+                              t-on-click="() => this.unlinkApps(apps)">
+                            <i class="cy-app-install-ri-delete-bin-6-line cy-app-install-ri-delete"></i>
+                        </span>
+                    </li>
+                </ul>
+            </t>
+        </div>
+        <div class="cy-app-install-appbar__footer">
+            <button type="button"
+                    class="cy-app-install-btn cy-app-install-btn--lg cy-app-install-btn--block cy-app-install-btn--primary"
+                    id="continueBtn"
+                    t-on-click="() => this.installApps(props.AppsToInstall)">
+                <span>Continue</span>
+                <i class="ri-arrow-right-s-line ms-2"/>
+            </button>
+        </div>
+    </t>
+</templates>

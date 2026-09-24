@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+<t t-name="VoiceNote" owl="1">
+    <div class="voice-message">
+        <audio t-ref="player">
+            <source t-attf-src="/web/content/{{props.attachmentId}}" type="audio/mp3"/>
+        </audio>
+
+        <div class="audio-player">
+            <t t-if="props.flag">
+                <div t-if="props.is_voice" class="voice-dp">
+                    <img class="img-fluid rounded-circle border avatar-img"
+                         t-attf-src="/web/image/res.users/{{env.session.uid}}/image_1920"
+                         alt="loading..."/>
+                    <i class="voice-mic ri-mic-fill"
+                       t-attf-style="color: {{state.msgState == 'read' ? '#3093fd' : '#25D366'}} !important"/>
+                </div>
+                <div class="voice-dp" t-if="!props.is_voice">
+                    <div class="audio-dp">
+                        <i class="ri-mic-fill"/>
+                    </div>
+                </div>
+            </t>
+
+            <button class="ms-2" t-on-click="togglePlay" t-ref="playBtn">
+                <i class='ri-play-fill'/>
+            </button>
+            <input type="range" t-ref="seekBar" value="0" max="100"/>
+
+            <t t-if="!props.flag">
+                <div t-if="props.is_voice" class="voice-dp ms-2">
+                    <img class="img-fluid rounded-circle border avatar-img"
+                         t-attf-src="/web/image/res.partner/{{props.partnerId}}/image_1920"
+                         alt="loading..."/>
+                    <i class="voice-mic ri-mic-fill"/>
+                </div>
+                <div class="voice-dp ms-2" t-if="!props.is_voice">
+                    <div class="audio-dp">
+                        <i class="ri-mic-fill"/>
+                    </div>
+                </div>
+            </t>
+
+            <div class="voice-duration">
+                <span class="m-0 p-0" t-if="state.showElapsed" t-esc="state.elapsed"/>
+                <span class="m-0 p-0" t-if="!state.showElapsed" t-esc="state.total"/>
+            </div>
+        </div>
+    </div>
+</t>
+</templates>

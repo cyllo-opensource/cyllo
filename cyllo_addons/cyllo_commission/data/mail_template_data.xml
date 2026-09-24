@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data noupdate="1">
+        <record id="email_template_duplicate_commission_plan"
+                model="mail.template">
+            <field name="name">Commission Plan Conflict Resolution</field>
+            <field name="email_from">{{ (object.company_id.email) }}</field>
+            <field name="email_to">{{ ctx.get('email_to') }}</field>
+            <field name="subject">Action Required: Commission Plan Selection</field>
+            <field name="model_id"
+                   ref="cyllo_commission.model_commission_plan"/>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;">
+                    <div style="border-bottom: 2px solid #ff6b35; padding-bottom: 10px; margin-bottom: 20px;">
+                        <h2 style="color: #ff6b35; margin: 0;">Commission Plan
+                            Selection Required
+                        </h2>
+                    </div>
+
+                    <p>Dear
+                        <strong>
+                            <t t-out="ctx.get('name')"/>
+                        </strong>
+                        ,
+                    </p>
+
+                    <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; color: #856404;">
+                            <strong>⚠️ Action Required:</strong>
+                            We've detected a commission plan conflict that
+                            requires your attention.
+                        </p>
+                    </div>
+
+                    <t t-if="ctx.get('types')">
+                        <p>You are currently associated with multiple commission
+                            plans of the same type. To ensure accurate
+                            commission calculations, please select your
+                            preferred plan from the available options.
+                        </p>
+
+                        <div style="background-color: #f8f9fa; border-left: 4px solid #ff6b35; padding: 15px; margin: 20px 0;">
+                            <p style="margin: 0;">
+                                <strong>Multiple Plan Types Detected</strong>
+                            </p>
+                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">
+                                Please review and select your preferred
+                                commission plan configuration.
+                            </p>
+                        </div>
+
+                        <t t-set="type_ids"
+                           t-value="','.join(map(str, ctx.get('types', [])))"/>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a t-att-href="'/commissions?type_ids=' + type_ids"
+                               style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                📋 Choose Your Commission Plan
+                            </a>
+                        </div>
+                    </t>
+
+                    <t t-else="">
+                        <p>You are currently associated with another commission
+                            plan of the same type:
+                            <strong style="color: #ff6b35;">
+                                <t t-esc="object.type_id.name"/>
+                            </strong>
+                        </p>
+
+                        <p>To maintain consistency in your commission structure
+                            and avoid conflicts, please select which plan you
+                            would like to keep active.
+                        </p>
+
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a t-att-href="'/commissions/?type_id=' + str(object.type_id.id)"
+                               style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                📋 Choose Your Commission Plan
+                            </a>
+                        </div>
+                    </t>
+
+                    <div style="background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 14px;">
+                            <strong>📞 Need Help?</strong>
+                            If you have questions about your commission plans or
+                            need assistance with selection:
+                        </p>
+                        <ul style="margin: 10px 0 0 20px; font-size: 14px;">
+                            <li>Contact your Team Lead</li>
+                            <li>Reach out to the HR department</li>
+                        </ul>
+                    </div>
+
+                    <div style="background-color: #f8f9fa; border-radius: 4px; padding: 12px; margin: 20px 0; font-size: 14px; color: #666;">
+                        <p style="margin: 0;">
+                            <strong>Note:</strong>
+                            If you prefer to keep your current commission plan
+                            unchanged, you can safely ignore this email. No
+                            action will be taken automatically.
+                        </p>
+                    </div>
+
+                    <p>Thank you for your prompt attention to this matter.</p>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                        <p style="margin: 0;">Best regards,</p>
+                        <p style="margin: 5px 0 0 0;">
+                            <strong>Commission Management Team</strong>
+                        </p>
+                        <t t-if="object.company_id.name">
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+                                <t t-esc="object.company_id.name"/>
+                            </p>
+                        </t>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <record id="email_template_notify_user" model="mail.template">
+            <field name="name">Commission Plan Assignment Notification</field>
+            <field name="email_from">{{ (object.company_id.email) }}</field>
+            <field name="email_to">{{ ctx.get('email_to') }}</field>
+            <field name="subject">Commission Plan Assignment - {{ object.name }}</field>
+            <field name="model_id"
+                   ref="cyllo_commission.model_commission_plan"/>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;">
+                    <div style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px;">
+                        <h2 style="color: #007bff; margin: 0;">Commission Plan
+                            Assignment
+                        </h2>
+                    </div>
+
+                    <p>Dear
+                        <strong>
+                            <t t-out="ctx.get('name')"/>
+                        </strong>
+                        ,
+                    </p>
+
+                    <p>We are pleased to inform you that you have been assigned
+                        to a new commission plan, effective immediately.
+                    </p>
+
+                    <div style="background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0;">
+                            <strong>Commission Plan:</strong>
+                            <t t-esc="object.name"/>
+                        </p>
+                        <t t-if="object.type=='target'">
+                            <p style="margin: 5px 0 0 0;">
+                                <strong>Plan Type:</strong>
+                                Target
+                            </p>
+                        </t>
+                        <t t-elif="object.type=='contribution'">
+                            <p style="margin: 5px 0 0 0;">
+                                <strong>Plan Type:</strong>
+                                Contribution
+                            </p>
+                        </t>
+                        <p style="margin: 5px 0 0 0;">
+                            <strong>Effective Period:</strong>
+                            <t t-esc="object.date_from"/>
+                            <strong>To</strong>
+                            <t t-esc="object.date_to"/>
+                        </p>
+                    </div>
+
+                    <p>This commission plan has been carefully designed to align
+                        with your role and our company objectives. We encourage
+                        you to review the plan details and reach out if you have
+                        any questions.
+                    </p>
+
+                    <div style="background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 4px; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 14px;">
+                            <strong>Need assistance?</strong>
+                            For questions regarding your commission structure,
+                            please contact:
+                        </p>
+                        <ul style="margin: 10px 0 0 20px; font-size: 14px;">
+                            <li>Your Team Lead</li>
+                            <li>Human Resources department</li>
+                            <li>Commission Management Team</li>
+                        </ul>
+                    </div>
+
+                    <p>Thank you for your continued dedication and contribution
+                        to our success.
+                    </p>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                        <p style="margin: 0;">Best regards,</p>
+                        <p style="margin: 5px 0 0 0;">
+                            <strong>Commission Management Team</strong>
+                        </p>
+                        <t t-if="object.company_id.name">
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+                                <t t-esc="object.company_id.name"/>
+                            </p>
+                        </t>
+                    </div>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

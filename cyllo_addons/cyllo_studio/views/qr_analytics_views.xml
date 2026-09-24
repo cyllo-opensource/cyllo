@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- QR Scan Event List View -->
+    <record id="view_qr_scan_event_tree" model="ir.ui.view">
+        <field name="name">qr.scan.event.tree</field>
+        <field name="model">qr.scan.event</field>
+        <field name="arch" type="xml">
+            <tree string="QR Scan Analytics" create="0" edit="0">
+                <field name="scanned_at"/>
+                <field name="report_id"/>
+                <field name="record_ref"/>
+                <field name="ip_address"/>
+                <field name="user_agent"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- QR Scan Event Form View -->
+    <record id="view_qr_scan_event_form" model="ir.ui.view">
+        <field name="name">qr.scan.event.form</field>
+        <field name="model">qr.scan.event</field>
+        <field name="arch" type="xml">
+            <form string="QR Scan Analytics" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="token_id"/>
+                            <field name="record_ref"/>
+                            <field name="ip_address"/>
+                        </group>
+                        <group>
+                            <field name="report_id"/>
+                            <field name="scanned_at"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="user_agent"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- QR Scan Event Search View -->
+    <record id="view_qr_scan_event_search" model="ir.ui.view">
+        <field name="name">qr.scan.event.search</field>
+        <field name="model">qr.scan.event</field>
+        <field name="arch" type="xml">
+            <search string="Search Analytics">
+                <field name="report_id"/>
+                <field name="ip_address"/>
+                <group expand="0" string="Group By">
+                    <filter string="Report" name="group_by_report" context="{'group_by': 'report_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'scanned_at:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for QR Scan Analytics -->
+    <record id="action_qr_scan_analytics" model="ir.actions.act_window">
+        <field name="name">QR Scan Analytics</field>
+        <field name="res_model">qr.scan.event</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_qr_scan_event_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No scan events recorded yet.
+            </p>
+            <p>
+                Analytics will appear here once users start scanning QR codes from your reports.
+            </p>
+        </field>
+    </record>
+</odoo>

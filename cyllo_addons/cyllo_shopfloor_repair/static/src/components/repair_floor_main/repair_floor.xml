@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<templates xml:space="preserve">
+    <t t-name="repair_floor.Dashboard" owl="1">
+
+        <div class="o_repair_floor_app d-flex flex-column bg-100" style="height: 100%; width: 100%; overflow: hidden;">
+
+            <div class="cy-rf-navbar">
+                <h1 class="m-0 d-flex align-items-center">
+                    <span class="cy-navbar-app-name">Repair floor</span>
+                </h1>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="dropdown" t-att-class="state.isManager ? '' : 'opacity-75'">
+                        <div class="dropdown-toggle fw-bold d-flex align-items-center px-3"
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                    t-att-disabled="!state.isManager"
+                                t-att-aria-disabled="state.isManager ? 'false' : 'true'">
+                            <t t-if="state.selectedEmployee and state.selectedEmployee.image_128 and state.selectedEmployee.image_128 != 'false'">
+                                <img t-attf-src="data:image/png;base64,#{state.selectedEmployee.image_128}"
+                                     class="cy-rf-operator-avatar me-1"
+                                     onerror="this.src='/web/static/img/user_placeholder.jpg';"
+                                     t-att-alt="state.selectedEmployee.name"/>
+                            </t>
+                            <t t-else="">
+                                <i class="fa fa-user-circle me-1 fs-5 text-primary cy-rf-operator-icon"/>
+                            </t>
+                                <t t-if="state.selectedEmployee">
+                                    <span><t t-esc="state.selectedEmployee.name"/></span>
+                                </t>
+                                <t t-else="">
+                                    <span class="text-muted">Select Operator</span>
+                                </t>
+                        </div>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0"
+                                style="max-height: 300px; overflow-y: auto; z-index: 1050;">
+                                <li>
+                                    <button class="dropdown-item py-2 fw-bold text-danger d-flex align-items-center"
+                                            t-on-click="() => this.selectEmployee(null)">
+                                        <i class="fa fa-user-times me-2 cy-rf-operator-icon"/>
+                                        Clear Operator
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider"/></li>
+                                <t t-foreach="state.employees" t-as="employee" t-key="employee.id">
+                                    <li>
+                                        <button class="dropdown-item py-2 d-flex align-items-center"
+                                                t-on-click="() => this.selectEmployee(employee)">
+                                            <t t-if="employee.image_128 and employee.image_128 != 'false'">
+                                                <img t-attf-src="data:image/png;base64,#{employee.image_128}"
+                                                     class="cy-rf-operator-avatar me-2"
+                                                     onerror="this.src='/web/static/img/user_placeholder.jpg';"
+                                                     t-att-alt="employee.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <i class="fa fa-user text-muted me-2 cy-rf-operator-icon"/>
+                                            </t>
+                                            <span><t t-esc="employee.name"/></span>
+                                        </button>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+
+                    <button class="btn btn-light border fw-bold hover-primary" t-on-click="fetchRepairOrders">
+                        <i class="fa fa-refresh"/>
+                        Refresh
+                    </button>
+                    <button class="btn btn-danger border shadow-sm fw-bold" t-on-click="goHome" title="Exit to Dashboard">
+                        <i class="fa fa-sign-out"/>
+                        Exit
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white border-bottom shadow-sm user-select-none"
+                 style="display: table; width: 100%; table-layout: fixed; box-sizing: border-box; position: relative; z-index: 1;">
+
+    <div style="display: table-row;">
+
+        <div class="cursor-pointer transition-base border-end cy-sf-filter-tab"
+             t-att-class="state.currentFilter === 'draft' ? 'bg-secondary text-dark' : 'text-muted'"
+             t-on-click="() => this.setView('draft')">
+            <span class="fw-bold text-uppercase d-inline-flex align-items-center gap-1 cy-sf-filter-label">
+                New
+                <span class="badge rounded-circle ms-1 cy-sf-filter-count"
+                      t-att-class="state.currentFilter === 'draft' ? 'bg-white' : 'bg-secondary text-white'">
+                    <t t-esc="state.repairs.draft.length"/>
+                </span>
+            </span>
+        </div>
+
+        <div class="cursor-pointer transition-base border-end cy-sf-filter-tab"
+             t-att-class="state.currentFilter === 'confirmed' ? 'bg-warning' : 'text-muted'"
+             t-on-click="() => this.setView('confirmed')">
+            <span class="fw-bold text-uppercase d-inline-flex align-items-center gap-1 cy-sf-filter-label">
+                Confirmed
+                <span class="badge rounded-circle ms-1 cy-sf-filter-count"
+                      t-att-class="state.currentFilter === 'confirmed' ? 'bg-white' : 'bg-secondary text-white'">
+                    <t t-esc="state.repairs.confirmed.length"/>
+                </span>
+            </span>
+        </div>
+
+        <div class="cursor-pointer transition-base border-end cy-sf-filter-tab"
+             t-att-class="state.currentFilter === 'under_repair' ? 'bg-info text-white' : 'text-muted'"
+             t-on-click="() => this.setView('under_repair')">
+            <span class="fw-bold text-uppercase d-inline-flex align-items-center gap-1 cy-sf-filter-label">
+                Under Repair
+                <span class="badge rounded-circle ms-1 cy-sf-filter-count"
+                      t-att-class="state.currentFilter === 'under_repair' ? 'bg-white text-info' : 'bg-secondary text-white'">
+                    <t t-esc="state.repairs.under_repair.length"/>
+                </span>
+            </span>
+        </div>
+
+        <div class="cursor-pointer transition-base border-end cy-sf-filter-tab"
+             t-att-class="state.currentFilter === 'done' ? 'bg-success text-white' : 'text-muted'"
+             t-on-click="() => this.setView('done')">
+            <span class="fw-bold text-uppercase d-inline-flex align-items-center gap-1 cy-sf-filter-label">
+                Done
+                <span class="badge rounded-circle ms-1 cy-sf-filter-count"
+                      t-att-class="state.currentFilter === 'done' ? 'bg-white text-success' : 'bg-secondary text-white'">
+                    <t t-esc="state.repairs.done.length"/>
+                </span>
+            </span>
+        </div>
+
+        <div class="cursor-pointer transition-base cy-sf-filter-tab"
+             t-att-class="state.currentFilter === 'cancel' ? 'bg-danger text-white' : 'text-muted'"
+             t-on-click="() => this.setView('cancel')">
+            <span class="fw-bold text-uppercase d-inline-flex align-items-center gap-1 cy-sf-filter-label">
+                Cancelled
+                <span class="badge rounded-circle ms-1 cy-sf-filter-count"
+                      t-att-class="state.currentFilter === 'cancel' ? 'bg-white text-danger' : 'bg-secondary text-white'">
+                    <t t-esc="state.repairs.cancel.length"/>
+                </span>
+            </span>
+        </div>
+
+    </div>
+</div>
+
+            <div class="o_rf_content flex-grow-1 p-3 overflow-auto d-flex flex-column">
+                <div class="o_rf_column w-100 rounded-3 flex-grow-1 d-flex flex-column">
+                    <t t-if="state.repairs[state.currentFilter].length > 0">
+                    <div class="row g-2">
+                            <t t-foreach="state.repairs[state.currentFilter]" t-as="repair" t-key="repair.id">
+                                <div class="col-md-6 col-lg-4 col-xl-3">
+                                    <RepairCard record="repair" onUpdate.bind="fetchRepairOrders"
+                                                activeEmployeeId="state.selectedEmployee ? state.selectedEmployee.id : null"
+                                                isManager="state.isManager"/>
+                                </div>
+                            </t>
+                        </div>
+                        </t>
+                        <t t-else="">
+                        <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1 text-muted opacity-25">
+                                <i class="fa fa-inbox fa-3x mb-2"/>
+                                <h5>No records found for this status.</h5>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+        </div>
+    </t>
+</templates>

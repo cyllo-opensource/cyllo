@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_web.CogMenuForm" owl="1">
+        <div class="container cy-top-section p-0" t-ref="resize">
+            <div class="cog-menu d-flex align-items-center justify-content-between">
+                <div class="col">
+                    <ul class="navbar-nav flex-row gap-1">
+                        <CogMenuItem t-if="props.canCreate and !(isNew or displayButtons)"
+                                     onClick="props.create" accesskey="'C'">
+                            <t t-set-slot="icon">
+                                <i class="ri-add-line"/>
+                            </t>
+                            <t t-set-slot="text">New</t>
+                        </CogMenuItem>
+                        <CogMenuItem t-if="props.canEdit and (isNew or displayButtons)"
+                                     onClick="props.saveButtonClicked" accesskey="'S'">
+                            <t t-set-slot="icon">
+                                <i class="ri-save-line"/>
+                            </t>
+                            <t t-set-slot="text">Save</t>
+                        </CogMenuItem>
+                        <CogMenuItem
+                                t-if="props.canEdit and (isNew or displayButtons or props.isEditOn)"
+                                onClick="() => this.props.discard()" accesskey="'D'">
+                            <t t-set-slot="icon">
+                                <i class="ri-eraser-line"/>
+                            </t>
+                            <t t-set-slot="text">Discard</t>
+                        </CogMenuItem>
+                        <CogMenuItem
+                                t-if="props.canEdit and !props.model.root.isInEdition and !props.isSelected"
+                                onClick="() => this.props.edit?.()" accesskey="'E'">
+                            <t t-set-slot="icon">
+                                <i class="ri-edit-box-line"/>
+                            </t>
+                            <t t-set-slot="text">Edit</t>
+                        </CogMenuItem>
+                        <CogMenuItem t-if="printItems.length and props.isSelected" accesskey="'P'">
+                            <t t-set-slot="icon">
+                                <i class="ri-printer-line"/>
+                            </t>
+                            <t t-set-slot="text">Print</t>
+                            <t t-set-slot="dropdown">
+                                <t t-foreach="printItems" t-as="item" t-key="item.key">
+                                    <li t-on-click="() => this.onItemSelected(item)">
+                                        <a href="#" class="dropdown-item">
+                                            <i class="ri-file-pdf-2-line me-1"/>
+                                            <t t-esc="item.description"/>
+                                        </a>
+                                    </li>
+                                </t>
+                            </t>
+                        </CogMenuItem>
+                        <t t-if="hasItems">
+                            <t t-set="less_cogItems" t-value="cogItems.slice(0,5)"/>
+                            <t t-set="more_cogItems" t-value="cogItems.slice(5)"/>
+                            <t t-foreach="less_cogItems" t-as="item" t-key="item.key">
+                                <t t-if="item.Component">
+                                    <t t-component="item.Component" t-props="item.props"/>
+                                </t>
+                                <CogMenuItem t-else="" onClick="() => this.onItemSelected(item)"
+                                             t-if="props.isSelected">
+                                    <t t-if="item.icon">
+                                        <t t-set-slot="icon">
+                                            <i t-att-class="item.icon"
+                                               style="font-family:'remixicon'"/>
+                                        </t>
+                                    </t>
+                                    <t t-set-slot="text">
+                                        <t t-esc="item.description"/>
+                                    </t>
+                                </CogMenuItem>
+                            </t>
+                            <t t-if="cogItems.length > 5 and props.isSelected">
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary nav-link cy-navitem-list border-0 dropdown-toggle border-0"
+                                            type="button" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                    More
+                                </button>
+                                    <ul class="dropdown-menu cy-cogmenu-dropdown">
+                                        <t t-foreach="cogItems" t-as="item" t-key="item.key">
+                                            <t t-if="item.Component">
+                                                <t t-component="item.Component"
+                                                   t-props="item.props"/>
+                                            </t>
+                                            <li t-else=""
+                                                t-on-click="() => this.onItemSelected(item)">
+                                                <a href="#" class="dropdown-item">
+                                                    <i t-if="item.icon" class="me-1"
+                                                       t-att-class="item.icon"/>
+                                                    <t t-esc="item.description"/>
+                                                </a>
+                                            </li>
+                                        </t>
+                                    </ul>
+                                </div>
+                            </t>
+                            <t t-foreach="cogItems" t-as="item" t-key="item.key">
+                                <li t-on-click="() => this.onItemSelected(item)" class="d-none"
+                                    t-if="props.isSelected">
+                                    <a href="#"
+                                       class="btn btn-outline-secondary nav-link cy-navitem-list border-0">
+                                        <i t-if="item.icon" t-att-class="item.icon"/>
+                                        <t t-esc="item.description"/>
+                                    </a>
+                                </li>
+                            </t>
+                        </t>
+                    </ul>
+                    <div class="resp-drop-container">
+                        <div t-ref="more" class="more-icon-box" data-bs-toggle="dropdown"
+                             data-bs-target="#cy_dropdown-menu">
+                            <i class="fa fa-caret-down"/>
+                        </div>
+                        <ul class="responsive-dropdown cy-dropdown-content dropdown-menu"
+                            style="width: fit-content"
+                            id="dropdown-menu" t-ref="responsive_dropdown"/>
+                    </div>
+                </div>
+                <div class="col-auto d-flex align-items-center ms-auto">
+                    <t t-slot="buttonBox"/>
+                </div>
+            </div>
+            <section class="cy-top-wrapper">
+                <div class="cy-top-bar">
+                    <ul class="container cy-head-option-list d-flex p-0 m-0"
+                        style="justify-content: space-between;">
+                        <div class="d-none menu" t-ref="menu"></div>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </t>
+
+    <t t-inherit="web.ControlPanel" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_control_panel_main')]" position="after">
+            <t t-slot="control-panel-cy-form-cogs"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_control_panel_main')]" position="attributes">
+            <attribute name="class" add="flex-nowrap px-3 py-2" separator=" "/>
+        </xpath>
+    </t>
+
+    <t t-inherit="web.FormView" t-inherit-mode="extension" owl="1">
+        <xpath expr="//Layout/t[@t-set-slot='control-panel-status-indicator']" position="replace"/>
+        <xpath expr="//Layout/t[@t-set-slot='control-panel-create-button']" position="replace"/>
+        <xpath expr="//Layout/t[@t-set-slot='layout-actions']" position="replace"/>
+        <xpath expr="//Layout/t[@t-set-slot='control-panel-create-button']" position="replace">
+            <t t-set-slot="control-panel-cy-form-cogs">
+                <CogMenuForm
+                        getActiveIds="() => model.root.isNew ? [] : [model.root.resId]"
+                        context="props.context"
+                        items="props.info.actionMenus ? actionMenuItems : {}"
+                        isDomainSelected="model.root.isDomainSelected"
+                        resModel="model.root.resModel"
+                        domain="props.domain"
+                        onActionExecuted="() => model.load({ resId: model.root.resId, resIds: model.root.resIds })"
+                        shouldExecuteAction.bind="shouldExecuteAction"
+                        create.bind="create"
+                        edit.bind="edit"
+                        canCreate="canCreate"
+                        canEdit="canEdit"
+                        discard.bind="discard"
+                        saveButtonClicked.bind="saveButtonClicked"
+                        model="model"
+                        isEditOn="isEditOn"
+                >
+                    <t t-set-slot="buttonBox">
+                        <t t-if="buttonBoxTemplate">
+                            <t t-call="{{ buttonBoxTemplate }}"
+                               t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
+                        </t>
+                    </t>
+                </CogMenuForm>
+            </t>
+        </xpath>
+    </t>
+
+    <t t-name="cyllo_web.CogMenuList" t-inherit="cyllo_web.CogMenuForm" t-inherit-mode="primary"
+       owl="1">
+        <xpath expr="//CogMenuItem[@t-if='props.canEdit and !props.model.root.isInEdition and !props.isSelected']"
+               position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+    </t>
+
+    <t t-inherit="web.ListView" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-if='props.info.actionMenus']" position="replace"/>
+        <xpath expr="//Layout[last()]" position="inside">
+            <t t-set-slot="control-panel-cy-form-cogs">
+                <CogMenuList
+                        canCreate="!model.root.editedRecord and activeActions.create and (!model.root.isGrouped or !editable) and !env.inDialog"
+                        canEdit="!!model.root.editedRecord"
+                        isSelected="!!nbSelected"
+                        model="model"
+                        create.bind="onClickCreate"
+                        onActionExecuted="() => model.load({ resId: model.root.resId, resIds: model.root.resIds })"
+                        saveButtonClicked.bind="onClickSave"
+                        discard.bind="onClickDiscard"
+                        isDomainSelected="model.root.isDomainSelected"
+                        getActiveIds="() => model.root.selection.map((r) => r.resId)"
+                        context="props.context"
+                        resModel="model.root.resModel"
+                        domain="props.domain"
+                        items="props.info.actionMenus ? actionMenuItems : {}"/>
+            </t>
+        </xpath>
+    </t>
+
+    <!-- Renders through core's own ExportAll component (this only overrides
+         its template) — CogMenuItem is added to ExportAll.components in
+         cog_menu_form.js so the tag below resolves. -->
+    <t t-inherit="web.ExportAll" t-inherit-mode="extension" owl="1">
+        <xpath expr="//DropdownItem" position="replace">
+            <CogMenuItem onClick="() => this.onDirectExportData()" accesskey="'E'">
+                <t t-set-slot="icon">
+                    <i class="ri-upload-2-line"/>
+                </t>
+                <t t-set-slot="text">Export All</t>
+            </CogMenuItem>
+        </xpath>
+    </t>
+
+    <t t-name="cyllo_web.Refresh" owl="1">
+        <CogMenuItem onClick="() => this.onRefresh()" accesskey="'R'">
+            <t t-set-slot="icon">
+                <i class="ri-refresh-line"/>
+            </t>
+            <t t-set-slot="text">Refresh</t>
+        </CogMenuItem>
+    </t>
+
+</templates>

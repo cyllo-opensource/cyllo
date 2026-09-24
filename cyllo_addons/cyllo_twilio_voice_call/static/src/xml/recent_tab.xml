@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="recent_tab" owl="1">
+        <div class="cy-dial__pad"
+             t-ref="recent" t-if="this.props.hidden">
+            <div class="cy-dial__pad-action">
+                <button class="cy-dial-actionbtn"
+                        t-on-click="_onClickMinimise" style="margin-top:-8px;">
+                    <i class="minimise ri-subtract-fill mini"/>
+                </button>
+                <button class="cy-dial-actionbtn"
+                        t-on-click="() => this.env.toggle_keypad()">
+                    <i class="ri-close-line close-btn"/>
+                </button>
+            </div>
+            <div class="recent-tab">
+                <t t-if="!this.state.showPartner">
+                    <t t-if="!this.state.call">
+                        <div class="cy-recent__container">
+                            <div class="cy-dial_search-box">
+                                <i class="ri-search-line cy-dial-search__icon"/>
+                                <input class="cy-search_input"
+                                       placeholder="Search Contacts"
+                                       t-on-input="searchRecent"
+                                       t-att-value="this.state.showPartner ? '' : this.state.searchTerms"/>
+                            </div>
+                            <div class="cy-dial__recent-list">
+                                <t t-if="this.filteredPartners.length === 0 and this.state.searchTerms">
+                                    <div align="center">No results found 🙁
+                                    </div>
+                                </t>
+                                <t t-elif="this.filteredPartners.length === 0">
+                                    <div align="center">
+                                        There is nothing in your call history!
+                                        <br/>
+                                        Give it a call right now to have it
+                                        listed here.🤓
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <t t-foreach="this.filteredPartners"
+                                       t-as="recent"
+                                       t-key="recent['serial']">
+                                        <div class="cy-recent__list-item"
+                                             t-on-click="() => this.getRecent(recent)">
+                                            <div>
+                                                <t t-if="recent.partner_id">
+                                                    <span class="cy-dial_pad-recent-number">
+                                                        <t t-if="recent.partner_id[1] and recent.from_number">
+                                                            <i class="ri-arrow-left-down-line cy-outgoing_icon"/>
+                                                            <span class="ps-2"
+                                                                  t-att-title="recent.partner_id[1]"
+                                                                  t-esc="recent.partner_id[1]"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span class="ps-2"
+                                                                  t-att-title="recent.from_number"
+                                                                  t-esc="recent.from_number"/>
+                                                        </t>
+                                                        <t t-if="recent.partner_id[1] and recent.to_number">
+                                                            <i class="ri-arrow-right-up-line cy-outgoing_icon"/>
+                                                            <span class="ps-2"
+                                                                  t-att-title="recent.partner_id[1]"
+                                                                  t-esc="recent.partner_id[1]"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span class="ps-2"
+                                                                  t-att-title="recent.to_number"
+                                                                  t-esc="recent.to_number"/>
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-if="recent.to_number">
+                                                        <span class="cy-dial_pad-recent-number">
+                                                            <i class="ri-arrow-right-up-line cy-outgoing_icon"/>
+                                                            <span class="ps-2"
+                                                                  t-att-title="recent.to_number"
+                                                                  t-esc="recent.to_number"/>
+                                                        </span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="cy-dial_pad-recent-number">
+                                                            <i class="ri-arrow-left-down-line cy-outgoing_icon"/>
+                                                            <span class="ps-2"
+                                                                  t-att-title="recent.from_number"
+                                                                  t-esc="recent.from_number"/>
+                                                        </span>
+                                                    </t>
+                                                </t>
+                                                <span class="ps-2">
+                                                    <span class="cy-dial_recent--timing"
+                                                          t-att-title="recent.start_time"
+                                                          t-esc="recent.start_time"/>
+                                                </span>
+                                                <span class="ps-2"
+                                                      style="margin-left:91px;">
+                                                    <span class="cy-dial_recent--timing"
+                                                          t-att-title="recent.duration"
+                                                          t-esc="recent.duration"/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <t t-if="this.state.showPartner">
+                    <div class="cy-dialer__contact-profile">
+                        <div align="left">
+                            <button class="btn cy-dial_backbtn"
+                                    t-on-click="_OnBack">
+                                <i class="ri-arrow-left-s-line"/>
+                            </button>
+                        </div>
+                        <div style="height:307px;" align="center">
+                            <t t-if="this.state.selectedPartner.image_1920">
+                                <img alt="Avatar"
+                                     class="o_dial_phonecall_avatar"
+                                     t-att-src="'data:image/png;base64,' + this.state.selectedPartner.image_1920"
+                                     style="height: 150px; width: 150px;"/>
+                            </t>
+                            <t t-else="">
+                                <img alt="Avatar"
+                                     class="o_dial_phonecall_avatar"
+                                     src="cyllo_twilio_voice_call/static/src/img/images.png"
+                                     style="height: 150px;width:150px;"/>
+                            </t>
+                            <br/>
+                            <t t-if="this.state.selectedPartner.partner_name">
+                                <b class="fw-bolder text-truncate"
+                                   style="font-size: 16px;"
+                                   t-att-title="this.state.selectedPartner.partner_name"
+                                   t-esc="this.state.selectedPartner.partner_name"/>
+                            </t>
+                            <span class="ps-2">
+                                <t t-if="!this.state.selectedPartner.partner_name">
+                                    <t t-if="this.state.selectedPartner.partner_id">
+                                        <b class="fw-bolder text-truncate"
+                                           style="font-size: 16px;"
+                                           t-att-title="this.state.selectedPartner.partner_id[1]"
+                                           t-esc="this.state.selectedPartner.partner_id[1]"/>
+                                    </t>
+                                </t>
+                                <br/>
+                                <t t-if="this.state.selectedPartner.from_number">
+                                    <b class="fw-bolder text-truncate"
+                                       style="font-size: 16px;"
+                                       t-att-title="this.state.selectedPartner.from_number"
+                                       t-esc="this.state.selectedPartner.from_number"/>
+                                </t>
+                                <t t-if="this.state.selectedPartner.to_number">
+                                    <b class="fw-bolder text-truncate"
+                                       style="font-size: 16px;"
+                                       t-att-title="this.state.selectedPartner.to_number"
+                                       t-esc="this.state.selectedPartner.to_number"/>
+                                </t>
+                            </span>
+                            <br/>
+                            <span class="ps-2">
+                                <t t-if="!this.state.call">
+                                    <t t-if="this.state.selectedPartner.start_time">
+                                        <b class="fw-bolder text-truncate"
+                                           t-att-title="this.state.selectedPartner.start_time"
+                                           t-esc="this.state.selectedPartner.start_time"/>
+                                    </t>
+                                </t>
+                            </span>
+                            <t t-if="this.state.call">
+                                <span class="call-duration"
+                                      t-ref="callDuration"
+                                      style="display: block; text-align: center; font-weight: bold; font-size:20px;margin-bottom:10px;">
+                                    <t t-esc="timeFormatted"/>
+                                </span>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <div class="cy-dial_footer--btns">
+                    <button class="cy-dial_footer-btn-item"
+                            t-on-click="_OnClickNumPad">
+                        <i class="fa fa-keyboard-o" style="font-size:24px;"/>
+                    </button>
+                    <button class="cy-dial_footer-btn-item"
+                            style="font-size:24px;"
+                            t-on-click="_OnContacts">
+                        <i class="fa fa-user"/>
+                    </button>
+                    <t t-if="this.state.showPartner">
+                        <t t-if="!this.state.call">
+                            <button class="cy-dial_footer-btn-item"
+                                    style="font-size:24px;"
+                                    t-on-click="_OnClickCall">
+                                <i class="ri-phone-fill"/>
+                            </button>
+                        </t>
+                    </t>
+                    <t t-if="this.state.call">
+                        <button class="cy-dial_footer-end_btn-item ri-phone-fill"
+                                t-on-click="_onClickCancel"
+                                style="margin-right: 5px; color:red;font-size:24px;"/>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

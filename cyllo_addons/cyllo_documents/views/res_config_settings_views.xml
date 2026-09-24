@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Define a form view for the res.config.settings model -->
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="15"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Documents" data-string="documents" name="cyllo_documents"
+                     logo="/cyllo_documents/static/description/documents.png">
+                    <block title="Trash">
+                        <setting id="trash">
+                            <field name="trash"/>
+                            <div class="d-inline-block p-1">days</div>
+                        </setting>
+                    </block>
+                    <block title="Integration">
+                        <setting id="google_drive"
+                                 help="Setup Google Drive credentials and sync your documents with Google Drive">
+                            <field name="sync_google_drive"/>
+                            <div class="content-group" invisible="not sync_google_drive">
+                                <button string="Google Accounts" class="btn btn-link"
+                                        name="action_google_drive_accounts" type="object">
+                                    <i class="fa fa-arrow-right"/>Google Drive Accounts
+                                </button>
+                                <br/>
+                                <br/>
+                                <field name="sync_google_workspace"/>
+                                <label for="sync_google_workspace"/>
+                                <div class="mt16">
+                                    <label for="auto_sync_google_drive"/>
+                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                        <field name="auto_sync_google_drive" class="text-center" style="width: 5rem;"/>
+                                        <div class="d-inline-block">days</div>
+                                    </div>
+                                </div>
+                                <button string="Sync Now" type="object" class="btn btn-link"
+                                        name="action_sync_now_google">
+                                    <i class="fa fa-fw o_button_icon fa-lg fa-refresh"/>
+                                    Sync now
+                                </button>
+                            </div>
+                        </setting>
+                        <setting id="sync_one_drive"
+                                 help="Setup One Drive credentials and sync your documents with One Drive">
+                            <field name="sync_one_drive"/>
+                            <div class="content-group" invisible="not sync_one_drive">
+                                <button string="One Drive Accounts" class="btn btn-link"
+                                        name="action_one_drive_accounts" type="object">
+                                    <i class="fa fa-arrow-right"/>One Drive Accounts
+                                </button>
+                                <br/>
+                                <br/>
+                                <field name="sync_one_drive_workspace"/>
+                                <label for="sync_one_drive_workspace"/>
+                                <div class="mt16">
+                                    <label for="auto_sync_one_drive"/>
+                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                        <field name="auto_sync_one_drive" class="text-center" style="width: 5rem;"/>
+                                        <div class="d-inline-block">days</div>
+                                    </div>
+                                </div>
+                                <button string="Sync Now" type="object" class="btn btn-link"
+                                        name="action_sync_now_onedrive">
+                                    <i class="fa fa-fw o_button_icon fa-lg fa-refresh"/>
+                                    Sync now
+                                </button>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Extra">
+                        <setting id="module_crm" help="Enable to create lead from documents">
+                            <field name="module_crm"/>
+                        </setting>
+                        <setting id="module_project" help="Enable to create task from documents">
+                            <field name="module_project"/>
+                        </setting>
+                        <setting id="cyllo_documents_master_password" help="Master Password of Documents">
+                            <field name="document_master_password" password="True"/>
+                        </setting>
+                        <setting id="cyllo_documents_password_admin_only"
+                                 help="Indicates if the locked records can only be opened by admins even with the Master password.">
+                            <field name="document_master_password_admin_only"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+    <!-- Define an action to open the Settings window with context -->
+    <record id="action_view_document_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="view_res_config_settings_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'cyllo_documents'}</field>
+    </record>
+</odoo>

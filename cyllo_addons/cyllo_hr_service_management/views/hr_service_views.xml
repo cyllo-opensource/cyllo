@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_service_tree" model="ir.ui.view">
+        <field name="name">view.hr.service.tree</field>
+        <field name="model">hr.service</field>
+        <field name="arch" type="xml">
+            <tree string="Service/Custody Requests">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="date_done" optional="hide"/>
+                <field name="employee_id"/>
+                <field name="service_category_id" optional="hide"/>
+                <field name="company_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_hr_service_form" model="ir.ui.view">
+        <field name="name">view.hr.service.form</field>
+        <field name="model">hr.service</field>
+        <field name="arch" type="xml">
+            <form string="Service/Custody Requests">
+                <header>
+                    <field name="state" statusbar_visible="draft,submit"
+                           widget="statusbar"/>
+                    <button name="action_submit" type="object" string="SUBMIT"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_assign" type="object"
+                            string="ASSIGN EXECUTOR" class="btn-primary"
+                            groups="hr.group_hr_manager"
+                            invisible="state != 'submit' or service_request_type == 'custody'"/>
+                    <button name="action_assign_to_me" type="object"
+                            string="ASSIGN TO ME" class="btn-primary"
+                            groups="hr.group_hr_manager"
+                            invisible="state != 'submit' or service_request_type == 'custody'"/>
+                    <button name="action_draft" type="object"
+                            string="RESET TO DRAFT" class="btn-primary"
+                            invisible="state != 'submit'"/>
+                    <button name="action_start" type="object" string="START"
+                            class="btn-primary"
+                            groups="hr.group_hr_manager"
+                            invisible="state != 'assign' or service_request_type == 'custody'"/>
+                    <button name="action_approve_quality" type="object"
+                            string="Approve"
+                            class="btn-primary"
+                            groups="hr.group_hr_manager"
+                            invisible="state != 'quality'"/>
+                    <button name="action_approve" type="object" string="APPROVE"
+                            groups="hr.group_hr_manager"
+                            class="btn-primary"
+                            invisible="state != 'submit' or service_request_type == 'service'"/>
+                    <button name="action_return" type="object" string="RETURN"
+                            class="btn-primary"
+                            invisible="state != 'approved' or service_request_type == 'service'"/>
+                    <button name="action_done" type="object"
+                            string="MARK AS DONE" class="btn-primary"
+                            invisible="state != 'ongoing' or service_request_type == 'custody'"/>
+                    <button name="action_cancel" type="object" string="CANCEL"
+                            class="btn-primary"
+                            groups="hr.group_hr_manager"
+                            invisible="state not in ('draft','submit')"/>
+                </header>
+                <sheet>
+                    <field name="service_request_type" widget="radio"
+                           options="{'horizontal': true}"
+                           readonly="state != 'draft'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <group>
+                                <field name="name"
+                                       nolabel="1"/>
+                            </group>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="employee_id"
+                                   widget="many2one_avatar_user"
+                                   readonly="state in ('done', 'returned')"/>
+                            <field name="employee_department_id"/>
+                        </group>
+                        <group>
+                            <field name="create_date"
+                                   invisible="not create_date"/>
+                            <field name="date" invisible="not date"/>
+                            <field name="date_done" invisible="not date_done"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="service_info" string="Service Information"
+                              invisible="service_request_type == 'custody'">
+                            <group>
+                                <group string="Service Details">
+                                    <field name="service_category_id"
+                                           readonly="state == 'done'"
+                                           required="service_request_type == 'service'"/>
+                                    <field name="is_equipment_required"
+                                           invisible="1"/>
+                                    <field name="equipment_id"
+                                           readonly="state == 'done'"
+                                           invisible="not is_equipment_required"
+                                           required="is_equipment_required"
+                                           domain="[('employee_id', '=', employee_id)]"/>
+                                    <field name="maintenance_type"
+                                           widget="radio"
+                                           readonly="state == 'done'"
+                                           invisible="not is_equipment_required"/>
+                                    <field name="maintenance_request_id"
+                                           invisible="not maintenance_request_id"/>
+                                </group>
+                                <group string="Handler's Details">
+                                    <field name="service_handler_id"
+                                           readonly="state == 'done'"
+                                           force_save="1"
+                                           widget="many2one_avatar_user"/>
+                                    <field name="service_handler_department_id"/>
+                                </group>
+                                <group string="Executor's Details"
+                                       invisible="state == 'draft'">
+                                    <field name="service_executor_id"
+                                           readonly="state == 'done'"
+                                           widget="many2one_avatar_user"/>
+                                    <field name="service_executor_department_id"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="custody_info" string="Custody Information"
+                              invisible="service_request_type == 'service'">
+                            <group>
+                                <group string="Custody Details">
+                                    <field name="equipment_id"
+                                           readonly="state == 'returned'"
+                                           domain="[('employee_id', '=', False)]"
+                                           required="service_request_type == 'custody'"/>
+                                    <field name="expected_return_date"
+                                           readonly="state == 'returned'"
+                                           required="service_request_type == 'custody'"/>
+                                </group>
+                                <group string="Handler's Details">
+                                    <field name="service_handler_id"
+                                           force_save="1"
+                                           readonly="state == 'returned'"
+                                           widget="many2one_avatar_user"/>
+                                    <field name="service_handler_department_id"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"
+                           groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="action_view_service_requests" model="ir.actions.act_window">
+        <field name="name">Service Requests</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.service</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your Service requests
+            </p>
+            <p>
+                You can create service requests if you need any kind of support
+                from the upper management
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_service_management_categ" name="Service Management"
+              parent="cyllo_hr.menu_services_categ"/>
+    <menuitem id="menu_service_requests" name="Service Requests"
+              parent="cyllo_hr_service_management.menu_service_management_categ"
+              action="action_view_service_requests" sequence="1"/>
+</odoo>

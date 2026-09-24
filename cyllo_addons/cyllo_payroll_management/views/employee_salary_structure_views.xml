@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Salary structure kanban view-->
+    <record id="view_employee_salary_structure_kanban" model="ir.ui.view">
+        <field name="name">view.employee.salary.structure.kanban</field>
+        <field name="model">employee.salary.structure</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_content oe_kanban_global_click">
+                            <div class="row">
+                                <div class="col-12">
+                                    <strong>
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <span>Code:
+                                        <field name="code"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Salary structure tree view-->
+    <record id="view_employee_salary_structure_tree" model="ir.ui.view">
+        <field name="name">view.employee.salary.structure.tree</field>
+        <field name="model">employee.salary.structure</field>
+        <field name="arch" type="xml">
+            <tree string="Salary Structure">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Salary structure search view-->
+    <record id="view_employee_salary_structure_search" model="ir.ui.view">
+        <field name="name">view.employee.salary.structure.search</field>
+        <field name="model">employee.salary.structure</field>
+        <field name="arch" type="xml">
+            <search string="Payroll Structures">
+                <field name="name" string="Payroll Structures" filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
+                <field name="type_id"/>
+                <field name="journal_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Structure Type" name="type_id" context="{'group_by':'type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Salary structure form view-->
+    <record id="view_employee_salary_structure_form" model="ir.ui.view">
+        <field name="name">view.employee.salary.structure.form</field>
+        <field name="model">employee.salary.structure</field>
+        <field name="arch" type="xml">
+            <form string="Employee Function">
+                <sheet>
+                    <div class="oe_title">
+                         <h1><field name="name" placeholder="e.g. Employee"/></h1>
+                    </div>
+                    <group>
+                    <group>
+                        <field name="code"/>
+                        <field name="type_id"/>
+                        <field name="parent_id"/>
+                    </group>
+                    <group>
+                        <field name="journal_id"/>
+                        <field name="schedule_pay"/>
+                        <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                        <field name="country_id"/>
+                    </group>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Salary Rules">
+                            <field name="employee_salary_rule_ids" domain="[('parent_rule_id','=',False)]">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="category_id"/>
+                                    <field name="sequence" column_invisible="True"/>
+                                    <field name="partner_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Unpaid Work Entry">
+                            <field name="unpaid_work_entry_type_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Other Inputs">
+                            <field name="other_input_line_type_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Salary structure action -->
+    <record id="action_view_salary_structure" model="ir.actions.act_window">
+        <field name="name">Salary Structures</field>
+        <field name="res_model">employee.salary.structure</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Employees salary structures</p>
+        </field>
+    </record>
+</odoo>

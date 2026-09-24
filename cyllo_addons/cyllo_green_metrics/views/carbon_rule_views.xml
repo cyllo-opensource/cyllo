@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_carbon_rule_tree" model="ir.ui.view">
+        <field name="name">carbon.assign.rule.tree</field>
+        <field name="model">carbon.assign.rule</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="source_id"/>
+                <field name="factor_id"/>
+                <field name="gas_id"/>
+                <field name="method"/>
+                <field name="priority"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_carbon_rule_form" model="ir.ui.view">
+        <field name="name">carbon.assign.rule.form</field>
+        <field name="model">carbon.assign.rule</field>
+        <field name="arch" type="xml">
+            <form string="Carbon Assignment Rule">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Rule Name"/>
+                        </h1>
+                    </div>
+                    <!-- Main Information -->
+                    <group>
+                        <group string="Rule Definition">
+                            <field name="model_id"/>
+                            <field name="domain"
+                                   widget="text"
+                                   placeholder="[('state','=','done')]"/>
+                            <field name="method"/>
+                            <field name="priority"/>
+                        </group>
+                        <group string="Assignment Target">
+                            <field name="source_id"/>
+                            <field name="factor_id"/>
+                            <field name="gas_id"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Rule Notes">
+                            <field name="note"
+                                   nolabel="1"
+                                   placeholder="Describe the purpose of this rule, matching conditions, assumptions, and expected behavior..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_carbon_rule" model="ir.actions.act_window">
+        <field name="name">Assignation Rules</field>
+        <field name="res_model">carbon.assign.rule</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

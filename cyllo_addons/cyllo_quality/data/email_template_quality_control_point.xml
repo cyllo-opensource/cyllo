@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="mail_template_quality_control_notification" model="mail.template">
+        <field name="name">Quality Control Point Notification</field>
+        <field name="model_id" ref="model_quality_control_point"/>
+        <field name="subject">Quality Control Point Assignment</field>
+        <field name="auto_delete" eval="False"/>
+        <field name="body_html" type="html">
+            <div style="background-color: #f5f5f5; padding: 20px; font-family: Arial, sans-serif; color: #333333;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <!-- Header with Logo -->
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: #9ea700; margin: 0; padding: 0; font-size: 24px;">Quality Control Notification</h2>
+                    </div>
+
+                    <!-- Greeting -->
+                    <div style="margin-bottom: 20px;">
+                        Dear
+                        <span style="font-weight: bold; color: #2C3E50;">
+                            <t t-out="ctx.get('team_leader') or not_available"/>,
+                        </span>
+                    </div>
+
+                    <!-- Introduction -->
+                    <div style="margin-bottom: 25px; line-height: 1.5;">
+                        I hope this email finds you well. This is to inform you that a new quality control point has been created and assigned to your team with the following details:
+                    </div>
+
+                    <!-- Details Container -->
+                    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                        <!-- Reference -->
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-weight: bold; color: #9ea700; display: inline-block; width: 150px;">Reference:</span>
+                            <span style="color: #576574;">
+                                <t t-out="ctx.get('name') or not_available"/>
+                            </span>
+                        </div>
+
+                        <!-- Control Type -->
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-weight: bold; color: #9ea700; display: inline-block; width: 150px;">Control Type:</span>
+                            <span style="color: #576574;">
+                                <t t-out="ctx.get('control_type') or not_available"/>
+                            </span>
+                        </div>
+
+                        <!-- Quality Team -->
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-weight: bold; color: #9ea700; display: inline-block; width: 150px;">Quality Team:</span>
+                            <span style="color: #576574;">
+                                <t t-out="ctx.get('team') or not_available"/>
+                            </span>
+                        </div>
+
+                        <!-- Control Method -->
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-weight: bold; color: #9ea700; display: inline-block; width: 150px;">Control Method:</span>
+                            <span style="color: #576574;">
+                                <t t-out="ctx.get('control_by') or not_available"/>
+                            </span>
+                        </div>
+
+                        <!-- Conditional Frequency -->
+                        <t t-if="ctx.get('frequency')">
+                            <div style="margin-bottom: 15px;">
+                                <span style="font-weight: bold; color: #9ea700; display: inline-block; width: 150px;">Control Frequency:</span>
+                                <span style="color: #576574;">
+                                    <t t-out="ctx.get('frequency') or not_available"/>
+                                    <t t-out="ctx.get('period') or 'day(s)'"/>
+                                </span>
+                            </div>
+                        </t>
+
+                        <!-- Operations -->
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-weight: bold; color: #9ea700; display: inline-block; width: 150px;">Operations:</span>
+                            <span style="color: #576574;">
+                                <t t-out="ctx.get('operations') or not_available"/>
+                            </span>
+                        </div>
+
+                        <!-- Conditional Products -->
+                        <t t-if="ctx.get('products')">
+                            <div style="margin-bottom: 15px;">
+                                <span style="font-weight: bold; color: #9ea700; display: inline-block; width: 150px;">Products:</span>
+                                <span style="color: #576574;">
+                                    <t t-out="ctx.get('products') or not_available"/>
+                                </span>
+                            </div>
+                        </t>
+
+                        <!-- Conditional Categories -->
+                        <t t-if="ctx.get('categories')">
+                            <div style="margin-bottom: 15px;">
+                                <span style="font-weight: bold; color: #9ea700; display: inline-block; width: 150px;">Product Categories:</span>
+                                <span style="color: #576574;">
+                                    <t t-out="ctx.get('categories') or not_available"/>
+                                </span>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Action Required Section -->
+                    <div style="background-color: #e8f4fc; padding: 15px; border-radius: 6px; margin-bottom: 25px; border-left: 4px solid #9ea700;">
+                        <p style="margin: 0; color: #9ea700; font-weight: bold;">Action Required:</p>
+                        <p style="margin: 10px 0 0 0; color: #333333;">
+                            Please review and implement the necessary quality control measures according to the specified parameters.
+                        </p>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666666; font-size: 14px;">
+                        <p style="margin-bottom: 10px;">
+                            If you have any questions or need further clarification, please don't hesitate to contact us.
+                        </p>
+                        <p style="margin-bottom: 5px;">Best regards,</p>
+                        <p style="font-weight: bold; color: #9ea700;">Quality Control Team</p>
+                        <div style="margin-top: 20px; font-size: 12px; color: #999999; text-align: center;">
+                            This is an automated message. Please do not reply directly to this email.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>

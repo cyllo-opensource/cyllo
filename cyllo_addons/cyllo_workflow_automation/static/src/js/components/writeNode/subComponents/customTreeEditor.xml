@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_workflow_automation.CustomTreeEditor">
+        <div class="o_tree_editor w-100" aria-atomic="true" t-att-class="className">
+            <div class="o_tree_editor_node d-flex flex-column gap-2">
+                <t t-foreach="tree" t-as="branch" t-key="branch_index">
+                    <t t-call="cyllo_workflow_automation.CustomTreeEditor.condition">
+                        <t t-set="node" t-value="branch"/>
+                    </t>
+                </t>
+                    <div class="o_tree_editor_row d-flex align-items-center">
+                        <a href="#" role="button" t-on-click="this.createNode">
+                            <t t-slot="newButton">
+                                <span>New</span>
+                            </t>
+                        </a>
+                    </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="cyllo_workflow_automation.CustomTreeEditor.condition">
+        <div class="o_tree_editor_condition d-flex flex-grow-1 align-items-end gap-2">
+            <t t-call="cyllo_workflow_automation.TreeEditor.Editor">
+                <t t-set="_classes" t-value="'col col-md-4 pe-0'" />
+                <t t-set="info" t-value="props.getPathEditorInfo(node)" />
+                <t t-set="value" t-value="node.path" />
+                <t t-set="update" t-value="(path, info) => this.updatePath(node, path, info)" />
+            </t>
+            <t t-call="cyllo_workflow_automation.TreeEditor.Editor">
+                <t t-set="_classes" t-value="'col ps-0 overflow-hidden'" />
+                <t t-set="info" t-value="getValueEditorInfo(node)" />
+                <t t-set="value" t-value="node.value" />
+                <t t-set="update" t-value="(value) => this.updateLeafValue(node,value)" />
+            </t>
+            <t t-call="cyllo_workflow_automation.TreeEditor.Controls">
+                <t t-set="branch" t-value="node"/>
+            </t>
+        </div>
+    </t>
+    <t t-name="cyllo_workflow_automation.TreeEditor.Controls">
+        <div class="o_tree_editor_node_control_panel d-flex" role="toolbar" aria-label="Domain node">
+            <button
+                    class="btn px-2 fs-4"
+                    role="button"
+                    title="Add New Rule"
+                    aria-label="Add New Rule"
+                    t-on-click="() => this.createNode(branch)"
+
+            >
+                <i class="fa fa-plus" />
+            </button>
+            <button
+                class="btn btn-link px-2 text-danger fs-4"
+                role="button"
+                title="Delete node"
+                aria-label="Delete node"
+                t-on-click="() => this.deleteNode(branch)"
+
+            >
+                <i class="fa fa-trash" />
+            </button>
+            <FieldTypeDropdown
+                currentLabel="getDropdownLabel(node.selectionType)"
+                onSelected="(type) => this.toggleIncludeVariable(type, node)"
+            />
+        </div>
+    </t>
+
+    <t t-name="cyllo_workflow_automation.TreeEditor.Editor">
+        <div t-attf-class="o_tree_editor_editor #{_classes}">
+            <t t-component="info.component" t-props="info.extractProps({ value, update })" />
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,872 @@
+<templates xml:space="preserve">
+    <t t-name="cyllo_timesheet_grid.GridFloatTimeField" owl="1">
+        <div>
+            <FloatTimeField t-props="FloatTimeFieldProps"/>
+        </div>
+    </t>
+
+    <t t-name="grid_view.GridRenderer" owl="1">
+        <div class="o_content grid-contents" t-ref="MainGridRenderer">
+            <div class="o_grid_renderer flex-grow-1" t-ref="renderer">
+                <div class="cy_grid_renderer flex-grow-1" t-if="myTimeSheet">
+                    <div t-attf-class="{{env.isSmall ? 'o_grid_view  o_view_controller o_action o_action_delegate_scroll': 'timesheet-timer position-relative d-md-flex align-items-center py-2 border-bottom cy-view'}}">
+                        <div class="table-head-div row d-flex align-items-center py-2">
+                            <div t-if="myTimeSheet"
+                                 class="col-md-3 cy-main-sectionhead timesheet-head-name">
+                                Timesheet
+                            </div>
+                            <div t-attf-class="{{myTimeSheet ? 'col-md-9' : 'col-md-12'}}" class="d-flex align-items-center justify-content-end gap-2 start_end_timer_grid_btn">
+                                <div class="position-relative">
+                                    <div id="recordLink"
+                                         class="cy-button-primary-stroke cy-timesheet_btn"
+                                         t-attf-class="{{timerStartsRunning.timer?'btn-secondary btn_width-btn_stop':'btn-primary'}}"
+                                         type="button"
+                                         data-bs-toggle="collapse"
+                                         data-bs-target="#recordContainer"
+                                         aria-expanded="false"
+                                         aria-controls="recordContainer">
+                                        <t t-if="timerStartsRunning.timer">STOP
+                                            <span>
+                                                <GridFloatTimeField
+                                                        t-if="grid.record.editedRecord"
+                                                        record="grid.record.editedRecord"
+                                                        name="'unit_amount'"
+                                                        displaySeconds="true"
+                                                        readonly="true"
+                                                        time="grid.time"
+                                                />
+                                            </span>
+                                        </t>
+                                        <t t-else=""><img style="transform: translateX(-6px) translateY(-1px);" src="/cyllo_timesheet_grid/static/src/icons/play-circle-line.png"/>
+                                            START</t>
+                                    </div>
+                                    <div class="cy-record_container collapse"
+                                         id="recordContainer"
+                                         t-ref="divStarterContainer">
+                                        <div t-if="timerStartsRunning.timer"
+                                             t-attf-class="{{env.isSmall ? 'timer-float-time-small':'cy-record_count text-center'}}">
+                                            <span>
+                                                <GridFloatTimeField
+                                                        t-if="grid.record.editedRecord"
+                                                        record="grid.record.editedRecord"
+                                                        name="'unit_amount'"
+                                                        displaySeconds="true"
+                                                        readonly="true"
+                                                        time="grid.time"
+                                                />
+                                            </span>
+                                        </div>
+                                        <div class="btn_start_timer cy-record_controller"
+                                             t-on-click="onclickStart">
+                                                    <img class="timer-play-img"
+                                                         src="/cyllo_timesheet_grid/static/src/icons/play-circle-fill_1.png"/>
+                                        </div>
+                                        <div class="btn_stop_timer cy-record_controller"
+                                             t-on-click="onclickStop"
+                                             data-hotkey="x">
+                                            <img class="timer-stop-img"
+                                                 src="/cyllo_timesheet_grid/static/src/icons/stop-circle-fill.png"/>
+                                        </div>
+                                        <button class="btn_discard_timer btn text-center cy-record_discard"
+                                                t-on-click="onclickDiscard">Discard Changes
+                                        </button>
+                                        <div class="ms-3 short_key">
+                                            <div>
+                                                <span class="text-muted">Press </span>
+                                                <span class="span-text-enter">Enter</span>
+                                                <span class="text-muted"> to launch the timer</span>
+                                            </div>
+                                        </div>
+                                        <div t-if="timerStartsRunning.timer"
+                                             t-attf-class="{{ env.isSmall ? 'timer-project-field-small d-flex flex-column flex-grow-1' : 'timer-project-field align-items-center'}}">
+                                            <label for="inputAddress"
+                                                   class="form-label cy-timesheet_label">Project</label>
+                                            <div id="project-input"
+                                                 class="project-input col-12 mb-2 cy-grid_project_input"
+                                                 t-ref="project-project"
+                                                 t-att-data-project-name="project.projectVal.display_name"
+                                                 t-att-data-analytic="project.projectVal.analytic || null"
+                                                 t-att-data-project-id="project.projectVal.id || null">
+                                                <div class="o_field_many2one_selection cy-button-stroke">
+                                                    <Many2XAutocomplete
+                                                            placeholder="'Project'"
+                                                            value="project.projectVal.display_name"
+                                                            fieldString="'Project'"
+                                                            activeActions="{}"
+                                                            resModel="'project.project'"
+                                                            getDomain.bind="getDomainProject"
+                                                            update.bind="onUpdateProject"
+                                                            context="{ 'task_id' : task.taskVal.id || 0 }"
+                                                            quickCreate="quickCreate"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <label for="inputAddress"
+                                                   class="form-label cy-timesheet_label">Task</label>
+                                            <div class="task-input project-input col-12 mb-2 cy-grid_task_input"
+                                                 t-ref="project-task"
+                                                 t-att-data-task-name="task.taskVal.display_name"
+                                                 t-att-data-task-id="task.taskVal.id || null">
+                                                <div class="o_field_many2one_selection cy-button-stroke">
+                                                    <Many2XAutocomplete
+                                                            placeholder="'Task'"
+                                                            value="task.taskVal.display_name"
+                                                            fieldString="'Task'"
+                                                            activeActions="{}"
+                                                            resModel="'project.task'"
+                                                            getDomain.bind="getDomainTask"
+                                                            update.bind="onUpdateTask"
+                                                            context="{ 'project_id' : project.projectVal.id || 0 }"
+                                                            quickCreate="quickCreateTask"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <label for="inputAddress"
+                                                   class="form-label cy-timesheet_label">Describe your activity</label>
+                                            <div class="analytic-description col-12 mb-2">
+                                                <textarea
+                                                        class="form-control  cy-button-stroke analytic-description-input"
+                                                        type="text" rows="4"
+                                                        placeholder="Describe your activity...."/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timesheet-grid-table cy-time-table_container">
+                    <table class="table cy-timesheet_table"
+                           id="timesheet-table">
+                        <thead id="table-head" class="table-head">
+                            <th t-att-class="env.isSmall ? '':'sticky-left-0'"
+                                id="head-serial-number" class="sticky-none"
+                                t-if="myTimeSheet"/>
+                            <th class="col-sm-8 col-md-5 col-lg-4 sticky-none"
+                                id="head-date"
+                                 t-att-class="env.isSmall ? '' : (myTimeSheet ? 'sticky-left-50' : 'sticky-left-0')">
+                                <div id="nav_buttons"
+                                     t-attf-class="{{myTimeSheet?'my_timesheet_nav-divs':'all_timesheet_nav-divs'}}"
+                                     class="col-sm-12 col-md-12 col-lg-12 d-flex align-items-center gap-4">
+                                    <button
+                                            class="btn cy-button-stroke button-active btn-filter_today"
+                                            t-on-click="setDateToday"
+                                            data-hotkey="t"
+                                    >Today</button>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="selector-days">
+                                            <select id="view-selector"
+                                                    class="form-select cy-select_form cy-timesheet_selector"
+                                                    t-on-change="onclickSelector"
+                                                    t-ref="nextDate"
+                                                    data-hotkey="v">
+                                                <option value="Day">Day</option>
+                                                <option value="Week">Week</option>
+                                                <option value="Month">Month</option>
+                                            </select>
+                                        </div>
+                                        <a class="cy-aligned-icons cy-navigation-icon-box cy-timesheet_nav">
+                                            <i class="ri-arrow-left-s-line cy-navigation-icon"
+                                               title="Previous"
+                                               aria-label="Previous"
+                                               t-on-click="onclickBack"
+                                               data-hotkey="p"/>
+                                            <i class="ri-arrow-right-s-line  cy-navigation-icon"
+                                               title="Next"
+                                               aria-label="Next"
+                                               t-on-click="onclickNext"
+                                               data-hotkey="n"/>
+                                        </a>
+                                    </div>
+                                    <div class="currentDate"/>
+                                </div>
+                            </th>
+                            <t t-foreach="iterations(table.tableHead.length)"
+                               t-as="index"
+                               t-key="index">
+                                <t t-set="thData"
+                                   t-value="table.tableHead[index]"/>
+                                <th t-on-mouseenter="mouseEnter"
+                                    t-att-data-day-obj="thData.dateObj.getDate()"
+                                    t-att-data-month-obj="thData.dateObj.getMonth()"
+                                    t-att-data-year-obj="thData.dateObj.getYear()"
+                                    t-on-mouseleave="mouseLeave"
+                                    t-attf-data-index="index_{{index}}"
+                                    class="table-head-date col-sm-3 col-md-5 col-lg-7">
+                                        <div class="date-container"
+                                             t-att-data-day-obj="thData.dateObj.getDate()"
+                                             t-att-data-month-obj="thData.dateObj.getMonth()"
+                                             t-att-data-year-obj="thData.dateObj.getYear()"
+                                             t-attf-data-index="index_{{index}}">
+                                            <div class="cy-timesheet_subhead"
+                                                 t-attf-class="{{selectedPeriodValue == 'Day'?'text-center':''}}"
+                                                 t-esc="thData.day"/>
+                                            <t t-if="myTimeSheet">
+                                                <div class="cy-timesheet_mainHead"
+                                                     t-attf-class="{{selectedPeriodValue == 'Day'?'text-center':''}}">
+                                                    <t t-if="table.tableBody.resultRecordList?.length > 0"
+                                                       t-out="formatTime(table.tableBody.resultRecordList[index])"/>
+                                                    <t t-else=""
+                                                       t-out="formatTime(table.tableBody.totalUnitAmount)"/>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="cy-timesheet_mainHead"
+                                                     t-attf-class="{{selectedPeriodValue == 'Day'?'text-center':''}}">
+                                                    <t t-if="table.tableBody.totalSumUnit?.length > 0"
+                                                       t-out="formatTime(table.tableBody.totalSumUnit[index])"/>
+                                                    <t t-else=""
+                                                       t-out="formatTime(sumUnit(table.tableBody.map(item => item.sumUnitTime)))"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                </th>
+                            </t>
+                            <t t-set="total"
+                               t-value="total + resultRecordList"/>
+                            <t t-if="isDay"><th id="total-hours" t-attf-class="{{ env.isSmall ? '' : 'sticky-right'}}" class="col-sm-1 col-md-2 col-lg-1 sticky-none">
+                                <t t-if="myTimeSheet">
+                                    <div class="total-hours-div">
+                                        <p class="cy-timesheet_subhead">Days</p>
+                                        <t t-if="table.tableBody.resultRecordList?.length > 0"><p class="cy-timesheet_mainHead" t-out="formatTime(sumUnit(table.tableBody.resultRecordList))"/></t>
+                                        <t t-else=""><p class="cy-timesheet_mainHead" t-out="formatTime(table.tableBody.totalUnitAmount)"/></t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="total-hours-div">
+                                        <p class="cy-timesheet_subhead">Days</p>
+                                        <t t-if="table.tableBody.totalSumUnit?.length > 0"><p class="cy-timesheet_mainHead" t-out="formatTime(sumUnit(table.tableBody.totalSumUnit))"/></t>
+                                        <t t-else=""><p class="cy-timesheet_mainHead" t-out="formatTime(sumUnit(table.tableBody.map(item => item.sumUnitTime)))"/></t>
+                                    </div>
+                                </t>
+                            </th></t>
+                            <t t-else=" "><th id="total-hours" t-attf-class="{{ env.isSmall ? '' : 'sticky-right'}}" class="col-sm-1 col-md-2 col-lg-1 sticky-none">
+                                <t t-if="myTimeSheet">
+                                    <div class="total-hours-div ">
+                                        <p class="cy-timesheet_subhead total-hours-div_style">Total Hours</p>
+                                        <t t-if="table.tableBody.resultRecordList?.length > 0"><p class="cy-timesheet_mainHead total-hours-div_style" t-out="formatTime(sumUnit(table.tableBody.resultRecordList))"/></t>
+                                        <t t-else=""><p class="cy-timesheet_mainHead total-hours-div_style" t-out="formatTime(table.tableBody.totalUnitAmount)"/></t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="total-hours-div ">
+                                        <p class="cy-timesheet_subhead total-hours-div_style">Total Hours</p>
+                                        <t t-if="table.tableBody.totalSumUnit?.length > 0"><p class="cy-timesheet_mainHead total-hours-div_style" t-out="formatTime(sumUnit(table.tableBody.totalSumUnit))"/></t>
+                                        <t t-else=""><p class="cy-timesheet_mainHead total-hours-div_style" t-out="formatTime(sumUnit(table.tableBody.map(item => item.sumUnitTime)))"/></t>
+                                    </div>
+                                </t>
+                            </th></t>
+                        </thead>
+                        <tbody id="table-body">
+                            <t t-set="total" t-value="0.0"/>
+                            <t t-if="table.week">
+                                <t t-if="myTimeSheet">
+                                    <tr t-foreach="table.tableBody"
+                                        t-as="tbData"
+                                        t-key="tbData_index"
+                                        class="table-row-body"
+                                        t-att-data-id="tbData.timesheet_id">
+                                        <t t-call="{{ constructor.GridRowRenderer }}">
+                                            <t t-set="tbData"
+                                               t-value="tbData"/>
+                                        </t>
+                                    </tr>
+                                    <t t-call="{{ constructor.addALineWeekMonth }}"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-set="allEmployeeTotal" t-value="0.0"/>
+                                    <t t-foreach="table.tableBody" t-as="tData"
+                                       t-key="tData_index">
+                                        <tr class="employee-hour-row">
+                                            <td class="employee-name">
+                                                <span>
+                                                    <img class="user-avatar"
+                                                         t-attf-src="/web/image/hr.employee/{{tData?.employee[0]}}/avatar_128"
+                                                         alt="loading..."/>
+                                                </span>
+                                                <span class="user-span"><span t-out="tData.employee[1]"/></span>
+                                            </td>
+                                            <t t-if="isIterable(tData.sumUnitTime)">
+                                                    <t t-foreach="iterations(tData.sumUnitTime.length)"
+                                                       t-as="index"
+                                                       t-key="index">
+                                                        <t t-set="sumUnitTime"
+                                                           t-value="tData.sumUnitTime[index]"/>
+                                                        <td t-out="formatTime(sumUnitTime)"
+                                                            class="employee-hour"
+                                                            t-attf-style="background:{{ tData.css[index] }} !important;"
+                                                            t-attf-data-index="index_{{index}}"/>
+                                                    </t>
+                                                </t>
+                                            <td class="employee-total-hour">
+                                                <div class="employee-total-hour-div">
+                                                    <t t-out="formatTime(sumUnit(tData.sumUnitTime))"/>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <t t-call="{{ constructor.weekMonthRowRenderer }}">
+                                            <t t-set="tData" t-value="tData"/>
+                                        </t>
+                                        <t t-call="{{ constructor.addALineWeekMonth }}">
+                                            <t t-set="tData" t-value="tData"/>
+                                        </t>
+                                    </t>
+                                    <t t-if="table.tableBody?.length lte 0"
+                                       t-call="{{ constructor.addALineWeekMonth }}"/>
+                                </t>
+                                <tr class="raw-total_hours-calc">
+                                    <td class="total-hours-calculated-serial sticky-none"
+                                        t-att-class="env.isSmall ? '':'sticky-left-0'"
+                                        t-if="myTimeSheet"/>
+                                     <td class="total-hours-calculated-main sticky-none"
+                                         t-att-class="env.isSmall ? '' : (myTimeSheet ? 'sticky-left-45' : 'sticky-left-0')"/>
+                                    <t t-if="table.tableBody.resultRecordList?.length > 0 and myTimeSheet">
+                                        <t t-foreach="table.tableBody.resultRecordList"
+                                           t-as="resultRecordList"
+                                           t-key="resultRecordList_index">
+                                            <td class="total-hours-calculated text-align-right"
+                                                t-attf-data-index="index_{{resultRecordList_index}}">
+                                                <t t-if="isDay?formatTime(resultRecordList) != '0.00':formatTime(resultRecordList) != '00:00'">
+                                                    <span t-att-class="{
+                                                    'cy-danger-txt': resultRecordList &lt; table.employeeWorkHour,
+                                                    'cy-success-txt' :  resultRecordList == table.employeeWorkHour
+                                                    }"
+                                                          t-out="formatTime(resultRecordList)"/>
+                                                </t>
+                                            </td>
+                                            <t t-set="total"
+                                               t-value="total + resultRecordList"/>
+                                        </t>
+                                    </t>
+                                    <t t-elif="table.tableBody.totalSumUnit?.length > 0 and !myTimeSheet">
+                                        <t t-foreach="table.tableBody.totalSumUnit"
+                                           t-as="totalSumUnit"
+                                           t-key="totalSumUnit_index">
+                                            <td class="total-hours-calculated text-align-right"
+                                                t-attf-data-index="index_{{totalSumUnit_index}}">
+                                                <t t-if="isDay?formatTime(totalSumUnit) != '0.00':formatTime(totalSumUnit) != '00:00'">
+                                                    <span t-att-class="{
+                                                    'cy-danger-txt': totalSumUnit lt table.employeeWorkHour,
+                                                    'cy-success-txt' :  totalSumUnit == table.employeeWorkHour
+                                                    }"
+                                                          t-out="formatTime(totalSumUnit)"/>
+                                                </t>
+                                            </td>
+                                            <t t-set="total"
+                                               t-value="total + totalSumUnit"/>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-foreach="weekMonthCount()"
+                                           t-as="index" t-key="index_index">
+                                          <td class="total-hours-calculated text-align-right"
+                                              t-attf-data-index="index_{{index_index}}"/>
+                                        </t>
+                                    </t>
+                                    <td id="total-calculated-hours"
+                                        t-att-class="env.isSmall ? '' : 'sticky-right'"
+                                        class="total-hours-calculated text-align-right sticky-none">
+                                            <span t-esc="formatTime(total)"/>
+                                    </td>
+                                </tr>
+                                <tr class="final-raw">
+                                    <t t-set="employeeOvertime"
+                                       t-value="table.employeeWorkHour"/>
+                                    <td t-att-class="env.isSmall ? '':'sticky-left-0'"
+                                        class="extra-hours-main-serial sticky-none"
+                                        t-if="myTimeSheet"/>
+                                     <td class="extra-hours-serial-main sticky-none"
+                                         t-att-class="env.isSmall ? '' : (myTimeSheet ? 'sticky-left-45' : 'sticky-left-0')"/>
+                                    <t t-if="table.tableBody.overTime">
+                                        <t t-foreach="table.tableBody.overTime"
+                                           t-as="number" t-key="number_index">
+                                            <td id="extra-hours"
+                                                class="extra-hours-main"
+                                                t-attf-data-index="final_index_{{number_index}}">
+                                                <t t-if="Math.abs(number) != employeeOvertime &amp; formatTime(number) != '00:00'">
+                                                    <div class="overtime-hour rounded-pill"
+                                                         title="Daily Overtime">
+                                                        <t t-if="number != 0 &amp; myTimeSheet">
+                                                            <span class="text-warning"
+                                                                  t-if="Math.abs(number) === number">+</span>
+                                                            <span class="text-warning"
+                                                                  t-esc="formatTime(number)"/>
+                                                        </t>
+                                                    </div>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </t>
+                                    <td id="total-calculated-hours"
+                                        t-att-class="env.isSmall ? '' : 'sticky-right'"
+                                        class="sticky-none">
+                                        <div t-if="myTimeSheet"
+                                             class="overtime-hour rounded-pill"
+                                             title="Weekly Overtime">
+                                            <t t-if="table.tableBody.overTime?.filter(data => data != -table.employeeWorkHour).reduce((acc, val) => acc + val, 0) != 0">
+                                                <span class="text-warning"
+                                                      t-if="table.tableBody.overTime?.filter(data => data != -table.employeeWorkHour).reduce((acc, val) => acc + val, 0) &gt; 0">+</span>
+                                                <span class="text-warning"
+                                                      t-out="formatTime(table.tableBody.overTime?.filter(data => data != -table.employeeWorkHour).reduce((acc, val) => acc + val, 0))"/>
+                                            </t>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-else="">
+                                <t t-if="myTimeSheet">
+                                    <t t-foreach="table.tableBody"
+                                       t-as="tbData" t-key="tbData_index">
+                                        <t t-call="{{constructor.dayRowRender}}">
+                                            <t t-set="tbData"
+                                               t-value="tbData"/>
+                                        </t>
+                                    </t>
+                                    <t t-call="{{ constructor.addALine }}"/>
+                                </t>
+                                <!-- All Timesheet table body day-->
+                                <t t-else="">
+                                    <t t-set="allEmployeeTotal" t-value="0.0"/>
+                                    <t t-foreach="table.tableBody" t-as="tData"
+                                       t-key="tData_index">
+                                        <tr class="employee-hour-row">
+                                            <td class="employee-name">
+                                                <span>
+                                                    <img class="user-avatar"
+                                                         t-attf-src="/web/image/hr.employee/{{tData.employee[0]}}/avatar_128"
+                                                         alt="loading..."/>
+                                                </span>
+                                                <span class="user-span"><span t-out="tData.employee[1]"/></span>
+                                            </td>
+                                            <td class="employee-hour"
+                                                t-attf-class="{{selectedPeriodValue == 'Day'?'text-center':''}}"
+                                                t-attf-style="background:{{table?.employeeHead}}"
+                                                t-out="formatTime(tData?.sumUnitTime)"/>
+                                            <td id="employee-total-hour"
+                                                class="employee-total-hour">
+                                                <div class="employee-total-hour-div">
+                                                    <t t-out="formatTime(tData?.sumUnitTime)"/>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <t t-foreach="tData.employee_data"
+                                           t-as="tbData" t-key="tbData_index">
+                                            <t t-call="{{constructor.dayRowRender}}">
+                                                <t t-set="tData"
+                                                   t-value="tData"/>
+                                            </t>
+                                        </t>
+                                        <t t-call="{{ constructor.addALine }}">
+                                            <t t-set="tData" t-value="tData"/>
+
+                                        </t>
+                                        <t t-set="allEmployeeTotal"
+                                           t-value="allEmployeeTotal + tData.sumUnitTime"/>
+                                    </t>
+                                    <t t-if="table.tableBody?.length lte 0"
+                                       t-call="{{ constructor.addALine }}"/>
+                                </t>
+                                <tr class="raw-total_hours-calc">
+                                    <td t-if="myTimeSheet"
+                                        class="total-hours-calculated-serial sticky-none"
+                                        t-att-class="env.isSmall ? '':'sticky-left-0'"/>
+                                     <td class="total-hours-calculated-main sticky-none"
+                                         t-att-class="env.isSmall ? '' : (myTimeSheet ? 'sticky-left-45' : 'sticky-left-0')"/>
+                                    <t t-set="total"
+                                       t-value="table.tableBody.totalUnitAmount"/>
+                                    <t t-set="employeeWorkHours"
+                                       t-value="table.employeeWorkHour"/>
+                                    <td class="total-hours-calculated">
+                                        <div t-if="total != 0">
+                                            <span t-att-class="{
+                                                    'cy-danger-txt': total &lt; table.employeeWorkHour,
+                                                    'cy-success-txt' :  total == table.employeeWorkHour
+                                            }"
+                                                  t-esc="formatTime(myTimeSheet?total:allEmployeeTotal)"/>
+                                        </div>
+                                    </td>
+                                    <td id="total-calculated-hours"
+                                        t-att-class="env.isSmall ? '' : 'sticky-right'"
+                                        class="total-hours-calculated sticky-none">
+                                        <div>
+                                            <span t-esc="formatTime(myTimeSheet?total:allEmployeeTotal)"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="final-raw">
+                                    <td t-if="myTimeSheet"
+                                        t-att-class="env.isSmall ? '':'sticky-left-0'"
+                                        class="extra-hours-main-serial sticky-none"/>
+                                    <td class="extra-hours-serial-main sticky-none"
+                                        t-att-class="env.isSmall ? '':'sticky-left-0'"/>
+                                    <td id="extra-hours"
+                                        class="extra-hours-main">
+                                        <t t-if="isDay?formatTime(total) != '0.00':formatTime(total) != '00:00'">
+                                            <div class="overtime-hour rounded-pill"
+                                                 title="Daily Overtime">
+                                                <t t-if="employeeWorkHours != 0 &amp; myTimeSheet">
+                                                    <span class="text-warning"
+                                                          t-if="total-employeeWorkHours &gt; 0">+</span>
+                                                    <span class="text-warning"
+                                                          t-esc="formatTime(total-employeeWorkHours)"/>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td id="total-calculated-hours"
+                                        t-att-class="env.isSmall ? '' : 'sticky-right'"
+                                        class="sticky-none">
+                                        <div t-if="myTimeSheet"
+                                             class="overtime-hour rounded-pill"
+                                             title="Daily Overtime">
+                                            <t t-if="total-employeeWorkHours != 0">
+                                                <span class="text-warning"
+                                                      t-if="total-employeeWorkHours &gt; 0">+</span>
+                                                <span class="text-warning"
+                                                      t-out="formatTime(total-employeeWorkHours)"/>
+                                            </t>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </t>
+    <!--    Week Month Data My timesheet Template-->
+    <t t-name="grid_view.GridRowRenderer" owl="1">
+        <td t-att-class="env.isSmall ? '':'sticky-left-0'"
+            class="serial-number play sticky-none border_bottom-style"
+            t-if="myTimeSheet">
+            <div t-attf-id="serial_{{tbData.rec_id}}"
+                 class="serial-number-btn btn-filter_today cy-button-stroke px-2 py-1"
+                 data-bs-toggle="collapse" data-bs-target="#recordContainer"
+                 aria-expanded="false" aria-controls="recordContainer"
+                 t-on-click="serialButtonClick">
+                <div class="main-serial-div ">
+                    <span class="serial-alphabet cy-searchbox-K active"
+                          t-out="tbData.serialNumber" style="display: none;"/>
+                    <span t-attf-data-parent-id="serial_{{tbData.rec_id}}"
+                          class="serial-play"/>
+                    <span t-attf-data-parent-id="serial_{{tbData.rec_id}}"
+                          class="serial-stop"/>
+                </div>
+            </div>
+        </td>
+         <td class="table-project-task sticky-none border_bottom-style"
+             t-att-class="env.isSmall ? '' : (myTimeSheet ? 'sticky-left-50' : 'sticky-left-0')">
+            <div class="table-project-task-div">
+            <span class="project-span data-color mr4 project-span-width"
+                  t-att-data-id="tbData?.project_id[0]" t-on-click="gotoProject"
+                  t-esc="tbData.project_id[1]"
+                  t-attf-title="{{tbData.project_id[1]}}"/>
+                <t t-if="tbData.task_id[1]">
+                <span class="data-seperator">|</span>
+            </t>
+                <span class="task-span task-data-id data-color ml4 task-span-width"
+                      t-att-data-id="tbData?.task_id[0]" t-on-click="gotoTask"
+                      t-esc="tbData.task_id[1]"
+                      t-attf-title="{{tbData.task_id[1]}}"/>
+                <small>
+                <div class="remaining-hours"
+                     t-attf-title="Difference between the number of {{tbData.planned_hour}} allocated to the task and the number of {{tbData.effective_hour}} recorded">
+                     <t t-if="tbData.task_remaining_time != 0">
+                         <span t-if="Math.abs(tbData.task_remaining_time) === tbData.task_remaining_time"
+                               t-att-class="{
+                            'text-warning' : (tbData.effective_hour/tbData.planned_hour)*100 &gt;= 80 and (tbData.effective_hour/tbData.planned_hour)*100 &lt;= 99,
+                            'cy-success-txt' : (tbData.effective_hour/tbData.planned_hour)*100 &lt;= 80 and (tbData.effective_hour/tbData.planned_hour)*100 &gt;= 0
+                            }">+
+                         </span>
+                         <span t-att-class="{
+                        'cy-danger-txt': (tbData.effective_hour/tbData.planned_hour)*100 &gt; 100,
+                        'text-warning' : (tbData.effective_hour/tbData.planned_hour)*100 &gt;= 80 and (tbData.effective_hour/tbData.planned_hour)*100 &lt;= 99,
+                        'cy-success-txt' : (tbData.effective_hour/tbData.planned_hour)*100 &lt;= 80 and (tbData.effective_hour/tbData.planned_hour)*100 &gt;= 0
+                        }"
+                               t-esc="formatTime(tbData.task_remaining_time)"/>
+                     </t>
+                </div>
+            </small></div>
+        </td>
+        <t t-if="tbData.dataWeek">
+            <t t-foreach="tbData.dataWeek" t-as="tData" t-key="tData_index">
+                <td t-on-mouseenter="mouseEnter" t-on-mouseleave="mouseLeave"
+                    t-attf-data-index="index_{{tData_index}}"
+                    class="data-container-body hoverable fa-magnifying-glass border_bottom-style cy-timesheet_time"
+                    t-on-click="clickInput" t-att-data-date="tData.date"
+                    t-attf-style="background: {{tData.css}};"
+                    t-attf-data-employee="{{myTimeSheet?tbData?.employee_id[0]:tData?.employee[0]}}">
+                    <i class="fa fa-search icon"
+                       t-on-click="(ev) => this.clickSearchIcon(ev)"
+                       t-att-data-name="tbData.display_name"
+                       t-att-data-task-id="tbData.task_id[0]"
+                       t-att-data-date="tData.date"
+                       t-attf-data-employee="{{myTimeSheet?tbData?.employee_id[0]:tData?.employee[0]}}"/>
+                    <div class="input-text-container">
+                        <div class="text-align-right">
+                            <div id="input_fiel"
+                                 class="text-opacity-2 editable time-format"
+                                 contenteditable="true"
+                                 tabindex="0"
+                                 t-on-blur="(ev) => this.spanFocusOut(ev, tData.unit_amount)"
+                                 placeholder="00:00"
+                                 t-att-data-time="tData.unit_amount"
+                                 t-on-click="spanClick"/>
+                        </div>
+                    </div>
+                </td>
+            </t>
+        </t>
+        <t t-if="tbData.dataWeek">
+            <td class="total-hours-data sticky-none" id="total-hours-data"
+                t-att-class="env.isSmall ? '' : 'sticky-right'">
+                <div class="total-hours-data-div total-hours-div_style">
+                    <t t-esc="formatTime(sumHours(tbData.dataWeek))"/>
+                </div>
+            </td>
+        </t>
+    </t>
+    <!--    Week Month Data All timesheet template-->
+    <t t-name="grid_view.weekMonthRowRenderer" owl="1">
+        <tr class="table-row-body" t-foreach="tData.employee_data"
+            t-as="employeeData" t-key="employeeData_index">
+             <td class="table-project-task sticky-none border_bottom-style"
+                 t-att-class="env.isSmall ? '' : (myTimeSheet ? 'sticky-left-50' : 'sticky-left-0')">
+                <div class="table-project-task-div">
+                <span class="project-span data-color mr4 project-span-width"
+                      t-att-data-id="employeeData?.project_id[0]"
+                      t-on-click="gotoProject"
+                      t-esc="employeeData.project_id[1]"
+                      t-attf-title="{{employeeData.project_id[1]}}"/>
+                    <t t-if="employeeData.task_id[1]">
+                    <span class="data-seperator">|</span>
+                </t>
+                    <span class="task-span task-data-id data-color ml4 task-span-width"
+                          t-att-data-id="employeeData?.task_id[0]"
+                          t-on-click="gotoTask"
+                          t-esc="employeeData.task_id[1]"
+                          t-attf-title="{{employeeData.task_id[1]}}"/>
+                    <small>
+                    <div class="remaining-hours"
+                         t-attf-title="Difference between the number of {{employeeData.planned_hour}} allocated to the task and the number of {{employeeData.effective_hour}} recorded">
+                         <t t-if="employeeData.task_remaining_time != 0">
+                             <span t-if="Math.abs(employeeData.task_remaining_time) === employeeData.task_remaining_time"
+                                   t-att-class="{
+                                'text-warning' : (employeeData.effective_hour/employeeData.planned_hour)*100 &gt;= 80 and (employeeData.effective_hour/employeeData.planned_hour)*100 &lt;= 99,
+                                'cy-success-txt' : (employeeData.effective_hour/employeeData.planned_hour)*100 &lt;= 80 and (employeeData.effective_hour/employeeData.planned_hour)*100 &gt;= 0
+                                }">+
+                             </span>
+                             <span t-att-class="{
+                            'cy-danger-txt': (employeeData.effective_hour/employeeData.planned_hour)*100 &gt; 100,
+                            'text-warning' : (employeeData.effective_hour/employeeData.planned_hour)*100 &gt;= 80 and (employeeData.effective_hour/employeeData.planned_hour)*100 &lt;= 99,
+                            'cy-success-txt' : (employeeData.effective_hour/employeeData.planned_hour)*100 &lt;= 80 and (employeeData.effective_hour/employeeData.planned_hour)*100 &gt;= 0
+                            }"
+                                   t-esc="formatTime(employeeData.task_remaining_time)"/>
+                         </t>
+                    </div>
+                </small>
+                </div>
+            </td>
+            <t t-if="employeeData.dataWeek">
+                <t t-foreach="employeeData.dataWeek" t-as="emData"
+                   t-key="emData_index">
+                    <td t-on-mouseenter="mouseEnter"
+                        t-on-mouseleave="mouseLeave"
+                        t-attf-data-index="index_{{emData_index}}"
+                        class="data-container-body hoverable fa-magnifying-glass border_bottom-style cy-timesheet_time"
+                        t-on-click="clickInput" t-att-data-date="emData.date"
+                        t-attf-style="background: {{emData.css}};"
+                        t-att-data-employee="employeeData?.employee_id[0]">
+                        <i class="fa fa-search icon"
+                           t-on-click="(ev) => this.clickSearchIcon(ev)"
+                           t-att-data-name="employeeData.display_name"
+                           t-att-data-task-id="employeeData?.task_id[0]"
+                           t-att-data-date="emData.date"
+                           t-att-data-employee="employeeData?.employee_id[0]"/>
+                        <div class="input-text-container">
+                            <div class="text-align-right">
+                                 <div id="input_fiel"
+                                      class="text-opacity-2 editable time-format"
+                                      contenteditable="true"
+                                      tabindex="0"
+                                      t-on-blur="(ev) => this.spanFocusOut(ev, emData.unit_amount)"
+                                      placeholder="00:00"
+                                      t-att-data-time="emData.unit_amount"
+                                      t-on-click="spanClick"/>
+                            </div>
+                        </div>
+                    </td>
+                </t>
+            </t>
+            <t t-if="employeeData.dataWeek">
+                <td class="total-hours-data sticky-none" id="total-hours-data"
+                    t-att-class="env.isSmall ? '' : 'sticky-right'">
+                    <div class="total-hours-data-div total-hours-div_style">
+                        <t t-esc="formatTime(sumHours(employeeData.dataWeek))"/>
+                    </div>
+                </td>
+
+            </t>
+        </tr>
+    </t>
+    <!--    Day wise timesheet template-->
+    <t t-name="grid_view.dayRowRender" owl="1">
+         <tr id="table-row-body" t-att-data-id="tbData.timesheet_id"
+             t-att-data-date="tbData.date">
+                <td t-if="myTimeSheet"
+                    t-att-class="env.isSmall ? '':'sticky-left-0'"
+                    class="serial-number play sticky-none border_bottom-style">
+                    <div t-attf-id="serial_{{tbData.rec_id}}"
+                         class="serial-number-btn  btn-filter_today cy-button-stroke px-2 py-1"
+                         data-bs-toggle="collapse"
+                         data-bs-target="#recordContainer" aria-expanded="false"
+                         aria-controls="recordContainer"
+                         t-on-click="serialButtonClick">
+                        <div class="main-serial-div ">
+                            <span class="serial-alphabet cy-searchbox-K active"
+                                  t-out="tbData.serialNumber"
+                                  style="display: none;"/>
+                            <span t-attf-data-parent-id="serial_{{tbData.rec_id}}"
+                                  class="serial-play"/>
+                            <span t-attf-data-parent-id="serial_{{tbData.rec_id}}"
+                                  class="serial-stop"/>
+                        </div>
+                    </div>
+                </td>
+              <td class="table-project-task sticky-none border_bottom-style"
+                  t-att-class="env.isSmall ? '' : (myTimeSheet ? 'sticky-left-50' : 'sticky-left-0')">
+                 <div class="table-project-task-div">
+                <span class="project-span data-color mr4 project-span-width"
+                      t-att-data-id="tbData?.project_id[0]"
+                      t-on-click="gotoProject"
+                      t-esc="isGrouped?tbData.display_name:tbData.project_id[1]"
+                      t-attf-title="{{isGrouped?tbData.display_name:tbData.project_id[1]}}"/>
+                     <t t-if="tbData.task_id[1]">
+                                            <span class="data-seperator">|</span>
+                                        </t>
+                     <span class="task-span task-data-id data-color ml4 task-span-width"
+                           t-att-data-id="tbData?.task_id[0]"
+                           t-on-click="gotoTask"
+                           t-esc="tbData.task_id[1]"
+                           t-attf-title="{{tbData.task_id[1]}}"/>
+                     <small>
+                    <div t-if="!isGrouped" class="remaining-hours"
+                         t-attf-title="Difference between the number of {{tbData.planned_hour}} allocated to the task and the number of {{tbData.effective_hour}} recorded">
+                         <t t-if="tbData.task_remaining_time != 0">
+                             <span t-if="Math.abs(tbData.task_remaining_time) === tbData.task_remaining_time"
+                                   t-att-class="{
+                            'text-warning' : (tbData.effective_hour/tbData.planned_hour)*100 &gt;= 80 and (tbData.effective_hour/tbData.planned_hour)*100 &lt;= 99,
+                            'cy-success-txt' : (tbData.effective_hour/tbData.planned_hour)*100 &lt;= 80 and (tbData.effective_hour/tbData.planned_hour)*100 &gt;= 0
+                            }">+</span>
+                             <span t-att-class="{
+                            'cy-danger-txt': (tbData.effective_hour/tbData.planned_hour)*100 &gt; 100,
+                            'text-warning' : (tbData.effective_hour/tbData.planned_hour)*100 &gt;= 80 and (tbData.effective_hour/tbData.planned_hour)*100 &lt;= 99,
+                            'cy-success-txt' : (tbData.effective_hour/tbData.planned_hour)*100 &lt;= 80 and (tbData.effective_hour/tbData.planned_hour)*100 &gt;= 0
+                            }"
+                                   t-esc="formatTime(tbData.task_remaining_time)"/>
+                         </t>
+                    </div>
+                 </small>
+                 </div>
+             </td>
+             <td class="data-container-body hoverable fa-magnifying-glass border_bottom-style cy-timesheet_time"
+                 t-on-click="clickInput"
+                 t-attf-style="background:{{tbData?.css}}"
+                 t-attf-data-index="index_0"
+                 t-attf-data-employee="{{myTimeSheet?tbData?.employee_id[0]:tData?.employee[0]}}">
+                <i class="fa fa-search icon"
+                   t-on-click="clickSearchIcon"
+                   t-att-data-name="tbData.display_name"
+                   t-att-data-task-id="tbData.task_id[0]"
+                   t-att-data-date="tbData.date"
+                   t-attf-data-employee="{{myTimeSheet?tbData?.employee_id[0]:tData?.employee[0]}}"/>
+                 <div class="input-text-container">
+                                            <div class="text-center">
+                                                <div id="input_fiel"
+                                                     class="text-opacity-2 editable time-format"
+                                                     contenteditable="true"
+                                                     tabindex="0"
+                                                     t-on-blur="(ev) => this.spanFocusOut(ev, tbData.unit_amount)"
+                                                     placeholder="00:00"
+                                                     t-att-data-time="tbData.unit_amount"
+                                                     t-on-click="spanClick"/>
+                                            </div>
+                                        </div>
+                                    </td>
+             <td class="total-hours-data sticky-none"
+                 id="total-hours-data"
+                 t-att-class="env.isSmall ? '' : 'sticky-right'"
+             >
+                 <div class="total-hours-data-div total-hours-div_style">
+                     <t t-esc="tbData.unit_amount"/>
+                 </div>
+             </td>
+             <t t-set="unitAmount"
+                t-value="tbData.unitAmountUnformat"/>
+             <t t-set="total" t-value="total + unitAmount"/>
+        </tr>
+    </t>
+    <!--    Add a line template in day wise-->
+    <t t-name="grid_view.addALine" owl="1">
+        <tr t-attf-class="{{myTimesheet?'':'add-a-line-main-row-div'}}">
+            <t t-set="employeeWorkHours"
+               t-value="total - table.employeeWorkHour"/>
+            <td t-if="myTimeSheet"
+                class="add-a-line-serial sticky-none"
+                t-att-class="env.isSmall ? '':'sticky-left-0'"
+            />
+            <td class="add-a-line-main sticky-none"
+                t-att-class="env.isSmall ? '':'sticky-left-0'">
+                    <div class="add-line-div"
+                         t-attf-data-id="{{myTimeSheet?'':tData?.employee[0]||null}}">
+                        <span id="add-a-line" class="cy-timesheet_add"
+                              t-on-click="addLine">+ Add timesheet row</span>
+                    </div>
+                </td>
+            <td class="add-a-line-hours"/>
+            <td id="add-line-row" class="add-line-row-head sticky-none"
+                t-att-class="env.isSmall ? '' : 'sticky-right'">
+                    <div class="add-line-row-div"/>
+                </td>
+        </tr>
+    </t>
+    <!--    Add a line template week and month-->
+    <t t-name="grid_view.addALineWeekMonth" owl="1">
+        <tr class="add-a-line-main-row"
+            t-attf-class="{{myTimesheet?'':'add-a-line-main-row-div'}}">
+            <td class="add-a-line-serial sticky-none"
+                t-att-class="env.isSmall ? '':'sticky-left-0'"
+                t-if="myTimeSheet"/>
+            <td class="add-a-line-main sticky-none"
+                t-att-class="env.isSmall ? '' : (myTimeSheet ? 'sticky-left-50' : 'sticky-left-0')">
+                <div class="add-line-div"
+                     t-attf-data-id="{{myTimeSheet?'':tData?.employee[0] || null}}">
+                    <span id="add-a-line" class="cy-timesheet_add"
+                          t-on-click="addLine">+ Add timesheet row</span>
+                </div>
+            </td>
+            <t t-if="table.tableBody.resultRecordList?.length > 0">
+                <t t-foreach="table.tableBody.resultRecordList"
+                   t-as="resultRecordLists"
+                   t-key="resultRecordLists_index">
+                  <td class="add-a-line-hours"
+                      t-on-mouseleave="mouseLeave"
+                      t-on-mouseenter="mouseEnter"
+                      t-attf-data-index="index_{{resultRecordLists_index}}"/>
+                </t>
+            </t>
+            <t t-else="">
+                <t t-foreach="weekMonthCount()"
+                   t-as="number" t-key="number_index">
+                  <td class="add-a-line-hours"/>
+                </t>
+            </t>
+            <td id="add-line-row" class="add-line-row-head sticky-none"
+                t-att-class="env.isSmall ? '' : 'sticky-right'">
+                <div class="add-line-row-div"/>
+            </td>
+        </tr>
+    </t>
+</templates>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View-->
+    <record id="view_employee_training_period_tree" model="ir.ui.view">
+        <field name="name">view.employee.training.period.tree</field>
+        <field name="model">employee.training.period</field>
+        <field name="arch" type="xml">
+            <tree name="Training period">
+                <field name="employee_id"/>
+                <field name="start_date"/>
+                <field name="company_id"/>
+                <field name="end_date"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'extended'"
+                       decoration-info="state == 'new'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_employee_training_period_form" model="ir.ui.view">
+        <field name="name">view.employee.training.period.form</field>
+        <field name="model">employee.training.period</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="start_date"/>
+                        </group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="end_date"/>
+                            <field name="extended_end_date" invisible="end_date == extended_end_date"/>
+                        </group>
+                    </group>
+                    <separator string="Time off Details"/>
+                    <field name="time_off_ids" readonly="1">
+                        <tree editable="bottom">
+                            <field name="name"/>
+                            <field name="employee_id"/>
+                            <field name="department_id"/>
+                            <field name="holiday_status_id"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="duration_display"/>
+                            <field name="state"/>
+                            <button type="object" name="get_formview_action" string="Open" icon="fa-edit"/>
+
+                        </tree>
+                    </field>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Action-->
+    <record id="action_view_training_period" model="ir.actions.act_window">
+        <field name="name">Employee Training Period</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">employee.training.period</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Employee Training Period
+            </p>
+            <p>
+                Create New Employee Training Period
+            </p>
+        </field>
+    </record>
+</odoo>

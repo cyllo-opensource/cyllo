@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_analytics.PresentationMaker">
+		<div class="cy_presentation cy_presentation_view w-100">
+			<div t-if="!state.warning" class="position-absolute top-0 w-100 d-flex justify-content-between align-items-center p-2 gap-2" style="z-index: 10;">
+				<button class="btn btn-secondary cursor-pointer"
+                        t-if="state.exit"
+                        t-on-click="exitPresentation"
+                        title="Leave Presentation"><i class="ri-arrow-left-line"></i> Back</button>
+                <button class="btn btn-secondary cursor-pointer"
+                        t-if="state.exit"
+                        t-on-click="triggerFullScreen"
+                        title="Full Screen"> <i class="ri-fullscreen-line"></i> Full Screen</button>
+			</div>
+            <div class="reveal"
+                 style="height:100dvh; width:100vw;"
+                 t-ref="root"
+                 t-on-dblclick="triggerFullScreen">
+				<div class="slides">
+					<section t-if="titlePage" class="cy-title-slide">
+						<h2><t t-esc="heading"/></h2>
+                        <p><t t-esc="subheading"/></p>
+					</section>
+                    <section t-foreach="chartData.data" t-as="data"
+                             t-key="data_index">
+						<div class="present-main-div">
+							<GraphTile t-if="data.type !== 'table'"
+                                       value="data"
+                                       theme="chartData.theme"
+                                       style="chartData.style"
+                                       themeColor="chartData.themeData.theme_color_ids"
+                                       isDarkMode="state.darkMode"
+                                       toggleClass="'cy_db_presentation_select'"/>
+                            <Table t-else=""
+                                   data="data"
+                                   style="chartData.style"
+                                   toggleClass="'cy_db_presentation_select'"/>
+						</div>
+					</section>
+                    <section t-if="state.warning">
+						<h2>Attention <img
+                                src="/cyllo_analytics/static/src/img/warning_logo.png"
+                                width="85px;"/></h2>
+                        <p>
+							It appears that the presentation session may have been lost. To restart the session,
+							please go back and click on 'Start' to continue with the presentation.
+							We apologize for any inconvenience and appreciate your understanding.
+						</p>
+                        <button class="btn btn-primary btn-go-back"
+                                t-on-click="exitPresentation"
+                                style="cursor: pointer;">Go Back</button>
+					</section>
+				</div>
+			</div>
+		</div>
+    </t>
+</templates>

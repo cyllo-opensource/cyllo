@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ExplainAIModal" owl="1">
+        <Dialog size="'fs'" footer="false" contentClass="'explain-ai-modal'">
+            <t t-set-slot="header">
+                <t t-if="fullscreen">
+                    <button class="btn oi text oi-arrow-left"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            t-on-click="dismiss"/>
+                </t>
+                <div class="modal-title ai-heading-gradient text-break explain-ai-modal-text">
+                    <div>
+                        <span class="ri-bard-line"/>
+                        <span class="ms-1">AI Insights</span>
+                    </div>
+                </div>
+                <t t-if="!fullscreen">
+                    <button type="button"
+                            class="btn close-icon-modal ri-close-line"
+                            aria-label="Close"
+                            tabindex="-1"
+                            t-on-click="dismiss"/>
+                </t>
+            </t>
+            <div class="d-flex p-2 explain-ai-child-container col-lg-12"
+                 t-ref="root">
+                  <div class="col-lg-6 ai-analytics-graph-container">
+                    <GraphTile t-if="state.data"
+                               value="chartProps"
+                               theme="props.currentTheme"
+                               reRender="false"
+                               themeColor="props.theme.theme_color_ids"
+                               setImage.bind="setImage"
+                               style="style"
+                               isDarkMode="props.isDarkMode"/>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-area ai-chat-mode-text">
+                        <t t-if="state.chatMode">
+                            <div class="d-flex flex-column justify-content-between w-100 h-100">
+                                <div class="pb-3">
+                                    <ChatThread
+                                            t-foreach="chatHistory.activeChats"
+                                            t-as="chat"
+                                            t-key="chat_index"
+                                            chat="chat"/>
+                                    <div class="proxy-bottom"/>
+                                </div>
+                            </div>
+                        </t>
+                        <div t-else=""
+                             class="d-flex justify-content-start ai-explain-group">
+                            <div class="ai-chat-avatar"><span class="ri-bard-line" /></div>
+                            <div class="explain-text-container">
+                                <div t-if="!state.explanation"
+                                     class="loading-chat px-1 pt-1">
+                                    <span class="loading__dot"/>
+                                    <span class="loading__dot"/>
+                                    <span class="loading__dot"/>
+                                </div>
+                                <p class="text px-3"
+                                   t-out="parseExplain(state.explainByLetter)"/>
+                                <div t-if="state.apiError"
+                                     class="d-flex justify-content-start align-items-center px-3">
+                                    <button class="btn btn-primary"
+                                            type="button"
+                                            t-on-click="goToSettings">
+                                        Settings
+                                    </button>
+                                </div>
+                                <div t-if="state.cut lt 100"
+                                     class="ai-explain-size-warn px-3">
+                                    <div class="ri-error-warning-line"/>
+                                    <div>Due to the size of the data, the analysis provided by the AI model reflects approximately the last
+                                        <t t-out="state.cut"/>% of the full
+                                        dataset.
+                                    </div>
+                                </div>
+                                <div t-if="state.explanation and !state.apiError"
+                                     class="explain-footer ai-tools-container px-3"
+                                     style="margin-left: auto;position:relative;"
+                                     t-ref="message">
+                                     <div class="ai-heading-gradient cursor-pointer m-2"
+                                          t-on-click="openChatMode">
+                                        <div><i class="ri-bard-line me-1" />Ask
+                                            More...</div>
+                                    </div>
+                                    <div id="messageContainer"/>
+                                    <button class="btn btn-secondary ri-file-copy-line m-1"
+                                            t-on-click="copyToClip"/>
+                                    <button class="btn btn-secondary ri-download-2-line m-1"
+                                            t-on-click="download"/>
+                                    <button class="btn btn-secondary ri-restart-line retry_btn m-1"
+                                            t-on-click="retry">
+                                        <span class="cy-retry w-80px">Regenerate</span>
+                                    </button>
+                                    <button class="btn btn-secondary ri-user-shared-line retry_btn m-1"
+                                            t-on-click="shareToUser">
+                                        <span class="cy-retry w-80px">Share</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div t-if="state.chatMode" class="chat-container">
+                        <div class="w-95 d-flex justify-content-between ai-chat-text-area-container">
+                            <textarea placeholder="Type here..."
+                                      t-model="state.chat"
+                                      t-on-keydown="handleChatKeydown"
+                                      class="chat-more-ai-analytics"/>
+                            <div class="d-flex justify-content-center align-items-center ai-send-button-div"
+                                 title="Send"
+                                 t-on-click="makeResponse">
+                                <i class="ri-send-plane-2-line ms-1"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Dialog>
+    </t>
+</templates>

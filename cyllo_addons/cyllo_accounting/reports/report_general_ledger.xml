@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_general_ledger">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="data_report_margin_top" t-value="12"/>
+                <t t-set="data_report_header_spacing" t-value="9"/>
+                <t t-set="data_report_dpi" t-value="110"/>
+                <div class="page">
+                    <center>
+                        <span class="fw-bolder h1">General Ledger</span>
+                    </center>
+                    <br/>
+                    <br/>
+
+                    <div class="filters">
+                        <table class="table table-sm o_main_table">
+                            <thead class="filter_table"
+                                   style="background:#808080;">
+                                <tr>
+                                    <th>Date Range</th>
+                                    <th>Comparison</th>
+                                    <th>Journal</th>
+                                    <th>Analytic Account</th>
+                                    <th>Options</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size:11px;font-weight:100;">
+                                <tr>
+                                    <th>
+                                        <t t-if="filter_by">
+                                            <t t-esc="filter_by"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="comparison_type">
+                                            <t t-if="comparison">
+                                                <t t-esc="comparison_type"/>
+                                                :
+                                                <t t-esc="comparison"/>
+                                            </t>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="journals">
+                                            <t t-esc="','.join(journals)"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="account_analytic">
+                                            <t t-esc="','.join(account_analytic)"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="options">
+                                            <t t-esc="','.join(options)"/>
+                                        </t>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <br/>
+                    <br/>
+
+                    <table class="table table-sm o_main_table">
+                        <thead class="text-nowrap h5">
+                            <tr>
+                                <th></th>
+                                <th>Date</th>
+                                <th>Communication</th>
+                                <th>Partner</th>
+                                <th class="text-end">Debit</th>
+                                <th class="text-end">Credit</th>
+                                <th class="text-end">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="grand_total_debit" t-value="0.0"/>
+                            <t t-set="grand_total_credit" t-value="0.0"/>
+
+                            <t t-foreach="pdf_data[0][0]" t-as="account">
+                                <t t-set="account_lines" t-value="pdf_data[0][0][account]"/>
+                                <t t-set="account_sums" t-value="pdf_data[1][0][account][0]"/>
+                                
+                                <tr>
+                                    <th colspan="4" class="fw-bolder h5 text-start ps-2">
+                                        <t t-esc="account"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(account_sums['total_debit'] or 0.0)"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(account_sums['total_credit'] or 0.0)"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format((account_sums['total_debit'] or 0.0) - (account_sums['total_credit'] or 0.0))"/>
+                                    </th>
+                                </tr>
+
+                                <t t-foreach="account_lines" t-as="line">
+                                    <tr>
+                                        <th>
+                                            <span class="d-flex gap-2">
+                                                <t t-esc="line['move_name']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <t t-esc="line['date']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <t t-esc="line.get('name') or ''"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span><t t-esc="line.get('partner_name') or ''"/></span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span>
+                                                <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(line['debit'] or 0.0)"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span>
+                                                <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(line['credit'] or 0.0)"/>
+                                            </span>
+                                        </th>
+                                        <th/>
+                                    </tr>
+                                </t>
+
+                                <t t-set="total_account_debit" t-value="account_sums['total_debit'] or 0.0"/>
+                                <t t-set="total_account_credit" t-value="account_sums['total_credit'] or 0.0"/>
+                                <t t-set="total_account_balance" t-value="total_account_debit - total_account_credit"/>
+
+                                <t t-set="grand_total_debit" t-value="grand_total_debit + total_account_debit"/>
+                                <t t-set="grand_total_credit" t-value="grand_total_credit + total_account_credit"/>
+
+                                <tr>
+                                    <th class="fw-bolder" colspan="4">
+                                        Total <t t-esc="account"/>
+                                    </th>
+                                    <th class="fw-bolder text-end text-nowrap">
+                                        <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(total_account_debit)"/>
+                                    </th>
+                                    <th class="fw-bolder text-end text-nowrap">
+                                        <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(total_account_credit)"/>
+                                    </th>
+                                    <th class="fw-bolder text-end text-nowrap">
+                                        <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(total_account_balance)"/>
+                                    </th>
+                                </tr>
+                            </t>
+
+                            <tr>
+                                <th class="fw-bolder" colspan="4">
+                                    Total General Ledger
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(grand_total_debit)"/>
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(grand_total_credit)"/>
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="currency_symbol"/><span class="ms-1" t-esc="'{0:,.2f}'.format(grand_total_debit - grand_total_credit)"/>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

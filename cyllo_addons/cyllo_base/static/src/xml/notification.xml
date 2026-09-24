@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_base.NotificationWowl" t-inherit="web.NotificationWowl"
+       t-inherit-mode="extension">
+        <xpath expr="//div[@t-on-mouseenter='this.props.freeze']"
+               position="replace">
+            <div class="cy-notification mb-2"
+                 t-on-mouseenter="this.props.freeze"
+                 t-on-mouseleave="this.props.refresh" role="alert"
+                 aria-live="assertive" aria-atomic="true">
+                <div class="cy-notifi_state"
+                     t-attf-class="cy-noti_{{props.type}}">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="ri-check-line"
+                           t-if="props.type == 'success'"/>
+                        <i class="ri-alarm-warning-line"
+                           t-if="props.type == 'warning'"/>
+                        <i class="ri-error-warning-line"
+                           t-if="props.type == 'danger'"/>
+                        <i class="ri-information-line"
+                           t-if="props.type == 'info'"/>
+                        <i class="ri-whatsapp-line"
+                           t-if="props.type == 'whatsapp'"/>
+                        <t t-if="props.title" t-out="props.title"/>
+                        <t t-elif="props.type == 'success'" t-out="'Success'"/>
+                        <t t-elif="props.type == 'warning'" t-out="'Warning'"/>
+                        <t t-elif="props.type == 'danger'" t-out="'Failed'"/>
+                        <t t-elif="props.type == 'info'" t-out="'Info'"/>
+                        <t t-elif="props.type == 'whatsapp'"
+                           t-out="'WhatsApp'"/>
+                    </span>
+                    <span><i class="ri-close-line" t-on-click="props.close"/></span>
+                </div>
+                <div t-if="props.message" class="cy-notifi_msg">
+                    <span>
+                        <t t-out="props.message"/>
+                    </span>
+                </div>
+                <div t-if="props.buttons.length"
+                     class="o_notification_buttons d-flex gap-2 mt-2">
+                    <button t-foreach="props.buttons" t-as="button"
+                            type="button" t-key="button_index"
+                            t-attf-class="btn {{button.primary ? 'btn-primary' : 'btn-secondary'}}"
+                            t-on-click="button.onClick">
+                        <t t-if="button.icon">
+                            <i t-if="button.icon.indexOf('fa-') === 0"
+                               role="img"
+                               t-att-aria-label="button.name"
+                               t-att-title="button.name"
+                               t-attf-class="fa fa-fw o_button_icon {{button.icon}}"/>
+                            <img t-else="" t-att-src="button.icon"
+                                 t-att-alt="button.name"/>
+                        </t>
+                        <span t-esc="button.name"/>
+                    </button>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

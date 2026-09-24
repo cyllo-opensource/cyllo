@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.BoardSidebar">
+        <div class="o_search_panel o_streams_sidebar flex-grow-0 flex-shrink-0 h-100 pb-5 bg-view overflow-auto px-3"
+            t-ref="root">
+            <button class="btn btn-primary btn-sm my-3 w-100" t-on-click="openNewBoardDialog">
+                <i class="ri-add-large-line"/>
+                New Board
+            </button>
+            <header class="o_search_panel_section_header pt-2 pb-2 mb-1 text-uppercase cursor-default">
+                <i class="ri-folder-fill o_search_panel_section_icon text-primary me-2"/>
+                <b>My Boards</b>
+            </header>
+            <ul class="list-group d-block o_search_panel_field">
+                <t t-if="props.loading">
+                    <t t-foreach="[0, 1, 2]" t-as="skeleton_index" t-key="skeleton_index">
+                        <li class="o_streams_board_item_skeleton list-group-item border-0 ps-0">
+                            <div class="o_skeleton_bar" style="width: 80%"/>
+                        </li>
+                    </t>
+                </t>
+                <t t-foreach="props.boards" t-as="board" t-key="board.id">
+                    <li class="o_search_panel_category_value o_streams_board_draggable list-group-item py-0 cursor-pointer border-0 pe-0 ps-0 mb-1"
+                        t-att-data-id="board.id">
+                        <header class="list-group-item list-group-item-action d-flex align-items-center border-0"
+                            t-att-class="{'active text-900 fw-bold': board.id === props.activeBoardId}"
+                            t-on-click="() => props.onSelect(board.id)">
+                            <div class="o_search_panel_label d-flex align-items-center overflow-hidden w-100 cursor-pointer mb-0">
+                                <span class="o_search_panel_label_title text-truncate" t-esc="board.name"
+                                    t-on-dblclick.stop="() => this.startRename(board)"/>
+                            </div>
+                            <Dropdown togglerClass="'o_streams_board_menu btn p-0'">
+                                <t t-set-slot="toggler">
+                                    <i class="ri-more-2-fill"/>
+                                </t>
+                                <DropdownItem onSelected="() => this.startRename(board)">Rename</DropdownItem>
+                                <DropdownItem onSelected="() => this.deleteBoard(board)">Delete</DropdownItem>
+                            </Dropdown>
+                        </header>
+                    </li>
+                </t>
+            </ul>
+        </div>
+    </t>
+</templates>

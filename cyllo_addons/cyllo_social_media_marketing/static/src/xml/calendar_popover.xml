@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-inherit="web.CalendarCommonPopover.body" t-inherit-mode="extension">
+        <xpath expr="//ul[hasclass('o_cw_popover_fields_secondary')]" position="replace">
+            <t t-if="props.model.resModel === 'social.media.post'">
+                <div class="o_smm_popover_card">
+                    <div class="o_smm_popover_head">
+                        <img t-if="props.record.rawRecord.calendar_account_image"
+                            t-att-src="props.record.rawRecord.calendar_account_image"
+                            class="o_smm_popover_avatar" />
+                        <div class="o_smm_popover_avatar o_smm_popover_avatar_placeholder" t-else="">
+                            <i t-att-class="props.record.rawRecord.calendar_platform_icon" />
+                        </div>
+                        <span class="o_smm_popover_username text-truncate"
+                            t-esc="props.record.rawRecord.calendar_account_name" />
+                        <span t-attf-class="o_smm_calendar_status o_smm_calendar_status_{{ props.record.rawRecord.state }}">
+                            <t t-if="props.record.rawRecord.state === 'post'">Published</t>
+                            <t t-elif="props.record.rawRecord.state === 'queue'">Scheduled</t>
+                            <t t-else="">Draft</t>
+                        </span>
+                    </div>
+                    <div class="o_smm_popover_media" t-if="props.record.rawRecord.calendar_image_url">
+                        <img t-att-src="props.record.rawRecord.calendar_image_url" />
+                    </div>
+                    <div class="o_smm_popover_caption" t-if="props.record.rawRecord.description">
+                        <span class="o_smm_popover_username" t-esc="props.record.rawRecord.calendar_account_name" />
+                        <t t-esc="props.record.rawRecord.description" />
+                    </div>
+                    <div class="o_smm_popover_meta">
+                        <span t-if="props.record.rawRecord.company_id" t-esc="props.record.rawRecord.company_id[1]" />
+                        <span t-if="props.record.rawRecord.campaign_id">
+                            <span class="o_smm_popover_dot">·</span>
+                            <t t-esc="props.record.rawRecord.campaign_id[1]" />
+                        </span>
+                        <span t-if="props.record.rawRecord.user_id">
+                            <span class="o_smm_popover_dot">·</span>
+                            <t t-esc="props.record.rawRecord.user_id[1]" />
+                        </span>
+                    </div>
+                </div>
+            </t>
+            <t t-else="">
+                <ul class="list-group list-group-flush o_cw_popover_fields_secondary">
+                    <Record resModel="props.model.resModel" resId="props.record.id" fields="props.model.fields" activeFields="activeFields" mode="'readonly'" values="props.record.rawRecord" t-slot-scope="slot">
+                        <t t-foreach="Object.keys(props.model.popoverFieldNodes)" t-as="fieldId" t-key="fieldId">
+                            <t t-set="fieldInfo" t-value="props.model.popoverFieldNodes[fieldId]"/>
+                            <t t-if="!isInvisible(fieldInfo, slot.record)">
+                                <li class="list-group-item d-flex text-nowrap align-items-center" t-att-class="fieldInfo.attrs.class"  t-att-data-tooltip="getFormattedValue(fieldId, slot.record)">
+                                    <span class="fw-bold me-2" t-if="!fieldInfo.options.noLabel">
+                                        <t t-if="fieldInfo.options.icon">
+                                            <i t-attf-class="fa-fw {{fieldInfo.options.icon}} text-400" />
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="fieldInfo.string" />
+                                        </t>
+                                    </span>
+                                    <div class="flex-grow-1 role-container text-truncate">
+                                        <Field name="fieldInfo.name" class="'w-100'" record="slot.record" fieldInfo="fieldInfo" type="fieldInfo.widget" />
+                                    </div>
+                                </li>
+                            </t>
+                        </t>
+                    </Record>
+                </ul>
+            </t>
+        </xpath>
+    </t>
+</templates>

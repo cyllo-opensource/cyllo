@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_workflow_automation.SearchNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <Record t-props="recordProps" t-slot-scope="data">
+                <div class="mb-3">
+                    <label for="label" class="form-label">Label</label>
+                    <CharField t-on-change="ev => this.onChangeLabel(ev.target.value)" name="'label'" record="data.record" id="'label'"/>
+                </div>
+                    <div class="mb-2">
+                        <div class="variable-input-container">
+                            <label for="variableName" class="" >Variable Name</label>
+                            <div class="input-wrapper">
+                                <input
+                                    id="variableName"
+                                    class="variable-input o_input"
+                                    autocomplete="off"
+                                    t-model="state.searchInput"
+                                    t-on-input="handleInput"
+                                    placeholder="Enter variable name"
+                                    t-on-change="() => this.setNewValue()"
+                                    t-attf-class="{{ state.errorMessage ? 'is-invalid': ''}} {{state.successMessage ? 'is-valid': ''}}"
+                                />
+                                <span t-if="state.successMessage" class="valid-icon"><i class="ri-check-line"/></span>
+                            </div>
+                            <t t-if="variableNameSuggestions.length > 0">
+                                <div class="mt-2">
+                                    <span class="text-muted small fw-semibold me-1">Suggestions:</span>
+                                    <t t-foreach="variableNameSuggestions" t-as="s" t-key="s">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-secondary me-1 mb-1 px-2 py-0"
+                                            t-on-click="() => this.selectSuggestion(s)"
+                                        >
+                                            <t t-esc="s"/>
+                                        </button>
+                                    </t>
+                                </div>
+                            </t>
+                            <p t-if="state.errorMessage" t-attf-class="error-message d-flex align-items-end message-animate {{ state.isHiding ? 'hiding' : '' }}">
+                                <span class="error-icon d-flex align-items-end"><i class="ri-error-warning-line"/></span>
+                                <span class="text" t-esc="state.errorMessage"/>
+                            </p>
+                            <p t-if="state.successMessage" t-attf-class="success-message message-animate {{ state.isHiding ? 'hiding' : '' }}">
+                                <span class="success-icon"><i class="ri-check-line"/></span>
+                                <span t-esc="state.successMessage"/>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="model" class="form-label">Model</label>
+                        <Many2XAutocomplete
+                            resModel="'ir.model'"
+                            getDomain="getModelsDomain"
+                            fieldString="'Models'"
+                            update.bind="handleModelSelect"
+                            value="modelState.model"
+                            context="{'id':modelState.model_id}"
+                            activeActions="{}"
+                        />
+                    </div>
+                <div class="row mb-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label d-block">Limit</label>
+                        <CheckBox value="isSearchAll" onChange="(checked) => this.toggleSearchAll(data.record, checked)">
+                            Search all records (no limit)
+                        </CheckBox>
+                        <div t-if="!isSearchAll" class="mt-2">
+                            <IntegerField
+                                name="'search_limit'"
+                                record="data.record"
+                                id="'search_limit'"
+                            />
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Order By</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ModelFieldSelector
+                                    readonly="false"
+                                    resModel="modelState.model_name"
+                                    path="fieldState.search_order_field"
+                                    isDebugMode="false"
+                                    update.bind="updatePath"
+                                    followRelations="false"
+                                    allowEmpty="true"
+                                />
+                            </div>
+                            <div class="col-md-6">
+                                <SelectionField
+                                    name="'search_order'"
+                                    record="data.record"
+                                    id="'search_order'"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div t-if="props.text" class="mb-3" t-out="props.text"/>
+                <CustomSearchDomainSelector t-if="modelState.model_id" t-props="domainSelectorProps"/>
+            </Record>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_workflow_automation.VariablePickerDialog">
+        <Dialog title="'Insert Variable'" size="'md'">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex mb-3">
+                        <div class="flex-grow-1 me-2">
+                            <t t-if="state.selectionType === 'variable'">
+                                <VariableSelector
+                                    value="state.value"
+                                    update.bind="onUpdateValue"
+                                    allVariable="true"
+                                    variables="props.variables"
+                                />
+                            </t>
+                            <t t-elif="state.selectionType === 'record'">
+                                <RecordPathSelector
+                                    value="state.value"
+                                    update.bind="onUpdateValue"
+                                    variables="recordVariables"
+                                    fieldInfo="recordFieldInfo"
+                                />
+                            </t>
+                        </div>
+                        <FieldTypeDropdown 
+                            currentLabel="getDropdownLabel(state.selectionType)"
+                            onSelected="(type) => this.setSelectionType(type)"
+                            options="typeOptions"
+                        />
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onInsert" t-att-disabled="!canInsert">Insert</button>
+                <button class="btn btn-secondary" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

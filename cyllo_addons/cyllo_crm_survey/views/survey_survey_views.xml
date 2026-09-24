@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="survey_survey_view_form_inherit_crm_survey" model="ir.ui.view">
+        <field name="name">survey.survey.view.form.inherit.crm.survey</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="create_lead"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="action_survey_form_create_lead" model="ir.actions.act_window">
+        <field name="name">Surveys (Create Lead)</field>
+        <field name="res_model">survey.survey</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('create_lead', '=', True)]</field>
+    </record>
+
+    <menuitem id="menu_crm_config_survey"
+              name="Survey"
+              parent="crm.crm_menu_config"
+              action="action_survey_form_create_lead"
+              sequence="10"/>
+</odoo>

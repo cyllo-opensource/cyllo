@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="crm_dashboard.crm_dashboard_template">
+        <div t-att-class="'o_crm_dashboard' + (state.isSampleData ? ' sample-data-mode' : '')">
+            <!-- Header Section -->
+            <div
+                class="dashboard-header o_pj_dashboard background-image-banner control-panel">
+                <div class="header-content">
+                    <div class="heading">
+                        <span class="dashboard-header-title">Dashboard</span>
+                    </div>
+                </div>
+                <div class="dashboard-filters-section">
+                    <button id="cydialogBtn" t-ref="filterButton"
+                        class="btn btn-secondary themed-bg dropdown-toggle cy-dash-filter-btn cy-churn-filter-btn"
+                        type="button"
+                        t-on-click="onToggleFilters"
+                        data-tooltip="Apply Filters">
+                        <i class="ri-filter-line"></i> Filters
+                    </button>
+
+                    <div class="filters-content" t-if="state.showFilters">
+                        <!-- Main filter row - all filters in one row -->
+                        <div class="filter-row">
+                            <!-- Date Range Filter -->
+                            <div class="filter-item">
+                                <label class="filter-label">
+                                    <i class="fa fa-calendar"/>
+                                    Date Range
+                                </label>
+                                <div class="filter-control">
+                                    <select class="form-select"
+                                            t-model="state.filters.dateRange"
+                                            t-on-change="onDateRangeChange">
+                                        <option value="today">Today</option>
+                                        <option value="this_week">This Week</option>
+                                        <option value="this_month"
+                                                selected="selected">This Month
+                                        </option>
+                                        <option value="this_quarter">This Quarter
+                                        </option>
+                                        <option value="this_year">This Year</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Sales Team Filter -->
+                            <div class="filter-item">
+                                <label class="filter-label">
+                                    <i class="fa fa-users"/>
+                                    Sales Team
+                                </label>
+                                <div class="filter-control">
+                                    <select class="form-select"
+                                            t-model="state.filters.salesTeam"
+                                            t-on-change="onSalesTeamChange">
+                                        <option value="">All Teams</option>
+                                        <t t-if="state.salesTeams">
+                                            <t t-foreach="state.salesTeams"
+                                               t-as="team" t-key="team.id">
+                                                <option t-att-value="team.id"
+                                                        t-esc="team.name"/>
+                                            </t>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Salesperson Filter -->
+                            <div class="filter-item"
+                                 t-if="!state.hideSalespersonFilter">
+                                <label class="filter-label">
+                                    <i class="fa fa-user"/>
+                                    Salesperson
+                                </label>
+                                <div class="filter-control">
+                                    <select class="form-select"
+                                            t-model="state.filters.salesperson"
+                                            t-on-change="onSalespersonChange">
+                                        <option value="">All Salespersons</option>
+                                        <t t-if="state.salespersons">
+                                            <t t-foreach="state.salespersons"
+                                               t-as="person" t-key="person.id">
+                                                <option t-att-value="person.id"
+                                                        t-esc="person.name"/>
+                                            </t>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Date Range (appears when custom is selected) -->
+                        <div class="custom-date-section"
+                             t-if="state.filters.dateRange === 'custom'">
+                            <div class="date-inputs">
+                                <div class="date-input-group">
+                                    <label class="date-label">From Date</label>
+                                    <input type="date" class=" date-input"
+                                           t-model="state.filters.dateFrom"
+                                           t-att-max="state.filters.dateTo"
+                                           t-on-change="onCustomDateChange"/>
+                                </div>
+                                <div class="date-separator">
+                                    <i class="fa fa-arrow-right"/>
+                                </div>
+                                <div class="date-input-group">
+                                    <label class="date-label">To Date</label>
+                                    <input type="date" class="date-input"
+                                           t-model="state.filters.dateTo"
+                                           t-att-min="state.filters.dateFrom"
+                                           t-on-change="onCustomDateChange"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Filters Display -->
+                        <div class="active-filters-section"
+                             t-if="hasActiveFilters()">
+                            <div class="active-filters-header">
+                                <span class="active-filters-label">
+                                    <i class="fa fa-tag"/>
+                                    Active Filters
+                                </span>
+                            </div>
+                            <div class="filter-tags">
+                                <span class="filter-tag"
+                                      t-if="state.filters.dateRange !== 'this_month'">
+                                    <span class="tag-content"
+                                          t-esc="getDateRangeLabel()"/>
+                                    <i class="fa fa-times tag-remove"
+                                       t-on-click="clearDateFilter"/>
+                                </span>
+                                <span class="filter-tag"
+                                      t-if="state.filters.salesTeam">
+                                    <span class="tag-content"
+                                          t-esc="'Team: ' + getSalesTeamName()"/>
+                                    <i class="fa fa-times tag-remove"
+                                       t-on-click="clearSalesTeamFilter"/>
+                                </span>
+                                <span class="filter-tag"
+                                      t-if="!state.hideSalespersonFilter and state.filters.salesperson">
+                                    <span class="tag-content"
+                                          t-esc="'Person: ' + getSalespersonName()"/>
+                                    <i class="fa fa-times tag-remove"
+                                       t-on-click="clearSalespersonFilter"/>
+                                </span>
+                                <span class="filter-tag" t-if="state.filters.stage">
+                                    <span class="tag-content"
+                                          t-esc="'Stage: ' + getStageName()"/>
+                                    <i class="fa fa-times tag-remove"
+                                       t-on-click="clearStageFilter"/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sample-data-banner" t-if="state.isSampleData">
+                <i class="ri-information-line"/>
+                <span>No data found. Showing sample data.</span>
+            </div>
+
+                <!-- Key Metrics Cards -->
+            <div class="metrics-grid">
+                <t t-foreach="state.metrics" t-as="metric" t-key="metric_index">
+                    <div class="metric-card"
+                        t-att-data-metric-type="metric.type"
+                        t-on-click="() => onMetricClick(metric, this.action)">
+                        <div class="metric-content">
+                            <div class="metric-info">
+                                <p class="metric-label" t-esc="metric.label"/>
+                                <p class="metric-value"
+                                   t-esc="metric.formatted_value"/>
+                                <p class="metric-change"
+                                   t-att-class="metric.change >= 0 ? 'positive-change' : 'negative-change'">
+                                    <t t-if="metric.change >= 0">+</t>
+                                    <t t-esc="metric.change"/>% from last period
+                                </p>
+                            </div>
+                            <div class="metric-icon"
+                                 t-att-class="metric.type + '-icon'">
+                                <i t-att-class="metric.icon"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+                <!-- Charts Section -->
+            <div class="charts-grid" t-ref="crmDashboardChartGrids">
+                <!-- Revenue Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Revenue &amp; Leads Trend</h3>
+                        <div class="chart-actions">
+                            <button class="btn btn-sm btn-secondary"
+                                t-on-click="()=>this.exportData('lead')"
+                                data-chart="revenue">
+                                <i class="fa fa-download" />
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas t-ref="revenueChart" />
+                    </div>
+                </div>
+
+                <!-- Pipeline Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Sales Pipeline</h3>
+                        <div class="chart-actions">
+                            <button class="btn btn-sm btn-secondary"
+                                    t-on-click="()=>this.exportData('sale')"
+                                    data-chart="pipeline">
+                                <i class="fa fa-download"/>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="salesChartWrapper">
+                        <div class="chart-container">
+                            <canvas t-ref="pipelineChart"/>
+                        </div>
+                        <div class="chart-legend">
+                            <t t-foreach="state.pipeline" t-as="stage"
+                               t-key="stage_index">
+                                <div class="legend-item">
+                                    <span class="legend-color"
+                                          t-att-style="'background-color: ' + stage.color"/>
+                                    <span class="legend-text"
+                                          t-esc="stage.stage + ': ' + stage.value + '%'"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activities and Performance Section -->
+            <div class="performance-grid">
+                <!-- Weekly Activities -->
+                <div class="activities-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Activities Overview</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas t-ref="activitiesChart"/>
+                    </div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="performers-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Top Performers</h3>
+                        <div class="chart-subtitle"
+                             t-if="state.filters.salesTeam">
+                            <span t-esc="'Team: ' + getSalesTeamName()"/>
+                        </div>
+                    </div>
+                    <t t-if="state.topPerformers and state.topPerformers.length > 0">
+                        <div class="performers-list">
+                        <t t-foreach="state.topPerformers" t-as="performer"
+                           t-key="performer_index">
+                            <div class="performer-item">
+                                <div class="performer-info">
+                                    <div class="performer-avatar"
+                                         t-esc="performer.initials"/>
+                                    <div class="performer-details">
+                                        <p class="performer-name"
+                                           t-esc="performer.name"/>
+                                        <p class="performer-deals"
+                                           t-esc="performer.deals + ' deals'"/>
+                                    </div>
+                                </div>
+                                <div class="performer-amount"
+                                     t-esc="performer.formatted_amount"/>
+                            </div>
+                            </t>
+                    </div>
+
+    </t>
+    <t t-else="">
+        <div class="no-data-message"
+        >
+            <span>No data found</span>
+        </div>
+    </t>
+                </div>
+            </div>
+
+            <!-- Lead Notifications and Activities Status Section - Side by Side -->
+            <div class="notifications-activities-grid">
+                <!-- Lead Notifications Section -->
+                <div class="notifications-section">
+                    <div class="notifications-header">
+                        <div class="notifications-title-group">
+                            <span class="notifications-title">
+                                <i class="fa fa-bell"/>
+                                Updates
+                            </span>
+                            <span class="notifications-count"
+                                  t-if="state.unreadVisibleCount and state.leadNotifications.length">
+                                <t t-esc="state.unreadVisibleCount"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="notifications-content">
+                        <!-- No notifications message -->
+                        <div class="no-notifications"
+                             t-if="!state.leadNotifications or !state.leadNotifications.length">
+                            <div class="no-notifications-content">
+                                <i class="fa fa-bell-slash no-notifications-icon"/>
+                                <h4 class="no-notifications-title">No New
+                                    Notifications
+                                </h4>
+                                <p class="no-notifications-text">You're all
+                                    caught up! Check back later for new lead
+                                    updates.
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Notifications List -->
+                        <div class="notifications-list"
+                             t-if="state.leadNotifications and state.leadNotifications.length">
+                            <t t-set="displayNotifications"
+                               t-value="state.showAllNotifications ? state.leadNotifications : state.leadNotifications.slice(0, 6)"/>
+                            <t t-foreach="displayNotifications"
+                               t-as="notification" t-key="notification.id">
+                                <div class="notification-item"
+                                     t-att-class="getNotificationClass(notification)"
+                                     t-on-click="onNotificationClick"
+                                     t-att-data-id="notification.id">
+
+                                    <!-- Notification Content -->
+                                    <div class="notification-content">
+                                        <div class="notification-header">
+                                            <div class="notification-meta">
+                                            </div>
+                                        </div>
+
+                                        <div class="notification-body">
+                                            <p class="notification-message"
+                                               t-esc="notification.message"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Notification Actions -->
+                                    <div class="notification-actions">
+                                        <!-- View Lead Button -->
+                                        <button class="btn btn-view-lead"
+                                                t-on-click.stop="onViewLead"
+                                                t-att-data-lead-id="notification.lead_id"
+                                                t-if="notification.lead_id">
+                                            View Lead
+                                        </button>
+
+                                        <!-- Dismiss Button -->
+                                        <button class="btn btn-dismiss"
+                                                t-on-click.stop="onDismissNotification"
+                                                t-att-data-id="notification.id">
+                                            Dismiss
+                                        </button>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- Show More/Less Button -->
+                            <div class="notifications-toggle-section"
+                                 t-if="state.leadNotifications.length > 6">
+                                <button class="btn btn-view-lead"
+                                        t-on-click="onToggleNotifications">
+                                    <i t-att-class="state.showAllNotifications ? 'fa fa-chevron-up' : 'fa fa-chevron-down'"/>
+                                    <span t-if="state.showAllNotifications">
+                                        Show Less
+                                    </span>
+                                    <span t-else="">
+                                        Show
+                                        <t t-esc="state.leadNotifications.length - 6"/>
+                                        More Notifications
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="actions-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Quick Actions</h3>
+                </div>
+                <div class="actions-grid">
+                    <!--                   TODO - commented due to its usage in crm. can be used in the future -->
+
+                    <!--                    <button class="action-btn calls-btn" t-on-click="onMakeCallsClick">-->
+                    <!--                        <i class="fa fa-phone"/>-->
+                    <!--                        <span>Make Calls</span>-->
+                    <!--                    </button>-->
+                    <!--                    <button class="action-btn emails-btn" t-on-click="onSendEmailsClick">-->
+                    <!--                        <i class="fa fa-envelope"/>-->
+                    <!--                        <span>Send Emails</span>-->
+                    <!--                    </button>-->
+                    <!--                    <button class="action-btn meetings-btn" t-on-click="onScheduleMeetingClick">-->
+                    <!--                        <i class="fa fa-calendar"/>-->
+                    <!--                        <span>Schedule Meeting</span>-->
+                    <!--                    </button>-->
+                    <button class="action-btn btn-view-lead"
+                            t-on-click="onViewReportsClick">
+                        <i class="fa fa-chart-line"/>
+                        <span>View Reports</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

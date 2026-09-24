@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="cyllo_payroll_management.PayrollDashboard">
+        <div class="pr-dashboard-navbar pr-pj-dashboard pr-control-panel">
+            <div class="pr-dashbd-info">
+                <div class="pr-heading">
+                    <span class="pr-dashboard-header-title">Payroll Dashboard Overview</span>
+                </div>
+            </div>
+            <div class="pr-date-records">
+                <div class="pr-filter-btn-group">
+                    <button class="pr-filter-btn"
+                            t-att-class="state.dashboard_period === 'day' ? 'pr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('day')">Today</button>
+                    <button class="pr-filter-btn"
+                            t-att-class="state.dashboard_period === 'month' ? 'pr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('month')">Month</button>
+                    <button class="pr-filter-btn"
+                            t-att-class="state.dashboard_period === 'year' ? 'pr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('year')">Year</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="pr-dashboard-graph">
+            <div class="pr-dashboard-container">
+
+                <!-- KPI Cards Section -->
+                <div class="pr-section-row pr-kpi-row">
+                    <!-- Employees -->
+                    <div class="pr-kpi-card" t-on-click="openEmployees">
+                        <div class="pr-kpi-v4">
+                            <div class="pr-kpi-v4-icon-wrap pr-kpi-icon-violet">
+                                <i class="fa fa-users"/>
+                            </div>
+                            <div class="pr-kpi-v4-content">
+                                <div class="pr-kpi-v4-title">Employees</div>
+                                <div class="pr-kpi-v4-value"><t t-esc="state.employees"/></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Active Contracts -->
+                    <div class="pr-kpi-card" t-on-click="openContracts">
+                        <div class="pr-kpi-v4">
+                            <div class="pr-kpi-v4-icon-wrap pr-kpi-icon-green">
+                                <i class="fa fa-file-text"/>
+                            </div>
+                            <div class="pr-kpi-v4-content">
+                                <div class="pr-kpi-v4-title">Active Contracts</div>
+                                <div class="pr-kpi-v4-value"><t t-esc="state.contracts"/></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Payslips Generated -->
+                    <div class="pr-kpi-card" t-on-click="openPayslips">
+                        <div class="pr-kpi-v4">
+                            <div class="pr-kpi-v4-icon-wrap pr-kpi-icon-yellow">
+                                <i class="fa fa-vcard"/>
+                            </div>
+                            <div class="pr-kpi-v4-content">
+                                <div class="pr-kpi-v4-title">Payslips</div>
+                                <div class="pr-kpi-v4-value"><t t-esc="state.generated"/></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Total Paid -->
+                    <div class="pr-kpi-card" t-on-click="openPaidPayslips">
+                        <div class="pr-kpi-v4">
+                            <div class="pr-kpi-v4-icon-wrap pr-kpi-icon-red">
+                                <i class="fa fa-bank"/>
+                            </div>
+                            <div class="pr-kpi-v4-content">
+                                <div class="pr-kpi-v4-title">Total Paid</div>
+                                <div class="pr-kpi-v4-value"><t t-esc="state.paid"/></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WARNINGS & BATCHES -->
+                <div class="pr-section-row pr-tables-row">
+                    <!-- Warnings Card -->
+                    <div class="pr-card pr-table-card">
+                        <div class="pr-card-header">
+                            <div class="pr-card-header-left">
+                                <i class="fa fa-exclamation-triangle pr-card-header-icon"/>
+                                <h5 class="pr-card-title">Action Required</h5>
+                            </div>
+                        </div>
+                        <div class="pr-card-body pr-card-body--table">
+                            <div class="pr-table-scroll pr-table-scroll--sm">
+                                <table class="pr-table">
+                                    <tbody class="pr-table-body">
+                                        <t t-if="state.warnings.length == 0">
+                                            <tr class="pr-tr">
+                                                <td class="pr-td pr-td--empty" colspan="2">No warnings currently</td>
+                                            </tr>
+                                        </t>
+                                        <t t-foreach="state.warnings" t-as="warn" t-key="warn.label">
+                                            <tr class="pr-tr" t-on-click="onWarningClick" t-att-data-id="warn.label" style="cursor:pointer;">
+                                                <td class="pr-td pr-td--bold"><t t-esc="warn.label"/></td>
+                                                <td class="pr-td pr-td--end">
+                                                    <span class="pr-badge pr-badge--danger"><t t-esc="warn.count"/></span>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Batches Card -->
+                    <div class="pr-card pr-table-card">
+                        <div class="pr-card-header">
+                            <div class="pr-card-header-left">
+                                <i class="fa fa-id-badge pr-card-header-icon"/>
+                                <h5 class="pr-card-title">Recent Batches</h5>
+                            </div>
+                            <button t-on-click="openBatchList" class="pr-view-all-btn">View All</button>
+                        </div>
+                        <div class="pr-card-body pr-card-body--table">
+                            <div class="pr-table-scroll pr-table-scroll--sm">
+                                <table class="pr-table">
+                                    <thead class="pr-table-head">
+                                        <tr>
+                                            <th class="pr-th">Name</th>
+                                            <th class="pr-th">Count</th>
+                                            <th class="pr-th pr-th--end">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="pr-table-body">
+                                        <t t-if="state.batches.length == 0">
+                                            <tr class="pr-tr">
+                                                <td class="pr-td pr-td--empty" colspan="3">No recent batches</td>
+                                            </tr>
+                                        </t>
+                                        <t t-foreach="state.batches" t-as="batch" t-key="batch.id">
+                                            <tr class="pr-tr" t-att-data-id="batch.id" t-on-click="openBatch" style="cursor:pointer;">
+                                                <td class="pr-td pr-td--bold"><t t-esc="batch.name"/></td>
+                                                <td class="pr-td  pr-td--muted"><t t-esc="batch.payslip_count"/> Payslips</td>
+                                                <td class="pr-td pr-td--end">
+                                                    <span class="pr-badge" t-attf-style="{{
+                                                        batch.state === 'draft' ? 'background:rgba(100,116,139,0.1);color:#64748b;' :
+                                                        batch.state === 'confirm' ? 'background:rgba(59,130,246,0.1);color:#3b82f6;' :
+                                                        batch.state === 'done' ? 'background:rgba(16,185,129,0.1);color:#10b981;' :
+                                                        batch.state === 'paid' ? 'background:rgba(16,185,129,0.1);color:#10b981;' :
+                                                        'background:rgba(100,116,139,0.1);color:#64748b;'
+                                                    }}">
+                                                        <t t-esc="batch.state.toUpperCase()"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHARTS -->
+                <div class="pr-section-row pr-charts-row">
+
+                    <!-- EMPLOYER COST -->
+                    <div class="pr-chart-item--lg pr-card pr-chart-card">
+                        <div class="pr-card-header">
+                            <div class="pr-card-header-left">
+                                <i class="fa fa-bar-chart pr-card-header-icon"/>
+                                <h5 class="pr-card-title">Employer Cost</h5>
+                            </div>
+                            <div class="pr-chart-type-group">
+                                <button t-attf-class="pr-chart-type-btn #{state.employee_cost_chart_type == 'bar' ? 'pr-chart-type-btn--active' : ''}"
+                                        t-on-click="() => this.setChartType('bar')" title="Bar Chart"><i class="fa fa-bar-chart"/></button>
+                                <button t-attf-class="pr-chart-type-btn #{state.employee_cost_chart_type == 'line' ? 'pr-chart-type-btn--active' : ''}"
+                                        t-on-click="() => this.setChartType('line')" title="Line Chart"><i class="fa fa-line-chart"/></button>
+                                <button t-attf-class="pr-chart-type-btn #{state.employee_cost_chart_type == 'pie' ? 'pr-chart-type-btn--active' : ''}"
+                                        t-on-click="() => this.setChartType('pie')" title="Pie Chart"><i class="fa fa-pie-chart"/></button>
+                                <button t-attf-class="pr-chart-type-btn #{state.employee_cost_chart_type == 'doughnut' ? 'pr-chart-type-btn--active' : ''}"
+                                        t-on-click="() => this.setChartType('doughnut')" title="Doughnut Chart"><i class="fa fa-dot-circle-o"/></button>
+                            </div>
+                        </div>
+                        <div class="pr-card-body pr-card-body--chart">
+                            <div class="pr-chart-canvas-wrap pr-chart-canvas-wrap--md">
+                                <canvas id="employeeCostChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMPLOYEE TRENDS -->
+                    <div class="pr-chart-item--lg pr-card pr-chart-card">
+                        <div class="pr-card-header">
+                            <div class="pr-card-header-left">
+                                <i class="fa fa-pie-chart pr-card-header-icon"/>
+                                <h5 class="pr-card-title">Salary Distribution</h5>
+                            </div>
+                            <div class="pr-chart-type-group">
+                                <button t-attf-class="pr-chart-type-btn #{state.payroll_dist_chart_type == 'bar' ? 'pr-chart-type-btn--active' : ''}"
+                                        t-on-click="() => this.setPayrollDistChartType('bar')" title="Bar Chart"><i class="fa fa-bar-chart"/></button>
+                                <button t-attf-class="pr-chart-type-btn #{state.payroll_dist_chart_type == 'line' ? 'pr-chart-type-btn--active' : ''}"
+                                        t-on-click="() => this.setPayrollDistChartType('line')" title="Line Chart"><i class="fa fa-line-chart"/></button>
+                                <button t-attf-class="pr-chart-type-btn #{state.payroll_dist_chart_type == 'pie' ? 'pr-chart-type-btn--active' : ''}"
+                                        t-on-click="() => this.setPayrollDistChartType('pie')" title="Pie Chart"><i class="fa fa-pie-chart"/></button>
+                                <button t-attf-class="pr-chart-type-btn #{state.payroll_dist_chart_type == 'doughnut' ? 'pr-chart-type-btn--active' : ''}"
+                                        t-on-click="() => this.setPayrollDistChartType('doughnut')" title="Doughnut Chart"><i class="fa fa-dot-circle-o"/></button>
+                            </div>
+                        </div>
+                        <div class="pr-card-body pr-card-body--chart">
+                            <div class="pr-chart-canvas-wrap pr-chart-canvas-wrap--md">
+                                <canvas id="payrollPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Template for printing 'Consolidated Balance' PDF report -->
+    <template id="consolidated_balance">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h3>
+                        <center>
+                            <b>
+                                <span t-esc="report_name"/>
+                            </b>
+                        </center>
+                    </h3>
+                    <br/>
+                    <br/>
+                    <div class="filters">
+                        <table class="table table-sm table-reports">
+                            <thead class="filter_table"
+                                   style="background:#808080;">
+                                <tr>
+                                    <th>Journal</th>
+                                    <th>Comparison</th>
+                                    <th>Groups</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size:11px;font-weight:100;">
+                                <tr>
+                                    <th>
+                                        <t t-foreach="data['journal']"
+                                           t-as="journal"
+                                           t-key="journal_index">
+                                            <t t-out="journal"/>
+                                            ,
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-foreach="data['comparison']"
+                                           t-as="comparison"
+                                           t-key="comparison_index">
+                                            <t t-out="comparison"/>
+                                            ,
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-foreach="data['selected_group_name']"
+                                           t-as="group_name"
+                                           t-key="group_name_index">
+                                            <t t-out="group_name[0]"/>
+                                            ,
+                                        </t>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <t t-if="data">
+                        <table class="table table-sm table-reports">
+                            <thead style="background:#808080;">
+                                <tr>
+                                    <th colspan="6"/>
+                                    <t t-foreach="data['data']['header']"
+                                       t-as="header" t-key="header_index">
+                                        <th class="text-right">
+                                            <span class="fw-bolder">
+                                                <t t-esc="header[0]"/>
+                                                <br/>
+                                                <t t-esc="header[1]"/>
+                                            </span>
+                                        </th>
+                                    </t>
+                                    <th class="text-right fw-bolder">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size:11px;font-weight:100;">
+                                <t t-foreach="data['data']['group']"
+                                   t-as="group" t-key="group_index">
+                                    <tr style="border-bottom: 1.5px solid black;">
+                                        <th colspan="6">
+                                            <span class="ms-2 fw-bolder">
+                                                <t t-esc="group[1]"/>
+                                            </span>
+                                        </th>
+                                        <t t-foreach="group" t-as="amount"
+                                           t-key="amount_index">
+                                            <t t-if="amount_index >= 2">
+                                                <th>
+                                                    <t t-if="amount">
+                                                        <span class="fw-bolder">
+                                                            <t t-esc="data['data']['symbol']"/>
+                                                            <t t-esc="amount"/>
+                                                        </span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">
+                                                            <t t-esc="data['data']['symbol']"/>
+                                                            <t t-esc="amount"/>
+                                                        </span>
+                                                    </t>
+                                                </th>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                    <t t-foreach="data['data']['child']"
+                                       t-as="child" t-key="child_index">
+                                        <t t-if="child[0]==group[0]">
+                                            <tr class="border-bottom border-gainsboro">
+                                                <th colspan="6">
+                                                    <span class="ms-3 fw-bolder">
+                                                        <t t-esc="child[2]"/>
+                                                    </span>
+                                                </th>
+                                                <t t-foreach="child"
+                                                   t-as="amount"
+                                                   t-key="amount_index">
+                                                    <t t-if="amount_index >= 3">
+                                                        <th>
+                                                            <t t-if="amount">
+                                                                <span class="fw-bolder">
+                                                                    <t t-esc="data['data']['symbol']"/>
+                                                                    <t t-esc="amount"/>
+                                                                </span>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <span class="text-muted">
+                                                                    <t t-esc="data['data']['symbol']"/>
+                                                                    <t t-esc="amount"/>
+                                                                </span>
+                                                            </t>
+                                                        </th>
+                                                    </t>
+                                                </t>
+                                            </tr>
+                                            <t t-foreach="data['data']['accounts']"
+                                               t-as="accounts"
+                                               t-key="accounts_index">
+                                                <t t-if="child[1]==accounts[0]">
+                                                    <tr class="border-bottom border-gainsboro">
+                                                        <th colspan="6">
+                                                            <span class="fw-bold ms-5">
+                                                                <t t-esc="accounts[1]"/>
+                                                            </span>
+                                                        </th>
+                                                        <t t-foreach="accounts"
+                                                           t-as="amount"
+                                                           t-key="amount_index">
+                                                            <t t-if="amount_index >= 2">
+                                                                <th>
+                                                                    <t t-if="amount">
+                                                                        <span class="fw-bold">
+                                                                            <t t-esc="data['data']['symbol']"/>
+                                                                            <t t-esc="amount"/>
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-else="">
+                                                                        <span class="text-muted">
+                                                                            <t t-esc="data['data']['symbol']"/>
+                                                                            <t t-esc="amount"/>
+                                                                        </span>
+                                                                    </t>
+                                                                </th>
+                                                            </t>
+                                                        </t>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </t>
+                                    </t>
+                                    <t t-foreach="data['data']['accounts']"
+                                       t-as="accounts" t-key="accounts_index">
+                                        <t t-if="group[0]==accounts[0]">
+                                            <tr class="border-bottom border-gainsboro">
+                                                <th colspan="6">
+                                                    <span class="ms-5">
+                                                        <t t-esc="accounts[1]"/>
+                                                    </span>
+                                                </th>
+                                                <t t-foreach="accounts"
+                                                   t-as="amount"
+                                                   t-key="amount_index">
+                                                    <t t-if="amount_index >= 2">
+                                                        <th>
+                                                            <t t-if="amount">
+                                                                <span class="fw-bold">
+                                                                    <t t-esc="data['data']['symbol']"/>
+                                                                    <t t-esc="amount"/>
+                                                                </span>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <span class="text-muted">
+                                                                    <t t-esc="data['data']['symbol']"/>
+                                                                    <t t-esc="amount"/>
+                                                                </span>
+                                                            </t>
+                                                        </th>
+                                                    </t>
+                                                </t>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                    <tr style="border-bottom: 1.5px solid black;">
+                                        <th colspan="6">
+                                            <span class="ms-2 fw-bolder">Total
+                                                <t t-esc="group[1]"/>
+                                            </span>
+                                        </th>
+                                        <t t-foreach="group" t-as="amount"
+                                           t-key="amount_index">
+                                            <t t-if="amount_index >= 2">
+                                                <th>
+                                                    <t t-if="amount">
+                                                        <span class="fw-bolder">
+                                                            <t t-esc="data['data']['symbol']"/>
+                                                            <t t-esc="amount"/>
+                                                        </span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="text-muted">
+                                                            <t t-esc="data['data']['symbol']"/>
+                                                            <t t-esc="amount"/>
+                                                        </span>
+                                                    </t>
+                                                </th>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </t>
+                                <tr class="border-top border-gainsboro">
+                                    <th colspan="6" class="fw-bolder">Total
+                                    </th>
+                                    <t t-set="total" t-value="0"/>
+                                    <t t-foreach="data['data']['total']"
+                                       t-as="amount" t-key="amount_index">
+                                        <th class="fw-bolder">
+                                            <t t-esc="data['data']['symbol']"/>
+                                            <t t-esc="amount"/>
+                                            <t t-set="total"
+                                               t-value="total+amount"/>
+                                        </th>
+                                    </t>
+                                    <th class="fw-bolder">
+                                        <t t-esc="data['data']['symbol']"/>
+                                        <t t-out="total"/>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

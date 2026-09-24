@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================= -->
+    <!-- Action -->
+    <!-- ========================= -->
+    <record id="action_hr_advance_salary" model="ir.actions.act_window">
+        <field name="name">Advance Salary Requests</field>
+        <field name="res_model">hr.advance.salary</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!-- ========================= -->
+    <!-- Tree View -->
+    <!-- ========================= -->
+    <record id="view_advance_salary_request_tree" model="ir.ui.view">
+        <field name="name">advance.salary.tree</field>
+        <field name="model">hr.advance.salary</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="request_date"/>
+                <field name="amount"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- Form View -->
+    <!-- ========================= -->
+    <record id="view_advance_salary_request_form" model="ir.ui.view">
+        <field name="name">advance.salary.form</field>
+        <field name="model">hr.advance.salary</field>
+        <field name="arch" type="xml">
+            <form string="Advance Salary Request">
+
+                <header>
+
+                    <button name="action_submit"
+                            string="Submit"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+
+                    <button name="action_approve"
+                            string="Approve"
+                            groups='cyllo_payroll_management.group_cyllo_payroll_management_manager'
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'submitted'"/>
+
+                    <button name="action_reject"
+                            string="Reject"
+                            groups='cyllo_payroll_management.group_cyllo_payroll_management_manager'
+                            type="object"
+                            class="btn-danger"
+                            invisible="state != 'submitted'"/>
+
+                    <button name="action_create_bill"
+                            string="Create Payment"
+                            type="object"
+                            class="btn-primary"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"
+                            invisible="state != 'approved' or bill_id != False"/>
+
+                    <button name="action_paid"
+                            string="Mark Paid"
+                            type="object"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"
+                            invisible="state != 'approved' or bill_id != False"/>
+
+                    <button name="%(cyllo_payroll_management.action_hr_advance_salary_close_wizard)d"
+                            string="Close"
+                            type="action"
+                            class="btn-secondary"
+                            invisible="state != 'paid'"
+                            context="{'default_advance_id': active_id}"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,rejected,approved,paid,closed"
+                           invisible="state == 'approved'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved,paid,closed"
+                           invisible="state != 'approved'"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="get_bill_action"
+                                string="Payments"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-pencil-square-o"
+                                invisible="bill_id == False"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="employee_id" readonly="state != 'draft'"
+                                   groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                            <field name="employee_id" readonly="1"
+                                   groups="!cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                            <field name="bill_id" invisible="bill_id == False"/>
+                            <field name="request_date" readonly="state != 'draft'"/>
+                            <field name="approval_date"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="amount" widget="monetary" readonly="state != 'draft'"/>
+                            <field name="currency_id" invisible="True"/>
+                            <field name="deduction_type" widget="radio"
+                                   readonly="state != 'draft'"/>
+                            <field name="deduction_amount" widget="monetary"
+                                   invisible="deduction_type != 'fixed'"
+                                   readonly="state != 'draft'"/>
+                            <field name="deduction_percentage"
+                                   invisible="deduction_type != 'percentage'"
+                                   readonly="state != 'draft'"/>
+                            <field name="monthly_deduction_amount" widget="monetary" readonly="1"
+                                   force_save="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Deduction Schedule">
+                            <field name="line_ids" readonly="1">
+                                <tree decoration-info="state == 'planned'"
+                                      decoration-warning="state == 'pending'"
+                                      decoration-success="state == 'paid'"
+                                      decoration-muted="state == 'canceled'">
+                                    <field name="date"/>
+                                    <field name="amount" widget="monetary" sum="Total"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="payslip_id"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'planned'"
+                                           decoration-warning="state == 'pending'"
+                                           decoration-success="state == 'paid'"
+                                           decoration-muted="state == 'canceled'"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Reason">
+                            <field name="reason"/>
+                        </page>
+                    </notebook>
+
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+
+</odoo>

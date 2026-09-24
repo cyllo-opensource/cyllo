@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View-->
+    <record id="view_gratuity_settlement_tree" model="ir.ui.view">
+        <field name="name">view.gratuity.settlement.tree</field>
+        <field name="model">gratuity.settlement</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="reference"/>
+                <field name="employee_id"/>
+                <field name="contract_type"/>
+                <field name="basic_salary" widget="monetary"/>
+                <field name="gratuity_years"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="gratuity_amount" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'draft'"
+                       decoration-info="state == 'submit'"
+                       decoration-primary="state == 'approve'"
+                       decoration-success="state == 'paid'"
+                       decoration-danger="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_gratuity_settlement_form" model="ir.ui.view">
+        <field name="name">view.gratuity.settlement.form</field>
+        <field name="model">gratuity.settlement</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="state != 'draft'"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('paid', 'cancel')"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                    <button name="action_set_to_draft" string="Set to draft" type="object" invisible="state != 'cancel'"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <div class="d-flex justify-content-between align-items-center" style="padding: 5px;">
+                                <!-- Left Side: Reference Field -->
+                                <field name="reference" class="text-break"/>
+
+                                <!-- Right Side: Gratuity Amount with Label -->
+                                <div class="d-flex align-items-center" invisible="gratuity_amount == 0">
+                                    <label for="gratuity_amount" string="Gratuity Payment:" class="me-1"/>
+                                    <field name="gratuity_amount" class="text-end text-primary" widget="monetary"/>
+                                </div>
+                            </div>
+                        </h1>
+                        <h1>
+                            <div class="d-flex">
+                                <field name="employee_id"
+                                       readonly="state in ('approve','paid','cancel')"
+                                       class="text-break"/>
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <separator string="Employee Details"/>
+                            <field name="currency_id" invisible="True"/>
+                            <field name="contract_type"/>
+                            <field name="contract_id" force_save="1"/>
+                            <field name="basic_salary"
+                                   options="{'currency_field': 'currency_id'}"
+                                   class="oe_inline" widget="monetary"/>
+                        </group>
+                        <group>
+                            <separator string="Gratuity Details"/>
+                            <field name="gratuity_configuration_id"
+                                   domain="[('id','in',gratuity_configuration_ids)]"
+                                   readonly="state in ('approve','paid','cancel')"/>
+                            <field name="gratuity_configuration_ids" invisible="1"/>
+                            <field name="gratuity_duration_line_id"
+                                   domain="[('gratuity_configuration_id','=',gratuity_configuration_id),('id','in',gratuity_duration_line_ids)]"
+                                   readonly="state in ('approve','paid','cancel')"/>
+                            <field name="gratuity_duration_line_ids" invisible="1"/>
+                            <field name="divide_days"/>
+                            <field name="extra_days"/>
+                            <field name="percentage"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <separator string="Employee Working Details"/>
+                            <field name="total_working_years" force_save="1"/>
+                            <field name="gratuity_years" force_save="1"/>
+                            <field name="leave_taken" force_save="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action-->
+    <record id="action_view_gratuity_settlement" model="ir.actions.act_window">
+        <field name="name">Gratuity Settlement</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">gratuity.settlement</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Gratuity Settlements
+            </p>
+            <p>
+                Create New Gratuity Settlements
+            </p>
+        </field>
+    </record>
+</odoo>

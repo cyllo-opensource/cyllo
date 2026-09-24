@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="MailNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//Dialog" position="attributes">
+            <attribute name="size">'xl'</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="cy-work-auto-form">
+                <!-- Label and Type Selector -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label for="from-subject" class="form-label cy-modal-form_label">Label</label>
+                        <TypeToggler
+                                options="getTogglerOptions"
+                                value="fieldState.mail_isTemplate || false"
+                                updateValue.bind="updateType"
+                                width="15"
+                        />
+                    </div>
+                    <input type="text"
+                           class="o_input"
+                           autocomplete="off"
+                           placeholder="Label"
+                           t-on-focusout="(ev) => this.setLabel(ev.target.value)"
+                           t-att-value="getLabel"
+                    />
+                </div>
+                <!-- Template Mode -->
+                <div class="row mb-3 align-items-end" t-if="getType">
+                    <div class="col-md-6 cy-variable-toggle">
+                        <label for="record" class="form-label cy-modal-form_label">Choose Record</label>
+                        <CustomDropdown
+                                options="getRecords"
+                                defaultValue="getModel"
+                                onChange="(value) => this.updateObject(value)"
+                                placeholder="'Select a record...'"
+                                searchable="true"
+                                width="''"
+                                maxHeight="'70px'"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="variable" class="form-label cy-modal-form_label">Choose your mail template</label>
+                        <Many2XAutocomplete
+                                resModel="'mail.template'"
+                                getDomain.bind="getDomain"
+                                fieldString="'Mail templates'"
+                                activeActions="{create: true, createEdit: true}"
+                                update.bind="onSelectMail"
+                                value="getTemplate"
+                        />
+                    </div>
+                </div>
+                <!-- Custom Mode -->
+                <div t-if="!getType">
+                    <div class="mb-3 align-items-end">
+                        <div class="col-md-12">
+                            <label for="from-mail" class="form-label cy-modal-form_label">To</label>
+                            <div class="mb-3">
+                                <t t-set="multipleDataLength"
+                                   t-value="this.getRecipient().length"/>
+                                <t t-foreach="this.getRecipient()" t-as="recipient"
+                                   t-key="recipient_index">
+                                    <div class="d-inline-flex justify-content-between gap-3 col-md-12">
+                                        <MultiDataSelector
+                                                index="recipient_index"
+                                                getValueEditorInfo.bind="(recipient) => this.getValueEditorInfo(recipient,'recipient')"
+                                                setData.bind="(value,index)=>this.setData(value,index,'recipient')"
+                                                getDataValue="recipient"
+                                                toggleIncludeVariable.bind="(type,index) =>this.toggleIncludeVariable(type,'recipient',index,)"
+                                                removeData.bind="(index)=>this.removeData(index,'recipient')"
+                                                length="multipleDataLength"
+                                                isAdd="true"
+                                                add.bind="(index)=>this.insertData(index,'recipient')"
+                                        />
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label for="from-mail-cc" class="form-label cy-modal-form_label mb-0">
+                                    Cc <small class="text-muted">(optional)</small>
+                                </label>
+                                <a t-if="this.getCc().length" href="#" role="button"
+                                   class="small" t-on-click.prevent="() => this.clearMailList('cc')">
+                                    Clear
+                                </a>
+                            </div>
+                            <div class="mb-3" t-if="this.getCc().length">
+                                <t t-set="ccDataLength"
+                                   t-value="this.getCc().length"/>
+                                <t t-foreach="this.getCc()" t-as="cc"
+                                   t-key="cc_index">
+                                    <div class="d-inline-flex justify-content-between gap-3 col-md-12">
+                                        <MultiDataSelector
+                                                index="cc_index"
+                                                getValueEditorInfo.bind="(cc) => this.getValueEditorInfo(cc,'cc')"
+                                                setData.bind="(value,index)=>this.setData(value,index,'cc')"
+                                                getDataValue="cc"
+                                                toggleIncludeVariable.bind="(type,index) =>this.toggleIncludeVariable(type,'cc',index,)"
+                                                removeData.bind="(index)=>this.removeData(index,'cc')"
+                                                length="ccDataLength"
+                                                isAdd="true"
+                                                add.bind="(index)=>this.insertData(index,'cc')"
+                                        />
+                                    </div>
+                                </t>
+                            </div>
+                            <button t-if="!this.getCc().length" type="button"
+                                    class="btn btn-sm btn-outline-primary mb-3"
+                                    t-on-click="() => this.insertData(false,'cc')">
+                                <i class="fa fa-plus me-1"/> Add Cc
+                            </button>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label for="from-mail-bcc" class="form-label cy-modal-form_label mb-0">
+                                    Bcc <small class="text-muted">(optional)</small>
+                                </label>
+                                <a t-if="this.getBcc().length" href="#" role="button"
+                                   class="small" t-on-click.prevent="() => this.clearMailList('bcc')">
+                                    Clear
+                                </a>
+                            </div>
+                            <div class="mb-3" t-if="this.getBcc().length">
+                                <t t-set="bccDataLength"
+                                   t-value="this.getBcc().length"/>
+                                <t t-foreach="this.getBcc()" t-as="bcc"
+                                   t-key="bcc_index">
+                                    <div class="d-inline-flex justify-content-between gap-3 col-md-12">
+                                        <MultiDataSelector
+                                                index="bcc_index"
+                                                getValueEditorInfo.bind="(bcc) => this.getValueEditorInfo(bcc,'bcc')"
+                                                setData.bind="(value,index)=>this.setData(value,index,'bcc')"
+                                                getDataValue="bcc"
+                                                toggleIncludeVariable.bind="(type,index) =>this.toggleIncludeVariable(type,'bcc',index,)"
+                                                removeData.bind="(index)=>this.removeData(index,'bcc')"
+                                                length="bccDataLength"
+                                                isAdd="true"
+                                                add.bind="(index)=>this.insertData(index,'bcc')"
+                                        />
+                                    </div>
+                                </t>
+                            </div>
+                            <button t-if="!this.getBcc().length" type="button"
+                                    class="btn btn-sm btn-outline-primary mb-3"
+                                    t-on-click="() => this.insertData(false,'bcc')">
+                                <i class="fa fa-plus me-1"/> Add Bcc
+                            </button>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="from-subject" class="form-label cy-modal-form_label">Subject</label>
+                            <t t-set="info" t-value="this.getValueEditorInfo(getSubject,'subject')"/>
+                            <div class="d-flex mb-3">
+                                <div class="flex-grow-1 me-2">
+                                    <t t-component="info.component"
+                                       t-props="getComponentProps(info)"/>
+                                </div>
+                                <FieldTypeDropdown
+                                        currentLabel="getDropdownLabel(getSubject.selectionType)"
+                                        onSelected="(type) => this.toggleIncludeVariable(type,'subject')"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="message" class="form-label cy-modal-form_label mb-0">Message</label>
+                            <button class="btn btn-sm btn-primary shadow-sm d-flex align-items-center"
+                                    style="font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 6px; letter-spacing: 0.3px;"
+                                    t-on-click.prevent="openVariablePicker">
+                                <span class="me-2 bg-white text-primary rounded px-1" style="font-family: monospace; font-size: 12px;">{}</span>
+                                Insert Variable
+                            </button>
+                        </div>
+                        <div class="cy-mail-toolbar d-flex align-items-center gap-1 border border-bottom-0 rounded-top px-2 py-1 mt-2">
+                            <button type="button" class="btn btn-sm" title="Bold"
+                                    t-att-class="toolbarState.bold ? 'btn-primary' : 'btn-outline-primary'"
+                                    t-on-mousedown.prevent="() => this.applyFormat('bold')">
+                                <b>B</b>
+                            </button>
+                            <button type="button" class="btn btn-sm" title="Italic"
+                                    t-att-class="toolbarState.italic ? 'btn-primary' : 'btn-outline-primary'"
+                                    t-on-mousedown.prevent="() => this.applyFormat('italic')">
+                                <i>I</i>
+                            </button>
+                            <button type="button" class="btn btn-sm" title="Underline"
+                                    t-att-class="toolbarState.underline ? 'btn-primary' : 'btn-outline-primary'"
+                                    t-on-mousedown.prevent="() => this.applyFormat('underline')">
+                                <u>U</u>
+                            </button>
+                            <span class="cy-mail-toolbar-sep mx-1"/>
+                            <button type="button" class="btn btn-sm" title="Bulleted list"
+                                    t-att-class="toolbarState.insertUnorderedList ? 'btn-primary' : 'btn-outline-primary'"
+                                    t-on-mousedown.prevent="() => this.applyFormat('insertUnorderedList')">
+                                <i class="fa fa-list-ul"/>
+                            </button>
+                            <button type="button" class="btn btn-sm" title="Numbered list"
+                                    t-att-class="toolbarState.insertOrderedList ? 'btn-primary' : 'btn-outline-primary'"
+                                    t-on-mousedown.prevent="() => this.applyFormat('insertOrderedList')">
+                                <i class="fa fa-list-ol"/>
+                            </button>
+                        </div>
+                        <div class="cy-mail-editor form-control rounded-top-0"
+                             contenteditable="true"
+                             placeholder="Write your message..."
+                             style="min-height: 200px; max-height: 45vh; overflow-y: auto;"
+                             t-on-blur="onMessageBlur"
+                             t-ref="messageEditor"
+                        />
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <label class="form-label cy-modal-form_label">Attachments</label>
+                        <CustomDropdown
+                            options="getMailAttachmentModeOptions"
+                            defaultValue="getMailAttachmentMode"
+                            onChange="(val) => this.updateMailAttachmentMode(val)"
+                            placeholder="'No Attachment'"
+                            searchable="false"
+                            width="''"
+                        />
+                    </div>
+
+                    <div class="mb-3" t-if="getMailAttachmentMode === 'static'">
+                        <label class="form-label cy-modal-form_label">Upload Files</label>
+                        <small class="text-muted d-block mb-2">
+                            Files uploaded here are stored in the system and sent whenever this node runs.
+                        </small>
+
+                        <div t-if="getMailStaticAttachments.length" class="mb-2">
+                            <div
+                                t-foreach="getMailStaticAttachments"
+                                t-as="att"
+                                t-key="att.id"
+                                class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1 bg-light"
+                            >
+                                <span class="text-truncate me-2">
+                                    <i class="fa fa-paperclip me-1 text-muted"/>
+                                    <t t-esc="att.name"/>
+                                </span>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-link text-danger p-0"
+                                    t-on-click="() => this.removeMailStaticAttachment(att.id)"
+                                >
+                                    <i class="fa fa-times"/>
+                                </button>
+                            </div>
+                        </div>
+
+                        <input
+                            type="file"
+                            class="d-none"
+                            t-ref="mail_file_input"
+                            t-on-change="onMailFileInputChange"
+                        />
+                        <button
+                            t-if="!mailAttachState.uploadingFile"
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            t-on-click="openMailFilePicker"
+                        >
+                            <i class="fa fa-upload me-1"/> Add File
+                        </button>
+                        <span t-if="mailAttachState.uploadingFile" class="text-muted">
+                            <i class="fa fa-spinner fa-spin me-1"/> Uploading...
+                        </span>
+                    </div>
+
+                    <div class="mb-3" t-if="getMailAttachmentMode === 'auto'">
+                        <label class="form-label cy-modal-form_label">Accounting Report</label>
+                        <small class="text-muted d-block mb-1">
+                            These reports are generated from a date range and accounting filters,
+                            recalculated fresh every time the workflow runs.
+                        </small>
+                        <CustomDropdown
+                            options="getMailAutoReportOptions"
+                            defaultValue="getMailAutoReportValue"
+                            onChange="(val) => this.updateMailAutoReport(val)"
+                            placeholder="'Select a report...'"
+                            searchable="true"
+                            width="''"
+                        />
+                    </div>
+
+                    <div class="mb-3" t-if="getMailAttachmentMode === 'auto' and getMailAutoReportValue">
+                        <label class="form-label cy-modal-form_label">Report Filters</label>
+
+                        <div class="mb-2">
+                            <label class="form-label cy-modal-form_label">Date Range</label>
+                            <CustomDropdown
+                                options="getMailDatePresetOptions"
+                                defaultValue="getMailDatePreset"
+                                onChange="(val) => this.updateMailDatePreset(val)"
+                                placeholder="'Select date range...'"
+                                searchable="false"
+                                width="''"
+                            />
+                        </div>
+
+                        <div class="row mb-2" t-if="getMailDatePreset === 'custom'">
+                            <div class="col-md-6">
+                                <label class="form-label cy-modal-form_label">Start Date</label>
+                                <input type="date" class="o_input" t-on-change="setMailCustomStartDate" t-att-value="getMailCustomStartDate"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label cy-modal-form_label">End Date</label>
+                                <input type="date" class="o_input" t-on-change="setMailCustomEndDate" t-att-value="getMailCustomEndDate"/>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label cy-modal-form_label">Journals (optional)</label>
+                            <div t-if="getMailReportJournals.length" class="mb-2">
+                                <div
+                                    t-foreach="getMailReportJournals"
+                                    t-as="journal"
+                                    t-key="journal.id"
+                                    class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1 bg-light"
+                                >
+                                    <span class="text-truncate me-2"><t t-esc="journal.name"/></span>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-link text-danger p-0"
+                                        t-on-click="() => this.removeMailReportJournal(journal.id)"
+                                    >
+                                        <i class="fa fa-times"/>
+                                    </button>
+                                </div>
+                            </div>
+                            <Many2XAutocomplete
+                                resModel="'account.journal'"
+                                getDomain.bind="getMailReportJournalDomain"
+                                fieldString="'Journals'"
+                                activeActions="{}"
+                                update.bind="onAddMailReportJournal"
+                                value="''"
+                            />
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label cy-modal-form_label">Analytic Accounts (optional)</label>
+                            <div t-if="getMailReportAnalytics.length" class="mb-2">
+                                <div
+                                    t-foreach="getMailReportAnalytics"
+                                    t-as="analytic"
+                                    t-key="analytic.id"
+                                    class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1 bg-light"
+                                >
+                                    <span class="text-truncate me-2"><t t-esc="analytic.name"/></span>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-link text-danger p-0"
+                                        t-on-click="() => this.removeMailReportAnalytic(analytic.id)"
+                                    >
+                                        <i class="fa fa-times"/>
+                                    </button>
+                                </div>
+                            </div>
+                            <Many2XAutocomplete
+                                resModel="'account.analytic.account'"
+                                getDomain.bind="getMailReportAnalyticDomain"
+                                fieldString="'Analytic Accounts'"
+                                activeActions="{}"
+                                update.bind="onAddMailReportAnalytic"
+                                value="''"
+                            />
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label cy-modal-form_label">Target Move</label>
+                            <CustomDropdown
+                                options="getMailTargetMoveOptions"
+                                defaultValue="getMailTargetMove"
+                                onChange="(val) => this.updateMailTargetMove(val)"
+                                placeholder="'Select target move...'"
+                                searchable="false"
+                                width="''"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

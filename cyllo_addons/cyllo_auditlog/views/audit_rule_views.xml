@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_audit_rule_tree" model="ir.ui.view">
+        <field name="name">audit.rule.tree</field>
+        <field name="model">audit.rule</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="not active">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="model_id" options="{'no_open': True}"/>
+                <field name="log_level" widget="badge" decoration-info="log_level == 'info'"
+                       decoration-warning="log_level == 'warning'" decoration-danger="log_level == 'critical'"/>
+                <field name="track_create" widget="boolean_toggle" optional="show"/>
+                <field name="track_write" widget="boolean_toggle" optional="show"/>
+                <field name="track_read" widget="boolean_toggle" optional="show"/>
+                <field name="track_unlink" widget="boolean_toggle" optional="show"/>
+                <field name="company_id" optional="hide" readonly="1"/>
+                <field name="log_count" sum="Total Logs"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_audit_rule_form" model="ir.ui.view">
+        <field name="name">audit.rule.form</field>
+        <field name="model">audit.rule</field>
+        <field name="arch" type="xml">
+            <form string="Audit Rule" class="o_audit_rule_form">
+                <sheet>
+                    <div class="oe_button_box" name="button_box" invisible="log_count == 0">
+                        <button name="%(action_audit_log)d" type="action" class="oe_stat_button" icon="fa-history"
+                                context="{'search_default_rule_id': id}">
+                            <field name="log_count" widget="statinfo" string="Logs"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Track Invoice Changes"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="basic_config" string="General Configuration">
+                            <field name="model_id" options="{'no_create': True, 'no_edit': True}"/>
+                            <field name="log_level" widget="radio" class="o_radio_horizontal"/>
+                            <field name="sequence" groups="base.group_no_one"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group name="operation_config" string="Operations to Track">
+                            <field name="track_create" widget="boolean_toggle"/>
+                            <field name="track_write" widget="boolean_toggle"/>
+                            <label for="track_read"/>
+                            <div class="o_row">
+                                <field name="track_read" widget="boolean_toggle" nolabel="1"/>
+                                <span class="text-warning ms-2" invisible="not track_read">
+                                    <i class="fa fa-exclamation-triangle me-1" title="Warning"/>
+                                    Read tracking can generate many logs and impact performance.
+                                </span>
+                            </div>
+                            <field name="track_unlink" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group name="advanced_config" string="Advanced Options">
+                            <field name="track_ip" widget="boolean_toggle"/>
+                            <field name="track_session" widget="boolean_toggle"/>
+                        </group>
+                        <group name="retention_config" string="Retention Policy">
+                            <label for="has_retention"/>
+                            <div class="o_row">
+                                <field name="has_retention" widget="boolean_toggle"/>
+                                
+                                <button name="action_cleanup_logs"
+                                        type="object"
+                                        string="Clear now"
+                                        class="btn btn-danger px-3 py-2 ms-5"
+                                        icon="fa-trash"
+                                        confirm="This will permanently delete ALL logs linked to this rule. This action cannot be undone. Continue?"
+                                />
+                            </div>
+                            <label for="retention_days" invisible="not has_retention"/>
+                            <div class="o_row" invisible="not has_retention">
+                                <field name="retention_days" required="has_retention" class="oe_inline"/>
+                                <span class="pe-3">days</span>
+                            </div>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page name="field_tracking" string="Fields">
+                            <group>
+                                <field name="tracking_scope" widget="radio" class="o_radio_horizontal"/>
+                            </group>
+                            <group invisible="tracking_scope != 'tracked'" string="Tracked Fields">
+                                <field name="tracked_field_ids" widget="many2many_tags" options="{'no_create': True}"
+                                       placeholder="Select fields to track..."/>
+                            </group>
+                            <group invisible="tracking_scope != 'excluded'" string="Excluded Fields">
+                                <field name="excluded_field_ids" widget="many2many_tags" options="{'no_create': True}"
+                                       placeholder="Select fields to exclude..."/>
+                            </group>
+                        </page>
+
+                        <page name="user_selection" string="Users">
+                            <group>
+                                <field name="user_selection_type"
+                                       widget="radio"
+                                       class="o_radio_horizontal"/>
+                            </group>
+
+                            <group invisible="user_selection_type == 'all'">
+                                <group string="Selection Configuration">
+                                    <field name="user_ids" widget="many2many_tags" options="{'no_create': True}"
+                                           invisible="user_selection_type not in ['specific', 'exclude']"
+                                           placeholder="Select users..."/>
+                                    <field name="group_ids" widget="many2many_tags" options="{'no_create': True}"
+                                           invisible="user_selection_type != 'group'" placeholder="Select groups..."/>
+                                    <field name="user_domain" widget="domain" options="{'model': 'res.users'}"
+                                           placeholder="Apply additional filter..."/>
+                                </group>
+                            </group>
+                            <div class="o_audit_summary_box" invisible="user_selection_type == 'all'">
+                                <div class="o_summary_icon">
+                                    <i class="fa fa-users" title="Users"/>
+                                </div>
+                                <div class="o_summary_content">
+                                    <div class="o_summary_label">Tracked Users</div>
+                                    <div class="o_summary_value"><field name="user_count"/></div>
+                                </div>
+                            </div>
+                            <div class="text-muted" invisible="user_selection_type != 'all'">
+                                <i class="fa fa-users me-2"/> All active users will be tracked by this rule.
+                            </div>
+                        </page>
+
+                        <page name="notes" string="Notes &amp; Description">
+                            <field name="notes" placeholder="Detailed purpose of this rule..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_audit_rule_search" model="ir.ui.view">
+        <field name="name">audit.rule.search</field>
+        <field name="model">audit.rule</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="user_ids"/>
+                <separator/>
+                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="filter_inactive" string="Deactivated" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_model" string="Model" context="{'group_by': 'model_id'}"/>
+                    <filter name="group_level" string="Log Level" context="{'group_by': 'log_level'}"/>
+                    <filter name="group_active" string="Status" context="{'group_by': 'active'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_audit_rule" model="ir.actions.act_window">
+        <field name="name">Audit Rules</field>
+        <field name="res_model">audit.rule</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Define your first audit rule!
+            </p>
+            <p>
+                Audit rules help you track changes on specific models.
+                Configure which operations and fields to monitor.
+            </p>
+        </field>
+    </record>
+</odoo>

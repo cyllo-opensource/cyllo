@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="multiDataSelector">
+        <div class="d-flex align-items-end justify-content-between gap-3 w-100" t-att-class="props.index !== 0 ? 'mt-3':''">
+            <t t-set="info" t-value="this.getValueEditorInfo()"/>
+            <div class="flex-grow-1">
+                <t t-set="value" t-value="props.getDataValue"/>
+                <t t-component="info.component"
+                   t-props="info.extractProps({ value :value?.value|| [], update: (value) => this.setAddFollowerData(value) })"/>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <FieldTypeDropdown
+                        currentLabel="getDropdownLabel(props.getDataValue.selectionType)"
+                        onSelected="(type) => this.changeFieldType(type)"
+                />
+                <a href="#" role="button">
+                    <i t-if="props.length &gt; 1" class="ri-delete-bin-6-line"
+                       t-on-click="() => this.removeAddFollower()"></i>
+                </a>
+
+                <div t-if="props.isAdd">
+                    <a href="#" role="button" t-on-click="() => this.insertData(true)">
+                        <i class="fa fa-plus"/>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div t-if="!props.isAdd &amp; props.index === props.length-1">
+            <div class=" o_tree_editor_row d-flex align-items-center mt-3">
+                <a href="#" role="button" t-on-click="() => this.insertData()">Add Extra
+                    Followers
+                </a>
+            </div>
+        </div>
+    </t>
+</templates>

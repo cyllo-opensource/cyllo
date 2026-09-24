@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Kanban view of the Quality Alert-->
+    <record id="view_quality_alert_kanban" model="ir.ui.view">
+        <field name="name">view.quality.alert.kanban</field>
+        <field name="model">quality.alert</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column" records_draggable="1">
+                <field name="name"/>
+                <field name="quality_check_id"/>
+                <field name="stage_id"/>
+                <field name="product_id"/>
+                <field name="picking_id"/>
+                <field name="user_id"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="kanban-menu">
+                        <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                        <ul class="oe_kanban_colorpicker" data-field="color"/>
+                    </t>
+
+                    <t t-name="kanban-box">
+                        <div t-attf-class="o_kanban_card oe_kanban_global_click oe_kanban_card #{kanban_color(record.color.raw_value)}">
+
+                            <!-- Kanban Header -->
+                            <div class="o_kanban_header">
+                                <div class="o_kanban_priority">
+                                    <field name="priority" widget="priority"/>
+                                </div>
+                                <!-- Name with more spacing -->
+                                <div class="o_kanban_record_title mt-1">
+                                    <field name="name"/>
+                                </div>
+                            </div>
+
+                            <!-- Kanban Body -->
+                            <div class="o_kanban_content">
+                                <div class="o_kanban_tags">
+                                    <field name="quality_check_id"/>
+                                    <field name="product_id"/>
+                                    <field name="picking_id"/>
+                                </div>
+                            </div>
+
+                            <!-- Kanban Bottom -->
+                            <div class="d-flex mt-2" style="justify-content: space-between ">
+                                <field name="activity_ids" widget="kanban_activity"/>
+
+                                <div class="o_kanban_user_avatar">
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--    Tree view of the Quality Alert-->
+    <record id="view_quality_alert_tree" model="ir.ui.view">
+        <field name="name">view.quality.alert.tree</field>
+        <field name="model">quality.alert</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="quality_check_id"/>
+                <field name="stage_id"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Form view of the quality Alert-->
+    <record id="view_quality_alert_form" model="ir.ui.view">
+        <field name="name">view.quality.alert.form</field>
+        <field name="model">quality.alert</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="quality_check_id" domain="[('state', '=', 'fail')]"/>
+                            <field name="product_template_id"/>
+                            <field name="product_id" domain="[('product_tmpl_id', '=', product_template_id)]"/>
+                            <field name="picking_id"/>
+                            <field name="quality_check_line_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="quality_team_id"/>
+                            <field name="user_id"/>
+                            <field name="company_id"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="description" string="Issue Description">
+                            <field name="description" placeholder="Describe the quality issue in detail."/>
+                        </page>
+                        <page name="corrective_action" string="Corrective Actions">
+                            <field name="corrective_action" placeholder="Describe the actions taken to resolve the issue."/>
+                        </page>
+                        <page name="preventive_action" string="Preventive Actions">
+                            <field name="preventive_action" placeholder="Describe the measures to prevent this issue from recurring."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--    Search view of the Quality Alert-->
+    <record id="view_quality_alert_search" model="ir.ui.view">
+        <field name="name">view.quality.alert.search</field>
+        <field name="model">quality.alert</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="quality_check_id"/>
+                <field name="product_id"/>
+                <field name="quality_team_id"/>
+                <field name="stage_id"/>
+                <filter string="My Alerts" name="my_alerts" domain="[('create_uid', '=', uid)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Stage" name="stage" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Team" name="team" context="{'group_by': 'quality_team_id'}"/>
+                    <filter string="Product" name="product" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!--   Action for the Quality Alert-->
+    <record id="action_view_quality_alerts" model="ir.actions.act_window">
+        <field name="name">Quality Alert</field>
+        <field name="res_model">quality.alert</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+</odoo>

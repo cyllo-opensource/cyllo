@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_email_digitization_config_tree" model="ir.ui.view">
+        <field name="name">view.email.digitization.config.tree</field>
+        <field name="model">email.digitization.config</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="email"/>
+                <field name="active_configuration"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_email_digitization_config_form" model="ir.ui.view">
+        <field name="name">view.email.digitization.config.form</field>
+        <field name="model">email.digitization.config</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1 class="oe_title">
+                        <field name="email" placeholder="e.g. ashly@gmail.com"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="model_id"/>
+                            <field name="model_name" invisible="1"/>
+                            <field name="active_configuration"
+                                   widget="boolean_toggle"/>
+                            <field name="digitize_type" widget="radio"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Field Details"
+                              name="purchase_line_details"
+                              invisible="model_name != 'purchase.order' or digitize_type != 'use_keyword'">
+                            <field name="purchase_line_field_details_ids">
+                                <tree editable="bottom">
+                                    <field name="purchase_line_field_id"
+                                           string="Fields" options="{'no_create': True, 'no_quick_create': True}" />
+                                    <field name="line_field_keyword_ids"
+                                           widget="many2many_tags"
+                                           string="Keyword"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Other Details"
+                              name="email_digitize_other_details"
+                              invisible="model_name != 'purchase.order' or digitize_type != 'use_keyword'">
+                            <group>
+                                <group>
+                                    <field name="tax_type" widget="radio"/>
+                                </group>
+                                <group>
+                                    <field name="product_creation_type"
+                                           widget="radio"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Field Details"
+                              name="sale_line_details"
+                              invisible="model_name != 'sale.order' or digitize_type != 'use_keyword'">
+                            <field name="sale_line_field_details_ids">
+                                <tree editable="bottom">
+                                    <field name="sale_line_field_id"
+                                           string="Fields" options="{'no_create': True, 'no_quick_create': True}"/>
+                                    <field name="line_field_keyword_ids"
+                                           widget="many2many_tags"
+                                           string="Keyword"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- actions -->
+    <record id="action_view_email_digitization_config"
+            model="ir.actions.act_window">
+        <field name="name">Email Digitization Config</field>
+        <field name="res_model">email.digitization.config</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="menu_email_digitization_config"
+              name="Email Digitization Config"
+              parent="cyllo_ocr_digitization.menu_configuration_categ"
+              action="action_view_email_digitization_config"
+              sequence="1"/>
+</odoo>

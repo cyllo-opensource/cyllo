@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_carbon_factor_tree" model="ir.ui.view">
+        <field name="name">carbon.factor.tree</field>
+        <field name="model">carbon.factor</field>
+        <field name="arch" type="xml">
+            <tree>
+                 <field name="name"/>
+                 <field name="source_id"/>
+                 <field name="ipcc_code" optional="show"/>
+                 <field name="ipcc_efdb_id" optional="show"/>
+                 <field name="gas_id"/>
+                 <field name="factor_value"/>
+                 <field name="unit_name"/>
+                 <field name="valid_from"/>
+                 <field name="valid_to"/>
+                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                 <field name="active"/>
+             </tree>
+         </field>
+     </record>
+ 
+     <record id="view_carbon_factor_form" model="ir.ui.view">
+         <field name="name">carbon.factor.form</field>
+         <field name="model">carbon.factor</field>
+         <field name="arch" type="xml">
+             <form>
+                 <sheet>
+                     <group>
+                         <group>
+                             <field name="name"/>
+                             <field name="source_id"/>
+                             <field name="gas_id"/>
+                             <field name="factor_value"/>
+                             <field name="unit_name"/>
+                             <field name="type"/>
+                         </group>
+                         <group>
+                             <field name="company_id" groups="base.group_multi_company"/>
+                             <field name="active"/>
+                         </group>
+                     </group>
+                     <group>
+                         <group string="IPCC EFDB Details">
+                             <field name="ipcc_efdb_id"/>
+                             <field name="ipcc_code"/>
+                             <field name="gwp_reference"/>
+                         </group>
+                         <group string="Validity &amp; Notes">
+                             <field name="valid_from"/>
+                             <field name="valid_to"/>
+                             <field name="note"/>
+                         </group>
+                     </group>
+                 </sheet>
+                 <div class="oe_chatter">
+                     <field name="message_follower_ids"/>
+                     <field name="activity_ids"/>
+                     <field name="message_ids"/>
+                 </div>
+             </form>
+        </field>
+    </record>
+
+    <record id="action_carbon_factors" model="ir.actions.act_window">
+        <field name="name">Factors</field>
+        <field name="res_model">carbon.factor</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

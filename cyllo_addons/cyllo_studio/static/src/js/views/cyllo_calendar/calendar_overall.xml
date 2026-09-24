@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.CalendarOverall">
+        <div class="d-flex align-items-center justify-content-center my-3">
+            <button class="btn btn-primary calendar-popover-btn"
+                t-on-click="openDialog">Filters and Popover Fields
+            </button>
+        </div>
+        <div class="CalenderOverall">
+            <div class="accordion cy-calendar-overall-view-field-button">
+                <div class="overall_container_list cy-from-type-field">
+                    <div>
+                        <div class="dropdown-checkbox-container">
+                            <label class="cy-navbar_label customCheckbox-label"
+                                for="start_date_field">Start Date Field
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    options="dateFields"
+                                    defaultValue="props.mode.fieldMapping.date_start"
+                                    onChange="(value)=>this.updateCalender('date_start', value)"
+                                    placeholder="'Start Date'"
+                                    searchable="true"
+                                />
+                            </div>
+                        </div>
+                        <div class="dropdown-checkbox-container">
+                            <label class="cy-navbar_label customCheckbox-label"
+                                for="end_date_field">End Date Field
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    options="dateFields"
+                                    defaultValue="props.mode.fieldMapping.date_stop"
+                                    onChange="(value)=>this.updateCalender('date_stop', value)"
+                                    placeholder="'End Date'"
+                                    searchable="true"
+                                />
+                            </div>
+                        </div>
+                        <div class="dropdown-checkbox-container">
+                            <label class="cy-navbar_label customCheckbox-label"
+                                for="delay_field">Delay Field
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    options="intFields"
+                                    defaultValue="props.mode.fieldMapping.date_delay"
+                                    onChange="(value)=>this.updateCalender('date_delay', value)"
+                                    placeholder="'Delay Date'"
+                                    searchable="true"
+                                />
+                            </div>
+                        </div>
+                        <div class="dropdown-checkbox-container">
+                            <label class="cy-navbar_label customCheckbox-label"
+                                for="all_day">All Day
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    options="booleanFields"
+                                    defaultValue="props.mode.fieldMapping.all_day"
+                                    onChange="(value)=>this.updateCalender('all_day', value)"
+                                    placeholder="'All Day'"
+                                    searchable="true"
+                                />
+                            </div>
+                        </div>
+                        <div class="dropdown-checkbox-container">
+                            <label class="cy-navbar_label customCheckbox-label"
+                                for="color">Color
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    options="colourFields"
+                                    defaultValue="props.mode.fieldMapping.color"
+                                    onChange="(value)=>this.updateCalender('color', value)"
+                                    placeholder="'Color'"
+                                    searchable="true"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion" id="accordionExample">
+                <div class="overall_container_list">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button cy-heading cy-studio_accordion collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseTwo"
+                            aria-expanded="false"
+                            aria-controls="collapseTwo">
+                            Details
+                        </button>
+                    </h2>
+                    <div id="collapseTwo"
+                        class="accordion-collapse collapse mt-3 hide"
+                        aria-labelledby="headingTwo"
+                        data-bs-parent="#accordionExample">
+                        <div class="dropdown-checkbox-container">
+                            <label class="cy-navbar_label customCheckbox-label"
+                                for="create_name_field">Default Display
+                                Field
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    options="defaultDisplayFields"
+                                    defaultValue="props.mode.fieldMapping.create_name_field"
+                                    onChange="(value)=>this.updateCalender('create_name_field', value)"
+                                    searchable="true"
+                                />
+                            </div>
+                        </div>
+                        <div class="dropdown-checkbox-container">
+                            <label class="cy-navbar_label customCheckbox-label"
+                                for="display_mode">Display Modes
+                            </label>
+                            <div class="cy-studio-custom-dropdown cy-studio-visible-to-drop-align">
+                                <MultiSelectDropDown
+                                    selectedValues="props.mode.scales"
+                                    allValues="scales"
+                                    onUpdate="(values)=>this.onDisplayModeChange(values, props.mode.scale)" />
+                            </div>
+                        </div>
+                        <div class="dropdown-checkbox-container">
+                            <label class="cy-navbar_label customCheckbox-label"
+                                for="default_display_mode">Default Display
+                                Mode
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    options="props.mode.scales.map(item => ({ value: item, label: item }))"
+                                    defaultValue="props.mode.scale"
+                                    onChange="(value)=>this.updateCalender('mode', value)"
+                                    searchable="true"
+                                />
+                            </div>
+                        </div>
+                        <div t-if="props.mode.showUnusualDays" class="cy-toggle-row">
+                            <span class="cy-toggle-label">Show Unusual Days</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.showUnusualDays"
+                                    t-on-click="(ev)=> this.props.handleView('show_unusual_days',!props.mode.show_unusual_days)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+                        <div class="cy-toggle-row">
+                            <span class="cy-toggle-label">Hide Date</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.isDateHidden"
+                                    t-on-click="(ev)=> this.handleView('hide_date',!props.mode.isDateHidden)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+                        <div class="cy-toggle-row">
+                            <span class="cy-toggle-label">Hide Time</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.isTimeHidden"
+                                    t-on-click="(ev)=> this.handleView('hide_time',!props.mode.isTimeHidden)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+                        <div class="cy-toggle-row">
+                            <span class="cy-toggle-label">Can Create</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.canCreate"
+                                    t-on-click="(ev)=> this.handleView('create',!props.mode.canCreate)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+
+                        <div t-if="props.mode.canCreate" class="cy-toggle-row">
+                            <span class="cy-toggle-label">Quick Create</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.quickCreate"
+                                    t-on-click="(ev)=> this.handleView('quick_create',!props.mode.quickCreate)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+                        <div t-if="props.mode.quickCreate and props.mode.canCreate"
+                            class="dropdown-checkbox-container">
+                            <label for="quick_create_view"
+                                class="cy-navbar_label customCheckbox-label">
+                                Quick Create View
+                            </label>
+                            <div class="cy-input form-control cy-studio-calendar">
+                                <CylloRecordSelector resId="props.mode.quickCreateViewId || false"
+                                    resModel="'ir.ui.view'"
+                                    domain="[['model', '=', props.model.resModel], ['type', '=', 'form']]"
+                                    update="(resId)=> this.handleView('quick_create_view_id', resId)" />
+                            </div>
+                        </div>
+                        <div class="bcheckbox-can-create mt-2">
+                            <label for="" class="cy-navbar_label">
+                                <span>Event Limit</span>
+                            </label>
+                            <input type="number" class="cy-input form-control event-limit-input"
+                                min="1"
+                                name="event_limit" t-model="props.mode.eventLimit"
+                                t-on-focusout="({target})=>this.handleView('event_limit', target.value)" />
+                        </div>
+                        <div class="cy-toggle-row">
+                            <span class="cy-toggle-label">Open Event Popup</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.hasEditDialog"
+                                    t-on-click="(ev)=> this.handleView('event_open_popup',!props.mode.hasEditDialog)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

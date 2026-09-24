@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+       <record id="deal_reminder" model="mail.template">
+           <field name="name">Deal Reminder</field>
+           <field name="model_id" ref="cyllo_crm.model_crm_lead"/>
+           <field name="subject">"{{(object.name)}}"</field>
+           <field name="email_from">"{{(object.company_id.email)}}"</field>
+           <field name="partner_to">"{{(object.user_id.email)}}"</field>
+           <field name="description">Add Description</field>
+           <field name="body_html" type="html">
+               <div>
+                   <p>
+                       Hello
+                       <t t-out="object.user_id.name"/>,
+                       <br/>
+                       <br/>
+                       The lead "<t t-out="object.name"/>" assigned to you has been idle for a while.
+                   <br/>
+                        🔹 Lead Name: <t t-out="object.name"/>
+                       <br/>
+                        🔹 Customer:  <t t-out="object.partner_id.name"/>
+                       <br/>
+                        🔹 Last Activity: <t t-out="object.last_stage_update_date"/>
+                       <br/>
+                        🔹 Days Since Last Update: <t t-out="object.lead_idle_days"/>
+                       <br/>
+                       <br/>
+
+Please take the necessary action to follow up. If this lead is no longer relevant, consider updating its status.
+                       <br/>
+                       <br/>
+                       <br/>
+                       <br/>
+                       Thanks and regards
+                   </p>
+               </div>
+           </field>
+       </record>
+   </data>
+</odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Target Commissions Tree -->
+    <record id="commission_report_view_tree_inherit_payroll" model="ir.ui.view">
+        <field name="name">commission.report.view.tree.inherit.payroll</field>
+        <field name="model">commission.report</field>
+        <field name="inherit_id" ref="cyllo_commission.view_target_commission_report_plan_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='commission_amount']" position="after">
+                <field name="paysliped_amount" widget="monetary"/>
+                <field name="remaining_amount" widget="monetary" decoration-bf="1"/>
+                <field name="report_to_payslip" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit Contribution Commissions Tree -->
+    <record id="commission_report_view_contribution_tree_inherit_payroll" model="ir.ui.view">
+        <field name="name">commission.report.view.contribution.tree.inherit.payroll</field>
+        <field name="model">commission.report</field>
+        <field name="inherit_id" ref="cyllo_commission.view_contribution_commission_report_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="decoration-info">report_to_payslip</attribute>
+            </xpath>
+            <xpath expr="//field[@name='commission_amount']" position="after">
+                <field name="paysliped_amount" widget="monetary"/>
+                <field name="remaining_amount" widget="monetary" decoration-bf="1"/>
+                <field name="report_to_payslip" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

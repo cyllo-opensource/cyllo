@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Define an action to open the "Debt Accept Wizard" window -->
+    <record id="action_view_debt_payback_wizard" model="ir.actions.act_window">
+        <field name="name">Debt Payback Wizard</field>
+        <field name="res_model">debt.payback.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <!-- Define a form view for the debt.payback.wizard model -->
+    <record id="view_debt_payback_wizard_form" model="ir.ui.view">
+        <field name="name">view.debt.payback.wizard.form</field>
+        <field name="model">debt.payback.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="return_type" required="1"/>
+                        <field name="amount"
+                               readonly="return_type != 'partial' "
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="balance_amount"
+                               invisible="return_type == 'full' "
+                               readonly="return_type == 'partial'"
+                               force_save="1" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                    <field name="company_id" invisible="1"/>
+                    <field name="payback_partner_id" invisible="1"/>
+                    <field name="available_journal_ids" invisible="1"/>
+                    <field name="payment_method_line_ids" invisible="1"/>
+                    <group>
+                        <field name="journal_id"/>
+                        <field name="payment_method_line_id"/>
+                        <field name="payback_recipient_bank_id"
+                               context="{'default_partner_id':payback_partner_id}"/>
+                    </group>
+                </group>
+                <footer>
+                    <button class="btn btn-primary" string="Pay"
+                            name="action_confirm_payback" type="object"/>
+                    <button class="btn btn-secondary" string="DISCARD"
+                            special="cancel"/>
+                </footer>
+            </form>
+
+        </field>
+    </record>
+    <!-- Define a Confirm form view for the debt.payback.wizard model -->
+    <record id="view_debt_payback_wizard_confirm_form" model="ir.ui.view">
+        <field name="name">view.debt.payback.wizard.form</field>
+        <field name="model">debt.payback.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="journal_id"/>
+                    </group>
+                    <group>
+                        <field name="recipient_bank_id"
+                               context="{'default_partner_id':partner_id}"/>
+                    </group>
+                    <group>
+                        <field name="payment_method_line_id"/>
+                    </group>
+                    <field name="company_id" invisible="1"/>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="available_journal_ids" invisible="1"/>
+                    <field name="payment_method_line_ids" invisible="1"/>
+                </group>
+                <footer>
+                    <button class="btn btn-primary" string="Pay"
+                            name="action_confirm_payment" type="object"/>
+                    <button class="btn btn-secondary" string="DISCARD"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_social_fb_account_form" model="ir.ui.view">
+        <field name="name">view.social.fb.account.form</field>
+        <field name="model">social.fb.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="is_default" invisible="True"/>
+                <header>
+                    <button name="action_connect" type="object" string="Connect"
+                            invisible="state != 'not connected'"
+                            class="btn-primary"/>
+                    <button name="action_disconnect" type="object"
+                            string="Disconnect" invisible="state != 'connected'"
+                            class="btn-primary"/>
+                    <button name="action_default_fb"
+                            string="Set as Default"
+                            type="object"
+                            class="btn-primary"
+                            invisible="is_default or state != 'connected'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="badge rounded-pill bg-primary text-white position-absolute end-0"
+                              invisible="not is_default">
+                            Default Account
+                        </span>
+                        <div>
+                            <label for="facebook_page_name"/>
+                            <h1>
+                                <field name="facebook_page_name"
+                                       readonly="state == 'connected'"
+                                       placeholder="Enter Facebook Page Name"/>
+                            </h1>
+                        </div>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="meta_app_number"
+                                   readonly="state == 'connected'"
+                                   placeholder="Enter Meta App Number"/>
+                            <field name="meta_app_secret"
+                                   readonly="state == 'connected'"
+                                   placeholder="Enter Meta App Secret"/>
+                            <field name="facebook_access_token"
+                                   readonly="state == 'connected'"
+                                   placeholder="Enter Facebook Access Token"/>
+                            <field name="facebook_user_access_token"
+                                   readonly="state == 'connected'"
+                                   placeholder="Enter Facebook User Access Token"/>
+                        </group>
+                        <group>
+                            <field name="facebook_base_url"
+                                   readonly="state == 'connected'"
+                                   placeholder="Enter Facebook Base URL"/>
+                            <field name="facebook_page_number"
+                                   readonly="1"
+                                   placeholder="Enter Facebook Page Number"/>
+                            <field name="facebook_connection_authenticated"/>
+                            <field name="followers_count" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_social_fb_account_tree" model="ir.ui.view">
+        <field name="name">view.social.fb.account.tree</field>
+        <field name="model">social.fb.account</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="facebook_page_name"/>
+                <field name="meta_app_number"/>
+                <field name="meta_app_secret"/>
+                <field name="facebook_page_number"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'connected'"
+                    decoration-info="state == 'not connected'"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_view_facebook_accounts" model="ir.actions.act_window">
+        <field name="name">Facebook Accounts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">social.fb.account</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new facebook account
+            </p>
+            <p>
+                You can link facebook account.
+            </p>
+        </field>
+    </record>
+</odoo>

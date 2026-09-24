@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="field_access_view_tree" model="ir.ui.view">
+        <field name="name">field.access.view.tree</field>
+        <field name="model">field.access</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="profile_management_id"/>
+                <field name="model_id"  context="{'model': True}"/>
+                <field name="model_name"  invisible="1"/>
+                <field name="field_id"/>
+                <field name="field_attribute"/>
+                <field name="domain" widget="domain" options="{'model': 'model_name'}"
+                       invisible="field_attribute == 'remove_link'"/>
+             </tree>
+        </field>
+    </record>
+
+    <record id="field_access_view_form" model="ir.ui.view">
+        <field name="name">field.access.view.form</field>
+        <field name="model">field.access</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="model_id"  context="{'model': True}"/>
+                        <field name="model_name"  invisible="1"/>
+                        <field name="field_id" domain="[('model_id','=',model_id)]"/>
+                    </group>
+                    <group>
+                        <field name="field_attribute"/>
+                        <field name="domain" widget="domain" options="{'model': 'model_name'}"
+                               invisible="field_attribute == 'remove_link'"/>
+                    </group>
+                </group>
+             </form>
+        </field>
+    </record>
+
+      <record id="action_field_access" model="ir.actions.act_window">
+        <field name="name">Field Access</field>
+        <field name="res_model">field.access</field>
+        <field name="view_mode">tree, form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face"></p>
+        </field>
+      </record>
+</odoo>

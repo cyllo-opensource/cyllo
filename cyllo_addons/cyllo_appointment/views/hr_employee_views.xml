@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_form_appointment_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.form.appointment.inherit</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_appointments" type="object" class="oe_stat_button" icon="fa-calendar-check-o"
+                        groups="cyllo_appointment.group_appointment_user">
+                    <field name="appointment_count" widget="statinfo" string="Appointments"/>
+                </button>
+            </xpath>
+            <notebook position="inside">
+                <page string="Appointments" name="appointments"
+                      groups="cyllo_appointment.group_appointment_user">
+                    <group>
+                        <group string="Configuration">
+                            <field name="appointment_type_ids" widget="many2many_tags" placeholder="Select appointment types..."/>
+                        </group>
+                        <group string="Notification Preferences">
+                            <field name="notify_on_new_appointment"/>
+                            <field name="notify_on_reschedule"/>
+                            <field name="notify_on_cancellation"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

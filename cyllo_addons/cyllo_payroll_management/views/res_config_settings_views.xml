@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Define a view to add twilio credential's in the settings form -->
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="70"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Insert a new section for twilio -->
+            <xpath expr="//form" position="inside">
+                <app data-string="Payroll" string="Payroll" name="cyllo_payroll_management"
+                     groups="cyllo_payroll_management.group_cyllo_payroll_management_manager">
+                    <div id="payroll_entry">
+                        <block title="Accounting" name="payroll_accounting">
+                            <setting id="batch_move_line" title="Batch Account Move Lines"
+                                     help="To combine all of the accounting entries for a given time into a single account move line, enable this option. In addition to disabling single payment generations, this will anonymize the accounting entries.">
+                                <field name="batch_move_line"/>
+                            </setting>
+                            <setting id="advance_salary_account_id" title="Advance Salary Account"
+                                     help="Account to be used for Advance Salary bill creation (Debit Account)">
+                                <field name="advance_salary_account_id"/>
+                            </setting>
+                            <setting id="advance_salary_payment_account_id" title="Advance Salary Payment Account"
+                                     help="Account to be used for Advance Salary payment (Credit Account)">
+                                <field name="advance_salary_payment_account_id"/>
+                            </setting>
+                        </block>
+                    </div>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_view_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'cyllo_payroll_management', 'bin_size': False}</field>
+    </record>
+    <menuitem id="menu_settings" name="Settings"
+              parent="cyllo_payroll_management.menu_configuration_categ"
+              sequence="0" action="action_view_settings"
+              groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+</odoo>

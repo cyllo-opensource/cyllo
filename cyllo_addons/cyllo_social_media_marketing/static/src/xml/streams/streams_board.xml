@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.StreamsBoard">
+        <div class="o_streams_board">
+            <BoardSidebar
+                boards="state.boards"
+                activeBoardId="state.activeBoardId"
+                loading="state.loadingBoards"
+                onSelect.bind="setActiveBoard"
+                onCreate.bind="createBoard"
+                onRename.bind="renameBoard"
+                onDelete.bind="deleteBoard"
+                onReorder.bind="reorderBoards"
+            />
+            <div class="o_streams_main">
+                <t t-if="activeBoard">
+                    <div class="o_streams_toolbar">
+                        <h4 class="o_streams_board_title" t-esc="activeBoard.name" />
+                        <button class="btn btn-primary o_streams_add_btn btn-sm" t-on-click="openAddStream">
+                            <i class="ri-add-large-line" />
+                            Add a stream
+                        </button>
+                    </div>
+                    <div class="o_streams_columns" t-if="!state.loadingBoards" t-ref="columns">
+                        <StreamColumn
+                            t-foreach="activeBoard.columns"
+                            t-as="column"
+                            t-key="column.id"
+                            column="column"
+                            onDelete.bind="deleteColumn"
+                            onEditStream.bind="openEditStream"
+                        />
+                        <div class="o_streams_empty" t-if="!activeBoard.columns.length">
+                            <i class="ri-carousel-view o_empty_icon"></i>
+                            <p class="mb-3">No streams yet on this board.</p>
+                            <button class="btn btn-secondary" t-on-click="openAddStream">Add a stream</button>
+                        </div>
+                        <AddStreamPanel
+                            t-if="state.showAddStream and activeBoard"
+                            boardId="activeBoard.id"
+                            editColumn="state.editingColumn"
+                            onAdded.bind="onStreamAdded"
+                            onClose.bind="closeAddStream"
+                        />
+                    </div>
+                </t>
+                <div class="o_streams_empty" t-elif="state.loadingBoards">
+                    <i class="ri-loader-4-line o_streams_spinner" />
+                </div>
+                <div class="o_streams_empty" t-else="">
+                    <i class="ri-carousel-view o_empty_icon"></i>
+                    <p class="mb-3">Create a board to start adding streams.</p>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

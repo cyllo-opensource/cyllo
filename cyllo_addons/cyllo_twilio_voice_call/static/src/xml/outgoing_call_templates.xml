@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+	<t t-name="dial_pad" owl="1">
+		<div class="cy-dial__pad cy_twilio_main" t-ref="keypad">
+			<div class="out-keypad cy-dial__pad-action">
+				<button class="cy-dial-actionbtn"
+                        t-on-click="_onClickMinimise" style="margin-top:-8px;">
+					<i class="minimise mini ri-subtract-fill"
+                       style="color:black"/>
+				</button>
+                <button class="cy-dial-actionbtn close-btn"
+                        t-on-click="() => this.env.toggle_keypad()">
+					<i class="ri-close-line"/>
+				</button>
+			</div>
+            <div class="outgoing">
+				<t t-if="!this.state.value">
+					<t t-if="!this.state.recent">
+						<t t-if="!this.state.contacts">
+							<div  class="cy-dial_input--container">
+								<select id="country-code" t-ref="countrySelect" name="country-code"
+                                        t-att-value="this.state.countryCode"
+                                        t-on-change="updatePhoneNumber">
+									<option value="+1">🇺🇸 +1 (United States)</option>
+                                    <option value="+44">🇬🇧 +44 (United Kingdom)</option>
+                                    <option value="+91">🇮🇳 +91 (India)</option>
+                                    <option value="+61">🇦🇺 +61 (Australia)</option>
+                                    <option value="+81">🇯🇵 +81 (Japan)</option>
+                                    <option value="+49">🇩🇪 +49 (Germany)</option>
+                                    <option value="+33">🇫🇷 +33 (France)</option>
+                                    <option value="+86">🇨🇳 +86 (China)</option>
+                                    <option value="+39">🇮🇹 +39 (Italy)</option>
+                                    <option value="+7">🇷🇺 +7 (Russia)</option>
+							    </select>
+                                <input type="tel" class="cy-dial-input"
+                                       placeholder="Enter the number"
+                                       t-att-value="this.state.number"
+                                       t-ref="keys"
+                                       />
+							</div>
+						</t>
+					</t>
+				</t>
+                <t t-if="this.state.value">
+					<t t-if="!this.state.recent">
+						<t t-if="!this.state.contacts">
+							<t t-if="!this.state.isPartner">
+								<div align="center" style="height:307px;">
+									<span class="fw-bolder text-truncate"
+                                          align="center"
+                                          style="font-size:16px;">
+										<t t-esc="this.PhoneNumber"/>
+									</span>
+                                    <br/>
+                                    <img alt="Avatar"
+                                         class="o_dial_phonecall_avatar"
+                                         src="cyllo_twilio_voice_call/static/src/img/images.png"
+                                         style="height:200px;width:200px;margin-top:30px"/>
+                                    <br/>
+                                    <span class="call-duration"
+                                          t-ref="callDuration"
+                                          style="display: block; text-align: center; font-weight: bold; font-size:21px;">
+										<t t-esc="timeFormatted"/>
+									</span>
+								</div>
+							</t>
+						</t>
+					</t>
+				</t>
+                <t t-if="this.state.isPartner">
+					<t t-if="this.state.value">
+						<t t-if="!this.state.recent">
+							<t t-if="!this.state.contacts">
+								<div align="center" style="height:307px;">
+                                    <img alt="Avatar"
+                                         class="o_dial_phonecall_avatar"
+                                         t-att-src="this.state.selectedPartner.image_1920 ? 'data:image/png;base64,' + this.state.selectedPartner.image_1920 : '/cyllo_twilio_voice_call/static/src/img/images.png'"
+                                         style="height:200px;width:200px;margin-top:30px"/>
+                                    <t t-if="this.state.selectedPartner.partner_name">
+										<br/>
+                                        <b class="fw-bolder text-truncate"
+                                           style="font-size: 16px;"
+                                           t-att-title="this.state.selectedPartner.partner_name"
+                                           t-esc="this.state.selectedPartner.partner_name"/>
+									</t>
+                                    <br/>
+                                    <span class="fw-bolder text-truncate"
+                                          align="center"
+                                          style="font-size:16px;">
+										<t t-esc="this.PhoneNumber"/>
+									</span>
+                                    <span class="call-duration"
+                                          t-ref="callDuration"
+                                          style="display: block; text-align: center; font-weight: bold; font-size:21px;">
+										<t t-esc="timeFormatted"/>
+									</span>
+								</div>
+							</t>
+						</t>
+					</t>
+				</t>
+                <div class="dial-pad-buttons" t-on-click="_onClickScreen">
+					<t t-if="!this.state.value">
+						<div
+                                class="cy-dial_additional-buttons">
+							<button class="btn cy-dial_additional-btn cy-button-primary-stroke cy-recent-bn"
+                                    t-on-click="() => this._onClickRecent()">Recent
+                        </button>
+                            <button class="btn cy-dial_additional-btn cy-button-primary-stroke cy-contant-btn"
+                                    t-on-click="() => this._onClickContact()">Contacts
+                        </button>
+						</div>
+					</t>
+                    <t t-if="!this.state.value">
+						<t t-if="!this.state.recent">
+							<t t-if="!this.state.contacts">
+								<div class="cy-dial_pad-numbers">
+									<button class=" btn cy-dialing-nmbr">1</button>
+                                    <button class="btn cy-dialing-nmbr">2</button>
+                                    <button class="btn cy-dialing-nmbr">3</button>
+                                    <button class="btn cy-dialing-nmbr">4</button>
+                                    <button class="btn cy-dialing-nmbr">5</button>
+                                    <button class="btn cy-dialing-nmbr">6</button>
+                                    <button class="btn cy-dialing-nmbr">7</button>
+                                    <button class="btn cy-dialing-nmbr">8</button>
+                                    <button class="btn cy-dialing-nmbr">9</button>
+                                    <button class="btn cy-dialing-nmbr">*</button>
+                                    <button class="btn cy-dialing-nmbr">0</button>
+                                    <button class="btn cy-dialing-nmbr">#</button>
+								</div>
+							</t>
+						</t>
+					</t>
+                    <ContactTab hidden="this.state.contacts" dial_pad="this"/>
+                    <t t-if="!this.state.recent">
+						<t t-if="!this.state.contacts">
+							<div class="cy-dial_pad-callprocess">
+								<button t-if="!this.state.cancel"
+                                        class="btn cy-dial_clearbtn"
+                                        t-ref="clear-all"
+                                        t-on-click="_OnClearAll">C</button>
+                                <button class="btn cy-dial-process-btn cy-call-btn"
+                                        id="call"
+                                        t-on-click="_onClickCall">
+									<i class="ri-phone-fill call-icon"/>
+								</button>
+                                <button t-if="!this.state.cancel"
+                                        class="btn cy-dial_clearbtn"
+                                        t-ref="clear-delete"
+                                        t-on-click="_OnClear"><i class="ri-delete-back-2-line"/></button>
+                                <t t-if="this.state.cancel">
+									<button class="btn cy-dial-process-btn cy-callend-btn"
+                                            t-on-click="_onClickCancel">
+									<i class="ri-phone-fill cy-callend-icon"/>
+								</button>
+								</t>
+							</div>
+						</t>
+					</t>
+				</div>
+			</div>
+		</div>
+        <div class="outgoing_minimise" t-ref="minPad">
+			</div>
+        <RecentTab hidden="this.state.recent" dial_pad="this"/>
+	</t>
+</templates>

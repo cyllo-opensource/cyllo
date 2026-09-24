@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="VariableDetails">
+        <!-- Main layout container for the variable details component -->
+        <div class="variable-details-layout">
+
+            <!-- Header section containing a back button and the variable name -->
+            <header class="variable-header">
+                <!-- Back button with an icon, triggering the `onBack` method when clicked -->
+                <button class="btn-back" t-on-click="onBack">
+                    <i class="ri-arrow-left-line"/>
+                    Back
+                </button>
+                <!-- Display the variable name from the `props.variable` object -->
+                <span class="variable-title" t-esc="props.variable.variable_name"/>
+            </header>
+
+            <!-- Body section of the variable details -->
+            <section class="variable-body">
+                <div class="cy-info-grid">
+
+                    <!-- First information item: Type of the variable -->
+                    <div class="cy-info-item">
+                        <div class="cy-info-icon">
+                            <i class="ri-code-line"/>
+                        </div>
+                        <div class="cy-info-content">
+                            <div class="cy-info-label">Type</div>
+                            <!-- Display the type of the variable from `props.variable.variable_type` -->
+                            <div class="cy-info-value" t-esc="props.variable.variable_type"/>
+                        </div>
+                    </div>
+
+                    <!-- Second information item: Scope of the variable -->
+                    <div class="cy-info-item">
+                        <div class="cy-info-icon">
+                            <i class="ri-focus-3-line"/>
+                        </div>
+                        <div class="cy-info-content">
+                            <div class="cy-info-label">Scope</div>
+
+                            <!-- If the scope exists, display the scope details -->
+                            <div t-if="props.scope" class="cy-variable-usage-node-item">
+                                <!-- Display the scope icon dynamically based on the scope class -->
+                                <img class="cy-variable-usage-icon" t-att-src="getIconSrc(props.scope.class)"/>
+                                <!-- Display the scope name -->
+                                <span class="cy-variable-usage-name" t-esc="props.scope.data.name"/>
+                                <!-- Search icon, triggers the `handleClickFind` method to locate the scope -->
+                                <i class="ri-search-line" t-on-click="() => this.handleClickFind(props.scope)"/>
+                            </div>
+
+                            <!-- If no specific scope, show "Global Scope" as default -->
+                            <span t-else="">Global Scope</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section showing nodes where the variable is used -->
+                <div t-if="this.props.usedNodes.length > 0" class="cy-variable-usage">
+                    <span class="cy-variable-usage-heading">Usage</span>
+                    <div class="cy-variable-usage-nodes">
+                        <!-- Iterate through `usedNodes` and display each node where the variable is used -->
+                        <t t-foreach="this.props.usedNodes" t-as="node" t-key="node.id">
+                            <div class="cy-variable-usage-node-item">
+                                <!-- Display the node icon dynamically based on the node class -->
+                                <img class="cy-variable-usage-icon" t-att-src="getIconSrc(node.class)"/>
+                                <!-- Display the node name -->
+                                <span class="cy-variable-usage-name" t-esc="node.data.name"/>
+                                <!-- Search icon, triggers the `handleClickFind` method to locate the node -->
+                                <i class="ri-search-line" t-on-click="() => this.handleClickFind(node)"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer section with edit and delete buttons -->
+            <footer t-if="props.variable.delete" class="variable-footer">
+                <!-- Edit button, triggers the `onEdit` method -->
+                <button class="btn btn-edit" t-on-click="onEdit">Edit</button>
+                <!-- Delete button, triggers the `onDelete` method -->
+                <button class="btn btn-delete" t-on-click="onDelete">Delete</button>
+            </footer>
+        </div>
+    </t>
+</templates>

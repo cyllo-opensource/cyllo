@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_shopfloor_repair" model="ir.module.category">
+        <field name="name">Shopfloor Repair</field>
+        <field name="description">Access rights for Shopfloor Repair</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <record id="group_shopfloor_repair_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="cyllo_shopfloor_repair.module_category_shopfloor_repair"/>
+        <field name="implied_ids"
+               eval="[(4, ref('stock.group_stock_user')), (4, ref('hr.group_hr_user'))]"/>
+    </record>
+
+    <record id="group_shopfloor_repair_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="cyllo_shopfloor_repair.module_category_shopfloor_repair"/>
+        <field name="implied_ids"
+               eval="[(4, ref('cyllo_shopfloor_repair.group_shopfloor_repair_user')), (4, ref('stock.group_stock_manager')), (4, ref('hr.group_hr_user'))]"/>
+        <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+</odoo>

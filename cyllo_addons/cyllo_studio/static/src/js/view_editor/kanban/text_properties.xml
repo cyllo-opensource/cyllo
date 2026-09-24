@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="cyllo_studio.TextProperties">
+        <div class="kanban_text_properties overall_container">
+            <div class="mb-2">
+                <label for="" class="cy-navbar_label">String</label>
+                <input type="text" t-att-value="state.string" class="cy-input form-control"
+                       t-on-input="handleLabelChange"
+                       t-on-change="() => this.autoSave()"/>
+            </div>
+            <div class="d-flex mt-3 ms-1 gap-2">
+                <button class="btn ri-bold" t-att-class="state.isBold ? 'btn-primary' : 'btn-light'" t-on-click="()=>this.handleStyle('bold')"/>
+                <button class="btn ri-italic" t-att-class="state.isItalic ? 'btn-primary' : 'btn-light'" t-on-click="()=>this.handleStyle('italic')"/>
+                <button class="btn ri-underline" t-att-class="state.isUnderline ? 'btn-primary' : 'btn-light'" t-on-click="()=>this.handleStyle('underline')"/>
+            </div>
+            <div class="cy-prop-toggle-row">
+                <span class="cy-toggle-label">Invisible</span>
+                <div class="cy-prop-toggle-right">
+                    <button class="cy-basedOn" data-attribute="invisible" t-on-click="onDomainClick">
+                        <span>Based on</span>
+                        <i class="fa fa-cog cy-setting-icon"/>
+                    </button>
+                    <label class="cy-switch">
+                        <input type="checkbox" t-on-click="onDomainRadioClick"
+                            t-att-checked="['false', 'undefined', undefined].includes(state.invisible) ? null : 'checked'"/>
+                        <span class="cy-slider"/>
+                    </label>
+                </div>
+            </div>
+
+            <div class="d-flex btn_div w-100 my-3 gap-2">
+                <button t-if="!state.is_edit" class="btn btn-secondary w-100" t-on-click="cancelRibbon">Cancel</button>
+                <button t-else="" class="btn btn-secondary w-100" t-on-click="removeSpan">Remove</button>
+            </div>
+
+        </div>
+    </t>
+</templates>

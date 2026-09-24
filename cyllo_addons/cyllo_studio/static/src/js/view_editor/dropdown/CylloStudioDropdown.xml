@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="CylloStudioDropdown">
+        <div class="custom-dropdown o-autocomplete" t-ref="dropdown"
+             t-att-style="'width: ' + props.width">
+            <div t-on-click.stop="toggleDropdown" class="d-flex">
+                <t t-if="props.searchable">
+                    <input
+                            t-if="props.searchable"
+                            type="text"
+                            class="o-autocomplete--input o_input"
+                            t-model="state.searchTerm"
+                            t-att-placeholder="displayValue"
+                            t-on-input="onInput"
+                            t-att-readonly="!state.isOpen"
+                            t-ref="input"
+                            t-att-disabled="props.disabled"
+                    />
+                </t>
+                <t t-else="" t-on-click.stop="toggleDropdown">
+                    <input type="text" style="color: #000000;" class="o-autocomplete--input o_input input_drop" required="true" t-att-placeholder="displayValue" readonly=""/>
+                </t>
+                <i t-att-class="(state.isOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + (props.disabled ? ' cy-dropdown-icon--disabled' : '')" class="cy-dropdown-icon"/>
+            </div>
+            <t t-if="state.isOpen  and !props.disabled">
+                <ul class="o-autocomplete--dropdown-menu ui-widget show"
+                    t-att-style="'width: ' + props.width"
+                    t-att-class="ulDropdownClass"
+                    t-ref="recordList">
+                    <li t-foreach="filteredOptions" t-as="option" t-key="option.value"
+                        t-att-class="o_m2o_dropdown_option"
+                        t-on-click.stop="() => this.selectOption(option)"
+                        class="o-autocomplete--dropdown-item ui-menu-item d-block "
+                    >
+                        <a
+                                class="dropdown-item ui-menu-item-wrapper text-truncate"
+                                t-att-class="{ 'ui-state-active': checkActive(option) }"
+                        >
+                            <span>
+                                <t t-esc="option.label"/>
+                            </span>
+                        </a>
+                    </li>
+                    <li t-if="filteredOptions.length === 0" class="no-results">No results found</li>
+                </ul>
+            </t>
+
+        </div>
+    </t>
+</templates>

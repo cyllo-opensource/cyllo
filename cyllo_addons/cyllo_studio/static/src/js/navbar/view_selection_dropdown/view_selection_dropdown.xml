@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.ViewSelectionDropDown">
+        <div t-ref="root">
+            <div class="hnk-selected d-flex align-items-center gap-1" t-if="props.view">
+                <t t-if="state.activatedViews">
+                    <t t-foreach="state.activatedViews" t-as="view" t-key="view_index">
+                        <t t-if="ViewTypes.includes(view)">
+                            <button class="view-icons"
+                                t-att-disabled="state.currentViewType == view"
+                                t-att-class="state.currentViewType == view ? 'active' : ''"
+                                t-att-data-tooltip="view.replace(/^./, c => c.toUpperCase())"
+                                t-on-click="(e) => view == 'search' ? this.onSearchClick(e) : this.onViewClicked(view, e)">
+                                <i t-attf-class="{{getViewIcon(view)}}" />
+                            </button>
+                        </t>
+                    </t>
+                </t>
+                <div class="hnk-dropdown">
+                    <i class="fa fa-caret-down view-icons cy-view-caret"
+                        t-on-click="(e) => this.toggleViewDropdown(e)" />
+                    <div class="hnk-dropdown__container">
+                        <ul class="hnk-dropdown__options scroll-container">
+
+                            <li class="cy-view-item cy-studio-view">
+                                <label class="cy-view-row" for="list" target="list">
+                                    <span class="cy-checkbox-wrap">
+                                        <input type="checkbox" class="cy-checkbox CheckView"
+                                            id="list" target="list" name="type"
+                                            t-att-checked="state.activatedViews.includes('list')"
+                                            t-on-click="(e) => this.onClickBox(e)" />
+                                    </span>
+                                    <i class="ri-table-line"/>
+                                    <span class="cy-item-text">List</span>
+                                </label>
+                                <t
+                                    t-if="state.activatedViews.includes('list') and state.defaultView == 'list'">
+                                    <i class="ri-pushpin-fill cy-pushpin-fill"
+                                        data-tooltip="Default View" />
+                                </t>
+                                <i t-elif="state.activatedViews.includes('list')"
+                                    class="cy-studio-view-pin ri-pushpin-fill"
+                                    data-tooltip="Set as Default View"
+                                    t-on-click="(ev)=>this.handleDefaultView(ev)" />
+                            </li>
+
+                            <li class="cy-view-item cy-studio-view">
+                                <label class="cy-view-row" for="form" target="form">
+                                    <span class="cy-checkbox-wrap">
+                                        <input type="checkbox" class="cy-checkbox CheckView"
+                                            id="form" target="form" name="type"
+                                            t-att-checked="state.activatedViews.includes('form')"
+                                            t-on-click="(e) => this.onClickBox(e)" />
+                                    </span>
+                                    <i class="ri-profile-line cy-view-icon" />
+                                    <span class="cy-item-text">Form</span>
+                                </label>
+                                <t
+                                    t-if="state.activatedViews.includes('form') and state.defaultView == 'form'">
+                                    <i class="ri-pushpin-fill cy-pushpin-fill"
+                                        data-tooltip="Default View" />
+                                </t>
+                                <i t-elif="state.activatedViews.includes('form')"
+                                    class="cy-studio-view-pin ri-pushpin-fill"
+                                    data-tooltip="Set as Default View"
+                                    t-on-click="(ev)=>this.handleDefaultView(ev)" />
+                            </li>
+
+                            <li class="cy-view-item cy-studio-view">
+                                <label class="cy-view-row" for="kanban" target="kanban">
+                                    <span class="cy-checkbox-wrap">
+                                        <input type="checkbox" class="cy-checkbox CheckView"
+                                            id="kanban" target="kanban" name="type"
+                                            t-att-checked="state.activatedViews.includes('kanban')"
+                                            t-on-click="(e) => this.onClickBox(e)" />
+                                    </span>
+                                    <i class="ri-bar-chart-2-line cy-view-icon" />
+                                    <span class="cy-item-text">Kanban</span>
+                                </label>
+                                <t
+                                    t-if="state.activatedViews.includes('kanban') and state.defaultView == 'kanban'">
+                                    <i class="ri-pushpin-fill cy-pushpin-fill"
+                                        data-tooltip="Default View" />
+                                </t>
+                                <i t-elif="state.activatedViews.includes('kanban')"
+                                    class="cy-studio-view-pin ri-pushpin-fill"
+                                    data-tooltip="Set as Default View"
+                                    t-on-click="(ev)=>this.handleDefaultView(ev)" />
+                            </li>
+
+                            <t t-if="state.activity">
+                                <li class="cy-view-item cy-studio-view">
+                                    <label class="cy-view-row" for="activity" target="activity">
+                                        <span class="cy-checkbox-wrap">
+                                            <input type="checkbox" class="cy-checkbox CheckView"
+                                                id="activity" target="activity" name="type"
+                                                t-att-checked="state.activatedViews.includes('activity')"
+                                                t-on-click="(e) => this.onClickBox(e)" />
+                                        </span>
+                                        <i class="ri-time-line cy-view-icon" />
+                                        <span class="cy-item-text">Activity</span>
+                                    </label>
+                                    <t
+                                        t-if="state.activatedViews.includes('activity') and state.defaultView == 'activity'">
+                                        <i class="ri-pushpin-fill cy-pushpin-fill"
+                                            data-tooltip="Default View" />
+                                    </t>
+                                    <i t-elif="state.activatedViews.includes('activity')"
+                                        class="cy-studio-view-pin ri-pushpin-fill"
+                                        data-tooltip="Set as Default View"
+                                        t-on-click="(ev)=>this.handleDefaultView(ev)" />
+                                </li>
+                            </t>
+
+                            <li class="cy-view-item cy-studio-view">
+                                <label class="cy-view-row" for="calendar" target="calendar">
+                                    <span class="cy-checkbox-wrap">
+                                        <input type="checkbox" class="cy-checkbox CheckView"
+                                            id="calendar" target="calendar" name="type"
+                                            t-att-checked="state.activatedViews.includes('calendar')"
+                                            t-on-click="(e) => this.onClickBox(e)" />
+                                    </span>
+                                    <i class="ri-calendar-2-line cy-view-icon" />
+                                    <span class="cy-item-text">Calendar</span>
+                                </label>
+                                <t
+                                    t-if="state.activatedViews.includes('calendar') and state.defaultView == 'calendar'">
+                                    <i class="ri-pushpin-fill cy-pushpin-fill"
+                                        data-tooltip="Default View" />
+                                </t>
+                                <i t-elif="state.activatedViews.includes('calendar')"
+                                    class="cy-studio-view-pin ri-pushpin-fill"
+                                    data-tooltip="Set as Default View"
+                                    t-on-click="(ev)=>this.handleDefaultView(ev)" />
+                            </li>
+
+                            <li class="cy-view-item cy-studio-view">
+                                <label class="cy-view-row" for="pivot" target="pivot">
+                                    <span class="cy-checkbox-wrap">
+                                        <input type="checkbox" class="cy-checkbox CheckView"
+                                            id="pivot" target="pivot" name="type"
+                                            t-att-checked="state.activatedViews.includes('pivot')"
+                                            t-on-click="(e) => this.onClickBox(e)" />
+                                    </span>
+                                    <i class="ri-table-2 cy-view-icon" />
+                                    <span class="cy-item-text">Pivot</span>
+                                </label>
+                                <t
+                                    t-if="state.activatedViews.includes('pivot') and state.defaultView == 'pivot'">
+                                    <i class="ri-pushpin-fill cy-pushpin-fill"
+                                        data-tooltip="Default View" />
+                                </t>
+                                <i t-elif="state.activatedViews.includes('pivot')"
+                                    class="cy-studio-view-pin ri-pushpin-fill"
+                                    data-tooltip="Set as Default View"
+                                    t-on-click="(ev)=>this.handleDefaultView(ev)" />
+                            </li>
+
+                            <li class="cy-view-item cy-studio-view">
+                                <label class="cy-view-row" for="graph" target="graph">
+                                    <span class="cy-checkbox-wrap">
+                                        <input type="checkbox" class="cy-checkbox CheckView"
+                                            id="graph" target="graph" name="type"
+                                            t-att-checked="state.activatedViews.includes('graph')"
+                                            t-on-click="(e) => this.onClickBox(e)" />
+                                    </span>
+                                    <i class="ri-line-chart-line cy-view-icon" />
+                                    <span class="cy-item-text">Graph</span>
+                                </label>
+                                <t
+                                    t-if="state.activatedViews.includes('graph') and state.defaultView == 'graph'">
+                                    <i class="ri-pushpin-fill cy-pushpin-fill"
+                                        data-tooltip="Default View" />
+                                </t>
+                                <i t-elif="state.activatedViews.includes('graph')"
+                                    class="cy-studio-view-pin ri-pushpin-fill"
+                                    data-tooltip="Set as Default View"
+                                    t-on-click="(ev)=>this.handleDefaultView(ev)" />
+                            </li>
+
+                            <li class="cy-view-item cy-studio-view cy-view-item--disabled">
+                                <label class="cy-view-row cy-view-row--disabled" for="search"
+                                    target="search">
+                                    <span class="cy-checkbox-wrap">
+                                        <input type="checkbox" class="cy-checkbox CheckView"
+                                            id="search" target="search" name="type"
+                                            disabled="1"
+                                            t-att-checked="state.activatedViews.includes('search')"
+                                            t-on-click="(e) => this.onClickBox(e)" />
+                                    </span>
+                                    <i class="ri-search-line cy-view-icon" />
+                                    <span class="cy-item-text">Search</span>
+                                </label>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

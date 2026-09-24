@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <menuitem id="account.menu_finance" name="Accounting"/>
+
+    <!-- Hide standard accounting dashboard from readonly users explicitly -->
+    <record id="account.menu_board_journal_1" model="ir.ui.menu">
+        <field name="groups_id" eval="[(3, ref('account.group_account_readonly')), (4, ref('account.group_account_invoice'))]"/>
+    </record>
+    <!-- Deferred revenue types -->
+    <menuitem id="menu_deferred_revenue_types" name="Deferred revenue types"
+              action="action_view_deferred_revenue_types" parent="account.account_management_menu"/>
+    <!-- Deferred expense types -->
+    <menuitem id="menu_deferred_expense_types" name="Deferred expense types"
+              action="action_view_deferred_expense_types" parent="account.account_management_menu"/>
+    <!-- Deferred revenues -->
+    <menuitem id="menu_deferred_revenues" name="Deferred revenues"
+              action="action_view_deferred_revenues"
+              parent="account.menu_finance_entries_management"/>
+    <!-- Deferred expenses -->
+    <menuitem id="menu_deferred_expenses" name="Deferred expenses"
+              action="action_view_deferred_expenses"
+              parent="account.menu_finance_entries_management"/>
+
+    <!-- Grant Billing group access to Accounting and Reporting menus -->
+    <record id="account.menu_finance_entries" model="ir.ui.menu">
+        <field name="groups_id" eval="[(4, ref('account.group_account_invoice'))]"/>
+    </record>
+    <record id="account.menu_account_supplier_accounts" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('account.group_account_invoice')])]"/>
+    </record>
+    <record id="account.menu_finance_reports" model="ir.ui.menu">
+        <field name="groups_id" eval="[(4, ref('account.group_account_invoice'))]"/>
+    </record>
+
+    <menuitem id="menu_accounting_reports_categ" groups="account.group_account_user,account.group_account_readonly,account.group_account_invoice" sequence="19"
+              name="Accounting Reports"
+              parent="account.menu_finance_reports"/>
+    <menuitem id="menu_aged_receivable" action="action_aged_receivable" name="Aged Receivable"
+              sequence="3"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_aged_payable" action="action_aged_payable" name="Aged Payable" sequence="4"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_profit_and_loss" action="action_dynamic_profit_and_loss"
+              name="Profit and Loss" sequence="7"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_balance_sheet" action="action_dynamic_balance_sheet" name="Balance Sheet"
+              sequence="6"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_bank_book" action="action_dynamic_bank_book" name="Bank Book" sequence="8"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_partner_ledger" action="action_dynamic_partner_ledger" name="Partner Ledger"
+              sequence="2"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_cash_book" action="action_dynamic_cash_book" name="Cash Book" sequence="9"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_tax_report" action="action_dynamic_tax_report" name="Tax Report"
+              sequence="10"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_general_ledger" action="action_dynamic_general_ledger" name="General Ledger"
+              sequence="1"
+              parent="menu_accounting_reports_categ"/>
+    <menuitem id="menu_trial_balance" action="action_dynamic_trial_balance" name="Trial Balance"
+              sequence="5"
+              parent="menu_accounting_reports_categ"/>
+    <!-- Menu item for the "Bank Statement" module -->
+    <menuitem id="menu_bank_statement_categ" name="Bank Statement"
+              parent="account.menu_finance" sequence="3"/>
+    <!-- Sub-menu item to initiate the bank statement import -->
+    <menuitem id="menu_import_bank_statement" name="Import Bank Statement"
+              parent="menu_bank_statement_categ" sequence="0"
+              action="action_view_import_bank_statement"/>
+    <!-- Sub-menu item for accessing the bank statements -->
+    <menuitem id="menu_bank_statement" name="Bank Statement"
+              parent="menu_bank_statement_categ" sequence="1"
+              action="account.action_bank_statement_tree"/>
+    <menuitem id="online_bank_provider_menu" action="action_online_bank_provider"
+              parent="account.account_banks_menu"
+              sequence="100"/>
+
+    <menuitem id="menu_customer_batch_payment" name="Batch Payments"
+              action="action_customer_batch_payment"
+              parent="account.menu_finance_receivables"/>
+    <menuitem id="menu_vendor_batch_payment" name="Batch Payments"
+              action="action_vendor_batch_payment"
+              parent="account.menu_finance_payables"/>
+    <menuitem id="menu_fiscal_years_and_periods_categ" name="Fiscal Years and Lock Dates"
+              parent="account.menu_finance_configuration"
+              groups="account.group_account_manager"/>
+    <menuitem id="menu_account_move_lock"
+              name="Lock Dates"
+              parent="menu_fiscal_years_and_periods_categ"
+              action="action_view_account_move_lock_wizard"/>
+    <menuitem id="menu_fiscal_years" name="Fiscal Years" action="action_view_fiscal_years"
+              parent="menu_fiscal_years_and_periods_categ"/>
+    <menuitem id="menu_account_return"
+              name="Tax Returns"
+              parent="account.menu_finance_entries"
+              action="action_account_return"
+              sequence="50"
+              groups="account.group_account_manager"/>
+    <menuitem id="menu_validation_engine"
+              name="Validation Rules"
+              parent="account.menu_finance_configuration"
+              action="action_account_return_checks"
+              groups="account.group_account_manager"/>
+
+</odoo>

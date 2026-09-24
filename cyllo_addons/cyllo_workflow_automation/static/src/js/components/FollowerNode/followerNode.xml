@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="FollowerNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="py-2">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label for="from-subject" class="form-label cy-modal-form_label">Label</label>
+                        <TypeToggler
+                                options="getOptions"
+                                value="fieldState.isRemoveFollower"
+                                updateValue.bind="setType"
+                                width="15"
+                        />
+                    </div>
+                    <input type="text"
+                           class="o_input"
+                           autocomplete="off"
+                           placeholder="Label"
+                           t-on-focusout="(ev) => this.setLabel(ev.target.value)"
+                           t-att-value="getLabel"
+                    />
+                </div>
+                <div class="mb-xxl-5 cy-variable-toggle">
+                    <label for="form-label" class="d-flex justify-content-between">
+                        <t t-out="fieldState.isRemoveFollower ? 'Remove Followers from' : 'Add Followers to'"/>
+                    </label>
+                    <div class="col-12 col-md-12 pe-0">
+                        <CustomDropdown
+                                options="state.filteredRecords"
+                                defaultValue="getAddFollowerTo"
+                                onChange="(value) => this.updateAddFollowerRec(value)"
+                                placeholder="'Select a record...'"
+                                searchable="true"
+                                width="''"
+                                maxHeight="'70px'"
+                        />
+                    </div>
+                </div>
+                <div class="col-12 mt-2">
+                    <label for="followers"
+                           class="form-label  cy-modal-form_label">
+                        <t t-out="fieldState.isRemoveFollower ? 'Follower to Remove': 'Follower to Add'"/>
+                    </label>
+                    <div class="mb-3">
+                        <t t-set="multipleAddLength"
+                           t-value="this.getFollowerData().length"/>
+                        <t t-foreach="this.getFollowerData()" t-as="followerData"
+                           t-key="followerData_index">
+                            <MultiDataSelector
+                                    index="followerData_index"
+                                    getValueEditorInfo.bind="getValueEditorInfo"
+                                    setData.bind="setAddFollowerData"
+                                    getDataValue="followerData"
+                                    toggleIncludeVariable.bind="(type,index) =>this.toggleIncludeVariable(type,index)"
+                                    removeData.bind="removeAddFollower"
+                                    length="multipleAddLength"
+                                    add.bind="insertNewAddFollower"
+                            />
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.FilterDomainSelectorDialog" t-inherit="web.DomainSelectorDialog" t-inherit-mode="primary" owl="1">
+         <xpath expr="//Dialog" position="attributes">
+            <attribute name="bodyClass">'overflow-visible'</attribute>
+        </xpath>
+        <xpath expr='//div[@t-if="props.text"]' position="after">
+            <div class="row filter_domain_selector_dialog">
+                <div class="col">
+                    <div class="form-group mb-2 col-10">
+                        <label>Date Filter</label>
+                        <CheckBox value="state.type" className="'d-inline-block o_field_boolean o_boolean_toggle form-switch ms-1'"
+                        onChange.bind="onTypeChange"/>
+                    </div>
+                    <div class="form-group mb-2 col-10">
+                        <label style="margin-bottom: 2%;">Label</label>
+                        <input type="text" class="form-control" t-on-input="()=> state.showLabelWarning = false" t-model="state.label"
+                               t-att-placeholder="state.type ? (props.allFields[state.field]?.string || 'Enter a label') : 'Enter a label'"/>
+                    </div>
+                    <div t-if="state.type" class="form-group mb-2 col-10 filter_domain">
+                        <label>Field</label>
+                        <div class="cy-studio-custom-dropdown-dialog-search-view">
+							<CylloStudioDropdown
+								onChange="(value) => this.handleFieldChange(value)"
+								options="Fields(dateFields)"
+								defaultValue="defaultField"
+								searchable="true"
+							/>
+						</div>
+
+                        <div class="invalid-feedback">
+                            Select a field.
+                        </div>
+                    </div>
+                    <div class="form-group mb-2 col-10 d-flex align-items-center pt-2">
+                        <input class="customCheckbox ViewCheck d-none" type="checkbox" name="invisible" id="invisible" t-on-click="onDomainRadioClick" t-att-checked="!['False','false', '0'].includes(state.invisible)" />
+                        <label class="customCheckbox-label mb-0" for="invisible" style="color:#495057">Invisible</label>
+                    </div>
+                </div>
+                <div class="col">
+                     <div t-if="state.type" class="form-group mb-2 col-10 cy-default-period">
+                        <label>Default Period</label>
+                        <MultiSelectDropDown t-props="multiSelectDropDown" />
+                    </div>
+                    <div class="form-group mb-3 col-10" style="margin-top: 7%;">
+                        <label style="margin-bottom: 2%;">Visible To</label>
+                        <div class="form-control" style="overflow:auto;" t-ref="visible">
+                                <MultiRecordSelector resIds="state.groupIds" resModel="'res.groups'" update="(groupIds) => this.updateGroup(groupIds)" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </xpath>
+        <DomainSelector position="attributes">
+            <attribute name="t-if">!state.type</attribute>
+        </DomainSelector>
+    </t>
+</templates>

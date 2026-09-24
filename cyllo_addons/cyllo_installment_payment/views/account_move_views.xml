@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_move_invoice_view_form" model="ir.ui.view">
+        <field name="name">view.account.move.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                <field name="total_advance_paid_amount" invisible="1"/>
+                <field name="advance_payment_ids" invisible="1"/>
+                <field name='installment_payment'
+                       invisible="move_type != 'out_invoice'"
+                       readonly="state != 'draft'"/>
+            </xpath>
+            <xpath expr="//header/button[@name='action_post']"
+                   position="before">
+                <button string="Compute Installments"
+                        name="action_button_compute_installments"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="state != 'draft' or installment_payment == False or installment_ids.state == 'cancel'"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='other_info']" position="after">
+                <page id="installment_tab" string="Installment Details"
+                      name="installment_info"
+                      invisible="installment_payment == False">
+                    <group col="12">
+                        <group colspan="4">
+                            <field name="amount_residual"
+                                   string="Payment Amount" readonly="1"
+                                   invisible="state != 'draft'"/>
+                            <field name="total_installment_amount"
+                                   string="Payment Amount" readonly="1"
+                                   invisible="state == 'draft'"/>
+                            <field name="installment_due_amount"
+                                   invisible="state == 'draft'" readonly="1"/>
+                            <field name="installment_paid"
+                                   invisible="state == 'draft'" readonly="1"/>
+                        </group>
+                        <group colspan="4">
+                            <field name="advance_payment_amount"
+                                   invisible="state != 'draft'"/>
+                            <field name="installment_amount"
+                                   invisible="state == 'draft'" readonly="1"/>
+                            <field name="installment_to_pay"
+                                   invisible="state == 'draft'" readonly="1"/>
+                        </group>
+                        <group colspan="4">
+                            <field name="duration"
+                                   invisible="state != 'draft'"/>
+                            <field name="next_installment_date"
+                                   invisible="state == 'draft'" readonly="1"/>
+                        </group>
+                        <field name="installment_ids"
+                               invisible="not installment_ids"
+                               readonly="state != 'draft'">
+                            <tree>
+                                <field name="sequence"/>
+                                <field name="payment_date"/>
+                                <field name="pay_amount"/>
+                                <field name="name"/>
+                                <field name="state"/>
+                                <field name="ready_to_pay"
+                                       column_invisible="1"/>
+                                <field name="is_advance" column_invisible="1"/>
+                                <button string="Payment"
+                                        name="action_create_payment"
+                                        class="btn btn-primary btn-installment"
+                                        type="object"
+                                        invisible="state != 'draft' or ready_to_pay != True"/>
+                            </tree>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

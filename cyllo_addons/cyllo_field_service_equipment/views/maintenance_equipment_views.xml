@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menu item for maintenance equipment -->
+    <menuitem id="menu_equipments" name="Equipments"
+              action="maintenance.hr_equipment_action"
+              parent="cyllo_field_service.menu_master_data_categ"/>
+    <!--Adding fields to service request form view-->
+    <record id="view_maintenance_equipment_form" model="ir.ui.view">
+        <field name="name">view.maintenance.equipment.form</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='department_id']" position="after">
+                <field name="field_service_id" readonly="1"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="action_view_equipment_history"
+                        type="object" class="oe_stat_button"
+                        icon="fa-pencil-square-o" invisible="equipment_history_count == 0">
+                    <field name="equipment_history_count" widget="statinfo" string="Equipment History"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

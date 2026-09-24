@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- This XML record defines an action for opening the Google Drive Connector form view.-->
+    <record id="view_google_drive_connector_form" model="ir.ui.view">
+        <field name="name">view.google.drive.connector.form</field>
+        <field name="model">google.drive.connector</field>
+        <field name="arch" type="xml">
+            <form string="Google Drive Account">
+                <header>
+                    <button name="action_get_access" string="Connect" class="oe_highlight" invisible="state != 'draft'"
+                            type="object"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connected"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                    <notebook>
+                        <page string="Credentials">
+                            <group>
+                                <field name="google_client_key"/>
+                                <field name="google_client_secret" password="True"/>
+                            </group>
+                        </page>
+                        <page string="Export" invisible="state == 'draft'">
+                            <group>
+                                <field name="google_drive_folder_key"/>
+                                <field name="workspace_id"/>
+                                <field name="document_file_ids" widget="many2many_checkboxes"/>
+                                <button name="action_export_files" type="object">Export</button>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- This XML record defines an action for  the Google Drive Connector -->
+    <record id="action_view_google_drive_connector" model="ir.actions.act_window">
+        <field name="name">Google Drive Connector</field>
+        <field name="res_model">google.drive.connector</field>
+        <field name="view_mode">form</field>
+    </record>
+</odoo>

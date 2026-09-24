@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="helpdesk_common_issue_view_tree" model="ir.ui.view">
+        <field name="name">helpdesk.common.issue.view.tree</field>
+        <field name="model">helpdesk.common.issue</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" string="Common Issues">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="color" widget="color_picker" optional="hide"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="helpdesk_common_issue_view_form" model="ir.ui.view">
+        <field name="name">helpdesk.common.issue.view.form</field>
+        <field name="model">helpdesk.common.issue</field>
+        <field name="arch" type="xml">
+            <form string="Common Issue Suggestion">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Issue Title"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Product arrived damaged"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="helpdesk_common_issue_view_search" model="ir.ui.view">
+        <field name="name">helpdesk.common.issue.view.search</field>
+        <field name="model">helpdesk.common.issue</field>
+        <field name="arch" type="xml">
+            <search string="Common Issues">
+                <field name="name" string="Issue Title"/>
+                <separator/>
+                <filter string="Active" name="active"
+                        domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived"
+                        domain="[('active', '=', False)]"
+                        context="{'active_test': False}"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_by_active"
+                            context="{'group_by': 'active'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="helpdesk_common_issue_action" model="ir.actions.act_window">
+        <field name="name">Common Issues</field>
+        <field name="res_model">helpdesk.common.issue</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="helpdesk_common_issue_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new common issue suggestion!
+            </p>
+            <p>
+                Common issue suggestions appear as clickable tags in the ticket form to quickly populate the ticket
+                title.
+            </p>
+        </field>
+    </record>
+</odoo>

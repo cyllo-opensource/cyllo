@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="mail_template_referral_friend" model="mail.template">
+        <field name="name">Referral Friend Mail</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="subject">{{ ctx.get('referrer_name', 'A friend') }} referred you some products!</field>
+        <field name="email_from">{{ object.company_id.email or 'info@yourcompany.com' }}</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="body_html" type="html">
+            <div>
+                <p>Hi<t t-esc="friend_name or 'there'"/>,
+                </p>
+
+                <p>
+                    <t t-esc="referrer_name or 'Someone'"/>
+                    thought you might be interested in the following products:
+                </p>
+                <ul>
+                    <t t-foreach="ctx.get('product_list', [])" t-as="p">
+                        <li>
+                            <t t-esc="p.display_name"/>
+                        </li>
+                    </t>
+                </ul>
+                <p>Visit our website to explore more or make a purchase at your
+                    convenience.
+                </p>
+                <p style="margin-top: 20px;">
+                    Best regards,
+                    <br/>
+                    <strong>
+                        <t t-esc="object.company_id.name"/>
+                    </strong>
+                </p>
+            </div>
+        </field>
+    </record>
+</odoo>

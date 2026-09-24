@@ -1,0 +1,137 @@
+/*
+ * Sales-forecast news/keyword feature.
+ * Self-contained: every selector is prefixed `cy-fcnews-` so it cannot clash
+ * with or override styles defined for other components in this module.
+ * Layout relies on Bootstrap utility classes in the markup; this file only
+ * adds positioning, the floating trigger, the slide-in panel, the mode badge
+ * and the accent theme (Cyllo green, matching the app).
+ */
+
+.cy-fcnews-stage {
+    min-height: 420px;
+}
+
+/* Floating trigger button on the chart (top-right) */
+.cy-fcnews-fab {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #b3bd1f 0%, #9ea700 100%);
+    font-size: 20px;
+    line-height: 1;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.cy-fcnews-fab:hover {
+    color: #ffffff;
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+.cy-fcnews-fab:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(158, 167, 0, 0.35);
+}
+
+/* Non-modal side panel: floats over the chart on the right, no backdrop,
+   so the chart underneath stays fully visible and interactive. */
+.cy-fcnews-panel {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: 320px;
+    max-width: calc(100% - 24px);
+    z-index: 6;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    animation: cy-fcnews-slidein 0.18s ease-out;
+}
+
+@keyframes cy-fcnews-slidein {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.cy-fcnews-panel__head {
+    background: #f5f6e2;
+    color: #5f6600;
+    border-bottom: 1px solid #e4e7bf;
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.cy-fcnews-panel__close {
+    color: #7a8200;
+    font-size: 18px;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.cy-fcnews-hint {
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+.cy-fcnews-panel__input {
+    border-color: #d2d79a;
+    font-size: 0.875rem;
+}
+
+.cy-fcnews-panel__input:focus {
+    border-color: #9ea700;
+    box-shadow: 0 0 0 0.2rem rgba(158, 167, 0, 0.2);
+}
+
+.cy-fcnews-panel__foot {
+    background: #fafbf0;
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+/* Accent action button (Cyllo green) */
+.cy-fcnews-btn {
+    background: linear-gradient(135deg, #b3bd1f 0%, #9ea700 100%);
+    color: #ffffff;
+    border: none;
+}
+
+.cy-fcnews-btn:hover:not(:disabled) {
+    color: #ffffff;
+    filter: brightness(1.06);
+}
+
+.cy-fcnews-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Keyword field accent in the wizard */
+.cy-fcnews-keyfield .form-control:focus {
+    border-color: #9ea700;
+    box-shadow: 0 0 0 0.2rem rgba(158, 167, 0, 0.15);
+}
+
+/* Mode badge next to the chart title (green for both AI and Algorithm) */
+.cy-fcnews-mode-badge {
+    background-color: #9ea700;
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+}
+
+.cy-fcnews-spin {
+    display: inline-block;
+    animation: cy-fcnews-rotate 0.8s linear infinite;
+}
+
+@keyframes cy-fcnews-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}

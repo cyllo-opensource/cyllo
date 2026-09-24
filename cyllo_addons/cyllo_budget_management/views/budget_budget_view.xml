@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Defines Tree View of Budget Management-->
+    <record id="view_budget_budget_tree" model="ir.ui.view">
+        <field name="name">view.budget.budget.tree</field>
+        <field name="model">budget.budget</field>
+        <field name="arch" type="xml">
+            <tree string="Budget">
+                <field name="name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="responsible_id"/>
+                <field name="stage" widget="badge"
+                       decoration-success="stage == 'success'"
+                       decoration-danger="stage == 'fail' "/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Defines Form View of Budget Management-->
+    <record id="view_budget_budget_form" model="ir.ui.view">
+        <field name="name">view.budget.budget.form</field>
+        <field name="model">budget.budget</field>
+        <field name="arch" type="xml">
+            <form string="budget">
+                <header>
+                    <button name="action_compute_budget" type="object"
+                            string="Compute" class="btn btn-primary"
+                            invisible="not budget_line_ids or state  in ('cancel','reject')"/>
+                    <button name="action_confirm_budget" type="object"
+                            string="Confirm" class="btn btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_approve_budget" type="object"
+                            string="Approve" class="btn btn-primary"
+                            invisible="state != 'confirm'"
+                            groups="account.group_account_manager"/>
+                    <button name="action_reject_budget" type="object"
+                            string="Reject" class="btn btn-primary"
+                            invisible="state != 'confirm'"
+                            groups="account.group_account_manager"
+                            confirm="Are you sure you want to Reject?"/>
+                    <button name="action_cancel_budget" type="object"
+                            string="Cancel" class="btn btn-primary"
+                            invisible="state not in ('confirm','approve')"
+                            confirm="Are you sure you want to cancel?"/>
+                    <button name="action_reset_to_draft" type="object"
+                            string="Reset to Draft" class="btn btn-primary"
+                            invisible="state not in ('cancel','reject')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirm"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Budget Name"/>
+                        <h1>
+                            <div class="d-flex">
+                                <field name="name" class="text-break"
+                                       options="{'line_breaks': False}"
+                                       widget="text"
+                                       placeholder="e.g. January-Expense"
+                                       readonly="state in ('confirm','approve','reject')"/>
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="compute_me" invisible="1"/>
+                            <field name="responsible_id"/>
+                            <field name="success_rate" widget="percentage"/>
+                            <field name="company_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="period_type"
+                                   readonly="state in ('confirm','approve','reject')"/>
+                            <field name="start_date"
+                                   readonly="state in ('confirm','approve','reject')"/>
+                            <field name="end_date"
+                                   readonly="state in ('confirm','approve','reject')"/>
+                            <field name="due_date"
+                                   readonly="state in ('confirm','approve','reject')"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Budget Details">
+                            <field name="budget_line_ids"
+                                   readonly="state in ('confirm','approve','reject')">
+                                <tree editable="bottom">
+                                    <field name="display_name"/>
+                                    <field name="account_ids"
+                                           widget="many2many_tags"/>
+                                    <field name="analytic_account_id"/>
+                                    <field name="analytic_account_ids"
+                                           column_invisible="1"/>
+                                    <field name="start_date" force_save="1"/>
+                                    <field name="end_date" force_save="1"/>
+                                    <field name="budget_type"
+                                           readonly="check_configuration == True"/>
+                                    <field name="currency_id"
+                                           column_invisible="1"/>
+                                    <field name="planned_amount"
+                                           widget="monetary" sum="total"
+                                           readonly="check_configuration == True"/>
+                                    <field name="practical_amount"
+                                           widget="monetary" sum="total"/>
+                                    <field name="theoretical_amount"
+                                           force_save="1" readonly="1"
+                                           widget="monetary"
+                                           sum="total"/>
+                                    <field name="stage" column_invisible="1"/>
+                                    <field name="achievement"
+                                           widget="percentage" sum="total"
+                                           decoration-success="stage == 'success'"
+                                           decoration-danger="stage == 'fail' "/>
+                                    <field name="include_child"
+                                           invisible="not analytic_account_id"/>
+                                    <button type="object"
+                                            name="action_budget_configuration"
+                                            string="Configure"
+                                            confirm="You Cant change the Planned Amount After Child Analytic Configuration , Are you sure to Confirm?"
+                                            invisible="check_configuration == True or include_child == False "
+                                            style="position:relative;"/>
+                                    <button type="object"
+                                            name="action_budget_configuration_view"
+                                            string="Configure"
+                                            invisible="check_configuration == False or include_child == False"
+                                            style="position:relative;"/>
+                                    <button type="object"
+                                            name="action_view_moves"
+                                            string="Entries"
+                                            style="position:relative;"/>
+                                    <field name="check_configuration"
+                                           column_invisible="1"/>
+                                </tree>
+                            </field>
+                            <span>Last Updated :
+                                <field name="last_updated"/>
+                            </span>
+                        </page>
+                        <page string="Description">
+                            <field name="description"
+                                   readonly="state in ('confirm','approve','reject')"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--    Defines Kanban View of Budget Management-->
+    <record id="view_budget_budget_kanban" model="ir.ui.view">
+        <field name="name">view.budget.budget.kanban</field>
+        <field name="model">budget.budget</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" records_draggable="0">
+                <field name="name"/>
+                <field name="stage"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="responsible_id"/>
+                <field name="state"/>
+                <progressbar field="stage"
+                             colors='{"success": "success", "fail": "danger"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click container"
+                             class="o_kanban_record_has_image_fill">
+                            <div class="oe_kanban_details">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings ps-2 pe-2">
+                                        <div class="text-truncate">
+                                            <strong class="o_kanban_record_title">
+                                                <field name="name"/>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-truncate">
+                                    <field name="start_date"/>-
+                                    <field name="end_date"/>
+                                    <span class="float-end">
+                                        <field name="stage" widget="badge"
+                                               decoration-success="stage == 'success'"
+                                               decoration-danger="stage == 'fail' "/>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="oe_kanban_footer">
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="due_date"/>
+                                        <field name="activity_ids"
+                                               widget="kanban_activity"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="responsible_id"
+                                               widget="many2one_avatar_user"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Defines the search view of Budget management   -->
+    <record id="view_budget_budget_search" model="ir.ui.view">
+        <field name="name">view.budget.budget.search</field>
+        <field name="model">budget.budget</field>
+        <field name="arch" type="xml">
+            <search string="Budget Search">
+                <field name="name" string="Name"/>
+                <field name="responsible_id"/>
+                <field name="stage"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="state"/>
+                <field name="due_date"/>
+                <filter string="My Budgets"
+                        domain="[('responsible_id','=',uid)]"
+                        name="search_my_budgets"/>
+                <separator/>
+                <filter string="Due Today" name="due_today"
+                        domain="[('due_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Draft" name="draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmed" name="confirmed"
+                        domain="[('state', '=', 'confirm')]"/>
+                <filter string="Approved" name="approved"
+                        domain="[('state', '=', 'approve')]"/>
+                <filter string="Cancelled" name="cancel"
+                        domain="[('state', '=', 'cancel')]"/>
+                <filter string="Rejected" name="Reject"
+                        domain="[('state', '=', 'reject')]"/>
+                <filter string="Expired" name="expired"
+                        domain="[('state', '=', 'expire')]"/>
+                <separator/>
+                <filter string="Success" name="success"
+                        domain="[('stage', '=', 'success')]"/>
+                <filter string="Failed" name="failed"
+                        domain="[('stage', '=', 'fail')]"/>
+                <separator/>
+                <filter string="Archived" domain="[('active','=',False)]"
+                        name="search_archived"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_due_date" string="Due Date"
+                            context="{'group_by':'due_date'}"/>
+                    <filter name="group_state" string="State"
+                            context="{'group_by':'state'}"/>
+                    <filter name="group_stage" string="Stage"
+                            context="{'group_by':'stage'}"/>
+                    <filter name="group_responsible" string="Responsible"
+                            context="{'group_by':'responsible_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

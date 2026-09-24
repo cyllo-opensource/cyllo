@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="commission_plan_template">
+        <t t-call="website.layout">
+            <div class="oe_structure">
+                <div class="commission-container">
+                    <div class="header">
+                        <h1>Select Your Commission Plan</h1>
+                        <p class="subheading">
+                            Choose the plan that best fits your needs and start
+                            earning commissions right away.
+                        </p>
+                    </div>
+
+                    <div class="comparison-toggle">
+                        <button class="toggle-btn" id="compareToggle">
+                            Compare All Plans
+                            <svg class="toggle-icon" width="16" height="16"
+                                 viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="comparison-table" id="comparisonTable">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Plan :</th>
+                                    <t t-foreach="plans" t-as="plan">
+                                        <td>
+                                            <t t-esc="plan.name"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Frequency :</th>
+                                    <t t-foreach="plans" t-as="plan">
+                                        <td>
+                                            <t t-if="plan.frequency == 'monthly'">
+                                                Monthly
+                                            </t>
+                                            <t t-elif="plan.frequency == 'quarterly'">
+                                                Quarterly
+                                            </t>
+                                            <t t-else="">Yearly</t>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr>
+                                    <th>OTC :</th>
+                                    <t t-foreach="plans" t-as="plan">
+                                        <t t-if="currency_position == 'before'">
+                                            <td>
+                                                <span t-esc="currency_symbol"
+                                                      class="me-1"/>
+                                                <span class="oe_currency_value"
+                                                      t-esc="plan.commission_amount"/>
+                                            </td>
+                                        </t>
+                                        <t t-else="">
+                                            <td>
+                                                <span class="oe_currency_value"
+                                                      t-esc="plan.commission_amount"/>
+                                                <span t-esc="currency_symbol"
+                                                      class="ms-1"/>
+                                            </td>
+                                        </t>
+                                    </t>
+                                </tr>
+                                <tr>
+                                    <th>Bonus Commission :</th>
+                                    <t t-foreach="plans" t-as="plan">
+                                        <t t-if="plan.is_bonus_commission">
+                                            <td>
+                                                <svg class="check-icon"
+                                                     width="16" height="16"
+                                                     viewBox="0 0 24 24"
+                                                     fill="none"
+                                                     stroke="currentColor"
+                                                     stroke-width="2"
+                                                     stroke-linecap="round"
+                                                     stroke-linejoin="round">
+                                                    <polyline
+                                                            points="20 6 9 17 4 12"/>
+                                                </svg>
+                                            </td>
+                                        </t>
+                                        <t t-else="">
+                                            <td>
+                                                <svg class="cross-icon"
+                                                     width="16"
+                                                     height="16"
+                                                     viewBox="0 0 24 24"
+                                                     fill="none"
+                                                     stroke="currentColor"
+                                                     stroke-width="2"
+                                                     stroke-linecap="round"
+                                                     stroke-linejoin="round">
+                                                    <line x1="18" y1="6" x2="6"
+                                                          y2="18"/>
+                                                    <line x1="6" y1="6" x2="18"
+                                                          y2="18"/>
+                                                </svg>
+                                            </td>
+                                        </t>
+                                    </t>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <form t-attf-action="/commission/submit" method="post"
+                          id="commissionForm">
+                        <input type="hidden" name="csrf_token"
+                               t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="plan_types"
+                               t-att-value="type_ids"/>
+                        <input type="hidden" name="active_plan"
+                               t-att-value="active_plan"/>
+                        <input type="hidden" name="user"
+                               t-att-value="user"/>
+                        <input type="hidden" id="selectedPlanInput"
+                               name="selected_plan" value=""/>
+                        <div class="cards-container">
+                            <t t-foreach="plans" t-as="plan">
+                                <div class="plan-card"
+                                     t-att-data-plan-id="plan.id">
+                                    <t t-if="plan.id == active_plan">
+                                        <div class="active-plan">
+                                            Active
+                                        </div>
+                                    </t>
+                                    <div class="plan-icon">
+                                        <svg
+                                                width="28" height="28"
+                                                viewBox="0 0 24 24"
+                                                fill="#4d7cfe">
+                                            <t t-if="plan.id==active_plan">
+                                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                                            </t>
+                                            <t t-else="">
+                                                <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z"/>
+                                            </t>
+                                        </svg>
+                                    </div>
+                                    <div class="plan-name">
+                                        <t t-esc="plan.name"/>
+                                    </div>
+                                    <div class="plan-type">
+                                        <t t-if="plan.type == 'target'">
+                                            Target Based
+                                        </t>
+                                        <t t-else="">Contribution Based</t>
+                                    </div>
+                                    <div class="plan-details">
+                                        <div class="detail-row">
+                                            <span class="detail-label">From:
+                                            </span>
+                                            <span class="detail-value">
+                                                <t t-esc="plan.date_from"/>
+                                            </span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">To:
+                                            </span>
+                                            <span class="detail-value">
+                                                <t t-esc="plan.date_to"/>
+                                            </span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">
+                                                Frequency:
+                                            </span>
+                                            <span class="detail-value">
+                                                <t t-if="plan.frequency == 'monthly'">
+                                                    Monthly
+                                                </t>
+                                                <t t-elif="plan.frequency == 'quarterly'">
+                                                    Quarterly
+                                                </t>
+                                                <t t-else="">Yearly</t>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="divider"/>
+                                    <ul class="benefits-list">
+                                    </ul>
+                                    <div class="otc-amount">
+                                        <t t-if="currency_position == 'before'">
+                                            <span t-esc="currency_symbol"
+                                                  class="me-1"/>
+                                            <span class="oe_currency_value"
+                                                  t-esc="plan.commission_amount"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="oe_currency_value"
+                                                  t-esc="plan.commission_amount"/>
+                                            <span t-esc="currency_symbol"
+                                                  class="ms-1"/>
+                                        </t>
+                                    </div>
+                                    <input type="radio" name="plan_radio"
+                                           t-att-value="plan.id"
+                                           class="radio-input"
+                                           t-att-id="'plan' + str(plan.id)"/>
+                                    <label t-att-for="'plan' + str(plan.id)"
+                                           class="select-btn">
+                                        Select Plan
+                                        <svg class="btn-icon" width="16"
+                                             height="16" viewBox="0 0 24 24"
+                                             fill="none" stroke="currentColor"
+                                             stroke-width="2"
+                                             stroke-linecap="round"
+                                             stroke-linejoin="round">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </label>
+
+                                </div>
+                            </t>
+                        </div>
+
+                        <div class="validation-message" id="validationMessage">
+                            Please select a plan before proceeding
+                        </div>
+                        <div class="submit-container">
+                            <button type="submit" id="submitBtn" disabled="1"
+                                    class="submit-btn">Confirm Selection
+                            </button>
+                            <div class="custom-tooltip">Please select a plan
+                                first
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

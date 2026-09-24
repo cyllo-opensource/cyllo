@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_bank_transaction_wizard_view_form" model="ir.ui.view">
+        <field name="name">account.bank.transaction.wizard.view.form</field>
+        <field name="model">account.bank.transaction.wizard</field>
+        <field name="arch" type="xml">
+            <form string="New Transaction">
+                <group>
+                    <field name="journal_id"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="date"/>
+                    <field name="payment_ref" placeholder="Enter payment reference"/>
+                    <field name="partner_id" placeholder="Select a partner"/>
+                    <field name="amount"/>
+                    <field name="foreign_currency_id"
+                           domain="[('id', '!=', currency_id)]"
+                           placeholder="Select foreign currency"/>
+                    <field name="amount_currency"
+                           invisible="not foreign_currency_id"
+                           required="foreign_currency_id"/>
+                </group>
+                <footer>
+                    <button name="action_create_transaction"
+                            string="Create Transaction"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="account_bank_transaction_wizard_action" model="ir.actions.act_window">
+        <field name="name">New Transaction</field>
+        <field name="res_model">account.bank.transaction.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account_bank_transaction_wizard_view_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

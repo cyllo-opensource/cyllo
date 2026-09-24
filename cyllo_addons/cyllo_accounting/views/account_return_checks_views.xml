@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_account_return_checks_tree" model="ir.ui.view">
+        <field name="name">account.return.checks.tree</field>
+        <field name="model">account.return.checks</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="not is_mandatory">
+                <field name="name"/>
+                <field name="model_name"/>
+                <field name="is_mandatory"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_account_return_checks_form" model="ir.ui.view">
+        <field name="name">account.return.checks.form</field>
+        <field name="model">account.return.checks</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="model_name"/>
+                            <field name="active" invisible="1"/>
+                            <field name="is_mandatory"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Domain">
+                            <field name="domain"
+                                   widget="domain"
+                                   options="{'model': 'model_name'}"
+                                   nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_account_return_checks_search" model="ir.ui.view">
+        <field name="name">account.return.checks.search</field>
+        <field name="model">account.return.checks</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="model_name"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_account_return_checks" model="ir.actions.act_window">
+        <field name="name">Validation Rules</field>
+        <field name="res_model">account.return.checks</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

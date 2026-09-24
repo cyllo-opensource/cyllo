@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Module Category -->
+        <record id="module_category_cyllo_front_desk" model="ir.module.category">
+            <field name="name">Front Desk</field>
+            <field name="description">Helps manage front desk stations and visitor check-ins.</field>
+            <field name="sequence">30</field>
+        </record>
+
+        <!-- Groups -->
+        <record id="group_frontdesk_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="module_category_cyllo_front_desk"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+
+        </record>
+
+        <record id="group_frontdesk_admin" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="category_id" ref="module_category_cyllo_front_desk"/>
+            <field name="implied_ids" eval="[(4, ref('group_frontdesk_user'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+        <!-- Record Rules -->
+        <record id="frontdesk_rule" model="ir.rule">
+            <field name="name">Frontdesk Station Multi-Company</field>
+            <field name="model_id" ref="model_frontdesk_frontdesk"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="visitor_rule" model="ir.rule">
+            <field name="name">Visitor Multi-Company</field>
+            <field name="model_id" ref="model_frontdesk_visitor"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('station_id.company_id', '=', False), ('station_id.company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="emergency_log_rule" model="ir.rule">
+            <field name="name">Emergency Log Multi-Company</field>
+            <field name="model_id" ref="model_frontdesk_emergency_log"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="frontdesk_station_manager_rule" model="ir.rule">
+            <field name="name">Frontdesk Station Manager Access</field>
+            <field name="model_id" ref="model_frontdesk_frontdesk"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+            <field name="groups" eval="[(4, ref('cyllo_front_desk.group_frontdesk_admin'))]"/>
+        </record>
+
+
+        <record id="frontdesk_station_user_rule" model="ir.rule">
+            <field name="name">Frontdesk Station User Access</field>
+            <field name="model_id" ref="model_frontdesk_frontdesk"/>
+            <field name="domain_force">
+                [('responsible_ids.user_id', '=', user.id)]
+            </field>
+            <field name="groups" eval="[(4, ref('cyllo_front_desk.group_frontdesk_user'))]"/>
+        </record>
+
+        <record id="frontdesk_visitor_manager_rule" model="ir.rule">
+            <field name="name">Frontdesk Visitor Manager Access</field>
+            <field name="model_id" ref="model_frontdesk_visitor"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+            <field name="groups" eval="[(4, ref('cyllo_front_desk.group_frontdesk_admin'))]"/>
+        </record>
+
+
+        <!-- User: only visitors from assigned stations -->
+        <record id="frontdesk_visitor_user_rule" model="ir.rule">
+            <field name="name">Frontdesk Visitor User Access</field>
+            <field name="model_id" ref="model_frontdesk_visitor"/>
+            <field name="domain_force">
+                [('user_id', '=', user.id)]
+            </field>
+            <field name="groups" eval="[(4, ref('cyllo_front_desk.group_frontdesk_user'))]"/>
+        </record>
+
+        <record id="frontdesk_enquiry_manager_rule" model="ir.rule">
+            <field name="name">Frontdesk Enquiry Manager Access</field>
+            <field name="model_id" ref="model_frontdesk_enquiry"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+            <field name="groups" eval="[(4, ref('cyllo_front_desk.group_frontdesk_admin'))]"/>
+        </record>
+
+
+        <!-- User: access only enquiries from assigned stations -->
+        <record id="frontdesk_enquiry_user_rule" model="ir.rule">
+            <field name="name">Frontdesk Enquiry User Access</field>
+            <field name="model_id" ref="model_frontdesk_enquiry"/>
+            <field name="domain_force">
+                [('visitor_id.user_id', '=', user.id)]
+            </field>
+            <field name="groups" eval="[(4, ref('cyllo_front_desk.group_frontdesk_user'))]"/>
+        </record>
+    </data>
+</odoo>

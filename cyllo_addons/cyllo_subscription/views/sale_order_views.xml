@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Search view for subscription order-->
+    <record id="view_sale_order_search" model="ir.ui.view">
+        <field name="name">view.sale.order.search</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <search string="Subscriptions">
+                <field name="name" string="Order"
+                       filter_domain="['|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self)]"/>
+                <field name="partner_id" operator="child_of"/>
+                <field name="user_id"/>
+                <field name="team_id"/>
+                <field name="order_line" string="Product"
+                       filter_domain="[('order_line.product_id', 'ilike', self)]"/>
+                <field name="sale_order_template_id"/>
+                <field name="analytic_account_id"
+                       groups="analytic.group_analytic_accounting"/>
+                <filter name="my_subscriptions" string="My Orders"
+                        domain="[('user_id','=',uid), ('is_subscription', '=', True)]"/>
+                <filter string="Unassigned" name="contracts_not_assigned"
+                        help="Subscriptions that are not assigned to an account manager."
+                        domain="[('user_id', '=', False)]"/>
+                <separator/>
+                <filter name="is_subscription" string="Subscriptions"
+                        domain="[('is_subscription', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Salesperson" name="sales_person"
+                            context="{'group_by':'user_id'}"/>
+                    <filter string="Sales Team" name="sales_team"
+                            context="{'group_by':'team_id'}"/>
+                    <filter string="Customer" name="customer"
+                            context="{'group_by':'partner_id'}"/>
+                    <filter string="Template" name="template"
+                            context="{'group_by':'sale_order_template_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_sale_order_form" model="ir.ui.view">
+        <field name="name">view.sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_management.sale_order_form_quote"/>
+        <field name="priority" eval="10"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="after">
+                <field name="is_subscription" invisible="1"/>
+                <field name="state_subscription" class="float-end fs-6"
+                       invisible="not is_subscription"
+                       widget="badge"
+                       decoration-success="state_subscription == 'sub_order'"
+                       decoration-info="state_subscription == 'quotation'"/>
+            </xpath>
+            <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"
+                   position="after">
+                <field name="time_based_price_id"
+                       column_invisible="not parent.is_subscription"
+                       required="product_template_id.is_subscription" readonly="parent.state in ['cancel','sale']"/>/>
+                <field name="trial_end"
+                       column_invisible="not parent.is_subscription" readonly="parent.state in ['cancel','sale']"/>
+                <field name="skip_trial"
+                       column_invisible="not parent.is_subscription" readonly="parent.state in ['cancel','sale']"/>
+                <field name="end_date" invisible="not product_id.is_subscription"/>
+            </xpath>
+            <xpath expr="//group[@name='sales_person']" position="inside">
+                <field name="subscription_require_payment" invisible="not is_subscription"/>
+                <field name="payment_token_id" invisible="not is_subscription" options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tree view-->
+    <record id="view_sale_order_tree" model="ir.ui.view">
+        <field name="name">view.sale.order.tree</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id"
+               ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="priority" eval="10"/>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Subscription form view created from sale order form-->
+    <record id="view_sale_order_form_subscription" model="ir.ui.view">
+        <field name="name">view.sale.order.form.subscription</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="cyllo_subscription.view_sale_order_form"/>
+        <field name="mode">primary</field>
+        <field name="priority">999</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="attributes">
+                <attribute name="domain">[('sale_ok', '=', True), ('is_subscription', '=', True)]</attribute>
+                <attribute name="context">{'default_is_subscription': True}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_template_id']" position="attributes">
+                <attribute name="domain">[('sale_ok', '=', True), ('is_subscription', '=', True)]</attribute>
+                <attribute name="context">{'default_is_subscription': True}</attribute>
+                <attribute name="options">{'no_quick_create': True}</attribute>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button type="object" name="action_subscriptions"
+                            class="oe_stat_button"
+                            icon="fa-pencil-square-o"
+                            invisible="not is_subscription or subscription_orders == 0">
+                        <field name="subscription_orders" string="Orders"
+                               widget="statinfo"/>
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="after">
+                <field name="state_subscription" class="float-end fs-6"
+                       invisible="is_subscription"
+                       widget="badge"
+                       decoration-success="state_subscription == 'sub_order'"
+                       decoration-info="state_subscription == 'quotation'"/>
+            </xpath>
+            <xpath expr="//field[@name='sale_order_template_id']"
+                   position="replace">
+                <field name="sale_order_template_id" string="Subscription Plan"
+                       domain="[('is_subscription', '=', True)]"
+                       readonly="state == 'sale'"
+                       options="{'no_quick_create': True,}"
+                       context ="{'default_is_subscription' : True}"/>
+            </xpath>
+            <xpath expr="//button[@id='create_invoice']" position="replace"/>
+            <xpath expr="//button[@id='create_invoice_percentage']"
+                   position="replace"/>
+        </field>
+    </record>
+
+    <!-- Action to show subscription orders-->
+    <record id="action_view_orders" model="ir.actions.act_window">
+        <field name="name">Orders</field>
+        <field name="res_model">sale.order</field>
+        <field name="domain">[('is_subscription','=',True)]</field>
+        <field name="search_view_id" eval="view_sale_order_search"/>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Order is found. Let's create one!
+            </p>
+        </field>
+    </record>
+    <!-- Open new form when access through the subscription model-->
+    <record id="view_sale_subscription_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_sale_order_form_subscription"/>
+        <field name="act_window_id" ref="action_view_orders"/>
+    </record>
+    <!-- Subscription tree view-->
+    <record id="view_sale_subscription_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_sale_order_tree"/>
+        <field name="act_window_id" ref="action_view_orders"/>
+    </record>
+</odoo>

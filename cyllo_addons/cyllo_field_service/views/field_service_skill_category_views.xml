@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action, views and menu items for the fs skill category model -->
+    <record id="view_field_service_skill_category_form" model="ir.ui.view">
+        <field name="name">view.field.service.skill.category.form</field>
+        <field name="model">field.service.skill.category</field>
+        <field name="arch" type="xml">
+            <form string="Category">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="description"/>
+                        </group>
+                        <group>
+                            <field name="parent_id"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="category_skill" string="Skills">
+                            <field name="hr_skill_ids"/>
+                        </page>
+                        <page name="service_checklist" string="Service Checklist">
+                            <field name="service_checklist_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="required"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="service_cost"/>
+                                    <field name="time_required" widget="float_time"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"
+                           widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_field_service_skill_category_tree" model="ir.ui.view">
+        <field name="name">view.field.service.skill.category.tree</field>
+        <field name="model">field.service.skill.category</field>
+        <field name="arch" type="xml">
+            <tree string="Category">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="parent_id"/>
+                <field name="hr_skill_ids" widget="many2many_tags"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_field_service_skill_category_search" model="ir.ui.view">
+        <field name="name">view.field.service.skill.category.search</field>
+        <field name="model">field.service.skill.category</field>
+        <field name="arch" type="xml">
+            <search string="Category">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="hr_skill_ids"/>
+                <field name="parent_id"/>
+                <group expand="1" string="Group By">
+                    <filter string="Parent Category" name="parent_id"
+                            context="{'group_by':'parent_id'}"/>
+                    <filter string="Skills" name="hr_skill_ids"
+                            context="{'group_by':'hr_skill_ids'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_field_service_skill_category_kanban" model="ir.ui.view">
+        <field name="name">view.field.service.skill.category.kanban</field>
+        <field name="model">field.service.skill.category</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <field name="description"/>
+                                    <field name="hr_skill_ids"
+                                           widget="many2many_tags"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="action_view_category" model="ir.actions.act_window">
+        <field name="name">Category</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">field.service.skill.category</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create New Field Service Category
+            </p>
+            <p>
+                These categories are used while creating field service request.
+            </p>
+        </field>
+    </record>
+    <record id="view_hr_skill_tree" model="ir.ui.view">
+        <field name="name">view.hr.skill.tree</field>
+        <field name="model">hr.skill</field>
+        <field name="arch" type="xml">
+            <tree string="Category" editable="bottom">
+                <field name="name"/>
+                <field name="skill_type_id"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_view_skills" model="ir.actions.act_window">
+        <field name="name">Skills</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.skill</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_hr_skill_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create New Skills
+            </p>
+            <p>
+                You can create/view skills from here.
+            </p>
+        </field>
+    </record>
+</odoo>

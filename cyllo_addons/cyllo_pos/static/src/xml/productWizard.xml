@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_pos.CreateProductWizard">
+        <Dialog size="'md'" title="props.title || 'New Product'">
+            <div class="container-fluid py-2">
+                <div class="row">
+                    <!-- Left Side Column (Fields) -->
+                    <div class="col-md-9">
+                        <!-- Product Name -->
+                        <div class="row mb-3 align-items-center">
+                            <label class="col-sm-3 col-form-label fw-bold">Product Name</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" t-model="state.name" placeholder="e.g. Cheese Burger" required="true"/>
+                            </div>
+                        </div>
+                        <!-- Barcode -->
+                        <div class="row mb-3 align-items-center">
+                            <label class="col-sm-3 col-form-label fw-bold">Barcode</label>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" t-model="state.barcode" placeholder="e.g. 1234567890"/>
+                                    <span class="input-group-text bg-light text-muted">
+                                        <i class="fa fa-barcode"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Track Inventory -->
+                        <div class="row mb-3 align-items-center">
+                            <label class="col-sm-3 col-form-label fw-bold d-flex align-items-center">
+                                Track Inventory
+                                <a href="#" class="text-decoration-none ms-1 text-muted" title="Inventory Tracking info" t-on-click.prevent="">
+                                    <i class="fa fa-question-circle" style="font-size: 12px; margin-left: 2px;"></i>
+                                </a>
+                            </label>
+                            <div class="col-sm-9 d-flex align-items-center gap-2">
+                                <input type="checkbox" class="form-check-input my-0" t-model="state.trackInventory" id="trackInventoryCheck"/>
+                                <select class="form-select flex-grow-1" t-model="state.tracking" t-att-disabled="!state.trackInventory">
+                                    <option value="none">By Quantity</option>
+                                    <option value="lot">By Lots</option>
+                                    <option value="serial">By Unique Serial Number</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Sales Price -->
+                        <div class="row mb-3 align-items-center">
+                            <label class="col-sm-3 col-form-label fw-bold d-flex align-items-center">
+                                Sales Price
+                                <a href="#" class="text-decoration-none ms-1 text-muted" title="Product public price" t-on-click.prevent="">
+                                    <i class="fa fa-question-circle" style="font-size: 12px; margin-left: 2px;"></i>
+                                </a>
+                            </label>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light" t-esc="pos.currency ? pos.currency.symbol : '$'"/>
+                                    <input type="number" step="0.01" class="form-control" t-model="state.salesPrice"/>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Sales Taxes -->
+                        <div class="row mb-3 align-items-center">
+                            <label class="col-sm-3 col-form-label fw-bold d-flex align-items-center">
+                                Sales Taxes
+                                <a href="#" class="text-decoration-none ms-1 text-muted" title="Taxes applied to this product" t-on-click.prevent="">
+                                    <i class="fa fa-question-circle" style="font-size: 12px; margin-left: 2px;"></i>
+                                </a>
+                            </label>
+                            <div class="col-sm-9">
+                                <div class="d-flex align-items-center gap-2 flex-wrap position-relative w-100">
+                                    <!-- Custom Select tag list drop down -->
+                                    <div class="form-control d-flex flex-wrap align-items-center gap-1 cursor-pointer select-taxes-box w-100" t-on-click="toggleTaxDropdown" style="min-height: 38px;">
+                                        <t t-if="state.selectedTaxIds.length === 0">
+                                            <span class="text-muted">Select Taxes</span>
+                                        </t>
+                                        <t t-foreach="state.selectedTaxIds" t-as="taxId" t-key="taxId">
+                                            <span class="badge bg-light text-dark border d-flex align-items-center gap-1 py-1 px-2 rounded-pill" t-on-click.stop="() => this.removeTax(taxId)">
+                                                <t t-esc="this.getTaxName(taxId)"/>
+                                                <i class="fa fa-times text-danger ms-1" style="font-size: 10px;"></i>
+                                            </span>
+                                        </t>
+                                        <i class="fa fa-chevron-down ms-auto text-muted"></i>
+                                    </div>
+                                    <div t-if="state.showTaxDropdown" class="position-absolute bg-white border rounded shadow p-2 w-100 tax-dropdown-list" style="max-height: 180px; overflow-y: auto; top: 100%; left: 0; z-index: 1050;">
+                                        <div t-foreach="pos.taxes" t-as="tax" t-key="tax.id" class="form-check p-1 cursor-pointer hover-bg-light" t-on-click="() => this.toggleTax(tax.id)">
+                                            <input type="checkbox" class="form-check-input" t-att-checked="state.selectedTaxIds.includes(tax.id)"/>
+                                            <label class="form-check-label ms-1 cursor-pointer" t-esc="tax.name"/>
+                                        </div>
+                                    </div>
+                                    <span class="text-muted small fw-bold mt-1" t-esc="getFormattedInclTaxPrice()"/>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- POS Category -->
+                        <div class="row mb-3 align-items-center">
+                            <label class="col-sm-3 col-form-label fw-bold d-flex align-items-center">
+                                POS Category
+                                <a href="#" class="text-decoration-none ms-1 text-muted" title="Category in the Point of Sale" t-on-click.prevent="">
+                                    <i class="fa fa-question-circle" style="font-size: 12px; margin-left: 2px;"></i>
+                                </a>
+                            </label>
+                            <div class="col-sm-9">
+                                <select class="form-select" t-on-change="onCategoryChange">
+                                    <option value="">Select POS Category</option>
+                                    <t t-foreach="posCategories" t-as="categ" t-key="categ.id">
+                                        <option t-att-value="categ.id" t-att-selected="state.posCategoryId == categ.id" t-esc="categ.name"/>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Color Index -->
+                        <div class="row mb-3 align-items-center">
+                            <label class="col-sm-3 col-form-label fw-bold">Color</label>
+                            <div class="col-sm-9">
+                                <div class="color-picker-circles d-flex flex-wrap gap-2">
+                                    <t t-foreach="odooColors" t-as="c" t-key="c.index">
+                                        <div class="color-circle" 
+                                             t-att-class="{ active: state.color === c.index }" 
+                                             t-attf-style="background-color: {{c.hex}}; border: 2px solid {{state.color === c.index ? '#714B67' : '#dee2e6'}};"
+                                             t-on-click="() => this.selectColor(c.index)"/>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Side Column (Image upload) -->
+                    <div class="col-md-3 d-flex flex-column align-items-center justify-content-start pt-3">
+                        <div class="product-image-uploader d-flex flex-column align-items-center justify-content-center border rounded cursor-pointer position-relative shadow-sm" 
+                             t-on-click="triggerImageUpload" 
+                             style="width: 130px; height: 130px; background-color: #f8f9fa; border: 2px dashed #dee2e6; transition: all 0.2s ease;">
+                            <t t-if="state.imageUrl">
+                                <img t-att-src="state.imageUrl" class="w-100 h-100 rounded" style="object-fit: cover;"/>
+                                <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-50 text-white text-center py-1 rounded-bottom" style="font-size: 11px;">Change</div>
+                            </t>
+                            <t t-else="">
+                                <i class="fa fa-camera text-muted mb-2" style="font-size: 28px;"></i>
+                                <span class="text-muted fw-bold" style="font-size: 11px;">Add Image</span>
+                            </t>
+                            <input type="file" t-ref="imageInput" class="d-none" accept="image/*" t-on-change="onImageChange"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="save" style="background-color: #714B67; border-color: #714B67;">Save</button>
+                <button class="btn btn-secondary" t-on-click="discard">Discard</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Action for support service ticket -->
+    <record id="action_view_all_tickets" model="ir.actions.act_window">
+        <field name="name">Tickets</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">kanban,tree,form,activity,pivot</field>
+    </record>
+    <!-- Tree view for support service ticket -->
+    <record id="view_support_service_ticket_tree" model="ir.ui.view">
+        <field name="name">view.support.service.ticket.tree</field>
+        <field name="model">support.service.ticket</field>
+        <field name="arch" type="xml">
+            <tree default_order="priority desc">
+                <field name="priority" widget="priority"/>
+                <field name="ticket"/>
+                <field name="name"/>
+                <field name="team_id"/>
+                <field name="customer_id"/>
+                <field name="date"/>
+                <field name="user_id"/>
+                <field name="company_id"/>
+                <field name="stage_name" column_invisible="True"/>
+                <field name="stage_id" widget="badge"
+                       decoration-success="stage_name == 'Solved'"
+                       decoration-info="stage_name == 'New'"
+                       decoration-primary="stage_name == 'In Progress'"
+                       decoration-muted="stage_name == 'Canceled'"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Kanban view for support_service tickets -->
+    <record id="view_support_service_ticket_kanban" model="ir.ui.view">
+        <field name="name">view.support.service.ticket.kanban</field>
+        <field name="model">support.service.ticket</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" quick_create="True"
+                    default_order="stage_id" groups_draggable="True"
+                    records_draggable="1" group_create="True"
+                    class="o_slide_kanban" sample="1">
+                <field name="name"/>
+                <field name="team_id"/>
+                <field name="customer_id"/>
+                <field name="user_id"/>
+                <field name="stage_id"/>
+                <progressbar field="activity_state"
+                             colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="row mb4">
+                                <div>
+                                    <h3>
+                                        <field name="name"/>
+                                    </h3>
+                                </div>
+                            </div>
+                            <div>
+                                <span>
+                                    <field name="team_id"/>
+                                </span>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div>
+                                        <field name="customer_id"/>
+                                    </div>
+                                    <div>
+                                        <field name="user_id"/>
+                                    </div>
+                                    <div>
+                                        <field name="activity_ids"
+                                               widget="kanban_activity"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Form view for support service tickets -->
+    <record id="view_support_service_ticket_form" model="ir.ui.view">
+        <field name="name">view.support.service.ticket.form</field>
+        <field name="model">support.service.ticket</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="stage_id" widget="statusbar"
+                           options="{'clickable': '1'}"/>
+                    <button name="action_assign_ticket" class="oe_highlight"
+                            invisible="stage_id != %(cyllo_support_service.support_service_stage_new)d"
+                            string="Assign" type="object"/>
+                    <button name="action_stop_ticket" class="oe_highlight"
+                            invisible="stage_id != %(cyllo_support_service.support_service_stage_on_hold)d"
+                            string="Finish" type="object"/>
+                    <button name="action_done_ticket" class="oe_highlight"
+                            invisible="(stage_id != %(cyllo_support_service.support_service_stage_in_progress)d or is_paid) and stage_id != %(cyllo_support_service.support_service_stage_to_invoice)d"
+                            string="Mark as Done" type="object"/>
+                    <button name="action_create_invoice" class="oe_highlight"
+                            string="Create Invoice"
+                            invisible="stage_id != %(cyllo_support_service.support_service_stage_in_progress)d or not is_paid and stage_id != %(cyllo_support_service.support_service_stage_on_hold)d"
+                            type="object"/>
+                    <button name="action_create_repair_order"
+                            class="oe_highlight"
+                            string="Repair"
+                            invisible="type_of_issue != 'repair' or ticket_type != 'issues'"
+                            type="object"/>
+                    <button name="action_create_refund" class="oe_highlight"
+                            string="Refund"
+                            invisible="type_of_issue != 'refund' or ticket_type != 'issues'"
+                            type="object"/>
+                    <button name="action_cancel_ticket" class="oe_highlight"
+                            invisible="stage_id != %(cyllo_support_service.support_service_stage_in_progress)d and stage_id != %(cyllo_support_service.support_service_stage_on_hold)d"
+                            string="Cancel" type="object"/>
+                </header>
+                <sheet>
+                    <field name="is_sale_order" invisible="1"/>
+                    <field name="is_invoice_status" invisible="1"/>
+                    <field name="is_repair_order" invisible="1"/>
+                    <field name="is_task" invisible="1"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="ticket"/>
+                        </h1>
+                    </div>
+                    <div class="oe_button_box" name="button_box"
+                         position="inside">
+                        <button class="oe_stat_button" type="object"
+                                name="action_sale_order"
+                                icon="fa-pencil-square-o"
+                                invisible="not is_sale_order">
+                            <field name="sale_order_count" widget="statinfo"
+                                   string="Sale Orders"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_get_invoice"
+                                icon="fa-pencil-square-o"
+                                invisible="not is_invoice_status">
+                            <field name="invoice_count" widget="statinfo"
+                                   string="Invoices"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_get_repair"
+                                icon="fa-pencil-square-o"
+                                invisible="not is_repair_order">
+                            <field name="repair_count" widget="statinfo"
+                                   string="Repairs"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_get_task"
+                                icon="fa-pencil-square-o"
+                                invisible="not is_task">
+                            <field name="task_count" widget="statinfo"
+                                   string="Tasks"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"
+                                   placeholder="Eg: Product arrived damaged"/>
+                            <field name="customer_id"
+                                   readonly="stage_id != %(cyllo_support_service.support_service_stage_new)d"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="sequence" invisible="1"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="category_id"/>
+                            <field name="is_closed_today" invisible="1"/>
+                            <field name="timer_toggle" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="date"
+                                   readonly="stage_id != %(cyllo_support_service.support_service_stage_new)d"/>
+                            <field name="deadline"/>
+                            <field name="closed_date" invisible="1"/>
+                            <field name="is_paid" invisible="1"/>
+                            <field name="sale_order_item_id"
+                                   domain="[('partner_id', '=', customer_id)]"
+                                   readonly="stage_id != %(cyllo_support_service.support_service_stage_new)d"
+                                   invisible="not is_paid"/>
+                            <field name="timesheet_time" widget="cy_timer"
+                                   string="Timer"
+                                   invisible="stage_id == %(cyllo_support_service.support_service_stage_new)d"/>
+                            <field name="ticket_type" widget="radio"
+                                   string="Ticket Type"/>
+                            <field name="type_of_issue"
+                                   options="{'horizontal': true}"
+                                   string="Type of Issue" widget="radio"
+                                   invisible="ticket_type != 'issues'"/>
+                            <field name="is_failed" invisible="1"/>
+                            <field name="is_timesheet" invisible="1"/>
+                            <field name="stage_change_date" invisible="1"/>
+                            <field name="service_task_id" invisible="1"/>
+                            <field name="tag_ids" widget="many2many_tags"
+                                   options="{'color_field': 'color'}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"
+                                   placeholder="Description about the ticket"/>
+                        </page>
+                        <page string="Timesheet"
+                              groups="cyllo_support_service.group_cyllo_support_service_team_manager"
+                              invisible="not is_timesheet">
+                            <field name="timesheet_ids"/>
+                        </page>
+                        <page string="Other Info">
+                            <group>
+                                <group>
+                                    <field name="team_id" required="1"
+                                           readonly="stage_id != %(cyllo_support_service.support_service_stage_new)d"/>
+                                    <field name="user_id"
+                                           readonly="stage_id != %(cyllo_support_service.support_service_stage_new)d"/>
+
+                                </group>
+                                <group>
+                                    <field name="company_id"/>
+                                    <field name="ticket_source"/>
+                                    <field name="email_from"
+                                           invisible="ticket_source != 'email'"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Search view for support service tickets -->
+    <record id="view_support_service_ticket_search" model="ir.ui.view">
+        <field name="name">view.support.service.ticket.search</field>
+        <field name="model">support.service.ticket</field>
+        <field name="arch" type="xml">
+            <search string="Tickets">
+                <field name="ticket" string="Seq Number"/>
+                <field name="name" string="Name"/>
+                <separator/>
+                <filter string="My Tickets" name="user_id"
+                        domain="[('user_id','=', uid)]"/>
+                <separator/>
+                <filter string="Open Tickets" name="open_tickets"
+                        domain="[('stage_id.is_closed','=', False),('stage_id.is_canceled','=',False)]"/>
+                <filter string="Closed Tickets" name="closed_tickets"
+                        domain="['|',('stage_id.is_closed','=', True),('stage_id.is_canceled','=',True)]"/>
+                <separator/>
+                <filter string="High Priority Tickets" name="high_priority"
+                        domain="[('priority','=', '2')]"/>
+                <filter string="Urgent Tickets" name="urgent"
+                        domain="[('priority','=', '3')]"/>
+                <filter string="Not Failed"
+                        name="not_failed"
+                        domain="[('is_failed','=', False)]"/>
+                <separator/>
+                <filter string="Team Tickets" name="team"
+                        domain="[('team_id','!=', False)]"/>
+                <separator/>
+                <filter string="Unassigned Tickets" name="unassigned"
+                        domain="[('user_id','=', False)]"/>
+                <filter string="Failed Tickets" name="failed"
+                        domain="[('is_failed','=', True)]"/>
+                <filter string="Closed Last 7 Days"
+                        name="closed_last_seven_days"
+                        domain="[('closed_date','>', (datetime.datetime.now() - datetime.timedelta(days=6)))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Teams" name="team" domain="[]"
+                            context="{'group_by': 'team_id'}"/>
+                    <filter string="Customers" name="customer" domain="[]"
+                            context="{'group_by': 'customer_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Action for my open tickets view-->
+    <record id="action_view_my_open_tickets"
+            model="ir.actions.act_window">
+        <field name="name">My Open Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_open_tickets':True,
+            }
+        </field>
+    </record>
+    <!-- Action for my high priority open tickets view-->
+    <record id="action_view_my_high_priority_open_tickets"
+            model="ir.actions.act_window">
+        <field name="name">My High Priority Open Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_open_tickets':True,
+            'search_default_high_priority':True,
+            }
+        </field>
+    </record>
+    <!-- Action for my urgent open tickets view-->
+    <record id="action_view_my_urgent_priority_open_ticket"
+            model="ir.actions.act_window">
+        <field name="name">My Urgent Open Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_open_tickets':True,
+            'search_default_urgent':True,
+            }
+        </field>
+    </record>
+    <!-- Action for failed tickets of current user view-->
+    <record id="action_view_my_failed_tickets"
+            model="ir.actions.act_window">
+        <field name="name">My Failed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_open_tickets':True,
+            'search_default_failed':True,
+            }
+        </field>
+    </record>
+    <!-- Action for high priority failed tickets of current user view-->
+    <record id="action_view_my_high_priority_failed_ticket"
+            model="ir.actions.act_window">
+        <field name="name">My High Priority Failed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_open_tickets':True,
+            'search_default_failed':True,
+            'search_default_high_priority':True,
+            }
+        </field>
+    </record>
+    <!-- Action for urgent failed tickets of current user view-->
+    <record id="action_my_urgent_failed_ticket"
+            model="ir.actions.act_window">
+        <field name="name">My Urgent Failed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_open_tickets':True,
+            'search_default_failed':True,
+            'search_default_urgent':True,
+            }
+        </field>
+    </record>
+    <!-- Action for current team tickets view-->
+    <record id="action_view_team_tickets"
+            model="ir.actions.act_window">
+        <field name="name">Team Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_tree"/>
+        <field name="context">{
+            'search_default_team':True, 'create':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team open tickets view-->
+    <record id="action_view_open_team_ticket"
+            model="ir.actions.act_window">
+        <field name="name">Open Team Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_open_tickets':True,
+            'search_default_team':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team unassigned tickets view-->
+    <record id="action_view_unassigned_team_tickets"
+            model="ir.actions.act_window">
+        <field name="name">Unassigned Team Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_unassigned':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team urgent tickets view-->
+    <record id="action_view_urgent_team_tickets"
+            model="ir.actions.act_window">
+        <field name="name">Urgent Team Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_urgent':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team failed tickets view-->
+    <record id="action_view_team_urgent_failed_tickets"
+            model="ir.actions.act_window">
+        <field name="name">Team Urgent Failed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_failed':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team closed tickets in last seven days view-->
+    <record id="action_view_closed_team_tickets"
+            model="ir.actions.act_window">
+        <field name="name">Closed Team Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_closed_last_seven_days':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team solved tickets in last seven days view-->
+    <record id="action_view_successfully_solved_team_tickets"
+            model="ir.actions.act_window">
+        <field name="name">Successfully Solved Team Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_closed_last_seven_days':True,
+            'search_default_not_failed':True
+            }
+        </field>
+    </record>
+    <!-- Action for today closed tickets of current user view-->
+    <record id="action_view_my_today_closed_tickets"
+            model="ir.actions.act_window">
+        <field name="name">My Today Closed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_closed_tickets':True
+            }
+        </field>
+    </record>
+    <!-- Action for successfully closed tickets of current user view-->
+    <record id="action_view_my_successfully_closed_tickets"
+            model="ir.actions.act_window">
+        <field name="name">My Successfully Closed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_closed_tickets':True,
+            'search_default_not_failed':True
+            }
+        </field>
+    </record>
+    <!-- Action for my tickets closed in last 7 days view-->
+    <record id="action_view_my_closed_last_seven_days_tickets"
+            model="ir.actions.act_window">
+        <field name="name">My Closed Last Seven Days Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_closed_last_seven_days':True,
+            }
+        </field>
+    </record>
+    <!-- Action for Last seven days closed success tickets of current user view-->
+    <record id="action_view_my_successfully_closed_last_seven_days_tickets"
+            model="ir.actions.act_window">
+        <field name="name">My Successfully Closed Last Seven Days Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">support.service.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="cyllo_support_service.view_support_service_ticket_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_closed_last_seven_days':True,
+            'search_default_not_failed':True
+            }
+        </field>
+    </record>
+    <!-- Action for closing tickets from list view-->
+    <record id="model_action_close_ticket" model="ir.actions.server">
+        <field name="name">Close</field>
+        <field name="model_id" ref="model_support_service_ticket"/>
+        <field name="binding_model_id" ref="model_support_service_ticket"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action =records.action_close_ticket()</field>
+    </record>
+    <!-- Action for canceling tickets from list view-->
+    <record id="model_action_cancel_ticket" model="ir.actions.server">
+        <field name="name">Cancel</field>
+        <field name="model_id" ref="model_support_service_ticket"/>
+        <field name="binding_model_id" ref="model_support_service_ticket"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action =records.action_cancel_ticket()</field>
+    </record>
+</odoo>

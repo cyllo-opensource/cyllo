@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_accounting.ManualOperation">
+        <div class="p-4 cy_dash_conf rounded" t-if="Object.keys(state.formData).length">
+            <form class="border p-3 rounded">
+                <div class="row g-3">
+                    <!-- Left Column -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Account</label>
+                            <t t-if="(state.formData.id and !state.formData.partner_account) || props.isReconciled">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    t-att-value="state.formData.account_id ?
+                                        (Array.isArray(state.formData.account_id) ?
+                                            state.formData.account_id[1] :
+                                            state.formData.account_id.display_name) : ''"
+                                    disabled="1"
+                                />
+                            </t>
+                            <t t-else="">
+                                <Many2XAutocomplete
+                                    resModel="'account.account'"
+                                    getDomain="() => []"
+                                    update.bind="(ev) => this.updateAccount(ev)"
+                                    value="state.formData.account_id ? state.formData.account_id[1] : ''"
+                                    placeholder="'Select an account'"
+                                    fieldString="'Account'"
+                                    activeActions="{}"
+                                />
+                            </t>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Partner</label>
+                            <t t-if="state.formData.id and !state.formData.isBankStatementLine == true and !state.formData.partner_account">
+                                <input
+                                        t-if="state.formData.partner_id"
+                                        type="text"
+                                        value="state.formData.partner_id ? state.formData.partner_id[1] : ''"
+                                        class="form-control"
+                                        t-model="state.formData.partner_id[1]"
+                                        disabled="1"
+                                />
+                            </t>
+                            <t t-elif="state.formData.tax_id || props.isReconciled">
+                                <input
+                                        type="text"
+                                        t-att-value="state.formData.partner_id ? state.formData.partner_id[1] : ''"
+                                        class="form-control"
+                                        disabled="1"
+                                />
+                            </t>
+                            <t t-else="">
+                                <Many2XAutocomplete
+                                        resModel="'res.partner'"
+                                        getDomain="() => []"
+                                        update.bind="(ev) => this.updatePartner(ev)"
+                                        value="state.formData.partner_id ? state.formData.partner_id[1] : ''"
+                                        placeholder="'Select a partner'"
+                                        fieldString="'Partner'"
+                                        activeActions="{}"
+                                />
+                            </t>
+                        </div>
+                        <div class="mb-3"
+                             t-if="state.formData.journal_label or (Array.isArray(state.formData.move_id)  and !state.formData.isBankStatementLine == true) or state.formData.partner_account">
+                            <label class="form-label fw-bold">Label</label>
+                            <input
+                                    t-if="(Array.isArray(state.formData.move_id) and !state.formData.isBankStatementLine == true) || state.formData.move_id and props.isReconciled"
+                                    type="text"
+                                    class="form-control"
+                                    t-model="state.formData.move_id[1]"
+                                    disabled="1"
+                            />
+                            <input
+                                    t-if="state.formData.journal_label or state.formData.partner_account"
+                                    type="text"
+                                    class="form-control"
+                                    t-model="state.formData.journal_label"
+                                    t-on-input="(ev) => this.updateField('journal_label', ev.target.value)"
+                            />
+                        </div>
+                        <div class="mb-3" t-if="state.formData.isBankStatementLine == true">
+                            <label class="form-label fw-bold">Payment Reference</label>
+                            <input t-if="props.isReconciled"
+                                   type="text"
+                                   class="form-control"
+                                   t-model="state.formData.payment_ref"
+                                   disabled="1"
+                            />
+                            <input t-else=""
+                                   type="text"
+                                   class="form-control"
+                                   t-model="state.formData.payment_ref"
+                                   t-on-input="(ev) => this.updateField('payment_ref', ev.target.value)"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <t t-if="!state.formData.isBankStatementLine">
+                                <label class="form-label fw-bold">Amount</label>
+                                <div class="input-group">
+                                    <input type="number"
+                                           class="form-control"
+                                           t-att-value="formatAmount(state.formData.amount_residual)"
+                                           t-on-change="(ev) => this.updateField('amount_residual', ev.target.valueAsNumber)"
+                                           step="0.01"
+                                           t-att-disabled="props.isReconciled? 1: 0"
+                                    />
+                                    <span class="input-group-text"
+                                          t-out="state.formData.company_currency_id and state.formData.company_currency_id[1]"/>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <label class="form-label fw-bold">Amount</label>
+                                <div class="input-group">
+                                    <input type="number"
+                                           class="form-control"
+                                           t-att-value="formatAmount(state.formData.amount)"
+                                           t-on-change="(ev) => this.updateField('amount', ev.target.valueAsNumber)"
+                                           step="0.01"
+                                           t-att-disabled="props.isReconciled ? 1 : 0"
+                                    />
+                                    <span class="input-group-text"
+                                          t-out="state.formData.currency_id and state.formData.currency_id[1]"/>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="mb-3" t-if="state.formData.isBankStatementLine">
+                            <label class="form-label fw-bold">Amount(Foreign Currency)</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="number"
+                                       class="form-control"
+                                       t-att-value="formatAmount(state.formData.amount_currency)"
+                                       t-on-change="(ev) => this.updateField('amount_currency', ev.target.valueAsNumber)"
+                                       step="0.01"
+                                       t-att-disabled="state.formData.foreign_currency_id and !props.isReconciled ? 0: 1"
+                                />
+                                <span>in</span>
+                                <t t-if="!props.isReconciled">
+                                    <Many2XAutocomplete resModel="'res.currency'"
+                                                        getDomain="() => [['id', 'not in', [state.formData.currency_id[0],props.companyCurrency[0]]]]"
+                                                        update="(ev) => this.updateField('foreign_currency_id', ev[0])"
+                                                        activeActions="{}"
+                                                        fieldString="'Foreign Currency'"
+                                                        value="state.formData.foreign_currency_id ? state.formData.foreign_currency_id[1] : ''"
+                                                        placeholder="'Foreign currency'"
+                                                        quickCreate="quickCreate"/>
+                                </t>
+                                <t t-else="">
+                                    <input type="text"
+                                           class="form-control"
+                                           t-att-value="state.formData.foreign_currency_id ? state.formData.foreign_currency_id[1] : ''"
+                                           disabled="1"
+                                           placeholder="'Foreign currency'"/>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="mb-3"
+                             t-if="state.formData.amount_in_base !== state.formData.amount">
+                            <label class="form-label fw-bold">Amount(Company Currency)</label>
+                            <div class="input-group">
+                                <input type="number"
+                                       class="form-control"
+                                       t-att-value="formatAmount(state.formData.amount_in_base)"
+                                       t-on-change="(ev) => this.updateField('amount_in_base', ev.target.valueAsNumber)"
+                                       step="0.01"
+                                       t-att-disabled="props.isReconciled ? 1 : 0"
+                                />
+                                <span class="input-group-text"
+                                      t-out="props.companyCurrency and props.companyCurrency[1]"/>
+                            </div>
+                        </div>
+                        <div class="mb-3"
+                             t-if="(!state.formData.tax_id and !state.formData.id) or state.formData.partner_account">
+                            <label class="form-label fw-bold">Taxes</label>
+                            <div class="o_field_tags d-inline-flex flex-wrap w-100 gap-1">
+                                <t t-if="!state.formData.id or state.formData.partner_account">
+                                    <div class="o_field_many2many_selection d-inline-flex gap-1 form-control overflow-scroll">
+                                        <TagsList tags="taxTags"/>
+                                        <Many2XAutocomplete
+                                                resModel="'account.tax'"
+                                                getDomain.bind="getTaxDomain"
+                                                update.bind="(ev) => this.updateTaxes(ev)"
+                                                placeholder="'Select taxes'"
+                                                fieldString="'Taxes'"
+                                                activeActions="{ create: false }"
+                                                isToMany="true"
+                                        />
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </t>
+</templates>

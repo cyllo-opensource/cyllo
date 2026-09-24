@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Form View-->
+    <record id="view_out_going_call_list_form" model="ir.ui.view">
+        <field name="name">view.out.going.call.list.form</field>
+        <field name="model">out.going.call.list</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Play Recording" type="object"
+                            name="action_play_recording"
+                            class="btn btn-primary" invisible="not record_sid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <div class="d-flex">
+                                <field name="reference" class="text-break"/>
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="partner_id"/>
+                            <field name="to_number"/>
+                            <field name="from_number"/>
+                        </group>
+                        <group>
+                            <field name="status"/>
+                            <field name="image_1920" widget="image"
+                                   options="{'size': [200, 200]}"/>
+                            <field name="company_id"/>
+                        </group>
+
+                        <group>
+                            <field name="start_time" options="{'rounding': 0}"/>
+                            <field name="end_time" options="{'rounding': 0}"/>
+                            <field name="duration" readonly="1"/>
+                            <field name="record_sid" widget="url"
+                                   readonly="True" invisible="1"/>
+                            <field name="call_sid" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--    List View for Twilio Voica Call-->
+    <record id="view_out_going_call_list_tree" model="ir.ui.view">
+        <field name="name">view.out.going.call.list.tree</field>
+        <field name="model">out.going.call.list</field>
+        <field name="arch" type="xml">
+            <tree name="twilio_tree" sample="1">
+                <field name="reference"/>
+                <field name="user_id"/>
+                <field name="from_number"/>
+                <field name="to_number"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="duration"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Action for Twilio  -->
+    <record id="action_view_out_going_call_list" model="ir.actions.act_window">
+        <field name="name">OutGoing Call List</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">out.going.call.list</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Outgoing Voice Call
+            </p>
+            <p>
+                The outgoing voice calls are listed here
+            </p>
+        </field>
+    </record>
+
+    <record id="view_out_going_call_list_search" model="ir.ui.view">
+        <field name="name">view.out.going.call.list.search</field>
+        <field name="model">out.going.call.list</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field name="user_id" filter_domain="[('user_id','ilike',self)]"
+                       string="User"/>
+                <field name="reference"
+                       filter_domain="[('reference','ilike',self)]"
+                       string="Reference"/>
+                <field name="from_number"
+                       filter_domain="[('from_number','ilike',self)]"
+                       string="From Number"/>
+                <field name="to_number"
+                       filter_domain="[('to_number','ilike',self)]"
+                       string="to Number"/>
+            </search>
+        </field>
+    </record>
+    <!-- MENU-->
+    <menuitem id="menu_out_going_call_list" name="Outgoing call list"
+              parent="menu_cyllo_twilio_voice_call_root"
+              action="action_view_out_going_call_list"
+              sequence="4"/>
+</odoo>

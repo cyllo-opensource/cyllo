@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Template for printing 'Aged Payable Receivable PDF report -->
+<odoo>
+
+    <template id="aged_payable_receivable">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="data_report_margin_top" t-value="12"/>
+                <t t-set="data_report_header_spacing" t-value="9"/>
+                <t t-set="data_report_dpi" t-value="110"/>
+                <div class="page">
+                    <center>
+                        <span class="fw-bolder h1" t-esc="report_name"/>
+                    </center>
+                    <br/>
+                    <br/>
+                    <span t-if="filter_partners" class="h5 fw-bolder">Partners:
+                        <t t-foreach="partners" t-as="partner" t-key="partner_index">
+                            <t t-esc="partner['name']"/>
+                            <t t-if="filter_partners != partner_index+1" t-esc="', '"/>
+                        </t>
+                    </span>
+                    <center>
+                        <span class="h5 fw-bolder">As of
+                            <t t-esc="date"/>
+                        </span>
+                    </center>
+                    <br/>
+                    <table class="table table-sm o_main_table">
+                        <thead class="text-nowrap h5">
+                            <tr>
+                                <th/>
+                                <th class="fw-bolder text-center">Invoice Date</th>
+                                <th class="fw-bolder text-end">Amount Currency</th>
+                                <th class="fw-bolder">Currency</th>
+                                <th class="fw-bolder ">Account</th>
+                                <th class="fw-bolder ">Expected Date</th>
+                                <th class="fw-bolder ">At Date</th>
+                                <th class="fw-bolder ">1-30</th>
+                                <th class="fw-bolder text-center">31-60</th>
+                                <th class="fw-bolder text-center">61-90</th>
+                                <th class="fw-bolder text-center">91-120</th>
+                                <th class="fw-bolder text-center">Older</th>
+                                <th class="fw-bolder ">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="partner_totals" t-as="ml_total" t-key="ml_total_index">
+                                <tr>
+                                    <th colspan="6" class="fw-bolder h5 text-start ps-2">
+                                        <t t-esc="ml_total['partner']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="ml_total['currency_id']"/>
+                                        <span class="ms-1" t-esc="ml_total['diff0_sum']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="ml_total['currency_id']"/>
+                                        <span class="ms-1" t-esc="ml_total['diff1_sum']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="ml_total['currency_id']"/>
+                                        <span class="ms-1" t-esc="ml_total['diff2_sum']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="ml_total['currency_id']"/>
+                                        <span class="ms-1" t-esc="ml_total['diff3_sum']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="ml_total['currency_id']"/>
+                                        <span class="ms-1" t-esc="ml_total['diff4_sum']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="ml_total['currency_id']"/>
+                                        <span class="ms-1" t-esc="ml_total['diff5_sum']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="ml_total['currency_id']"/>
+                                        <span class="ms-1 me-2" t-esc="ml_total['sub_total']"/>
+                                    </th>
+                                </tr>
+                                <t t-foreach="ml_total['move_lines']" t-as="move_line" t-key="move_line_index">
+                                    <tr>
+                                        <th>
+                                            <span class="d-flex gap-2">
+                                                <span t-esc="move_line['move_name']"/>
+                                                <span t-if="move_line['name'] and move_line['name'] != move_line['move_name']" class="mx-1" t-esc="move_line['name']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <t t-esc="move_line['date']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end">
+                                            <span>
+                                                <t t-esc="move_line['amount_currency_symbol']"/>
+                                                <span class="mx-1" t-esc="move_line['amount_currency']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <t t-esc="move_line['amount_currency_name']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <span class="mx-1" t-esc="move_line['account_code']"/>
+                                                <t t-esc="move_line['account_name']['en_US']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <t t-if="move_line['date_maturity']"
+                                                   t-esc="move_line['date_maturity']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span t-if="move_line['diff0']">
+                                                <t t-esc="ml_total['currency_id']"/>
+                                                <span class="ms-1" t-esc="move_line['diff0']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span t-if="move_line['diff1']">
+                                                <t t-esc="ml_total['currency_id']"/>
+                                                <span class="ms-1" t-esc="move_line['diff1']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span t-if="move_line['diff2']">
+                                                <t t-esc="ml_total['currency_id']"/>
+                                                <span class="ms-1" t-esc="move_line['diff2']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span t-if="move_line['diff3']">
+                                                <t t-esc="ml_total['currency_id']"/>
+                                                <span class="ms-1" t-esc="move_line['diff3']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span t-if="move_line['diff4']">
+                                                <t t-esc="ml_total['currency_id']"/>
+                                                <span class="ms-1" t-esc="move_line['diff4']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span t-if="move_line['diff5']">
+                                                <t t-esc="ml_total['currency_id']"/>
+                                                <span class="ms-1" t-esc="move_line['diff5']"/>
+                                            </span>
+                                        </th>
+                                        <th/>
+                                    </tr>
+                                </t>
+                            </t>
+                            <tr>
+                                <th class="fw-bolder" colspan="6">
+                                    Total
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="grand_total['currency']"/>
+                                    <span class="ms-1" t-out="grand_total['diff0_sum']"/>
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="grand_total['currency']"/>
+                                    <span class="ms-1" t-out="grand_total['diff1_sum']"/>
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="grand_total['currency']"/>
+                                    <span class="ms-1" t-out="grand_total['diff2_sum']"/>
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="grand_total['currency']"/>
+                                    <span class="ms-1" t-out="grand_total['diff3_sum']"/>
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="grand_total['currency']"/>
+                                    <span class="ms-1" t-out="grand_total['diff4_sum']"/>
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="grand_total['currency']"/>
+                                    <span class="ms-1" t-out="grand_total['diff5_sum']"/>
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                    <t t-esc="grand_total['currency']"/>
+                                    <span class="ms-1 me-2" t-out="grand_total['total']" />
+                                </th>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

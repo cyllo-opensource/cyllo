@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <t t-name="UserDashboard" owl="1">
+        <div t-if="session.is_admin" class="cyllo_user_dashboard" t-ref="root">
+            <div class="col-md-11 col-lg-12 h-100 w-100">
+                 <div class="row h-100 g-0 px-2 pb-2">
+                     <div class="col-md-6 col-lg-3 g-3 pb-4"
+                          style="overflow: auto; max-height: 100%; scrollbar-width: none">
+                        <div class="cy-dashboard_container">
+                            <div class="cy-dashbaord-profile-banner"
+                                 t-att-style="'background-image: url(' + (this.state.bannerUrl || '/cyllo_dashboard/static/src/img/coverImage.png') + ');'">
+                                <label class="cy-dashboard-banner-upload" title="Change banner">
+                                    <i class="fa fa-camera"></i>
+                                    <input type="file" accept="image/*" t-on-change="uploadBanner"
+                                           style="display:none;"/>
+                                </label>
+                                <div class="cy-dashboard_profile">
+                                    <img t-if="this.user.userId"
+                                         t-att-src="imageLoader(this.user.userId)" alt="User Image"/>
+                                    <img t-else="" src="/cyllo_dashboard/static/src/img/dummy.jpg" alt=""/>
+                                </div>
+                            </div>
+                            <h2 class="cy-dashboard_name mb-1"><t t-esc="this.state.userProfile.name"/></h2>
+                            <a href="#" class="cy-userdashboard_md-txt text-center d-block"><t t-esc="this.state.userProfile.work_email"/></a>
+                            <form action="" class="d-flex gap-2 flex-wrap w-100 mt-3">
+                                <div class="cy-user_form-content">
+                                    <label for="" class="cy-userdashboard_label">Language</label>
+                                    <div class="dropdown cy-userdashboard_dropdwn">
+                                        <select id="lang" name="lang" t-attf-class="form-control" required="1"
+                                                t-on-change="onChangeLang">
+                                            <t t-foreach="this.state.userProfile.active_lang or []" t-as="lang"
+                                               t-key="lang_index">
+                                                <option t-att-value="lang.code"
+                                                        t-att-selected="lang.id == this.state.userProfile.language ? 'selected': ''">
+                                                    <t t-esc="lang.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="cy-user_form-content">
+                                    <label for="" class="cy-userdashboard_label">Timezone</label>
+                                    <div class="dropdown cy-userdashboard_dropdwn">
+                                        <select id="tz" name="tz" t-attf-class="form-control" required="1"
+                                                t-on-change="onChangeTimezone">
+                                            <t t-foreach="this.state.userProfile.timezone or []" t-as="tz"
+                                               t-key="tz_index">
+                                                <option t-att-selected="this.tz == tz[0] ? 'selected': ''"
+                                                        t-att-value="tz[0]">
+                                                    <t t-esc="tz[1]"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 mt-2 cy-userdashboard_btn-container cy_permission_button_container">
+                                    <button class="btn cy-button-stroke cy-permission_button text-nowrap text-center justify-content-center p-2"
+                                            type="button" t-on-click="onClickPermissions">
+                                        Permissions
+                                    </button>
+                                    <button class="btn cy-button-primary-stroke cy-change-password-button text-nowrap p-2"
+                                            type="button" t-on-click="onClickChangePassword">
+                                        Change password
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="div-timer">
+                                    <div>
+                                        <h5 id="idle_timer"/>
+                                    </div>
+                            </div>
+                        </div>
+                         <div class="cy-dashboard_container mt-3">
+                            <div class="cy-dashboard_headline-btm cy-border-btm pb-3">
+                                <h2 class="cy_tile-text">Memory</h2>
+                            </div>
+                             <div class="cy-dashboard_chart">
+                                 <div t-if="state.showLoading">
+                                     <div class="loader"/>
+                                 </div>
+                                 <canvas id="system_ram" t-ref="system_ram"/>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="col-md-6 col-lg-9 h-100 g-3 pb-4 overflow-auto"
+                          style="max-height: 100%; scrollbar-width: none">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="cy-dashboard_container">
+                                    <div class="cy-dashboard_headline cy-border-btm pb-2 d-flex align-items-center justify-content-between">
+                                        <h2 class="cy_tile-text mb-1">Your Shortcuts</h2>
+                                        <div class="d-flex align-items-center justify-content-end"
+                                             t-if="this.state.weatherDetails.temp">
+                                            <img t-attf-src="https://openweathermap.org/img/w/{{this.state.weatherDetails.icon}}.png"
+                                                 style="width:40px; height:40px;"
+                                                 onerror="this.src='/cyllo_dashboard/static/src/img/cloud-fill.svg';"/>
+                                            <span class="cy-userdashboard_md-txt">
+                                                <t t-esc="this.state.weatherDetails.temp"/>
+                                                <span>&#176;</span>C</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center flex-wrap gap-2 mt-3"
+                                         t-if="state.shortcuts.length">
+                                        <t t-foreach="state.shortcuts" t-as="shortcut" t-key="shortcut_index">
+                                            <div class="shortcut-btn-wrapper position-relative">
+                                                <button class="text-truncate cy-shortcuts"
+                                                        t-on-click="() => this.onClickShortCutMenu(shortcut)">
+                                                    <p class="cy-userdashboard--detail"><t t-esc="shortcut.name"/></p>
+                                                    <i t-if="shortcut.can_create"
+                                                       t-on-click.stop.prevent="() => this.onClickShortCutAdd(shortcut.model)"
+                                                       class="ri-add-line" style="cursor:pointer"/>
+                                                </button>
+                                                <div class="custom-tooltip" t-attf-data-tooltip="#{shortcut.path}"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div class="d-flex flex-wrap flex-column my-2 pt-3 justify-content-center align-items-center"
+                                         t-else="">
+                                        <img src="/cyllo_dashboard/static/src/img/folder.png" alt=""
+                                             style="width:90px; height:90px;"/>
+                                        <h4 class="text-muted mt-2">Create a shortcut...!</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="col-lg-12">
+                                <div class="cy-dashboard_container cy-dashboard-box">
+                                    <div class="cy-dashboard_headline cy-border-btm pb-3">
+                                        <h2 class="cy_tile-text">Login Details</h2>
+                                    </div>
+                                    <table class="w-100 mb-3 cy-dashboard_table">
+                                        <thead class="cy-userdashboard_sm-head">
+                                            <tr>
+                                                <th>User Name</th>
+                                                <th>Login Date and Time</th>
+                                                <th>IP Address</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.loginUserDetails" t-as="user" t-key="user_index">
+                                                <tr>
+                                                    <td class="">
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <img t-if="user.res_user_id"
+                                                                 t-att-src="imageLoader(user.res_user_id)"
+                                                                 class="cy-dashboard-login-profile" alt=""/>
+                                                            <img t-else=""
+                                                                 src="/cyllo_dashboard/static/src/img/dummy.jpg"
+                                                                 class="cy-dashboard-login-profile" alt=""/>
+                                                            <p class="cy-userdashboard--detail"><t t-esc="user.name"/></p>
+                                                        </div>
+                                                    </td>
+                                                    <td class="">
+                                                        <p class="cy-userdashboard--detail"><t t-esc="user.date_time"/></p>
+                                                    </td>
+                                                    <td class="">
+                                                        <p class="cy-userdashboard--detail"><t t-esc="user.ip_address"/></p>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                                <div class="col-lg-12 mt-3">
+                                <div class="cy-dashboard_container cy-dashboard-box mt-2">
+                                    <div class="cy-dashboard_headline cy-border-btm pb-3"
+                                         t-if="state.performanceInsights.is_admin == true">
+                                        <h2 class="cy_tile-text">System Monitor</h2>
+                                    </div>
+                                    <div class="cy-dashboard_headline cy-border-btm pb-3" t-elif="session.is_admin">
+                                        <h2 class="cy_tile-text">System Monitor</h2>
+                                    </div>
+                                    <div class="cy-userdasboard_system-monitor justify-content-center"
+                                         t-if="state.performanceInsights.is_admin == true">
+                                        <div class="cy-userdashboard_system-container">
+                                            <h3 class="cy-userdashboard_system-size"><t t-esc="state.performanceInsights.total_memory"/>
+                                                GB</h3>
+                                            <span class="cy-userdashboard_system-name">Total Storage</span>
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+                                            <h3 class="cy-userdashboard_system-size"><t t-esc="state.performanceInsights.used_memory"/>
+                                                GB</h3>
+                                            <span class="cy-userdashboard_system-name">Used Storage</span>
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+                                            <h3 class="cy-userdashboard_system-size"><t t-esc="state.performanceInsights.total_ram"/>
+                                                GB</h3>
+                                            <span class="cy-userdashboard_system-name">Total Memory</span>
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+                                            <h3 class="cy-userdashboard_system-size"><t t-esc="state.performanceInsights.total_cpu_usage"/>
+                                                %</h3>
+                                            <span class="cy-userdashboard_system-name">CPU Usage</span>
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+                                            <h3 class="cy-userdashboard_system-size"><t t-esc="state.performanceInsights.ram_percent"/>
+                                                %</h3>
+                                            <span class="cy-userdashboard_system-name">Memory usage</span>
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+                                            <h3 class="cy-userdashboard_system-size"><t t-if="state.performanceInsights.os_dict" t-esc="state.performanceInsights.os_dict.operating_system"/></h3>
+                                            <span class="cy-userdashboard_system-name">Operating System</span>
+                                        </div>
+                                    </div>
+                                    <div class="cy-userdasboard_system-monitor cy-userdasboard_system-monitor-no-content justify-content-center"
+                                         t-elif="session.is_admin">
+                                        <div class="cy-userdashboard_system-container">
+
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+
+                                        </div>
+                                        <div class="cy-userdashboard_system-container">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="col-lg-12">
+                                <div class="cy-dashboard_container cy-dashboard-box h-100">
+                                    <div class="cy-dashboard_headline cy-border-btm pb-3 mb-1">
+                                        <h2 class="cy_tile-text">Upcoming Activities</h2>
+                                    </div>
+                                    <div class="cyllo-upcoming_activity-container h-100">
+                                        <t t-if="state.activities.length > 0">
+                                            <t t-foreach="this.state.activities" t-as="group" t-key="group_index">
+                                            <div class="d-flex align-items-center justify-content-between py-2 mt-2 pe-2 cy-userdashboard__upcoming-container"
+                                                 t-att-data-model_name="group.model"
+                                                 style="cursor:pointer">
+                                                <div t-if="group.type === 'meeting'"
+                                                     t-on-click="() => this.handleGroupClick(group)"
+                                                     class="d-flex align-items-center gap-2">
+                                                      <div>
+                                                        <p class="cy-userdashboard__upcoming-txt"><t t-esc="group.name"/></p>
+                                                          <span class="cy-userdashboard_upcoming-vsm-txt">
+                                                          <t t-esc="group.meetings.length"/>
+                                                              Today
+                                                        </span>
+                                                      </div>
+                                                  </div>
+                                                <div class="d-flex align-items-center gap-2"
+                                                     t-on-click="() => this.openActivityGroup(group)"
+                                                     t-if="group.type === 'activity'">
+                                                    <div>
+                                                        <p class="cy-userdashboard__upcoming-txt"><t t-esc="group.name"/></p>
+                                                        <span class="cy-userdashboard_upcoming-vsm-txt"
+                                                              t-if="group.overdue_count"
+                                                              t-on-click.stop="() => this.openActivityGroup(group, 'overdue')"
+                                                              style="cursor:pointer"><t t-esc="group.overdue_count"/>
+                                                            late</span>
+                                                        <span class="cy-userdashboard_upcoming-vsm-txt" t-else=""><t t-esc="group.overdue_count"/>
+                                                            late</span>
+                                                        <span class="cy-userdashboard_upcoming-vsm-txt"
+                                                              t-if="group.today_count"
+                                                              t-on-click.stop="() => this.openActivityGroup(group, 'today')"
+                                                              style="cursor:pointer"><t t-esc="group.today_count"/>
+                                                            Today</span>
+                                                        <span class="cy-userdashboard_upcoming-vsm-txt" t-else="">0 Today</span>
+                                                    </div>
+                                                </div>
+                                                <span class="cy-userdashboard__upcoming-box-count"
+                                                      t-if="group.planned_count"
+                                                      t-on-click.stop="() => this.openActivityGroup(group, 'upcoming_all')"
+                                                      style="cursor:pointer"><t t-esc="group.planned_count"/>
+                                                    Future</span>
+                                                <span class="cy-userdashboard__upcoming-box-count"
+                                                      t-else="">0 Future</span>
+                                            </div>
+                                        </t>
+                                        </t>
+                                        <t t-else="">
+                                            <div class="d-flex flex-wrap flex-column h-100 mt-5 pt-3 justify-content-center align-items-center">
+                                                <img src="/cyllo_dashboard/static/src/img/empty.png" alt=""
+                                                     style="width:100px; height:100px;"/>
+                                                <h4 class="text-muted mt-2">Schedule an activity...!</h4>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                                <div class="col-lg-12 mt-3">
+                                <div class="cy-dashboard_container cy-dashboard-box h-100">
+                                    <div class="cy-dashboard_headline cy-border-btm pb-3">
+                                        <h2 class="cy_tile-text">System parameters</h2>
+                                    </div>
+                                    <div class="row g-lg-3" style="padding: 0.5rem 0 0rem !important"
+                                         t-if="state.performanceInsights.conf_dict and state.performanceInsights.is_admin == true">
+                                        <div class="col-lg-6">
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-user-fill"/>db_user
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.db_user"/></span>
+                                            </div>
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-database-2-fill"/>limit_memory_soft
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.limit_memory_soft"/></span>
+                                            </div>
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-database-2-fill"/>limit_memory_hard
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.limit_memory_hard"/></span>
+                                            </div>
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-database-2-fill"/>transient_age_limit
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.transient_age_limit"/></span>
+                                            </div>
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-team-line"/>workers
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.workers"/></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-time-line"/>limit_time_cpu
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.limit_time_cpu"/>
+                                                    s</span>
+                                            </div>
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-database-2-fill"/>limit_request
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.limit_request"/></span>
+                                            </div>
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-time-line"/>limit_time_real
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.limit_time_real"/></span>
+                                            </div>
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-task-line"/>max_cron_threads
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.max_cron_threads"/></span>
+                                            </div>
+                                            <div class="cy-system-detail-card">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-database-2-fill"/>http_port
+                                                </div>
+                                                <span><t t-esc="state.performanceInsights.conf_dict.http_port"/></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-lg-3 cy-performanceInsight-no_content"
+                                         style="padding: 0.5rem 0 0 !important"
+                                         t-elif="session.is_admin">
+                                        <div class="col-lg-6">
+                                            <div class="d-flex justify-content-between cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                            <div class="d-flex justify-content-between cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                            <div class="d-flex justify-content-between cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                            <div class="d-flex justify-content-between cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                            <div class="d-flex justify-content-between  cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="d-flex justify-content-between cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                            <div class="d-flex justify-content-between cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                            <div class="d-flex justify-content-between cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                            <div class="d-flex justify-content-between cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                            <div class="d-flex justify-content-between  cy-system-detail-card cy-performanceInsight flex-wrap mb-2">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div t-else="" class="row py-3 pt-0 cyllo-non-admin-main cyllo_user_dashboard" t-ref="root-non-admin">
+            <div class="row mt-0 pt-0 g-3 py-3 ps-3 pe-3">
+                <div class=" col-md-6 col-lg-3">
+                <div class="cy-dashboard_container">
+                        <div class="cy-dashbaord-profile-banner"
+                             t-att-style="'background-image: url(' + (this.state.bannerUrl || '/cyllo_dashboard/static/src/img/coverImage.png') + ');'">
+                            <label class="cy-dashboard-banner-upload" title="Change banner">
+                                <i class="fa fa-camera"></i>
+                                <input type="file" accept="image/*" t-on-change="uploadBanner" style="display:none;"/>
+                            </label>
+                            <div class="cy-dashboard_profile">
+                                <img t-if="this.user.userId"
+                                     t-att-src="imageLoader(this.user.userId)" alt="User Image"/>
+                                <img t-else="" src="/cyllo_dashboard/static/src/img/dummy.jpg" alt=""/>
+                            </div>
+                        </div>
+                    <h2 class="cy-dashboard_name mb-1"><t t-esc="this.state.userProfile.name"/></h2>
+                    <a href="#" t-if="this.state.userProfile.work_email"
+                       class="cy-userdashboard_md-txt text-center d-block">
+                        <t t-esc="this.state.userProfile.work_email"/>
+                    </a>
+                    <form action="" class="d-flex gap-2 flex-wrap w-100 mt-3">
+                        <div class="cy-user_form-content">
+                            <label for="" class="cy-userdashboard_label">Language</label>
+                            <div class="dropdown cy-userdashboard_dropdwn">
+                                <select id="lang" name="lang" t-attf-class="form-control" required="1"
+                                        t-on-change="onChangeLang">
+                                    <t t-foreach="this.state.userProfile.active_lang or []" t-as="lang"
+                                       t-key="lang_index">
+                                        <option t-att-value="lang.code"
+                                                t-att-selected="lang.id == this.state.userProfile.language ? 'selected': ''">
+                                            <t t-esc="lang.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="cy-user_form-content">
+                            <label for="" class="cy-userdashboard_label">Timezone</label>
+                            <div class="dropdown cy-userdashboard_dropdwn">
+                                <select id="tz" name="tz" t-attf-class="form-control" required="1"
+                                        t-on-change="onChangeTimezone">
+                                    <t t-foreach="this.state.userProfile.timezone or []" t-as="tz" t-key="tz_index">
+                                        <option t-att-selected="this.tz == tz[0] ? 'selected': ''" t-att-value="tz[0]">
+                                            <t t-esc="tz[1]"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="cy-user_form-content">
+                            <label for="" class="cy-userdashboard_label">Notification Type</label>
+                            <div class="d-flex gap-4 ">
+                                <div class="form-check ">
+                                    <input class="form-check-input d-inline" type="radio" name="handle_option"
+                                           id="email" value="email" t-on-input="(ev) => this.onInputNotifType(ev)"
+                                           t-att-checked="this.state.userProfile.notif_type === 'email' ? 'checked' : ''"/>
+                                    <label class="cy-userdashboard--detail" for="option1">Handle by Email</label>
+                                </div>
+                                <div class="form-check ">
+                                    <input class="form-check-input d-inline" type="radio" name="handle_option"
+                                           id="inbox" value="inbox"
+                                           t-on-input="(ev) => this.onInputNotifType(ev)"
+                                           t-att-checked="this.state.userProfile.notif_type === 'inbox' ? 'checked' : ''"/>
+                                    <label class="cy-userdashboard--detail" for="option1">Handle in Cyllo</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 mt-2 cy-userdashboard_btn-container mb-2">
+                            <button class="btn cy-button-stroke w-100 text-nowrap
+                                           text-center justify-content-center" type="button"
+                                    t-on-click="onClickPermissions">Permissions</button>
+                            <button class="btn cy-button-primary-stroke w-100  text-nowrap" type="button"
+                                    t-on-click="onClickChangePassword">Change password</button>
+                        </div>
+                    </form>
+                </div>
+                    <div class="my-3 cy-state-option-container cy-dashboard_container">
+                    <div class="cy-dashboard_headline  pb-2">
+                        <h2 class="cyllo-non-useradmin--md-text">Groups, Rules and Access Rights</h2>
+                    </div>
+                        <div class="cyllo_non-admin-state_btns ">
+                        <div class="cy-non-admin-box_container cyllo_useradmin-state--btn" t-on-click="onClickGroups">
+                            <i class="ri-group-fill cyllo_useradmin--icon"/>
+                            <span>Groups</span>
+                        </div>
+                            <div class="cy-non-admin-box_container cyllo_useradmin-state--btn"
+                                 t-on-click="onClickAccessRights">
+                            <i class="ri-folders-fill cyllo_useradmin--icon"/>
+                                <span>Access Right</span>
+                        </div>
+                            <div class="cy-non-admin-box_container cyllo_useradmin-state--btn"
+                                 t-on-click="onClickRecordRules">
+                            <i class="ri-stack-fill cyllo_useradmin--icon"/>
+                                <span>Record Rules</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="col-md-6 col-lg-9">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="cy-dashboard_container">
+                            <div class="cy-dashboard_headline cy-border-btm d-flex align-items-center justify-content-between pb-2">
+                                <h2 class="cy_tile-text mb-1">Your Shortcuts</h2>
+                                <div class="d-flex align-items-center mb-2" t-if="this.state.weatherDetails.temp">
+                                    <img t-attf-src="https://openweathermap.org/img/w/{{this.state.weatherDetails.icon}}.png"
+                                         style="width:40px; height:40px;"
+                                         onerror="this.src='/cyllo_dashboard/static/src/img/cloud-fill.svg';"/>
+                                    <span>
+                                        <t t-esc="this.state.weatherDetails.temp"/>
+                                        <span>&#176;</span>C
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center flex-wrap gap-2 mt-3" t-if="state.shortcuts.length">
+                                <t t-foreach="state.shortcuts" t-as="shortcut" t-key="shortcut_index">
+                                    <button class="cy-shortcuts text-truncate"
+                                            t-on-click.prevent.stop="() => this.onClickShortCutMenu(shortcut)">
+                                        <t t-set="is_unique" t-value="isCompleteNameUnique(shortcut.name)"/>
+                                        <span class="text-truncate"
+                                              t-attf-title='#{is_unique ? shortcut.name : shortcut.menu_id[1]}'>
+                                            <t t-if="is_unique">
+                                                <t t-esc="shortcut.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="shortcut.menu_id[1]"/>
+                                            </t>
+                                        </span>
+                                        <i t-if="shortcut.can_create"
+                                           class="ri-add-line"
+                                           t-on-click.prevent.stop="() => this.onClickShortCutAdd(shortcut.model)">
+                                        </i>
+                                    </button>
+                                </t>
+                            </div>
+                            <div class="d-flex flex-wrap flex-column my-2 pt-3 justify-content-center align-items-center"
+                                 t-else="">
+                                <img src="/cyllo_dashboard/static/src/img/folder.png" alt=""
+                                     style="width:90px; height:90px;"/>
+                                <h4 class="text-muted mt-2">Create a shortcut...!</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mt-3">
+                        <div class="cy-dashboard_container">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div t-if="this.state.nonAdmin.phone" class="cyllo-user-dashboard_ps-container">
+                                        <label for="" class="cyllo-non-useradmin--md-text">Phone</label>
+                                        <span class="cy-user-smtext"><t t-esc="this.state.nonAdmin.phone"/></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div t-if="state.nonAdmin.action_id" class="cyllo-user-dashboard_ps-container">
+                                        <label class="cyllo-non-useradmin--md-text" for="">Home Action</label>
+                                        <span class="cy-user-smtext"><t t-esc="this.state.nonAdmin.action_id"/></span>
+                                    </div>
+                                    <div t-else="" class="cyllo-user-dashboard_ps-container">
+                                        <label class="cyllo-non-useradmin--md-text" for="">Home Action</label>
+                                        <span class="cy-user-smtext">Not Provided</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div t-if="this.state.nonAdmin.job_position"
+                                         class="cyllo-user-dashboard_ps-container">
+                                        <label class="cyllo-non-useradmin--md-text" for="">Job Position</label>
+                                        <span class="cy-user-smtext"><t t-esc="this.state.nonAdmin.job_position"/></span>
+                                    </div>
+                                    <div t-else="" class="cyllo-user-dashboard_ps-container">
+                                        <label class="cyllo-non-useradmin--md-text" for="">Job Position</label>
+                                        <span class="cy-user-smtext">Not Provided</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="cyllo-user-dashboard_ps-container">
+                                        <label class="cyllo-non-useradmin--md-text" for="">Default Company</label>
+                                        <span class="cy-user-smtext"><t t-esc="state.nonAdmin.default_company.name"/></span>
+                                    </div>
+                                </div>
+                                <div class="col-12 ">
+                                    <div class="cyllo-user-dashboard_ps-container">
+                                        <label class="cyllo-non-useradmin--md-text" for="">Allowed Company</label>
+                                        <div class="d-flex flex-wrap mt-4">
+                                            <t t-foreach="state.nonAdmin.allowed_companies or []" t-as="company"
+                                               t-key="company.id">
+                                                <span class="cyllo_useradmin--badge cursor-pointer"
+                                                      t-on-click="() => this.onClickCompany(company)"><t t-esc="company.name"/></span>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 ">
+
+                                    <div class="cyllo-user-dashboard_ps-container">
+                                        <div class="d-flex justify-content-between">
+                                            <label for="" class="cyllo-non-useradmin--md-text">Email Signature</label>
+                                            <div class="d-flex gap-1">
+                                                <button class="btn cyllo-userdashboard-feature-btn"
+                                                        id="signatureSaveBtn" t-on-click="saveSignature">
+                                                    <i class="ri-save-fill"/>
+                                                </button>
+                                                <button class="btn cyllo-userdashboard-feature-btn"
+                                                        id="signatureEditBtn" t-on-click="editSignature">
+                                                    <i class="ri-pencil-fill"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <span id="signatureContent"><t t-out="markupSignature"/></span>
+                                        <textarea name="" t-att-value="signature"
+                                                  class="w-100  d-none cyllo-user_dashboard-textarea cy-user-smtext"
+                                                  id="email-sign-textarea" cols="" placeholder="Mr Demo" rows="2"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mt-3">
+                        <div class="cy-dashboard_container h-100">
+                            <div class="cy-dashboard_headline cy-border-btm pb-3">
+                                <h2 class="cy_tile-text">Upcoming Activities</h2>
+                            </div>
+                            <div class="cyllo-upcoming_activity-container h-100">
+                                <t t-if="state.activities.length > 0">
+                                    <t t-foreach="this.state.activities" t-as="group" t-key="group_index">
+                                    <div class="d-flex align-items-center justify-content-between mt-3 cy-userdashboard__upcoming-container"
+                                         t-att-data-model_name="group.model"
+                                         t-on-click="() => this.openActivityGroup(group)" style="cursor:pointer">
+                                            <div class="d-flex align-items-center gap-2"
+                                                 t-if="group.type === 'activity'">
+                                                <div>
+                                                    <p class="cy-userdashboard__upcoming-txt"><t t-esc="group.name"/></p>
+                                                    <span class="cy-userdashboard_upcoming-vsm-txt"
+                                                          t-if="group.overdue_count"
+                                                          t-on-click.stop="() => this.openActivityGroup(group, 'overdue')"
+                                                          style="cursor:pointer">
+                                                        <t t-esc="group.overdue_count"/>
+                                                        late</span>
+                                                    <span class="cy-userdashboard_upcoming-vsm-txt" t-else=""><t t-esc="group.overdue_count"/>
+                                                        late</span>
+                                                    <span class="cy-userdashboard_upcoming-vsm-txt"
+                                                          t-if="group.today_count"
+                                                          t-on-click.stop="() => this.openActivityGroup(group, 'today')"
+                                                          style="cursor:pointer"><t t-esc="group.today_count"/>
+                                                        Today</span>
+                                                    <span class="cy-userdashboard_upcoming-vsm-txt"
+                                                          t-else="">0 Today</span>
+                                                </div>
+                                            </div>
+                                        <span class="cy-userdashboard__upcoming-box-count"
+                                              t-if="group.planned_count"
+                                              t-on-click.stop="() => this.openActivityGroup(group, 'upcoming_all')"
+                                              style="cursor:pointer">
+                                                <t t-esc="group.planned_count"/>
+                                            Future</span>
+                                        <span class="cy-userdashboard__upcoming-box-count" t-else="">0 Future</span>
+                                    </div>
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                     <div class="d-flex flex-wrap flex-column h-100 mt-5 pt-3 justify-content-center align-items-center">
+                                        <img src="/cyllo_dashboard/static/src/img/empty.png" alt=""
+                                             style="width:100px; height:100px;"/>
+                                         <h4 class="text-muted mt-2">Schedule an activity...!</h4>
+                                     </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="cyllo_dashboard.CompanyDetailsDialog">
+        <Dialog size="'md'" title="props.title">
+            <div class="row">
+                <div class="col-12 d-flex">
+                    <div class="col-6">
+                        <div t-if="props.company.email">
+                            <label for="" class="cy-non-admin-userdashboard_label">Email</label>
+                            <span class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.email"/></span>
+                        </div>
+                        <div class="mt-2" t-if="props.company.phone">
+                        <label for="" class="cy-non-admin-userdashboard_label">Phone</label>
+                            <span class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.phone"/></span>
+                    </div>
+                        <div class="mt-2" t-if="props.company.currency_id">
+                        <label for="" class="cy-non-admin-userdashboard_label">Currency</label>
+                            <span class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.currency_id[1]"/></span>
+                    </div>
+                        <div class="mt-2" t-if="props.company.vat">
+                        <label for="" class="cy-non-admin-userdashboard_label">TAX ID</label>
+                            <span class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.vat"/></span>
+                    </div>
+                    </div>
+                    <div class="col-6">
+                        <div t-if="props.company.street or props.company.state_id or props.company.country_id">
+                            <label for="" class="cy-non-admin-userdashboard_label">Address</label>
+                            <span t-if="props.company.street" class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.street"/></span>
+                            <span t-if="props.company.street2" class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.street2"/></span>
+                            <span t-if="props.company.state_id" class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.state_id[1]"/></span>
+                            <span t-if="props.company.country_id" class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.country_id[1]"/></span>
+                            <span t-if="props.company.zip" class="cyllo-useradmin--md-text cy-company-text"><t t-esc="props.company.zip"/></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <t t-set-slot="footer">
+                    <button class="btn btn-primary" t-on-click="() => this.props.close()">
+                    Close
+                    </button>
+                </t>
+            </t>
+        </Dialog>
+    </t>
+</templates>

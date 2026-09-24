@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ChatSidebar" owl="1">
+        <div class="chatbot-history-sidebar" t-ref="root" t-att-class="{'closing': this.state.closing}">
+            <div class="history-header">
+                <dotlottie-player
+                    src="https://lottie.host/a67f0b6e-2baa-4912-9609-68750eb652ca/oDZqiBaV7g.json"
+                    background="transparent"
+                    speed="0"
+                    loop=""
+                    autoplay=""
+                    class="bot-avatar"
+                />
+                <button class="cy-ai-icon-btn" t-on-click="() => this.chatSideBarClose()" title="Close">
+                    <i class="ri-arrow-left-s-line" />
+                </button>
+            </div>
+            <div class="history-body">
+                <t t-if="state.loading">
+                    <div style="color:#6b7280;">Loading…</div>
+                </t>
+                <t t-elif="state.sessions.length === 0">
+                    <div style="color:#6b7280;">No chats yet</div>
+                </t>
+                <t t-else="">
+                    <div class="recent-chats-header">
+                        <span>Recent Chats</span>
+                    </div>
+                    <div class="session-list">
+                        <t t-foreach="state.sessions" t-as="s" t-key="s.session_id">
+                            <div class="session-item" t-att-class="{'active': this.state.activeSubMenu === s.session_id}">
+                                <t t-if="state.activeRenameTextbox === s.session_id">
+                                    <div class="rename-box">
+                                        <div class="rename-textbox">
+                                            <input type="text"
+                                                t-att-id="'input-session-' + s.session_id"
+                                                class="form-control"
+                                                t-att-value="s.title" />
+                                        </div>
+                                        <div class="rename-textbox-buttons">
+                                            <button class="ri-check-line rename-session-button" t-on-click="() => this.editSessionTitle(s)" />
+                                            <button class="ri-close-line cancel-rename-button" t-on-click="() => this.toggleRenameTextbox(s)" />
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-else="">
+                                    <div class="history-list">
+                                        <t t-if="this.state.activeSubMenu === s.session_id">
+                                            <div class="submenu" t-att-class="{'show': this.state.activeSubMenu === s.session_id}">
+                                                <div class="submenu-item" t-on-click="() => this.toggleRenameTextbox(s)">
+                                                    <i class="ri-edit-line" />
+                                                    Edit
+                                                </div>
+                                                <div class="submenu-item" t-on-click="(ev) => this.deleteSession(ev, s)">
+                                                    <i class="ri-delete-bin-line" />
+                                                    Delete
+                                                </div>
+                                            </div>
+                                        </t>
+                                        <div class="session-content" t-on-click="() => this.selectSession(s)">
+                                            <span class="session-title" t-esc="s.title" />
+                                        </div>
+
+                                        <div class="session-menu-button" t-on-click="(ev) => this.showSubMenu(ev, s)">
+                                            <i class="ri-more-2-line" />
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

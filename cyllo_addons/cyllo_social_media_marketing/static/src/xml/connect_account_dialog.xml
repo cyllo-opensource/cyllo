@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.ConnectAccountDialog">
+        <Dialog size="'md'" title="title">
+            <div t-if="entry">
+                <div class="form-group" t-foreach="entry.fields" t-as="field" t-key="field.key">
+                    <label t-att-for="field.key" class="custom-modal-label" t-esc="field.label" />
+                    <input autocomplete="off" t-att-id="field.key" t-att-type="field.type || 'text'"
+                        class="o_input rounded-0 form-control mb-3 mt-1"
+                        t-att-value="state.values[field.key] or ''"
+                        t-on-input="(ev) => state.values[field.key] = ev.target.value"
+                        t-att-placeholder="field.placeholder"
+                        t-att-required="field.required" />
+                </div>
+
+                <p class="mt-3" t-if="entry.note" t-esc="entry.note(state.values)" />
+            </div>
+
+            <t t-set-slot="footer">
+                <button type="button" class="btn btn-secondary rounded me-1" t-on-click="() => this.props.close()">
+                    Close
+                </button>
+                <button type="submit" class="btn btn-primary rounded" t-on-click="connect">
+                    Connect
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

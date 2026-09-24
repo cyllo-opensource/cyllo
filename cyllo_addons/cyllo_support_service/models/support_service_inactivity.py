@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+from odoo import fields, models
+
+
+class SupportServiceInactivity(models.Model):
+    """ Class defines support service Inactivity model"""
+    _name = 'support.service.inactivity'
+    _description = 'Support Service Inactivity'
+
+    stage_id = fields.Many2one('support.service.stage', string='Current Stage')
+    state_id = fields.Many2one('support.service.stage',
+                               string='Stage To Be Converted')
+    no_of_inactive_days = fields.Integer(string="Number of inactive days")
+    team_id = fields.Many2one('support.service.team')

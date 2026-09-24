@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherited the Hr contract for adding new fields -->
+    <record id="view_hr_work_entry_type_form" model="ir.ui.view">
+        <field name="name">view.hr.work.entry.type.form</field>
+        <field name="model">hr.work.entry.type</field>
+        <field name="inherit_id" ref="hr_work_entry.hr_work_entry_type_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='code']" position="after">
+                <field name="is_attendance"/>
+            </xpath>
+            <xpath expr="//group[@name='main_group']" position="after">
+                <group>
+                    <group string="Display in Payslip">
+                        <field name="round_days"/>
+                        <field name="round_type" invisible="round_days == 'no'"/>
+                    </group>
+                    <group string="UNPAID">
+                        <field name="unpaid_structure_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

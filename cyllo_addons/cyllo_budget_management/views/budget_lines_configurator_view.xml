@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Defines the Action of Budget Lines Configuration-->
+    <record id="action_view_budget_lines_configuration"
+            model="ir.actions.act_window">
+        <field name="name">budget lines configuration</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">budget.lines.configuration</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder no_content_message">
+                Create New ..
+            </p>
+        </field>
+    </record>
+    <!--    Defines the Tree View of Budget Lines Configuration-->
+    <record id="view_budget_lines_configuration_tree" model="ir.ui.view">
+        <field name="name">view.budget.lines.configuration.tree</field>
+        <field name="model">budget.lines.configuration</field>
+        <field name="arch" type="xml">
+            <tree string="configuration" editable="bottom" create="False">
+                <field name="analytic_account_id" readonly="1"/>
+                <field name="type"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount" readonly="type != 'amount'" force_save="1"
+                       optional="show" widget="monetary" sum="total"/>
+                <field name="percentage" readonly="type != 'percentage'"
+                       force_save="1" sum="total"/>
+                <field name="practical_amount" readonly="1" force_save="1"/>
+                <field name="achievement" readonly="1" force_save="1"
+                       widget="percentage"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

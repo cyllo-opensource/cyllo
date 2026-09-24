@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_instagram.InstagramComment" owl="1">
+        <div class="cyllo_comment_template">
+            <div class="p-4">
+                <form class="pb-4 border-bottom mb-4">
+                    <div class="form-group d-flex overflow-hidden">
+                        <textarea
+                                class="form-control"
+                                id="ig_comment_area"
+                                rows="1" role="textbox"
+                                placeholder="Write a comment...."
+                                t-ref="new_message_ig"/>
+                        <div class="d-flex justify-content-end align-items-end">
+                            <button class="btn text-end" style="font-size: 20px"
+                                    t-on-click="(ev) => this.onClickPost(ev)"><i class="ri-send-plane-2-line"/></button>
+                        </div>
+                    </div>
+                </form>
+                <t t-foreach="InstagramCommentDetails" t-as="comment"
+                   t-key="comment.id" t-if="InstagramCommentDetails">
+                    <div class="cy-social_market-commentReply">
+                        <div class="cy-social_marketComment-box p-0">
+                            <div class="cy-comment-bubble">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span>
+                                            <a t-on-click="() => this.DirectPartner(comment.partner_id)"
+                                               class="cy-main-sectionhead">
+                                                    <t t-esc="comment.username"/>
+                                            </a>
+                                        </span>
+                                        <div class="badge rounded-pill cursor-pointer"
+                                             t-on-click="convertToLead"
+                                             t-att-id="comment.id" data-tooltip="Create Lead" aria-label="Create Lead">
+                                            <i class="fa fa-user cy-cmt_rply"/>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="cy-soical-market-count_txt cy-cmt_rply"><i class="ri-heart-line"/></span>
+                                            <span class="cy-soical-market-count_txt cy-cmt_rply"><t t-esc="comment.like_count"/></span>
+                                        </div>
+                                        <span class="cy-soical-comment_txt"><t t-esc="comment.timestamp"/></span>
+                                    </div>
+                                </div>
+                                <p class="cy-soical-market-cmnttile"><t t-esc="comment.text"/></p>
+                            </div>
+                            <div class="d-flex justify-content-start align-items-center mt-1">
+                                <a t-on-click="(ev) => this.onClickReply(ev)"
+                                   class="cursor-pointer d-flex align-items-center gap-1">
+                                    <span>
+                                        <i class="ri-chat-3-line cy-cmt_rply-icon"/>
+                                    </span>
+                                    <span class="cy-cmt_rply">
+                                        Reply
+                                    </span>
+                                </a>
+                                <t t-if="comment.reply?.length > 0">
+                                    <a class="o_fb_comment_replies btn btn-sm btn-link"
+                                       href="#"
+                                       t-att-id="comment.id"
+                                       style="margin-left:10px;"
+                                       t-on-click="onClickViewReplies">
+                                        View Replies (<t t-esc="comment.reply?.length"/>)
+                                    </a>
+                                </t>
+                            </div>
+                            <div class="reply_div d-none">
+                                <input class="form-control mt-2"
+                                       type="text"
+                                       placeholder="Write a reply..."
+                                       name="" autocomplete="off"
+                                       t-attf-id="comment_{{comment.id}}"/>
+                                <span class="send_button">
+                                    <i class="ri-send-plane-2-line"
+                                       t-on-click="() => this.postReply(comment)"/>
+                                </span>
+                            </div>
+                            <div id="view_replies"
+                                 t-att-id="comment.id"
+                                 class="view_replies d-none">
+                                <t t-if="comment.reply">
+                                    <t t-foreach="comment.reply"
+                                       t-as="replies"
+                                       t-key="replies.id">
+                                            <div class="d-flex align-items-center">
+                                            <div class="cy-reply-line"/>
+                                                <div class="cy-comment-bubble mb-2">
+                                                <a t-on-click="() => this.DirectPartner(replies.partner_id)"
+                                                   class="cy-main-sectionhead">
+                                                    <span t-esc="replies?.username"/>
+                                                </a>
+                                                    <p t-esc="replies.text"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

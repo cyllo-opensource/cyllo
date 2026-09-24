@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.SearchPanelValueDialog">
+        <Dialog title="'Search Panel Value'" bodyClass="'overflow-visible'">
+            <div class="cy-studio-search_panel_value_dialog">
+                <p class="cy-studio-modal_subtitle">
+                    <t t-if="props.properties">
+                        Update the Search Panel Value
+                    </t>
+                    <t t-else="">
+                        Fill the form to add Search Panel Value
+                    </t>
+                </p>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group mb-3 col-10">
+                            <label class="cy-navbar_label">Label</label>
+                            <input type="text" class="form-control" t-model="state.properties.string"
+                                   t-attf-placeholder="{{props.allFields[state.properties.field]?.string || 'Enter a label'}}"/>
+                        </div>
+                        <div class="form-group mb-3 col-10 filter_domain">
+                            <label>Field</label>
+                            <div class="cy-studio-custom-dropdown-dialog-search-view">
+                                <CylloStudioDropdown
+                                        options="fields"
+                                        onChange="(value) => this.handleFieldChange(value)"
+                                        defaultValue="state.properties.field"
+                                        searchable="true"
+                                />
+                            </div>
+
+                            <div class="invalid-feedback">
+                                Please select a field.
+                            </div>
+                        </div>
+                        <div class="form-group mb-3 col-10 filter_domain">
+                            <label class="cy-navbar_label">Type</label>
+                            <div class="cy-studio-custom-dropdown-dialog-search-view cy-studio-custom-dropdown-dialog-search-view-type">
+                                <CylloStudioDropdown
+                                        onChange="(value) => this.handleOnChangeType(value)"
+                                        options="Type"
+                                        defaultValue="state.properties.select"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group mb-3 col-10" t-if="isLimit">
+                            <label class="cy-navbar_label">Limit</label>
+                            <input type="number" class="form-control" t-model="state.properties.limit"/>
+                        </div>
+                        <div class="d-flex ms-2 pt-2 col-10">
+    <!--                            changed -> removed class customCheckbox from input-->
+                            <input class="ViewCheck" type="checkbox" name="expand" id="expand"
+                                   t-model="state.properties.expand"/>
+                            <label class="cy-navbar_label customCheckbox-label me-3 ms-2 mt-2"
+                                   for="expand">Expand</label>
+                            <input class="ViewCheck" type="checkbox" name="counter" id="counter"
+                                   t-model="state.properties.enable_counters"/>
+                            <label class="cy-navbar_label customCheckbox-label me-3 ms-2 mt-2"
+                                   for="counter">Enable Counters</label>
+                            <t t-if="state.properties.select === 'one' and state.properties.expand">
+                                <input class="ViewCheck" type="checkbox" name="hierarchize" id="hierarchize"
+                                       t-model="state.properties.hierarchize"/>
+                                <label class="cy-navbar_label customCheckbox-label ms-2 mt-2" for="hierarchize">Enable Hierarchize</label>
+                            </t>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                      <div class="mb-3 col-10 position-relative">
+                        <label for="" class="cy-navbar_label">Icon</label>
+                          <div class="form-control text-center d-flex cursor-pointer">
+                              <i class="flex-grow-1 fa fa-2x" t-att-class="state.properties.icon || 'p-2'"
+                                   t-on-click="()=>state.iconToggle = !state.iconToggle"/>
+                              <i t-if="state.properties.icon"
+                                 class="align-self-center text-danger ri-close-circle-fill ri-lg"
+                                 t-on-click="()=>state.properties.icon=''"/>
+                </div>
+                          <div class="modal-content cy-sheet_icon-selectBox position-absolute overflow-auto z-index-1"
+                               style="min-height:25vh !important; height:40vh !important;" t-att-class="state.iconToggle ? '':'d-none'">
+                    <div class="modal-header cy-sheet_selection-box-head d-flex align-items-center">
+                        <h5 class=" cy-sheet_selection-heading-txt">Select Icon</h5>
+                        <span class="cy-icons cy-social_cmnt-closebtn cursor-pointer opacity-75-hover"
+                              t-on-click="()=>state.iconToggle = false">
+                            <i class="ri-close-line"/>
+                        </span>
+                    </div>
+                              <div class="modal-body pt-0">
+                        <ul class="d-flex align-items-start gap-3 flex-wrap cy-selection_icon-list py-2 list-unstyled">
+                            <li t-foreach="IconClass" t-as="icon" t-key="icon_index">
+                                <div class="cy-icon_box-item cursor-pointer opacity-75-hover p-1"
+                                     t-att-class="state.properties.icon == icon ? 'bg-secondary rounded':''"
+                                     t-on-click="()=> this.onSelectIcon(icon)">
+                                    <i class="cy-icons fa fa-fw"
+                                       t-att-class="state.properties.icon == icon ? 'text-primary '+icon: icon" style="color:#495057 !important;"/>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+                        <div class="form-group mb-3 col-10">
+                            <label class="cy-navbar_label">Color</label>
+                            <input type="color" class="form-control" t-model="state.properties.color"
+                                   style="min-height:4vh;"/>
+                        </div>
+
+                        <div class="form-group mb-3 col-10">
+                            <label class="cy-navbar_label">Visible To</label>
+                            <div class="form-control overflow-auto" style="max-height: 10vh;">
+                                <MultiRecordSelector resIds="state.properties.groupIds" resModel="'res.groups'"
+                                                     update="(groupIds)=> state.properties.groupIds = groupIds"/>
+                            </div>
+                        </div>
+                        <div class="d-flex ms-3 pt-2 col-10">
+    <!--                            changed -> removed class customCheckbox from input-->
+                            <input class="ViewCheck" type="checkbox" name="invisible" id="invisible"
+                                   t-on-click="onDomainRadioClick"
+                                   t-att-checked="!['False', '0'].includes(state.properties.invisible)"/>
+                            <label class="cy-navbar_label customCheckbox-label ms-2 mt-2"
+                                   for="invisible">Invisible</label>
+                        </div>
+                    </div>
+                </div>
+                <t t-set-slot="footer">
+                    <button class="btn btn-primary" t-on-click="onConfirm">Confirm</button>
+                    <button class="btn btn-secondary" t-on-click="onDiscard">Discard</button>
+                </t>
+            </div>
+        </Dialog>
+    </t>
+</templates>

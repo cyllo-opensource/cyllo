@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_base.StatusBarButtons">
+         <div class="o_statusbar_buttons d-flex align-items-center align-content-around flex-wrap gap-1">
+
+            <!-- Small screen: collapse all into a single "Action" dropdown (Odoo default) -->
+             <t t-if="env.isSmall and visibleSlotNames.length > 1">
+                <Dropdown togglerClass="'btn btn-primary'" showCaret="true">
+                    <t t-set-slot="toggler">Action</t>
+                    <t t-foreach="visibleSlotNames" t-as="slot" t-key="slot">
+                        <DropdownItem class="'o_statusbar_button_dropdown_item'">
+                            <t t-slot="{{ slot }}"/>
+                        </DropdownItem>
+                    </t>
+                </Dropdown>
+            </t>
+             <t t-else="">
+                <!-- First N buttons shown inline -->
+                 <t t-foreach="primarySlotNames" t-as="slot" t-key="slot">
+                    <t t-slot="{{ slot }}"/>
+                </t>
+                 <t t-if="hasExtraButtons">
+                        <div class="position-relative">
+                            <button
+                                    class="btn btn-secondary cy-show-more-btn"
+                                    t-on-click="toggleDropdown"
+                            >
+                                More
+                                <i t-attf-class="ri-arrow-drop-{{ dropdownState.isOpen ? 'up' : 'down' }}-line"></i>
+                            </button>
+                            <t t-if="dropdownState.isOpen">
+                                <div
+                                        class="dropdown-menu show position-absolute"
+                                        style="z-index:1000; top:100%; left:0; min-width:160px;"
+                                >
+                                    <t t-foreach="extraSlotNames" t-as="slot" t-key="slot">
+                                        <div class="dropdown-item px-2 py-1">
+                                            <t t-slot="{{ slot }}"/>
+                                        </div>
+                                    </t>
+                                </div>
+                                <div
+                                        class="position-fixed top-0 start-0 w-100 h-100"
+                                        style="z-index:999;"
+                                        t-on-click="closeDropdown"
+                                />
+                            </t>
+                        </div>
+                </t>
+            </t>
+        </div>
+    </t>
+</templates>

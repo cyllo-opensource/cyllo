@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="email_template_applicant_schedule_interview" model="mail.template">
+        <field name="name">Cyllo Appointment: Schedule Interview</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="subject">
+            Can we schedule an interview for your
+            {{ (object.job_id.name + ' ') if object.job_id else '' }}application?
+        </field>
+        <field name="email_to" eval="False"/>
+        <field name="partner_to" eval="False"/>
+        <field name="use_default_to" eval="True"/>
+        <field name="description">
+            Send this template when you want to invite an applicant to book
+            their own interview slot through the Cyllo Appointment portal.
+        </field>
+        <field name="body_html" type="html">
+<div style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif;">
+    <h2 style="color: #333333;">Hello,</h2>
+    <div style="font-size: 13px; color: #555555; line-height: 1.6;">
+        Thank you for your application and your interest in joining
+        <t t-out="object.company_id.name or ''">Our Company</t>.<br/><br/>
+
+        We would like to invite you to schedule a phone interview at a time
+        that suits you. The session should last approximately 30 minutes —
+        we will discuss your experience and motivations for joining the
+        <t t-out="object.company_id.name or ''">Our Company</t> team.<br/><br/>
+
+        Please use the button below to pick a slot that works best for you:
+    </div>
+    <br/>
+    <a t-att-href="object._get_interview_invite_url()"
+       t-attf-style="
+           background-color: {{ user.company_id.email_secondary_color or '#875A7B' }};
+           color: {{ user.company_id.email_primary_color or '#FFFFFF' }};
+           text-decoration: none;
+           padding: 10px 20px;
+           border-radius: 5px;
+           font-size: 14px;
+           display: inline-block;
+       ">
+        Book my interview slot
+    </a>
+    <br/><br/>
+    <div style="font-size: 12px; color: #888888;">
+        If the button above does not work, copy and paste the following
+        link into your browser:<br/>
+        <t t-out="object._get_interview_invite_url()"/>
+    </div>
+    <br/>
+    <p style="font-size: 13px; color: #555555;">
+        Best regards,<br/>
+        <t t-out="user.name"/>
+    </p>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+</odoo>

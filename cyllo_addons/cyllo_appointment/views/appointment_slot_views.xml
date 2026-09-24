@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Slot Form View -->
+    <record id="view_appointment_slot_form" model="ir.ui.view">
+        <field name="name">appointment.slot.form</field>
+        <field name="model">appointment.slot</field>
+        <field name="arch" type="xml">
+            <form string="Time Slot">
+                <header>
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="available,partially_booked,fully_booked"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Morning Slot"/></h1>
+                    </div>
+                    <group>
+                        <group string="Slot Details">
+                            <field name="appointment_type_id" domain="[('scheduling_type', '=', 'predefined')]"/>
+                            <field name="event_id" invisible="event_id == False"/>
+                            <field name="start_datetime"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="end_datetime"/>
+                            <field name="duration" widget="float_time"/>
+                        </group>
+                        <group string="Assignment">
+                            <field name="staff_domain" invisible="1"/>
+                            <field name="resource_domain" invisible="1"/>
+                            <field name="staff_id"
+                                domain="staff_domain"/>
+                            <field name="resource_id"
+                                domain="resource_domain"/>
+                            <field name="max_attendees"/>
+                            <field name="booked_count" readonly="1"/>
+                            <field name="available_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Appointments in this Slot" name="appointments">
+                            <field name="appointment_ids" readonly="1" context="{
+                                'default_appointment_type_id': appointment_type_id,
+                                'default_start_datetime': start_datetime,
+                                'default_end_datetime': end_datetime,
+                                'default_staff_id': staff_id,
+                                'default_resource_id': resource_id
+                            }">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="state" widget="badge"
+                                        decoration-success="state == 'confirmed'"
+                                        decoration-info="state == 'draft'"
+                                        decoration-danger="state in ('cancelled','rejected')"/>
+                                    <field name="attendee_count"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Slot List View -->
+    <record id="view_appointment_slot_list" model="ir.ui.view">
+        <field name="name">appointment.slot.list</field>
+        <field name="model">appointment.slot</field>
+        <field name="arch" type="xml">
+            <tree string="Time Slots" decoration-success="state == 'available'"
+                decoration-warning="state == 'partially_booked'"
+                decoration-danger="state == 'fully_booked'">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+                <field name="appointment_type_id"/>
+                <field name="staff_id"/>
+                <field name="resource_id"/>
+                <field name="max_attendees"/>
+                <field name="booked_count"/>
+                <field name="available_count"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'available'"
+                    decoration-warning="state == 'partially_booked'"
+                    decoration-danger="state == 'fully_booked'"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Slot Calendar View -->
+    <record id="view_appointment_slot_calendar" model="ir.ui.view">
+        <field name="name">appointment.slot.calendar</field>
+        <field name="model">appointment.slot</field>
+        <field name="arch" type="xml">
+            <calendar string="Time Slots" date_start="start_datetime" date_stop="end_datetime"
+                color="appointment_type_id" event_limit="5" mode="week">
+                <field name="appointment_type_id"/>
+                <field name="staff_id"/>
+                <field name="available_count"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+    <!-- Search View -->
+    <record id="view_appointment_slot_search" model="ir.ui.view">
+        <field name="name">appointment.slot.search</field>
+        <field name="model">appointment.slot</field>
+        <field name="arch" type="xml">
+            <search string="Time Slots">
+                <field name="appointment_type_id"/>
+                <field name="staff_id"/>
+                <field name="resource_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <filter string="Available" name="available" domain="[('state', '=', 'available')]"/>
+                <filter string="Partially Booked" name="partial" domain="[('state', '=', 'partially_booked')]"/>
+                <filter string="Fully Booked" name="full" domain="[('state', '=', 'fully_booked')]"/>
+                <separator/>
+                <filter string="Today" name="today"
+                    domain="[('start_datetime', '>=', context_today()),('start_datetime', '&lt;', (context_today() + relativedelta(days=1)))]"/>
+                <filter string="This Week" name="this_week" domain="[('start_datetime', '>=', (datetime.date.today() - datetime.timedelta(days=datetime.date.today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Appointment Type" name="group_type" context="{'group_by': 'appointment_type_id'}"/>
+                    <filter string="Staff" name="group_staff" context="{'group_by': 'staff_id'}"/>
+                    <filter string="Resource" name="group_resource" context="{'group_by': 'resource_id'}"/>
+                    <filter string="Company" name="company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'start_datetime:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Action -->
+    <record id="action_appointment_slot" model="ir.actions.act_window">
+        <field name="name">Time Slots</field>
+        <field name="res_model">appointment.slot</field>
+        <field name="view_mode">calendar,tree,form</field>
+        <field name="search_view_id" ref="view_appointment_slot_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No time slots yet!</p>
+            <p>Create time slots to allow appointment booking.</p>
+        </field>
+    </record>
+</odoo>

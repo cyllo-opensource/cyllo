@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Template for form print of service request-->
+    <template id="hr_service_report_document">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <div class="text-center">
+                        <h1>Services Request Report</h1>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <div t-if="hr_service_request">
+                        <div class="row">
+                            <div class="col-6">
+                                <h3 class="text-900">
+                                    Service Request #
+                                    <t t-esc="hr_service_request.name"/>
+                                </h3>
+                            </div>
+                            <div class="col-6">
+                                <h6>
+                                    <b>Service Requester:</b>
+                                </h6>
+                                <t t-esc="hr_service_request.employee_id.name"/>
+                                <br/>
+                                <br/>
+                                <h6>
+                                    <b>Email:</b>
+                                </h6>
+                                <t t-esc="hr_service_request.employee_id.work_email"/>
+                                <br/>
+                                <br/>
+                                <h6>
+                                    <b>Department:</b>
+                                </h6>
+                                <t t-esc="hr_service_request.employee_id.department_id.name"/>
+                                <br/>
+                                <br/>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="col-6">
+                            <h6>
+                                <b>Created on:</b>
+                            </h6>
+                            <t t-esc="hr_service_request.create_date"/>
+                        </div>
+                        <br/>
+                        <div t-if="hr_service_request.date"
+                             class="col-6">
+                            <h6>Submitted Date:</h6>
+                            <t t-esc="hr_service_request.date"/>
+                        </div>
+                        <div t-if="hr_service_request.date_done"
+                             class="col-6">
+                            <h6>Completion Date:</h6>
+                            <t t-esc="hr_service_request.date_done"/>
+                        </div>
+                        <div>
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <th t-if="hr_service_request.service_request_type=='service'">
+                                        Service Category
+                                    </th>
+                                    <th>Service Handler</th>
+                                    <th>Handler's Department</th>
+                                    <th t-if="hr_service_request.service_request_type=='service'">
+                                        Service Executor
+                                    </th>
+                                    <th t-if="hr_service_request.service_request_type=='service'">
+                                        Executor's Department
+                                    </th>
+                                    <th t-if="hr_service_request.service_request_type=='custody'">
+                                        Equipment
+                                    </th>
+                                    <th t-if="hr_service_request.service_request_type=='custody'">
+                                        Expected Return Date
+                                    </th>
+                                </thead>
+                                <tr>
+                                    <td t-if="hr_service_request.service_request_type=='service'">
+                                        <center>
+                                            <t t-esc="hr_service_request.service_category_id.name"/>
+                                        </center>
+                                    </td>
+                                    <td>
+                                        <center>
+                                            <t t-esc="hr_service_request.service_handler_id.name"/>
+                                        </center>
+                                    </td>
+                                    <td>
+                                        <center>
+                                            <t t-esc="hr_service_request.service_handler_department_id.name"/>
+                                        </center>
+                                    </td>
+                                    <td t-if="hr_service_request.service_request_type=='service'">
+                                        <center>
+                                            <t t-esc="hr_service_request.service_executor_id.name"/>
+                                        </center>
+                                    </td>
+                                    <td t-if="hr_service_request.service_request_type=='service'">
+                                        <center>
+                                            <t t-esc="hr_service_request.service_executor_department_id.name"/>
+                                        </center>
+                                    </td>
+                                    <td t-if="hr_service_request.service_request_type=='custody'">
+                                        <center>
+                                            <t t-esc="hr_service_request.equipment_id.name"/>
+                                        </center>
+                                    </td>
+                                    <td t-if="hr_service_request.service_request_type=='custody'">
+                                        <center>
+                                            <t t-esc="hr_service_request.expected_return_date"/>
+                                        </center>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <br/>
+                        <br/>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

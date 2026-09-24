@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_quality_check_tree_inherit_asset_quality" model="ir.ui.view">
+        <field name="name">quality.check.tree.inherit.asset.quality</field>
+        <field name="model">quality.check</field>
+        <field name="inherit_id" ref="cyllo_quality.view_quality_check_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="before">
+                <field name="control_type" column_invisible="True"/>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="invisible">control_type == 'asset'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="asset_operation_type" invisible="control_type != 'asset'"/>
+                <field name="asset_ids" widget="many2many_tags" invisible="control_type != 'asset'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_quality_check_form_inherit_asset_quality" model="ir.ui.view">
+        <field name="name">quality.check.form.inherit.asset.quality</field>
+        <field name="model">quality.check</field>
+        <field name="inherit_id" ref="cyllo_quality.view_quality_check_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="invisible">control_type not in ('product', 'quantity')</attribute>
+            </xpath>
+            <xpath expr="//label[@for='quantity']" position="attributes">
+                <attribute name="invisible">control_type != 'quantity'</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('o_row') and field[@name='quantity']]" position="attributes">
+                <attribute name="invisible">control_type != 'quantity'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='picking_id']" position="attributes">
+                <attribute name="invisible">control_type == 'asset'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='control_type']" position="after">
+                <field name="asset_operation_type" invisible="control_type != 'asset'" required="control_type == 'asset'"/>
+                <field name="asset_ids" widget="many2many_tags" invisible="control_type != 'asset'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

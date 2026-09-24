@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="WindowNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <Record t-props="recordProps" t-slot-scope="data">
+                <div class="row py-2">
+                    <div class="col-12 mb-3">
+                        <label class="form-label cy-modal-form_label">
+                            <span>Label</span>
+                        </label>
+                        <CharField
+                            name="'label'"
+                            record="data.record"
+                            id="'label'"
+                            t-on-change="ev => this.onChangeLabel(ev.target.value)"
+                        />
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label class="form-label cy-modal-form_label">
+                            <span>Window Action</span>
+                        </label>
+                        <Many2OneField
+                            name="'window_action_id'"
+                            record="data.record"
+                            id="'window_action_id'"
+                        />
+                    </div>
+
+                    <div class="col-6 mb-3">
+                        <label class="form-label cy-modal-form_label">
+                            <span>View Type</span>
+                        </label>
+                        <SelectionField
+                            name="'window_view_type'"
+                            record="data.record"
+                            id="'window_view_type'"
+                        />
+                    </div>
+
+                    <div class="col-6 mb-3">
+                        <label class="form-label cy-modal-form_label">
+                            <span>Target</span>
+                        </label>
+                        <SelectionField
+                            name="'window_target'"
+                            record="data.record"
+                            id="'window_target'"
+                        />
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label class="form-label cy-modal-form_label">
+                            <span>Domain Filter <small class="text-muted">(optional)</small></span>
+                        </label>
+                        <t t-if="windowState.resModel">
+                            <CustomSearchDomainSelector t-props="domainSelectorProps" />
+                        </t>
+                        <t t-else="">
+                            <div class="text-muted small fst-italic py-1">
+                                Select a Window Action first to enable the domain builder.
+                            </div>
+                        </t>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label class="form-label cy-modal-form_label">
+                            <span>Context <small class="text-muted">(optional)</small></span>
+                        </label>
+                        <CharField
+                            name="'window_context'"
+                            record="data.record"
+                            id="'window_context'"
+                        />
+                        <t t-if="contextSuggestionGroups.length > 0">
+                            <t t-foreach="contextSuggestionGroups" t-as="group" t-key="group.title">
+                                <div class="mt-2">
+                                    <span class="text-muted small fw-semibold me-1" t-esc="group.title + ':'"/>
+                                    <t t-foreach="group.items" t-as="s" t-key="s">
+                                        <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-secondary me-1 mb-1 px-2 py-0"
+                                                t-on-click="() => this.selectContextSuggestion(data.record, s)"
+                                        >
+                                            <t t-esc="s"/>
+                                        </button>
+                                    </t>
+                                </div>
+                            </t>
+                        </t>
+                        <div class="text-muted small fst-italic mt-1">
+                            A Python dict literal. <code>current_record</code> refers to the record the workflow is running on.
+                            Replace <code>FIELD_NAME</code>, <code>FILTER_NAME</code> and <code>VALUE</code> placeholders as needed.
+                        </div>
+                    </div>
+                </div>
+            </Record>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,303 @@
+.cy-pivot-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: transparent;
+    font-family: inherit;
+}
+
+.cy-pivot-section {
+    padding: 16px;
+    border-top: 1px solid var(--cy-components-span);
+
+    &:first-child {
+        border-top: none;
+    }
+}
+
+// Toggle rows
+.cy-pivot-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.cy-pivot-toggle-label {
+    font-size: 13px;
+    color: #e2e2e2;
+    font-weight: 400;
+}
+
+// Toggle switch
+.cy-pivot-switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+
+    input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+    }
+
+    .cy-pivot-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background-color: #46442d;
+        border-radius: 18px;
+        transition: background-color 0.2s ease;
+
+        &::before {
+            content: "";
+            position: absolute;
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            top: 3px;
+            background: #85857d;
+            border-radius: 50%;
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+        }
+    }
+
+    input:checked+.cy-pivot-slider {
+        background-color: #3a3e00;
+    }
+
+    input:checked+.cy-pivot-slider::before {
+        transform: translateX(16px);
+        background: #9ea700;
+    }
+}
+
+// Section headers
+.cy-pivot-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    height: 22px;
+}
+
+.cy-pivot-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #bcbba7;
+}
+
+.cy-pivot-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #9ea700;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+        background: #9ea700;
+        color: #fff;
+    }
+
+    i {
+        font-size: 16px;
+    }
+}
+
+// Items list
+.cy-pivot-items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.cy-pivot-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #373627;
+    border: 1px solid #4b4934;
+    border-radius: 8px;
+    padding: 5px 10px;
+    min-height: 35px;
+    position: relative;
+}
+
+.cy-pivot-item .o-dropdown.dropdown.o-dropdown--no-caret {
+    width: 100%;
+    position: relative;
+    overflow: visible;
+}
+
+.cy-pivot-item-label {
+    flex: 1;
+    font-size: 13px;
+    color: #e2e2e2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Select button (shown when no value yet)
+.cy-pivot-select-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    font-size: 13px;
+    color: #BCBBA7;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    white-space: nowrap;
+
+    i {
+        font-size: 11px;
+        color: #BCBBA7;
+        flex-shrink: 0;
+    }
+}
+
+.cy-pivot-delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    flex: 0 0 22px;
+    margin: 0;
+    padding: 0;
+    align-self: center;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: #BCBBA7;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+
+    &:hover {
+        color: #ff5c5c;
+        background: rgba(255, 92, 92, 0.1);
+    }
+
+    i {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        margin: 0;
+    }
+}
+
+.cy-pivot-item .cy-pivot-delete-btn {
+    align-self: center;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+// Remove the global margin-bottom and extra min-height from the dropdown
+// wrapper so it does not force the .cy-pivot-item to expand vertically.
+.cy-pivot-item .cy-studio-custom-dropdown {
+    margin-bottom: 0;
+    min-height: unset;
+    flex: 1;
+}
+
+// Dropdown menu — override Odoo's inline position:fixed via !important
+
+.o-dropdown.dropdown>.cy-pivot-dropdown-menu.o-dropdown--menu {
+    margin-top: 16px !important;
+}
+
+.cy-pivot-dropdown-menu {
+    background: #2d2d20;
+    border: 1px solid #4b4934;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    min-width: 120%;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4b4934 transparent;
+    font-size: 13px;
+    z-index: 9999 !important;
+    animation: cy-pivot-dropdown-slide 0.18s ease;
+
+    .dropdown-item {
+        color: #BCBBA7;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 13px;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.22);
+            color: #e2e2e2;
+        }
+    }
+}
+
+@keyframes cy-pivot-dropdown-slide {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Grid layout (preserve existing)
+.cy-studio-container {
+    display: grid;
+    grid-template-columns: 250px 1fr 300px;
+    gap: 10px;
+    height: 100vh;
+
+    @media (max-width: 1024px) {
+        grid-template-columns: 200px 1fr 250px;
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: 60px 1fr 250px;
+    }
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+
+        .pivot_properties {
+            display: none;
+        }
+
+        &.show-properties .pivot_properties {
+            display: block;
+            position: fixed;
+            width: 250px;
+            height: 100%;
+            z-index: 1000;
+        }
+    }
+}

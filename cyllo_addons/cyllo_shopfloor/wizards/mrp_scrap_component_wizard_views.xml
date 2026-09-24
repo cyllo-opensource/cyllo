@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_mrp_scrap_component_wizard" model="ir.ui.view">
+        <field name="name">mrp.scrap.component.wizard.form</field>
+        <field name="model">mrp.scrap.component.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Scrap Component">
+                <sheet>
+                    <group>
+                        <field name="production_id" invisible="1"/>
+                        <field name="component_ids" invisible="1"/>
+                        <field name="product_id" domain="[('id', 'in', component_ids)]" options="{'no_create': True}"/>
+                        <field name="quantity"/>
+                        <field name="reason" placeholder="e.g., Damaged during assembly"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_scrap_component" type="object" string="Scrap" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mrp_scrap_component_wizard" model="ir.actions.act_window">
+        <field name="name">Scrap Component</field>
+        <field name="res_model">mrp.scrap.component.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

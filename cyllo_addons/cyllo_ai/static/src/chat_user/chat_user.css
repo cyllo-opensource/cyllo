@@ -1,0 +1,74 @@
+/* ============================================================================
+   Cyllo AI — user message bubble.
+
+   Tokens are declared on `.chatbot-modal` in chatbot.css; this file is always
+   rendered inside that subtree. The row wrapper (`.chat-message`) is owned by
+   chatbot.css — do not redeclare it here.
+   ========================================================================= */
+
+/* Top chart container for user attachments */
+.cy-ai-chat-chart-user {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+/* User turn message container */
+.user-message {
+    justify-content: flex-start;
+    flex-direction: row-reverse;
+}
+
+/* Column wrapper for the chart + bubble, so both nest inside the same
+   .chat-message row as the avatar instead of the chart floating outside it.
+   flex:1 lets the chart use the row's full remaining width; the avatar gap
+   moves here (was margin-right on the bubble) since the bubble is no longer
+   a direct sibling of the avatar. */
+.user-message-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: var(--cy-ai-space-3);
+}
+
+/* User avatar */
+.cyllo-ai-user {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+/* Single owner for the user turn — the only message that still gets a
+   container, and a neutral one: colour is reserved for interaction. Caps its
+   own width (the shared `.chat-bubble` base is typography-only now) so a short
+   question doesn't stretch across the panel. */
+.user-message .chat-bubble.user {
+    max-width: 78%;
+    background: var(--cy-ai-surface-sunken);
+    color: var(--cy-ai-text);
+    border: 1px solid var(--cy-ai-border-soft);
+    border-radius: var(--cy-ai-radius-md);
+    padding: 8px;
+    white-space: pre-wrap;
+
+    .user-message {
+        padding: 0 4px;
+    }
+}
+
+/* The select-to-quote card (same look as the composer's own .cy-ai-quote-strip)
+   needs its own gap from the message below it — the bubble isn't a flex/gap
+   layout like the composer, where that spacing comes for free. */
+.chat-bubble.user .cy-ai-quote-strip {
+    margin-bottom: var(--cy-ai-space-2);
+}
+
+/* Dark Reader support for user message */
+[data-darkreader-scheme="dark"] .chatbot-modal .user-message .chat-bubble.user {
+    background-color: #c0ceec1f;
+}
+
+/* @ mention pills inside a sent bubble use the shared .inline-mention-pill
+   look (chatbot.css) — same token as the live composer, minus its × button
+   (see ChatUser.mentionParts). Nothing to declare here. */

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="profile_management_view_form" model="ir.ui.view">
+        <field name="name">profile.management.view.form</field>
+        <field name="model">profile.management</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_refresh_ui_components" type="object"
+                            string="Sync UI Components" class="btn-secondary"
+                            title="Sync buttons, tabs, filters if not found in any model."/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_show_users" type="object" groups="base.group_no_one"
+                                class="oe_stat_button" icon="fa-user">
+                            <field string="Users" name="user_count" widget="statinfo"/>
+                        </button>
+                        <button name="action_show_access_rights" type="object"
+                                groups="base.group_no_one" class="oe_stat_button" icon="fa-list">
+                            <field string="Access Rights" name="access_count" widget="statinfo"/>
+                        </button>
+                        <button name="action_show_record_rules" type="object"
+                                groups="base.group_no_one" class="oe_stat_button" icon="fa-list-ul">
+                            <field string="Record Rules" name="rule_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <field name="is_activated" invisible="1"/>
+                    <widget name="web_ribbon" title="Deactivated" bg_color="text-bg-danger"
+                            invisible="is_activated">
+                    </widget>
+                    <div class="ms-1">
+                        <group>
+                            <div class="oe_title">
+                                <h1 class="mb-32">
+                                    <field name="name"/>
+                                </h1>
+                            </div>
+                            <group>
+                                <field name="company_ids" widget="many2many_tags"/>
+                                <field name="profile_ids" widget="many2many_tags"
+                                       options="{'color_field': 'color'}"/>
+                            </group>
+                            <group>
+                                <field name="is_readonly" invisible="not profile_ids"/>
+                                <field name="disable_chatter" invisible="not profile_ids"/>
+                                <field name="disable_debug_mode" invisible="not profile_ids"/>
+                                <field name="disable_login" invisible="not profile_ids"/>
+                            </group>
+                        </group>
+                    </div>
+                    <notebook>
+                        <page string="Hide Any Menus">
+                            <field name="menu_ids">
+                                <tree>
+                                    <field name="complete_name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Hide Any Button or Tab">
+                            <field name="hide_buttons_tabs_ids">
+                                <tree editable="bottom">
+                                    <field name="model_id" context="{'model': True}"/>
+                                    <field name="button_ids" widget="many2many_tags"
+                                           domain="[('model_id','=',model_id)]"
+                                           required="not tab_ids"/>
+                                    <field name="tab_ids" widget="many2many_tags"
+                                           domain="[('model_id','=',model_id)]"
+                                           required="not button_ids"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Hide Any Filter or Group By">
+                            <field name="hide_filters_ids">
+                                <tree editable="bottom">
+                                    <field name="model_id" context="{'model': True}"/>
+                                    <field name="filter_ids" widget="many2many_tags"
+                                           domain="[('model_id','=',model_id)]"
+                                           required="not group_ids"/>
+                                    <field name="group_ids" widget="many2many_tags"
+                                           domain="[('model_id','=',model_id),('is_group_by','=',True)]"
+                                           required="not filter_ids"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Edit Field Access">
+                            <field name="field_access_ids">
+                                <tree>
+                                    <field name="model_id" context="{'model': True}"/>
+                                    <field name="model_name" invisible="1" column_invisible="1"/>
+                                    <field name="field_id" domain="[('model_id','=',model_id)]"/>
+                                    <field name="field_attribute"/>
+                                    <field name="domain"
+                                           invisible="field_attribute == 'remove_link'"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Edit Model Access">
+                            <field name="model_access_ids">
+                                <tree editable="bottom">
+                                    <field name="model_id" context="{'model': True}"/>
+                                    <field name="is_readonly"/>
+                                    <field name="hide_create"/>
+                                    <field name="hide_edit"/>
+                                    <field name="hide_delete"/>
+                                    <field name="hide_archive"/>
+                                    <field name="hide_duplicate"/>
+                                    <field name="hide_export"/>
+                                    <field name="hide_reports"/>
+                                    <field name="hide_actions"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Edit Domain Access">
+                            <field name="domain_access_ids">
+                                <tree>
+                                    <field name="model_id" context="{'model': True}"/>
+                                    <field name="model_name" invisible="1" column_invisible="1"/>
+                                    <field name="domain"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="profile_management_view_tree" model="ir.ui.view">
+        <field name="name">profile.management.view.tree</field>
+        <field name="model">profile.management</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="create_uid"/>
+                <field name="create_date"/>
+                <field name="profile_ids" widget="many2many_tags"
+                       options="{'color_field': 'color'}"/>
+                <field name="is_activated" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_profile_management" model="ir.actions.act_window">
+        <field name="name">Profile Management</field>
+        <field name="res_model">profile.management</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face"></p>
+        </field>
+    </record>
+</odoo>

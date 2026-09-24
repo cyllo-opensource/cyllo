@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="frontdesk_emergency_wizard_view_form" model="ir.ui.view">
+        <field name="name">frontdesk.emergency.wizard.view.form</field>
+        <field name="model">frontdesk.emergency.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Trigger Emergency Alert">
+                <!-- Premium Danger UI Alert Box -->
+                <div class="alert alert-danger" role="alert" style="border-radius: 8px; font-weight: bold; margin-bottom: 20px;">
+                    <span class="fa fa-exclamation-triangle mr-2" style="font-size: 1.4rem; vertical-align: middle;"/>
+                    CRITICAL WARNING: This action will broadcast an emergency alert to all configured security channels, groups, and contacts immediately!
+                </div>
+                <group>
+                    <field name="station_id" readonly="1" force_save="1"/>
+                    <field name="alert_id" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="message" placeholder="Type emergency message here..." rows="4"/>
+                </group>
+                <footer>
+                    <button name="action_send_alert" string="Broadcast Alert" type="object" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_frontdesk_emergency_wizard" model="ir.actions.act_window">
+        <field name="name">Trigger Emergency Alert</field>
+        <field name="res_model">frontdesk.emergency.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

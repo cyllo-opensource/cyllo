@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="CashBookReport" t-inherit="cyllo_accounting.AccountingReportBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('cy_accounting_filters_sub')]" position="inside">
+            <t t-call="CashBookFilter"/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_table_main-view')]" position="inside">
+            <div>
+                <div class="table_view_dfr">
+                    <div>
+                        <table class="table cy_accounting_report_table table-sm table-reports">
+                            <thead>
+                                <tr>
+                                    <th/>
+                                    <th>Journal</th>
+                                    <th>Partner</th>
+                                    <th>Reference</th>
+                                    <th>Accounting Date</th>
+                                    <th>Entry Label</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.accountEntries"
+                                   t-as="account"
+                                   t-key="account_index">
+                                    <ReportDropdownWithPager
+                                            parentTemplate="'commonBNKBookParent'"
+                                            childTemplate="'commonBNKBookChild'"
+                                            account="account"
+                                            accountEntries="state.accountEntries"
+                                            currencySymbol="currencySymbol"
+                                            ledgerId="ledgerId"
+                                            openJournal.bind="openJournal"
+                                            openAnnotation.bind="openAnnotation"
+                                            removeAnnotation.bind="removeAnnotation"
+                                            accountDataPage="state.accountEntries[account][4]"
+                                            updateMoveLines.bind="updateMoveLines"
+                                            callBackKey="'cashBook'"
+                                            onClickAccount.bind="onClickAccount"
+                                            subAccounts="state.openAccounts"
+                                    />
+                                </t>
+                                <tr class="cy-report-line-acc">
+                                    <th/>
+                                    <th colspan="4" class="o_heading">
+                                        Total
+                                    </th>
+                                    <th/>
+                                    <th class="o_heading">
+                                        <t t-esc="currencySymbol"/>
+                                        <t t-out="state.totalDebit"/>
+                                    </th>
+                                    <th class="o_heading">
+                                        <t t-esc="currencySymbol"/>
+                                        <t t-out="state.totalCredit"/>
+                                    </th>
+                                    <th class="o_heading">
+                                        <t t-esc="currencySymbol"/>
+                                        <t t-out="state.totalBalance"/>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+    <t t-name="commonCSHBookParent">
+        <tr t-on-click="onClickParent" class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+            <th>
+                <strong>
+                    <span class="toggle-icon">
+                        <i t-att-class="caretDropdown"/>
+                    </span>
+                    <span class="ms-3" t-out="props.account"/>
+                </strong>
+            </th>
+            <th/>
+            <th/>
+            <th/>
+            <th/>
+            <th/>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="props.accountEntries[props.account][1]"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="props.accountEntries[props.account][2]"/>
+                </span>
+            </th>
+            <th>
+                <strong>
+                    <span>
+                        <t t-out="currencySymbol"/>
+                        <span class="mx-1" t-out="props.accountEntries[props.account][3]"/>
+                    </span>
+                </strong>
+            </th>
+        </tr>
+    </t>
+    <t t-name="commonCSHBookChild">
+        <tr t-if="pager.total > 100" class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+            <th t-foreach="Array(7)" t-as="th" t-key="th_index"/>
+            <th colspan="6">
+                <div class="d-flex justify-content-end me-3 p-0">
+                    <Pager total="pager.total"
+                           offset="pager.offset"
+                           limit="pager.limit"
+                           isEditable="false"
+                           onUpdate.bind="onPagerChanged"/>
+                </div>
+            </th>
+        </tr>
+        <tr t-foreach="props.accountEntries[props.account][0]" t-as="entry" t-key="entry_index"
+            class="border-bottom border-gainsboro cy-report-line-acc">
+            <th>
+                <span class="d-flex gap-2">
+                    <span class="mx-1" t-out="entry.date"/>
+                    <t t-set="annotation"
+                       t-value="entry.annotations and entry.annotations.hasOwnProperty(this.props.ledgerId) ? entry.annotations[this.props.ledgerId] : ''"/>
+                    <Dropdown class="'border_unset_button'">
+                        <t t-set-slot="toggler">
+                            <span class="mx-2 fa fa-caret-down"/>
+                        </t>
+                        <DropdownItem onSelected="() => this.props.openJournal(entry.move_id[0], entry.move_id[1])">
+                            View Entry
+                        </DropdownItem>
+                        <DropdownItem
+                                onSelected="() => this.props.openAnnotation(entry.id, annotation, entry.account_id[1])">
+                            Annotation
+                        </DropdownItem>
+                    </Dropdown>
+                    <div t-on-click="() => this.props.openAnnotation(entry.id, annotation, entry.account_id[1])"
+                         t-if="annotation" class="mx-2 cursor-pointer position-relative">
+                        <div class="cy-annotation-tooltip">
+                            <span class="ri-ball-pen-line"/>
+                        </div>
+                        <div class="cy-annotation-tooltip-content justify-content-around modal_background position-absolute"
+                             t-out="annotation"/>
+                    </div>
+                    <div class="mx-1 delete-on-h-show ri-delete-bin-6-line on-h-red cursor-pointer" t-if="annotation"
+                         t-on-click="() => this.props.removeAnnotation(entry.id, entry.account_id[1])"
+                         title="Remove Annotation"/>
+                </span>
+
+            </th>
+            <th>
+                <span>
+                    <span class="mx-1" t-out="entry['journal_id'][1]"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-if="entry['partner_id']">
+                        <span class="mx-1" t-out="entry['partner_id'][1]"/>
+                    </t>
+                </span>
+            </th>
+            <th/>
+            <th>
+                <span>
+                    <span class="mx-1" t-out="entry.move_name"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <span class="mx-1" t-out="entry.name"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="entry.debit"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="entry.credit"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="entry.balance"/>
+                </span>
+            </th>
+        </tr>
+    </t>
+    <t t-name="CashBookFilter">
+        <button class="btn dropdown-toggle dropdown-toggle-none" type="button"  t-on-click="onClickPartners">
+            <span class="ri-user-line me-1"/>
+                        Partners
+        </button>
+<!--        <MultiRecordSelector placeholder="'Partner'" resIds="filterState.selected_partners"-->
+<!--                             domain="[['id', 'in', state.partner_ids]]"-->
+<!--                             resModel="'res.partner'"-->
+<!--                             update="(partner_ids)=> filterState.selected_partners = partner_ids"/>-->
+
+        <t t-call="dateRange">
+            <t t-set="dateFilterTemplate" t-value="'toAndFromDateFilter'"/>
+            <t t-set="separateAt" t-value="3"/>
+        </t>
+        <div class="drop accounts_filter">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-book"/>
+                    Accounts
+                    <span class="account"/>
+                </t>
+                <DropdownItem parentClosingMode="'none'" t-foreach="state.all_account" t-as="account"
+                              t-key="account_index" onSelected="()=> this.addFilters(account.id, 'account_ids')">
+                    <i t-if="filterState.account_ids.includes(account.id)" class="ri-check-line"/>
+                    <span class="mx-2" t-out="account.name"/>
+                </DropdownItem>
+            </Dropdown>
+        </div>
+
+        <div class="drop search_Target_move">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-filter"/>
+                    Options
+                    <span class="target"/>
+                </t>
+                <DropdownItem parentClosingMode="'none'" onSelected="() => this.addFilters('draft', 'target_move')">
+                    <i t-if="filterState.target_move.includes('draft')" class="ri-check-line"/>
+                    <span class="mx-2">Include Draft Entries</span>
+                </DropdownItem>
+                <DropdownItem parentClosingMode="'none'" onSelected.bind="toggleUnfold">
+                    <span t-if="state.isFolded" class="mx-2">UnFold All</span>
+                    <span t-else="" class="mx-2">Fold All</span>
+                </DropdownItem>
+            </Dropdown>
+        </div>
+    </t>
+</templates>

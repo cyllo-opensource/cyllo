@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_project.ProjectControlPanel"
+        t-inherit="project.ProjectControlPanel" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_control_panel')]" position="attributes">
+            <attribute name="class" remove="px-3 pt-2 pb-3 gap-3 gap-lg-1" separator=" " />
+            <attribute name="class" add="gap-0 gap-lg-0" separator=" " />
+        </xpath>
+        <xpath expr="//nav[hasclass('o_cp_switch_buttons')]" position="replace">
+            <div class="cy-aligned-icons view_buttons d-print-none d-none d-xl-inline-flex">
+                <t t-foreach="env.config.viewSwitcherEntries" t-as="view"
+                    t-key="view.type">
+                    <i t-attf-class="o_{{view.type}} {{view.active and view.icon.endsWith('-line') ? view.icon.slice(0, -5) + '-fill' : view.icon}} {{view.active ? 'active' : ''}}"
+                        t-att-data-tooltip="view.name"
+                        t-on-click="() => this.onViewClicked(view.type)" />
+                </t>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o_control_panel_main')]" position="before">
+            <t t-slot="control-panel-cy-form-cogs" />
+        </xpath>
+        <xpath expr="//div[hasclass('o_control_panel_main')]"
+            position="attributes">
+            <attribute name="class" add="flex-nowrap px-3 py-2" separator=" " />
+        </xpath>
+    </t>
+</templates>

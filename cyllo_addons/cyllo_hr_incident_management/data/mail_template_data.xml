@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Mail notification for the Receptor when the incident is submitted -->
+    <record id="mail_template_incident_receptor_notification_email"
+            model="mail.template">
+        <field name="name">Incident Receptor Notification Email</field>
+        <field name="model_id"
+               ref="cyllo_hr_incident_management.model_hr_incident"/>
+        <field name="email_to">{{object.incident_receptor_email}}</field>
+        <field name="subject">Submitted Incident: {{object.incident_category_id.name or 'n/a'}} - {{object.name}}</field>
+        <field name="body_html" type="html">
+            <table border="0" cellpadding="0" cellspacing="0"
+                   style="padding-top:16px;background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;">
+                <tbody>
+                    <tr>
+                        <td align="center">
+                            <table border="0" cellpadding="0"
+                                   cellspacing="0" width="900"
+                                   style="padding:16px;background-color: white; color: #454748; border-collapse:separate;">
+                                <tbody>
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="middle">
+                                                            <br/>
+                                                            <span style="font-size:20px;">
+                                                                <b>Dear
+                                                                    <span t-out="object.incident_receptor_id.name"/>
+                                                                    ,
+                                                                </b>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2"
+                                                            style="text-align:center;">
+                                                            <hr width="100%"
+                                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;"/>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- CONTENT -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="top">
+                                                            <div>
+                                                                I am writing
+                                                                to inform
+                                                                you that an
+                                                                incident
+                                                                with name
+                                                                <strong t-out="object.name"/>
+                                                                has been
+                                                                submitted to
+                                                                you.
+                                                                <div>
+                                                                    <div>
+
+                                                                    </div>
+                                                                    Please
+                                                                    assign the
+                                                                    request to
+                                                                    someone to
+                                                                    handle the
+                                                                    incident or
+                                                                    yourself as
+                                                                    soon as
+                                                                    possible.
+                                                                </div>
+                                                                <br/>
+                                                                Regards,
+                                                                <br/>
+                                                                --
+                                                                <br/>
+                                                                <div>
+                                                                    <span t-out="object.company_id.name"/>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="text-align:center;">
+                                                            <hr width="100%"
+                                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="middle"
+                                                            align="left">
+                                                            <span t-out="object.company_id.name"/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td valign="middle"
+                                                            align="left"
+                                                            style="opacity: 0.7;">
+                                                            <span t-out="object.company_id.phone"/>
+                                                            |
+                                                            <a href="'mailto:%s' % ${object.company_id.email}"
+                                                               style="text-decoration:none; color: #454748;">
+                                                                <span t-out="object.company_id.email"/>
+                                                            </a>
+                                                            |
+                                                            <a href="'%s' % ${object.company_id.website}"
+                                                               style="text-decoration:none; color: #454748;">
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </field>
+    </record>
+    <!-- Mail notification for the Handler when the incident is assigned -->
+    <record id="mail_template_incident_handler_notification_email"
+            model="mail.template">
+        <field name="name">Incident Handler Notification Email</field>
+        <field name="model_id"
+               ref="cyllo_hr_incident_management.model_hr_incident"/>
+        <field name="email_to">{{ object.incident_handler_email }}</field>
+        <field name="subject">Assigned Incident: {{ object.incident_category_id.name or 'n/a' }} - {{object.name}}</field>
+        <field name="body_html" type="html">
+            <table border="0" cellpadding="0" cellspacing="0"
+                   style="padding-top:16px;background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;">
+                <tbody>
+                    <tr>
+                        <td align="center">
+                            <table border="0" cellpadding="0"
+                                   cellspacing="0" width="900"
+                                   style="padding:16px;background-color: white; color: #454748; border-collapse:separate;">
+                                <tbody>
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="middle">
+                                                            <br/>
+                                                            <span style="font-size:20px;">
+                                                                <b>Dear
+                                                                    <span t-out="object.incident_handler_id.name"/>
+                                                                    ,
+                                                                </b>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2"
+                                                            style="text-align:center;">
+                                                            <hr width="100%"
+                                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;"/>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- CONTENT -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="top">
+                                                            <div>
+                                                                I am writing
+                                                                to inform
+                                                                you that an
+                                                                incident
+                                                                with name
+                                                                <strong t-out="object.name"/>
+                                                                has been
+                                                                assigned to
+                                                                you.
+                                                                <div>
+                                                                    <div>
+
+                                                                    </div>
+                                                                    Please
+                                                                    handle
+                                                                    the
+                                                                    incident
+                                                                    as soon
+                                                                    as
+                                                                    possible.
+                                                                </div>
+                                                                <br/>
+                                                                Regards,
+                                                                <br/>
+                                                                --
+                                                                <br/>
+                                                                <div>
+                                                                    <span t-out="object.company_id.name"/>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="text-align:center;">
+                                                            <hr width="100%"
+                                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="middle"
+                                                            align="left">
+                                                            <span t-out="object.company_id.name"/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td valign="middle"
+                                                            align="left"
+                                                            style="opacity: 0.7;">
+                                                            <span t-out="object.company_id.phone"/>
+                                                            |
+                                                            <a href="'mailto:%s' % ${object.company_id.email}"
+                                                               style="text-decoration:none; color: #454748;">
+                                                                <span t-out="object.company_id.email"/>
+                                                            </a>
+                                                            |
+                                                            <a href="'%s' % ${object.company_id.website}"
+                                                               style="text-decoration:none; color: #454748;">
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </field>
+    </record>
+    <!-- Mail notification for the initiator when the enquiry is start -->
+    <record id="mail_template_incident_initiator_notification_email"
+            model="mail.template">
+        <field name="name">Incident Initiator Notification Email</field>
+        <field name="model_id"
+               ref="cyllo_hr_incident_management.model_hr_incident"/>
+        <field name="email_to">{{ object.incident_initiator_email }}</field>
+        <field name="subject">Started the Incident Enquiry: {{ object.incident_category_id.name or 'n/a' }} - {{object.name}}</field>
+        <field name="body_html" type="html">
+            <table border="0" cellpadding="0" cellspacing="0"
+                   style="padding-top:16px;background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;">
+                <tbody>
+                    <tr>
+                        <td align="center">
+                            <table border="0" cellpadding="0"
+                                   cellspacing="0" width="900"
+                                   style="padding:16px;background-color: white; color: #454748; border-collapse:separate;">
+                                <tbody>
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="middle">
+                                                            <br/>
+                                                            <span style="font-size:20px;">
+                                                                <b>Dear
+                                                                    <span t-out="object.incident_initiator_id.name"/>
+                                                                    ,
+                                                                </b>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2"
+                                                            style="text-align:center;">
+                                                            <hr width="100%"
+                                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;"/>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- CONTENT -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="top">
+                                                            <div>
+                                                                I am writing
+                                                                to inform
+                                                                you that an
+                                                                incident
+                                                                with name
+                                                                <strong t-out="object.name"/>
+                                                                has been
+                                                                started the
+                                                                enquiry.
+                                                                <div>
+                                                                    <div>
+
+                                                                    </div>
+                                                                    Please
+                                                                    co-operate
+                                                                    with us.
+                                                                </div>
+                                                                <br/>
+                                                                Regards,
+                                                                <br/>
+                                                                --
+                                                                <br/>
+                                                                <div>
+                                                                    <span t-out="object.company_id.name"/>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="text-align:center;">
+                                                            <hr width="100%"
+                                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="middle"
+                                                            align="left">
+                                                            <span t-out="object.company_id.name"/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td valign="middle"
+                                                            align="left"
+                                                            style="opacity: 0.7;">
+                                                            <span t-out="object.company_id.phone"/>
+                                                            |
+                                                            <a href="'mailto:%s' % ${object.company_id.email}"
+                                                               style="text-decoration:none; color: #454748;">
+                                                                <span t-out="object.company_id.email"/>
+                                                            </a>
+                                                            |
+                                                            <a href="'%s' % ${object.company_id.website}"
+                                                               style="text-decoration:none; color: #454748;">
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </field>
+    </record>
+    <!-- Mail notification for the receptor when the enquiry is completed -->
+    <record id="mail_template_incident_receptor_completed_notification_email_"
+            model="mail.template">
+        <field name="name">Incident Receptor Completed Notification Email
+        </field>
+        <field name="model_id"
+               ref="cyllo_hr_incident_management.model_hr_incident"/>
+        <field name="email_to">{{ object.incident_receptor_email }}</field>
+        <field name="subject">Completed the Incident Enquiry: {{ object.incident_category_id.name or 'n/a' }} - {{object.name}}</field>
+        <field name="body_html" type="html">
+            <table border="0" cellpadding="0" cellspacing="0"
+                   style="padding-top:16px;background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;">
+                <tbody>
+                    <tr>
+                        <td align="center">
+                            <table border="0" cellpadding="0"
+                                   cellspacing="0" width="900"
+                                   style="padding:16px;background-color: white; color: #454748; border-collapse:separate;">
+                                <tbody>
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="middle">
+                                                            <br/>
+                                                            <span style="font-size:20px;">
+                                                                <b>Dear
+                                                                    <span t-out="object.incident_receptor_id.name"/>
+                                                                    ,
+                                                                </b>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2"
+                                                            style="text-align:center;">
+                                                            <hr width="100%"
+                                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;"/>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- CONTENT -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="top">
+                                                            <div>
+                                                                I am writing
+                                                                to inform
+                                                                you that an
+                                                                incident
+                                                                with name
+                                                                <strong t-out="object.name"/>
+                                                                has been
+                                                                completed
+                                                                successfully.
+                                                                <div>
+                                                                    <div>
+
+                                                                    </div>
+                                                                    Please take
+                                                                    the
+                                                                    necessary
+                                                                    action.
+                                                                </div>
+                                                                <br/>
+                                                                Regards,
+                                                                <br/>
+                                                                --
+                                                                <br/>
+                                                                <div>
+                                                                    <span t-out="object.company_id.name"/>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="text-align:center;">
+                                                            <hr width="100%"
+                                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width:900px;">
+                                            <table border="0"
+                                                   cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="590"
+                                                   style="min-width:900px;background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td valign="middle"
+                                                            align="left">
+                                                            <span t-out="object.company_id.name"/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td valign="middle"
+                                                            align="left"
+                                                            style="opacity: 0.7;">
+                                                            <span t-out="object.company_id.phone"/>
+                                                            |
+                                                            <a href="'mailto:%s' % ${object.company_id.email}"
+                                                               style="text-decoration:none; color: #454748;">
+                                                                <span t-out="object.company_id.email"/>
+                                                            </a>
+                                                            |
+                                                            <a href="'%s' % ${object.company_id.website}"
+                                                               style="text-decoration:none; color: #454748;">
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </field>
+    </record>
+</odoo>

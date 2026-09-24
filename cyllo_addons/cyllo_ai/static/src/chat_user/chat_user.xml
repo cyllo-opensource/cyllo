@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="ChatUser">
+        <div class="chat-message user-message">
+            <img t-att-src="props.userImage" class="cyllo-ai-avatar cyllo-ai-user" />
+            <div class="user-message-content">
+                <!-- The user's attached chart (e.g. "explain this chart"):
+                     full-width, above the bubble so it isn't cramped in the
+                     narrow right-aligned one. -->
+                <t t-if="props.chart and chartComponent">
+                    <div class="cy-ai-chat-chart cy-ai-chat-chart-user">
+                        <t t-component="chartComponent" t-props="props.chart" />
+                    </div>
+                </t>
+                <div class="chat-bubble user">
+                    <div class="cy-ai-quote-strip" t-if="quotedExcerpt">
+                        <i class="ri-corner-up-left-line" />
+                        <span class="cy-ai-quote-text" t-esc="quotedExcerpt.quote" />
+                    </div>
+                    <div class="user-message">
+                        <t t-if="mentionParts">
+                            <t t-foreach="mentionParts" t-as="part" t-key="part_index">
+                                <span t-if="part.type === 'pill'" class="inline-mention-pill">
+                                    <i class="ri-at-line" />
+                                    <t t-esc="part.name" />
+                                    <t t-if="part.recordName">
+                                        <i class="chip-sep ri-arrow-right-line" />
+                                        <t t-esc="part.recordName" />
+                                    </t>
+                                </span>
+                                <t t-else="" t-esc="part.value" />
+                            </t>
+                        </t>
+                        <t t-elif="props.html" t-out="props.html" />
+                        <t t-elif="bodyText" t-out="bodyText" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

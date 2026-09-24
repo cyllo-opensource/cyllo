@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Customizing the res.partner form view -->
+    <record id="view_res_partner_form" model="ir.ui.view">
+        <field name="name">view.res.partner.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='sale']" position="before">
+                <group>
+                    <group>
+                        <field name="is_customer"/>
+                    </group>
+                    <group>
+                        <field name="is_vendor"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+    <!-- Customizing the res.partner list view filters -->
+    <record id="view_res_partner_filter" model="ir.ui.view">
+        <field name="name">view.res.partner.filter</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <filter name="inactive" position="after">
+                <filter name="Customer" domain="[('is_customer','=',True)]"/>
+                <filter name="Vendor" domain="[('is_vendor','=',True)]"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

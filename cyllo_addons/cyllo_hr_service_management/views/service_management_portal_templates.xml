@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Template for breadcrumbs-->
+    <template id="service_request_portal_layout"
+              name="Portal layout : Support Service Ticket"
+              inherit_id="portal.portal_breadcrumbs" priority="66">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'services_page'"
+                class="breadcrumb-item active">
+                <span>Service Management</span>
+            </li>
+            <li t-if="page_name == 'service_details'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/service_management" aria-label="Home">
+                    <span>Service Requests</span>
+                </a>
+                <span>/
+                    <t t-out="service_req.name"/>
+                </span>
+            </li>
+            <li t-if="page_name == 'create_service'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/service_management" aria-label="Home">
+                    <span>Service Requests</span>
+                </a>
+                <span>/ Create</span>
+            </li>
+        </xpath>
+    </template>
+
+    <!--    Table content of service management records -->
+    <template id="portal_service_management_table"
+              name="Table Support Service Portal">
+        <t t-if="table_content">
+            <table class="table mt16">
+                <tbody>
+                    <t t-foreach="table_content" t-as="service_request">
+                        <tr>
+                            <td>
+                                <div>
+                                    <div class="row">
+                                        <div class="request_top col-md-8">
+                                            <span class="request-title">
+                                                <h5>
+                                                    <a t-att-href="service_request.get_portal_url()"
+                                                       class="disciplinary_tracking_name"
+                                                       t-esc="service_request.name"/>
+                                                </h5>
+                                            </span>
+                                            <span class="service_req_employee mr4">
+                                                Initiator:
+                                                <t t-esc="service_request.employee_id.name"/>
+                                            </span>
+                                            <br/>
+                                            <span class="service_req_category">
+                                                Department:
+                                                <t t-esc="service_request.employee_department_id.name"/>
+                                            </span>
+                                            <br/>
+                                        </div>
+                                        <div class="request_content col-md-4">
+                                            <span t-if="service_request.state == 'new'"
+                                                  class="badge text-bg-info state_badge">
+                                                New
+                                            </span>
+                                            <span t-elif="service_request.state == 'submitted'"
+                                                  class="badge text-bg-info state_badge">
+                                                Submitted
+                                            </span>
+                                            <span t-elif="service_request.state == 'ongoing'"
+                                                  class="badge text-bg-info state_badge">
+                                                Ongoing
+                                            </span>
+                                            <span t-elif="service_request.state == 'completed'"
+                                                  class="badge text-bg-info state_badge">
+                                                Completed
+                                            </span>
+                                            <div class="o_cyllo_support_date">
+                                                <t t-if="service_request.create_date">
+                                                    <span t-field="service_request.create_date"
+                                                          class="date"/>
+                                                </t>
+                                                <span class="img-rounded user_img"
+                                                      t-field="service_request.create_uid.image_1920"
+                                                      t-att-title="service_request.create_uid.name"
+                                                      t-options="{'widget': 'image', 'class': 'img-rounded create_user_image'}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </t>
+    </template>
+    <!--  Template that shows all user service requests -->
+    <template id="service_request_template" name="Service Requests">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Service Request</t>
+            </t>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist"
+                        style="border-color: white;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-support_service-ticket-state-btn active"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#all"
+                                    type="button" role="tab"
+                                    aria-controls="profile"
+                                    aria-selected="false">All
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-support_service-ticket-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#draft" type="button"
+                                    role="tab"
+                                    aria-controls="profile"
+                                    aria-selected="false">Draft
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-support_service-ticket-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#submitted" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Submitted
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-support_service-ticket-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#approved" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Approved
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-support_service-ticket-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#returned" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Returned
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-support_service-ticket-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#done" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Done
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-support_service-ticket-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#cancel" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Cancel
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-6  d-flex justify-content-end">
+                    <a href="/service_management/create"
+                       class="btn btn-primary cy-create_btn mt24 mb8">New
+                        Request
+                    </a>
+                </div>
+            </div>
+            <div class="tab-content">
+                <t t-set="url" t-value="'/service_management/create'"/>
+                <t t-set="description" t-value="'Currently No Services !'"/>
+                <div class="tab-pane fade show active w-100" id="all"
+                     role="tabpanel" aria-labelledby="home-tab">
+                    <t t-if="service_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content"
+                           t-value="support_service_tickets"/>
+                        <t t-call="cyllo_hr_service_management.portal_service_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="draft" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="len(draft_services) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="draft_services"/>
+                        <t t-call="cyllo_hr_service_management.portal_service_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="submitted" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="len(submitted_services) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="submitted_services"/>
+                        <t t-call="cyllo_hr_service_management.portal_service_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane w-100 fade" id="approved" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="len(approved_services) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="approved_services"/>
+                        <t t-call="cyllo_hr_service_management.portal_service_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="returned" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="len(returned_services) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="returned_services"/>
+                        <t t-call="cyllo_hr_service_management.portal_service_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="done" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="len(done_services) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="done_services"/>
+                        <t t-call="cyllo_hr_service_management.portal_service_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="ongoing" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="len(ongoing_services) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="ongoing_services"/>
+                        <t t-call="cyllo_hr_service_management.portal_service_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="cancel" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="len(cancel_services) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="cancel_services"/>
+                        <t t-call="cyllo_hr_service_management.portal_service_management_table"/>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!--  Template that shows details of Service Ticket -->
+    <template id="service_requests_details" name="Service Requests Content"
+              inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <t t-set="o_portal_fullwidth_alert" groups="base.group_user">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url"
+                       t-value="'/web#return_label=Website&amp;model=hr.service&amp;id=%s&amp;' % object.id"/>
+                </t>
+            </t>
+            <div class="row mt16 o_cyllo_portal_sidebar">
+                <t t-call="cyllo_portal.cy_portal_record_sidebar"
+                   id="support_service_portal_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+                    <t t-set="title">
+                        <h2 t-esc="object.name"/>
+                    </t>
+                    <t t-set="entries">
+                        <div class="d-flex flex-column gap-1 order-md-last order-lg-first"
+                             id="support_service_sidebar_button">
+                            <div class="d-flex flex-column gap-4">
+                                <div class="o_download_pdf">
+                                    <a class="btn btn-primary o_print_btn d-block"
+                                       t-att-href="object.get_portal_url(report_type='pdf')"
+                                       title="View Details" target="_blank">
+                                        <i class="fa fa-print"/>
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-4"
+                                 t-if="object.state == 'draft'">
+                                <div class="o_btn_start_service">
+                                    <a t-attf-href="/service_request/submit/{{object.id}}"
+                                       class="btn btn-secondary mt24 w-100 mb8">
+                                        Submit Request
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="navspy flex-grow-1 ps-0" t-ignore="true"
+                             role="complementary">
+                            <ul class="nav flex-column bs-sidenav"/>
+                        </div>
+                        <div t-if="object.date">
+                            <small>
+                                <b>Requested Date</b>
+                            </small>
+                            <div t-field="object.date"/>
+                        </div>
+                        <div t-if="object.employee_department_id">
+                            <small>
+                                <b>Requesters Department</b>
+                            </small>
+                            <div t-field="object.employee_department_id"/>
+                        </div>
+                        <div>
+                            <small>
+                                <b>Created Date</b>
+                            </small>
+                            <div t-field="object.create_date"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.employee_id">
+                            <h6>
+                                <small class="text-muted">Your contact</small>
+                            </h6>
+                            <div class="o_portal_contact_details d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-start align-items-center gap-2">
+                                    <img class="o_avatar o_portal_contact_img rounded"
+                                         t-if="object.employee_id"
+                                         t-att-src="image_data_uri(object.employee_id.avatar_1024)"
+                                         alt="Contact"/>
+                                    <img class="o_avatar o_portal_contact_img rounded"
+                                         t-else=""
+                                         t-att-alt="'%s' % object.company_id.name"
+                                         alt="Contact"/>
+                                    <div>
+                                        <h6 class="mb-0"
+                                            t-out="object.employee_id.name"/>
+                                        <a href="#discussion"
+                                           class="d-flex align-items-center gap-2 small fw-bold">
+                                            Send message
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <div id="quote_content"
+                     class="col-12 col-lg justify-content-end">
+                    <div class="p-3 o_cy_portal_border border">
+                        <h2 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
+                            <span class="badge text-bg-warning  state_badge mt-2"
+                                  style="font-size:15px;"
+                                  t-field="object.state"/>
+                        </h2>
+                        <br/>
+                        <div class="row mt-4">
+                            <div class="col-4">
+                                <hr class="my-0"/>
+                                <div t-if="object.employee_department_id">
+                                    <strong>Requesters Department</strong>
+                                    <div t-field="object.employee_department_id"/>
+                                </div>
+                                <div t-else="">
+                                    <h1>
+                                        <t t-esc="object.name"/>
+                                    </h1>
+                                </div>
+                            </div>
+                            <div id="customer_info"
+                                 class="col-8 col-lg-6 offset-lg-1 ms-auto">
+                                <hr class="my-0"/>
+                                <strong t-esc="object.employee_id.name"/>
+                                <div t-field="object.employee_id.address_id"
+                                     t-options="{ 'widget': 'contact', 'fields': [ 'name', 'address', 'phone', 'email']}"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <section id="initiator_details"
+                                 style="page-break-inside: auto;"
+                                 class="mt32 row"
+                                 t-if="object.service_request_type == 'custody'">
+                            <h3>
+                                Custody Information
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2">
+                                <div class="col-md-3 mb-2" t-if="object.name">
+                                    <strong>Equipment :</strong>
+                                    <br/>
+                                    <span t-field="object.equipment_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.expected_return_date">
+                                    <strong>Expected Return Date</strong>
+                                    <br/>
+                                    <span t-field="object.expected_return_date"/>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="initiator_details"
+                                 t-if="object.service_request_type == 'service'"
+                                 style="page-break-inside: auto;"
+                                 class="mt32 row">
+                            <h3>
+                                Service Information
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2">
+                                <div class="col-md-3 mb-2" t-if="object.name">
+                                    <strong>Category:</strong>
+                                    <br/>
+                                    <span t-field="object.service_category_id.name"/>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="handlers_details"
+                                 style="page-break-inside: auto;"
+                                 class="mt32 row">
+                            <h3>
+                                Handlers Details
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2"
+                                 id="service_request_information">
+                                <div class="col-md-3 mb-2">
+                                    <strong>Handler :</strong>
+                                    <br/>
+                                    <span t-field="object.service_handler_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.service_handler_department_id">
+                                    <strong>Department</strong>
+                                    <br/>
+                                    <span t-field="object.service_handler_department_id"/>
+                                </div>
+                            </div>
+                        </section>
+                        <!--====== Adding Chatter==========-->
+                        <div id="_communication">
+                            <h3>Communication history</h3>
+                            <t t-call="portal.message_thread"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <!--  Template of service request ticket Form  -->
+    <template id="service_request_form">
+        <t t-call="website.layout">
+            <div id="wrap"
+                 class="oe_structure oe_empty cyllo_register_support_ticket_form">
+                <div class="service-management-request_container m-0">
+                    <br/>
+                    <h3 class="heading_align-style d-flex mt-5">
+                        Service Management Request
+                    </h3>
+                    <br/>
+                    <p class="service_management_description">Submit your
+                        employee service requests through this portal.
+                        <br/>
+                        We'll ensure your needs are addressed promptly and
+                        efficiently.
+                    </p>
+                </div>
+                <div class="s_col_no_bgcolor container s_allow_columns w-50 property_container_style">
+                    <div class="container mt-4 mb-5 justify-content-center d-flex cy_service_create">
+                        <form action="/request/submit" method="post"
+                              enctype="multipart/form-data"
+                              class="o_mark_required cy-support_service-ticket_form"
+                              data-mark="*">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="employee_name"
+                                           class="cy-service_management-label">
+                                        Name
+                                    </label>
+                                    <input type="hidden" name="csrf_token"
+                                           t-att-value="request.csrf_token()"
+                                           class="form-control"/>
+                                    <input type="text" id="cy-employee_input"
+                                           class="form-control cy-service_requests_input"
+                                           name="employee_name"
+                                           t-att-data="request.env.user.employee_ids.id"
+                                           t-att-value="request.env.user.employee_ids.name"
+                                           t-att-title="request.env.user.employee_ids.department_id.name"
+                                           readonly="1"/>
+                                    <input type="hidden" id="cy_emp_hidden"
+                                           name="emp_hidden"
+                                           t-att-value="request.env.user.employee_ids.department_id.id"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="requester_dept"
+                                           class="cy-service_management-label">
+                                        Requesters Department
+                                    </label>
+                                    <select name="requester_dept"
+                                            class="form-control s_website_form_input">
+                                        <option t-att-value="request.env.user.employee_ids.department_id.id">
+                                            <t t-esc="request.env.user.employee_ids.department_id.name"/>
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="request_type"
+                                           class="cy-service_management-label">
+                                        Service Request Type
+                                    </label>
+                                    <select name="request_type"
+                                            class="form-control s_website_form_input request_type">
+                                        <option value="service">Service</option>
+                                        <option value="custody">Custody</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6 equipment d-none">
+                                    <label for="equipment"
+                                           class="cy-service_management-label">
+                                        Equipment
+                                    </label>
+                                    <select name="equipment" id="equipment_sel"
+                                            t-attf-class="form-control s_website_form_input">
+                                        <option value=""/>
+                                        <t t-foreach="equipment or []"
+                                           t-as="equipment">
+                                            <t t-set="equipment_name"
+                                               t-value="(equipment.name or '') + ' ' + (equipment.serial_no or '')"/>
+                                            <option t-att-value="equipment.id">
+                                                <t t-esc="equipment_name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6 return_dt_div d-none">
+                                    <label for="expected_return_date"
+                                           class="cy-service_management-label">
+                                        Expected Return Date
+                                    </label>
+                                    <input type="date"
+                                           class="form-control cy-service_requests_input return_date"
+                                           name="expected_return_date"/>
+                                </div>
+                                <div class="col-12 col-sm-6 category">
+                                    <label for="category"
+                                           class="cy-service_management-label">
+                                        Service Category
+                                    </label>
+                                    <select name="category"
+                                            class="form-control s_website_form_input category_sel"
+                                            required="1">
+                                        <option value=""/>
+                                        <t t-foreach="categories or []"
+                                           t-as="category">
+                                            <option t-att-value="category.id">
+                                                <t t-esc="category.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6 cy-ser_equip d-none">
+                                    <label for="equipment"
+                                           class="cy-service_management-label">
+                                        Service Equipment
+                                    </label>
+                                    <select name="service_equipment"
+                                            class="form-control s_website_form_input cy_service_equip">
+                                        <option value=""/>
+                                        <t t-foreach="service_equipment"
+                                           t-as="ser_equip">
+                                            <t t-set="ser_equipment_name"
+                                               t-value="ser_equip.name + ser_equip.serial_no"/>
+                                            <option t-att-value="ser_equip.id">
+                                                <t t-esc="ser_equipment_name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6 cy-maintenance_type d-none">
+                                    <label for="maintenance_type"
+                                           class="cy-service_management-label">
+                                        Maintenance Type
+                                    </label>
+                                    <select name="maintenance_type"
+                                            class="form-control s_website_form_input cy_maintenance_type">
+                                        <option value="corrective">Corrective
+                                        </option>
+                                        <option value="preventive">Preventive
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="handler"
+                                           class="cy-service_management-label">
+                                        Service Handler
+                                    </label>
+                                    <select name="handler"
+                                            t-attf-class="form-control s_website_form_input cy_service_handler"
+                                            required="1">
+                                        <option/>
+                                        <t t-foreach="service_handlers"
+                                           t-as="employee">
+                                            <option t-att-value="employee.id"
+                                                    t-att-data="employee.department_id.id"
+                                                    t-att-title="employee.department_id.name">
+                                                <t t-esc="employee.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="handlers_dept"
+                                           class="cy-service_management-label">
+                                        Handler's Department
+                                    </label>
+                                    <select name="handlers_dept"
+                                            class="form-control s_website_form_input handlers_dept"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="attachment"
+                                           class="field_request-label">
+                                        Attachments
+                                    </label>
+                                    <br/>
+                                    <input type="file" multiple="true"
+                                           class="file form-control"
+                                           name="attachment_id"
+                                           id="attachment_id"/>
+                                </div>
+                                <div class="d-flex justify-content-left mt-5">
+                                    <button class="btn btn-primary"
+                                            type="submit">Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!--  Template shown when submit service request by user  -->
+    <template id="service_request_submitting_template">
+        <t t-call="website.layout">
+            <div style="margin-top: 100px;" class="jumbotron text-center">
+                <h1 class="display-3">Thank You!</h1>
+                <p class="lead">Your request has been successfully submitted.
+                </p>
+                <a href="/service_management">Back to requests</a>
+            </div>
+        </t>
+    </template>
+</odoo>

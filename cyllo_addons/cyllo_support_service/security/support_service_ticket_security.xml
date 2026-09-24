@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Record for user access levels -->
+    <record id="ir_module_category_support_service" model="ir.module.category">
+        <field name="name">Support Service</field>
+        <field name="description">User access level for Support Service module
+        </field>
+        <field name="sequence">10</field>
+    </record>
+    <!-- Record for access right for User -->
+    <record id="group_cyllo_support_service_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="ir_module_category_support_service"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('base.group_user'))]"/>
+    </record>
+    <!-- Record for access right for Ticket Manager -->
+    <record id="group_cyllo_support_service_team_manager" model="res.groups">
+        <field name="name">Team Manager</field>
+        <field name="category_id" ref="ir_module_category_support_service"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('group_cyllo_support_service_user'))]"/>
+    </record>
+    <!-- Record for access right for Manager -->
+    <record id="group_cyllo_support_service_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="ir_module_category_support_service"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('group_cyllo_support_service_team_manager'))]"/>
+        <field name="users"
+               eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
+    <!-- Record for default user group -->
+    <record id="base.default_user" model="res.users">
+        <field name="groups_id"
+               eval="[(4,ref('cyllo_support_service.group_cyllo_support_service_user'))]"/>
+    </record>
+    <!-- Record for hiding the tickets between different companies for multi company -->
+    <record id="rule_support_service_ticket_company" model="ir.rule">
+        <field name="name">support_service Multi-Company</field>
+        <field name="model_id" ref="model_support_service_ticket"/>
+        <field name="domain_force">
+            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
+        </field>
+    </record>
+    <!-- Record for hiding the team between different companies for multi company -->
+    <record id="rule_support_service_team_company" model="ir.rule">
+        <field name="name">Support Service Multi-Company</field>
+        <field name="model_id" ref="model_support_service_team"/>
+        <field name="domain_force">
+            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
+        </field>
+    </record>
+
+    <!-- Record for hiding the category between different companies for multi company -->
+    <record id="rule_support_service_category_company" model="ir.rule">
+        <field name="name">Support Service Category Multi-Company</field>
+        <field name="model_id" ref="model_support_service_category"/>
+        <field name="domain_force">
+            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
+        </field>
+    </record>
+
+    <!-- Record for hiding the tag between different companies for multi company -->
+    <record id="rule_support_service_tag_company" model="ir.rule">
+        <field name="name">Support Service Tag Multi-Company</field>
+        <field name="model_id" ref="model_support_service_tag"/>
+        <field name="domain_force">
+            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
+        </field>
+    </record>
+
+    <!-- Record for hiding the stage between different companies for multi company -->
+    <record id="rule_support_service_stage_company" model="ir.rule">
+        <field name="name">Support Service Stage Multi-Company</field>
+        <field name="model_id" ref="model_support_service_stage"/>
+        <field name="domain_force">
+            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
+        </field>
+    </record>
+
+    <data noupdate="1">
+        <record id="rule_support_service_ticket_user_public" model="ir.rule">
+            <field name="name">User Own documents</field>
+            <field name="model_id" ref="model_support_service_ticket"/>
+            <field name="groups"
+                   eval="[Command.link(ref('group_cyllo_support_service_user'))]"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+        </record>
+
+        <record id="rule_support_service_ticket_all_public" model="ir.rule">
+            <field name="name">All</field>
+            <field name="model_id" ref="model_support_service_ticket"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+            <field name="groups"
+                   eval="[Command.link(ref('group_cyllo_support_service_manager'))]"/>
+        </record>
+
+        <record id="rule_support_service_ticket_manager_public" model="ir.rule">
+            <field name="name">Manager All documents</field>
+            <field name="model_id" ref="model_support_service_ticket"/>
+            <field name="groups"
+                   eval="[Command.link(ref('group_cyllo_support_service_team_manager'))]"/>
+            <field name="domain_force">[('manager_id', '=', user.id)]</field>
+        </record>
+    </data>
+</odoo>

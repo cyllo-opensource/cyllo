@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Appointment Form View -->
+    <record id="view_appointment_form" model="ir.ui.view">
+        <field name="name">appointment.appointment.form</field>
+        <field name="model">appointment.appointment</field>
+        <field name="arch" type="xml">
+            <form string="Appointment" class="apt_appointment_form">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object"
+                            class="btn-primary"
+                            invisible="state not in ['draft']"/>
+                    <button name="action_start" string="Start" type="object"
+                            invisible="state not in ['confirmed']"/>
+                    <button name="action_done" string="Mark as Done" type="object"
+                            class="btn-primary"
+                            invisible="state not in ['in_progress', 'confirmed']"/>
+                    <button name="action_reschedule" string="Reschedule" class="btn-secondary"
+                            type="object"
+                            invisible="state in ['done', 'cancelled', 'rejected', 'no_show']"/>
+                    <button name="action_no_show" string="No Show" type="object"
+                            class="btn-secondary"
+                            invisible="state not in ['in_progress']"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            class="btn-danger"
+                            invisible="state in ['done', 'cancelled', 'rejected', 'no_show']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,pending_payment,confirmed,in_progress,done"
+                           options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <field name="is_rescheduled" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-refresh"
+                                invisible="is_rescheduled == False">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="reschedule_count"/>
+                                </span>
+                                <span class="o_stat_text">Rescheduled</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_refund_credit_note"
+                                icon="fa-file-text-o"
+                                invisible="refund_credit_note_id == False">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Credit Note</span>
+                            </div>
+                        </button>
+                        <button
+                            name="action_view_sale_order"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-usd"
+                            groups="sales_team.group_sale_salesman"
+                            invisible="not sale_order_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Sales</span>
+                            </div>
+                        </button>
+                    </div>
+                    <!-- Priority & Reference -->
+                    <div class="apt-form-header">
+                        <span class="apt-reference">
+                            <field name="meeting_subject" readonly="1"/>
+                        </span>
+                        <span invisible="is_rescheduled == False" class="badge badge-warning ml-2">
+                            <i class="fa fa-refresh" title="Rescheduled"/>
+                            Rescheduled
+                        </span>
+                    </div>
+                    <div class="oe_title">
+                        <h2 class="text-muted">
+                            <field name="name" readonly="1"/>
+                        </h2>
+                        <label for="appointment_type_id" string="Appointment Type"/>
+                        <h2>
+                            <field name="appointment_type_id"
+                                   placeholder="Select appointment type..."
+                                   readonly="state not in ['draft', 'pending_payment']"/>
+                        </h2>
+                        <field name="sale_order_id" invisible="1"/>
+                    </div>
+                    <group>
+                        <group string="Customer">
+                            <field name="partner_id" widget="many2one_avatar"/>
+                            <field name="attendee_count"/>
+                            <field name="attendee_ids" widget="many2many_tags_avatar"
+                                   invisible="attendee_count == 1"/>
+                        </group>
+                        <group string="Scheduling">
+                            <field name="scheduling_type" invisible="1"/>
+                            <field name="start_datetime"
+                                   readonly="scheduling_type == 'predefined' or state != 'draft'"
+                                   force_save="1" required="scheduling_type != 'predefined'"/>
+                            <field name="end_datetime"
+                                   readonly="scheduling_type == 'predefined' or state != 'draft'"
+                                   force_save="1" required="scheduling_type != 'predefined'"/>
+                            <field name="duration" widget="float_time" readonly="1"/>
+                            <field name="timezone"/>
+                            <field name="slot_id" string="Event / Slot"
+                                   domain="[('state', '!=', 'fully_booked')]" required="scheduling_type == 'predefined'"/>
+                            <field name="event_id" invisible="event_id == False"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Assignment">
+                            <field name="staff_domain" invisible="1"/>
+                            <field name="resource_domain" invisible="1"/>
+                            <field name="staff_id"
+                                   domain="staff_domain"
+                                   context="{'default_appointment_type_ids': [appointment_type_id]}"/>
+                            <field name="resource_id"
+                                   domain="resource_domain"/>
+                        </group>
+                        <group string="Location">
+                            <field name="location_type" readonly="1"/>
+                            <field name="location"/>
+                            <field name="meeting_url"
+                                   invisible="location_type != 'online'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <group>
+                                <field name="customer_notes"
+                                       placeholder="Customer notes or requests..."/>
+                            </group>
+                            <group string="Internal Notes">
+                                <field name="internal_notes" widget="html"
+                                       placeholder="Internal notes (not visible to customer)..."/>
+                            </group>
+                        </page>
+
+                        <page string="Notifications" name="notifications">
+                            <group>
+                                <group>
+                                    <field name="confirmation_sent" readonly="1"/>
+                                    <field name="reminder_sent" readonly="1"/>
+                                    <field name="followup_sent" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Rescheduling History" name="reschedule"
+                              invisible="is_rescheduled == False">
+                            <group>
+                                <field name="original_start_datetime" readonly="1"/>
+                                <field name="reschedule_count" readonly="1"/>
+                                <field name="reschedule_reason" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Cancellation" name="cancellation"
+                              invisible="state not in ['cancelled', 'rejected']">
+                            <group>
+                                <field name="cancelled_by" readonly="1"/>
+                                <field name="cancellation_reason" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Refund" name="refund"
+                              invisible="state != 'cancelled' or sale_order_id == False">
+                            <group>
+                                <group string="Refund Details">
+                                    <field name="refund_credit_note_id" readonly="1"
+                                           widget="many2one" string="Credit Note"/>
+                                    <field name="refund_status" readonly="1" string="Status"/>
+                                </group>
+                                <group string="Applied Policy">
+                                    <field name="appointment_type_id" readonly="1" string="Type"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Appointment List View -->
+    <record id="view_appointment_list" model="ir.ui.view">
+        <field name="name">appointment.appointment.list</field>
+        <field name="model">appointment.appointment</field>
+        <field name="arch" type="xml">
+            <tree string="Appointments"
+                  decoration-success="state == 'confirmed'"
+                  decoration-info="state == 'draft'"
+                  decoration-muted="state in ('cancelled', 'rejected', 'no_show')"
+                  decoration-primary="state == 'in_progress'">
+                <field name="name"/>
+                <field name="meeting_subject"/>
+                <field name="partner_id" widget="many2one_avatar"/>
+                <field name="appointment_type_id"/>
+                <field name="category"/>
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+                <field name="duration" widget="float_time"/>
+                <field name="staff_id"/>
+                <field name="resource_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="priority" widget="priority"/>
+                <field name="is_rescheduled" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-info="state == 'draft'"
+                       decoration-primary="state == 'in_progress'"
+                       decoration-danger="state in ('cancelled', 'rejected', 'no_show')"/>
+                <button name="action_confirm" string="Confirm" type="object"
+                        invisible="state != 'draft'" icon="fa-check"/>
+                <button name="action_reschedule" string="Reschedule" type="object"
+                        invisible="state in ['done', 'cancelled', 'rejected', 'no_show']"
+                        icon="fa-refresh"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Appointment Kanban View -->
+    <record id="view_appointment_kanban" model="ir.ui.view">
+        <field name="name">appointment.appointment.kanban</field>
+        <field name="model">appointment.appointment</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_appointment_kanban">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="appointment_type_id"/>
+                <field name="start_datetime"/>
+                <field name="staff_id"/>
+                <field name="state"/>
+                <field name="color"/>
+                <field name="priority"/>
+                <field name="is_rescheduled"/>
+                <field name="meeting_subject"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="apt-kanban-card apt-state-#{record.state.raw_value}">
+                            <a type="open" class="apt-kanban-link">
+                                <div class="apt-kanban-header">
+                                    <field name="priority" widget="priority"/>
+                                    <span class="apt-kanban-ref text-muted small">
+                                        <t t-esc="record.name.value"/>
+                                    </span>
+                                    <span invisible="is_rescheduled == False"
+                                          class="badge badge-warning badge-pill ml-1 small">
+                                        <i class="fa fa-refresh" title="Rescheduled"/>
+                                    </span>
+                                </div>
+                                <div class="apt-kanban-type">
+                                    <strong>
+                                        <t t-esc="record.appointment_type_id.value"/>
+                                    </strong>
+                                </div>
+                                <div class="apt-kanban-customer">
+                                    <field name="partner_id" widget="many2one_avatar"/>
+                                </div>
+                                <div class="apt-kanban-time">
+                                    <i class="fa fa-clock-o text-muted" title="Time"/>
+                                    <span class="ml-1">
+                                        <t t-esc="record.start_datetime.value"/>
+                                    </span>
+                                </div>
+                                <div invisible="staff_id == False"
+                                     class="apt-kanban-staff text-muted small">
+                                    <i class="fa fa-user" title="User"/>
+                                    <t t-esc="record.staff_id.value"/>
+                                </div>
+                            </a>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Calendar View -->
+    <record id="view_appointment_calendar" model="ir.ui.view">
+        <field name="name">appointment.appointment.calendar</field>
+        <field name="model">appointment.appointment</field>
+        <field name="arch" type="xml">
+            <calendar string="Appointments" date_start="start_datetime" date_stop="end_datetime"
+                      color="appointment_type_id" event_limit="5" mode="week"
+                      quick_create="False">
+                <field name="partner_id" filters="1" invisible="0"/>
+                <field name="staff_id" filters="1" invisible="0"/>
+                <field name="appointment_type_id" filters="1"/>
+                <field name="state" filters="1"/>
+                <field name="name"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_appointment_graph" model="ir.ui.view">
+        <field name="name">appointment.appointment.graph</field>
+        <field name="model">appointment.appointment</field>
+        <field name="arch" type="xml">
+            <graph string="Appointments" type="bar">
+                <field name="appointment_type_id" type="row"/>
+                <field name="state" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_appointment_search" model="ir.ui.view">
+        <field name="name">appointment.appointment.search</field>
+        <field name="model">appointment.appointment</field>
+        <field name="arch" type="xml">
+            <search string="Appointments">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="appointment_type_id"/>
+                <field name="staff_id"/>
+                <field name="resource_id"/>
+                <!-- Filters -->
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="In Progress" name="in_progress"
+                        domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Today" name="today"
+                        domain="[('start_datetime', '&gt;=', context_today().strftime('%Y-%m-%d')),('start_datetime', '&lt;', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Upcoming" name="upcoming"
+                        domain="[('start_datetime', '&gt;=', datetime.datetime.now()), ('state', 'not in', ['cancelled', 'done', 'rejected', 'no_show'])]"/>
+                <filter string="Rescheduled" name="rescheduled"
+                        domain="[('is_rescheduled', '=', True)]"/>
+                <separator/>
+                <filter string="High Priority" name="priority"
+                        domain="[('priority', 'in', ['1', '2'])]"/>
+                <separator/>
+                <filter string="Confirmation Not Sent" name="no_confirmation"
+                        domain="[('confirmation_sent', '=', False), ('state', 'in', ['confirmed'])]"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <!-- Group By -->
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Appointment Type" name="group_type"
+                            context="{'group_by': 'appointment_type_id'}"/>
+                    <filter string="Staff" name="group_staff" context="{'group_by': 'staff_id'}"/>
+                    <filter string="Customer" name="group_customer"
+                            context="{'group_by': 'partner_id'}"/>
+                    <filter string="Date" name="group_date"
+                            context="{'group_by': 'start_datetime:day'}"/>
+                    <filter string="Week" name="group_week"
+                            context="{'group_by': 'start_datetime:week'}"/>
+                    <filter string="Month" name="group_month"
+                            context="{'group_by': 'start_datetime:month'}"/>
+                    <filter string="Company" name="company" context="{'group_by':'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Main Action -->
+    <record id="action_appointment" model="ir.actions.act_window">
+        <field name="name">Appointments</field>
+        <field name="res_model">appointment.appointment</field>
+        <field name="view_mode">tree,kanban,calendar,form,graph</field>
+        <field name="context">{'search_default_upcoming': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No appointments yet!</p>
+            <p>Schedule your first appointment.</p>
+        </field>
+    </record>
+    <!-- Today's Appointments Action -->
+    <record id="action_appointment_today" model="ir.actions.act_window">
+        <field name="name">Today's Appointments</field>
+        <field name="res_model">appointment.appointment</field>
+        <field name="view_mode">tree,calendar,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="domain">[('state', 'not in', ['cancelled', 'rejected', 'no_show'])]</field>
+    </record>
+    <!-- Cancel Wizard View -->
+    <record id="view_appointment_cancel_wizard_form" model="ir.ui.view">
+        <field name="name">appointment.cancel.wizard.form</field>
+        <field name="model">appointment.cancel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cancel Appointment">
+                <group>
+                    <field name="appointment_id" readonly="1"/>
+                    <field name="cancellation_reason" required="1"
+                           placeholder="Reason for cancellation..."/>
+                    <field name="cancelled_by"/>
+                    <field name="send_notification"/>
+                </group>
+                <!-- Refund preview -->
+                <group string="Refund Preview"
+                       invisible="refund_policy == 'none' or not is_paid_appointment">
+                    <field name="is_paid_appointment" invisible="1"/>
+                    <field name="refund_policy" readonly="1" string="Policy"/>
+                    <field name="expected_refund_percentage" readonly="1"
+                           string="Refund %"
+                           invisible="refund_policy == 'credit'"/>
+                    <field name="expected_refund_amount" readonly="1"
+                           string="Estimated Refund" widget="monetary"
+                           invisible="refund_policy == 'credit'"/>
+                    <field name="expected_refund_amount" readonly="1"
+                           string="Credit Note Amount" widget="monetary"
+                           invisible="refund_policy != 'credit'"/>
+                </group>
+                <div class="alert alert-info mt-2" role="alert"
+                     invisible="refund_policy == 'none' or not is_paid_appointment">
+                    <i class="fa fa-info-circle me-1"/>
+                    <span invisible="refund_policy != 'credit'">
+                        A credit note will be issued and kept open as a redeemable balance.
+                        No cash refund — the customer can use this against a future appointment.
+                    </span>
+                    <span invisible="refund_policy not in ['full', 'partial']">
+                        A credit note will be created and reconciled against the original payment.
+                    </span>
+                </div>
+                <footer>
+                    <button name="action_confirm_cancel" type="object" string="Cancel Appointment"
+                            class="btn-danger"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <!-- Reschedule Wizard View -->
+    <record id="view_appointment_reschedule_wizard_form" model="ir.ui.view">
+        <field name="name">appointment.reschedule.wizard.form</field>
+        <field name="model">appointment.reschedule.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reschedule Appointment">
+                <group>
+                    <field name="appointment_id" readonly="1"/>
+                    <field name="current_start" readonly="1"/>
+                    <field name="new_start_datetime" required="1"/>
+                    <field name="new_end_datetime"/>
+                    <field name="reschedule_reason" placeholder="Reason for rescheduling..."/>
+                    <field name="notify_customer"/>
+                    <field name="notify_staff"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_reschedule" type="object"
+                            string="Confirm Reschedule"
+                            class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

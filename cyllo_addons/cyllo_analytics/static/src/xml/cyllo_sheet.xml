@@ -1,0 +1,842 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="CylloSheet" owl="1">
+        <div t-ref="sheet" class="cy_dashboard_sheet w-100">
+            <div class="cy-sheet-loading-overlay"
+                 t-att-class="{'cy-overlay-hidden': !state.loading, 'cy-sheet-loading-blur': state.savingMode}">
+                <t t-if="state.savingMode">
+                    <div class="cy-sheet-saving-card">
+                        <i class="ri-loader-4-line cy-sheet-saving-icon"/>
+                        <span class="cy-sheet-saving-label">Saving…</span>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="cy-grid-loading-spinner">
+                        <span class="cy-grid-loading-dot"/>
+                        <span class="cy-grid-loading-dot"/>
+                        <span class="cy-grid-loading-dot"/>
+                    </div>
+                    <span class="cy-sheet-loading-label">Loading…</span>
+                </t>
+            </div>
+            <div class="d-flex align-items-center py-2 px-4 ps-0 cy_sheet_nav_bar"
+                style="height: 60.68px;">
+                <div
+                    class="col cy-main-sectionhead d-flex align-items-center pr-5 justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <span class="nav-link cy-template-title d-flex gap-1 align-items-center"
+                            t-on-click="goBack"
+                            style="cursor: pointer;">
+                            <i class="ri-arrow-left-s-line"
+                                style=";padding-left: 1%; me-5; font-size: 19px;"
+                                title="Go Back" /> Sheets </span>
+                        <div class="control-panel d-flex">
+                            <a class="nav-link cy-navitem-list"
+                                href="#"
+                                t-if="this.id" t-on-click="onClickNew">
+                                <i class="ri-add-line" />New </a>
+                            <a class="nav-link cy-navitem-list save_button"
+                                href="#" t-if="isDirty" t-on-click="onSave">
+                                <i class="ri-save-line" />Save </a>
+                            <a class="nav-link cy-navitem-list" href="#"
+                                t-if="isDirty"
+                                t-on-click="onClickDiscard">
+                                <i class="ri-restart-line" />Discard </a>
+                            <a class="nav-link cy-navitem-list on-delete-sheet"
+                                href="#"
+                                t-if="this.state.id"
+                                t-on-click="onDelete">
+                                <i class="ri-delete-bin-line" />Delete </a>
+                            <a class="nav-link cy-navitem-list"
+                                href="#"
+                                t-if="this.state.id"
+                                t-on-click="onClickDuplicate">
+                                <i class="ri-file-copy-line" />Duplicate </a>
+                        </div>
+                    </div>
+                    <div t-if="id" class="d-flex"
+                        style="margin-right: 1%; white-space: nowrap;">
+                        <span class="mt-1" style="margin-right: 10%;">
+                            <t t-out="navState.recordValue" /> / <t
+                                t-out="navState.allRecords.length" />
+                        </span>
+                        <button class="btn btn-secondary ri-arrow-left-s-line me-2"
+                            t-on-click="() => this.changeRecord('bwd')" />
+                        <button class="btn btn-secondary ri-arrow-right-s-line"
+                            t-on-click="() => this.changeRecord('fwd')" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="d-flex" style="height: calc(100dvh - 60.68px);">
+                <div class="sidebar cy-unified-sidebar">
+                    <!-- Sheet Title -->
+                    <div class="cy-sidebar-field-group">
+                        <label class="cy-sidebar-static-label">Sheet Title</label>
+                        <input type="text" class="cy-sidebar-input"
+                            t-model="state.name"
+                            name="sheet_name"
+                            autocomplete="off"
+                            maxlength="32"
+                            required="" />
+                    </div>
+
+                    <!-- Sheet / Options tabs -->
+                    <ul class="nav cy-sidebar-tabs" id="cy-sidebar-maintabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="cy-tab-sheet-main"
+                                data-bs-toggle="tab" data-bs-target="#cy-pane-sheet-main"
+                                type="button" role="tab">Sheet</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="cy-tab-options-main"
+                                data-bs-toggle="tab" data-bs-target="#cy-pane-options-main"
+                                type="button" role="tab">Options</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content cy-sidebar-tab-content" id="cy-sidebar-tabcontent">
+                        <!-- Sheet tab: Dimension / Measure / Presets -->
+                        <div class="tab-pane fade show active cy-sidebar-sheet-pane"
+                            id="cy-pane-sheet-main" role="tabpanel">
+                            <div class="accordion accordion-flush" id="fieldListAccordion">
+
+                                <!-- Configurations -->
+                                <div
+                                    class="accordion-item bg-transparent cy-config-section">
+                                    <h2 class="accordion-header" id="headingConfigurations">
+                                        <button
+                                            class="accordion-button shadow-none bg-transparent px-3 py-3 text-dark cy-config-accordion-btn"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseConfigurations"
+                                            aria-expanded="true"
+                                            aria-controls="collapseConfigurations"> Setup <i
+                                                class="ri-arrow-down-s-line ms-auto cy-accordion-caret" />
+                                        </button>
+                                    </h2>
+                                    <div id="collapseConfigurations"
+                                        class="accordion-collapse collapse show"
+                                        data-bs-parent="#fieldListAccordion"
+                                        aria-labelledby="headingConfigurations">
+                                        <div class="accordion-body">
+                                            <div class="cy-sidebar-field-group">
+                                                <label class="cy-sidebar-static-label">Dashboards</label>
+                                                <div class="cy-sidebar-widget-input"
+                                                    t-attf-class="{{!state.configs.length and 'warn-no-dashboard'}}"
+                                                    t-attf-title="{{!state.configs.length and 'Connect Your Dashboards here'}}">
+                                                    <Many2XAutocomplete
+                                                        resModel="'dashboard.config'"
+                                                        getDomain.bind="dashboardDomain"
+                                                        fieldString="'Dashboard'"
+                                                        activeActions="{}"
+                                                        update.bind="onDashboardSelect" />
+                                                </div>
+                                                <div t-if="state.configs.length > 0"
+                                                    class="cy-dashboard-tags">
+                                                    <t t-foreach="state.configs" t-as="config"
+                                                        t-key="config_index">
+                                                        <span class="cy-dashboard-tag"
+                                                            t-att-class="'cy-tag-' + (config.display_name.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % 11)">
+                                                            <t t-esc="config.display_name" />
+                                                            <i
+                                                                t-on-click="() => this.onRemoveDashboard(config)"
+                                                                class="ri-close-line" />
+                                                        </span>
+                                                    </t>
+                                                </div>
+                                            </div>
+
+                                            <div class="cy-sidebar-field-group">
+                                                <ModelViewer models="state.models"
+                                                    setModel.bind="setModel"
+                                                    checkHasLink.bind="checkHasLink" />
+                                            </div>
+
+                                            <div class="cy-sidebar-field-group">
+                                                <label class="cy-sidebar-static-label"
+                                                    title="Limits the number of records used. Set to 0 for no limit.">
+                                                    Limit <sup class="cursor-pointer"
+                                                        style="color: var(--primary);">?</sup>
+                                                </label>
+                                                <div class="cy-sidebar-widget-input">
+                                                    <Number setValue="(val) => state.limit = val"
+                                                        value="state.limit"
+                                                        className="''"
+                                                        placeholder="' '"
+                                                        negative="false"
+                                                        decimal="false" />
+                                                </div>
+                                            </div>
+
+                                            <div t-if="hasMonetary" class="cy-sidebar-field-group">
+                                                <label class="cy-sidebar-static-label"
+                                                    title="Set currency rate in settings to get precise result">
+                                                    Currency
+                                                </label>
+                                                <div class="cy-sidebar-widget-input">
+                                                    <Many2XAutocomplete resModel="'res.currency'"
+                                                        getDomain="() => []"
+                                                        update="(ev) => this.setCurrency(ev[0])"
+                                                        activeActions="{}"
+                                                        fieldString="' '"
+                                                        value="this.state.currency ? this.state.currency.display_name : ''"
+                                                        placeholder="' '"
+                                                        quickCreate="quickCreate" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <t
+                                    t-if="!['kpi','gauge'].includes(state.selectedType[1].toLowerCase())">
+                                    <div class="accordion-item bg-transparent dimensions"
+                                        t-if="state.models.length">
+                                        <h2 class="accordion-header" id="headingDimension">
+                                            <button
+                                                class="accordion-button shadow-none bg-transparent px-3 py-3 text-dark cy-config-accordion-btn"
+                                                type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseDimension"
+                                                aria-expanded="false"
+                                                aria-controls="collapseDimension"> Dimensions <i
+                                                    class="ri-arrow-down-s-line ms-auto cy-accordion-caret" />
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDimension"
+                                            class="accordion-collapse collapse"
+                                            data-bs-parent="#fieldListAccordion"
+                                            aria-labelledby="headingDimension">
+                                            <div class="accordion-body">
+                                                <FieldList t-if="state.models.length"
+                                                    mode="'dimension'"
+                                                    data="dimensions"
+                                                    limit="1" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <div class="accordion-item bg-transparent measures"
+                                    t-if="state.models.length">
+                                    <h2 class="accordion-header" id="headingMeasure">
+                                        <button
+                                            class="accordion-button shadow-none bg-transparent px-3 py-3 text-dark cy-config-accordion-btn"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseMeasure"
+                                            aria-expanded="false"
+                                            aria-controls="collapseMeasure"> Measures <i
+                                                class="ri-arrow-down-s-line ms-auto cy-accordion-caret" />
+                                        </button>
+                                    </h2>
+                                    <div id="collapseMeasure"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#fieldListAccordion"
+                                        aria-labelledby="headingMeasure">
+                                        <div class="accordion-body">
+                                            <FieldList t-if="state.models.length"
+                                                mode="'measure'" data="measures"
+                                                limit="5" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="accordion-item bg-transparent presets-sidebar-section"
+                                    t-if="state.models.length">
+                                    <h2 class="accordion-header" id="headingPresets">
+                                        <button
+                                            class="accordion-button shadow-none bg-transparent px-3 py-3 text-dark cy-config-accordion-btn"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapsePresets"
+                                            aria-expanded="false"
+                                            aria-controls="collapsePresets"> Presets <i
+                                                class="ri-arrow-down-s-line ms-auto cy-accordion-caret" />
+                                        </button>
+                                    </h2>
+                                    <div id="collapsePresets"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#fieldListAccordion"
+                                        aria-labelledby="headingPresets">
+                                        <div class="accordion-body">
+                                            <div>
+                                                <FieldList t-if="state.models.length"
+                                                    mode="'presets'" data="presets"
+                                                    limit="5" />
+                                                <div t-if="state.models.length"
+                                                    class="mt-2 text-center">
+                                                    <button class="btn btn-primary w-100 mb-4"
+                                                        t-on-click="onAddPreset">
+                                                        <i class="ri-add-line me-1" />Add Preset </button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Options tab -->
+                        <div class="tab-pane fade cy-sidebar-options-pane"
+                            id="cy-pane-options-main" role="tabpanel">
+                            <div class="accordion accordion-flush" id="optionsAccordion">
+
+                                <!-- Sheet Filter -->
+                                <div class="accordion-item bg-transparent border-0">
+                                    <h2 class="accordion-header" id="headingSheetFilter">
+                                        <button
+                                            class="accordion-button shadow-none bg-transparent px-3 py-3 text-dark cy-config-accordion-btn"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseSheetFilter"
+                                            aria-expanded="true"
+                                            aria-controls="collapseSheetFilter"> Sheet Filter <i
+                                                class="ri-arrow-down-s-line ms-auto cy-accordion-caret" />
+                                        </button>
+                                    </h2>
+                                    <div id="collapseSheetFilter"
+                                        class="accordion-collapse collapse show"
+                                        data-bs-parent="#optionsAccordion"
+                                        aria-labelledby="headingSheetFilter">
+                                        <div class="accordion-body p-3">
+                                            <div t-if="!query_data.where.length"
+                                                class="cy-options-empty-hint">
+                                                No filters added yet.
+                                            </div>
+                                            <t t-foreach="query_data.where" t-as="where"
+                                                t-key="where_index">
+                                                <div class="cy-options-filter-item"
+                                                    t-att-class="where.active ? 'active' : ''"
+                                                    t-on-click="() => this.updateWhere(where)">
+                                                    <span t-att-class="'cy-filter-cb' + (where.active ? ' cy-filter-cb-checked' : '')">
+                                                        <i class="ri-check-line" t-if="where.active" />
+                                                    </span>
+                                                    <span class="cy-options-filter-name"
+                                                        t-esc="where.name" />
+                                                    <div class="d-flex gap-1">
+                                                        <button class="cy-options-filter-btn"
+                                                            t-on-click.stop.prevent="() => this.onClickEditFilter(where)"
+                                                            title="Edit">
+                                                            <i class="ri-pencil-line" />
+                                                        </button>
+                                                        <button
+                                                            class="cy-options-filter-btn cy-options-filter-del"
+                                                            t-on-click.stop.prevent="() => this.onClickDeleteFilter(where_index, where.id)"
+                                                            title="Delete">
+                                                            <i class="ri-close-line" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                            <button t-on-click="onFilterClick"
+                                                class="btn btn-primary w-100 mt-1 mb-2">
+                                                <i class="ri-add-line me-1" />Add Filter </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Global Filter -->
+                                <div class="accordion-item bg-transparent border-0">
+                                    <h2 class="accordion-header" id="headingGlobalFilter">
+                                        <button
+                                            class="accordion-button shadow-none bg-transparent px-3 py-3 text-dark cy-config-accordion-btn"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseGlobalFilter"
+                                            aria-expanded="false"
+                                            aria-controls="collapseGlobalFilter"> Global Filter <i
+                                                class="ri-arrow-down-s-line ms-auto cy-accordion-caret" />
+                                        </button>
+                                    </h2>
+                                    <div id="collapseGlobalFilter"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#optionsAccordion"
+                                        aria-labelledby="headingGlobalFilter">
+                                        <div class="accordion-body p-3 d-flex flex-column gap-3">
+                                            <t t-if="state.fields.length and state.configs.length">
+                                                <t t-foreach="Object.keys(state.globalFilters)"
+                                                    t-as="key" t-key="key_index">
+                                                    <div class="cy-options-gf-group"
+                                                        t-att-data-gfkey="key"
+                                                        t-on-click="onFilterGroupCardClick"
+                                                        style="cursor:pointer;">
+                                                        <div
+                                                            class="cy-options-gf-card d-flex align-items-center justify-content-between">
+                                                            <span
+                                                                class="cy-options-gf-label fw-semibold"
+                                                                t-esc="key" />
+                                                            <i class="ri-arrow-right-s-line" />
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </t>
+                                            <div t-if="!state.configs.length"
+                                                class="cy-options-empty-hint">
+                                                Connect a dashboard to use global filters.
+                                            </div>
+                                            <div t-if="state.configs.length and !state.fields.length"
+                                                class="cy-options-empty-hint">
+                                                <i class="ri-table-line me-1" />Select a table to configure global filters.
+                                            </div>
+
+                                            <!-- Filter Group Modal -->
+                                            <t t-if="state.activeFilterGroup">
+                                                <div class="cy-gf-modal-backdrop"
+                                                    t-on-click="closeFilterGroupModal" />
+                                                <div class="cy-gf-modal card shadow"
+                                                    t-attf-style="top:{{state.filterModalPos.top}}px; left:{{state.filterModalPos.left}}px;">
+                                                    <div
+                                                        class="cy-gf-modal-header d-flex align-items-center justify-content-between px-3 py-2">
+                                                        <span class="fw-semibold"
+                                                            t-esc="state.activeFilterGroup" />
+                                                        <button class="btn btn-sm btn-link p-0"
+                                                            t-on-click="closeFilterGroupModal">
+                                                            <i class="ri-close-line" />
+                                                        </button>
+                                                    </div>
+                                                    <div class="cy-gf-modal-body px-3 pb-3 pt-2">
+                                                        <t
+                                                            t-foreach="state.globalFilters[state.activeFilterGroup]"
+                                                            t-as="filter" t-key="filter_index">
+                                                            <div
+                                                                class="d-flex flex-column gap-1 mb-3">
+                                                                <span class="cy-options-gf-name"
+                                                                    t-esc="filter.name" />
+                                                                <t t-set="options"
+                                                                    t-value="getGlobalFilters(filter.type, filter.relation)" />
+                                                                <t t-set="defaultOption"
+                                                                    t-value="getDefaultOption(options, filter)" />
+                                                                <FieldAutoCompleteGlobal
+                                                                    value="defaultOption"
+                                                                    options="options"
+                                                                    filter="filter.id"
+                                                                    placeholder="'Fields'"
+                                                                    onClick.bind="onOptionClick" />
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Color Mapping -->
+                                <div class="accordion-item bg-transparent border-0" t-if="!['kpi', 'gauge', 'radar', 'map', 'table', 'pictorialBar'].includes(state.selectedType[1])">
+                                    <h2 class="accordion-header" id="headingColorMapping">
+                                        <button
+                                            class="accordion-button shadow-none bg-transparent px-3 py-3 text-dark cy-config-accordion-btn"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseColorMapping"
+                                            aria-expanded="false"
+                                            aria-controls="collapseColorMapping"> Color Mapping <i
+                                                class="ri-arrow-down-s-line ms-auto cy-accordion-caret" />
+                                        </button>
+                                    </h2>
+                                    <div id="collapseColorMapping"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#optionsAccordion"
+                                        aria-labelledby="headingColorMapping">
+                                        <div class="accordion-body p-3">
+                                            <div
+                                                t-if="!query_data.color_mappings.filter(m => !m._point_label).length"
+                                                class="cy-options-empty-hint">
+                                                No color mappings added yet.
+                                            </div>
+                                            <t t-foreach="query_data.color_mappings" t-as="mapping"
+                                                t-key="mapping_index">
+                                                <t t-if="!mapping._point_label">
+                                                    <div class="cy-mapping-chip">
+                                                        <span class="cy-mapping-chip-dot"
+                                                            t-attf-style="background:{{mapping.color}};" />
+                                                        <span class="cy-mapping-chip-label">
+                                                            <t
+                                                                t-esc="this.getMeasureLabel(mapping.measure_alias)" />
+                                                            <span class="cy-mapping-chip-range"> (<t
+                                                                    t-esc="mapping.min_value" /> – <t
+                                                                    t-esc="mapping.max_value || '∞'" />
+                                                                ) </span>
+                                                        </span>
+                                                        <button class="cy-mapping-chip-btn"
+                                                            t-on-click="() => this.openMappingEdit(mapping_index)"
+                                                            title="Edit">
+                                                            <i class="ri-pencil-line" />
+                                                        </button>
+                                                        <button
+                                                            class="cy-mapping-chip-btn cy-mapping-chip-del"
+                                                            t-on-click="() => this.removeColorMapping(mapping_index)"
+                                                            title="Remove">
+                                                            <i class="ri-close-line" />
+                                                        </button>
+                                                    </div>
+                                                </t>
+                                            </t>
+                                            <button t-on-click="addColorMapping"
+                                                class="btn btn-primary w-100 mt-2">
+                                                <i class="ri-add-line me-1" />Add Mapping </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Type vertical strip -->
+                <div class="cy-chart-type-strip">
+                    <t t-foreach="state.sheetTypes" t-as="type" t-key="type_index">
+                        <div class="cy-chart-type-item"
+                            t-att-class="type.id == state.selectedType[0] ? 'active' : ''"
+                            t-att-data-tooltip="type.name[0].toUpperCase() + type.name.slice(1)"
+                            t-on-click="() => this.onClickSheetType([type.id, type.ttype])">
+                            <div class="cy-chart-type-icon">
+                                <img t-attf-src="data:image/png;base64,#{type.image}"
+                                    alt=""
+                                    class="cy-sheet-img" />
+                            </div>
+                            <span class="cy-chart-type-name">
+                                <t t-esc="type.name[0].toUpperCase() + type.name.slice(1)" />
+                            </span>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="main" style="flex: 1; min-width: 0; overflow: hidden;">
+                    <div class="cy-sheets-previewContainer">
+                        <!-- <div class="cy-note-hint-sidebar">
+                            <i class="ri-information-line" style="color: #4CAF50; font-size: 16px;" />
+                            <span>Tip: Double click on any chart point to add an independent
+                                business context note.</span>
+                        </div> -->
+
+                        <div class="graph-container">
+                            <div class="cy_kpi_sheet cy_kpi_parent mb-2"
+                                t-att-class="{'d-flex': !ChartData.generate}"
+                                t-if="state.selectedType[1] == 'kpi'">
+                                <KpiSheet t-if="ChartData.generate"
+                                    query="ChartData"
+                                    onUpdate.bind="onUpdate"
+                                    kpi="state.kpiValue"
+                                    name="this.state.name"
+                                    model="this.state.models"
+                                    query_data="this.query_data">
+                                </KpiSheet>
+                            </div>
+                            <div class="pb-3 cy_table_sheet"
+                                t-elif="state.selectedType[1] == 'table'">
+                                <Table t-if="ChartData.generate"
+                                    data="ChartData.data" />
+                            </div>
+                            <div class="graph" t-else="">
+                                <GraphTile t-if="ChartData.generate"
+                                    value="ChartData.data"
+                                    style="style"
+                                    setImage.bind="setImage"
+                                    onChartPointClick.bind="onChartPointClick"
+                                    itemId="state.id"
+                                    showNoteHint="true"
+                                    isCreator="true"
+                                    name="state.name"
+                                    themeColor="state.themeColors"
+                                    isDarkMode="state.darkMode" />
+                            </div>
+                            <div class="d-flex justify-content-center"
+                                t-if="state.false_linking and !ChartData.generate">
+                                <div class="info-panel dropzone-warning-panel mb-3"
+                                    style="width: auto;">
+                                    <div>
+                                        <i class="ri-information-line me-1" />
+                                        <span>Data fetched is empty. Some unused
+                                            tables are still connected.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column gap-2 m-3">
+                            <div
+                                class="d-flex align-items-center justify-content-between gap-2 mt-1 mb-2 px-1">
+                                <div>
+                                    <span class="h4">
+                                        <t t-if="state.toggleQuery">Query</t>
+                                        <t t-else="">Builder</t>
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="cy-toggle-label"
+                                        t-att-class="{'cy-toggle-label-active': !state.toggleQuery}">
+                                        Builder</span>
+                                    <button type="button"
+                                        class="cy-pill-toggle"
+                                        t-att-class="{'cy-pill-toggle-on': state.toggleQuery}"
+                                        t-on-click="onToggleQuery"
+                                        aria-label="Toggle query/builder">
+                                        <span class="cy-pill-thumb" />
+                                    </button>
+                                    <span class="cy-toggle-label"
+                                        t-att-class="{'cy-toggle-label-active': state.toggleQuery}">
+                                        Query</span>
+
+                                </div>
+                            </div>
+
+                            <t t-set="axisData" t-value="getAxisData" />
+                            <t t-if="state.toggleQuery">
+                                <div class="col-lg-7 w-auto">
+                                    <div class="cy-sheet_query-container">
+                                        <SQLEditor value="state.query" theme="'lesser-dark'"
+                                            onBlur.bind="onQueryChange" />
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-else="!state.toggleQuery">
+                                <DropZone t-if="axisData.xLimit > 0"
+                                    axis="'x'"
+                                    string="'X axis'"
+                                    category="'main'"
+                                    limit="axisData.xLimit"
+                                    type="axisData.xType"
+                                    children="axisData.x" />
+                                <DropZone t-if="axisData.yLimit > 0"
+                                    axis="'y'"
+                                    string="'Y axis'"
+                                    category="'main'"
+                                    limit="axisData.yLimit"
+                                    type="axisData.yType"
+                                    children="axisData.y"
+                                    info="yZoneInfo" />
+                                <DropZone t-if="axis.group"
+                                    string="'Group By'"
+                                    category="'groupBy'"
+                                    limit="5"
+                                    type="'groupBy'"
+                                    children="query_data.groupBy" />
+                                <DropZone string="'Order By'"
+                                    category="'orderBy'"
+                                    limit="1"
+                                    type="'orderBy'"
+                                    children="query_data.orderBy" />
+                            </t>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="FieldList" owl="1">
+        <div class="field_list d-flex">
+            <div>
+                <div class="card-header">
+                    <t t-esc="props.mode.toUpperCase()" />
+                    <div class="field-tooltip"
+                        style="cursor: pointer;">
+                        <span style="font-size: 9px;" class="filter-info">?
+                        </span>
+                    </div>
+                    <div class="tooltip-content justify-content-around modal_background"
+                        style="background-color: #fff;">
+                        <ul style="padding-left: 13px;">
+                            <t t-if="props.mode == 'dimension'">
+                                <li style="font-size: 0.8rem; font-weight: 400;">
+                                    A dimension refers to a qualitative
+                                    attribute or category used to categorize and
+                                    organize data. Dimensions are typically
+                                    non-numeric fields that provide context to
+                                    the measures in the database.Examples of
+                                    dimensions in Cyllo could include "Product
+                                    Category," "Customer Type," or "Location."
+                                </li>
+                            </t>
+                            <t t-if="props.mode == 'measure'">
+                                <li style="font-size: 0.8rem; font-weight: 400;">
+                                    A measure in a Cyllo database represents a
+                                    quantitative, numeric value that can be
+                                    subjected to mathematical operations or
+                                    statistical analysis. Measures are fields
+                                    that store numerical data, such as
+                                    quantities, amounts, or other numeric
+                                    indicators related to business processes.
+                                    Examples of measures in Cyllo may include
+                                    "Total Sales Amount," "Quantity Sold," or
+                                    "Average Unit Price."
+                                </li>
+                            </t>
+                            <t t-if="props.mode == 'presets'">
+                                <li style="font-size: 0.8rem; font-weight: 400;">
+                                    Presets are custom-defined formulas and
+                                    calculations that can be reused across your
+                                    analysis. They allow for complex math,
+                                    combining multiple fields, and defining
+                                    specific logic that isn't directly available
+                                    as a standard field in the database.
+                                </li>
+                            </t>
+                        </ul>
+                    </div>
+                </div>
+                <div class="d-flex mt-3 mb-1">
+                    <div class="cy-search cy-templates_search-icon">
+                        <i class="ri-search-line cy-search-icon cy-sheet_font" />
+                        <input class="form-control cy-custom-search cy-sheet_font"
+                            type="search" placeholder=" Search"
+                            t-model="state.search"
+                            aria-label="Search" />
+                    </div>
+                </div>
+            </div>
+            <div class="cy-sheet-selection_box">
+                <t t-foreach="state.data" t-as="field" t-key="field_index">
+                    <t t-set="column"
+                        t-value="field.column || (field.model.table + '.' + field.name)" />
+                    <DragItem is_json="field.is_json" column="column"
+                        draggable="'true'" type="props.mode == 'presets' ? 'measure' : props.mode"
+                        value="field.label"
+                        field_type="field.field_type"
+                        relation="field.model.relation"
+                        isPreset="field.isPreset"
+                        rawFormula="field.rawFormula"
+                        variables="field.variables"
+                        variable_configs="field.variable_configs"
+                        calculation_type="field.calculation_type"
+                        aggregate_func="field.aggregate_func"
+                        preset_id="field.preset_id"
+                        monetaryInBase="field.monetaryInBase"
+                        alias="field.name" />
+                </t>
+            </div>
+        </div>
+    </t>
+    <t t-name="ModelViewer" owl="1">
+        <div>
+            <label class="cy-sidebar-static-label">Tables <sup class="cursor-pointer"
+                    style="color: var(--primary);"
+                    title="Choose one or more tables. Tables will be linked using relational fields. All fields will be grouped into measures and dimensions.">
+                ?</sup>
+            </label>
+            <div class="cy-sidebar-widget-input">
+                <t t-if="state.can_select">
+                    <Many2XAutocomplete resModel="'ir.model'" getDomain.bind="getDomain"
+                        fieldString="'Models'"
+                        activeActions="{}" update.bind="onSelect" />
+                </t>
+            </div>
+            <div t-if="state.models.length > 0" class="cy-dashboard-tags mt-1">
+                <t t-foreach="state.models" t-as="model" t-key="model_index">
+                    <span class="cy-dashboard-tag"
+                        t-att-class="'cy-tag-' + (model.name.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % 11)">
+                        <t t-esc="model.name" />
+                        <span t-if="model.linked_by and model.linked_by.string"
+                            t-att-data-tooltip="model.linked_by.string">
+                            <i class="ri-information-line" style="font-size: 11px;" />
+                        </span>
+                        <i t-on-click="() => this.onRemoveModel(model)" class="ri-close-line" />
+                    </span>
+                </t>
+            </div>
+        </div>
+    </t>
+    <t t-name="LinkSelectDialog">
+        <Dialog size="'md'" title="props.title">
+            <t t-set-slot="header">
+                <div class="d-flex w-100">
+                    <h4>Link Model</h4>
+                    <div t-on-click="props.close" type="button"
+                        class="btn-close" aria-label="Close" />
+                </div>
+            </t>
+            <div class="d-flex m-2" t-foreach="fields" t-as="field"
+                t-key="field_index">
+                <span class="badge rounded text-white"
+                    t-on-click="() => this.setSelected(field_index, field)"
+                    t-attf-style="background-color: {{field_index === state.index ? '#893448' : '#EAEBEC'}};
+                       color: {{field_index !== state.index ? '#893448 !important' : '#FFF !important'}}"
+                    t-if="field.linked_by" t-esc="field.linked_by.string" />
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="confirm">
+                    Link
+                </button>
+                <button class="btn btn-primary" t-on-click="props.close">
+                    close
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="ColorMappingDialog" owl="1">
+        <Dialog size="'md'" title="'Color Mapping'">
+            <div class="p-3 d-flex flex-column gap-3">
+                <div class="cy-options-mapping-field">
+                    <span class="cy-options-mapping-label">Measure</span>
+                    <select class="cy-options-mapping-input cy-options-mapping-select"
+                        t-on-change="(ev) => this.update('measure_alias', ev.target.value)">
+                        <t t-foreach="props.measures" t-as="msr" t-key="msr.alias">
+                            <option t-att-value="msr.alias"
+                                t-att-selected="state.measure_alias == msr.alias">
+                                <t t-esc="msr.value" />
+                            </option>
+                        </t>
+                    </select>
+                </div>
+                <div class="cy-options-mapping-field">
+                    <span class="cy-options-mapping-label">Min</span>
+                    <input type="number" class="cy-options-mapping-input"
+                        t-att-value="state.min_value"
+                        t-on-change="(ev) => this.update('min_value', ev.target.value)" />
+                </div>
+                <div class="cy-options-mapping-field">
+                    <span class="cy-options-mapping-label">Max</span>
+                    <input type="text" class="cy-options-mapping-input"
+                        t-att-value="state.max_value"
+                        t-on-change="(ev) => this.update('max_value', ev.target.value)"
+                        placeholder="∞" />
+                </div>
+                <div class="cy-options-mapping-field">
+                    <span class="cy-options-mapping-label">Color</span>
+                    <input type="color" class="cy-options-mapping-color-input"
+                        t-att-value="state.color"
+                        t-on-change="(ev) => this.update('color', ev.target.value)" />
+                </div>
+                <div class="cy-options-mapping-field">
+                    <span class="cy-options-mapping-label">Indicator</span>
+                    <input type="text" class="cy-options-mapping-input"
+                        t-att-value="state.indicator"
+                        t-on-change="(ev) => this.update('indicator', ev.target.value)"
+                        placeholder="Label" />
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="() => props.close()">Done</button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="ChartNoteDialog">
+        <Dialog size="'md'" title="'Add Context Note'">
+            <div class="p-3">
+                <div class="mb-3">
+                    <label class="form-label">Measure</label>
+                    <input type="text" class="form-control" t-att-value="props.measureName"
+                        readonly="1" disabled="1" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Value</label>
+                    <input type="text" class="form-control" t-att-value="props.value" readonly="1"
+                        disabled="1" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Note Context</label>
+                    <textarea class="form-control" t-model="state.note" rows="3"
+                        placeholder="Enter reason or context..."></textarea>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="_onSave">Save Context</button>
+                <button class="btn btn-secondary" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

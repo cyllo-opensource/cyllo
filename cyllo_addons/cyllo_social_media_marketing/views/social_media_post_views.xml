@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_social_media_post_form" model="ir.ui.view">
+        <field name="name">view.social.media.post.form</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <form string="Social Media Post">
+                <header>
+                    <button name="action_post" type="object" string="Post Now"
+                        class="btn-primary"
+                        invisible="state != 'draft'"/>
+                    <button name="action_open_schedule_wizard" type="object" string="Schedule Later"
+                        class="btn-secondary"
+                        invisible="state != 'draft'"/>
+                    <button name="action_cancel_schedule" type="object" string="Cancel Schedule"
+                        invisible="state != 'queue'"/>
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,queue,post"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"
+                                readonly="state != 'draft'"
+                                placeholder="eg: This is a post regarding end of season Sale"/>
+                        </h1>
+                    </div>
+                    <div class="o_form_label o_platform_tiles_label">Choose Accounts</div>
+                    <widget name="post_platform_accounts" readonly="state != 'draft'"/>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <group>
+                                <field name="has_selected_platform" invisible="1"/>
+                                <field name="mode" widget="platform_filtered_mode"
+                                    invisible="not has_selected_platform"
+                                    readonly="state != 'draft'"/>
+                                <field name="post_url" widget="url"
+                                    invisible="not has_selected_platform or mode!='url'"
+                                    readonly="state != 'draft'"
+                                    placeholder="Provide jpg format url"/>
+                                <field name="ir_attachment_ids" string="Upload Photo"
+                                    class="o_media_upload_photo"
+                                    widget="media_upload_field"
+                                    options="{'number_of_files': 20, 'accepted_file_extensions': 'image/*'}"
+                                    invisible="not has_selected_platform or mode != 'photo'"
+                                    readonly="state != 'draft'"/>
+                                <field name="ir_attachment_ids" string="Upload Video"
+                                    class="o_media_upload_video"
+                                    widget="media_upload_field"
+                                    options="{'number_of_files': 1, 'accepted_file_extensions': 'video/*'}"
+                                    invisible="not has_selected_platform or mode != 'video'"
+                                    readonly="state != 'draft'"/>
+                                <field name="description" widget="text_emojis"
+                                    readonly="state != 'draft'"
+                                    placeholder="eg: Grab your offer before the end of season"/>
+                                <field name="company_id" readonly="state != 'draft'"/>
+                                <field name="user_id" readonly="state != 'draft'"/>
+                                <field name="campaign_id" readonly="state != 'draft'"/>
+                                <field name="posted_date" string="Scheduled Date"
+                                    invisible="state != 'queue'"
+                                    readonly="1"/>
+                                <field name="posted_date" string="Date of Posting"
+                                    invisible="state not in ('post', 'delete')"
+                                    readonly="1"/>
+                                <field name="active" invisible="1"/>
+                            </group>
+                        </div>
+                        <div class="col-lg-6">
+                            <widget name="social_post_preview"/>
+                        </div>
+                    </div>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_social_media_post_tree" model="ir.ui.view">
+        <field name="name">view.social.media.post.tree</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <tree string="Social Media Post">
+                <field name="name"/>
+                <field name="posted_date"/>
+                <field name="company_id"/>
+                <field name="state"/>
+                <field name="description" optional="hide"/>
+                <field name="user_id" optional="hide"/>
+                <field name="mode" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_social_media_post_search" model="ir.ui.view">
+        <field name="name">view.social.media.post.search</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <search string="Social Media Post">
+                <field name="name"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Scheduled" name="scheduled" domain="[('state', '=', 'queue')]"/>
+                <filter string="Posted" name="posted" domain="[('state', '=', 'post')]"/>
+                <filter string="Archived" name="inactive"
+                    domain="[('active', '=', False)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Status" name="group_state" domain="[]"
+                        context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="posted_date" domain="[]"
+                        context="{'group_by': 'posted_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_social_media_post_kanban" model="ir.ui.view">
+        <field name="name">view.social.media.post.kanban</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" records_draggable="0">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="mode"/>
+                <field name="description"/>
+                <field name="posted_date"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="oe_kanban_details d-flex flex-column h-100">
+                                <div class="o_kanban_record_top mb-2">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title fs-5">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <div class="text-end ms-2">
+                                        <field name="state" widget="badge"
+                                            decoration-success="state == 'post'"
+                                            decoration-info="state == 'draft'"
+                                            decoration-warning="state == 'queue'"/>
+                                    </div>
+                                </div>
+
+                                <div class="o_kanban_record_body text-muted mb-2">
+                                    <div t-if="record.mode.raw_value" class="mb-1">
+                                        <i class="fa fa-share-alt fa-fw me-1" title="Mode"/>
+                                        <span class="fw-bold me-1">Mode:</span>
+                                        <field name="mode"/>
+                                    </div>
+                                    <div t-if="record.description.raw_value" class="text-truncate" title="Description">
+                                        <i class="fa fa-align-left fa-fw me-1"/>
+                                        <field name="description"/>
+                                    </div>
+                                </div>
+
+                                <div class="o_kanban_record_bottom mt-auto border-top pt-2">
+                                    <div class="oe_kanban_bottom_left">
+                                        <t t-if="record.posted_date.raw_value">
+                                            <t t-if="record.state.raw_value == 'queue'">
+                                                <i class="fa fa-clock-o fa-fw me-1 text-muted" title="Scheduled Date"/>
+                                            </t>
+                                            <t t-else="">
+                                                <i class="fa fa-calendar fa-fw me-1 text-muted" title="Date of Posting"/>
+                                            </t>
+                                            <span class="text-muted">
+                                                <field name="posted_date" widget="date"/>
+                                            </span>
+                                        </t>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="create_uid"
+                                            widget="many2one_avatar_user"
+                                            domain="[('share', '=', False)]"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="view_social_media_post_calendar" model="ir.ui.view">
+        <field name="name">view.social.media.post.calendar</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <calendar string="Planner" date_start="posted_date" color="state" quick_create="0" event_open_popup="1">
+                <field name="description"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id"/>
+                <field name="campaign_id" invisible="not campaign_id"/>
+                <field name="user_id"/>
+                <field name="calendar_account_name"/>
+                <field name="calendar_account_image"/>
+                <field name="calendar_platform_icon"/>
+                <field name="calendar_image_url"/>
+            </calendar>
+        </field>
+    </record>
+    <record id="action_view_posts_calendar" model="ir.actions.act_window">
+        <field name="name">Planner</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">social.media.post</field>
+        <field name="view_mode">calendar,kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Social Media Post
+            </p>
+            <p>
+                Plan and track scheduled and posted content on a calendar.
+            </p>
+        </field>
+    </record>
+    <record id="action_view_posts" model="ir.actions.act_window">
+        <field name="name">Posts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">social.media.post</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Social Media Post
+            </p>
+            <p>
+                You can make contents which can be posted to selected social
+                media from here.
+            </p>
+        </field>
+    </record>
+    <record id="social_media_feed_dashboard_action" model="ir.actions.client">
+        <field name="name">Streams</field>
+        <field name="tag">social_media_feed_dashboard_tag</field>
+    </record>
+    <record id="social_media_dashboard_action" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">social_media_dashboard</field>
+    </record>
+    <menuitem id="menu_cyllo_social_media_marketing_root"
+        name="Social Media Marketing"
+        groups="cyllo_social_media_marketing.group_social_media_user"
+        web_icon="cyllo_social_media_marketing,static/description/cyllo_social-marketing.svg"/>
+    <menuitem id="menu_dashboard" name="Dashboard" sequence="10"
+        parent="menu_cyllo_social_media_marketing_root"
+        action="social_media_dashboard_action"/>
+    <menuitem id="menu_configuration_categ" name="Configuration" sequence="60"
+        parent="menu_cyllo_social_media_marketing_root"
+        groups="cyllo_social_media_marketing.group_social_media_administrator"/>
+    <menuitem name="Streams" id="menu_timeline" sequence="20"
+        action="social_media_feed_dashboard_action"
+        parent="cyllo_social_media_marketing.menu_cyllo_social_media_marketing_root"/>
+    <menuitem id="menu_posts" name="Posts" action="action_view_posts"
+        sequence="30"
+        parent="cyllo_social_media_marketing.menu_cyllo_social_media_marketing_root"/>
+    <menuitem id="menu_planning" name="Planner" action="action_view_posts_calendar"
+        sequence="40"
+        parent="cyllo_social_media_marketing.menu_cyllo_social_media_marketing_root"/>
+</odoo>

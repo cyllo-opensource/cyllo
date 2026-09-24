@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.Notebook" t-inherit="web.Notebook">
+        <div t-if="state.currentPage" position="attributes">
+            <attribute name="t-att-cy-xpath">props.cyXpath</attribute>
+        </div>
+        <ul position="attributes">
+            <attribute name="t-att-cy-xpath">props.cyXpath</attribute>
+            <attribute name="t-ref">cy-Page</attribute>
+        </ul>
+        <li position="attributes">
+            <attribute name="t-on-click">onSelectPage</attribute>
+            <attribute name="t-att-cy-xpath">navItem[1].cyXpath</attribute>
+            <attribute name="t-att-id">navItem[1].cyXpath</attribute>
+            <attribute name="class">nav-item flex-nowrap cursor-pointer me-1 border-1</attribute>
+        </li>
+        <ul position="inside">
+            <li class="nav-item flex-nowrap cursor-pointer cy-add-page opacity-50-hover ps-4 pt-2" t-on-click="addNewPage">
+                <a class="nav-link d-none" href="#" role="tab" tabindex="0" name="">New Page</a>
+                 <div class="cy-studio-blink-container">
+                    <i class="ri-add-line"/>
+                    <div class="cy-studio-blink-anim" style="top: -15% !important;left: -25% !important;"/>
+                </div>
+            </li>
+        </ul>
+        <a class="nav-link" position="attributes">
+            <attribute name="t-att-cy-xpath">navItem[1].cyXpath</attribute>
+            <attribute name="t-att-class">navItem[1].invisibleStriped ? 'cy-studio-striped' : null</attribute>
+            <attribute name="t-attf-class">{{ navItem[0] === state.currentPage ? 'active' : 'border-secondary' }} {{ props.orientation === 'vertical' ? 'p-3 rounded-0' : '' }} {{ navItem[1].className || '' }}</attribute>
+        </a>
+        <div class="tab-pane active" position="attributes">
+            <attribute name="t-att-cy-xpath">props.slots[state.currentPage].cyXpath</attribute>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- This XML record defines a form view for managing One Drive accounts.-->
+    <record id="view_one_drive_connector_form" model="ir.ui.view">
+        <field name="name">view.one.drive.connector.form</field>
+        <field name="model">one.drive.connector</field>
+        <field name="arch" type="xml">
+            <form string="One Drive Account">
+                <header>
+                    <button name="action_get_access" string="Connect" class="oe_highlight" invisible="state != 'draft'" type="object"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connected"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                    <notebook>
+                        <page string="Credentials">
+                            <group>
+                                <field name="one_drive_client_key"/>
+                                <field name="one_drive_secret"/>
+                            </group>
+                        </page>
+                        <page string="Export" invisible="state == 'draft'">
+                            <group>
+                                <field name="one_drive_folder_key"/>
+                                <field name="workspace_id"/>
+                                <field name="document_file_ids" widget="many2many_checkboxes"/>
+                                <button name="action_export_files" type="object">Export</button>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- This XML record defines a form view for managing One Drive accounts.-->
+    <record id="action_view_one_drive_connector" model="ir.actions.act_window">
+        <field name="name">One Drive Connector</field>
+        <field name="res_model">one.drive.connector</field>
+        <field name="view_mode">form</field>
+    </record>
+</odoo>

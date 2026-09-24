@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Views and action of cyllo.office.connector and res.partner  -->
+    <record id="view_cyllo_office_connector_form" model="ir.ui.view">
+        <field name="name">view.cyllo.office.connector.form</field>
+        <field name="model">cyllo.office.connector</field>
+        <field name="arch" type="xml">
+            <form string="Contact Connector">
+                <header>
+                    <button name="action_token_access" string="Connect"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'new'"/>
+                    <button name="action_get_office365_contacts"
+                            string="Import contact" type="object"
+                            class="oe_highlight"
+                            invisible="state == 'new' or type != 'contact'"/>
+                    <button name="action_export_contacts"
+                            string="Export contact" type="object"
+                            class="oe_highlight"
+                            invisible="state == 'new' or type != 'contact'"/>
+                    <button name="action_import_to_do" string="Import To do"
+                            type="object" class="oe_highlight"
+                            invisible="state == 'new' or type != 'task'"/>
+                    <button name="action_export_to_do" string="Export To do"
+                            type="object" class="oe_highlight"
+                            invisible="state == 'new' or type != 'task'"/>
+                    <button name="action_upload" string="Upload" type="object"
+                            class="oe_highlight"
+                            invisible="state == 'new' or type != 'file' or not ir_attachment_ids"/>
+                    <button name="action_refresh_office_365_tokens"
+                            string="Reconnect" type="object"
+                            class="btn btn-secondary"
+                            invisible="state == 'new'"/>
+                    <button name="action_disconnect" string="Disconnect"
+                            type="object" class="btn btn-secondary"
+                            invisible="state == 'new'"/>
+                    <button name="action_sync_contact" string="Sync Contact"
+                            type="object" class="btn btn-secondary"
+                            invisible="state == 'new' or contact_synced == True or type != 'contact'"/>
+                    <button name="action_unsync_contact" string="UnSync Contact"
+                            type="object"
+                            class="btn btn-secondary"
+                            invisible="state == 'new' or contact_synced == False or type != 'contact'"/>
+                    <button name="action_sync_todo" string="Sync To Do"
+                            type="object" class="btn btn-secondary"
+                            invisible="state == 'new' or to_do_synced or type != 'task'"/>
+                    <button name="action_unsync_todo" string="UnSync To Do"
+                            type="object" class="btn btn-secondary"
+                            invisible="state == 'new' or not to_do_synced or type != 'task'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <h1>
+                        <field name="name" readonly="state == 'sync'"
+                               placeholder="Name for the connector"/>
+                    </h1>
+                    <group>
+                        <field name="contact_synced" invisible="1"/>
+                        <field name="to_do_synced" invisible="1"/>
+                        <field name="type" widget="radio"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                    </group>
+                    <notebook>
+                        <page name="information" string="Configuration">
+                            <group>
+                                <group>
+                                    <field name="client_number"
+                                           readonly="state == 'sync'"/>
+                                    <field name="client_secrets"
+                                           readonly="state == 'sync'"/>
+                                    <field name="access_token" invisible="1"/>
+                                </group>
+                                <group>
+                                    <field name="office_contact_api_url"
+                                           required="type == 'contact'"
+                                           invisible="type != 'contact'"/>
+                                    <field name="office_file_api_url"
+                                           required="type == 'file'"
+                                           invisible="type != 'file'"/>
+                                    <field name="office_to_do_api_url"
+                                           required="type == 'task'"
+                                           invisible="type != 'task'"/>
+                                    <field name="ir_attachment_ids"
+                                           widget="many2many_tags"
+                                           invisible="type != 'file'"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_cyllo_office_connector_tree" model="ir.ui.view">
+        <field name="name">view.cyllo.office.connector.tree</field>
+        <field name="model">cyllo.office.connector</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_view_connector" model="ir.actions.act_window">
+        <field name="name">Office Connector</field>
+        <field name="res_model">cyllo.office.connector</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

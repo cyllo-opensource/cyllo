@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- Inject fields into your existing Contact Us page form -->
+    <template id="modify_contactus_form" inherit_id="website.contactus">
+
+        <!-- Replace empty form with full helpdesk form -->
+        <xpath expr="//form" position="replace">
+
+            <form action="/website/form/" method="post" class="o_website_form" enctype="multipart/form-data">
+
+                <!-- REQUIRED -->
+                <input type="hidden" name="model_name" value="helpdesk.ticket"/>
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label>Name</label>
+                        <input type="text" name="partner_name" required="1" class="form-control"/>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Email</label>
+                        <input type="email" name="email" required="1" class="form-control"/>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Phone</label>
+                        <input type="text" name="phone" class="form-control"/>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Subject</label>
+                        <input type="text" name="name" required="1" class="form-control"/>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label>Message</label>
+                        <textarea name="description" required="1" class="form-control"></textarea>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label>Attachments</label>
+                        <input type="file" name="attachment_ids" class="form-control" multiple="multiple"/>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            Submit
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </xpath>
+
+    </template>
+
+</odoo>

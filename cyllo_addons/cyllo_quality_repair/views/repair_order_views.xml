@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_repair_order_form_inherit_quality" model="ir.ui.view">
+        <field name="name">repair.order.form.inherit.quality</field>
+        <field name="model">repair.order</field>
+        <field name="inherit_id" ref="repair.view_repair_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="js_class">quality_check_view</attribute>
+            </xpath>
+            <xpath expr="//field[@name='priority']" position="after">
+                <field name="is_quality_check" invisible="1"/>
+                <field name="quality_check_ids" invisible="1"/>
+            </xpath>
+            <xpath expr="//button[@name='action_repair_start']" position="after">
+                <button name="action_quality_check"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="not is_quality_check">
+                    <span>Quality Check (</span>
+                    <field name="qc_checked_count" nolabel="1"/> / <field name="qc_count" nolabel="1"/>
+                    <span>)</span>
+                </button>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" name="action_view_quality_check" type="object"
+                        invisible="qc_count == 0">
+                    <i class="o_button_icon ri-check-line"/>
+                    <field name="qc_count" string="Quality Checks" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

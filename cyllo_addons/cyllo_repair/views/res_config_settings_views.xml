@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_inherit_repair" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.repair</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//form" position="inside">
+                <app data-string="Repair" string="Repair" name="repair" groups="base.group_system">
+                    <block title="Advanced Operations" name="repair_advanced_operations">
+                        <setting id="repairfloor_setting"
+                                 string="Repair Floor"
+                                 help="Install Repair Floor module for advanced floor management.">
+                            <field name="module_cyllo_shopfloor_repair"/>
+                        </setting>
+                        <setting id="repair_max_active_orders_setting" string="Max Active Repairs"
+                              help="Maximum number of concurrent repairs an operator can start. Set to 0 for unlimited.">
+                            <field name="repair_max_active_orders"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_repair_configuration" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'repair'}</field>
+    </record>
+
+    <menuitem id="menu_repair_settings"
+              name="Settings"
+              parent="repair.repair_menu_config"
+              sequence="0"
+              action="action_repair_configuration"
+              groups="base.group_system"/>
+
+</odoo>

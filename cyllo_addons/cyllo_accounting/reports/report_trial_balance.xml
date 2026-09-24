@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_trial_balance">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="data_report_margin_top" t-value="12"/>
+                <t t-set="data_report_header_spacing" t-value="9"/>
+                <t t-set="data_report_dpi" t-value="110"/>
+                <div class="page">
+                    <h3>
+                        <center>
+                            <b>
+                                <span t-esc="report_name"/>
+                            </b>
+                        </center>
+                    </h3>
+                    <br/>
+                    <br/>
+                    <div class="filters">
+                        <table class="table table-sm table-reports">
+                            <thead class="filter_table"
+                                   style="background:#808080;">
+                                <tr>
+                                    <th>Date Range</th>
+                                    <th>Comparison</th>
+                                    <th>Account</th>
+                                    <th>Journal</th>
+                                    <th>Options</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size:11px;font-weight:100;">
+                                <tr>
+                                    <th>
+                                        <t t-if="filter_by">
+                                            <t t-esc="filter_by"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="comparison_type">
+                                            <t t-if="comparison">
+                                                <t t-esc="comparison_type"/>
+                                                :
+                                                <t t-esc="comparison"/>
+                                            </t>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="account_analytic">
+                                            <t t-esc="','.join(account_analytic)"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="journals">
+                                            <t t-esc="','.join(journals)"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="options">
+                                            <t t-esc="','.join(options)"/>
+                                        </t>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <table class="table">
+                        <thead style="background:#808080;">
+                            <tr class="o_heading">
+                                <th colspan="6"/>
+                                <th class="text-center">Initial Balance</th>
+                                <th t-foreach="periods" t-as="period"
+                                    t-key="period_index" class="text-center"
+                                    t-out="period"/>
+                                <th class="text-center">End Balance</th>
+
+                            </tr>
+                            <tr class="h-1-rem o_heading">
+                                <th colspan="6"/>
+                                <th class="text-center">
+                                    <div class="row">
+                                        <div class="col-6">Debit</div>
+                                        <div class="col-6">Credit</div>
+                                    </div>
+                                </th>
+                                <th t-foreach="periods" t-as="period"
+                                    t-key="period_index" class="text-center">
+                                    <div class="row">
+                                        <div class="col-6">Debit</div>
+                                        <div class="col-6">Credit</div>
+                                    </div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="row">
+                                        <div class="col-6">Debit</div>
+                                        <div class="col-6">Credit</div>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="pdf_data[0]" t-as="data"
+                               t-key="data_index">
+                                <tr>
+                                    <th>
+                                        <t t-esc="data['account']['name']"/>
+                                    </th>
+                                    <th colspan="5"/>
+
+                                    <th class="text-center">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <t t-esc="data['initial_data']['debit']"/>
+                                            </div>
+                                            <div class="col-6">
+                                                <t t-esc="data['initial_data']['credit']"/>
+                                            </div>
+                                        </div>
+                                    </th>
+
+                                    <t t-foreach="data['values']" t-as="value"
+                                       t-key="value_index">
+                                        <th class="text-center">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <t t-esc="value['debit']"/>
+                                                </div>
+                                                <div class="col-6">
+                                                    <t t-esc="value['credit']"/>
+                                                </div>
+                                            </div>
+                                        </th>
+                                    </t>
+                                    <th class="text-center">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <t t-esc="data['end_data']['debit']"/>
+                                            </div>
+                                            <div class="col-6">
+                                                <t t-esc="data['end_data']['credit']"/>
+                                            </div>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </t>
+                            <tr class="border-bottom cy-report-line-acc" style="border-spacing: 0 10px;">
+                                <th style="background:#e6e8e8;">
+                                    <t/>
+                                    Total
+                                </th>
+                                <th colspan="5"/>
+                                <th style="background:#e6e8e8;" class="text-center">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <t t-esc="total_common_data['initial_debit_sum']"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <t t-esc="total_common_data['initial_credit_sum']"/>
+                                        </div>
+                                    </div>
+                                </th>
+
+                                <t t-foreach="total_data" t-as="value" t-key="value_index">
+                                    <th  style="background:#e6e8e8;" class="text-center">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <t t-esc="value['debit']"/>
+                                            </div>
+                                            <div class="col-6">
+                                                <t t-esc="value['credit']"/>
+                                            </div>
+                                        </div>
+                                    </th>
+                                </t>
+                                <th style="background:#e6e8e8;" class="text-center">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <t t-esc="total_common_data['end_debit_sum']"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <t t-esc="total_common_data['end_credit_sum']"/>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

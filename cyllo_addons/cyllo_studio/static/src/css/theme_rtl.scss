@@ -1,0 +1,48 @@
+/* =========================================================
+   FIX OVERLAPPED CHECKBOX + LABEL (RTL — FINAL)
+   ========================================================= */
+
+body.o_rtl .overall_container_list label {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    /* clean spacing */
+}
+
+/* Kill inline LTR margin */
+body.o_rtl .overall_container_list label span {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* RTL-aware spacing */
+body.o_rtl .overall_container_list label span {
+    margin-inline-start: 20px !important;
+}
+
+/* Lock checkbox size */
+body.o_rtl .overall_container_list input[type="checkbox"] {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+/* =========================================================
+   FINAL RTL FIX — ROUND CHECKBOX TICK (OVERRIDE)
+   ========================================================= */
+body.o_rtl .round input[type="checkbox"]:checked+label::after {
+    /* Reset any RTL-specific positioning */
+    right: auto !important;
+    left: 5px !important;
+
+    /* Create the mirrored checkmark (Reverse Tick) */
+    position: absolute;
+    top: 3px !important;
+    width: 5px !important;
+    /* Short side (Right stroke components) */
+    height: 10px !important;
+    /* Long side (Left stroke components) */
+    border: solid #fff;
+    border-width: 0 0 2px 2px;
+    /* Bottom and Left borders */
+    transform: rotate(-45deg) !important;
+}

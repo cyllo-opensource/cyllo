@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Pdf template of Debt Report-->
+    <template id="report_debt_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        <h2 class="text-center">DEBT REPORT</h2>
+                        <br/>
+                        <p>
+                            <span style="font-weight: bold; font-size: 21px;">
+                                State :
+                            </span>
+                            <span style="font-size: 18px;" t-field="o.state"/>
+                        </p>
+                        <table class="table table-bordered mt32">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        <span>Person</span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span>Amount</span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span>Date</span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span>PayBack Period</span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span>PayBack Date</span>
+                                    </th>
+                                    <t t-if="o.partially_returned">
+                                        <th class="text-center">
+                                            <span>Balance To Pay</span>
+                                        </th>
+                                    </t>
+                                    <th class="text-center">
+                                        <span>Returned Date</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="text-center">
+                                    <td>
+                                        <span t-field="o.person_id.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.amount"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.date"
+                                              t-options="{'widget': 'date'}"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.payback_period"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.payback_date"
+                                              t-options="{'widget': 'date'}"/>
+                                    </td>
+                                    <t t-if="o.partially_returned">
+                                        <td>
+                                            <span t-field="o.balance_amount"/>
+                                        </td>
+                                    </t>
+                                    <td>
+                                        <span t-field="o.returned_date"
+                                              t-options="{'widget': 'date'}"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

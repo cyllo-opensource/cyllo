@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <t t-name="PnlReport" t-inherit="cyllo_accounting.AccountingReportBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('cy_accounting_filters_sub')]" position="inside">
+            <t t-call="PnlHeaderButtons"/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_table_main-view')]" position="inside">
+            <div>
+                <div class="table_view_dfr">
+                    <div>
+                        <div class="table_main_view">
+                            <table class="cy_accounting_report_table cy_pnl_report_table" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr class="o_heading cy-acc-year">
+                                        <th colspan="6"/>
+                                        <th t-foreach="periodData" t-as="period" t-key="period_index" class="text-end"
+                                            t-out="period"/>
+                                    </tr>
+                                    <tr class="h-1-rem o_heading cy-acc-year">
+                                        <th colspan="6"/>
+                                        <th t-foreach="periodData" t-as="period" t-key="period_index" class="text-end">Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="pnl_report_body">
+                                    <tr class="h-2-rem gl-line">
+                                        <th colspan="6">
+                                            <span class="cy-balance-sheet-heading">
+                                                Net Profit
+                                            </span>
+                                        </th>
+                                        <th t-foreach="records" t-as="data" t-key="data_index" class="text-end">
+                                            <span class="fw-bolder cy-balance-sheet-heading">
+                                                <t t-if="data.total">
+                                                    <t t-out="currencySymbol"/>
+                                                    <span class="mx-1" t-out="data.total"/>
+                                                </t>
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                                        <th colspan="6">
+                                            <span class="ms-2">
+                                                Income
+                                            </span>
+                                        </th>
+                                        <th t-foreach="records" t-as="data" t-key="data_index" class="text-end">
+                                            <span>
+                                                <t t-out="currencySymbol"/>
+                                                <span class="mx-1" t-out="data.total_income"/>
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                                        <th colspan="6">
+                                            <span class="ms-3">
+                                                Gross Profit
+                                            </span>
+                                        </th>
+                                        <th t-foreach="records" t-as="data" t-key="data_index" class="text-end">
+                                            <span>
+                                                <t t-out="currencySymbol"/>
+                                                <span class="mx-1" t-out="data.gross_profit"/>
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <t t-set="accountLines" t-value="getAccountLines('income')"/>
+                                    <ReportDropdown t-if="accountLines.length" t-props="commonReportDropdownProps"
+                                                    accountLines="accountLines" displayTemplate="'pnlGeneralValDT'"
+                                                    pnlKey="'income'" title="'Operating Income'"/>
+                                    <tr t-else=""
+                                        class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                                        <th colspan="9">
+                                            <span class="ms-4">
+                                                Operating
+                                                Income
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <t t-set="accountLines" t-value="getAccountLines('expense_direct_cost')"/>
+                                    <ReportDropdown t-if="accountLines.length" t-props="commonReportDropdownProps"
+                                                    title="'Cost of Revenue'" displayTemplate="'pnlGeneralValDT'"
+                                                    pnlKey="'expense_direct_cost'" accountLines="accountLines"/>
+
+                                    <tr t-else=""
+                                        class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                                        <th colspan="9">
+                                            <span class="ms-4">Cost of Revenue</span>
+                                        </th>
+                                    </tr>
+                                    <t t-set="accountLines" t-value="getAccountLines('income_other')"/>
+                                    <ReportDropdown t-if="accountLines.length" t-props="commonReportDropdownProps"
+                                                    displayTemplate="'pnlGeneralValDT'" pnlKey="'income_other'"
+                                                    title="'Other income'" accountLines="accountLines"/>
+
+                                    <tr t-else=""
+                                        class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                                        <th colspan="9">
+                                            <span class="ms-4">Other income</span>
+                                        </th>
+                                    </tr>
+                                    <tr class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                                        <th colspan="6">
+                                            <span class="ms-2">Total Income</span>
+                                        </th>
+                                        <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                                            <span>
+                                                <t t-out="currencySymbol"/>
+                                                <span class="mx-1" t-out="record.total_income"/>
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                                        <th colspan="6">
+                                            <span class="ms-1">
+                                                Expenses
+                                            </span>
+                                        </th>
+                                        <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                                            <span>
+                                                <t t-out="currencySymbol"/>
+                                                <span class="mx-1" t-out="record.total_expense"/>
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <t t-set="accountLines" t-value="getAccountLines('expense')"/>
+                                    <ReportDropdown t-if="accountLines.length" t-props="commonReportDropdownProps"
+                                                    title="'Expenses'"
+                                                    displayTemplate="'pnlGeneralValDT'" pnlKey="'expense'"
+                                                    accountLines="accountLines"/>
+                                    <tr t-else=""
+                                        class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                                        <th colspan="9">
+                                            <span class="ms-2">Expenses
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <t t-set="accountLines" t-value="getAccountLines('expense_depreciation')"/>
+                                    <ReportDropdown t-if="accountLines.length" t-props="commonReportDropdownProps"
+                                                    title="'Depreciation'" displayTemplate="'pnlGeneralValDT'"
+                                                    pnlKey="'expense_depreciation'" accountLines="accountLines"/>
+                                    <tr t-else=""
+                                        class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                                        <th colspan="9">
+                                            <span class="ms-2">Depreciation
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                                        <th colspan="6">
+                                            <span class="cy-balance-sheet-heading fw-bolder ms-2">
+                                                Total
+                                                Expenses
+                                            </span>
+                                        </th>
+                                        <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                                            <span class="cy-balance-sheet-heading fw-bolder">
+                                                <t t-out="currencySymbol"/>
+                                                <span class="mx-1" t-out="record.total_expense"/>
+                                            </span>
+                                        </th>
+                                    </tr>
+                                    <tr class="h-2-rem"/>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+    <t t-name="commonPNLParent">
+        <tr t-on-click="onClickParent" class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+            <th colspan="6">
+                <div class="ms-3 collapsed">
+                    <a class="btn header">
+                        <span class="toggle-icon">
+                            <i t-att-class="caretDropdown"/>
+                        </span>
+                        <span class="ms-3 cy-accounting-sub-heading" t-out="props.title"/>
+                    </a>
+                </div>
+            </th>
+            <t t-foreach="props.records" t-as="data" t-key="data_index">
+                <th class="text-end">
+                    <span>
+                        <t t-out="props.currencySymbol"/>
+                        <t t-call="{{props.displayTemplate}}"/>
+                    </span>
+                </th>
+            </t>
+        </tr>
+    </t>
+    <t t-name="pnlGeneralValDT">
+        <span t-if="props.pnlKey" class="mx-1 cy-accounting-sub-heading" t-out="data[props.pnlKey][1]"/>
+    </t>
+    <t t-name="pnlTotalIncomeDT">
+        <span class="mx-1" t-out="data.total_income"/>
+    </t>
+    <t t-name="commonPNLChild">
+        <t t-foreach="props.accountLines[0]" t-as="account" t-key="account_index">
+            <t t-set="accAmountIncome" t-value="props.getAccountLine(account.id, props.accountLines)"/>
+            <tr t-if="accAmountIncome.length" class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                <th colspan="6">
+                    <div class="d-flex">
+                        <span class="ms-5 cy-accounting-sub-heading">
+                            <t t-out="account.name"/>
+                        </span>
+                        <t t-set="annotation"
+                           t-value="account.annotations and account.annotations.hasOwnProperty(props.ledgerId) ? account.annotations[props.ledgerId] : ''"/>
+                        <Dropdown class="'border_unset_button'">
+                            <t t-set-slot="toggler">
+                                <span class="mx-2 fa fa-caret-down"/>
+                            </t>
+                            <DropdownItem onSelected="() => this.props.openGeneralLedger(account.id)">
+                                General Ledger
+                            </DropdownItem>
+                            <DropdownItem
+                                    onSelected="() => this.props.openAnnotation(account.id, annotation, props.pnlKey)">
+                                Annotation
+                            </DropdownItem>
+                        </Dropdown>
+                        <div t-on-click="() => this.props.openAnnotation(account.id, annotation, props.pnlKey)"
+                             t-if="annotation" class="mx-2 cursor-pointer position-relative">
+                            <div class="cy-annotation-tooltip">
+                                <span class="ri-ball-pen-line"/>
+                            </div>
+                            <div class="cy-annotation-tooltip-content justify-content-around modal_background position-absolute"
+                                 t-out="annotation"/>
+                        </div>
+                        <div class="mx-1 delete-on-h-show ri-delete-bin-6-line on-h-red cursor-pointer"
+                             t-if="annotation" t-on-click="() => this.props.removeAnnotation(account.id, props.pnlKey)"
+                             title="Remove Annotation"/>
+                    </div>
+                </th>
+                <th t-foreach="accAmountIncome" t-as="amountIncome" t-key="amountIncome_index" class="text-end">
+                    <span>
+                        <t t-out="props.currencySymbol"/>
+                        <span class="mx-1 cy-accounting-sub-heading" t-out="amountIncome.format_amount"/>
+                    </span>
+                </th>
+            </tr>
+        </t>
+    </t>
+</templates>

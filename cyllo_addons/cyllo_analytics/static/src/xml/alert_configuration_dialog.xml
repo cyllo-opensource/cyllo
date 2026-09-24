@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_analytics.AlertConfigurationDialog" owl="1">
+        <Dialog size="'md'" title="'Set Smart Alert'">
+            <t t-set-slot="header">
+                <div class="d-flex w-100 align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="mb-0">
+                            Set Smart Alert
+                        </h5>
+                    </div>
+                    <button type="button" class="btn-close" aria-label="Close" tabindex="-1" t-on-click="props.close"/>
+                </div>
+            </t>
+
+            <div class="cy-analytics-alert-body">
+                <!-- ── Alert Name ── -->
+                <div class="mb-3">
+                    <label class="cy-modal-form_label mb-1 cy-analytics-alert-label">Alert Name</label>
+                    <input type="text" class="cy-sidebar-input"
+                           t-model="state.name"
+                           placeholder="e.g. Sales Target Alert"/>
+                </div>
+
+                <!-- ── Measure Conditions (only when chart has measures) ── -->
+                <t t-if="hasMeasures">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="fw-semibold">Measure-Specific Conditions</span>
+                            <small class="text-muted ms-2">Set individual thresholds for multiple measures</small>
+                        </div>
+
+                        <t t-foreach="state.measureConditions" t-as="row" t-key="row_index">
+                            <div class="border p-3 mb-2 cy-analytics-alert-measure-row"
+                                 t-att-class="{ 'cy-analytics-alert-measure-row--active': row.enabled }">
+
+                                <!-- Measure toggle row -->
+                                <div class="d-flex align-items-center">
+                                    <span class="slider-container me-3">
+                                        <label class="switch">
+                                            <input type="checkbox"
+                                                   t-att-id="'msr_' + row_index"
+                                                   t-att-checked="row.enabled"
+                                                   t-on-change="() => this.toggleMeasure(row_index)"/>
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </span>
+                                    <label t-att-for="'msr_' + row_index"
+                                           class="mb-0 fw-bold me-auto cy-analytics-alert-strong-label"
+                                           t-esc="row.label"/>
+                                    <span t-if="row.enabled" class="badge rounded-pill cy-analytics-alert-badge-active">Active</span>
+                                    <span t-if="!row.enabled" class="badge rounded-pill bg-light text-muted cy-analytics-alert-badge-off">Off</span>
+                                </div>
+
+                                <!-- Condition + Value (visible only when measure is enabled) -->
+                                <t t-if="row.enabled">
+                                    <div class="row g-3 mt-1">
+                                        <div class="col-7 mt-2">
+                                            <label class="form-label small text-muted mb-1 cy-analytics-alert-field-label">Condition</label>
+                                            <div class="position-relative cy-analytics-alert-ac">
+                                                <AutoComplete
+                                                    value="getConditionLabel(row)"
+                                                    sources="conditionSources(row)"
+                                                    onSelect="(selected) => this.onConditionSelect(row, selected)"
+                                                    placeholder="'Select Condition...'"
+                                                />
+                                                <i class="ri-arrow-down-s-line cy-analytics-alert-select-arrow"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-5 mt-2">
+                                            <label class="form-label small text-muted mb-1 cy-analytics-alert-field-label">Threshold Value</label>
+                                            <input type="number" class="cy-sidebar-input"
+                                                   t-model.number="row.value"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- No measures fallback -->
+                <t t-if="!hasMeasures">
+                    <div class="alert alert-warning mb-3">
+                        <i class="fa fa-exclamation-triangle me-1"/>
+                        No numeric measures found in this chart. Open the sheet editor and add a measure to use alerts.
+                    </div>
+                </t>
+
+                <!-- ── Dimension-based Filter (Domain-Wise) ── -->
+                <t t-if="hasDimension">
+                    <div class="border p-3 mb-3 cy-analytics-alert-dim-box"
+                         t-att-class="{ 'cy-analytics-alert-dim-box--active': state.dimension_filter }">
+
+                        <div class="d-flex align-items-center">
+                            <span class="slider-container me-3">
+                                <label class="switch">
+                                    <input type="checkbox"
+                                           id="dimensionFilterToggle"
+                                           t-model="state.dimension_filter"/>
+                                    <span class="slider round"></span>
+                                </label>
+                            </span>
+                            <label for="dimensionFilterToggle" class="fw-bold mb-0 me-auto cy-analytics-alert-strong-label">
+                                Filter by <t t-esc="dimensionAxisName"/>
+                            </label>
+                            <i t-if="!state.dimension_filter" class="ri-filter-off-line text-muted cy-analytics-alert-filter-icon"/>
+                            <i t-if="state.dimension_filter" class="ri-filter-line cy-analytics-alert-filter-icon cy-analytics-alert-filter-icon--active"/>
+                        </div>
+
+                        <t t-if="state.dimension_filter">
+                            <div class="mt-2 p-2 mb-2 cy-analytics-alert-hint-box">
+                                <small class="text-muted cy-analytics-alert-field-label">
+                                    <i class="ri-information-line me-1 cy-analytics-alert-accent-icon"/>
+                                    Alert will only trigger when values for this specific <t t-esc="dimensionAxisName"/> meet the conditions.
+                                </small>
+                            </div>
+                            <div>
+                                <label class="form-label small fw-bold mb-1 cy-analytics-alert-sublabel">
+                                    Target <t t-esc="dimensionAxisName"/> Value
+                                </label>
+                                <div class="position-relative cy-analytics-alert-ac">
+                                    <AutoComplete
+                                        value="state.dimension_value"
+                                        sources="dimensionSources"
+                                        onSelect.bind="onDimensionSelect"
+                                        placeholder="'Search or select a value...'"
+                                    />
+                                    <i class="ri-arrow-down-s-line cy-analytics-alert-select-arrow"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- ── Notifications ── -->
+                <div class="mb-3">
+                    <label class="cy-modal-form_label mb-2 cy-analytics-alert-label">Notifications</label>
+                    <div class="p-3 border cy-analytics-alert-panel">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="slider-container">
+                                <label class="switch">
+                                    <input type="checkbox" id="notifyScreen" t-model="state.screen_notification"/>
+                                    <span class="slider round"></span>
+                                </label>
+                            </span>
+                            <label class="form-check-label fw-semibold cy-analytics-alert-switch-label" for="notifyScreen">Real-time Screen Warning</label>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="slider-container">
+                                <label class="switch">
+                                    <input type="checkbox" id="notifyEmail" t-model="state.send_email"/>
+                                    <span class="slider round"></span>
+                                </label>
+                            </span>
+                            <label class="form-check-label fw-semibold cy-analytics-alert-switch-label" for="notifyEmail">Send Email to Group</label>
+                        </div>
+
+                        <!-- ── Recipients (M2M style) ── -->
+                        <t t-if="state.send_email">
+                            <div class="mt-3 px-3 py-2 border cy-analytics-alert-recipients-box">
+                                <label class="form-label small fw-bold mb-1 cy-analytics-alert-sublabel">Recipients</label>
+
+                                <div class="cy-dashboard-tags mb-2" t-if="state.notify_users.length > 0">
+                                    <t t-foreach="state.notify_users" t-as="user" t-key="user.id">
+                                        <span class="cy-dashboard-tag">
+                                            <t t-esc="user.display_name"/>
+                                            <i class="ri-close-line"
+                                               t-on-click="() => this.removeUser(user.id)"/>
+                                        </span>
+                                    </t>
+                                </div>
+
+                                <div class="position-relative cy-analytics-alert-ac">
+                                    <AutoComplete
+                                        sources="userSources"
+                                        onSelect.bind="onUserSelect"
+                                        placeholder="'Search and add users...'"
+                                    />
+                                </div>
+                                <small class="text-muted mt-1 d-block cy-analytics-alert-hint-sm">Select users to receive email alerts when conditions are met.</small>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- ── Notify User ── -->
+                <div class="mb-1 px-3 py-2 cy-analytics-alert-user d-flex align-items-center gap-2">
+                    <i class="ri-user-follow-line text-muted cy-analytics-alert-user-icon"/>
+                    <span class="fw-bold cy-analytics-alert-username"><t t-esc="state.userName"/></span>
+                    <small class="text-muted ms-auto">Odoo inbox &amp; activities on trigger</small>
+                </div>
+
+            </div>
+
+            <t t-set-slot="footer">
+                <div class="d-flex justify-content-between w-100">
+                    <div class="d-flex align-items-center">
+                        <button t-if="state.alertId" class="btn btn-outline-danger btn-sm border-0 cy-analytics-alert-delete-btn"
+                                t-on-click="onDelete">
+                            <i class="ri-delete-bin-line me-1"/>Delete Alert
+                        </button>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-secondary" t-on-click="props.close">
+                            Cancel
+                        </button>
+                        <button class="btn btn-primary" t-on-click="onSave">
+                            <i class="ri-save-line me-1"/>Save Alert
+                        </button>
+                    </div>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+</templates>

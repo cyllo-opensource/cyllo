@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.KanbanOverall">
+        <div class="m-3 kanban_overall">
+            <div class="mb-3">
+                <div t-if="props.ribbonElement.length != 0" class="kanban-checkbox-container">
+                    <div class="kanban-input-container mb-2">
+                        <div class="w-100 kanban-input--box p-1 ms-0">
+                            <span class="cy-content-text">Ribbons</span>
+                        </div>
+                        <button class="cy-drag_edit-btn cy-drag_save">
+                            <i class="ri-edit-2-fill cy-studio-icon" t-on-click="editRibbon" />
+                        </button>
+                    </div>
+                </div>
+                <div class="kanban-checkbox-container">
+                    <div class="kanban-input-container mb-2">
+                        <div class="w-100 kanban-input--box p-1 ms-0">
+                            <span class="cy-content-text">Menu</span>
+                        </div>
+                        <button t-if="!props.isMenu" class="cy-drag_edit-btn cy-drag_save">
+                            <i class="ri-add-line cy-studio-icon"
+                                t-on-click="()=>this.menuEditor(true)" />
+                        </button>
+                        <button t-else="" class="cy-drag_edit-btn cy-drag_delete">
+                            <i class="ri-delete-bin-6-fill cy-studio-icon" style="color:red;"
+                                t-on-click="()=>this.menuEditor()" />
+                        </button>
+                    </div>
+                </div>
+                <div class="kanban-checkbox-container" t-if="props.isMenu">
+                    <div class="kanban-input-container mb-2">
+                        <div class="w-100 kanban-input--box p-1 ms-0">
+                            <span class="cy-content-text">Color Picker</span>
+                        </div>
+                        <button t-if="!props.hasColorPicker" class="cy-drag_edit-btn cy-drag_save">
+                            <i class="ri-add-line cy-studio-icon" t-on-click="addColorPicker" />
+                        </button>
+                        <button t-else="" class="cy-drag_edit-btn cy-drag_delete">
+                            <i class="ri-delete-bin-6-fill cy-studio-icon" style="color:red;"
+                                t-on-click="removeColorPicker" />
+                        </button>
+                    </div>
+                </div>
+                <div class="kanban-checkbox-container">
+                    <div class="kanban-input-container mb-2">
+                        <div class="w-100 kanban-input--box p-1 ms-0">
+                            <span class="cy-content-text">Progress Bar</span>
+                        </div>
+                        <button class="cy-drag_edit-btn cy-drag_save">
+                            <i
+                                t-att-class="props.progressAttributes?.fieldName ? 'ri-edit-2-fill' : 'ri-add-line'"
+                                class="cy-studio-icon" t-on-click="openProgressBar" />
+                        </button>
+                        <button t-if="props.progressAttributes?.fieldName"
+                            class="cy-drag_edit-btn cy-drag_delete">
+                            <i class="ri-delete-bin-6-fill cy-studio-icon" style="color:red;"
+                                t-on-click="deleteProgressBar" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown-checkbox-container">
+                <label class="cy-navbar_label customCheckbox-label" for="defaultGroupBy">Group by</label>
+                <div class="cy-studio-custom-dropdown">
+                    <CylloStudioDropdown
+                        options="kanbanFields"
+                        defaultValue="props.mode.defaultGroupBy || 'Default'"
+                        onChange="(value)=>this.handleKanbanView('default_group_by', value)"
+                        searchable="true"
+                    />
+                </div>
+            </div>
+            <div class="cy-toggle-row">
+                <span class="cy-toggle-label">Can Create</span>
+                <label class="cy-switch">
+                    <input type="checkbox" t-model="props.mode.create"
+                        t-on-click="(ev)=> this.props.handleView('create',!props.mode.create)" />
+                    <span class="cy-slider" />
+                </label>
+            </div>
+            <div class="cy-toggle-row">
+                <span class="cy-toggle-label">Quick Create</span>
+                <label class="cy-switch">
+                    <input type="checkbox" t-model="props.mode.quickCreate"
+                        t-on-click="(ev)=> this.props.handleView('quick_create',!props.mode.quickCreate)" />
+                    <span class="cy-slider" />
+                </label>
+            </div>
+            <div class="cy-toggle-row">
+                <span class="cy-toggle-label">Can Drag Records</span>
+                <label class="cy-switch">
+                    <input type="checkbox" t-model="props.mode.recordsDraggable"
+                        t-on-click="(ev)=> this.props.handleView('records_draggable',!props.mode.recordsDraggable)" />
+                    <span class="cy-slider" />
+                </label>
+            </div>
+            <div class="cy-toggle-row">
+                <span class="cy-toggle-label">Can Drag Groups</span>
+                <label class="cy-switch">
+                    <input type="checkbox" t-model="props.mode.groupsDraggable"
+                        t-on-click="(ev)=> this.props.handleView('groups_draggable',!props.mode.groupsDraggable)" />
+                    <span class="cy-slider" />
+                </label>
+            </div>
+            <div class="cy-toggle-row">
+                <span class="cy-toggle-label">Show Invisible Elements</span>
+                <label class="cy-switch">
+                    <input type="checkbox" t-att-checked="props.showInvisible"
+                        t-on-click="(ev)=> this.props.showInvisibleFields(ev)" />
+                    <span class="cy-slider" />
+                </label>
+            </div>
+        </div>
+    </t>
+</templates>

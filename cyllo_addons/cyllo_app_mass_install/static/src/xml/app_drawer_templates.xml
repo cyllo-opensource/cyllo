@@ -1,0 +1,800 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <!-- Template for the main container of the application -->
+    <t t-name="cyllo_app_mass_install.massive" owl="1">
+        <link rel="stylesheet" type="text/css"
+              href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;600&amp;display=swap"/>
+        <main class="cy_app_mass_install_main" t-ref="root">
+            <t t-if="state.template"
+               t-call="cyllo_app_mass_install.{{state.template}}"/>
+        </main>
+    </t>
+    <!-- Template for the main content during app installation -->
+    <t t-name="cyllo_app_mass_install.main_content">
+        <div class="cy-app-install-demo-container cy-app-install-view cyllo_app_install_apps">
+            <div class="cy-app-install-demo-card cy-app-install-company-card"
+                 t-att-class="{'cy-app-install-demo-card--sidebar': state.apps_to_install.length > 0 }">
+                <div class="cy-app-install-container"
+                     t-att-style="state.apps_to_install.length ? 'border-right: 1px solid #DFDFDF;': ''">
+                    <div class="cy-app-install-sticky">
+                        <div class="cy-app-install-demo-card__header">
+                            <img src="/cyllo_app_mass_install/static/src/img/cyllo-logo.png"
+                                 style="width: auto; height: 2.5rem;"
+                                 alt="Cyllo" class="cy-demo-card__logo"/>
+                            <p class="cy-app-install-demo-card__page m-0">
+                                Step 1 out of 3
+                            </p>
+                            <div type="button"
+                                 class="cy-app-install-btn cy-app-install-btn--primary h-auto"
+                                 t-on-click="() => this.skip_first()">
+                                Skip
+                                <i class="ri-arrow-right-s-line ms-2"/>
+                            </div>
+                        </div>
+                        <ul class="cy-app-install-steps">
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox active"/>
+                                </div>
+                            </li>
+                            <div class="cy-app-install-step--bar"/>
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox">
+                                        <span>2</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <div class="cy-app-install-step--bar"/>
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox">
+                                        <span>3</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <ul class="cy-app-install-steps-text justify-content-between">
+                            <li class="cy-app-install-step__label text-start">
+                                Install Apps
+                            </li>
+                            <li class="cy-app-install-step__label text-center">
+                                Company Details
+                            </li>
+                            <li class="cy-app-install-step__label text-end">User
+                                Details
+                            </li>
+                        </ul>
+                        <div class="cy-app-install-demo-card__hero cy-app-install-app-search"
+                             t-att-class="{'cy-app-install-demo-card--sidebar-optional': state.apps_to_install.length > 0 }">
+                            <div style="min-width: max-content;">
+                                <h1 class="cy-app-install-demo-card__title">
+                                    Choose Your Apps
+                                </h1>
+                                <p class="cy-app-install-demo-card__lead">
+                                    Free instant access, no credit card
+                                    required.
+                                </p>
+                            </div>
+                            <div class="cy-app-install-demo-card__search-container">
+                                <div class="cy-app-install-select-input-button"
+                                     t-att-class="{'cy-app-install-div-wrap': state.moduleSearchTerm !== null and Object.values(state.moduleSearchTerm).some(term => term !== null and term !== '') }">
+                                    <div class="cy-app-install-select-highlighted"
+                                         t-att-class="{'cy-app-install-highlighted-phone': state.moduleSearchTerm !== null and Object.values(state.moduleSearchTerm).some(term => term !== null and term !== '') }">
+                                        <label class="select-cy">
+                                            <select class="cy-app-install-demo_selection-container"
+                                                    t-on-change="onAllAppsClick"
+                                                    t-att-class="{'cy-app-install-select-wrap': state.moduleSearchTerm !== null and Object.values(state.moduleSearchTerm).some(term => term !== null and term !== '') }">
+                                                <option class="cy-app-install-options">
+                                                    Apps
+                                                </option>
+                                                <option class="cy-app-install-options">
+                                                    All
+                                                </option>
+                                            </select>
+                                        </label>
+                                        <div style="display:flex; height:auto;">
+                                            <div class="cy-app-install-highlighted-category"
+                                                 t-if="state.moduleSearchTerm !== null and Object.values(state.moduleSearchTerm).some(term => term !== null and term !== '')">
+                                                <span>Module</span>
+                                            </div>
+                                            <div class="cy-app-install-highlighted-term d-flex align-items-center"
+                                                 t-if="state.moduleSearchTerm !== null and Object.values(state.moduleSearchTerm).some(term => term !== null and term !== '')">
+                                                <t t-if="state.moduleSearchTerm[0] !== ''">
+                                                    <span>
+                                                        <span t-esc="state.moduleSearchTerm[0]"/>
+                                                        <t t-if="state.moduleSearchTerm.slice(1).length > 0">
+                                                            <t t-esc="' or&#160; '"/>
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                                <t t-set="number" t-value="0"/>
+                                                <t t-foreach="state.moduleSearchTerm.slice(1)"
+                                                   t-as="term" t-key="number">
+                                                    <t t-if="term !== null and term !== ''">
+                                                        <span>
+                                                            <t t-esc="term"/>
+                                                            <t t-if="state.moduleSearchTerm.slice(1)[number+1] and state.moduleSearchTerm.slice(1)[number+1] != ''">
+                                                                <t t-esc="' or&#160; '"/>
+                                                            </t>
+                                                        </span>
+                                                    </t>
+                                                    <t t-set="number"
+                                                       t-value="number+1"/>
+                                                </t>
+                                                <button class="cy-app-install-close-button"
+                                                        t-on-click="clearSearchModuleTerm">
+                                                    <i class="ri-close-line"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div style="display:flex;height:auto;">
+                                            <div class="cy-app-install-highlighted-category"
+                                                 t-if="state.technicalSearchTerm !== null and Object.values(state.technicalSearchTerm).some(term => term !== null and term !== '')">
+                                                <span>Technical</span>
+                                            </div>
+                                            <div class="cy-app-install-highlighted-term d-flex align-items-center"
+                                                 t-if="state.technicalSearchTerm !== null and Object.values(state.technicalSearchTerm).some(term => term !== null and term !== '')">
+                                                <t t-if="state.technicalSearchTerm[0] !== ''">
+                                                    <span>
+                                                        <t t-esc="state.technicalSearchTerm[0]"/>
+                                                        <t t-if="state.technicalSearchTerm.slice(1).length > 0">
+                                                            <t t-esc="' or&#160; '"/>
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                                <t t-set="number" t-value="0"/>
+                                                <t t-foreach="state.technicalSearchTerm.slice(1)"
+                                                   t-as="term" t-key="number">
+                                                    <t t-if="term !== null and term !== ''">
+                                                        <span>
+                                                            <t t-esc="term"/>
+                                                            <t t-if="state.technicalSearchTerm.slice(1)[number+1] and state.technicalSearchTerm.slice(1)[number+1] != ''">
+                                                                <t t-esc="' or&#160; '"/>
+                                                            </t>
+                                                        </span>
+                                                    </t>
+                                                    <t t-set="number"
+                                                       t-value="number+1"/>
+                                                </t>
+                                                <button class="cy-app-install-close-button"
+                                                        t-on-click="clearSearchTechnicalTerm">
+                                                    <i class="ri-close-line"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div style="display:flex;height:auto;">
+                                            <div class="cy-app-install-highlighted-category"
+                                                 t-if="state.categorySearchTerm !== null and Object.values(state.categorySearchTerm).some(term => term !== null and term !== '')">
+                                                <span>Category</span>
+                                            </div>
+                                            <div class="cy-app-install-highlighted-term d-flex align-items-center"
+                                                 t-if="state.categorySearchTerm !== null and Object.values(state.categorySearchTerm).some(term => term !== null and term !== '')">
+                                                <t t-if="state.categorySearchTerm[0] !== ''">
+                                                    <span>
+                                                        <t t-esc="state.categorySearchTerm[0]"/>
+                                                        <t t-if="state.categorySearchTerm.slice(1).length > 0">
+                                                            <t t-esc="' or&#160; '"/>
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                                <t t-set="number" t-value="0"/>
+                                                <t t-foreach="state.categorySearchTerm.slice(1)"
+                                                   t-as="term" t-key="number">
+                                                    <t t-if="term !== null and term !== ''">
+                                                        <span>
+                                                            <t t-esc="term"/>
+                                                            <t t-if="state.categorySearchTerm.slice(1)[number+1] and state.categorySearchTerm.slice(1)[number+1] != ''">
+                                                                <t t-esc="' or&#160; '"/>
+                                                            </t>
+                                                        </span>
+                                                    </t>
+                                                    <t t-set="number"
+                                                       t-value="number+1"/>
+                                                </t>
+                                                <button class="cy-app-install-close-button"
+                                                        t-on-click="clearSearchCategoryTerm">
+                                                    <i class="ri-close-line"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="search" name="search"
+                                           t-on-input="onSearch"
+                                           t-att-class="{'cy-app-install-input-conditional': state.technicalSearchTerm !== null and Object.values(state.technicalSearchTerm).some(term => term !== null and term !== '') }"
+                                           class="cy-app-install-demo-search_input"
+                                           placeholder="Search apps, categories..."
+                                           t-on-keydown="onInputKeydown"
+                                           t-on-blur="onInputBlur"
+                                           t-on-focus="onInputFocus"
+                                           t-ref="search" t-model="state.keys"/>
+                                    <t t-if="state.autoCompleteItems !== null and Object.values(state.autoCompleteItems).some(term => term !== null and term !== '')">
+                                        <t t-call="cyllo_app_mass_install.SearchBarItems"/>
+                                    </t>
+                                    <button type="submit"
+                                            class="cy-app-install-demo-search_btn"
+                                            aria-label="Search" title="Search"
+                                            t-on-click="onInputClick">
+                                        <i class="ri-search-line"/>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cy-app-mass-install-scrollable">
+                        <div class="cy-app-install-demo-apps">
+                            <div class="cy-app-install-demo-apps__cat">
+                                <t class="kanban-category"
+                                   t-if="this.state.category"
+                                   t-foreach="this.state.category"
+                                   t-as="categ" t-key="categ.id">
+                                    <t t-if="categ.child_apps.length>0">
+                                        <div class="cy-app-install-demo-apps__cat">
+                                            <div class="cy-app-install-demo-apps__cat-header">
+                                                <h2 class="cy-app-install-demo-apps__cat-title mb-0">
+                                                    <t t-esc="categ.name"/>
+                                                </h2>
+                                            </div>
+                                            <div class="cy-demo-apps__cat-body">
+                                                <ul class="cy-app-install-demo-apps-items">
+                                                    <t t-if="categ.child_apps"
+                                                       t-foreach="categ.child_apps"
+                                                       t-as="app"
+                                                       t-key="app.id">
+                                                        <li class="cy-demo-apps-item">
+                                                            <Apps app_data="app"
+                                                                  selected_apps="this.state.apps_to_install"
+                                                                  t-if="app"/>
+                                                            <input type="checkbox"
+                                                                   id="crm"
+                                                                   name="module"
+                                                                   class="cy-app-install-demo-apps__checkbox"
+                                                                   aria-hidden="true"/>
+                                                        </li>
+                                                    </t>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                                <div t-if="this.state.category.length == 0">
+                                    <center class="cy-app-install-nothing_to_display">
+                                        No Apps Found To Display
+                                    </center>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cy-app-install-appbar">
+                    <t t-if="this.state.apps_to_install.length > 0">
+                        <t t-set="selectedAppsCount"
+                           t-value="this.state.app_details"/>
+                        <t t-set="AppsToInstall"
+                           t-value="this.state.apps_to_install"/>
+                        <SelectedAppDetails
+                                SelectedAppsCount="selectedAppsCount"
+                                AppsToInstall="AppsToInstall"/>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+    <!-- Template for collecting company details -->
+    <t t-name="cyllo_app_mass_install.company">
+        <div class="cy-app-install-demo-container cy-app-install-view cyllo_app_install_company">
+            <div class="cy-app-install-demo-card cy-app-install-company-card">
+                <div class="cy-app-install-container">
+                    <div class="cy-app-install-sticky">
+                        <div class="cy-app-install-demo-card__header">
+                            <img src="/cyllo_app_mass_install/static/src/img/cyllo-logo.png"
+                                 style="width: auto; height: 2.5rem;"
+                                 alt="Cyllo" class="cy-demo-card__logo"/>
+                            <p class="cy-app-install-demo-card__page m-0">
+                                Step 2 out of 3
+                            </p>
+                            <div style="visibility: hidden; width:98px"/>
+                        </div>
+                        <ul class="cy-app-install-steps">
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox completed">
+                                        <i class="ri-check-line"/>
+                                    </div>
+                                </div>
+                            </li>
+                            <div class="cy-app-install-step--bar completed"/>
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox active"/>
+                                </div>
+                            </li>
+                            <div class="cy-app-install-step--bar"/>
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox">
+                                        <span>3</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <ul class="cy-app-install-steps-text justify-content-between">
+                            <li class="cy-app-install-step__label text-start">
+                                Install Apps
+                            </li>
+                            <li class="cy-app-install-step__label text-center">
+                                Company Details
+                            </li>
+                            <li class="cy-app-install-step__label text-end">User
+                                Details
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="cy-app-mass-install-scrollable">
+                        <div class="cy-app-install-demo-card__hero cy-app-install-demo_step2-hero">
+                            <div class="cy-app-install-demo-card__hero-profile">
+                                <label t-if="!state.image" for="file-upload"
+                                       class="company-logo-upload cy-app-install-demo_hero-profile btn"
+                                       id="previewImage"
+                                       t-on-click="triggerImageInput">
+                                    <svg width="27"
+                                         height="27"
+                                         viewBox="0 0 27 27"
+                                         fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                                d="M12.15 12.15V6.75H14.85V12.15H20.25V14.85H14.85V20.25H12.15V14.85H6.75V12.15H12.15ZM13.5 27C6.04415 27 0 20.9558 0 13.5C0 6.04415 6.04415 0 13.5 0C20.9558 0 27 6.04415 27 13.5C27 20.9558 20.9558 27 13.5 27ZM13.5 24.3C19.4647 24.3 24.3 19.4647 24.3 13.5C24.3 7.53532 19.4647 2.7 13.5 2.7C7.53532 2.7 2.7 7.53532 2.7 13.5C2.7 19.4647 7.53532 24.3 13.5 24.3Z"
+                                                fill="#828176"/>
+                                    </svg>
+                                    <span id="file-name" class="ml-2 d-block"/>
+                                    <span class="max"/>
+                                </label>
+                                <div t-else="">
+                                    <i class="fa fa-trash trash_icon"
+                                       t-on-click="clearImage"/>
+                                    <i class="ri-pencil-fill pencil-icon"
+                                       t-on-click="triggerImageInput"/>
+                                    <img t-attf-src="{{'data:' + (this.state.imageMimeType or 'image/jpeg') + ';base64,' + this.state.image}}"
+                                         alt="Preview Image"
+                                         id="previewImage"
+                                         class="cy-app-install-demo_hero-profile"/>
+                                </div>
+                                <input type="file" id="imageInput"
+                                       accept="image/jpeg,image/png,image/gif,image/webp" class="d-none"
+                                       t-on-change="handleImageUpload"/>
+                            </div>
+                            <input type="text"
+                                   class="cy-app-install-demo-card__title cy-app-install-main__placeholder"
+                                   name="name" t-att-value="this.state.name"
+                                   placeholder="My Company"
+                                   t-model="state.name"/>
+                        </div>
+                        <div class="cy-app-install-demo-apps cy-app-install-form-data cy-app-install-company-form">
+                            <form class="cy-app-install-onboarding-card__form">
+                                <div class="cy-app-install-onboarding-card__form-row">
+                                    <div class="cy-app-install-onboarding-card__input-container">
+                                        <div class="cy-app-install-onboarding-card__input-group">
+                                            <label class="cy-app-install-userinform-form__label"
+                                                   for="address1">
+                                                Address 1
+                                            </label>
+                                            <input class="cy-app-install-onboarding-card__input"
+                                                   id="address1"
+                                                   type="text"
+                                                   name="street"
+                                                   t-att-value="this.state.street"
+                                                   placeholder="1234 Main St"
+                                                   t-model="state.street"/>
+                                        </div>
+                                        <div class="cy-app-install-onboarding-card__input-group">
+                                            <label class="cy-app-install-userinform-form__label"
+                                                   for="address2">
+                                                Address 2
+                                            </label>
+                                            <input class="cy-app-install-onboarding-card__input"
+                                                   type="text"
+                                                   id="address2" name="street2"
+                                                   placeholder="1234 Main St"
+                                                   t-att-value="this.state.street2"
+                                                   t-model="state.street2"/>
+                                        </div>
+                                        <div class="cy-app-install-onboarding-card__form-row-two">
+                                            <div class="cy-app-install-onboarding-card__input-group">
+                                                <label class="cy-app-install-userinform-form__label"
+                                                       for="state">
+                                                    State
+                                                </label>
+                                                <select type="text"
+                                                        required="required"
+                                                        class="cy-app-install-onboarding-card__input"
+                                                        id="state"
+                                                        name="state_id"
+                                                        t-on-change="StateOnchange">
+                                                    <option t-att-value="false"/>
+                                                    <t t-foreach="state.states"
+                                                       t-as="state"
+                                                       t-key="state.id">
+                                                        <option t-att-value="state.id"
+                                                                t-att-selected="state.id === this.state.country_state">
+                                                            <t t-esc="state.display_name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </div>
+                                            <div class="cy-app-install-onboarding-card__input-group">
+                                                <label class="cy-app-install-userinform-form__label"
+                                                       for="city">
+                                                    City
+                                                </label>
+                                                <input type="text"
+                                                       required="required"
+                                                       class="cy-app-install-onboarding-card__input"
+                                                       id="city" name="city"
+                                                       placeholder=" San Franciso"
+                                                       t-att-value="this.state.city"
+                                                       t-model="state.city"/>
+                                            </div>
+                                        </div>
+                                        <div class="cy-app-install-onboarding-card__form-row-two">
+                                            <div class="cy-app-install-onboarding-card__input-group">
+                                                <label class="cy-app-install-userinform-form__label"
+                                                       for="pin">
+                                                    Pin code
+                                                </label>
+                                                <input type="text"
+                                                       required="required"
+                                                       class="cy-app-install-onboarding-card__input"
+                                                       id="pin" name="zip"
+                                                       placeholder="1234 "
+                                                       t-att-value="this.state.pin"
+                                                       t-model="state.pin"/>
+                                            </div>
+                                            <div class="cy-app-install-onboarding-card__input-group">
+                                                <label class="cy-app-install-userinform-form__label"
+                                                       for="vat">
+                                                    Tax Id
+                                                </label>
+                                                <input type="text"
+                                                       class="cy-app-install-onboarding-card__input"
+                                                       id="vat" name="vat"
+                                                       placeholder="US12345671"
+                                                       t-att-value="this.state.vat"
+                                                       t-model="state.vat"/>
+                                            </div>
+                                        </div>
+                                        <div class="cy-app-install-onboarding-card__form-row-two">
+                                            <div class="cy-app-install-onboarding-card__input-group">
+                                                <label class="cy-app-install-userinform-form__label"
+                                                       for="company_registry">
+                                                    Company ID
+                                                </label>
+                                                <input type="text"
+                                                       class="cy-app-install-onboarding-card__input"
+                                                       id="company_registry"
+                                                       name="company_registry"
+                                                       t-att-value="this.state.company_registry"
+                                                       t-model="state.company_registry"/>
+                                            </div>
+                                            <div class="cy-app-install-onboarding-card__input-group">
+                                                <label class="cy-app-install-userinform-form__label"
+                                                       for="company">
+                                                    Country
+                                                </label>
+                                                <select type="text"
+                                                        t-on-change="CountryOnchange"
+                                                        class="cy-app-install-onboarding-card__input"
+                                                        id="company"
+                                                        name="country_id">
+                                                    <option t-att-value="this.state.country"
+                                                            selected="selected">
+                                                        <t t-esc="this.state.user_data.company_data[0].country_id[1]"/>
+                                                    </option>
+                                                    <t t-foreach="this.state.countries"
+                                                       t-as="country"
+                                                       t-key="country.id">
+                                                        <option t-att-value="country.id"
+                                                                placeholder="United States"
+                                                                t-att-selected="country.id === this.state.country">
+                                                            <t t-esc="country.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="cy-app-install-onboarding-card__input-container">
+                                        <div class="cy-app-install-onboarding-card__input-group">
+                                            <label class="cy-app-install-userinform-form__label"
+                                                   for="phone">
+                                                Phone
+                                            </label>
+                                            <input type="tel"
+                                                   class="cy-app-install-onboarding-card__input"
+                                                   id="phone"
+                                                   name="phone"
+                                                   placeholder="+1 (650) 555-0111"
+                                                   t-att-value="this.state.phone"
+                                                   t-model="state.phone"/>
+                                        </div>
+                                        <div class="cy-app-install-onboarding-card__input-group">
+                                            <label class="cy-app-install-userinform-form__label"
+                                                   for="mobile">
+                                                Mobile
+                                            </label>
+                                            <input type="tel"
+                                                   class="cy-app-install-onboarding-card__input"
+                                                   id="mobile"
+                                                   name="mobile"
+                                                   placeholder="+1 (650) 555-0111"
+                                                   t-att-value="this.state.mobile"
+                                                   t-model="state.mobile"/>
+                                        </div>
+                                        <div class="cy-app-install-onboarding-card__input-group">
+                                            <label class="cy-app-install-userinform-form__label"
+                                                   for="email">
+                                                Email
+                                            </label>
+                                            <input type="email"
+                                                   class="cy-app-install-onboarding-card__input"
+                                                   name="email" id="email"
+                                                   placeholder="info@yourcompany.com"
+                                                   t-att-value="this.state.email"
+                                                   t-model="state.email"/>
+                                        </div>
+                                        <div class="cy-app-install-onboarding-card__input-group">
+                                            <label class="cy-app-install-userinform-form__label"
+                                                   for="website">
+                                                Website
+                                            </label>
+                                            <input type="url"
+                                                   class="cy-app-install-onboarding-card__input"
+                                                   placeholder="www."
+                                                   name="website" id="website"
+                                                   t-att-value="this.state.website"
+                                                   t-model="state.website"/>
+                                        </div>
+                                        <div class="cy-app-install-onboarding-card__input-group">
+                                            <label class="cy-app-install-userinform-form__label">
+                                                Color
+                                            </label>
+                                            <ul class="cy-app-install-colors">
+                                                <t t-set="number" t-value="0"/>
+                                                <t t-foreach="colors"
+                                                   t-as="color"
+                                                   t-key="color_index">
+                                                    <li class="cy-app-install-color"
+                                                        t-on-click="() => this.colorClick(color, color_index)">
+                                                        <input type="radio"
+                                                               class="cy-app-install-color__input"
+                                                               name="color"
+                                                               t-att-value="number"/>
+                                                        <label class="cy-app-install-color__label color"
+                                                               t-att-class="color"/>
+                                                        <t t-set="number"
+                                                           t-value="number + 1"/>
+                                                    </li>
+                                                </t>
+                                            </ul>
+                                        </div>
+                                        <input type="hidden" name="id"
+                                               t-att-value="this.state.id"
+                                               t-model="state.id"/>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cy-app-install-appbar__footer cy-app-install-form_submit d-flex justify-content-end gap-2">
+                <div class="cy-app-install-btn cy-app-install-btn--link"
+                     id="continueBtn"
+                     t-on-click="() => this.back_first()">
+                    <i class="ri-arrow-left-s-line me-2"/>
+                    <span>Back</span>
+                </div>
+                <div class="cy-app-install-btn cy-app-install-btn--primary"
+                     id="continueBtn"
+                     t-on-click.stop.prevent="redirectUser">
+                    <span>Continue</span>
+                    <i class="ri-arrow-right-s-line ms-2"/>
+                </div>
+            </div>
+        </div>
+    </t>
+    <!-- Template for the Cyllo app user details -->
+    <t t-name="cyllo_app_mass_install.user">
+        <div t-if="this.state.loading">
+            <div class="cy_app-install-loading-indicator flex-column">
+                <div class="cy-app-install-spinner-container">
+                    <dotlottie-player
+                            src="https://lottie.host/a67f0b6e-2baa-4912-9609-68750eb652ca/oDZqiBaV7g.json"
+                            background="transparent"
+                            speed="1"
+                            style="width: 200px; height: 200px"
+                            loop=""
+                            autoplay=""></dotlottie-player>
+                </div>
+                <div class="cy-app-install-loading-message">
+                    <div id="cy-app-install-cyllo-info"
+                         class="odoo-info-container">
+                        <t t-esc="this.updateLoadingContent()"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="welcomeMessage" class="cy_app-install-loading-indicator"
+             style="display:none;">
+            <div class="cy-app-install-welcome-message">
+                <img src="/cyllo_base/static/src/img/Logo.svg"
+                     style="width:200px;"/>
+            </div>
+        </div>
+        <div class="cy-app-install-demo-container cy-app-install-view cyllo_app_install_user">
+            <div class="cy-app-install-demo-card cy-app-install-company-card">
+                <div class="cy-app-install-container">
+                    <div class="cy-app-install-sticky">
+                        <div class="cy-app-install-demo-card__header">
+                            <img src="/cyllo_app_mass_install/static/src/img/cyllo-logo.png"
+                                 style="width: auto; height: 2.5rem;"
+                                 alt="Cyllo" class="cy-demo-card__logo"/>
+                            <p class="cy-app-install-demo-card__page m-0">Step 3
+                                out of 3
+                            </p>
+                            <div style="visibility: hidden; width:98px"/>
+                        </div>
+                        <ul class="cy-app-install-steps">
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox completed">
+                                        <i class="ri-check-line"/>
+                                    </div>
+                                </div>
+                            </li>
+                            <div class="cy-app-install-step--bar completed"/>
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox completed">
+                                        <i class="ri-check-line"/>
+                                    </div>
+                                </div>
+                            </li>
+                            <div class="cy-app-install-step--bar completed"/>
+                            <li class="cy-app-install-step cy-app-install-step">
+                                <div class="d-flex align-items-center">
+                                    <div class="cy-app-install-step--checkbox active"/>
+                                </div>
+                            </li>
+                        </ul>
+                        <ul class="cy-app-install-steps-text justify-content-between">
+                            <li class="cy-app-install-step__label text-start">
+                                Install Apps
+                            </li>
+                            <li class="cy-app-install-step__label text-center">
+                                Company Details
+                            </li>
+                            <li class="cy-app-install-step__label text-end">User
+                                Details
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="cy-app-mass-install-scrollable">
+                        <div class="cy-app-install-top_header">
+                            <div>
+                                <h2 class="cy-app-install-demo-card__title">
+                                    Users
+                                </h2>
+                                <p class="cy-app-install-demo-card__lead">
+                                    Free instant access, no credit card
+                                    required.
+                                </p>
+                            </div>
+                        </div>
+                        <span class="cy-app-install-user_addbtn-text"
+                              t-on-click="openAddUserPopup">
+                            <i class="ri-add-line"/>
+                            Add User
+
+
+                        </span>
+                        <div class="cy-app-install-demo-apps cy-app-install_user_table">
+                            <div class="cy-app-install-demo_usertable-container">
+                                <table class="cy-app-install-demo_usertable">
+                                    <thead class="cy-app-install-usertable__head">
+                                        <th class="cy-app-install-userlist_head">
+                                            Name
+                                        </th>
+                                        <th class="cy-app-install-userlist_head">
+                                            Login
+                                        </th>
+                                        <th class="cy-app-install-userlist_head">
+                                            Language
+                                        </th>
+                                        <th class="cy-app-install-userlist_head">
+                                            Latest authentication
+                                        </th>
+                                        <th/>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.user_data.users"
+                                           t-as="user" t-key="user.id">
+                                            <tr class="cy-app-install-usertable__row"
+                                                t-on-click="() => this.redirectToUserDetails(user.id)">
+                                                <td class="cy-app-install-userlist_data">
+                                                    <div class="cy-app-install-user_profile-data">
+                                                        <div class="cy-app-install-userlist_avatar">
+                                                            <img class="cy-app-install-user-avatar"
+                                                                 t-attf-src="{{'data:image/jpeg;base64,' + user.image_1920}}"
+                                                                 alt="User Avatar"
+                                                                 onerror="this.src='cyllo_app_mass_install/static/src/img/alt.jpg'; this.alt='Fallback Image';"/>
+                                                        </div>
+                                                        <t t-esc="user.name"/>
+                                                    </div>
+                                                </td>
+                                                <td class="cy-app-install-userlist_data">
+                                                    <t t-esc="user.login"/>
+                                                </td>
+                                                <td class="cy-app-install-userlist_data">
+                                                    <t t-esc="this.getLanguageName(user.lang)"/>
+                                                </td>
+                                                <td class="cy-app-install-userlist_data">
+                                                    <t t-esc="user.login_date ? user.login_date : ''"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cy-app-install-appbar__footer justify-content-end gap-2 d-flex cy_app-install-get_started">
+                <div class="cy-app-install-btn cy-app-install-btn--link"
+                     id="continueBtn"
+                     t-on-click="() => this.back_second()">
+                    <i class="ri-arrow-left-s-line me-2"/>
+                    <span>Back</span>
+                </div>
+                <button type="button"
+                        class="cy-app-install-btn  cy-app-install-btn--primary cy-app-install-user_addbtn"
+                        t-on-click="getStarted" id="continueBtn">
+                    <span>Get Started</span>
+                    <i class="ri-arrow-right-s-line ms-2"/>
+                </button>
+            </div>
+        </div>
+    </t>
+    <t t-name="cyllo_app_mass_install.SearchBarItems">
+        <ul class="o-dropdown--menu dropdown-menu show"
+            id="cy-app-install-autocomplete" role="menu">
+            <li class="cy-app-install-suggestions"
+                t-att-class="{ 'cy-app-install-highlighted-suggestion': state.highlightedId === 'module' }"
+                t-on-mouseover="(ev) => this.onMouseOver('module')"
+                t-on-click="() => this.SuggestionClick('module',state.autoCompleteItems)">
+                Search Module name for :
+
+
+                <t t-esc="state.autoCompleteItems"/>
+            </li>
+            <li class="cy-app-install-suggestions"
+                t-att-class="{ 'cy-app-install-highlighted-suggestion': state.highlightedId === 'technical' }"
+                t-on-mouseover="(ev) => this.onMouseOver('technical')"
+                t-on-click="() => this.SuggestionClick('technical',state.autoCompleteItems)">
+                Search Technical name for :
+
+
+                <t t-esc="state.autoCompleteItems"/>
+            </li>
+            <li class="cy-app-install-suggestions"
+                t-att-class="{ 'cy-app-install-highlighted-suggestion': state.highlightedId === 'category' }"
+                t-on-mouseover="(ev) => this.onMouseOver('category')"
+                t-on-click="() => this.SuggestionClick('category',state.autoCompleteItems)">
+                Search category name for :
+
+
+                <t t-esc="state.autoCompleteItems"/>
+            </li>
+        </ul>
+    </t>
+</templates>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="CustomTrigger">
+        <div class="variable-details-layout">
+            <header class="variable-header">
+                <button class="btn-back" t-on-click="onBack">
+                    <i class="ri-arrow-left-line"/>
+                    Back
+                </button>
+                <span class="variable-title" t-esc="props.editTriggerId ? 'Edit Custom Trigger' : 'Create Custom Trigger'"/>
+            </header>
+            <section class="variable-body">
+                <div class="cy-info-grid">
+                    <label for="customTriggerName">Name</label>
+                    <input
+                            id="customTriggerName"
+                            class="variable-input o_input"
+                            autocomplete="off"
+                            t-model="state.trigger_name"
+                    />
+
+                    <CustomDropdown
+                            options="btnTriggers"
+                            defaultValue="state.trigger_value"
+                            onChange="(value) => this.updateBtnFn(value)"
+                            placeholder="'Select a function'"
+                            searchable="true"
+                            width="''"
+                            maxHeight="'70px'"
+                    />
+                </div>
+                <div class="icon-upload-section mt-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-preview mr-3" t-att-class="{ 'has-icon': iconSrc }" t-on-click="uploadIcon">
+                            <t t-if="iconSrc">
+                                <img t-att-src="iconSrc" alt="Trigger Icon" class="preview-image"/>
+                            </t>
+                            <t t-else="">
+                                <i class="fa fa-image text-muted"/>
+                            </t>
+                        </div>
+                        <div class="icon-actions d-flex align-items-center gap-2">
+                            <input type="file" t-ref="fileInput" style="display: none;" accept="image/*" t-on-change="handleIconUpload"/>
+                            <button class="btn btn btn-primary mr-2" t-on-click="uploadIcon">
+                                <t t-if="state.icon">Change Icon</t>
+                                <t t-else="">Upload Icon</t>
+                            </button>
+                            <button t-if="state.icon" class="btn btn btn-danger mr-2" t-on-click="removeIcon">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+            <footer class="variable-footer">
+                <button class="btn btn-edit" t-on-click="onSave">
+                    <t t-if="props.editTriggerId">Update</t>
+                    <t t-else="">Save</t>
+                </button>
+            </footer>
+        </div>
+    </t>
+</templates>

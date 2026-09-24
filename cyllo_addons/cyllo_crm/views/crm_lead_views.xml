@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_crm_lead_view_form_inherit" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_schedule_meeting']"
+                   position="after">
+                <button name="action_open_activity_graph" type="object"
+                        class="oe_stat_button" icon="fa-tasks"
+                        string="Activities" invisible="not has_activities"/>
+
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <div style="
+                    display:inline-flex;
+                    align-items:baseline;
+                    gap:6px;
+                    white-space:nowrap;
+                    vertical-align:baseline;
+                ">
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="after">
+                <div style="
+                    display:inline-flex;
+                    align-items:baseline;
+                    gap:6px;
+                    white-space:nowrap;
+                    vertical-align:baseline;
+                ">
+                    <field name="partner_work_status" widget="html"/>
+                    <field name="is_pinned" invisible="1"/>
+                    <field name="is_installed" invisible="1"/>
+                    <field name="has_activities" invisible="1"/>
+                </div>
+            </xpath>
+            <xpath expr="//header/field[@name='stage_id']" position="replace">
+                <field name="stage_id" widget="statusbar_duration"
+                       options="{'clickable': '1', 'fold_field': 'fold'}"/>
+            </xpath>
+            <xpath expr="//header/field[@name='stage_id']"
+                   position="attributes">
+                <attribute name="domain">
+                    [
+                    '&amp;',
+                    '|', ('team_id', '=', team_id),
+                    ('team_id', '=', False),
+                    '|', ('type', '=', 'both'),
+                    ('type', '=', 'type'),
+                    ]
+                </attribute>
+            </xpath>
+            <!--            Advance followup-->
+            <xpath expr="//field[@name='stage_id']" position="after">
+                <div class="mt8" invisible="not exit_criteria_activity_name">
+                    <span class="text-warning">
+                        <i class="fa fa-exclamation-triangle"/>
+                        Stage requires completion of activity:
+                    </span>
+                    <field name="exit_criteria_activity_name" readonly="1"
+                           class="text-warning"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_crm_lead_kanban_stages_inherit" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.stages.inherit</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_lead_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="default_group_by">stage_id</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_crm_case_custom_activities_filter" model="ir.ui.view">
+        <field name="name">crm.lead.search.custom.activities</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='activities_overdue']"
+                   position="before">
+                <filter string="no activity" name="no_activity"
+                        domain="[('activity_ids', '=', False),('user_id','=',uid)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='no_activity']" position="after">
+                <filter string="Activities ongoing" name="activities_ongoing"
+                        domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+            </xpath>
+            <xpath expr="//filter[@name='activities_ongoing']" position="after">
+                <filter string="Assigned to me" name="my"
+                        domain="[('user_id','=',uid)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='my']" position="after">
+                <filter string="Idle" name="activities_idle"
+                        domain="[('my_activity_date_deadline', '&gt;', context_today().strftime('%Y-%m-%d')-7)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='activities_idle']" position="after">
+                <filter string="All" name="reset_filter"
+                        domain="[]"/>
+            </xpath>
+            <!-- Global All-Leads filters (no user restriction) -->
+            <xpath expr="//filter[@name='reset_filter']" position="after">
+                <filter string="All Leads - No Activity" name="all_no_activity"
+                        domain="[('activity_ids', '=', False), ('type', '=', 'lead')]"/>
+                <filter string="All Leads - Idle" name="all_activities_idle"
+                        domain="[('activity_ids.date_deadline', '&lt;', (context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d')), ('type', '=', 'lead')]"/>
+                <filter string="All Leads - Overdue" name="all_activities_overdue"
+                        domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d')), ('type', '=', 'lead')]"/>
+                <filter string="All Leads - Due Today" name="all_activities_today"
+                        domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d')), ('type', '=', 'lead')]"/>
+                <filter string="All Leads - My Activities" name="all_activity_today"
+                        domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d')), ('type', '=', 'lead')]"/>
+                <filter string="All Leads" name="all_leads"
+                        domain="[('type', '=', 'lead')]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_crm_view_mini_tree" model="ir.ui.view">
+        <field name="name">crm.lead.view.mini.dashboard</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="js_class">crm_lead_dashboard_list</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_crm_view_mini_oppor_tree" model="ir.ui.view">
+        <field name="name">crm.lead.view.mini.oppor.dashboard</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="js_class">crm_opportunity_dashboard_list
+                </attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

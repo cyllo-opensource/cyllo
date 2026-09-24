@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Product Variants view-->
+    <record id="action_view_product_variants" model="ir.actions.act_window">
+        <field name="name">Product Variants</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">tree,kanban,activity,form</field>
+        <field name="view_id" ref="product.product_product_tree_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            No Product is Found!
+            </p>
+            <p>Create some Products!.</p>
+        </field>
+    </record>
+    <!--Archived product shows here-->
+    <record id="action_view_products_for_approval" model="ir.actions.act_window">
+        <field name="name">Products for Approval</field>
+        <field name="res_model">product.template</field>
+        <field name="domain">[('state','=', 'to_approve')]</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                There's nothing to see!
+            </p>
+            <p>This page displays only Archived products.</p>
+            <p>Make a product; if it's archived, it will be available here!.</p>
+        </field>
+    </record>
+    <!--Approval and rejection button in the product form view-->
+    <record id="view_product_product_form_inherit_approve" model="ir.ui.view">
+        <field name="name">view.product.product.form.inherit.approve</field>
+        <field name="model">product.product</field>
+        <field name="priority">110</field>
+        <field name="inherit_id"
+               ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_button_approve" string="Approve" type="object"
+                        groups="cyllo_product.group_cyllo_product" class="oe_highlight"
+                        invisible="approval_status or not button_approval_visibility"/>
+                <button name="action_product_variant_reject" string="Reject" type="object"
+                        groups="cyllo_product.group_cyllo_product" class="oe_highlight"
+                        invisible="approval_status or not button_approval_visibility"/>
+                <field name="state" widget="statusbar" invisible="1"/>
+                <field name="button_approval_visibility" invisible="1"/>
+                <field name="page_approver_visibility" invisible="1"/>
+                <field name="approval_status" invisible="1"/>
+            </xpath>
+            <xpath expr="//header" position="after">
+                <div class="alert alert-warning mb-0" role="alert"
+                     invisible="state != 'to_approve'">
+                    The Product Variant
+                    <b>
+                        <field name="name" readonly="1"/>
+                    </b>
+                    is under
+                    <b>
+                        <field name="state" readonly="1"/>
+                    </b>
+                    for
+                    <b>
+                        <field name="type_approval" readonly="1"/>
+                    </b>
+                </div>
+            </xpath>
+            <!--Approvers page in notebook-->
+            <xpath expr="//notebook" position="inside">
+                <page string="Approvers" name="approvers"  invisible="not button_approval_visibility">
+                    <field name="approver_product_line_ids">
+                        <tree create="0" delete="0">
+                            <field name="product_approver_id"/>
+                            <field name="status"
+                                   widget="badge"
+                                   decoration-warning="status == 'pending'"
+                                   decoration-success="status == 'approved'"
+                                   decoration-danger="status == 'rejected'"
+                            />
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

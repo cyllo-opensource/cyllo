@@ -1,0 +1,735 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Subscription order portal view template -->
+    <template id="portal_my_home_menu_subscription"
+              name="Portal layout : cyllo_subscription"
+              inherit_id="portal.portal_breadcrumbs" priority="25">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'Subscription Orders'"
+                class="breadcrumb-item active">
+                <span>My Subscriptions</span>
+            </li>
+            <li t-if="page_name == 'Details'" class="breadcrumb-item active">
+                <a t-attf-href="/your_sub_orders">
+                    <span>My Subscriptions</span>
+                </a>
+                /
+                <span>
+                    <t t-out="each_order.name"/>
+                </span>
+            </li>
+            <li t-if="page_name == 'Close order'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/your_sub_orders">
+                    <span>My Subscriptions</span>
+                </a>
+                /
+                <a t-attf-href="/details/{{order.id}}">
+                    <span>
+                        <t t-out="orders.name"/>
+                    </span>
+                </a>
+                /
+                <span>
+                    Closed
+                </span>
+            </li>
+        </xpath>
+    </template>
+    <!-- Template to show if there is no record -->
+    <template id="no_order_template">
+        <div class="container-fluid mt32 mb80">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card-body">
+                        <div class="col-sm-12 text-center">
+                            <img src="/cyllo_subscription/static/src/img/no_order.png"
+                                 width="200px" height="auto"
+                                 class="img-fluid mb-4 mr-3"/>
+                            <h3>
+                                <strong>Currently no orders !</strong>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <!-- Template to show subscription record in the portal -->
+    <template id="portal_subscription" name="Subscription Order"
+              customize_show="True" inherit_id="portal.portal_my_home"
+              priority="34">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/sale/static/src/img/bag.svg'"/>
+                <t t-set="title">Subscription Orders</t>
+                <t t-set="url" t-value="'/your_sub_orders'"/>
+                <t t-set="text">View your Subscription Orders</t>
+                <t t-set="placeholder_count" t-value="'subscription_count'"/>
+            </t>
+        </div>
+    </template>
+    <!-- Subscription tree view in portal -->
+    <template id="subscription_orders" name="Subscriptions">
+        <t t-call="portal.portal_layout">
+            <div>
+                <div class="ht_home_div">
+                    <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                    <t t-call="portal.portal_searchbar">
+                        <t t-set="title">Subscription</t>
+                    </t>
+                </div>
+                <div class="nav_tab">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist"
+                        style="border-color: white;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#all" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">All
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#active" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Active
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#to_renew"
+                                    type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">To Renew
+                            </button>
+                        </li>
+                        <!--requested menu-->
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#requested"
+                                    type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Requested
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#churned"
+                                    type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Churned
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#trial"
+                                    type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Trial
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="ht-tab-content tab-content">
+                    <div class="tab-pane fade show active" id="all"
+                         role="tabpanel" aria-labelledby="home-tab">
+                        <t t-if="not orders">
+                            <t t-call="cyllo_subscription.no_order_template"/>
+                        </t>
+                        <t t-else="">
+                            <table class="table mt16 mb40">
+                                <tbody>
+                                    <t t-foreach="orders"
+                                       t-as="order">
+                                        <tr>
+                                            <td>
+                                                <div class="subscription_order_row">
+                                                    <div>
+                                                        <span>
+                                                            <h5>
+                                                                <a t-attf-href="/details/{{order.id}}"
+                                                                   t-out="order.name"/>
+                                                            </h5>
+                                                        </span>
+                                                        <span>Product:-
+                                                            <t t-out="order.subscription_order_line_ids.product_id.name"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                    <div class="tab-pane fade" id="active"
+                         role="tabpanel" aria-labelledby="home-tab">
+                        <t t-if="not active_records">
+                            <t t-call="cyllo_subscription.no_order_template"/>
+                        </t>
+                        <t t-else="">
+                            <table class="table mt16 mb40">
+                                <tbody>
+                                    <t t-foreach="active_records"
+                                       t-as="active">
+                                        <tr>
+                                            <td>
+                                                <div class="subscription_order_row">
+                                                    <div>
+                                                        <span>
+                                                            <h5>
+                                                                <a t-attf-href="/details/{{active.id}}"
+                                                                   t-out="active.name"/>
+                                                            </h5>
+                                                        </span>
+                                                        <span>Product:-
+                                                            <t t-out="active.subscription_order_line_ids.product_id.name"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                    <div class="tab-pane fade" id="to_renew"
+                         role="tabpanel" aria-labelledby="home-tab">
+                        <t t-if="not to_renew">
+                            <t t-call="cyllo_subscription.no_order_template"/>
+                        </t>
+                        <t t-else="">
+                            <table class="table mt16 mb40">
+                                <tbody>
+                                    <t t-foreach="to_renew"
+                                       t-as="renew">
+                                        <tr>
+                                            <td>
+                                                <div class="subscription_order_row">
+                                                    <div>
+                                                        <span>
+                                                            <h5>
+                                                                <a t-attf-href="/details/{{renew.id}}"
+                                                                   t-out="renew.name"/>
+                                                            </h5>
+                                                        </span>
+                                                        <span>Product:-
+                                                            <t t-out="renew.subscription_order_line_ids.product_id.name"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                    <!--requested orders-->
+                    <div class="tab-pane fade" id="requested"
+                         role="tabpanel" aria-labelledby="home-tab">
+                        <t t-if="not requested_orders">
+                            <t t-call="cyllo_subscription.no_order_template"/>
+                        </t>
+                        <t t-else="">
+                            <table class="table mt16 mb40">
+                                <tbody>
+                                    <t t-foreach="requested_orders"
+                                       t-as="requested">
+                                        <tr>
+                                            <td>
+                                                <div class="subscription_order_row">
+                                                    <div>
+                                                        <span>
+                                                            <h5>
+                                                                <a t-attf-href="/details/{{requested.id}}"
+                                                                   t-out="requested.name"/>
+                                                            </h5>
+                                                        </span>
+                                                        <span>Product:-
+                                                            <t t-out="requested.subscription_order_line_ids.product_id.name"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                    <div class="tab-pane fade" id="churned"
+                         role="tabpanel" aria-labelledby="home-tab">
+                        <t t-if="not churned">
+                            <t t-call="cyllo_subscription.no_order_template"/>
+                        </t>
+                        <t t-else="">
+                            <table class="table mt16 mb40">
+                                <tbody>
+                                    <t t-foreach="churned"
+                                       t-as="churn">
+                                        <tr>
+                                            <td>
+                                                <div class="subscription_order_row">
+                                                    <div>
+                                                        <span>
+                                                            <h5>
+                                                                <a t-attf-href="/details/{{churn.id}}"
+                                                                   t-out="churn.name"/>
+                                                            </h5>
+                                                        </span>
+                                                        <span>Product:-
+                                                            <t t-out="churn.subscription_order_line_ids.product_id.name"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                    <div class="tab-pane fade" id="trial"
+                         role="tabpanel" aria-labelledby="home-tab">
+                        <t t-if="not trial">
+                            <t t-call="cyllo_subscription.no_order_template"/>
+                        </t>
+                        <t t-else="">
+                            <table class="table mt16 mb40">
+                                <tbody>
+                                    <t t-foreach="trial"
+                                       t-as="tria">
+                                        <tr>
+                                            <td>
+                                                <div class="subscription_order_row">
+                                                    <div>
+                                                        <span>
+                                                            <h5>
+                                                                <a t-attf-href="/details/{{tria.id}}"
+                                                                   t-out="tria.name"/>
+                                                            </h5>
+                                                        </span>
+                                                        <span>Product:-
+                                                            <t t-out="tria.subscription_order_line_ids.product_id.name"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!-- Template called when close the subscription -->
+    <template id="subscription_closed" name="Subscription closed">
+        <t t-call="portal.portal_layout">
+            <div class="ht_home_div">
+                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                <t t-call="portal.portal_searchbar">
+                    <t t-set="title">Subscription Closed</t>
+                </t>
+            </div>
+            <center>
+                <h1>
+                    <b>Your Subscription is closed</b>
+                </h1>
+            </center>
+        </t>
+    </template>
+    <!-- Template called when renew the subscription -->
+    <template id="subscription_renewed" name="Subscription renewed">
+        <t t-call="portal.portal_layout">
+            <div class="ht_home_div">
+                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                <t t-call="portal.portal_searchbar">
+                    <t t-set="title">Subscription Renewed </t>
+                </t>
+            </div>
+            <center>
+                <h1>
+                    Your Subscription is renewed(<t t-esc="new_record"/>)
+                </h1>
+            </center>
+        </t>
+    </template>
+    <!-- Subscription order details (form inside template) -->
+    <template id="subscription_details"
+              name="Subscription Details"
+              inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <t t-set="o_portal_fullwidth_alert">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="url" t-value="'/my/custody/records/#'"/>
+                </t>
+            </t>
+            <t t-set="o_portal_fullwidth_alert">
+                <t t-call="portal.portal_back_in_edit_mode">
+                </t>
+            </t>
+            <div class="row mt16 o_portal_sale_sidebar">
+                <t t-call="portal.portal_record_sidebar"
+                   id="custody_portal_sidebar">
+                    <t t-set="classes"
+                       t-value="'d-print-none col-lg-3 col-xl-4'"/>
+                    <t t-set="title">
+                        <h2 t-esc="each_order.name"/>
+                    </t>
+                    <t t-set="entries">
+                        <div class="d-flex flex-column gap-1 order-md-last order-lg-first"
+                             id="sale_order_sidebar_button">
+                            <div class="d-flex flex-column gap-4">
+                                <div class="o_download_pdf">
+                                    <a class="btn btn-primary o_print_btn d-block"
+                                       t-att-href="each_order.get_portal_url(report_type='pdf')"
+                                       id="print_invoice_report"
+                                       title="View Details"
+                                       target="_blank">
+                                        <i class="fa fa-print"/>
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            <div style="display: contents;">
+                                <t t-if="each_order.sale_order_template_id.customer_can_close and each_order.state_subscription != 'churned'"
+                                   class="list-group-item flex-grow-1">
+                                    <a class="btn btn-primary o_print_btn d-block"
+                                       role="button"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#wc-modal-close"
+                                       href="#">Close Subscription
+                                    </a>
+                                </t>
+                                <t t-if="each_order.renewal_request and each_order.state_subscription in ('churned', 'renew')"
+                                   class="list-group-item flex-grow-1">
+                                    <a class="btn btn-primary o_print_btn d-block"
+                                       role="button"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#wc-modal-renew"
+                                       href="#">Renew Subscription
+                                    </a>
+                                </t>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="navspy flex-grow-1 ps-0" t-ignore="true"
+                             role="complementary">
+                            <ul class="nav flex-column bs-sidenav"/>
+                        </div>
+                        <br/>
+                        <div t-if="each_order.renewal_date">
+                            <small>
+                                <b>Return Date of the property</b>
+                            </small>
+                            <div t-field="each_order.renewal_date"/>
+                        </div>
+                        <br/>
+                        <div t-if="each_order.company_id">
+                            <h6>
+                                <small class="text-muted">Your contact</small>
+                            </h6>
+                            <div class="o_portal_contact_details d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-start align-items-center gap-2">
+                                    <img t-att-src="'/logo.png?company=%s' % each_order.company_id.id"
+                                         style="padding: 0px; margin: 0px; height: auto; width: 80px;"
+                                         t-att-alt="'%s' % each_order.company_id.name"/>
+                                    <div>
+                                        <h6 class="mb-0"
+                                            t-out="each_order.company_id.name"/>
+                                        <a href="#discussion"
+                                           class="d-flex align-items-center gap-2 small fw-bold">
+                                            Send message
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <div id="quote_content"
+                     class="col-12 col-lg-9 col-xl-8 mt-5 mt-lg-0">
+                    <h2 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
+                        Request -
+                        <t t-esc="each_order.name"/>
+                    </h2>
+                    <t t-if="each_order.state_subscription == 'active'">
+                        <span class="badge state_badge rounded-pill bg-success">
+                            <t t-esc="each_order.state_subscription"/>
+                        </span>
+                    </t>
+                    <t t-elif="each_order.state_subscription == 'renew'">
+                        <span class="badge state_badge rounded-pill bg-warning">
+                            <t t-esc="each_order.state_subscription"/>
+                        </span>
+                    </t>
+                    <t t-elif="each_order.state_subscription == 'churned'">
+                        <span class="badge state_badge rounded-pill bg-danger">
+                            <t t-esc="each_order.state_subscription"/>
+                        </span>
+                    </t>
+                    <t t-elif="each_order.state_subscription == 'trial'">
+                        <span class="badge state_badge rounded-pill text-bg-info">
+                            <t t-esc="each_order.state_subscription"/>
+                        </span>
+                    </t>
+
+                    <br/>
+                    <div id="informations" class="row mt-4">
+                        <!-- Information -->
+                        <div id="custody_info"
+                             class="col-12 col-lg-5 mb-3 mb-lg-0">
+                            <span id="sale_info_title">
+                                <h5 class="mb-1">Subscription Information</h5>
+                                <hr class="my-0"/>
+                            </span>
+                            <table class="table table-borderless table-sm">
+                                <tbody style="white-space:nowrap"
+                                       id="custody_info_table">
+                                    <tr t-if="each_order.renewal_date">
+                                        <th class="text-end pb-0">Renewal
+                                            Date:
+                                        </th>
+                                        <td class="w-100 pb-0 text-wrap">
+                                            <span t-field="each_order.renewal_date"
+                                                  t-options='{"widget": "date"}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="customer_info"
+                             class="col-12 col-lg-5 offset-lg-1">
+                            <h5 class="mb-1">
+                                Name and Address
+                            </h5>
+                            <hr class="my-0"/>
+                            <t t-esc="each_order.partner_id.name"/>
+                            <br/>
+                            <t t-if="each_order.partner_street">
+                                <t t-esc="each_order.partner_street"/>
+                            </t>
+                            <br/>
+                            <t t-if="each_order.partner_city">
+                                <t t-esc="each_order.partner_city"/>
+                            </t>
+                            <br/>
+                            <t t-if="each_order.partner_state">
+                                <t t-esc="each_order.partner_state"/>
+                            </t>
+                        </div>
+                    </div>
+                    <hr/>
+                    <section id="details" style="page-break-inside: auto;"
+                             class="mt32 row">
+                        <h3 id="details">Order Detail</h3>
+                        <br/>
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <th class="text-start">Product</th>
+                                    <th class="text-start">Qty</th>
+                                    <th class="text-start">Subs</th>
+                                    <th class="text-start">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span t-esc="each_order.subscription_order_line_ids.product_id.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="each_order.subscription_order_line_ids.quantity"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="each_order.time_based_price_id.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="each_order.subscription_order_line_ids.total_price"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <br/>
+                    <hr/>
+                    <br/>
+                    <hr/>
+                    <div id="custody_communication">
+                        <h3>Communication history</h3>
+                        <t t-set="object" t-value="each_order"/>
+                        <t t-call="portal.message_thread"/>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal called to close the subscription -->
+            <div role="dialog" class="modal fade" id="wc-modal-close">
+                <div class="modal-dialog reason-modal">
+                    <form t-attf-action="/your_sub_orders/close/{{each_order.id}}"
+                          id="accept" method="POST"
+                          class="js_accept_json modal-content js_website_submit_form">
+                        <input type="hidden" name="csrf_token"
+                               t-att-value="request.csrf_token()"/>
+                        <header class="modal-header">
+                            <h4 class="modal-title">Close Reason</h4>
+                            <button type="button" class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"/>
+                        </header>
+                        <main>
+                            <input class="d-none" name="csrf_token"
+                                   t-att-value="request.csrf_token()"/>
+                            <main class="modal-body">
+                                <div>
+                                    <span>Please choose reason to close the
+                                        subscription
+                                    </span>
+                                </div>
+                                <br/>
+                                <p class="fst-italic text-muted">Your subscription valid until <t t-out="each_order.renewal_date"/>
+                                    Be sure you need to close the subscription
+                                </p>
+                                <h2>We are sorry to see you go.</h2>
+                                <p>Tell us, why are you leaving?</p>
+                                <select name="reasons"
+                                        t-attf-class="form-control s_website_form_input" >
+                                    <t t-foreach="reasons" t-as="reason">
+                                        <option t-att-value="reason.reason">
+                                            <span t-field="reason.reason"/>
+                                        </option>
+                                    </t>
+                                     <!-- Add the "Other" option -->
+                                    <option value="other">Other</option>
+                                </select>
+                                 <!-- Hidden input for custom reason -->
+                                <div id="custom-reason-container" class="mt-3 d-none">
+                                    <label for="custom-reason">Please specify:</label>
+                                    <input type="text" name="custom_reason" id="custom-reason" class="form-control"/>
+                                </div>
+                            </main>
+                            <footer class="modal-footer">
+                                <a role="button" data-bs-toggle="modal"
+                                   data-bs-target="#wc-modal-close-retain"
+                                   href="#"
+                                   class="btn btn-primary subscription-close-init-retain d-none">
+                                    Submit
+                                </a>
+                                <button t-attf-class="btn btn-primary">
+                                    Submit
+                                </button>
+                                <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Discard, I want
+                                    to stay</button>
+                            </footer>
+                        </main>
+                    </form>
+                </div>
+            </div>
+            <div role="dialog" class="modal fade" id="wc-modal-renew">
+                <div class="modal-dialog">
+                    <form t-attf-action="/renew_sub" id="accept" method="POST"
+                          class="js_accept_json modal-content js_website_submit_form">
+                        <input type="hidden" name="csrf_token"
+                               t-att-value="request.csrf_token()"/>
+                        <header class="modal-header">
+                            <h4 class="modal-title">Renewal Request</h4>
+                            <button type="button" class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"/>
+                        </header>
+                        <main>
+                            <input class="d-none" name="csrf_token"
+                                   t-att-value="request.csrf_token()"/>
+                            <main class="modal-body">
+                                 <t t-if="existing_order">
+                                    <div class="alert alert-warning">
+                                        You already have an active subscription for this order.
+                                    </div>
+                                </t>
+                                <p class="fst-italic text-muted">Subscription
+                                    Renewal Request
+                                </p>
+                                <h1>Choose a plan.</h1>
+                                <br/>
+                                <select name="partner"
+                                        t-attf-class="form-control s_website_form_input d-none">
+                                    <option t-att-value="each_order.partner_id.id">
+                                        <span t-field="each_order.partner_id.name"/>
+                                    </option>
+                                </select>
+                                <select name="product"
+                                        t-attf-class="form-control s_website_form_input d-none">
+                                    <option t-att-value="each_order.subscription_order_line_ids.product_id.id">
+                                        <span t-field="each_order.subscription_order_line_ids.product_id.name"/>
+                                    </option>
+                                </select>
+                                <div class="text-muted">Choose your plan</div>
+                                <select name="plan"
+                                        t-attf-class="form-control s_website_form_input">
+                                    <t t-foreach="each_order.subscription_order_line_ids.product_tmpl_id.time_based_ids"
+                                       t-as="plan">
+                                        <option t-att-value="plan.id">
+                                            <span t-field="plan.name"/>
+                                        </option>
+                                        <span name="price"
+                                              t-field="plan.cost"/>
+                                    </t>
+                                </select>
+                                <input t-attf-class="form-control s_website_form_input d-none"
+                                       name="quantity"
+                                       t-att-value="each_order.subscription_order_line_ids.quantity"/>
+                                <input t-attf-class="form-control s_website_form_input d-none"
+                                       name="order_id"
+                                       t-att-value="each_order.id"/>
+                                <input class="d-none" name="sale_order_template_id"
+                                   t-att-value="each_order.sale_order_template_id.id"/>
+                            </main>
+                            <footer class="modal-footer">
+                                <a role="button" data-bs-toggle="modal"
+                                   data-bs-target="#wc-modal-close-retain"
+                                   href="#"
+                                   class="btn btn-primary subscription-close-init-retain d-none">
+                                    Submit
+                                </a>
+                                <button t-attf-class="btn btn-primary subscription-close-init-noretain subscription-close-finish" t-att-disabled="existing_order">
+                                    Submit
+                                </button>
+                                <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Discard
+                                </button>
+                            </footer>
+                        </main>
+                    </form>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

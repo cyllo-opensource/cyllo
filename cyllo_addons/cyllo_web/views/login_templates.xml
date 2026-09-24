@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<!-- Login page template -->
+	<template id="login" inherit_id="web.login" name="Login">
+		<xpath expr="//t[@t-call='web.login_layout']" position="replace">
+			<t t-call="web.frontend_layout">
+				<t t-set="html_data" t-value="{'style': 'height: 100%;'}" />
+				<t t-set="body_classname" t-value="'bg-100'" />
+				<t t-set="no_header" t-value="True" />
+				<t t-set="no_footer" t-value="True" />
+				<section class="cy-instance cy-instance-login"
+					t-att-data-already-logged-in="'1' if request.session.uid else '0'">
+
+					<!-- Background decoration -->
+					<div class="cy-instance_bg">
+						<img src="/cyllo_web/static/src/img/hero-des-r.svg" alt=""
+							class="cy-instance_bg-img" />
+					</div>
+
+					<!-- Toast container -->
+					<div id="cy-toast-container" class="cy-toast-container"></div>
+
+					<!-- Card wrapper -->
+					<div class="cy-instance_box">
+						<div class="cy-instance_content">
+
+							<!-- Logo & DB Name -->
+							<div class="cy-login-logo-wrap">
+								<img src="/cyllo_web/static/src/img/cyllo.svg" alt="Cyllo logo"
+									class="cy-login-logo-img" />
+								<span t-if="request and request.db" class="cy-current-db-name">
+									<i class="ri-database-2-line"></i>
+									<t t-out="request.db" />
+								</span>
+							</div>
+
+							<!-- Form area -->
+							<div class="cy-step4 cy-form">
+								<form role="form"
+									t-attf-action="/web/login"
+									method="post"
+									novalidate="novalidate"
+									onsubmit="this.action = '/web/login' + location.hash">
+
+									<div class="cy-form_title">
+										<span class="cy-instance-title">Welcome back!</span>
+										<span class="cy-login-subtitle">Please login to your account
+											to
+											continue</span>
+									</div>
+
+									<div t-if="request.session.uid" class="cy-login-warning" role="alert">
+										<i class="ri-information-line"></i>
+										<span>You are already logged in. Please log out before trying to log in again.</span>
+									</div>
+
+									<input type="hidden" name="csrf_token"
+										t-att-value="request.csrf_token()" />
+
+									<!-- Email -->
+									<div class="floating-label-group">
+										<input type="text"
+											name="login"
+											id="login"
+											class="form-control cy-input"
+											t-att-value="login"
+											required="required"
+											autofocus="autofocus"
+											autocapitalize="off"
+											t-att-readonly="'readonly' if request.session.uid else None"
+											placeholder=" " />
+										<label for="login">Email</label>
+									</div>
+
+									<!-- Password (hidden until email confirmed) -->
+									<div class="floating-label-group cy-password-group"
+										t-attf-class="floating-label-group cy-password-group#{' cy-password-group--error' if error else ''}"
+										id="password_group"
+										t-attf-style="display: #{'block' if error else 'none'};">
+										<input type="password"
+											class="form-control cy-input"
+											name="password"
+											id="password"
+											placeholder=" "
+											required="required"
+											t-attf-class="form-control cy-input#{' cy-input--error' if error else ''}" />
+										<label for="password">Password</label>
+									</div>
+
+									<!-- Server-side auth error (hidden, picked up by JS toast) -->
+									<p t-if="error"
+										id="cy-server-error"
+										class="cy-server-error-hidden"
+										t-esc="error" />
+
+									<!-- Actions row -->
+									<div class="cy-login-actions">
+										<div class="cy-login-buttons">
+											<button type="button" id="continue_button"
+												class="btn btn1"
+												t-att-disabled="'disabled' if request.session.uid else None">Continue</button>
+											<button type="submit" id="login_button"
+												class="btn btn1 cy-hidden"
+												t-att-disabled="'disabled' if request.session.uid else None">Login</button>
+											<a t-if="request.session.uid" href="/web"
+												class="btn btn2 cy-login-dashboard-link">Go to Dashboard</a>
+											<t t-if="debug == '1'">
+												<button type="submit" name="redirect"
+													value="/web/become" class="btn btn2">
+													Log in as superuser
+												</button>
+											</t>
+										</div>
+
+										<div class="cy-login_bottom">
+
+											<div t-if="not request.session.uid" class="cy-login-forgot-row">
+												<a t-if="reset_password_enabled"
+													class="click"
+													t-attf-href="/web/reset_password?{{ keep_query() }}">
+													Forgot Password?
+												</a>
+											</div>
+
+											<div t-if="not request.session.uid" class="cy-login-signup-row">
+												<p t-if="signup_enabled" class="para">
+													Don't have an
+														account?
+													<a
+														t-attf-href="/web/signup?{{ keep_query() }}"
+														class="click">Sign Up</a>
+												</p>
+											</div>
+										</div>
+
+									</div>
+
+									<input type="hidden" name="redirect" t-att-value="redirect" />
+									<div class="o_login_auth d-none" />
+								</form>
+							</div>
+
+							<!-- Database link -->
+							<p class="para cy-login-db-link">
+								Looking to organize your database?
+								<a
+									class="click db-click" href="/web/database/selector">Click Here</a>
+							</p>
+
+						</div>
+					</div>
+
+					<script>
+						localStorage.setItem('mainMenuVisibility', 'true');
+						localStorage.setItem("cy_selected_app", false);
+						localStorage.setItem("isSidebarOn", true);
+					</script>
+				</section>
+			</t>
+		</xpath>
+	</template>
+</odoo>

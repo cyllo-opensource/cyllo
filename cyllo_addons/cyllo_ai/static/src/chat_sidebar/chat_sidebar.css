@@ -1,0 +1,277 @@
+/* ============================================================================
+   Cyllo AI — History Sidebar Component (chat_sidebar.xml)
+   ========================================================================= */
+
+/* 1. Main Sidebar Container & States */
+.chatbot-history-sidebar {
+    position: fixed;
+    width: 300px;
+    height: inherit;
+    margin-top: -10px;
+    margin-left: -10px;
+    border-right: 1px solid var(--cy-ai-border);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    display: flex;
+    border-radius: var(--cy-ai-radius-lg) 0 0 var(--cy-ai-radius-lg);
+    flex-direction: column;
+    transform: translateX(-12px);
+    opacity: 0;
+}
+
+.chatbot-history-sidebar.closing {
+    transform: translateX(-12px);
+    opacity: 0;
+}
+
+.chatbot-history-sidebar.ready {
+    transform: translateX(0);
+    opacity: 1;
+    transition: transform 200ms ease, opacity 200ms ease;
+}
+
+/* 2. Header Section */
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--cy-ai-space-5);
+    font-weight: 600;
+    background: var(--cy-ai-surface);
+    border-radius: var(--cy-ai-radius-md) 0 0 0;
+}
+
+.history-header .back-arrow-icon {
+    cursor: pointer;
+}
+
+.sidebar-avatar {
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    background: var(--cy-ai-brand-deco-soft);
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+/* 3. Body Section */
+.history-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0 0 0 var(--cy-ai-radius-md);
+    background: var(--cy-ai-surface);
+    font-size: 16px;
+}
+
+/* 4. Recent Chats Header */
+.recent-chats-header {
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-3);
+    padding: var(--cy-ai-space-4) var(--cy-ai-space-5);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--cy-ai-text-faint);
+    background: var(--cy-ai-surface);
+    margin-bottom: var(--cy-ai-space-1);
+    font-family: var(--cy-ai-font);
+}
+
+.recent-chats-header i {
+    font-size: 16px;
+    color: var(--cy-ai-text-faint);
+}
+
+/* 5. Session List & Items */
+.session-list {
+    display: flex;
+    flex-direction: column;
+    background: var(--cy-ai-surface);
+    padding: 0 15px 10px 15px;
+}
+
+.session-item {
+    position: relative;
+    align-items: center;
+    padding: 5px var(--cy-ai-space-4);
+    border-radius: var(--cy-ai-radius-sm);
+    z-index: 1;
+    margin-bottom: 5px;
+    font-size: .9rem;
+}
+
+.session-item:not(.active):hover {
+    background: var(--cy-ai-surface-hover);
+    z-index: 10;
+}
+
+.session-item.active {
+    background: var(--cy-ai-surface-hover);
+    z-index: 1001;
+}
+
+.session-item.active:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* 6. Rename Textbox Box (inside session item) */
+.rename-box {
+    display: flex;
+    align-items: center;
+    padding: 2px;
+}
+
+.rename-textbox {
+    width: 85%;
+}
+
+.rename-textbox input {
+    border: none;
+    padding: 2px 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.rename-textbox input:focus {
+    border-bottom: 1px solid var(--cy-ai-accent);
+}
+
+.rename-textbox-buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-1);
+}
+
+.rename-session-button,
+.cancel-rename-button {
+    border: none;
+    background: none;
+    padding: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rename-session-button {
+    font-size: 12px;
+}
+
+.cancel-rename-button {
+    font-size: 10px;
+}
+
+.rename-session-button:hover {
+    color: var(--cy-ai-success);
+}
+
+.cancel-rename-button:hover {
+    color: var(--cy-ai-danger);
+}
+
+/* 7. History List & Submenu Options (inside session item) */
+.history-list {
+    display: flex;
+    justify-content: space-between;
+}
+
+.submenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--cy-ai-surface);
+    border: 1px solid var(--cy-ai-border);
+    border-radius: var(--cy-ai-radius-xxs);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
+    padding: var(--cy-ai-space-1) 0;
+    transform: translateY(4px);
+    transition: all 0.15s ease;
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+.submenu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(4px);
+    pointer-events: auto;
+}
+
+.session-item .submenu {
+    pointer-events: none;
+}
+
+.session-item .submenu.show {
+    pointer-events: auto;
+}
+
+.submenu-item {
+    padding: var(--cy-ai-space-2) var(--cy-ai-space-5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-3);
+    font-size: 13px;
+    color: var(--cy-ai-text-muted);
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+}
+
+.submenu-item:hover {
+    background-color: var(--cy-ai-surface-hover);
+}
+
+.submenu-item i {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+}
+
+.submenu-item:hover i {
+    color: var(--cy-ai-text-strong);
+}
+
+.session-content {
+    flex: 1;
+    cursor: pointer;
+    padding: var(--cy-ai-space-1) 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-3);
+}
+
+.session-icon {
+    font-size: 14px;
+    color: var(--cy-ai-text-faint);
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+.session-item:hover .session-icon {
+    color: var(--cy-ai-text-faint);
+}
+
+.session-title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: var(--cy-ai-space-3);
+    flex: 1;
+}
+
+.session-menu-button {
+    opacity: 1;
+    transition: opacity 0.2s ease;
+    padding: var(--cy-ai-space-1);
+    border-radius: var(--cy-ai-radius-xxs);
+    cursor: pointer;
+    pointer-events: auto;
+}

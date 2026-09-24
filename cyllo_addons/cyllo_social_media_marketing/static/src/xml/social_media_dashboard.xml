@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_social_media_marketing.SocialMediaDashboard">
+        <div class="o_social_media_dashboard">
+            <div class="o_left_section">
+                <div class="d-flex align-items-center justify-content-between pt-3 px-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <h2 class="mb-0">Dashboard</h2>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-primary btn-sm" t-on-click="CreatePost"
+                            t-if="state.accounts.length">
+                            <i class="ri-add-large-line me-1"></i>
+                            New Post
+                        </button>
+                        <button t-attf-class="btn btn-sm {{ state.accounts.length ? 'btn-secondary' : 'btn-primary' }}"
+                            t-on-click="OpenPlatformPicker" t-if="state.isAdmin">
+                            <i class="ri-add-large-line me-1"></i>
+                            Add social account
+                        </button>
+                        <button class="btn btn-secondary btn-sm"
+                            t-att-disabled="state.refreshingAudience"
+                            t-on-click="RefreshAudience">
+                            <i t-att-class="{'ri-refresh-line me-1': true, 'fa-spin': state.refreshingAudience}"/>
+                            <t t-if="state.refreshingAudience"> Refreshing...</t>
+                            <t t-else=""> Refresh</t>
+                        </button>
+                    </div>
+                </div>
+                <div class="o_audience_overview" t-if="state.accounts">
+                    <div class="o_gauge_row">
+                        <div class="o_gauge_card" t-foreach="state.accounts" t-as="account"
+                            t-key="account_index" t-on-click="() => this.ViewAccounts(account)">
+                            <div class="o_gauge_content">
+                                <div class="d-flex align-items-start justify-content-between">
+                                    <div class="o_gauge_header cursor-pointer">
+                                        <div class="o_gauge_avatar_wrap">
+                                            <img t-if="account.account_image" t-att-src="account.account_image"
+                                                class="o_gauge_avatar"/>
+                                            <div t-else="" class="o_gauge_avatar o_gauge_avatar_placeholder">
+                                                <i class="fa fa-user"/>
+                                            </div>
+                                            <span class="o_gauge_platform_badge">
+                                                <i t-att-class="streamPlatforms.get(account.platform, false)?.icon"
+                                                    t-attf-style="color: {{ streamPlatforms.get(account.platform, false)?.color }}"/>
+                                            </span>
+                                        </div>
+                                        <h4>
+                                            <t t-esc="account.account_name"/>
+                                        </h4>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end">
+                                        <div class="d-flex align-items-center gap-1">
+                                            <div class="o_gauge_number">
+                                                <t t-esc="account.total_audience.toLocaleString()"/>
+                                            </div>
+                                            <div class="o_gauge_label"
+                                                t-esc="streamPlatforms.get(account.platform, false)?.audienceLabel"/>
+                                        </div>
+                                        <div t-att-class="{'o_gauge_delta': true, 'o_gauge_delta_down': account.audience_delta lt 0}">
+                                            <i t-att-class="{'ri-arrow-down-line': account.audience_delta lt 0, 'ri-arrow-up-line': account.audience_delta >= 0}"/>
+                                            <t t-esc="Math.abs(this.audiencePercent(account))"/>
+                                            %
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_gauge_chart_wrap" title="Open in graph view"
+                                t-on-click.stop="() => this.OpenAudienceGraph(account)">
+                                <AudienceChart account="account"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="o_social_media_posts" t-if="!state.accounts.length">
+                <div class="cy-social-marketing-nostream">
+                    <div class="cy-nostream_icon">
+                        <i class="ri-links-line"/>
+                    </div>
+                    <p class="cy-nostream_add-msg">No social accounts connected</p>
+                    <span class="cy-nostream_add-subtext">
+                        Connect a Facebook, Instagram, LinkedIn or YouTube account to
+                        start posting and tracking activity here.
+                    </span>
+                    <button class="btn btn-primary btn-sm mt-3" t-on-click="OpenPlatformPicker">
+                        <i class="ri-add-large-line me-1"></i>
+                        Add social account
+                    </button>
+                </div>
+            </div>
+            <div class="o_social_media_posts" t-else="">
+                <div class="d-flex align-items-center justify-content-between mb-3 px-3">
+                    <h3 class="mb-0">Recent Posts</h3>
+                    <div class="tabs d-none">
+                        <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'all'}"
+                            t-on-click="(ev) => this.setActiveTab(ev, 'all')">
+                            <i class="ri-carousel-view"/>
+                        </button>
+                        <t t-foreach="streamPlatforms.getEntries()" t-as="platformEntry" t-key="platformEntry[0]">
+                            <button t-att-class="{'tab-button': true, 'active': state.activeTab === platformEntry[0]}"
+                                t-on-click="(ev) => this.setActiveTab(ev, platformEntry[0])">
+                                <i t-att-class="platformEntry[1].tabIcon"/>
+                            </button>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="o_recent_posts_kanban"
+                    t-if="state.activePosts.length &gt; 0">
+                    <div class="o_recent_posts_column" t-foreach="groupedPosts" t-as="group" t-key="group.platform">
+                        <div class="o_recent_posts_column_header">
+                            <i t-att-class="group.icon" t-attf-style="color: {{ group.color }};"/>
+                            <span t-esc="group.label"/>
+                            <span class="o_recent_posts_column_count" t-esc="group.posts.length"/>
+                        </div>
+                        <div class="o_recent_post_card" t-foreach="group.posts"
+                            t-as="post"
+                            t-key="post.id"
+                            t-on-click="() => this.OpenFeed(post.id)">
+                            <div class="o_recent_post_header">
+                                <img t-if="post.account_image" t-att-src="post.account_image"
+                                    class="o_recent_post_avatar"/>
+                                <div t-else="" class="o_recent_post_avatar o_recent_post_avatar_placeholder">
+                                    <i class="fa fa-user"/>
+                                </div>
+                                <div class="o_recent_post_header_text">
+                                    <div class="o_recent_post_title_row">
+                                        <span class="o_recent_post_account">
+                                            <t t-esc="post.account_name or 'Unknown account'"/>
+                                        </span>
+                                        <span class="o_recent_post_date text-muted">
+                                            <t t-esc="formatDate(post.posted_date)"/>
+                                        </span>
+                                    </div>
+                                    <div class="o_recent_post_byline text-muted" t-if="post.user_name">
+                                        via Cyllo by
+                                        <t t-esc="post.user_name"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_recent_post_image_wrap" t-if="post.posted_image_url">
+                                <video t-if="post.mode == 'video' and !post.posted_on_youtube"
+                                    t-att-src="post.posted_image_url" class="o_recent_post_image" controls="controls"/>
+                                <t t-else="">
+                                    <img t-att-src="post.posted_image_url" class="o_recent_post_image"/>
+                                    <span class="o_recent_post_play_overlay" t-if="post.posted_on_youtube">
+                                        <i class="fa fa-play"/>
+                                    </span>
+                                </t>
+                            </div>
+                            <div class="o_recent_post_content" t-if="post.description">
+                                <t t-esc="post.description"/>
+                            </div>
+                            <button class="btn btn-link o_recent_post_open_platform"
+                                t-on-click="(ev) => this.OpenOnPlatform(ev, post.id, group.platform)">
+                                <i class="ri-external-link-line"/>
+                                Open in <t t-esc="group.label"/>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="o_posts_list"
+                    t-if="state.activePosts.length &lt; 1">
+                    <div class="cy-social-marketing-nostream">
+                        <div class="cy-nostream_icon">
+                            <i class="ri-quill-pen-line"/>
+                        </div>
+                        <p class="cy-nostream_add-msg">No posts yet</p>
+                        <span class="cy-nostream_add-subtext">
+                            Add a post to keep an eye on your own posts and
+                            monitor all social activities
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+            <div t-if="state.showModal" class="modal fade show" tabindex="-1"
+                role="dialog" style="display: block;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">All Connected Accounts</h5>
+                            <a type="button" class="close" style="cursor: pointer; font-size: 22px;"
+                                aria-label="Close" t-on-click="CloseModal">
+                                <i class="ri-close-line"/>
+                            </a>
+                        </div>
+                        <div class="modal-body">
+                            <div class="o_account_cards">
+                                <div class="o_account_card"
+                                    t-foreach="state.accounts" t-as="account"
+                                    t-on-click="() => this.ViewAccounts(account)"
+                                    t-key="account_index">
+                                    <i t-att-class="streamPlatforms.get(account.platform, false)?.modalIcon"/>
+                                    <div class="o_account_details">
+                                        <h4>
+                                            <t t-esc="account.account_name"/>
+                                        </h4>
+                                        <p>
+                                            Total Audience:
+                                            <t t-esc="account.total_audience"/>
+                                        </p>
+                                        <p>
+                                            Stories Created:
+                                            <t t-esc="account.total_posts"/>
+                                        </p>
+                                        <p>
+                                            Total Likes:
+                                            <t t-esc="account.total_likes"/>
+                                        </p>
+                                        <p>
+                                            Total Comments:
+                                            <t t-esc="account.total_comments"/>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                t-on-click="CloseModal">Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="cyllo_social_media_marketing.AudienceChart">
+        <div class="o_audience_chart_canvas">
+            <canvas t-ref="canvas"/>
+        </div>
+    </t>
+</templates>

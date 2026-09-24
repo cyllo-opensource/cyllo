@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="custom_report.edit_report">
+        <div class="cy-report d-flex flex-column w-100 p-2">
+            <!-- Header -->
+            <div class="cy-report-hdr">
+                <span class="cy-current-model cy-bc-trail">
+                    <a href="#" class="cy-bc-prev" t-on-click="() => this.goToBusinessParent(this)" t-esc="businessBreadcrumbName"/>
+                    <i class="ri-arrow-right-s-line cy-bc-sep"/>
+                    <a href="#" class="cy-bc-prev" t-on-click="() => this.close_edit(this)">Reports</a>
+                    <i class="ri-arrow-right-s-line cy-bc-sep"/>
+                    <span class="cy-bc-field" t-esc="state.reportInfo.name || 'Report'"/>
+                </span>
+
+                <div class="d-flex align-items-center justify-content-end cy-nav-menu pe-2">
+                    <div class="cy-preview-toggle d-flex align-items-center gap-2">
+                        <span>Preview</span>
+                        <label class="cy-switch-wrap m-0">
+                            <input type="checkbox" id="previewSwitch" t-on-change="togglePreview"
+                                t-att-checked="state.previewMode"/>
+                            <span class="cy-slider"></span>
+                        </label>
+                    </div>
+
+                    <t t-if="!state.previewMode">
+                        <button t-ref="undoBtn" t-on-click="undo" class="btn btn-secondary" disabled="1" title="Undo">
+                            <i class="ri-arrow-go-back-line"/>
+                        </button>
+                        <button t-ref="redoBtn" t-on-click="redo" class="btn btn-secondary" disabled="1" title="Redo">
+                            <i class="ri-arrow-go-forward-line"/>
+                        </button>
+                    </t>
+                    <t t-if="state.previewMode">
+                        <div class="cy-report-pager">
+                            <button class="btn btn-secondary prev" t-on-click="onPrevRecord">
+                                <i class="ri-arrow-left-s-line"/>
+                            </button>
+                            <span class="px-2">
+                                <t t-esc="state.currentIndex + 1"/>
+                                /
+                                <t t-esc="state.records.length"/>
+                            </span>
+                            <button class="btn btn-secondary next" t-on-click="onNextRecord">
+                                <i class="ri-arrow-right-s-line"/>
+                            </button>
+                        </div>
+                        <button class="btn btn-secondary"
+                                style="left: calc(50% + 170px);" t-on-click="onPrintReport">
+                            <i class="ri-printer-line me-1"/>Print
+                        </button>
+                        <button t-if="state.hasSign"
+                                class="btn btn-primary"
+                                t-on-click="onSignReport">
+                            <i class="ri-pencil-line me-1"/>Sign
+                        </button>
+                    </t>
+                    <div class="position-relative">
+                        <button class="btn btn-secondary" t-att-disabled="state.isSaving"
+                                t-on-click="() => state.showActionsMenu = !state.showActionsMenu">
+                            <i class="ri-menu-line me-1"/>
+                            Actions
+                            <i class="ri-arrow-down-s-line ms-1"/>
+                        </button>
+                        <div t-if="state.showActionsMenu" class="position-absolute bg-white border rounded shadow-sm py-1"
+                            style="top: 38px; left: 0; min-width: 180px; z-index: 1050;">
+                            <button class="dropdown-item text-start w-100 px-3 py-2 border-0 bg-white"
+                                    t-on-click="openSaveTemplateDialog">Save as Template</button>
+                            <button class="dropdown-item text-start w-100 px-3 py-2 border-0 bg-white"
+                                    t-on-click="exportTemplate">Export Template</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary" t-on-click="() => this.close_edit(this)">Discard</button>
+                    <button class="btn btn-primary" t-att-disabled="state.isSaving" t-on-click="() => this.save_changes(this)">
+                        <i t-if="state.isSaving" class="fa fa-spinner fa-spin me-1"/>
+                        <i t-else="" class="fa fa-floppy-o me-1"/>
+                        Save
+                    </button>
+                </div>
+            </div>
+            <!-- Body -->
+            <div class="cy-report-body d-flex flex-grow-1 overflow-hidden" t-att-class="{'previewing': state.previewMode}">
+                <!-- Sidebar (Editable) -->
+                <div id="snippet-panel" class="cy-snippet-panel border-end d-flex flex-column" style="width: 320px; overflow-y: auto;">
+
+                    <div class="cy-tab-header">
+                        <div class="cy-tab-pill">
+                            <div class="cy-window-view">
+                                <button
+                                    class="cy-nav__link"
+                                    t-on-click="togglePreview"
+                                    t-att-class="!state.previewMode ? 'active' : ''">Edit</button>
+                            </div>
+                            <div>
+                                <button class="cy-nav__link" t-on-click="togglePreview"
+                                    t-att-class="state.previewMode ? 'active' : ''">
+                                    Preview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cy-report-section" t-att-class="{'d-none': state.previewMode}">
+
+
+                    <div class="cy-section-label">
+                        <span>Basic Elements</span>
+                    </div>
+
+                    <div class="cy-node-card snippet" data-type="box" title="Box">
+   
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-layout-2-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Box</div>
+                            <div class="cy-node-desc">Layout container</div>
+                        </div>
+                        <i class="ri-draggable"></i>
+                    </div>
+
+                    <div class="cy-node-card snippet" data-type="field" title="Dynamic Field">
+   
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-file-list-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Dynamic Field</div>
+                            <div class="cy-node-desc">Field from a record</div>
+                        </div>
+                        <i class="ri-draggable"></i>
+                    </div>
+
+                    <div class="cy-node-card snippet" data-type="table" title="Table">
+   
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-table-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Table</div>
+                            <div class="cy-node-desc">Rows &amp; columns</div>
+                        </div>
+                        <i class="ri-draggable"></i>
+                    </div>
+
+                    <div class="cy-node-card snippet" data-type="text" title="Text">
+   
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-text"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Text</div>
+                            <div class="cy-node-desc">Static text block</div>
+                        </div>
+                        <i class="ri-draggable"></i>
+                    </div>
+
+                    <div class="cy-node-card snippet" data-type="qr" title="QR Code">
+   
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-qr-code-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">QR Code</div>
+                            <div class="cy-node-desc">Scannable link</div>
+                        </div>
+                        <i class="ri-draggable"></i>
+                    </div>
+
+                    <div class="cy-node-card snippet" data-type="sign" title="Signature">
+   
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-pen-nib-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Signature</div>
+                            <div class="cy-node-desc">Sign-off field</div>
+                        </div>
+                        <i class="ri-draggable"></i>
+                    </div>
+
+                        <!-- Footer Settings -->
+                    <div class="cy-section-label">
+                        <span>Footer Settings</span>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="cy-toggle-label">Company Footer</span>
+                            <label class="cy-switch-wrap m-0">
+                                <input type="checkbox"
+                                       t-att-checked="state.footerShowReportFooter"
+                                       t-on-change="(ev) => { state.footerShowReportFooter = ev.target.checked; this._updateFooterInIframe(); }"/>
+                                <span class="cy-slider"></span>
+                            </label>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="cy-toggle-label">Page Number</span>
+                            <label class="cy-switch-wrap m-0">
+                                <input type="checkbox"
+                                       t-att-checked="state.footerShowPageNum"
+                                       t-on-change="(ev) => { state.footerShowPageNum = ev.target.checked; this._updateFooterInIframe(); }"/>
+                                <span class="cy-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="pt-2">
+                            <label class="cy-snippet-report-label">Footer Text</label>
+                            <textarea class="cy-footer-textarea" rows="2"
+                                      t-model="state.companyReportFooterText"
+                                      t-on-input="(ev) => { state.companyReportFooterText = ev.target.value; this._debouncedSaveCompanyFooter(); }"></textarea>
+                        </div>
+                    </div>
+
+                        <!-- Technical Actions -->
+                    <div class="cy-section-label">
+                        <span>Technical Tools</span>
+                    </div>
+                    <div class="cy-tech-tools">
+                        <button class="btn btn-primary w-100" t-on-click="onEditSources">
+                            <i class="ri-code-s-slash-line me-1"></i>
+                            <span>Edit Sources</span>
+                        </button>
+                        <button class="btn btn-danger w-100" t-on-click="onResetReport">
+                            <i class="ri-refresh-line me-1"></i>
+                            <span>Reset Report</span>
+                        </button>
+                    </div>
+                    </div>
+
+
+                    <!-- Properties Sidebar (Preview) — defined in studio_report_setup_sidebar.xml -->
+                <t t-if="state.previewMode" t-call="custom_report.preview_sidebar"/>
+</div>
+                <!-- Source Editor -->
+
+                <div t-if="state.showSourceEditor" class="source-editor-container d-flex flex-column border-end bg-dark"
+                     style="width: 500px; z-index: 5;">
+                    <div class="source-editor-header d-flex align-items-center justify-content-between p-2 text-white small fw-bold">
+                        <span>SOURCE EDITOR</span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-success py-0 px-2" t-on-click="onSaveSource">Save</button>
+                            <button class="btn btn-sm btn-light py-0 px-2"
+                                    t-on-click="() => state.showSourceEditor = false">Close</button>
+                        </div>
+                    </div>
+                    <div id="ace-editor" t-ref="aceEditor" class="flex-grow-1 w-100"
+                         style="font-size: 14px; min-height: 400px;"/>
+                </div>
+
+                <!-- Main Area -->
+                <div class="cy-canvas-area flex-grow-1 overflow-auto d-flex flex-column align-items-center pt-5 pb-5"
+                     style="position: relative; min-height: 100%;">
+
+                    <!-- A4 / Custom Paper Container -->
+
+                    <div class="cyllo-studio-report-container d-flex flex-column"
+                         t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm; overflow: visible;'">
+
+                        <iframe t-if="state.previewMode and state.previewUrl"
+                                class="live-report-content w-100 flex-grow-1 border-0"
+                                style="overflow: hidden; max-width: 100%; box-sizing: border-box; background: white;"
+                                t-att-src="state.previewUrl"
+                                t-on-load="onIframeLoad"/>
+                        <t t-else="">
+                            <iframe id="report_frame" t-ref="report_frame"
+                                 class="editable-area w-100 flex-grow-1 text-dark border-0"
+                                 style="overflow: hidden; max-width: 100%; box-sizing: border-box; background: white;"
+                                 t-att-src="state.editIframeUrl"
+                                 t-on-load="onEditIframeLoad"/>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- ── Box Properties Panel (right sidebar) ────────────────── -->
+                <div t-if="state.showBoxProps and !state.previewMode" class="box-props-panel">
+                    <!-- Header -->
+                    <div class="box-props-header">
+                        <span><i class="fa fa-object-group me-2"/>Section Properties</span>
+                        <button class="box-props-close" t-on-click="closeBoxProps">✕</button>
+                    </div>
+
+                    <div class="box-props-body">
+                        <!-- Label -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Identity</div>
+                            <div class="box-props-row">
+                                <label>Label</label>
+                                <input type="text"
+                                       t-att-value="state.boxConfig.label"
+                                       t-on-change="(ev) => this.onBoxConfigChange('label', ev.target.value)"
+                                       placeholder="Section name"/>
+                            </div>
+                        </div>
+
+                        <!-- Size -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Size</div>
+                            <div class="box-props-row">
+                                <label>Width (px)</label>
+                                <input type="number" min="80"
+                                       t-att-value="state.boxConfig.width"
+                                       t-on-change="(ev) => this.onBoxConfigChange('width', ev.target.value)"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Height (px)</label>
+                                <input type="number" min="80"
+                                       t-att-value="state.boxConfig.height"
+                                       t-on-change="(ev) => this.onBoxConfigChange('height', ev.target.value)"/>
+                            </div>
+                        </div>
+
+                        <!-- Layout Mode -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Layout Mode</div>
+                            <div class="box-props-row">
+                                <label>Mode</label>
+                                <div class="box-layout-toggle">
+                                    <button t-att-class="state.boxConfig.layoutMode === 'free' ? 'active' : ''"
+                                            t-on-click="() => this.onBoxLayoutModeChange('free')">
+                                        <i class="fa fa-arrows me-1"/>Free
+                                    </button>
+                                    <button t-att-class="state.boxConfig.layoutMode === 'flow' ? 'active' : ''"
+                                            t-on-click="() => this.onBoxLayoutModeChange('flow')">
+                                        <i class="fa fa-bars me-1"/>Flow
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Background -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Background</div>
+                            <div class="box-props-row">
+                                <label>Color</label>
+                                <input type="text"
+                                       t-att-value="state.boxConfig.backgroundColor"
+                                       t-on-change="(ev) => this.onBoxConfigChange('backgroundColor', ev.target.value)"
+                                       placeholder="transparent or #rrggbb"/>
+                            </div>
+                        </div>
+
+                        <!-- Border -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Border</div>
+                            <div class="box-props-row">
+                                <label>Border</label>
+                                <input type="text"
+                                       t-att-value="state.boxConfig.border"
+                                       t-on-change="(ev) => this.onBoxConfigChange('border', ev.target.value)"
+                                       placeholder="1px solid #ccc"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Radius (px)</label>
+                                <input type="number" min="0"
+                                       t-att-value="state.boxConfig.borderRadius"
+                                       t-on-change="(ev) => this.onBoxConfigChange('borderRadius', ev.target.value)"/>
+                            </div>
+                        </div>
+
+                        <!-- Padding -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Spacing</div>
+                            <div class="box-props-row">
+                                <label>Padding (px)</label>
+                                <input type="number" min="0"
+                                       t-att-value="state.boxConfig.padding"
+                                       t-on-change="(ev) => this.onBoxConfigChange('padding', ev.target.value)"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Margin Top (px)</label>
+                                <input type="number" min="0"
+                                       t-att-value="state.boxConfig.marginTop"
+                                       t-on-change="(ev) => this.onBoxConfigChange('marginTop', ev.target.value)"/>
+                            </div>
+                        </div>
+
+                        <!-- Delete -->
+                        <button class="box-props-delete-btn" t-on-click="deleteSelectedBox">
+                            <i class="fa fa-trash me-1"/>Delete Section
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Signature Properties Panel (right sidebar) ────────────────── -->
+                <div t-if="state.showSignProps and !state.previewMode" class="box-props-panel">
+                    <!-- Header -->
+                    <div class="box-props-header">
+                        <span><i class="fa fa-pencil me-2"/>Signature Properties</span>
+                        <button class="box-props-close" t-on-click="closeSignProps">✕</button>
+                    </div>
+
+                    <div class="box-props-body">
+                        <!-- Role -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Signatory Role</div>
+                            <div class="box-props-row">
+                                <label>Role</label>
+                                <select class="tcm-select"
+                                        t-att-value="state.signConfig.role"
+                                        t-on-change="(ev) => this.onSignConfigChange('role', ev.target.value)">
+                                    <option value="customer">Customer</option>
+                                    <option value="vendor">Vendor</option>
+                                    <option value="internal">Internal</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Label -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Identity</div>
+                            <div class="box-props-row">
+                                <label>Label</label>
+                                <input type="text"
+                                       t-att-value="state.signConfig.label"
+                                       t-on-change="(ev) => this.onSignConfigChange('label', ev.target.value)"
+                                       placeholder="Authorized Signature"/>
+                            </div>
+                            <div class="tcm-options-grid mt-2">
+                                <label class="tcm-checkbox" style="font-size: 11px;">
+                                    <input type="checkbox"
+                                           t-att-checked="state.signConfig.required"
+                                           t-on-change="(ev) => this.onSignConfigChange('required', ev.target.checked)"/>
+                                    Required to sign
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Options</div>
+                            <div class="tcm-options-grid">
+                                <label class="tcm-checkbox" style="font-size: 11px;">
+                                    <input type="checkbox"
+                                           t-att-checked="state.signConfig.show_date"
+                                           t-on-change="(ev) => this.onSignConfigChange('show_date', ev.target.checked)"/>
+                                    Show Date Line
+                                </label>
+                                <label class="tcm-checkbox" style="font-size: 11px;">
+                                    <input type="checkbox"
+                                           t-att-checked="state.signConfig.show_name"
+                                           t-on-change="(ev) => this.onSignConfigChange('show_name', ev.target.checked)"/>
+                                    Show Name Line
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Size & Alignment -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Size &amp; Alignment</div>
+                            <div class="box-props-row">
+                                <label>Width (px)</label>
+                                <input type="number" min="100"
+                                       t-att-value="state.signConfig.width"
+                                       t-on-change="(ev) => this.onSignConfigChange('width', ev.target.value)"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Height (px)</label>
+                                <input type="number" min="60"
+                                       t-att-value="state.signConfig.height"
+                                       t-on-change="(ev) => this.onSignConfigChange('height', ev.target.value)"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Alignment</label>
+                                <div class="box-layout-toggle" style="display:flex; gap:2px;">
+                                    <button t-att-class="state.signConfig.alignment === 'left' ? 'active' : ''"
+                                            t-on-click="() => this.onSignConfigChange('alignment', 'left')">
+                                        <i class="fa fa-align-left"/>
+                                    </button>
+                                    <button t-att-class="state.signConfig.alignment === 'center' ? 'active' : ''"
+                                            t-on-click="() => this.onSignConfigChange('alignment', 'center')">
+                                        <i class="fa fa-align-center"/>
+                                    </button>
+                                    <button t-att-class="state.signConfig.alignment === 'right' ? 'active' : ''"
+                                            t-on-click="() => this.onSignConfigChange('alignment', 'right')">
+                                        <i class="fa fa-align-right"/>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delete -->
+                        <button class="box-props-delete-btn" t-on-click="deleteSelectedSign">
+                            <i class="fa fa-trash me-1"/>Delete Signature
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branch Selector Popup -->
+            <div id="branchSelector" class="bg-white shadow-lg"
+                 style="position: fixed;
+                        right: 40px;
+                        top: 100px;
+                        width: 300px;
+                        border: 1px solid #dee2e6;
+                        border-radius: 8px;
+                        padding: 20px;
+                        display: none;
+                        z-index: 1050;">
+                <h5 style="margin: 0 0 15px 0;
+                            border-bottom: 2px solid #3b82f6;
+                            padding-bottom: 10px;
+                            font-size: 16px;">
+                    Select Condition
+                </h5>
+                <i class="close-selector fa fa-times text-muted"
+                   t-on-click="closeBranchSelector"
+                   style="position: absolute;
+                          top: 15px;
+                          right: 15px;
+                          cursor: pointer;
+                          font-size: 16px;"/>
+                <div id="branchOptions"/>
+            </div>
+            <!-- Reset Report Dialog -->
+            <div t-if="state.showResetDialog"
+                 style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                <div class="bg-dark text-white rounded-3 shadow-lg p-4" style="width: 420px; position: relative;">
+                    <!-- Close X -->
+                    <button class="btn-close btn-close-white" style="position: absolute; top: 16px; right: 16px;"
+                            t-on-click="() => state.showResetDialog = false"/>
+
+                    <h5 class="fw-bold mb-3">Reset report</h5>
+
+                    <p class="small opacity-75 mb-4">
+                        All changes done to the report's structure will be discarded and
+                        the report will be reset to its factory settings.
+                    </p>
+
+                    <!-- Include header and footer checkbox -->
+                    <div class="d-flex align-items-start gap-3 mb-4 p-3 rounded-2"
+                         style="background: rgba(255,255,255,0.08);">
+                        <div class="mt-1">
+                            <input type="checkbox" id="resetHeaderFooter" class="form-check-input"
+                                   t-att-checked="state.includeHeaderFooter"
+                                   t-on-change="(ev) => state.includeHeaderFooter = ev.target.checked"
+                                   style="width: 18px; height: 18px; accent-color: #28a745;"/>
+                        </div>
+                        <div>
+                            <label for="resetHeaderFooter" class="fw-semibold small mb-1 d-block"
+                                   style="cursor: pointer;">Include header and footer</label>
+                            <span class="small opacity-50">Header and footer are shared with other reports which may be impacted by the reset.</span>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger px-4" t-on-click="confirmResetReport">Reset report</button>
+                        <button class="btn btn-secondary px-4"
+                                t-on-click="() => state.showResetDialog = false">Go back</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Save as Template Dialog -->
+            <div t-if="state.showTemplateDialog"
+                 style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                <div class="bg-white rounded-3 shadow-lg p-4" style="width: 480px; position: relative;">
+                    <button class="btn-close" style="position: absolute; top: 16px; right: 16px;"
+                            t-on-click="closeSaveTemplateDialog"/>
+
+                    <h5 class="fw-bold mb-2">Save as Template</h5>
+                    <p class="small text-muted mb-4">
+                        Save this report design for reuse across other reports. Record values are not stored.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Template Name</label>
+                        <input type="text" class="form-control"
+                               placeholder="Modern Invoice"
+                               t-att-value="state.templateForm.name"
+                               t-on-input="(ev) => state.templateForm.name = ev.target.value"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Description</label>
+                        <textarea class="form-control" rows="3"
+                                  placeholder="Professional invoice template"
+                                  t-att-value="state.templateForm.description"
+                                  t-on-input="(ev) => state.templateForm.description = ev.target.value"/>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">Category</label>
+                        <input type="text" class="form-control"
+                               placeholder="Invoice"
+                               t-att-value="state.templateForm.category"
+                               t-on-input="(ev) => state.templateForm.category = ev.target.value"/>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-light border px-4" t-on-click="closeSaveTemplateDialog">Cancel</button>
+                        <button class="btn px-4 text-white"
+                                style="background-color: #9ea700;"
+                                t-att-disabled="state.isSaving"
+                                t-on-click="saveAsTemplate">
+                            <i t-if="state.isSaving" class="fa fa-spinner fa-spin me-1"/>
+                            Save Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Table Config Modal — inline overlay (controlled by state.showTableModal) -->
+            <div t-if="state.showTableModal" class="tcm-overlay" t-on-click.self="onTableModalCancel">
+                <div class="tcm-modal">
+                    <!-- Header -->
+                    <div class="tcm-header">
+                        <h5>Add Table</h5>
+                        <button class="tcm-close" t-on-click="onTableModalCancel">✕</button>
+                    </div>
+
+                    <!-- Section 1: Template Preset -->
+                    <div class="tcm-section">
+                        <div class="tcm-section-label">Template</div>
+                        <div class="tcm-preset-grid">
+                            <div t-att-class="'tcm-preset-card' + (state.tcm.preset === 'balance_sheet' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectPreset('balance_sheet')">
+                                <div class="tcm-preset-icon"><i class="fa fa-balance-scale"/></div>
+                                <div class="tcm-preset-info">
+                                    <div class="tcm-preset-title">Balance Sheet</div>
+                                    <div class="tcm-preset-desc">Assets, Liabilities &amp; Equity with computed totals</div>
+                                </div>
+                            </div>
+                            <div t-att-class="'tcm-preset-card' + (state.tcm.preset === 'p_and_l' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectPreset('p_and_l')">
+                                <div class="tcm-preset-icon"><i class="fa fa-line-chart"/></div>
+                                <div class="tcm-preset-info">
+                                    <div class="tcm-preset-title">Profit &amp; Loss</div>
+                                    <div class="tcm-preset-desc">Revenue and expense sections with net total</div>
+                                </div>
+                            </div>
+                            <div t-att-class="'tcm-preset-card' + (state.tcm.preset === 'invoice' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectPreset('invoice')">
+                                <div class="tcm-preset-icon"><i class="fa fa-file-text-o"/></div>
+                                <div class="tcm-preset-info">
+                                    <div class="tcm-preset-title">Invoice Lines</div>
+                                    <div class="tcm-preset-desc">Line items with qty, rate, amount and grand total</div>
+                                </div>
+                            </div>
+                            <div t-att-class="'tcm-preset-card' + (state.tcm.preset === 'blank' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectPreset('blank')">
+                                <div class="tcm-preset-icon"><i class="fa fa-th"/></div>
+                                <div class="tcm-preset-info">
+                                    <div class="tcm-preset-title">Blank Table</div>
+                                    <div class="tcm-preset-desc">Fully manual, no assumptions</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Odoo Model -->
+                    <div class="tcm-section">
+                        <div class="tcm-section-label">Model</div>
+                        <select class="tcm-select"
+                                t-on-change="onModelChange">
+                            <option value="">— Select a model —</option>
+                            <t t-foreach="state.tcm.availableModels" t-as="m" t-key="m.model">
+                                <option t-att-value="m.model"
+                                        t-att-selected="m.model === state.tcm.model">
+                                    <t t-esc="m.name"/>
+                                    (<t t-esc="m.model"/>)
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+
+                    <!-- Section 3: Columns -->
+                    <div class="tcm-section">
+                        <div class="tcm-col-header">
+                            <div class="tcm-section-label" style="margin-bottom:0">Columns</div>
+                            <button class="tcm-add-btn" t-on-click="onAddColumn">+ Add</button>
+                        </div>
+                        <t t-if="state.tcm.columns.length === 0">
+                            <div class="tcm-empty-state">No columns added yet. Click "+ Add" above.</div>
+                        </t>
+                        <t t-foreach="state.tcm.columns" t-as="col" t-key="col_index">
+                            <div class="tcm-col-row">
+                                <span class="tcm-col-drag" title="Drag to reorder">⠿</span>
+                                <input type="text" class="tcm-input tcm-input-sm tcm-col-field"
+                                       placeholder="Label"
+                                       t-att-value="col.label"
+                                       t-on-change="(ev) => this.onColumnLabelChange(col_index, ev)"/>
+                                <select class="tcm-select tcm-input-sm tcm-col-field"
+                                        t-on-change="(ev) => this.onColumnFieldChange(col_index, ev)">
+                                    <option value="">— Field —</option>
+                                    <t t-foreach="state.tcm.availableFields" t-as="f" t-key="f.name">
+                                        <option t-att-value="f.name"
+                                                t-att-selected="f.name === col.field">
+                                            <t t-esc="f.string || f.name"/>
+                                            <t t-if="f.type"> (<t t-esc="f.type"/>)</t>
+                                        </option>
+                                    </t>
+                                </select>
+                                <select class="tcm-select tcm-input-sm tcm-col-agg"
+                                        t-att-value="col.aggregation"
+                                        t-on-change="(ev) => this.onColumnAggChange(col_index, ev)">
+                                    <option value="none">None</option>
+                                    <option value="sum" t-att-selected="col.aggregation === 'sum'">SUM</option>
+                                    <option value="avg" t-att-selected="col.aggregation === 'avg'">AVG</option>
+                                    <option value="count" t-att-selected="col.aggregation === 'count'">COUNT</option>
+                                </select>
+                                <input type="text" class="tcm-input tcm-input-sm tcm-col-width"
+                                       placeholder="Width"
+                                       t-att-value="col.width"
+                                       t-on-change="(ev) => this.onColumnWidthChange(col_index, ev)"/>
+                                <button class="tcm-col-remove"
+                                        t-on-click="() => this.onRemoveColumn(col_index)">✕</button>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Section 4: Row Source -->
+                    <div class="tcm-section">
+                        <div class="tcm-section-label">Row Source</div>
+                        <div class="tcm-radio-group">
+                            <label class="tcm-radio">
+                                <input type="radio" name="tcm_rowsource" value="dynamic"
+                                       t-att-checked="state.tcm.rowSource === 'dynamic'"
+                                       t-on-change="() => this.state.tcm.rowSource = 'dynamic'"/>
+                                Dynamic (repeats per record)
+                            </label>
+                            <label class="tcm-radio">
+                                <input type="radio" name="tcm_rowsource" value="manual"
+                                       t-att-checked="state.tcm.rowSource === 'manual'"
+                                       t-on-change="() => this.state.tcm.rowSource = 'manual'"/>
+                                Manual
+                            </label>
+                            <div t-if="state.tcm.rowSource === 'manual'" class="tcm-manual-count">
+                                <label>Rows:</label>
+                                <input type="number" class="tcm-input tcm-input-sm" style="width: 60px;"
+                                       t-att-value="state.tcm.manualRows"
+                                       t-on-change="(ev) => this.state.tcm.manualRows = parseInt(ev.target.value) || 5"
+                                       min="1" max="100"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Options -->
+                    <div class="tcm-section">
+                        <div class="tcm-section-label">Options</div>
+                        <div class="tcm-options-grid">
+                            <label class="tcm-checkbox">
+                                <input type="checkbox"
+                                       t-att-checked="state.tcm.headerRow"
+                                       t-on-change="(ev) => this.state.tcm.headerRow = ev.target.checked"/>
+                                Header row
+                            </label>
+                            <label class="tcm-checkbox">
+                                <input type="checkbox"
+                                       t-att-checked="state.tcm.totalsRow"
+                                       t-on-change="(ev) => this.state.tcm.totalsRow = ev.target.checked"/>
+                                Totals row
+                            </label>
+                            <label class="tcm-checkbox">
+                                <input type="checkbox"
+                                       t-att-checked="state.tcm.applyDomain"
+                                       t-on-change="(ev) => this.state.tcm.applyDomain = ev.target.checked"/>
+                                Apply domain filter
+                            </label>
+                            <label class="tcm-checkbox">
+                                <input type="checkbox"
+                                       t-att-checked="state.tcm.includeAllCompanies"
+                                       t-on-change="(ev) => this.state.tcm.includeAllCompanies = ev.target.checked"/>
+                                Include all companies
+                            </label>
+                        </div>
+
+                        <!-- Inline domain editor -->
+                        <div t-if="state.tcm.applyDomain" class="tcm-domain-editor">
+                            <label>Domain filter</label>
+                            <input type="text" class="tcm-input tcm-input-sm"
+                                   placeholder="[('account_type', '=', 'asset_receivable')]"
+                                   t-att-value="state.tcm.domain"
+                                   t-on-change="(ev) => this.state.tcm.domain = ev.target.value"/>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="tcm-footer">
+                        <button class="tcm-btn-cancel" t-on-click="onTableModalCancel">Cancel</button>
+                        <button class="tcm-btn-insert" t-on-click="onTableModalConfirm"
+                                t-att-disabled="state.tcm.preset !== 'blank' ? false : !state.tcm.model">
+                            Insert Table
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Code Wizard Modal — defined in studio_report_qr_wizard.xml -->
+            <t t-call="custom_report.qr_wizard"/>
+        </div>
+    </t>
+
+
+</templates>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_youtube_account_form" model="ir.ui.view">
+        <field name="name">view.youtube.account.form</field>
+        <field name="model">youtube.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_get_authorization_url" type="object"
+                            string="Connect"
+                            class="btn-primary"
+                            invisible="state != 'new'"/>
+                    <button name="action_get_channel_details" type="object"
+                            string="Fetch Channel"
+                            class="btn-primary"
+                            invisible="state != 'sync'"/>
+                    <button name="action_refresh_access_token" type="object"
+                            string="Reconnect"
+                            class="btn-primary"
+                            invisible="state != 'sync'"/>
+                    <button name="action_disconnect" type="object"
+                            string="Disconnect"
+                            class="btn-primary"
+                            invisible="state != 'sync'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_channel" type="object"
+                                string="Channels" icon="fa-newspaper-o"
+                                class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="channel_count" nolabel="1"
+                                           widget="statinfo"/>
+                                </span>
+                                <span class="o_stat_text">Channels</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Enter the name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="client_number" placeholder="Enter client number"/>
+                            <field name="client_secret" placeholder="Enter client secret"/>
+                            <field name="access_token" readonly="1" placeholder="Access token will be generated"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_youtube_account_tree" model="ir.ui.view">
+        <field name="name">view.youtube.account.tree</field>
+        <field name="model">youtube.account</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="client_number"/>
+                <field name="client_secret"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'sync'"
+                    decoration-danger="state == 'expired'"
+                    decoration-info="state == 'new'"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_view_youtube_account" model="ir.actions.act_window">
+        <field name="name">Youtube Accounts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">youtube.account</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Social Media Post
+            </p>
+            <p>
+                You can make contents which can be posted to selected social
+                media from here.
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_youtube_account" action="action_view_youtube_account"
+              name="Youtube Account"
+              parent="cyllo_social_media_marketing.menu_configuration_categ"/>
+</odoo>

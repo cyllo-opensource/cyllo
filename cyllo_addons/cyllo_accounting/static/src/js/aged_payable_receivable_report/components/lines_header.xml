@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t t-name="LinesHeader">
+    <t t-set="mlTotal" t-value="props.mlTotal"/>
+    <tr class="border-dark cy-report-line-acc on-hover-show" t-on-click="onClickHeader">
+        <th >
+            <div class="cursor-pointer">
+                <div class="d-flex justify-content-left align-item-center">
+                    <span class="me-2">
+                        <i class="fa" t-att-class="state.showLines ? 'fa-caret-down' : 'fa-caret-right'"/>
+                    </span>
+                    <span class="o_heading text-nowrap" t-esc="mlTotal.partner" t-att-class="boldHeader"/>
+                </div>
+            </div>
+        </th>
+        <th colspan="5">
+            <!-- Open Partner Button-->
+                <!-- <button class="btn btn-outline-primary btn-sm me-1" t-on-click="()=> this.openPartner(mlTotal.partner_id)">
+                    Open
+                </button> -->
+                <!-- Journal Items Button -->
+                <button class="btn btn-outline-primary btn-sm text-nowrap" t-on-click="()=> this.goToJournalItem(mlTotal.partner_id)">
+                    Journal Items
+                </button>
+        </th>
+        <th/>
+        <th/>
+        <th/>
+        <th/>
+        <th/>
+        <th class="text-end" t-att-class="boldHeader">
+            <t t-esc="mlTotal.currency_id"/>
+            <span class="ms-1" t-esc="(mlTotal.diff0_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+        </th>
+        <th class="text-end" t-att-class="boldHeader">
+            <t t-esc="mlTotal.currency_id"/>
+            <span class="ms-1" t-esc="(mlTotal.diff1_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+        </th>
+        <th class="text-end" t-att-class="boldHeader">
+            <t t-esc="mlTotal.currency_id"/>
+            <span class="ms-1" t-esc="(mlTotal.diff2_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+        </th>
+        <th class="text-end" t-att-class="boldHeader">
+            <t t-esc="mlTotal.currency_id"/>
+            <span class="ms-1" t-esc="(mlTotal.diff3_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+        </th>
+        <th class="text-end" t-att-class="boldHeader">
+            <t t-esc="mlTotal.currency_id"/>
+            <span class="ms-1" t-esc="(mlTotal.diff4_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+        </th>
+        <th class="text-end" t-att-class="boldHeader">
+            <t t-esc="mlTotal.currency_id"/>
+            <span class="ms-1" t-esc="(mlTotal.diff5_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+        </th>
+        <th class="text-end" t-att-class="boldHeader">
+            <t t-esc="mlTotal.currency_id"/>
+            <span class="mx-1" t-esc="(mlTotal.sub_total || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+            <sup  class="cy_report_info me-1 position-relative">
+                <span t-if="pager.total > 100" class="cy_report_info_ques position-absolute" title="The total presented represents the cumulative sum of all move lines, inclusive of those beyond the current page of pagination.">
+                    ?
+                </span>
+            </sup>
+        </th>
+    </tr>
+    <t t-if="state.showLines">
+        <tr t-if="pager.total > 100" class="border-0">
+            <th colspan="12" class="border-0"/>
+            <th colspan="6" class="border-0">
+                <div class="d-flex justify-content-end p-0">
+
+                    <Pager total="pager.total"
+                           offset="pager.offset"
+                           limit="pager.limit"
+                           isEditable="false"
+                           onUpdate.bind="onPagerChanged"/>
+                </div>
+
+            </th>
+        </tr>
+        <Lines moveLines="mlTotal.move_lines" currencyId="mlTotal.currency_id" ledgerId="props.ledgerId" openAnnotation.bind="props.openAnnotation" removeAnnotation.bind="props.removeAnnotation"/>
+    </t>
+</t>

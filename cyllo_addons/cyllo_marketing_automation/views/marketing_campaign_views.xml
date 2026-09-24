@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Record for defining a tree view named 'marketing.campaign.tree' for the model 'marketing.campaign' -->
+    <record id="view_marketing_campaign_tree" model="ir.ui.view">
+        <field name="name">view.marketing.campaign.tree</field>
+        <field name="model">marketing.campaign</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="user_id" optional="hide"/>
+                <field name="model_id"/>
+                <field name="state" widget='badge'
+                       decoration-success="state == 'running'"
+                       decoration-warning="state == 'draft'"
+                       decoration-info="state == 'stopped'"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Record for defining a kanban view named 'marketing.campaign.kanban' for the model 'marketing.campaign' -->
+    <record id="view_marketing_campaign_kanban" model="ir.ui.view">
+        <field name="name">view.marketing.campaign.kanban</field>
+        <field name="model">marketing.campaign</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false"
+                    records_draggable="false">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="participant_count"/>
+                <field name="test_count"/>
+                <field name="activity_count"/>
+                <field name="user_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click"
+                             class="cy-kanban-div-style-marketing cy_kanban-box_style">
+                            <div class="o_kanban_record ">
+                                <span t-att-title="record.name.value"
+                                      class="cy-header-marketing_campaign">
+                                    <t t-esc="record.name.value"/>
+                                </span>
+                            </div>
+                            <div class=" cy-activity-state_container">
+                                <div class="cy-div-styles cy-activity_state-box">
+                                    <span class="cy-state_heading state_heading-marketing-campaign">
+                                        Activity
+                                    </span>
+                                    <br/>
+                                    <div t-att-title="record.activity_count.value"
+                                         t-esc="record.activity_count.value"
+                                         class="cy-state_count-marketing-campaign"/>
+                                </div>
+                                <div class="cy-div-styles  cy-activity_state-box">
+                                    <span class="cy-state_heading state_heading-marketing-campaign">
+                                        Participants
+                                    </span>
+                                    <br/>
+                                    <div t-att-title="record.participant_count.value"
+                                         t-esc="record.participant_count.value"
+                                         class="cy-state_count-marketing-campaign"/>
+                                </div>
+                                <div class="cy-div-styles cy-activity_state-box">
+                                    <span class="state_heading-marketing-campaign">
+                                        Test
+                                    </span>
+                                    <br/>
+                                    <div t-att-title="record.test_count.value"
+                                         t-esc="record.test_count.value"
+                                         class="cy-state_count-marketing-campaign"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Record for defining a form view named 'marketing.campaign.form' for the model 'marketing.campaign' -->
+    <record id="view_marketing_campaign_form" model="ir.ui.view">
+        <field name="name">view.marketing.campaign.form</field>
+        <field name="model">marketing.campaign</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_start_campaign" string="Start"
+                            type="object" class="btn-primary"
+                            invisible="state == 'running' or not activity_ids"/>
+                    <button name="action_stop_campaign" string="Stop"
+                            type="object"
+                            class="cy_btn-stop-campaign  btn-danger"
+                            invisible="state in ('stopped','draft')"/>
+                    <button class="btn-secondary" type="action"
+                            string="Add New Activity" context="{'state': state}"
+                            name="%(cyllo_marketing_automation.action_marketing_activity)d"
+                            icon="fa-clock-o"
+                            invisible="state in ['running', 'stopped']">
+                    </button>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_marketing_test"
+                                icon="fa-check-square" title="Tests"
+                                invisible="test_count == 0" string="Tests">
+                            <field name="test_count" string="Tests"
+                                   widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_marketing_participant"
+                                invisible="participant_count == 0"
+                                icon="fa-address-card" title="Participants"
+                                string="Participants">
+                            <field name="participant_count"
+                                   string="Participants" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="action"
+                                name="%(cyllo_marketing_automation.action_marketing_activity)d"
+                                icon="fa-address-card"
+                                invisible="activity_count == 0"
+                                context="{'state': state}" title="Activities"
+                                string="Activities">
+                            <field name="activity_count" string="Activities"
+                                   widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_marketing_templates"
+                                icon="fa-envelope"
+                                invisible="template_count == 0"
+                                title="Templates" string="Templates">
+                            <field name="template_count" string="Templates"
+                                   widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"
+                                   placeholder="eg: Generate Lead/Opportunity"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="model_id" readonly="state != 'draft'"
+                                   options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"
+                                   context="{'tree_view_ref': 'cyllo_marketing_automation.view_ir_model_tree'} "/>
+                            <field name="activity_ids" invisible="1"/>
+                            <field name="user_id"/>
+                            <field name="marketing_filter_id"
+                                   options="{'no_create': 'True', 'no_open': 'True'}"
+                                   placeholder="Select a favourite filter"
+                                   invisible="state != 'draft'"/>
+                        </group>
+                        <field name="model_name" invisible="1"/>
+                        <div class="domain-filter cy-marketing-auto-domain-filter d-flex gap-3"
+                             invisible="not model_id">
+                            <div>
+                                <label for="filter" string="Domain"
+                                       style="color:black ;"/>
+                            </div>
+                            <field name="filter" string="Domain" widget="domain"
+                                   options="{'model': 'model_name'}"/>
+                        </div>
+
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Record for defining a search view named 'marketing.campaign.search' for the model 'marketing.campaign' -->
+    <record id="view_marketing_campaign_search" model="ir.ui.view">
+        <field name="name">view.marketing.campaign.search</field>
+        <field name="model">marketing.campaign</field>
+        <field name="arch" type="xml">
+            <search string="Campaign">
+                <field name="name" string="Campaign"/>
+                <field name="model_id" string="Target"/>
+                <filter string="New" name="state"
+                        domain="[('state','=','draft')]"/>
+                <filter string="Running" name="state"
+                        domain="[('state','=','running')]"/>
+                <filter string="Stopped" name="state"
+                        domain="[('state','=','stopped')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Target" name="model_id"
+                            context="{'group_by':'model_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Record for defining an action window named 'action_view_campaigns' for the model 'marketing.campaign' -->
+    <record id="action_view_campaigns" model="ir.actions.act_window">
+        <field name="name">Campaigns</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">marketing.campaign</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No data yet!
+            </p>
+            <p>Create Marketing Campaign Records.
+            </p>
+        </field>
+    </record>
+</odoo>

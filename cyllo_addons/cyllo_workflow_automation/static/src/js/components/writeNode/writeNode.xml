@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="WriteNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <Record t-props="recordProps" t-slot-scope="data">
+                <div class="d-flex flex-column">
+                    <div class="row py-2">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="label" class="form-label">Label</label>
+                                <CharField
+                                    t-on-change="ev => this.onChangeLabel(ev.target.value)"
+                                    name="'label'"
+                                    record="data.record"
+                                    id="'label'"
+                                />
+                            </div>
+                            <div class="row align-items-end">
+                                <div t-attf-class="mb-3 {{ fieldState.write_selected_record ? 'col-md-6' : 'col-12' }}">
+                                    <label for="rec" class="form-label">Record</label>
+                                    <CustomDropdown
+                                        options="getRecords"
+                                        defaultValue="fieldState.write_selected_record?.value"
+                                        onChange="(value) => this.updateObject(value)"
+                                        placeholder="'Select a record...'"
+                                        searchable="true"
+                                        width="''"
+                                        maxHeight="'70px'"
+                                    />
+                                </div>
+                                <div t-if="fieldState.write_selected_record" class="col-md-6 mb-3">
+                                    <label for="model" class="form-label">Model</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="model"
+                                        t-att-value="state.model ? state.model : ''"
+                                        disabled="disabled"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div t-if="state.model" class="col-12">
+                            <CustomTreeEditor
+                                getPathEditorInfo.bind="getPathEditorInfo"
+                                resModel="state.model"
+                                tree="state.tree"
+                                createNewNode.bind="createNewNode"
+                                nodeUpdate.bind="nodeUpdate"
+                                nodeValueUpdate.bind="nodeValueUpdate"
+                                deleteNode.bind="deleteNode"
+                                variables="getVariables"
+                            >
+                                <t t-set-slot="newButton">
+                                    <span><i class="ri-add-fill"/> Add Field</span>
+                                </t>
+                            </CustomTreeEditor>
+                        </div>
+                    </div>
+                </div>
+            </Record>
+        </xpath>
+    </t>
+</templates>

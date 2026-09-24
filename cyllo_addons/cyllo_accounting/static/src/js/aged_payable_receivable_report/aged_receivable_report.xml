@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="AgedReceivable" t-inherit="cyllo_accounting.AccountingReportBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('cy_accounting_filters_sub')]" position="inside">
+            <t t-call="AgedReceivableFilters"/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_table_main-view')]" position="inside">
+            <t t-call="AgedReceivableBody"/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_filtered_data-body')]" position="before">
+            <div t-if="pager.total > 50" class="d-flex justify-content-end me-3 p-0" t-attf-class="{{ uiState.isSideBarActive ? sidebarClass.pagerOn : sidebarClass.pagerOff}}">
+                <Pager total="pager.total"
+                       offset="pager.offset"
+                       limit="pager.limit"
+                       isEditable="false"
+                       onUpdate.bind="onPagerChanged"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_table_main-view')]" position="attributes">
+            <attribute name="class" remove="cy_table_main-view" add="cy_aged-pr-view" separator=" "/>
+        </xpath>
+    </t>
+    <t t-name="CustomDateFilter">
+        <label for="end_date" class="dropdown-item">Date:</label>
+        <input type="date" id="end_date" t-model="filters.endDate"
+               t-attf-class="{{!filters.endDate and 'class-date-alert'}}"
+               t-on-change="(ev) => this.onDateChange(ev, 'endDate')" name="end_date"
+               class="form-control datepicker dropdown-item"/>
+    </t>
+    <t t-name="AgedReceivableFilters">
+        <button class="btn dropdown-toggle dropdown-toggle-none" type="button"  t-on-click="onClickPartners">
+            <span class="ri-user-line me-1"/>
+                        Partners
+        </button>
+        <!-- Time Range -->
+        <t t-call="dateRange">
+            <t t-set="dateFilterTemplate" t-value="'CustomDateFilter'"/>
+        </t>
+
+        <!-- Options Dropdown -->
+        <div class="drop dropdown">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-filter"/>
+                    Options
+                    <span class="code"/>
+                </t>
+                <DropdownItem onSelected.bind="toggleUnfold">
+                    <span t-if="state.isFolded" class="mx-2">UnFold All</span>
+                    <span t-else="" class="mx-2">Fold All</span>
+                </DropdownItem>
+            </Dropdown>
+        </div>
+    </t>
+
+    <t t-name="AgedReceivableBody">
+        <div class="cy_table_age_pr" t-attf-class="{{  uiState.isSideBarActive ? 'cy_table_age_pr-side-bar' : 'cy_table_age_pr-side-bar-off' }}">
+        <table class="cy_accounting_report_table table-hover table-hover table-cy-report w-100">
+            <thead>
+                <tr class="text-nowrap">
+                    <th colspan="6"/>
+                    <th class="text-center">Invoice Date</th>
+                    <th class="text-end">Amount Currency</th>
+                    <th>Currency</th>
+                    <th class="text-center">Account</th>
+                    <th class="text-center">Expected Date</th>
+                    <th class="text-end">At Date</th>
+                    <th class="text-end">1-30</th>
+                    <th class="text-end">31-60</th>
+                    <th class="text-end">61-90</th>
+                    <th class="text-end">91-120</th>
+                    <th class="text-end">Older</th>
+                    <th class="text-end pe-3">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <LinesHeader t-foreach="state.data" t-as="ml_total" t-key="ml_total_index" mlTotal="ml_total"
+                             model="this.model" accountType="args[0]" date="filters.endDate" ledgerId="ledgerId"
+                             openAnnotation.bind="openAnnotation" removeAnnotation.bind="removeAnnotation"
+                             openAccounts="state.openAccounts"
+                             callBackFn.bind="addPartnerToAccounts"
+                             saveSession.bind="saveSession"
+                             searchViewId="searchViewId"
+                />
+                <tr>
+                    <th/>
+                    <th colspan="10">
+                        Total
+                    </th>
+                    <th class="text-end">
+                        <t t-esc="state.grandTotal.currency"/>
+                        <span class="ms-1"
+                              t-out="(state.grandTotal.diff0_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                    </th>
+                    <th class="text-end">
+                        <t t-esc="state.grandTotal.currency"/>
+                        <span class="ms-1"
+                              t-out="(state.grandTotal.diff1_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                    </th>
+                    <th class="text-end">
+                        <t t-esc="state.grandTotal.currency"/>
+                        <span class="ms-1"
+                              t-out="(state.grandTotal.diff2_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                    </th>
+                    <th class="text-end">
+                        <t t-esc="state.grandTotal.currency"/>
+                        <span class="ms-1"
+                              t-out="(state.grandTotal.diff3_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                    </th>
+                    <th class="text-end">
+                        <t t-esc="state.grandTotal.currency"/>
+                        <span class="ms-1"
+                              t-out="(state.grandTotal.diff4_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                    </th>
+                    <th class="text-end">
+                        <t t-esc="state.grandTotal.currency"/>
+                        <span class="ms-1"
+                              t-out="(state.grandTotal.diff5_sum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                    </th>
+                    <th class="text-end">
+                        <t t-esc="state.grandTotal.currency"/>
+                        <span class="ms-1 me-2"
+                              t-out="(state.grandTotal.total || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                    </th>
+                </tr>
+
+            </tbody>
+        </table>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.SocialPostPreview">
+        <div class="o_social_post_preview">
+            <div class="o_social_post_preview_label">Preview</div>
+            <div class="o_social_post_preview_card">
+                <div class="o_social_post_preview_head">
+                    <img t-att-src="currentUserAvatarUrl" class="o_social_post_preview_avatar" />
+                    <div class="o_social_post_preview_meta">
+                        <span class="o_social_post_preview_author" t-esc="currentUserName" />
+                        <span class="o_social_post_preview_time">Just now</span>
+                    </div>
+                </div>
+                <div class="o_social_post_preview_text" t-if="description" t-esc="description" />
+                <div class="o_social_post_preview_poll" t-if="isPoll and pollQuestion">
+                    <div class="o_social_post_preview_poll_question" t-esc="pollQuestion"/>
+                    <div class="o_social_post_preview_poll_option" t-foreach="pollOptions" t-as="option"
+                        t-key="option_index">
+                        <div class="o_social_post_preview_poll_bar" style="width: 0%;"/>
+                        <div class="o_social_post_preview_poll_option_label">
+                            <span t-esc="option"/>
+                            <span class="o_social_post_preview_poll_option_pct">0%</span>
+                        </div>
+                    </div>
+                    <div class="o_social_post_preview_poll_footer">
+                        <span>0 votes</span>
+                        <span t-if="pollDurationLabel">
+                            ·
+                            <t t-esc="pollDurationLabel"/>
+                        </span>
+                    </div>
+                </div>
+                <div class="o_social_post_preview_carousel" t-if="imageUrls.length > 1">
+                    <div class="o_social_post_preview_carousel_track" t-on-scroll="onCarouselScroll">
+                        <img t-foreach="imageUrls" t-as="carouselImg" t-key="carouselImg_index" t-att-src="carouselImg"/>
+                    </div>
+                    <span class="o_social_post_preview_carousel_count" t-esc="imageUrls.length + ' photos'"/>
+                    <button class="o_social_post_preview_carousel_arrow o_social_post_preview_carousel_arrow_prev"
+                        t-if="state.carouselIndex > 0"
+                        t-on-click="(ev) => this.scrollCarousel(ev, -1)">
+                        <i class="ri-arrow-left-s-line"/>
+                    </button>
+                    <button class="o_social_post_preview_carousel_arrow o_social_post_preview_carousel_arrow_next"
+                        t-if="state.carouselIndex &lt; imageUrls.length - 1"
+                        t-on-click="(ev) => this.scrollCarousel(ev, 1)">
+                        <i class="ri-arrow-right-s-line"/>
+                    </button>
+                    <div class="o_social_post_preview_carousel_dots">
+                        <span t-foreach="imageUrls" t-as="carouselImg" t-key="carouselImg_index"
+                            t-attf-class="o_social_post_preview_carousel_dot{{ state.carouselIndex === carouselImg_index ? ' active' : '' }}"/>
+                    </div>
+                </div>
+                <div class="o_social_post_preview_media" t-elif="mediaUrl and !isVideoAttachment">
+                    <img t-att-src="mediaUrl" onerror="this.style.display='none';" />
+                </div>
+                <div class="o_social_post_preview_media" t-if="imageUrls.length &lt;= 1 and mediaUrl and isVideoAttachment">
+                    <video t-att-src="mediaUrl" controls="controls" />
+                </div>
+                <div class="o_social_post_preview_empty" t-if="!description and !mediaUrl and !(isPoll and pollQuestion)">
+                    Nothing to preview yet - add content or media.
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

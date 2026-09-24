@@ -1,0 +1,1116 @@
+:root {
+    --dfBackgroundColor: rgba(255, 255, 255, 0);
+    --dfBackgroundSize: 30px 30px;
+    --dfBackgroundImage: linear-gradient(rgba(169, 169, 169, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(169, 169, 169, 0.4) 1px, transparent 1px);
+}
+
+.them-edit-link {
+    position: absolute;
+    top: 10px;
+    right: 100px;
+    color: black;
+    font-size: 40px;
+}
+
+.them-edit-link a {
+    text-decoration: none;
+}
+
+.github-link {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: black;
+}
+
+.wrapper {
+    width: 100%;
+    height: calc(100vh - 67px);
+    display: flex;
+}
+
+.gap-2 {
+    gap: 5px;
+}
+
+.toast-message {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #9EA700;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 1050;
+}
+
+.variable-pill {
+    border-radius: 0px !important;
+    padding: 0 !important;
+    border: 1px solid #dedede;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background-color: #dee2e6;
+    margin: 0 12px;
+}
+
+.copy-btn {
+    background-color: #e9ecef;
+    color: #343a40;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.copy-btn:hover {
+    background-color: #ced4da;
+    cursor: pointer;
+}
+
+.drag-drawflow {
+    line-height: 50px;
+    border-bottom: 1px solid var(--border-color);
+    padding-left: 20px;
+    cursor: move;
+    user-select: none;
+}
+
+.btn-export {
+    float: right;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    font-weight: bold;
+    border: 1px solid #0e5ba3;
+    background: #4ea9ff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.btn-clear {
+    float: right;
+    position: absolute;
+    top: 10px;
+    right: 85px;
+    color: white;
+    font-weight: bold;
+    border: 1px solid #96015b;
+    background: #e3195a;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.swal-wide {
+    width: 80% !important;
+}
+
+.bar-zoom {
+    float: right;
+    position: absolute;
+    bottom: 67px;
+    right: 40px;
+    display: flex;
+    font-size: 24px;
+    color: white;
+    background: #555555;
+    border-radius: 4px;
+    border-right: 1px solid var(--border-color);
+    z-index: 5;
+}
+
+#drawflow {
+    position: relative;
+    height: calc(100vh - 59px);
+    overflow-y: auto;
+    background-color: var(--dfBackgroundColor);
+    background-size: var(--dfBackgroundSize);
+    background: #f3f2f2;
+}
+
+@media only screen and (max-width: 768px) {
+    .col {
+        width: 50px;
+    }
+
+    .col .drag-drawflow span {
+        display: none;
+    }
+
+    #drawflow {
+        width: calc(100% - 1px);
+    }
+}
+
+/* Editing Drawflow */
+
+.drawflow .drawflow-node.selected {
+    background: white;
+    box-shadow: #9ea700cf 0 1px 12px 2px;
+}
+
+.drawflow .drawflow-node.Condition.selected {
+    background: white;
+}
+
+.drawflow .drawflow-node.selected .title-box {
+    color: #22598c;
+}
+
+.drawflow .connection .main-path {
+    stroke: #505050c7;
+    stroke-width: 3px;
+}
+
+.drawflow .drawflow-node .input,
+.drawflow .drawflow-node .output {
+    height: 15px;
+    width: 15px;
+    border: 1px solid var(--border-color) !important;
+}
+
+.drawflow .drawflow-node .input:hover,
+.drawflow .drawflow-node .output:hover {
+    background: #4ea9ff;
+}
+
+.drawflow .drawflow-node .output {
+    right: 10px;
+    background: #F44336;
+}
+
+.drawflow .drawflow-node .input {
+    left: -10px;
+    background: #4CAF50;
+}
+
+.drawflow>.drawflow-delete {
+    border: 2px solid #43b993;
+    background: white;
+    color: #43b993;
+    -webkit-box-shadow: 0 2px 20px 2px #43b993;
+    box-shadow: 0 2px 20px 2px #43b993;
+}
+
+.drawflow-delete {
+    border: 2px solid #4ea9ff;
+    background: white;
+    color: #4ea9ff;
+    -webkit-box-shadow: 0 2px 20px 2px #4ea9ff;
+    box-shadow: 0 2px 20px 2px #4ea9ff;
+}
+
+
+.drawflow-node .title-box {
+    height: 100%;
+    background: var(--background-box-title);
+    border-radius: 4px 4px 0px 0px;
+    padding-left: 10px;
+
+    .settings-icon {
+        margin-left: 10px;
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .delete-icon {
+        margin-left: 10px;
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out;
+
+        i {
+            transition: transform 0.3s ease-in-out;
+        }
+    }
+}
+
+.drawflow-node.Condition .title-box {
+    background: none;
+    border-bottom: none;
+}
+
+.drawflow .title-box svg {
+    position: initial;
+}
+
+.flow-diagram>div {
+    position: relative;
+}
+
+.node-container {
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.drawflow .drawflow-node.cy-test-running {
+    filter: drop-shadow(0 0 14px rgba(34, 197, 94, 0.35));
+    border-color: rgba(34, 197, 94, 0.85);
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.22), 0 8px 24px rgba(34, 197, 94, 0.18);
+}
+
+.drawflow .drawflow-node.cy-test-running::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    padding: 3px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(110deg,
+            rgba(34, 197, 94, 0) 0%,
+            rgba(34, 197, 94, 0.14) 28%,
+            rgba(74, 222, 128, 0.95) 50%,
+            rgba(34, 197, 94, 0.14) 72%,
+            rgba(34, 197, 94, 0) 100%);
+    background-size: 220% 100%;
+    animation: cy-test-border-flow 1.15s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+}
+
+.drawflow .drawflow-node.Condition.cy-test-running {
+    animation: none;
+    filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.22));
+    border-color: transparent;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.55), 0 8px 24px rgba(34, 197, 94, 0.14);
+}
+
+.drawflow .drawflow-node.Condition.cy-test-running::after {
+    content: none;
+}
+
+.drawflow .connection.cy-test-flow-active .main-path {
+    stroke: rgba(74, 222, 128, 0.95);
+    stroke-width: 4px;
+    stroke-linecap: round;
+    stroke-dasharray: 8 10;
+    animation: cy-test-flow-travel 0.85s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+    transition: stroke 160ms ease, stroke-width 160ms ease, filter 160ms ease, opacity 160ms ease;
+}
+
+.drawflow.cy-test-flow-mode .connection .main-path {
+    stroke: rgba(34, 197, 94, 0.24);
+    stroke-width: 2.6px;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 3px rgba(34, 197, 94, 0.16));
+    transition: stroke 180ms ease, stroke-width 180ms ease, opacity 180ms ease, filter 180ms ease;
+}
+
+.drawflow .connection.cy-test-flow-complete .main-path {
+    stroke: rgba(34, 197, 94, 0.55);
+    stroke-width: 3px;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.24));
+    transition: stroke 180ms ease, stroke-width 180ms ease, filter 180ms ease;
+}
+
+.drawflow .drawflow-node.cy-test-warning {
+    border: 2px solid #f59e0b;
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.18), 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.drawflow .drawflow-node.cy-test-warning .node-container .title-box {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #854d0e;
+}
+
+.drawflow .drawflow-node.cy-test-error {
+    border: 2px solid #ef4444;
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.18), 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.drawflow .drawflow-node.cy-test-error .node-container .title-box {
+    background: linear-gradient(135deg, #fee2e2, #fca5a5);
+    color: #991b1b;
+}
+
+.drawflow .drawflow-node.Condition.cy-test-warning,
+.drawflow .drawflow-node.Condition.cy-test-error,
+.drawflow .drawflow-node.Condition.cy-test-success {
+    border-color: transparent;
+}
+
+.drawflow .drawflow-node.Condition.cy-test-warning {
+    box-shadow: 0 0 0 2px #f59e0b, 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.drawflow .drawflow-node.Condition.cy-test-error {
+    box-shadow: 0 0 0 2px #ef4444, 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.cy-test-tooltip {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translateX(-50%) translateY(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 6;
+}
+
+.cy-test-tooltip.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.cy-test-tooltip .tooltip-text {
+    display: inline-block;
+    min-width: 180px;
+    max-width: 260px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.2);
+}
+
+/* Canvas busy gate: unlike .cy-test-overlay this one is interactive, so it
+   swallows drops and node clicks while an async canvas operation is running. */
+.cy-canvas-busy {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 24px;
+    z-index: 9;
+    pointer-events: auto;
+    cursor: progress;
+    background: rgba(248, 250, 252, 0.35);
+}
+
+.cy-canvas-busy__card {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    background: rgba(17, 24, 39, 0.9);
+    color: #fff;
+    box-shadow: 0 16px 35px rgba(15, 23, 42, 0.24);
+}
+
+.cy-canvas-busy__spinner {
+    animation: cy-test-spin 0.9s linear infinite;
+}
+
+.cy-test-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 24px;
+    z-index: 7;
+    pointer-events: none;
+}
+
+.cy-test-overlay__card {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.9);
+    color: #fff;
+    box-shadow: 0 16px 35px rgba(15, 23, 42, 0.24);
+}
+
+.cy-test-overlay__spinner {
+    animation: cy-test-spin 0.9s linear infinite;
+}
+
+.cy-test-trigger.disabled {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+@keyframes cy-test-border-flow {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -20% 0;
+    }
+}
+
+@keyframes cy-test-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes cy-test-flow-travel {
+    from {
+        stroke-dashoffset: 54;
+        opacity: 0.72;
+    }
+
+    50% {
+        opacity: 1;
+        stroke: rgba(74, 222, 128, 0.98);
+        filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.55));
+    }
+
+    to {
+        stroke-dashoffset: 0;
+        opacity: 0.78;
+    }
+}
+
+.cy-gm-section-divider {
+    border-color: #e0f2f1;
+    margin: 16px 0 12px;
+}
+
+.cy-gm-section {
+    .cy-gm-section-header {
+        padding: 6px 10px;
+        background: #f0faf9;
+        border-left: 3px solid #00897b;
+        border-radius: 3px;
+    }
+
+    .cy-gm-config-panel {
+        padding: 12px 14px;
+        background: #fafafa;
+        border: 1px solid #e8f5e9;
+        border-radius: 6px;
+        margin-top: 8px;
+    }
+
+    .cy-gm-info-box {
+        padding: 8px 12px;
+        background: #e8f5e9;
+        border-radius: 4px;
+        border: 1px solid #c8e6c9;
+    }
+}
+
+.cy-gm-section-icon {
+    color: #00897b;
+    flex-shrink: 0;
+    font-size: 16px;
+}
+
+.cy-gm-section-title {
+    font-size: 14px;
+}
+
+.cy-gm-help-inline {
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.drawflow-node .box {
+    padding: 10px 20px 20px 20px;
+    font-size: 14px;
+    color: #555555;
+}
+
+.drawflow-node .box p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.drawflow-node.welcome {
+    width: 250px;
+}
+
+.drawflow-node.slack .title-box {
+    border-radius: 4px;
+}
+
+.drawflow-node input,
+.drawflow-node select,
+.drawflow-node textarea {
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    height: 30px;
+    line-height: 30px;
+    font-size: 16px;
+    width: 158px;
+    color: #555555;
+}
+
+.drawflow-node textarea {
+    height: 100px;
+}
+
+
+.drawflow-node.personalized {
+    background: red;
+    height: 200px;
+    text-align: center;
+    color: white;
+}
+
+.drawflow-node.personalized .input {
+    background: yellow;
+}
+
+.drawflow-node.personalized .output {
+    background: green;
+}
+
+.drawflow-node.personalized.selected {
+    background: blue;
+}
+
+.drawflow .connection .point {
+    stroke: var(--border-color);
+    stroke-width: 2;
+    fill: white;
+    transform: translate(-9999px, -9999px);
+}
+
+.drawflow .connection .point.selected,
+.drawflow .connection .point:hover {
+    fill: #4ea9ff;
+}
+
+.accessible-variables .title span {
+    font-size: 0.9rem;
+    font-weight: bolder;
+}
+
+.work-auto-form .o_input {
+    padding: 5px 4px;
+}
+
+.modal-body .cy-variable-toggle button.dropdown-toggle {
+    all: unset;
+}
+
+.modal-body .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.cy-work-auto-form .cy-variable-toggle button.dropdown-toggle {
+    width: 100%;
+}
+
+.cy-work-auto-search .o_input {
+    padding: 5px 4px;
+}
+
+.wd-50 {
+    width: 50%;
+}
+
+.wd-40 {
+    width: 40%;
+}
+
+.wd-60 {
+    width: 60%;
+}
+
+.cy-modal-form_label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.cy-work-config-modal,
+.cy-w-modal-body,
+.cy-work-auto-form {
+    label,
+    .form-label,
+    .cy-modal-form_label {
+        font-weight: 600;
+    }
+}
+
+.cy-flex-column {
+    flex-direction: column;
+}
+
+
+.cy-work-auto-form input.o_input {
+    border-radius: unset !important;
+}
+
+.cy-create-field-row>.flex-grow-1 {
+    min-width: 0;
+}
+
+.cy-create-field-row .field-type-dropdown-wrapper {
+    flex: 0 0 auto;
+}
+
+.cy-mail-toolbar-sep {
+    align-self: stretch;
+    width: 1px;
+    background-color: var(--bs-border-color, #dee2e6);
+    opacity: 0.6;
+}
+
+.cy-mail-editor:empty:before {
+    content: attr(placeholder);
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+//mycss
+@keyframes archShakeVibrate {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    10% {
+        transform: translate(-3px, -2px) rotate(-0.5deg);
+    }
+
+    20% {
+        transform: translate(3px, -4px) rotate(0.5deg);
+    }
+
+    30% {
+        transform: translate(-3px, -6px) rotate(-0.5deg);
+    }
+
+    40% {
+        transform: translate(3px, -4px) rotate(0.5deg);
+    }
+
+    50% {
+        transform: translate(-3px, -2px) rotate(-0.5deg);
+    }
+
+    60% {
+        transform: translate(3px, 0) rotate(0.5deg);
+    }
+
+    70% {
+        transform: translate(-3px, 0) rotate(-0.5deg);
+    }
+
+    80% {
+        transform: translate(3px, -1px) rotate(0.5deg);
+    }
+
+    90% {
+        transform: translate(-3px, 0) rotate(-0.5deg);
+    }
+}
+
+.cy-validation-tooltip {
+    position: absolute;
+    top: -53px;
+    left: 20px;
+    background-color: #ff4d4d;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.drawflow-node.Condition .cy-validation-tooltip {
+    top: -90px;
+    left: 10px;
+}
+
+.cy-flow-err {
+    border: 1.8px dashed #ff4d4d !important;
+}
+
+.drawflow .drawflow-node {
+    border: 1px solid #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.drawflow .drawflow-node.cy-test-success {
+    border: 2px solid #22c55e;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.drawflow .drawflow-node.Condition.cy-test-success {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px #22c55e, 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.drawflow-node.Condition .cy-flow-err {
+    all: unset !important;
+}
+
+.cy-validation-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: #ff4d4d transparent transparent transparent;
+}
+
+.cy-validation-tooltip .tooltip-text {
+    display: block;
+    white-space: nowrap;
+}
+
+/* Animation for smooth appearance, arch shaking, and vibration */
+.cy-validation-tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+    animation: archShakeVibrate 0.8s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+.work_auto_buttons {
+    margin-right: 250px;
+}
+
+.cy-w-save-btn {
+    display: flex;
+    background: #9ea70069;
+    color: #dadada;
+    align-items: center;
+    /* justify-content: center; */
+    padding: 0.3125rem 0.625rem;
+    border-radius: 5px;
+
+    &:hover {
+        cursor: pointer;
+        color: #FFFFFF;
+        background: #8e9600;
+    }
+}
+
+.input-container {
+    position: relative;
+    width: 300px;
+}
+
+.cy-w-o-input {
+    width: 100%;
+    border: 1px solid #0000002b;
+    font-size: 16px;
+    border-radius: 4px;
+    background-color: #fefdfa;
+    transition: all 0.3s ease;
+    height: 33px;
+    color: #3e3e3e;
+    padding: 0 0 0 10px;
+}
+
+.cy-w-o-input:focus {
+    border: 1px solid #9ea700bd;
+    box-shadow: 0 0 2px 0 #9EA700;
+    outline: none;
+    padding: 0 0 0 10px;
+}
+
+.cy-w-o-input::placeholder {
+    color: transparent;
+}
+
+.input-container label {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    background-color: #ffffff;
+    padding: 0 5px;
+    font-size: 13px;
+    color: #757575;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    font-weight: 600;
+}
+
+.cy-w-o-input:focus+label,
+.cy-w-o-input:not(:placeholder-shown)+label {
+    top: 0;
+    font-size: 12px;
+    color: #9ea700;
+}
+
+.cy-flow-err .cy-w-o-input {
+    border-color: #ff3860;
+}
+
+.cy-flow-err label {
+    color: #ff3860;
+}
+
+.cy_w_auto_name-text {
+    height: 39px;
+}
+
+.cy-w-warning {
+    background-color: #fff3cd;
+    border-left: 5px solid #ffc107;
+    color: #856404;
+    padding: 15px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.cy-w-warning::before {
+    content: "\26A0";
+    font-size: 24px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.cy-w-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.node-container {
+    .success {
+        display: none;
+        top: -46px;
+        left: 63px;
+        font-size: 11px;
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .failed {
+        display: none;
+        top: 40px;
+        left: 114px;
+        font-size: 10px;
+        color: #FF8982;
+        font-weight: bold;
+    }
+
+    .default {
+        display: none;
+        left: 74px;
+        top: 83px;
+        font-size: 10px;
+        color: #b47706;
+        font-weight: bold;
+    }
+}
+
+.cy-w-modal-body .cy-variable-toggle button {
+    width: 100% !important;
+}
+
+.cy-w-modal-body .cy-w-follower-select select {
+    padding-top: 5px;
+    padding-bottom: 10px;
+}
+
+//controls
+
+.cy-w-zoom-controls {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.cy-w-zoom-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    border: none;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.cy-w-zoom-button:hover {
+    background-color: #f0f0f0;
+}
+
+.cy-w-zoom-button:active {
+    background-color: #e0e0e0;
+}
+
+.cy-w-divider {
+    height: 1px;
+    background-color: #e0e0e0;
+}
+
+.cy-w-zoom-percent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 32px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #444;
+    user-select: none;
+    letter-spacing: 0.02em;
+}
+
+.btn-lock {
+    position: absolute;
+    bottom: 20px;
+    right: 40px;
+    background-color: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 909;
+
+    &.locked {
+        background-color: #f8d9d9;
+    }
+}
+
+.btn-lock:hover {
+    cursor: pointer;
+    background-color: #f0f0f0;
+}
+
+.btn-lock i {
+    font-size: 24px;
+    color: #333;
+}
+
+.canvas-locked {
+    display: flex;
+    gap: 3px;
+    position: absolute;
+    top: 85px;
+    right: 20px;
+    padding: 5px 10px;
+    background-color: white;
+    border-radius: 8px;
+
+    span {
+        font-weight: bold;
+        user-select: none;
+    }
+}
+
+//make variable
+.make-variable-container {
+    padding: 16px;
+    text-align: center;
+}
+
+.make-variable-btn {
+    background-color: #9ea700;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 12px 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+
+    &:hover {
+        background-color: #b0b904;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+    }
+
+    .icon-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .ri-add-line {
+        font-size: 18px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-text {
+        position: relative;
+        z-index: 1;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.5s ease;
+    }
+
+    &:hover {
+        .icon-wrapper {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        &::before {
+            width: 300px;
+            height: 300px;
+        }
+    }
+}
+
+//variable usage
+.cy-find-usage {
+    border: solid 2px #f59509 !important;
+}

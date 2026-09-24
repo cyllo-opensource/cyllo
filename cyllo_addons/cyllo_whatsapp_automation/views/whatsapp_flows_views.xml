@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!--    whatsapp_flows search view-->
+    <record id="view_whatsapp_flows_search" model="ir.ui.view">
+        <field name="name">view.whatsapp.flows.search</field>
+        <field name="model">whatsapp.flows</field>
+        <field name="arch" type="xml">
+            <search string="Templates">
+                <field name="name"/>
+                <field name="state"/>
+                <separator/>
+                <filter string="Archived" name="filter_archived"
+                        domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Confirmed" name="confirmed"
+                        domain="[('state', '=', 'confirmed')]"/>
+                <separator/>
+                <filter string="Published" name="published"
+                        domain="[('state', '=', 'published')]"/>
+                <separator/>
+                <filter string="Deprecated" name="deprecate"
+                        domain="[('state', '=', 'deprecate')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="state" domain="[]"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+<!--    whatsapp_flows form view-->
+    <record id="whatsapp_flows_view_form" model="ir.ui.view">
+        <field name="name">whatsapp.flows</field>
+        <field name="model">whatsapp.flows</field>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+            <form string="Whatsapp flow types">
+                <header>
+                    <button name="action_confirm_flows" string="Confirm"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_analysis_flow" string="Analyse"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'published'"/>
+                    <button name="action_publish_flows" string="Publish"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_preview_flow" string="Preview"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'published'"/>
+                    <button name="action_deprecate_flow" string="Deprecate"
+                            type="object" invisible="state != 'published'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,published"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_flows_user_input_completed"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-check-square-o">
+                            <field string="Responses"
+                                   name="response_done_count"
+                                   widget="statinfo"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived"
+                            bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="name"/>
+                            <field name="flow_name" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Screens">
+                            <field name="screen_ids">
+                                <tree>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+<!--    whatsapp_flows tree view-->
+    <record id="whatsapp_flows_view_tree" model="ir.ui.view">
+        <field name="name">whatsapp.flows.view.tree</field>
+        <field name="model">whatsapp.flows</field>
+        <field name="arch" type="xml">
+            <tree string="Flows" default_order="id desc">
+                <field name="name"/>
+                <field name="state"/>
+                <button name="action_analysis_flow" string="Analyse"
+                        type="object" class="oe_highlight"
+                        invisible="state != 'published'"/>
+
+            </tree>
+        </field>
+    </record>
+
+<!--    whatsapp_flows window action-->
+    <record id="action_view_whatsapp_flows" model="ir.actions.act_window">
+        <field name="name">Whatsapp flows</field>
+        <field name="res_model">whatsapp.flows</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+<!--    Flows menu item-->
+    <menuitem id="menu_whatsapp_flows" name="Flows" sequence="1"
+              parent="cyllo_whatsapp.menu_configuration_categ"
+              action="cyllo_whatsapp_automation.action_view_whatsapp_flows"/>
+</odoo>

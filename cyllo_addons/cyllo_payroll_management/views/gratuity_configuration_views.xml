@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View-->
+    <record id="view_gratuity_configuration_tree" model="ir.ui.view">
+        <field name="name">view.gratuity.configuration.tree</field>
+        <field name="model">gratuity.configuration</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="contract_type"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_gratuity_configuration_form" model="ir.ui.view">
+        <field name="name">view.gratuity.configuration.form</field>
+        <field name="model">gratuity.configuration</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <group>
+                            <label for="name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name" placeholder="e.g Tenure Bonus"/>
+                            </h1>
+                            <label for="contract_type" class="oe_edit_only"/>
+                            <h6>
+                                <field name="contract_type" style="width:44%"/>
+                            </h6>
+                        </group>
+                    </div>
+                    <group string="Validity Details">
+                        <group>
+                            <field name="start_date" class="oe_inline"/>
+                            <field name="end_date" class="oe_inline"/>
+                            <field name="company_id" class="oe_inline"/>
+                        </group>
+                        <group>
+                            <field name="include_training" class="oe_inline"/>
+                            <field name="date_from" class="oe_inline"/>
+                            <field name="joining_date" class="oe_inline"
+                                   invisible="date_from != 'manual'" required="date_from == 'manual'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="gratuity_configuration_rules" string="Rules">
+                            <field name="gratuity_configuration_ids" readonly="0">
+                                <tree string="Gratuity Configuration" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="from_year"/>
+                                    <field name="to_year"/>
+                                    <field name="divide_days"/>
+                                    <field name="extra_days"/>
+                                    <field name="percentage"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action-->
+    <record id="action_view_gratuity_configuration" model="ir.actions.act_window">
+        <field name="name">Gratuity Configuration</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">gratuity.configuration</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Gratuity Configuration
+            </p>
+            <p>
+                Create New Gratuity Configuration
+            </p>
+        </field>
+    </record>
+</odoo>

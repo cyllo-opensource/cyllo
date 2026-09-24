@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Station Kanban View -->
+    <record id="frontdesk_frontdesk_view_kanban" model="ir.ui.view">
+        <field name="name">frontdesk.frontdesk.view.kanban</field>
+        <field name="model">frontdesk.frontdesk</field>
+        <field name="arch" type="xml">
+            <kanban class="oe_background_grey o_kanban_dashboard">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="responsible_ids"/>
+                <field name="visitor_count"/>
+                <field name="has_emergency_alert"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click" style="border-radius: 8px; border-left: 5px solid #7C5BBA; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 16px;">
+                            <div class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="text-primary font-weight-bold" style="font-size: 1.2rem; margin-bottom: 4px;">
+                                        <field name="name"/>
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.85rem;">
+                                        <span class="fa fa-users mr-1"/>
+                                        <t t-out="record.visitor_count.raw_value"/> Active Visitors
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_card_content mt-3">
+                                <div class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                    <strong>Responsibles:</strong>
+                                    <field name="responsible_ids" widget="many2many_tags"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_card_manage_pane mt-3" style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; gap: 8px;">
+                                    <button name="action_open_visitors" type="object" class="btn btn-sm btn-secondary" style="flex: 1;">
+                                        <span class="fa fa-eye mr-1"/> View Visitors
+                                    </button>
+                                    <button name="action_quick_register_visitor" type="object" class="btn btn-sm btn-primary" style="flex: 1;">
+                                        <span class="fa fa-plus mr-1"/> New Visitor
+                                    </button>
+                                </div>
+                                <t t-if="record.has_emergency_alert.raw_value">
+                                    <button name="action_trigger_emergency" type="object" class="btn btn-sm btn-danger mt-1" style="width: 100%; border-radius: 6px; font-weight: bold; background-color: #dc3545; border-color: #dc3545;">
+                                        <span class="fa fa-exclamation-triangle mr-1"/> Trigger Emergency
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Station Tree View -->
+    <record id="frontdesk_frontdesk_view_tree" model="ir.ui.view">
+        <field name="name">frontdesk.frontdesk.view.tree</field>
+        <field name="model">frontdesk.frontdesk</field>
+        <field name="arch" type="xml">
+            <tree string="Front Desks">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="notify_by_email"/>
+                <field name="notify_by_sms"/>
+                <field name="notify_by_discuss"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Station Form View -->
+    <record id="frontdesk_frontdesk_view_form" model="ir.ui.view">
+        <field name="name">frontdesk.frontdesk.view.form</field>
+        <field name="model">frontdesk.frontdesk</field>
+        <field name="arch" type="xml">
+            <form string="Front Desk Station">
+                <header>
+                    <field name="has_emergency_alert" invisible="1"/>
+                    <button name="action_trigger_emergency" type="object" string="Trigger Emergency Alert" class="btn-danger" icon="fa-exclamation-triangle" style="font-weight: bold;" invisible="not has_emergency_alert"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_visitors" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="visitor_count" string="Visitors" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Main Reception"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="company_id"/>
+                            <field name="responsible_ids" widget="many2many_tags" options="{'no_create': True}" invisible="not is_host"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Options" name="page_options">
+                            <div class="row mt16 o_settings_container">
+                                <setting help="Allows the visitor to pick the host of the meeting from the list">
+                                    <field name="is_host"/>
+                                </setting>
+                                <setting help="Notify the host on guest arrival via email" invisible="not is_host">
+                                    <field name="notify_by_email"/>
+                                </setting>
+                                <setting help="Notify the host on guest arrival via Discuss" invisible="not is_host">
+                                    <field name="notify_by_discuss"/>
+                                </setting>
+                                <setting help="Allow visitor to select a drink during registration">
+                                    <field name="is_drink"/>
+                                    <div invisible="not is_drink">
+                                        <field name="drink_selection_ids" widget="many2many_tags" nolabel="1"/>
+                                        <div class="mt8">
+                                            <button name="%(cyllo_front_desk.action_frontdesk_drink)d" icon="oi-arrow-right" type="action" string="Configure Drinks" class="btn-link"/>
+                                        </div>
+                                    </div>
+                                </setting>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_frontdesk_frontdesk" model="ir.actions.act_window">
+        <field name="name">Stations</field>
+        <field name="res_model">frontdesk.frontdesk</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Setup a new Front Desk Station!
+            </p>
+            <p>
+                Configure front desk locations, assign responsible employees, and define communication methods to notify hosts when guests arrive.
+            </p>
+        </field>
+    </record>
+</odoo>

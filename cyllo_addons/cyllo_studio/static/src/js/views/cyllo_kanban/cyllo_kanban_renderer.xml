@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.CylloKanbanRenderer">
+        <div class="o_kanban_renderer o_renderer d-flex o_kanban_ungrouped align-content-start flex-wrap justify-content-start"
+             t-ref="root">
+            <t t-set="groupOrRecord" t-value="getGroupsOrRecords()"/>
+            <t t-set="isRecord" t-value="groupOrRecord and (groupOrRecord.group or groupOrRecord.record)"/>
+            <t t-if="groupOrRecord and groupOrRecord.group">
+                <t t-set="group" t-value="groupOrRecord.group"/>
+                <t t-set="isGroupProcessing" t-value="isProcessing(group.id)"/>
+                <t t-set="record" t-value="group.list.records[0]"/>
+                <t t-set="isRecord" t-value="!!record"/>
+                <t t-if="record">
+                        <CylloKanbanRecord
+                            archInfo="props.archInfo"
+                            Compiler="props.Compiler"
+                            canResequence="!isGroupProcessing and !isProcessing(record.id) and canResequenceRecords"
+                            forceGlobalClick="props.forceGlobalClick"
+                            group="group"
+                            list="props.list"
+                            deleteRecord="props.deleteRecord"
+                            openRecord="props.openRecord"
+                            readonly="props.readonly"
+                            record="record"
+                            templates="props.archInfo.templateDocs"
+                            progressBarState="props.progressBarState"
+                        />
+
+                </t>
+            </t>
+            <t t-elif="groupOrRecord and groupOrRecord.record">
+                <CylloKanbanRecord
+                        archInfo="props.archInfo"
+                        Compiler="props.Compiler"
+                        canResequence="!isProcessing(groupOrRecord.record.id) and canResequenceRecords"
+                        forceGlobalClick="props.forceGlobalClick"
+                        list="props.list"
+                        deleteRecord="props.deleteRecord"
+                        openRecord="props.openRecord"
+                        readonly="props.readonly"
+                        record="groupOrRecord.record"
+                        templates="props.archInfo.templateDocs"
+                />
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"></div>
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"></div>
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"></div>
+            </t>
+            <t t-if="!isRecord">
+                <h5 class="position-absolute top-50 start-50 translate-middle text-muted">At least one record is needed to edit the Kanban card.</h5>
+            </t>
+            <t t-else="">
+                <KanbanComponents  fields="props.list.fields" rendererRef="rootRef" x2many="this.x2many"/>
+            </t>
+
+        </div>
+
+    </t>
+</templates>

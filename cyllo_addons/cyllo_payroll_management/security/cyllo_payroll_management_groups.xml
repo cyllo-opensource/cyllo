@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Access rights for the payroll management-->
+    <!-- Access Groups-->
+    <record id="ir_module_category_payroll_management" model="ir.module.category">
+        <field name="name">Payroll Management</field>
+        <field name="description">Access for Payroll Management Module</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="group_cyllo_payroll_management_employee" model="res.groups">
+        <field name="name">Employee</field>
+        <field name="category_id" ref="cyllo_payroll_management.ir_module_category_payroll_management"/>
+        <field name="implied_ids" eval="[Command.link(ref('hr.group_hr_user'))]"/>
+    </record>
+    <record id="group_cyllo_payroll_management_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="cyllo_payroll_management.ir_module_category_payroll_management"/>
+        <field name="implied_ids" eval="[Command.link(ref('group_cyllo_payroll_management_employee')),Command.link(ref('hr.group_hr_manager'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_admin'))]"/>
+    </record>
+</odoo>

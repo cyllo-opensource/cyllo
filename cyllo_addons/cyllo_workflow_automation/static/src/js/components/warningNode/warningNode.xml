@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="WarningNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <Record t-props="recordProps" t-slot-scope="data">
+                    <div class="row py-2">
+                        <div class="col-12 mb-3">
+                            <label for="label" class="form-label  cy-modal-form_label">
+                                <span>Label</span>
+                            </label>
+                            <CharField t-on-change="ev => this.onChangeLabel(ev.target.value)" name="'label'"
+                                       record="data.record" id="'label'"/>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <TypeToggler
+                                options="types"
+                                value="fieldState.warning_type"
+                                updateValue.bind="(type) => this.handleUpdate(type.value,'warning_type')"
+                                width="20"
+                            />
+                        </div>
+                        <t t-if="fieldState.warning_type === 'error'">
+                            <div class="col-12  mb-3">
+                                <label for="warning"
+                                       class="form-label  cy-modal-form_label">
+                                    <span>Warning</span>
+                                </label>
+                                <SelectionField name="'warning'"
+                                                record="data.record"
+                                                id="'warning'"/>
+                            </div>
+                        </t>
+                        <t class="mt-2" t-if="fieldState.warning_type === 'notification'">
+                            <div class="col-12 mb-3">
+                                <label for="label" class="form-label  cy-modal-form_label">
+                                    <span>Type</span>
+                                </label>
+                                <CustomDropdown
+                                    options="options"
+                                    defaultValue="fieldState.notification_type || ''"
+                                    onChange="(value) => this.handleUpdate(value, 'notification_type')"
+                                    placeholder="'Select notification type'"
+                                    searchable="true"
+                                    width="''"
+                                    maxHeight="'70px'"
+                                />
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label for="label" class="form-label  cy-modal-form_label">
+                                    <span>Title</span>
+                                </label>
+                                <Input value="fieldState.notification_title" update="(value) => this.handleUpdate(value, 'notification_title')"/>
+                            </div>
+                        </t>
+                        <div class="col-12  mb-3">
+                            <label for="warning_text"
+                                   class="form-label  cy-modal-form_label">
+                                <span>Warning Text</span>
+                            </label>
+                            <CharField name="'warning_text'"
+                                       record="data.record"
+                                       id="'warning_text'"/>
+                        </div>
+                    </div>
+            </Record>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Adding the Budget Management block in settings-->
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="91"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='account']" position="attributes">
+                <attribute name="string">Accounting</attribute>
+            </xpath>
+            <xpath expr="//block[@id='print_vendor_checks_setting_container']" position="after">
+                <block title="Budget Management" id="budget_management">
+                    <setting id="budget_management"
+                             help="A budget system is like a roadmap for your money. You track income and expenses to see where it flows, then plan how to spend it wisely and reach your financial goals.">
+                        <field name="module_cyllo_budget_management"/>
+                    </setting>
+                </block>
+            </xpath>
+            <xpath expr="//block[@id='pay_invoice_online_setting_container']" position="inside">
+                <setting help="Advance payment option on sales and purchase">
+                    <field name="module_cyllo_advance_payment"/>
+                </setting>
+                <setting help="Enable this to add credit card payment option">
+                    <field name="module_cyllo_credit_card_payment"/>
+                </setting>
+                <setting help="Payment plan option on invoice">
+                    <field name="module_cyllo_installment_payment"/>
+                </setting>
+                <setting help="Follow-up feature on Invoices">
+                    <field name="module_cyllo_accounting_follow_up"/>
+                </setting>
+                <setting help="Post Dated Cheque management">
+                    <field name="module_cyllo_accounting_pdc"/>
+                </setting>
+            </xpath>
+            <xpath expr="//block[@id='print_vendor_checks_setting_container']" position="after">
+                <block title="Digitization" name="cy-digitization">
+                    <setting
+                            help="This helps to retrieve data from pdf files and generate the field values of invoice, bill automatically or manually">
+                        <field name="module_cyllo_invoice_digitization"/>
+                    </setting>
+                </block>
+            </xpath>
+            <xpath expr="//block[@id='print_vendor_checks_setting_container']"
+                   position="after">
+                <block title="Anglo Saxon Accounting" name="cy-anglo_saxon">
+                    <setting
+                            help="Anglo-Saxon accounting is a simple system for recording income, expenses, and assets to ensure clear and responsible resource management">
+                        <field name="module_cyllo_anglo_saxon"/>
+                    </setting>
+                </block>
+            </xpath>
+            <xpath expr="//block[@id='quick_edit_mode']" position="after">
+                <block title="Configue Online Bank Providers" id="connect_saltedge">
+                    <div>
+                        <p style="margin-bottom: 0; font-weight:bold;">Salt Edge</p>
+                    </div>
+                    <div class="text-muted">
+                        <p style="margin-bottom: 0">Before enabling the provider, set your salt edge account.
+                            <a href="https://www.saltedge.com/">Sign in</a>
+                        </p>
+                        <p style="margin-bottom: 0">Create your own application and create api and secret keys inside
+                            the salt edge.
+                        </p>
+                        <p style="margin-bottom: 0">Also set the home url of the application as your_domain/connection
+                            for example - domain.com/connection.
+                        </p>
+                    </div>
+                    <setting id="connect_saltedge_provider" help="Connect Salt Edge Provider"
+                             title="Allows you to use Salt Edge provider.">
+                        <field name="enable_saltedge"/>
+                        <div class="content-group" invisible="not enable_saltedge">
+                            <div class="mt8">
+                                <label for="saltedge_app_id" string="App Id" class="col-3 col-lg-3 o_light_label"/>
+                                <field name="saltedge_app_id" password="True"/>
+                            </div>
+                        </div>
+                        <div class="content-group" invisible="not enable_saltedge">
+                            <div class="mt8">
+                                <label for="saltedge_secret_key" string="Secret Key"
+                                       class="col-3 col-lg-3 o_light_label"/>
+                                <field name="saltedge_secret_key" password="True"/>
+                            </div>
+                        </div>
+                        <div class="content-group" invisible="not enable_saltedge">
+                            <div class="mt8">
+                                <label for="include_fake_providers" string="Include Fake providers"
+                                       class="col-3 col-lg-3 o_light_label"/>
+                                <field name="include_fake_providers"/>
+                            </div>
+                        </div>
+                    </setting>
+
+                </block>
+            </xpath>
+             <xpath expr="//block[@name='default_taxes_setting_container']" position="after">
+                <block title="Tax Returns" id="tax_returns_settings">
+                    <setting id="tax_return_periodicity_setting" help="Periodicity of tax returns">
+                        <field name="tax_return_periodicity"/>
+                    </setting>
+                    <setting id="tax_return_deadline_setting" help="Deadline after the period end (in days)">
+                        <field name="tax_return_deadline"/>
+                    </setting>
+                    <setting id="tax_return_journal_setting" help="Journal used for tax returns">
+                        <field name="tax_return_journal_id"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

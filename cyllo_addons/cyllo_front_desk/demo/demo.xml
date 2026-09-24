@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Demo data for cyllo_front_desk module
+    Covers: Drinks, Stations, Visitors (Meeting & Enquiry), Enquiries, Emergency Alerts
+    Load order matters: drinks → stations → visitors → enquiries → emergency alerts → emergency logs
+-->
+<odoo>
+    <data>
+
+        <!-- ============================================================
+             DRINKS
+        ============================================================ -->
+        <record id="drink_coffee" model="frontdesk.drink">
+            <field name="name">Coffee</field>
+            <field name="sequence">1</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="drink_tea" model="frontdesk.drink">
+            <field name="name">Tea</field>
+            <field name="sequence">2</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="drink_water" model="frontdesk.drink">
+            <field name="name">Water</field>
+            <field name="sequence">3</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="drink_juice" model="frontdesk.drink">
+            <field name="name">Orange Juice</field>
+            <field name="sequence">4</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="drink_soda" model="frontdesk.drink">
+            <field name="name">Soda</field>
+            <field name="sequence">5</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- ============================================================
+             FRONT DESK STATIONS
+        ============================================================ -->
+        <record id="station_main_lobby" model="frontdesk.frontdesk">
+            <field name="name">Main Lobby</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="is_host">True</field>
+            <field name="is_drink">True</field>
+            <field name="notify_by_email">True</field>
+            <field name="notify_by_discuss">True</field>
+            <field name="notify_by_sms">False</field>
+            <field name="drink_selection_ids" eval="[(6, 0, [
+                ref('drink_coffee'),
+                ref('drink_tea'),
+                ref('drink_water'),
+                ref('drink_juice'),
+                ref('drink_soda'),
+            ])]"/>
+        </record>
+
+        <record id="station_north_wing" model="frontdesk.frontdesk">
+            <field name="name">North Wing Reception</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="is_host">True</field>
+            <field name="is_drink">True</field>
+            <field name="notify_by_email">True</field>
+            <field name="notify_by_discuss">False</field>
+            <field name="notify_by_sms">False</field>
+            <field name="drink_selection_ids" eval="[(6, 0, [
+                ref('drink_coffee'),
+                ref('drink_water'),
+                ref('drink_tea'),
+            ])]"/>
+        </record>
+
+        <record id="station_vip_lounge" model="frontdesk.frontdesk">
+            <field name="name">VIP Executive Lounge</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="is_host">True</field>
+            <field name="is_drink">True</field>
+            <field name="notify_by_email">True</field>
+            <field name="notify_by_discuss">True</field>
+            <field name="notify_by_sms">True</field>
+            <field name="drink_selection_ids" eval="[(6, 0, [
+                ref('drink_coffee'),
+                ref('drink_tea'),
+                ref('drink_juice'),
+                ref('drink_soda'),
+                ref('drink_water'),
+            ])]"/>
+        </record>
+
+        <record id="station_warehouse" model="frontdesk.frontdesk">
+            <field name="name">Warehouse Gate</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="is_host">False</field>
+            <field name="is_drink">False</field>
+            <field name="notify_by_email">True</field>
+            <field name="notify_by_discuss">False</field>
+            <field name="notify_by_sms">False</field>
+        </record>
+
+        <!-- ============================================================
+             VISITORS — Meeting type (state: draft)
+        ============================================================ -->
+        <record id="visitor_meeting_001" model="frontdesk.visitor">
+            <field name="visitor_name">Alice Johnson</field>
+            <field name="visitor_type">meeting</field>
+            <field name="phone">+1-555-0101</field>
+            <field name="email">alice.johnson@example.com</field>
+            <field name="company">Acme Corp</field>
+            <field name="station_id" ref="station_main_lobby"/>
+            <field name="purpose">Annual Contract Review</field>
+            <field name="expected_arrival" eval="(DateTime.now() + timedelta(days=1)).replace(hour=10, minute=0, second=0, microsecond=0)"/>
+            <field name="state">draft</field>
+        </record>
+
+        <record id="visitor_meeting_002" model="frontdesk.visitor">
+            <field name="visitor_name">Robert Chen</field>
+            <field name="visitor_type">meeting</field>
+            <field name="phone">+1-555-0202</field>
+            <field name="email">robert.chen@techstart.io</field>
+            <field name="company">TechStart Inc.</field>
+            <field name="station_id" ref="station_vip_lounge"/>
+            <field name="purpose">Partnership Discussion</field>
+            <field name="expected_arrival" eval="(DateTime.now() + timedelta(days=2)).replace(hour=14, minute=30, second=0, microsecond=0)"/>
+            <field name="drink_id" ref="drink_coffee"/>
+            <field name="state">draft</field>
+        </record>
+
+        <!-- ============================================================
+             VISITORS — Enquiry type (state: planned)
+        ============================================================ -->
+        <record id="visitor_enquiry_001" model="frontdesk.visitor">
+            <field name="visitor_name">Maria Garcia</field>
+            <field name="visitor_type">enquiry</field>
+            <field name="phone">+1-555-0303</field>
+            <field name="email">maria.garcia@mail.com</field>
+            <field name="company">Garcia Solutions</field>
+            <field name="station_id" ref="station_main_lobby"/>
+            <field name="state">planned</field>
+        </record>
+
+        <record id="visitor_enquiry_002" model="frontdesk.visitor">
+            <field name="visitor_name">James Patel</field>
+            <field name="visitor_type">enquiry</field>
+            <field name="phone">+1-555-0404</field>
+            <field name="email">james.patel@retailplus.com</field>
+            <field name="company">RetailPlus Ltd.</field>
+            <field name="station_id" ref="station_north_wing"/>
+            <field name="state">planned</field>
+        </record>
+
+        <!-- ============================================================
+             VISITORS — Checked In
+        ============================================================ -->
+        <record id="visitor_checked_in_001" model="frontdesk.visitor">
+            <field name="visitor_name">Sophie Williams</field>
+            <field name="visitor_type">meeting</field>
+            <field name="phone">+1-555-0505</field>
+            <field name="email">sophie.w@globalventures.com</field>
+            <field name="company">Global Ventures</field>
+            <field name="station_id" ref="station_main_lobby"/>
+            <field name="purpose">Product Demo</field>
+            <field name="expected_arrival" eval="DateTime.now().replace(hour=9, minute=0, second=0, microsecond=0)"/>
+            <field name="check_in" eval="DateTime.now() - timedelta(hours=1)"/>
+            <field name="drink_id" ref="drink_tea"/>
+            <field name="drink_served">True</field>
+            <field name="state">checked_in</field>
+        </record>
+
+        <record id="visitor_checked_in_002" model="frontdesk.visitor">
+            <field name="visitor_name">David Kim</field>
+            <field name="visitor_type">meeting</field>
+            <field name="phone">+1-555-0606</field>
+            <field name="email">d.kim@nexustech.com</field>
+            <field name="company">Nexus Technologies</field>
+            <field name="station_id" ref="station_vip_lounge"/>
+            <field name="purpose">Executive Briefing</field>
+            <field name="expected_arrival" eval="DateTime.now().replace(hour=11, minute=0, second=0, microsecond=0)"/>
+            <field name="check_in" eval="DateTime.now() - timedelta(minutes=30)"/>
+            <field name="drink_id" ref="drink_juice"/>
+            <field name="drink_served">False</field>
+            <field name="state">checked_in</field>
+        </record>
+
+        <!-- ============================================================
+             VISITORS — Checked Out
+        ============================================================ -->
+        <record id="visitor_checked_out_001" model="frontdesk.visitor">
+            <field name="visitor_name">Laura Martinez</field>
+            <field name="visitor_type">meeting</field>
+            <field name="phone">+1-555-0707</field>
+            <field name="email">laura.m@brightideas.net</field>
+            <field name="company">Bright Ideas Co.</field>
+            <field name="station_id" ref="station_main_lobby"/>
+            <field name="purpose">Budget Presentation</field>
+            <field name="expected_arrival" eval="DateTime.now().replace(hour=8, minute=0, second=0, microsecond=0) - timedelta(days=1)"/>
+            <field name="check_in" eval="DateTime.now() - timedelta(hours=5)"/>
+            <field name="check_out" eval="DateTime.now() - timedelta(hours=3)"/>
+            <field name="drink_id" ref="drink_water"/>
+            <field name="drink_served">True</field>
+            <field name="state">checked_out</field>
+        </record>
+
+        <record id="visitor_checked_out_002" model="frontdesk.visitor">
+            <field name="visitor_name">Samuel Brown</field>
+            <field name="visitor_type">enquiry</field>
+            <field name="phone">+1-555-0808</field>
+            <field name="email">s.brown@quickship.com</field>
+            <field name="company">QuickShip Logistics</field>
+            <field name="station_id" ref="station_warehouse"/>
+            <field name="check_in" eval="DateTime.now() - timedelta(hours=4)"/>
+            <field name="check_out" eval="DateTime.now() - timedelta(hours=2)"/>
+            <field name="state">checked_out</field>
+        </record>
+
+        <!-- ============================================================
+             VISITORS — Cancelled
+        ============================================================ -->
+        <record id="visitor_cancelled_001" model="frontdesk.visitor">
+            <field name="visitor_name">Emily Thompson</field>
+            <field name="visitor_type">meeting</field>
+            <field name="phone">+1-555-0909</field>
+            <field name="email">emily.t@alphasolutions.org</field>
+            <field name="company">Alpha Solutions</field>
+            <field name="station_id" ref="station_north_wing"/>
+            <field name="purpose">Initial Consultation</field>
+            <field name="expected_arrival" eval="(DateTime.now() + timedelta(days=1)).replace(hour=15, minute=0, second=0, microsecond=0)"/>
+            <field name="state">cancelled</field>
+        </record>
+
+        <!-- ============================================================
+             ENQUIRIES
+        ============================================================ -->
+        <record id="enquiry_general_001" model="frontdesk.enquiry">
+            <field name="visitor_name">Carlos Mendez</field>
+            <field name="phone">+1-555-1001</field>
+            <field name="email">c.mendez@personal.com</field>
+            <field name="company">Mendez Trading</field>
+            <field name="station_id" ref="station_main_lobby"/>
+            <field name="enquiry_type">general</field>
+            <field name="subject">Office Hours and Location Information</field>
+            <field name="description">Visitor requested information about working hours, office location, and departments available for walk-ins.</field>
+            <field name="state">new</field>
+            <field name="priority">0</field>
+        </record>
+
+        <record id="enquiry_product_001" model="frontdesk.enquiry">
+            <field name="visitor_name">Nina Ivanova</field>
+            <field name="phone">+1-555-1002</field>
+            <field name="email">nina.ivanova@eurotech.eu</field>
+            <field name="company">EuroTech GmbH</field>
+            <field name="station_id" ref="station_vip_lounge"/>
+            <field name="enquiry_type">product</field>
+            <field name="subject">Enterprise Software Licensing Enquiry</field>
+            <field name="description">Visitor is interested in enterprise software licensing options and wants a product brochure and pricing guide.</field>
+            <field name="state">in_progress</field>
+            <field name="priority">1</field>
+        </record>
+
+        <record id="enquiry_pricing_001" model="frontdesk.enquiry">
+            <field name="visitor_name">Aaron Brooks</field>
+            <field name="phone">+1-555-1003</field>
+            <field name="email">a.brooks@startupxyz.com</field>
+            <field name="company">StartupXYZ</field>
+            <field name="station_id" ref="station_main_lobby"/>
+            <field name="enquiry_type">pricing</field>
+            <field name="subject">Custom Development Quotation Request</field>
+            <field name="description">Small startup seeking quotation for custom ERP module development. Budget is under $50,000.</field>
+            <field name="state">new</field>
+            <field name="priority">1</field>
+        </record>
+
+        <record id="enquiry_support_001" model="frontdesk.enquiry">
+            <field name="visitor_name">Priya Sharma</field>
+            <field name="phone">+1-555-1004</field>
+            <field name="email">priya.sharma@clientco.in</field>
+            <field name="company">ClientCo India</field>
+            <field name="station_id" ref="station_north_wing"/>
+            <field name="enquiry_type">support</field>
+            <field name="subject">Billing Discrepancy Complaint</field>
+            <field name="description">Client received an incorrect invoice and is seeking clarification and a corrected bill from the finance department.</field>
+            <field name="state">in_progress</field>
+            <field name="priority">2</field>
+        </record>
+
+        <record id="enquiry_career_001" model="frontdesk.enquiry">
+            <field name="visitor_name">Lucas Hoffman</field>
+            <field name="phone">+1-555-1005</field>
+            <field name="email">lucas.h@jobseeker.com</field>
+            <field name="station_id" ref="station_main_lobby"/>
+            <field name="enquiry_type">career</field>
+            <field name="subject">Walk-In Application for Software Engineer Role</field>
+            <field name="description">Applicant with 5 years of Python/Odoo experience walked in to submit a CV and enquire about open engineering positions.</field>
+            <field name="state">closed</field>
+            <field name="priority">0</field>
+        </record>
+
+        <record id="enquiry_lost_001" model="frontdesk.enquiry">
+            <field name="visitor_name">Dana West</field>
+            <field name="phone">+1-555-1006</field>
+            <field name="email">dana.west@missmatch.com</field>
+            <field name="company">MissMatch Ltd.</field>
+            <field name="station_id" ref="station_warehouse"/>
+            <field name="enquiry_type">other</field>
+            <field name="subject">Incorrect Delivery – Wrong Address</field>
+            <field name="description">Visitor arrived with a shipment addressed to the wrong company. Redirected to correct facility.</field>
+            <field name="state">lost</field>
+            <field name="priority">0</field>
+        </record>
+
+        <!-- ============================================================
+             EMERGENCY ALERTS
+        ============================================================ -->
+        <record id="emergency_alert_fire" model="frontdesk.emergency.alert">
+            <field name="name">Fire Alarm</field>
+            <field name="station_ids" eval="[(6, 0, [
+                ref('station_main_lobby'),
+                ref('station_north_wing'),
+                ref('station_vip_lounge'),
+                ref('station_warehouse'),
+            ])]"/>
+            <field name="default_message">FIRE ALARM ACTIVATED! Evacuate immediately via nearest emergency exit. Do not use elevators. Assemble at the designated muster point.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="emergency_alert_medical" model="frontdesk.emergency.alert">
+            <field name="name">Medical Emergency</field>
+            <field name="station_ids" eval="[(6, 0, [
+                ref('station_main_lobby'),
+                ref('station_north_wing'),
+                ref('station_vip_lounge'),
+            ])]"/>
+            <field name="default_message">MEDICAL EMERGENCY at reception! Please send first-aid personnel immediately. Call emergency services if needed.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="emergency_alert_security" model="frontdesk.emergency.alert">
+            <field name="name">Security Threat</field>
+            <field name="station_ids" eval="[(6, 0, [
+                ref('station_main_lobby'),
+                ref('station_vip_lounge'),
+            ])]"/>
+            <field name="default_message">SECURITY ALERT! Suspicious person reported at the front desk. Security team please respond immediately.</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="emergency_alert_lockdown" model="frontdesk.emergency.alert">
+            <field name="name">Building Lockdown</field>
+            <field name="station_ids" eval="[(6, 0, [
+                ref('station_main_lobby'),
+                ref('station_north_wing'),
+                ref('station_vip_lounge'),
+                ref('station_warehouse'),
+            ])]"/>
+            <field name="default_message">BUILDING LOCKDOWN IN EFFECT! All staff and visitors must remain in their current location. Await further instructions from security.</field>
+            <field name="active">True</field>
+        </record>
+
+    </data>
+</odoo>

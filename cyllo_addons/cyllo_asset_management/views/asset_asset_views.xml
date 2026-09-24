@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Tree view of the asset model-->
+    <record id="view_asset_asset_tree" model="ir.ui.view">
+        <field name="name">view.asset.asset.tree</field>
+        <field name="model">asset.asset</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="asset_item_id"/>
+                <field name="brand_id"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+    <!--    search view of the asset model-->
+    <record id="view_asset_asset_search" model="ir.ui.view">
+        <field name="name">view.asset.asset.search</field>
+        <field name="model">asset.asset</field>
+        <field name="arch" type="xml">
+            <search string="Asset">
+                <field name="name"/>
+                <field name="asset_item_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="draft" string="Draft" domain="[('status', '=', 'draft')]"/>
+                <filter name="reserved" string="Reserved" domain="[('status', '=', 'reserved')]"/>
+                <filter name="leased" string="Leased" domain="[('status', '=', 'leased')]"/>
+                <filter name="damaged" string="Damaged" domain="[('status', '=', 'damaged')]"/>
+                <filter name="lost" string="Lost" domain="[('status', '=', 'lost')]"/>
+                <filter name="repair" string="Repair" domain="[('status', '=', 'repair')]"/>
+                <filter name="maintenance" string="Maintenance" domain="[('status', '=', 'maintenance')]"/>
+                <filter name="disposed" string="Disposed" domain="[('status', '=', 'disposed')]"/>
+                <filter name="sell" string="Sold" domain="[('status', '=', 'sell')]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Asset Item" name="asset_item" domain="[]" context="{'group_by':'asset_item_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--    Form view of the asset model-->
+    <record id="view_asset_asset_form" model="ir.ui.view">
+        <field name="name">view.asset.asset.form</field>
+        <field name="model">asset.asset</field>
+        <field name="arch" type="xml">
+            <form string="Asset">
+                <header>
+                    <field name="status" class="float-end fs-6" widget="badge"
+                           decoration-success="status in ('draft','running')"
+                           decoration-warning="status == 'leased'"
+                           decoration-info="status == 'rented'"
+                           decoration-danger="status in ('sell','disposed','cancel')"/>
+                    <button type="object" name="action_confirm_deprecation" string="Confirm" class="oe_highlight"
+                            invisible="is_confirm or status in ('cancel', 'sell', 'disposed', 'lost', 'running')"/>
+                    <button type="object" name="action_compute_depreciation" string="Depreciate" class="oe_highlight"
+                            invisible="is_confirm or is_modify or status in ('cancel', 'sell', 'disposed', 'lost')"/>
+                    <button type="object" name="action_modify_asset" string="Modify Asset" class="oe_highlight"
+                            invisible="status in ('cancel', 'sell', 'disposed', 'lost', 'draft') or not is_confirm"/>
+                    <button type="object" name="action_reset_to_draft" string="Reset to Draft"
+                            class="oe_highlight" invisible="status not in ('cancel','sell', 'disposed')"/>
+                    <button type="object" name="action_cancel_asset" string="Cancel" class="btn-secondary"
+                            invisible="status != 'draft'"/>
+                    <button type="object" name="action_sell_dispose_assets" string="Sell/Dispose" class="btn-secondary"
+                            invisible="status in ('cancel','sell', 'disposed','draft')"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_modified_asset" type="object"
+                            class="oe_stat_button" icon="ri-align-justify" invisible="modified_count == 0">
+                            <div class="o_stat_info">
+                                <field name="modified_count" class="o_stat_value"/>
+                                <span class="o_stat_text">Modified Assets</span>
+                            </div>
+                        </button>
+                        <button name="action_view_asset_booking" type="object"
+                            class="oe_stat_button" icon="fa-book">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Bookings</span>
+                            </div>
+                        </button>
+                        <button name="action_view_journal_entries" type="object"
+                            class="oe_stat_button" icon="fa-align-justify" invisible="entry_count == 0">
+                            <div class="o_stat_info">
+                                <field name="entry_count" class="o_stat_value"/>
+                                <span class="o_stat_text">Journal Entries</span>
+                            </div>
+                        </button>
+                        <button name="action_view_maintenance_repairs" type="object"
+                            class="oe_stat_button" icon="fa-wrench" invisible="maintenance_count == 0">
+                            <div class="o_stat_info">
+                                <field name="maintenance_count" class="o_stat_value"/>
+                                <span class="o_stat_text">Maintenance/Repair</span>
+                            </div>
+                        </button>
+                        <button name="action_view_reservation" type="object"
+                            class="oe_stat_button" icon="fa-calendar" invisible="is_reserve != True">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Reservation</span>
+                            </div>
+                        </button>
+                        <button name="action_view_assign" type="object"
+                            class="oe_stat_button" icon="fa-user" invisible="is_assign != True">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Assign</span>
+                            </div>
+                        </button>
+                        <button name="action_view_lease" type="object"
+                            class="oe_stat_button" icon="fa-file-text-o" invisible="not asset_lease_count">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Lease</span>
+                            </div>
+                        </button>
+                        <button name="action_view_rental" type="object"
+                            class="oe_stat_button" icon="fa-dollar" invisible="is_rental != True">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Rental</span>
+                            </div>
+                        </button>
+                    </div>
+                    <field name="maintenance_state" class="float-end fs-6" widget="badge"
+                           invisible="not maintenance_state"
+                           decoration-warning="maintenance_state == 'repair'"
+                           decoration-info="maintenance_state == 'maintenance'"/>
+                    <div class="oe_title">
+                        <label for="name" name="asset_name" string="Asset Name"/>
+                        <h1>
+                            <field name="name" readonly="is_depreciate" placeholder="e.g. Laptop Book"/>
+                        </h1>
+                    </div>
+                    <div class="mb-3">
+                        <span name="is_lease_asset">
+                            <field name="is_lease_asset" string="Is Lease"/>
+                            <label for="is_lease_asset" name="is_lease_asset" string="Is Lease"/>
+                        </span>
+                        <span name="is_rental_asset">
+                            <field name="is_rental_asset" string="Is Rental"/>
+                            <label for="is_rental_asset" name="is_rental_asset" string="Is Rental"/>
+                        </span>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="asset_item_id" readonly="status == 'running'" options="{'no_create': True}"/>
+                            <field name="brand_id" readonly="status == 'running'"/>
+                            <field name="vendor_id"/>
+                        </group>
+                        <group>
+                            <field name="serial_no" readonly="is_confirm"/>
+                            <field name="date" readonly="is_confirm"/>
+                            <label for="buffer_duration" name="buffer_duration" string="Cool down duation"/>
+                            <div class="o_row">
+                                <field name="buffer_duration" readonly="is_confirm"
+                                       style="width:25% !important;"/>
+                                <field name="buffer_period" nolabel="1" readonly="is_confirm"/>
+                            </div>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="is_confirm" invisible="1"/>
+                            <field name="is_modify" invisible="1"/>
+                            <field name="is_reserve" invisible="1"/>
+                            <field name="is_lease" invisible="1"/>
+                            <field name="is_rental" invisible="1"/>
+                            <field name="is_assign" invisible="1"/>
+                            <field name="is_sell" invisible="1"/>
+                            <field name="is_repair" invisible="1"/>
+                            <field name="is_lost" invisible="1"/>
+                            <field name="is_maintenance" invisible="1"/>
+                            <field name="is_dispose" invisible="1"/>
+                            <field name="is_depreciate" invisible="1"/>
+                            <field name="depreciated_entry_ids" invisible="1"/>
+                            <field name="is_entry" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="asset_depreciation" string="Depreciation">
+                            <group>
+                                <group string="Depreciation">
+                                    <field name="depreciation_date" readonly="is_confirm"/>
+                                    <label for="method_duration" name="method_duration" string="Duration"/>
+                                    <div class="o_row">
+                                        <field name="method_duration" readonly="is_confirm"
+                                               style="width:25% !important;"/>
+                                        <field name="duration_period" nolabel="1" readonly="is_confirm"/>
+                                    </div>
+                                    <field name="depreciation_method" readonly="is_confirm"/>
+                                    <field name="original_value" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" readonly="is_confirm"/>
+                                    <field name="salvage_value" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" readonly="is_confirm"/>
+                                    <field name="modify_value" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" readonly='1'
+                                           invisible="modify_value == 0"/>
+                                    <field name="is_auto_calculate" readonly="is_confirm"/>
+                                    <field name="depreciating_factor" widget="percentage"
+                                           invisible="depreciation_method == 'straight_line'"
+                                           readonly="is_auto_calculate or is_confirm"/>
+                                    <field name="computation_method" readonly="is_confirm"/>
+                                    <field name="prorata_date" required="computation_method != 'no_prorata'"
+                                           invisible="computation_method == 'no_prorata'" readonly="is_confirm"/>
+                                </group>
+                                <group string="Accounting">
+                                    <field name="invoice_id" invisible="not invoice_id"
+                                           readonly="1"/>
+                                    <field name="asset_journal_id" readonly="is_confirm"/>
+                                    <field name="fixed_asset_account_id" readonly="is_confirm"/>
+                                    <field name="asset_depreciation_account_id" readonly="is_confirm"/>
+                                    <field name="asset_expense_account_id" readonly="is_confirm"/>
+                                    <field name="asset_loss_account_id" readonly="is_confirm"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="asset_warranty_insurance" string="Warranty and Insurance">
+                            <group>
+                                <group string="Warranty">
+                                    <field name="under_warranty"/>
+                                    <label for="warranty_period" name="warranty_period" string="Period"
+                                           invisible="not under_warranty"/>
+                                    <div class="o_row" invisible="not under_warranty">
+                                        <field name="warranty_period"
+                                               style="width:25% !important;" required="under_warranty"/>
+                                        <field name="warranty_period_type" nolabel="1"
+                                               required="under_warranty"/>
+                                    </div>
+                                    <field name="warranty_end_date" invisible="not under_warranty"/>
+                                    <field name="warranty_attachment_ids" widget="many2many_binary"
+                                           invisible="not under_warranty"/>
+                                </group>
+                                <group string="Insurance">
+                                    <field name="under_insurance"/>
+                                    <field name="reimburse_after_invoice" invisible="not under_insurance"/>
+                                    <field name="insurance_name_id" invisible="not under_insurance"
+                                           options="{'no_create': True, 'no_create_edit': True}"
+                                           required="under_insurance"/>
+                                    <field name="insurance_number" invisible="not under_insurance"
+                                           required="under_insurance"/>
+                                    <field name="insurance_start_date" widget="daterange"
+                                           options="{'end_date_field': 'insurance_end_date'}"
+                                           required="under_insurance" invisible="not under_insurance"/>
+                                    <field name="insurance_end_date" invisible="1"/>
+                                    <field name="insurance_attachment_ids" widget="many2many_binary"
+                                           invisible="not under_insurance"/>
+                                </group>
+                                <group string="Maintenance">
+                                    <field name="automatic_maintenance"/>
+                                    <field name="last_maintenance_date"/>
+                                    <field name="next_maintenance_date"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="depreciation_lines" string="Depreciation Line"
+                              invisible="is_depreciate != True">
+                            <field name="depreciation_line_ids">
+                                <tree editable="bottom" create="0" delete="0" order="date asc">
+                                    <field name="depreciation_id" column_invisible="1" readonly="parent.status != 'draft'"/>
+                                    <field name="date" readonly="parent.status != 'draft'"/>
+                                    <field name="currency_id" column_invisible="1" readonly="parent.status != 'draft'"/>
+                                    <field name="depreciation_expense" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" readonly="parent.status != 'draft'"/>
+                                    <field name="accumulative_depreciation" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" readonly="parent.status != 'draft'"/>
+                                    <field name="salvage_value" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" readonly="parent.status != 'draft'"/>
+                                    <field name="journal_reference" widget="many2one_button"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="rental_value" string="Rental Value"
+                              invisible="is_rental_asset != True">
+                            <group string="Rent Amount">
+                                <field name="currency_id" invisible="1"/>
+                                <label for="day_amount"/>
+                                <div class="o_row">
+                                    <field name="day_amount" class="o_hr_narrow_field" nolabel="1"
+                                           options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                    <span class="ms-3">/ day</span>
+                                </div>
+                                <label for="week_amount"/>
+                                <div class="o_row">
+                                    <field name="week_amount" class="o_hr_narrow_field" nolabel="1"
+                                           options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                    <span class="ms-3">/ day</span>
+                                </div>
+                                <label for="month_amount"/>
+                                <div class="o_row">
+                                    <field name="month_amount" class="o_hr_narrow_field" nolabel="1"
+                                           options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                    <span class="ms-3">/ day</span>
+                                </div>
+                                <label for="year_amount"/>
+                                <div class="o_row">
+                                    <field name="year_amount" class="o_hr_narrow_field" nolabel="1"
+                                           options="{'currency_field': 'currency_id'}" widget="monetary"/>
+                                    <span class="ms-3">/ day</span>
+                                </div>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--   Action for the asset model-->
+    <record id="action_view_assets" model="ir.actions.act_window">
+        <field name="name">Assets</field>
+        <field name="res_model">asset.asset</field>
+        <field name="domain">[('parent_id', '=', False)]</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!--    MenuItem of the asset-->
+    <menuitem id="menu_assets_categ" name="Assets"
+              sequence="10"
+              groups="cyllo_asset_management.group_cyllo_asset_users"
+              web_icon="cyllo_asset_management,static/description/asset_dark.svg"/>
+
+    <!--   Submenu of the asset model-->
+    <menuitem id="menu_assets" name="Assets"
+              parent="cyllo_asset_management.menu_assets_categ"
+              action="action_view_assets"
+              sequence="1"/>
+</odoo>

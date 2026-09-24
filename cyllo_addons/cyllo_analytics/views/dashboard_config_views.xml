@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dashboard_config_tile" model="ir.ui.view">
+        <field name="name">view.dashboard.config.tile</field>
+        <field name="model">dashboard.config</field>
+        <field name="arch" type="xml">
+            <tile string="Cyllo Analytic Dashboard">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="group_ids"/>
+                <field name="user_ids"/>
+                <field name="limit"/>
+                <field name="theme_id"/>
+            </tile>
+        </field>
+    </record>
+
+    <record id="view_dashboard_config_form" model="ir.ui.view">
+        <field name="name">view.dashboard.config.form</field>
+        <field name="model">dashboard.config</field>
+        <field name="arch" type="xml">
+            <form string="Analytic Dashboard">
+                <header>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Dashboard Name..." readonly="context.get('hide_access_rights')"/>
+                        </h1>
+                    </div>
+                    <notebook>
+                        <page name="sheets" string="Sheets" invisible="context.get('hide_access_rights')">
+                            <field name="sheet_ids"/>
+                        </page>
+                        <page name="access" string="Access Rights" invisible="context.get('hide_access_rights')">
+                            <group>
+                                <field name="user_ids" widget="many2many_tags"/>
+                                <field name="group_ids" widget="many2many_tags"/>
+                            </group>
+                        </page>
+                        <page name="sharing" string="Public Sharing">
+                            <div class="mb-3">
+                                <button name="generate_share_link" string="Generate New Sharing Link" 
+                                        type="object" class="btn-primary" icon="fa-plus"/>
+                            </div>
+                            <separator string="Active Sharing Links"/>
+                            <field name="share_link_ids" nolabel="1" colspan="2"
+                                   domain="['&amp;', ('is_active', '=', True), '|', ('expiry_date', '=', False), ('expiry_date', '&gt;', context_today().strftime('%Y-%m-%d %H:%M:%S'))]"
+                                   context="{'default_dashboard_id': active_id}">
+                                <tree editable="top" create="0">
+                                    <field name="access_url" widget="CopyClipboardChar" string="Share URL" readonly="1"/>
+                                    <field name="expiry_date" string="Expiries on"/>
+                                    <field name="is_active" widget="boolean_toggle" string="Status"/>
+                                    <button name="revoke" string="Revoke" type="object" icon="fa-times" title="Revoke Link" class="text-danger" invisible="not is_active"/>
+                                </tree>
+                            </field>
+                            <div class="oe_grey">
+                                Note: Revoked or expired links will not be accessible to external users.
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for dashboard templates -->
+    <record id="action_view_templates" model="ir.actions.act_window">
+        <field name="name">Analytic Dashboard</field>
+        <field name="res_model">dashboard.config</field>
+        <field name="view_mode">tile,form</field>
+    </record>
+
+    <!-- Root menu -->
+    <menuitem groups="group_cyllo_analytics_user"
+              id="menu_cyllo_analytics_root"
+              web_icon="cyllo_analytics,static/description/cyllo_analytics.svg"
+              name="Cyllo Analytics"/>
+
+    <!-- Configuration menu -->
+    <menuitem id="menu_configuration"
+              name="Configuration"
+              sequence="100"
+              parent="cyllo_analytics.menu_cyllo_analytics_root"
+              groups="cyllo_analytics.group_cyllo_analytics_admin"/>
+
+    <!-- Templates submenu -->
+    <menuitem id="menu_templates"
+              name="Templates"
+              parent="menu_cyllo_analytics_root"
+              action="action_view_templates"/>
+</odoo>

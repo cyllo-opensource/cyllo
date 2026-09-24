@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_manufacturing_mps.MPSClientAction">
+        <div class="o_action d-flex flex-column h-100">
+            <ControlPanel display="controlPanelDisplay">
+                <t t-set-slot="control-panel-create-button">
+                    <button class="btn btn-primary" t-on-click="onClickOrder">
+                        Order
+                    </button>
+                </t>
+                <t t-set-slot="control-panel-always-buttons">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-secondary text-nowrap" t-on-click="onClickAddProduct">
+                            Add a Product
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <t t-esc="state.period"/>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('day')">Day</a></li>
+                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('week')">Week</a></li>
+                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('month')">Month</a></li>
+                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('year')">Year</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </t>
+                <t t-set-slot="layout-actions">
+                    <div class="d-flex w-100">
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Search products..."
+                               t-model="state.search"/>
+                    </div>
+                </t>
+            </ControlPanel>
+
+            <div class="o_content o_mps_content flex-grow-1 overflow-auto bg-view">
+                <div class="table-responsive h-100">
+                    <table class="table table-sm table-bordered mps-table mb-0" style="min-width: 1200px;">
+
+                        <thead class="sticky-top shadow-sm" style="z-index: 2; background-color: #f8f9fa;">
+                            <tr>
+                                <th class="align-middle text-uppercase text-muted ps-3 text-nowrap"
+                                    style="min-width: 350px; position: sticky; left: 0; background: #f8f9fa; z-index: 3;">
+                                    Product
+                                </th>
+                                <t t-foreach="state.columns" t-as="col" t-key="col_index">
+                                    <th class="text-center align-middle py-2">
+                                        <t t-esc="col.label"/>
+                                    </th>
+                                </t>
+                            </tr>
+                        </thead>
+
+                        <t t-foreach="state.products.filter(p => p.name.toLowerCase().includes((state.search || '').toLowerCase()))"
+                           t-as="product" t-key="product.id">
+
+                            <tbody style="border-top: 3px solid #dee2e6;">
+                                <tr class="table-light">
+                                    <td class="fw-bold align-middle ps-3 text-nowrap"
+                                        style="min-width: 350px; position: sticky; left: 0; background: #f8f9fa; z-index: 1;">
+                                        <div class="d-flex justify-content-between align-items-center flex-nowrap">
+                                            <span class="fs-5 text-dark d-flex align-items-center flex-nowrap">
+                                                <button class="btn btn-sm btn-outline-secondary border-0 shadow-none me-2 p-1"
+                                                        t-on-click="() => this.toggleProduct(product.id)"
+                                                        title="Toggle Details">
+                                                    <i t-att-class="state.expandedProducts[product.id] ? 'fa fa-minus' : 'fa fa-plus'"/>
+                                                </button>
+                                                <t t-esc="product.name"/>
+                                                <i class="fa fa-external-link ms-3 fs-6 text-primary"
+                                                   style="cursor: pointer;"
+                                                   t-on-click="() => this.openAddProductForm(product.id)"/>
+                                            </span>
+                                            <div class="d-flex align-items-center">
+                                                <button class="btn btn-sm btn-primary py-0 px-2 ms-3"
+                                                        t-if="product.replenishment[state.columns[0]?.label] > 0"
+                                                        t-on-click="() => this.onClickSingleOrder(product.id)"
+                                                        title="Order this product">
+                                                    Order
+                                                </button>
+                                                <button class="btn btn-sm btn-link text-danger p-0 ms-3"
+                                                        t-on-click="() => this.removeProduct(product.id)"
+                                                        title="Remove from Schedule">
+                                                    <i class="fa fa-times fa-lg"/>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <t t-foreach="state.columns" t-as="col" t-key="col_index">
+                                        <td class="p-0 align-middle bg-light">
+                                            <input type="number"
+                                                   class="form-control form-control-sm text-center border-0 bg-transparent text-muted fw-bold"
+                                                   t-att-value="product.startingStock[col.label] || 0"
+                                                   readonly="readonly"
+                                                   tabindex="-1"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>
+
+                            <tbody t-if="state.expandedProducts[product.id]">
+                                <tr>
+                                    <td class="text-end fw-bold align-middle pe-3 border-end"
+                                        style="position: sticky; left: 0; background: white; z-index: 1;">
+                                        Forecast Demand
+                                    </td>
+                                    <t t-foreach="state.columns" t-as="col" t-key="col_index">
+                                        <td class="p-0 align-middle">
+                                            <input type="number"
+                                                   class="form-control form-control-sm text-center border-0 shadow-none"
+                                                   t-att-value="product.demand[col.label]"
+                                                   t-on-change="(ev) => this.updateValue(product, 'demand', col.label, ev)"/>
+                                        </td>
+                                    </t>
+                                </tr>
+
+                                <tr t-if="product.has_indirect_demand">
+                                    <td class="text-end text-muted align-middle pe-3 border-end"
+                                        style="position: sticky; left: 0; background: white; z-index: 1;">
+                                        Indirect Demand
+                                    </td>
+                                    <t t-foreach="state.columns" t-as="col" t-key="col_index">
+                                        <td class="p-0 align-middle bg-light">
+                                            <input type="number"
+                                                   class="form-control form-control-sm text-center border-0 bg-transparent text-muted"
+                                                   t-att-value="product.indirect_demand[col.label] || 0"
+                                                   readonly="readonly"
+                                                   tabindex="-1"/>
+                                        </td>
+                                    </t>
+                                </tr>
+
+                                <tr>
+                                    <td class="text-end fw-bold align-middle pe-3 border-end"
+                                        style="position: sticky; left: 0; background: white; z-index: 1;">
+                                        Replenishment
+                                    </td>
+                                    <t t-foreach="state.columns" t-as="col" t-key="col_index">
+                                        <td class="p-0 align-middle"
+                                            t-att-style="product.manual_replenishment[col.label] ? 'background-color: #fff3cd;' : 'background-color: #f4fbf7;'">
+                                            <input type="number"
+                                                   class="form-control form-control-sm text-center border-0 bg-transparent fw-bold"
+                                                   t-att-class="product.manual_replenishment[col.label] ? 'text-dark' : 'text-success'"
+                                                   t-att-title="product.manual_replenishment[col.label] ? 'Manually Locked - Delete number to unlock' : 'Auto-calculated'"
+                                                   t-att-value="product.replenishment[col.label]"
+                                                   t-on-change="(ev) => this.updateValue(product, 'replenishment', col.label, ev)"/>
+                                        </td>
+                                    </t>
+                                </tr>
+
+                                <tr class="table-secondary">
+                                    <td class="text-end fw-bold align-middle pe-3 border-end"
+                                        style="position: sticky; left: 0; background: #e9ecef; z-index: 1;">
+                                        Forecasted Stock
+                                    </td>
+                                    <t t-foreach="state.columns" t-as="col" t-key="col_index">
+                                        <td class="text-center align-middle fw-bold py-2"
+                                            t-att-class="product.stock[col.label] &lt; 0 ? 'text-danger' : 'text-dark'">
+                                            <t t-esc="product.stock[col.label]"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>
+                        </t>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

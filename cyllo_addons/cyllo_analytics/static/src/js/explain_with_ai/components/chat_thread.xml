@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="ChatThread">
+        <div t-ref="root" class="mb-4 d-flex ai-explain-group" t-attf-class="justify-content-{{ chat.role == 'assistant' ? 'start' : 'end'}}">
+            <div t-if="chat.role == 'assistant'" class="ai-chat-avatar">
+                <span class="ri-bard-line"/>
+            </div>
+            <div class="chat-text-container" t-attf-class="{{ chat.role == 'user'? 'max-width-restrict' : 'w-89p'}}">
+                <div class="explain-text-container">
+                    <div t-if="!chat.content" class="loading-chat">
+                        <span class="loading__dot"/>
+                        <span class="loading__dot"/>
+                        <span class="loading__dot"/>
+                    </div>
+                    <p class="text" t-out="parseExplain(state.explain)"/>
+                </div>
+                <div t-if="chat.role == 'assistant' and chat.content" class="explain-footer ai-chat-tools ai-tools-container"
+                     style="margin-left: auto;position:relative;"
+                     t-ref="message">
+                    <div class="tools-chat-ai-explain">
+                        <div id="copy_text_message" t-if="state.copied">
+                            <div>copied!!!</div>
+                        </div>
+                            <button class="d-inline btn btn-secondary ri-file-copy-line m-1" t-on-click="copyToClip"/>
+                    </div>
+                </div>
+            </div>
+            <div t-if="chat.role == 'user'" class="ai-chat-avatar">
+                <span  class="ri-user-line"/>
+            </div>
+        </div>
+    </t>
+</templates>

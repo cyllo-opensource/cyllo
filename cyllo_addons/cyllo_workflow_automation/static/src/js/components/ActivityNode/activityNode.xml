@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="ActivityNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <!-- Template for the ActivityNode configuration, extending the base ConfigurationBase and
+        adding fields for Label, Record Selection, Activity Type, Deadline, Assignee, and Summary -->
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="cy-work-auto-form d-flex cy-flex-column">
+                <div class="mb-3">
+                    <label for="label" class="form-label  cy-modal-form_label mb-3">
+                        Label
+                    </label>
+                    <input
+                            type="text"
+                            class="o_input"
+                            autocomplete="off"
+                            placeholder="Label"
+                            t-on-focusout="(ev) => this.setLabel(ev.target.value)"
+                            t-att-value="getLabel"
+                    />
+                </div>
+                <div class="row mb-3 align-items-end">
+                    <div class="col-md-6">
+                        <label for="record-select" class="form-label">Choose record</label>
+                        <CustomDropdown
+                                options="getRecords"
+                                defaultValue="getModel"
+                                onChange="(value) => this.updateObject(value)"
+                                placeholder="'Select a record...'"
+                                searchable="true"
+                                width="''"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="type-select" class="form-label">Activity Type</label>
+                        <Many2XAutocomplete
+                                resModel="'mail.activity.type'"
+                                getDomain="() => []"
+                                fieldString="'ActivityType'"
+                                update.bind="updateActivityType"
+                                value="fieldState.activity_type?.display_name"
+                                activeActions="{}"
+                        />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="date-select" class="form-label">Deadline</label>
+                        <t t-set="dateInfo" t-value="getValueEditorInfo(fieldState.activity_deadline,'date')"/>
+                        <div class="d-flex mb-3">
+                            <div class="flex-grow-1 me-2">
+                                <t t-component="dateInfo.component" t-props="getComponentProps(dateInfo,'date')"/>
+                            </div>
+                            <FieldTypeDropdown
+                                    currentLabel="getDropdownLabel(fieldState.activity_deadline?.selectionType)"
+                                    onSelected="(type) => this.toggleIncludeVariable(type,'date')"
+                            />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="record-select" class="form-label">Assignee</label>
+                        <t t-set="info" t-value="this.getValueEditorInfo(fieldState.activity_user,'assignee')"/>
+                        <div class="d-flex mb-3">
+                            <div class="flex-grow-1 me-2">
+                                <t t-component="info.component"
+                                   t-props="getComponentProps(info,'assignee')"/>
+                            </div>
+                            <FieldTypeDropdown
+                                    currentLabel="getDropdownLabel(fieldState.activity_user?.selectionType)"
+                                    onSelected="(type) => this.toggleIncludeVariable(type,'user')"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="summary" class="form-label cy-modal-form_label">Summary</label>
+                    <textarea class="form-control"
+                              rows="4"
+                              t-on-focusout="(ev) => this.setSummary(ev.target.value)"
+                              t-att-value="fieldState.activity_summary || ''"
+                    />
+                </div>
+                <t t-if="showGoogleMeetOptions">
+                    <hr class="cy-gm-section-divider"/>
+                    <div class="cy-gm-section mb-3">
+                        <div class="cy-gm-section-header d-flex align-items-center gap-2 mb-3">
+                            <i class="fa fa-video-camera cy-gm-section-icon"/>
+                            <span class="fw-semibold cy-gm-section-title">Google Meet Options</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        id="cy-gm-toggle"
+                                        t-att-checked="fieldState.activity_is_google_meet"
+                                        t-on-change="(ev) => this.toggleGoogleMeet(ev)"
+                                />
+                                <label class="form-check-label fw-medium" for="cy-gm-toggle">
+                                    Create as Google Meet
+                                </label>
+                            </div>
+                        </div>
+                        <t t-if="fieldState.activity_is_google_meet">
+                            <div class="cy-gm-config-panel">
+                                <div t-if="!googleMeetState.configured" class="alert alert-warning py-2 px-3 mb-3">
+                                    Google Meet credentials are not configured. Configure Client ID, Client Secret,
+                                    and Refresh Token before saving this meeting activity.
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label cy-modal-form_label">
+                                        Meeting Name
+                                        <span class="text-muted fw-normal cy-gm-help-inline">
+                                            (defaults to Activity Summary if empty)
+                                        </span>
+                                    </label>
+                                    <input
+                                            type="text"
+                                            class="o_input"
+                                            autocomplete="off"
+                                            placeholder="e.g. Sales Discussion with Customer"
+                                            t-att-value="fieldState.activity_meet_summary || ''"
+                                            t-on-focusout="(ev) => this.updateMeetSummary(ev)"
+                                    />
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label cy-modal-form_label">
+                                            Schedule After (hours)
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input
+                                                    type="number"
+                                                    class="o_input"
+                                                    min="0"
+                                                    step="0.5"
+                                                    placeholder="1"
+                                                    t-att-value="fieldState.activity_meet_offset_hours ?? 1"
+                                                    t-on-change="(ev) => this.updateOffsetHours(ev)"
+                                            />
+                                            <span class="text-muted cy-gm-help-inline">
+                                                hours after trigger
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">
+                                            0.5 = 30 min · 1 = 1 hr · 24 = next day
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label cy-modal-form_label">
+                                            Meeting Duration (hours)
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input
+                                                    type="number"
+                                                    class="o_input"
+                                                    min="0.25"
+                                                    step="0.25"
+                                                    placeholder="1"
+                                                    t-att-value="fieldState.activity_meet_duration_hours ?? 1"
+                                                    t-on-change="(ev) => this.updateDurationHours(ev)"
+                                            />
+                                            <span class="text-muted cy-gm-help-inline">
+                                                hours
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">
+                                            Min 0.25 (15 min)
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="form-check form-switch mb-0">
+                                        <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="cy-gm-also-activity"
+                                                t-att-checked="fieldState.activity_also_schedule_activity"
+                                                t-on-change="(ev) => this.toggleAlsoScheduleActivity(ev)"
+                                        />
+                                        <label class="form-check-label" for="cy-gm-also-activity">
+                                            Also schedule Activity reminder in chatter
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="cy-gm-info-box mt-3 d-flex gap-2">
+                                    <i class="fa fa-info-circle cy-gm-section-icon"/>
+                                    <small class="text-muted">
+                                        A Google Meet calendar event will be created automatically.
+                                        Google OAuth must be configured in the Google Meet module.
+                                    </small>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+                <t t-if="showZoomMeetOptions">
+                    <hr class="cy-zm-section-divider"/>
+                    <div class="cy-zm-section mb-3">
+                        <div class="cy-zm-section-header d-flex align-items-center gap-2 mb-3">
+                            <i class="fa fa-video-camera cy-zm-section-icon"/>
+                            <span class="fw-semibold cy-zm-section-title">Zoom Meet Options</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        id="cy-zm-toggle"
+                                        t-att-checked="fieldState.activity_is_zoom_meet"
+                                        t-on-change="(ev) => this.toggleZoomMeet(ev)"
+                                />
+                                <label class="form-check-label fw-medium" for="cy-zm-toggle">
+                                    Create as Zoom Meeting
+                                </label>
+                            </div>
+                        </div>
+                        <t t-if="fieldState.activity_is_zoom_meet">
+                            <div class="cy-zm-config-panel">
+                                <div t-if="!zoomMeetState.configured" class="alert alert-warning py-2 px-3 mb-3">
+                                    Zoom access token is not configured.
+                                    Go to Settings &#x2192; General Settings &#x2192; Zoom Integration
+                                    and connect your Zoom account before saving.
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label cy-modal-form_label">
+                                        Meeting Name
+                                        <span class="text-muted fw-normal cy-zm-help-inline">
+                                            (defaults to Activity Summary if empty)
+                                        </span>
+                                    </label>
+                                    <input
+                                            type="text"
+                                            class="o_input"
+                                            autocomplete="off"
+                                            placeholder="e.g. Sales Call with Customer"
+                                            t-att-value="fieldState.activity_zoom_summary || ''"
+                                            t-on-focusout="(ev) => this.updateZoomMeetSummary(ev)"
+                                    />
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label cy-modal-form_label">
+                                            Schedule After (hours)
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input
+                                                    type="number"
+                                                    class="o_input"
+                                                    min="0"
+                                                    step="0.5"
+                                                    placeholder="1"
+                                                    t-att-value="fieldState.activity_zoom_offset_hours ?? 1"
+                                                    t-on-change="(ev) => this.updateZoomOffsetHours(ev)"
+                                            />
+                                            <span class="text-muted cy-zm-help-inline">
+                                                hours after trigger
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">
+                                            0.5 = 30 min · 1 = 1 hr · 24 = next day
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label cy-modal-form_label">
+                                            Meeting Duration (hours)
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input
+                                                    type="number"
+                                                    class="o_input"
+                                                    min="0.25"
+                                                    step="0.25"
+                                                    placeholder="1"
+                                                    t-att-value="fieldState.activity_zoom_duration_hours ?? 1"
+                                                    t-on-change="(ev) => this.updateZoomDurationHours(ev)"
+                                            />
+                                            <span class="text-muted cy-zm-help-inline">
+                                                hours
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">Min 0.25 (15 min)</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="form-check form-switch mb-0">
+                                        <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="cy-zm-also-activity"
+                                                t-att-checked="fieldState.activity_also_schedule_activity_zoom"
+                                                t-on-change="(ev) => this.toggleAlsoScheduleActivityZoom(ev)"
+                                        />
+                                        <label class="form-check-label" for="cy-zm-also-activity">
+                                            Also schedule Activity reminder in chatter
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="cy-zm-info-box mt-3 d-flex gap-2">
+                                    <i class="fa fa-info-circle cy-zm-section-icon"/>
+                                    <small class="text-muted">
+                                        A Zoom meeting will be created automatically via the Zoom API.
+                                        The access token must be configured in the Zoom Integration module.
+                                    </small>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </t>
+</templates>

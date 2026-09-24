@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="email_template_google_form_share" model="mail.template">
+            <field name="name">Google Form Share</field>
+            <field name="model_id" ref="model_google_form"/>
+            <field name="subject">Please Fill This Form: {{ object.name }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+                    <p>Dear Recipient,</p>
+                    <p>Please fill in the following form:</p>
+                    <p>
+                        <a t-att-href="object.form_url or ''"
+                           target="_blank"
+                           style="background-color:#9EA700;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;display:inline-block;font-weight:bold;">
+                            Click Here to Open the Form
+                        </a>
+                    </p>
+                    <p>Or copy and paste this link into your browser:<br/>
+                        <a t-att-href="object.form_url or ''" target="_blank">
+                            <t t-esc="object.form_url or 'URL not available — please contact us.'"/>
+                        </a>
+                    </p>
+                    <br/>
+                    <p>Thank you,<br/>
+                        <t t-esc="user.name"/>
+                    </p>
+                </div>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

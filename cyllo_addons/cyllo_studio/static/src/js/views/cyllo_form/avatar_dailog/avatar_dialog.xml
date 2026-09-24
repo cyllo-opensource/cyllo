@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.AvatarDialog">
+        <div class="cy-studio-avatar-dialog">
+            <Dialog title="'Add Image Field'" size="'md'">
+                <div class="cy-avatar-dialog">
+                    <div class="form-check form-check-inline mb-3">
+                      <input class="form-check-input" type="radio" name="field"
+                             value="existing" t-model="state.field"/>
+                        <label class="form-check-label">Existing Field</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="field"
+                             value="new" t-model="state.field"/>
+                        <label class="form-check-label">New Fields</label>
+                    </div>
+                    <div t-if="state.field == 'existing'">
+                        <div class="cy-studio-custom-dropdown-dialog-avatar">
+                        <CylloStudioDropdown
+                                options="avatarExistingFields(existingFields)"
+                                onChange="(value) => this.handleAvatarExistingFields(value)"
+                                defaultValue="defaultAvatarExistingField"
+                                searchable="true"
+                        />
+                        </div>
+                    </div>
+
+                    <!--                <select t-if="state.field == 'existing'" class="form-select cy-input-modal" aria-label="Existing image fields" t-model="state.existingFieldTech">-->
+                    <!--                        <option value=""/>-->
+                    <!--                    <t t-foreach="existingFields" t-as="field" t-key="field_index">-->
+                    <!--                        <option t-att-value="field.name"><t t-esc="field.string"/></option>-->
+                    <!--                    </t>-->
+                    <!--                </select>-->
+                    <div t-else="" class="d-flex gap-3">
+                    <div class="d-flex flex-column new_field_prop">
+                        <label class="mb-1" for="label">Label Name:</label>
+                        <input required="true"
+                               type="text"
+                               class="cy-input-modal mmb-2"
+                               id="label"
+                               name="label"
+                               t-att-value="state.newFieldLabel"
+                               t-on-input="onInputLabel"/>
+                    </div>
+
+                        <div class="d-flex flex-column new_field_prop">
+                        <label class="mb-1" for="tech_name">Technical Name:</label>
+                            <input required="true"
+                                   type="text"
+                                   class="cy-input-modal"
+                                   id="tech_name"
+                                   name="Technical Name"
+                                   t-att-value="state.newFieldTechName"
+                                   t-on-input="onInputTechName"/>
+                    </div>
+                </div>
+
+                </div>
+                <t t-set-slot="footer">
+                    <button class="btn btn-primary"
+                            t-on-click="onConfirm">Confirm</button>
+                    <button class="btn btn-secondary"
+                            t-on-click="onDiscard">Discard</button>
+                </t>
+            </Dialog>
+        </div>
+    </t>
+</templates>

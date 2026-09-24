@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_helpdesk.TicketIssueSuggestions">
+        <div t-if="!props.record.data.name" class="o_ticket_issue_suggestions d-flex flex-wrap align-items-center gap-1 my-2">
+            <span class="text-muted small me-1 fw-semibold">
+                <i class="fa fa-lightbulb-o text-warning me-1"/>Suggestions:
+            </span>
+            <t t-foreach="state.issues" t-as="issue" t-key="issue.id">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0 border-opacity-50 text-dark bg-light-subtle d-inline-flex align-items-center"
+                    style="font-size: 0.82rem; transition: all 0.2s;"
+                    t-on-click="() => this.selectIssue(issue.name)"
+                    t-att-title="'Use &quot;' + issue.name + '&quot; as ticket title'"
+                >
+                    <i class="fa fa-tag me-1 small" style="color: #9EA700;"/>
+                    <t t-esc="issue.name"/>
+                </button>
+            </t>
+            <t t-if="!state.isAdding">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-link text-decoration-none py-0 px-1 text-muted small"
+                    t-on-click="() => this.toggleAdd(true)"
+                    title="Create new issue suggestion"
+                >
+                    <i class="fa fa-plus-circle me-1" style="color: #9EA700;"/>Add Suggestion
+                </button>
+            </t>
+            <t t-else="">
+                <div class="d-inline-flex align-items-center gap-1">
+                    <input
+                        type="text"
+                        class="form-control form-control-sm py-0 px-2 rounded-pill"
+                        style="width: 180px; font-size: 0.8rem;"
+                        placeholder="New issue title..."
+                        t-model="state.newIssueName"
+                        t-on-keydown="(ev) => this.onKeyDown(ev)"
+                        autofocus="autofocus"
+                    />
+                    <button
+                        type="button"
+                        class="btn btn-sm text-white rounded-circle p-0"
+                        style="width: 22px; height: 22px; background-color: #9EA700; border-color: #9EA700;"
+                        t-on-click="() => this.createAndSelectIssue()"
+                        title="Save &amp; Select"
+                    >
+                        <i class="fa fa-check small"/>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-secondary rounded-circle p-0"
+                        style="width: 22px; height: 22px;"
+                        t-on-click="() => this.toggleAdd(false)"
+                        title="Cancel"
+                    >
+                        <i class="fa fa-times small"/>
+                    </button>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

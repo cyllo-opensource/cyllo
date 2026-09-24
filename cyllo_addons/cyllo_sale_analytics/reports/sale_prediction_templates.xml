@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="report_sales_prediction_pdf" model="ir.actions.report">
+        <field name="name">Sale Prediction</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_sale_analytics.report_sales_prediction</field>
+        <field name="report_file">cyllo_sale_analytics.report_sales_prediction</field>
+    </record>
+    <template id="cyllo_sale_analytics.report_sales_prediction">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div t-ref="root" class="w-100">
+                    <h1 style="text-align:center;
+                    font-size: 40px;
+                    font-family: sans-serif !important">
+                        Sales Prediction Report
+                    </h1>
+                    <t t-if="chart_data_sales">
+                        <center>
+                            <h1 style="margin-bottom: 2rem;
+                            margin-top: 3rem;
+                            font-size: 25px;">Actual Sales from
+                                <t t-esc="start_date"/>
+                                to
+                                <t t-esc="end_date"/> &amp; Predicted Sales For
+                                <t t-esc="period"/>
+                                <t t-if="frequency == 'D'">
+                                    <span>Days</span>
+                                </t>
+                                <t t-elif="frequency == 'M'">
+                                    <span>Months</span>
+                                </t>
+                                <t t-elif="frequency == 'Y'">
+                                    <span>Years</span>
+                                </t>
+                            </h1>
+
+                            <div class="col"
+                                 style="margin-left: -5rem; margin-bottom: 10px;">
+                                <img t-att-src="chartImg"
+                                     style="width:82rem; height: 36rem; margin-left: 2rem;"/>
+                            </div>
+
+                            <div class="px-3">
+                                <table class="table">
+                                    <thead>
+                                        <tr style="height: 50px; border:1px solid #dfdfdf;">
+                                            <th colspan="4"
+                                                style="font-size:24px; padding-top:15px;">
+                                                ACTUAL
+                                                SALES
+                                            </th>
+                                        </tr>
+                                        <tr style="height: 50px; border:1px solid #dfdfdf;">
+                                            <th style="font-size:22px; padding-top:15px;">
+                                                Periods
+                                            </th>
+                                            <th style="font-size:22px; padding-top:15px;">
+                                                Amount
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-if="actual_sale_data">
+                                            <t t-foreach="actual_sale_data"
+                                               t-as="act"
+                                               t-key="act_index">
+                                                <tr style="height: 50px; text-align: center;">
+                                                    <td style="font-size:20px; padding-top:15px;">
+                                                        <t t-esc="act['date']"/>
+                                                    </td>
+                                                    <td style="font-size:20px; padding-top:15px;">
+                                                        <t t-esc="act['value']"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </tbody>
+                                </table>
+                                <table class="table"
+                                       style="margin-top:10px;"
+                                       border="1">
+                                    <thead>
+                                        <tr style="height: 50px;">
+                                            <th colspan="4"
+                                                style="font-size:24px; padding-top:15px;">
+                                                PREDICTED SALES
+                                            </th>
+                                        </tr>
+                                        <tr style="height: 50px;">
+                                            <th style="font-size:22px; padding-top:15px;">
+                                                Periods
+                                            </th>
+                                            <th style="font-size:22px; padding-top:15px;">
+                                                Amount
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-if="predict_sale_data">
+                                            <t t-foreach="predict_sale_data"
+                                               t-as="fore"
+                                               t-key="fore_index">
+                                                <tr style="height: 50px; text-align: center;">
+                                                    <td style="font-size:20px; padding-top:15px;">
+                                                        <t t-esc="fore['date']"/>
+                                                    </td>
+                                                    <td style="font-size:20px; padding-top:15px;">
+                                                        <t t-esc="fore['value']"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </center>
+                    </t>
+                    <t t-else="">
+                        <center>
+                            <h1 style="margin-bottom: 2rem; margin-top: 4rem; font-size: 20px;">
+                                Actual Sales from
+                                <t t-esc="start_date"/>
+                                to
+                                <t t-esc="end_date"/> &amp; Predicted Sales For
+                                <t t-esc="period"/>
+                                <t t-if="frequency == 'D'">
+                                    <span>Days</span>
+                                </t>
+                                <t t-elif="frequency == 'M'">
+                                    <span>Months</span>
+                                </t>
+                                <t t-elif="frequency == 'Y'">
+                                    <span>Years</span>
+                                </t>
+                            </h1>
+                            <h1 style="margin-top: 10rem; font-size: 18px;">
+                                <b>Sales Data for this Frequency is
+                                    Insufficient.
+                                </b>
+                            </h1>
+                            <p style="font-size: 14px;">The dataset is too small
+                                to perform a meaningful prediction.
+                                Increase the Actual Data by adjusting the Start
+                                Date and End Date.
+                            </p>
+                        </center>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

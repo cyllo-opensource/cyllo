@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="helpdesk_ticket_view_form_inherit_loyalty" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.form.inherit.loyalty</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="cyllo_helpdesk.helpdesk_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='stage_id']" position="before">
+                <field name="use_coupons" invisible="1"/>
+                <field name="use_gift_cards" invisible="1"/>
+                <button name="action_create_coupon" type="object" string="Create Coupon"
+                        invisible="not customer_id or not use_coupons"
+                        groups="sales_team.group_sale_manager"/>
+                <button name="action_send_gift_card" type="object" string="Send Gift Card"
+                        invisible="not customer_id or not use_gift_cards"
+                        groups="sales_team.group_sale_manager"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_coupons" type="object" class="oe_stat_button"
+                        icon="fa-ticket" invisible="not use_coupons or coupon_count == 0"
+                        groups="sales_team.group_sale_manager">
+                    <field name="coupon_count" widget="statinfo" string="Coupons"/>
+                </button>
+                <button name="action_view_gift_cards" type="object" class="oe_stat_button"
+                        icon="fa-credit-card" invisible="not use_gift_cards or gift_card_count == 0"
+                        groups="sales_team.group_sale_manager">
+                    <field name="gift_card_count" widget="statinfo" string="Gift Cards"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

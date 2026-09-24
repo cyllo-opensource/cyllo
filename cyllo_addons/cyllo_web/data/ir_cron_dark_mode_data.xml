@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This cron job is responsible for scheduling the dark mode enable task.-->
+    <!-- It runs daily, and its purpose is to perform dark mode scheduling operations.-->
+    <record id="ir_cron_darkmode_schedule_dark_mode_enable" model="ir.cron">
+        <field name="name">DarkMode: Schedule dark mode enable</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="nextcall"
+               eval="(DateTime.now().replace(hour=0, minute=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="doall" eval="False"/>
+        <field name="model_id" ref="model_res_users"/>
+        <field name="code">model.schedule_dark_mode_enable()</field>
+        <field name="state">code</field>
+    </record>
+    <!-- This cron job is responsible for scheduling the dark mode disable task.-->
+    <!-- It runs daily, and its purpose is to perform dark mode scheduling operations.-->
+    <record id="ir_cron_darkmode_schedule_dark_mode_disable" model="ir.cron">
+        <field name="name">DarkMode: Schedule dark mode disable</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="nextcall"
+               eval="(DateTime.now().replace(hour=0, minute=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="doall" eval="False"/>
+        <field name="model_id" ref="model_res_users"/>
+        <field name="code">model.schedule_dark_mode_disable()</field>
+        <field name="state">code</field>
+    </record>
+</odoo>

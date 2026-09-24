@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ChatBot" owl="1">
+        <t t-if="state.chatOn and !state.isStudio">
+            <div class="chatbot-modal" t-att-style="state.dragStyle"
+                t-att-class="{'chatbot-box': true, 'minimized': state.minimized, 'maximized': !state.minimized, 'dragging': state.isDragging, 'has-nudge': state.minimized and state.nudge, 'docked': !state.minimized and state.docked}"
+                t-ref="chatbotDiv">
+                <t t-if="!state.minimized">
+                    <div class="chatbot-box" t-on-keydown="onKeyDown">
+                        <!-- Select text in a response → quote it into the composer. -->
+                        <button class="cy-ai-quote-btn" t-if="state.quoteBtn"
+                            t-attf-style="left: {{ state.quoteBtn.x }}px; top: {{ state.quoteBtn.y }}px;"
+                            t-on-click="useQuote">
+                            <i class="ri-double-quotes-l" />
+                            <span>Reply</span>
+                        </button>
+                        <div class="chatbot-header">
+                            <div class="cy-ai-header-left">
+                                <button class="cy-ai-icon-btn" title="Conversations"
+                                    t-on-click="toggleHistory">
+                                    <i class="ri-menu-line" />
+                                </button>
+                                <span class="cy-ai-header-title" t-esc="state.currentTitle" />
+                            </div>
+                            <!-- Reachable suggest affordance while a conversation hides the
+                                 empty-state offer. Keyed on the host's offer (NOT docking, which
+                                 is a generic layout concern), so it's scoped to where suggestions
+                                 are actually offered. -->
+                            <button class="cy-ai-header-suggest"
+                                t-if="state.offer and state.messages.length"
+                                t-on-click="onHeaderSuggest">
+                                <i class="ri-magic-line me-1" />
+                                <span t-esc="state.offer.label" />
+                            </button>
+                            <div class="cy-ai-header-actions">
+                                <button class="btn btn-outline" title="New chat"
+                                    t-if="state.messages.length != 0 and !state.isTyping and !state.interrupted"
+                                    t-on-click="resetChat">
+                                    <i class="ri-add-large-line" />
+                                    New Chat
+                                </button>
+                                <button class="cy-ai-icon-btn" title="Open in Cyllo AI"
+                                    t-on-click="openInScreen">
+                                    <i class="ri-external-link-line" />
+                                </button>
+                                <button class="cy-ai-icon-btn" title="Close"
+                                    t-on-click="_minimize_chatbot">
+                                    <i class="ri-close-line" />
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chatbot-content">
+                            <div class="upper-chatbot" t-ref="upperScroll" t-key="state.session_id"
+                                t-on-scroll="onMessagesScroll"
+                                t-att-class="(state.messages.length === 0 and !state.docked) ? 'collapsed' : 'expanded'">
+                                <div t-ref="messageContainer" class="chat-messages flex-grow-1 mb-2"
+                                    t-on-mouseup="onMessagesMouseUp">
+                                    <t t-if="state.messages.length === 0">
+                                        <!-- Docked (analytics): a minimal, purpose-built empty state —
+                                         just the "Generate charts" offer, no owl/greeting/prompts. -->
+                                        <t t-if="state.docked">
+                                            <!-- Render as a normal bot message (owl avatar, top-left). -->
+                                            <div class="chat-message response-message" t-if="state.offer">
+                                                <div class="cy-ai-response-head">
+                                                    <!--                                                <img
+                                                src="/cyllo_ai/static/src/img/cyllo-ai.png"
+                                                alt="Cyllo AI" class="bot-avatar"/>-->
+                                                    <dotlottie-player
+                                                        src="https://lottie.host/f44dd487-2810-485e-a159-fb4377a8db29/jODYvOf9p9.lottie"
+                                                        background="transparent"
+                                                        speed="1"
+                                                        loop=""
+                                                        autoplay=""></dotlottie-player>
+                                                </div>
+                                                <div class="chat-bubble-wrapper">
+                                                    <div class="chat-bubble bot">
+                                                        <div>Want AI chart suggestions for this sheet?</div>
+                                                        <button class="cy-ai-offer mt-2" t-on-click="onOfferClick"
+                                                            t-att-disabled="state.offerLoading">
+                                                            <t t-if="state.offerLoading">
+                                                                <i class="ri-loader-4-line cy-ai-spin" />
+                                                                <span>Analysing your fields…</span>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <i class="ri-magic-line" />
+                                                                <span t-esc="state.offer.label" />
+                                                            </t>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                        <!-- Normal (floating) chatbot: the usual owl + greeting. -->
+                                        <t t-else="">
+                                            <div class="chatbot-center">
+                                                <dotlottie-player
+                                                    src="https://lottie.host/f44dd487-2810-485e-a159-fb4377a8db29/jODYvOf9p9.lottie"
+                                                    background="transparent"
+                                                    speed="1"
+                                                    style="width: 300px; height: 150px;"
+                                                    loop=""
+                                                    autoplay=""></dotlottie-player>
+                                                <p class="chatbot-greeting">How can I assist you today?</p>
+                                            </div>
+                                        </t>
+                                    </t>
+                                    <t t-foreach="state.messages" t-as="msg" t-key="msg.id or msg_index">
+                                        <t t-if="msg.from === 'user'">
+                                            <ChatUser t-props="{
+                                            text: msg.text,
+                                            html: msg.html,
+                                            chart: msg.chart,
+                                            userImage: state.user_image
+                                        }" />
+                                        </t>
+                                        <t t-if="msg.from === 'bot'">
+                                            <ChatResponse t-props="{
+                                            text: msg.text,
+                                            id: msg.id,
+                                            html: msg.html,
+                                            chart_config: msg.chart_config,
+                                            suggestions: msg.suggestions,
+                                            chart: msg.chart,
+                                            widget: msg.widget,
+                                            usage: msg.usage,
+                                            steps: msg.steps,
+                                            thinkingMs: msg.thinkingMs,
+                                            unsaved: msg.unsaved,
+                                            timestamp: msg.timestamp,
+                                            streaming: msg.streaming,
+                                            isPlaying: state.playingMessageId === msg.id,
+                                            onPlay: (id, text) => this.playMessage(id, text),
+                                            onStop: () => this.stopSpeaking(),
+                                            interrupted: msg.interrupted and msg_index === state.messages.length - 1,
+                                            onInterruptResponse: onInterruptResponse.bind(this),
+                                            onEditRequest: (draft) => this.onEditRequest(draft),
+                                            onLoad: (api) => this.registerChartApi(msg_index, api)
+                                        }" />
+                                        </t>
+                                    </t>
+                                    <t t-if="state.isTyping">
+                                        <!-- Deliberately identical markup to ChatResponse's streaming
+                                         head, so when the first answer token arrives and the real
+                                         response takes over there is no visible swap. -->
+                                        <div class="chat-message response-message">
+                                            <div class="cy-ai-response-head">
+                                                <!-- <img src="/cyllo_ai/static/src/img/cyllo-ai.png" alt="Cyllo AI" class="bot-avatar" /> -->
+                                                <dotlottie-player
+                                                    src="https://lottie.host/a67f0b6e-2baa-4912-9609-68750eb652ca/oDZqiBaV7g.json"
+                                                    background="transparent"
+                                                    speed="0"
+                                                    loop=""
+                                                    autoplay=""
+                                                    class="bot-avatar"
+                                                />
+                                                <span class="cy-ai-head-live" t-esc="state.activityStatus or 'Working…'" />
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                            <div class="bottom-chatbot"
+                                t-att-style="state.messages.length === 0 ? 'padding: 12px 14px 14px 14px' : 'padding: 8px'">
+                                <div class="chatbot-input-wrapper" t-ref="input-wrapper">
+                                    <t t-if="state.slashOpen">
+                                        <div class="slash-menu" role="listbox" aria-label="Commands">
+                                            <t t-foreach="filteredSlashCommands" t-as="cmd" t-key="cmd.key">
+                                                <div role="option"
+                                                    t-att-aria-selected="cmd_index === state.slashIndex ? 'true' : 'false'"
+                                                    t-att-class="'slash-item' + (cmd_index === state.slashIndex ? ' active' : '')"
+                                                    t-on-click="() => this.selectSlashCommand(cmd)"
+                                                    t-on-mouseenter="() => this.state.slashIndex = cmd_index">
+                                                    <span class="slash-key" t-esc="cmd.key" />
+                                                    <span class="slash-label" t-esc="cmd.label" />
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-if="state.pickerOpen">
+                                        <div class="slash-menu" role="listbox" aria-label="Results">
+                                            <t t-if="state.pickerLoading">
+                                                <div class="slash-item picker-empty">Searching…</div>
+                                            </t>
+                                            <t t-elif="!state.pickerOptions.length">
+                                                <div class="slash-item picker-empty">No matches — keep typing to search</div>
+                                            </t>
+                                            <t t-foreach="state.pickerOptions" t-as="opt" t-key="opt.id">
+                                                <div role="option"
+                                                    t-att-aria-selected="opt_index === state.pickerIndex ? 'true' : 'false'"
+                                                    t-att-class="'slash-item' + (opt_index === state.pickerIndex ? ' active' : '')"
+                                                    t-on-click="() => this.selectPickerOption(opt)"
+                                                    t-on-mouseenter="() => this.state.pickerIndex = opt_index">
+                                                    <span class="slash-label" t-esc="opt.name" />
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-if="state.mentionOpen">
+                                        <div class="slash-menu" role="listbox" aria-label="Mention a screen">
+                                            <t t-if="state.mentionLoading">
+                                                <div class="slash-item picker-empty">Searching…</div>
+                                            </t>
+                                            <t t-elif="!state.mentionOptions.length">
+                                                <div class="slash-item picker-empty">No matching screens</div>
+                                            </t>
+                                            <t t-foreach="state.mentionOptions" t-as="opt" t-key="opt.id">
+                                                <div role="option"
+                                                    t-att-aria-selected="opt_index === state.mentionIndex ? 'true' : 'false'"
+                                                    t-att-class="'slash-item' + (opt_index === state.mentionIndex ? ' active' : '')"
+                                                    t-on-click="() => this.selectMention(opt)"
+                                                    t-on-mouseenter="() => this.state.mentionIndex = opt_index">
+                                                    <span class="slash-label" t-esc="opt.name" />
+                                                    <span class="slash-badge" t-esc="opt.model" />
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-if="state.mentionRecordOpen">
+                                        <div class="slash-menu" role="listbox" aria-label="Pin a record (optional)">
+                                            <div class="mention-record-header">
+                                                <i class="ri-arrow-left-line mention-record-back"
+                                                    title="Back — change the model" t-on-click="backToMentionMenu" />
+                                                <input type="text"
+                                                    class="mention-record-search"
+                                                    t-ref="mention-record-input"
+                                                    placeholder="Search a record…"
+                                                    t-on-input="onMentionRecordInput"
+                                                    t-on-keydown="onKeyDown" />
+                                            </div>
+                                            <t t-if="state.mentionRecordLoading">
+                                                <div class="slash-item picker-empty">Searching…</div>
+                                            </t>
+                                            <t t-foreach="state.mentionRecordOptions" t-as="opt" t-key="opt.id">
+                                                <div role="option"
+                                                    t-att-aria-selected="opt_index === state.mentionRecordIndex ? 'true' : 'false'"
+                                                    t-att-class="'slash-item' + (opt_index === state.mentionRecordIndex ? ' active' : '') + (opt.skip ? ' picker-skip' : '')"
+                                                    t-on-click="() => this.selectMentionRecord(opt)"
+                                                    t-on-mouseenter="() => this.state.mentionRecordIndex = opt_index">
+                                                    <span class="slash-label" t-esc="opt.name" />
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-if="state.quotedText">
+                                        <div class="cy-ai-quote-strip">
+                                            <i class="ri-corner-up-left-line" />
+                                            <span class="cy-ai-quote-text" t-esc="state.quotedText" />
+                                            <i class="ri-close-line cy-ai-quote-remove"
+                                                title="Remove quote" t-on-click="clearQuote" />
+                                        </div>
+                                    </t>
+                                    <t t-if="state.activeCommand">
+                                        <div class="command-chips">
+                                            <span class="command-chip">
+                                                <i class="ri-flashlight-line" />
+                                                <span t-esc="state.activeCommand.chip" />
+                                                <t t-if="state.activeCommand.selection">
+                                                    <span class="chip-sep">→</span>
+                                                    <span class="chip-target" t-esc="state.activeCommand.selection.name" />
+                                                </t>
+                                                <i class="ri-close-line chip-remove" title="Remove"
+                                                    t-on-click="cancelActiveCommand" />
+                                            </span>
+                                        </div>
+                                    </t>
+                                    <!-- @ mentions render as REAL inline pill tokens inside this box
+                                         itself, the moment a screen is picked (see insertPillAtPendingRange
+                                         in chatbot.js) — no separate "in progress" chip while the record
+                                         picker (step two) refines it in place, the pill IS the confirmation,
+                                         and no separate summary row once committed either — that would
+                                         just show each mention twice. -->
+                                    <div
+                                        class="chat-input-box chat-input-editable"
+                                        t-att-class="{ 'is-empty': !state.inputText }"
+                                        t-ref="composer"
+                                        t-att-contenteditable="(state.convertVoice or state.isRecording or state.mentionRecordOpen) ? 'false' : 'true'"
+                                        t-att-data-placeholder="inputPlaceholder"
+                                        t-on-keydown="onKeyDown"
+                                        t-on-input="onInput"
+                                        t-on-paste="onComposerPaste"
+                                        role="textbox"
+                                        aria-multiline="true"
+                                    ></div>
+                                    <div class="input-bottom-bar">
+                                        <div class="input-bar-left">
+
+                                            <!-- <button class="cy-ai-icon-btn" type="button"
+                                                disabled="disabled"
+                                                title="Attachments">
+                                                <i class="ri-add-large-line" />
+                                            </button> -->
+                                            <t t-if="state.uiContext">
+                                                <div class="context-chips">
+                                                    <span t-att-class="'context-chip' + (state.contextEnabled ? '' : ' context-off')"
+                                                        role="button" tabindex="0"
+                                                        t-att-aria-pressed="state.contextEnabled ? 'true' : 'false'"
+                                                        t-on-click="toggleContext"
+                                                        t-on-keydown="(ev) => this.onActivateKey(ev, () => this.toggleContext())"
+                                                        t-att-title="state.contextEnabled ? 'Context on — click to stop sending the current screen' : 'Context off — click to include the current screen'">
+                                                        <i t-att-class="'context-toggle ' + (state.contextEnabled ? 'ri-file-list-line' : 'ri-eye-off-line')" />
+                                                        <t t-if="state.uiContext.recordName">
+                                                            <span class="context-name" t-esc="state.uiContext.recordName" />
+                                                            <span class="chip-sep">
+                                                                <i class="ri-circle-fill"></i>
+                                                            </span>
+                                                            <span class="context-model" t-esc="state.uiContext.modelLabel" />
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span class="context-name" t-esc="state.uiContext.modelLabel" />
+                                                            <t t-if="state.uiContext.viewType">
+                                                                <span class="chip-sep">·</span>
+                                                                <span class="context-model" t-esc="state.uiContext.viewType" />
+                                                            </t>
+                                                        </t>
+                                                    </span>
+                                                </div>
+                                            </t>
+                                        </div>
+
+                                        <div class="input-bar-right">
+                                            <t t-if="state.modelLabel">
+                                                <span class="cy-ai-model-chip"
+                                                    t-att-title="state.providerLabel">
+                                                    <span t-esc="state.modelLabel" />
+                                                    <!-- <i class="ri-arrow-down-s-line" /> -->
+                                                </span>
+                                            </t>
+                                            <t t-if="state.isRecording">
+                                                <span class="rec-timer-left" t-esc="state.recordingDisplay" />
+                                            </t>
+                                            <div class="mic-wrapper">
+                                                <span
+                                                    t-att-class="'mic-btn ' + (state.isRecording ? 'recording' : '')"
+                                                    t-on-click="state.isRecording ? stopRecording : recordVoice">
+                                                    <i class="ri-mic-line"></i>
+                                                </span>
+                                                <t t-if="state.convertVoice">
+                                                    <div class="mic-loader"></div>
+                                                </t>
+                                            </div>
+                                            <button t-if="state.isGenerating and !state.isRecording"
+                                                t-on-click="stopGenerating"
+                                                class="send-icon-btn stop-btn"
+                                                title="Stop generating">
+                                                <i class="ri-stop-fill"></i>
+                                            </button>
+                                            <button t-else=""
+                                                t-att-disabled="state.isTyping or (!state.isRecording and !state.inputText.trim())"
+                                                t-on-click="state.isRecording ? cancelRecording : handleSend"
+                                                t-attf-class="send-icon-btn {{ state.isRecording ? 'btn-danger' : '' }}">
+                                                <t t-if="state.isRecording">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </t>
+                                                <t t-elif="state.isTyping">
+                                                    <i class="ri-loader-4-line cy-ai-spin" />
+                                                </t>
+                                                <t t-else="">
+                                                    <i class="ri-arrow-up-line"></i>
+                                                </t>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <t t-if="state.messages.length === 0 and !state.docked">
+                                    <div class="chatbot-actions d-flex flex-wrap gap-1 justify-content-center">
+                                        <div class="chatbot-action-button" role="button" tabindex="0"
+                                            t-on-click="() => this.handleQuickAction('Total sales of current year')"
+                                            t-on-keydown="(ev) => this.onActivateKey(ev, () => this.handleQuickAction('Total sales of current year'))">
+                                            <i class="ri-shopping-bag-line"></i>
+                                            Total sales of current year
+                                        </div>
+                                        <div class="chatbot-action-button" role="button" tabindex="0"
+                                            t-on-click="() => this.handleQuickAction('Total profit of current year')"
+                                            t-on-keydown="(ev) => this.onActivateKey(ev, () => this.handleQuickAction('Total profit of current year'))">
+                                            <i class="ri-money-dollar-box-line"></i>
+                                            Total profit of current year
+                                        </div>
+                                        <div class="chatbot-action-button" role="button" tabindex="0"
+                                            t-on-click="() => this.handleQuickAction('Top 10 customers')"
+                                            t-on-keydown="(ev) => this.onActivateKey(ev, () => this.handleQuickAction('Top 10 customers'))">
+                                            <i class="ri-group-line"></i>
+                                            Top 10 customers
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="state.minimized">
+                    <!-- Contextual nudge bubble; positioned beside the icon and
+                         moves with the (draggable) launcher container. -->
+                    <div class="cy-ai-nudge" t-if="state.nudge"
+                        t-on-click="onNudgeClick" role="button" tabindex="0"
+                        t-att-title="state.nudge.label">
+                        <span t-esc="state.nudge.label" />
+                    </div>
+                    <a t-att-class="'toggle-icon' + (state.isDragging ? ' dragging' : '')"
+                        type="button" tabindex="0" aria-expanded="false"
+                        title="Open Cyllo AI (drag to move)"
+                        t-on-pointerdown="onIconPointerDown"
+                        t-on-pointermove="onIconPointerMove"
+                        t-on-pointerup="onIconPointerUp"
+                        t-on-keydown="onIconKeydown">
+                        <dotlottie-player
+                            src="https://lottie.host/a67f0b6e-2baa-4912-9609-68750eb652ca/oDZqiBaV7g.json"
+                            background="transparent"
+                            speed="1"
+                            style="width: 50px; height: 50px"
+                            loop=""
+                            autoplay=""
+                        />
+                    </a>
+                </t>
+                <t t-if="state.historyOpen">
+                    <ChatSidebar
+                        onSelect="(session) => this.onSelectSession(session)"
+                        onClose="() => this.toggleHistory()"
+                    />
+                </t>
+            </div>
+        </t>
+    </t>
+</templates>

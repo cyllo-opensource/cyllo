@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Record Rules-->
+    <record id="rule_cyllo_budget_management_budget_budget_company"
+            model="ir.rule">
+        <field name="name">Budget Management: Multi-Company Rule</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_budget_budget"/>
+        <field name="domain_force">['|', ('company_id', '=', False),
+            ('company_id', 'in', company_ids)]
+        </field>
+    </record>
+    <record id="rule_cyllo_budget_management_budget_lines_company"
+            model="ir.rule">
+        <field name="name">Budget Lines: Multi-Company Rule</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_budget_lines"/>
+        <field name="domain_force">['|', ('company_id', '=', False),
+            ('company_id', 'in', company_ids)]
+        </field>
+    </record>
+    <record id="rule_cyllo_budget_management_debt_management_company"
+            model="ir.rule">
+        <field name="name">Debt Management: Multi-Company Rule</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_debt_management"/>
+        <field name="domain_force">['|', ('company_id', '=', False),
+            ('company_id', 'in', company_ids)]
+        </field>
+    </record>
+    <record id="rule_cyllo_budget_management_budget_budget_public"
+            model="ir.rule">
+        <field name="name">Budget Management: Edit User Rule</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_budget_budget"/>
+        <field name="domain_force">[('responsible_id','=', user.id)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="groups"
+               eval="[Command.link(ref('account.group_account_invoice'))]"/>
+    </record>
+    <record id="rule_cyllo_budget_management_budget_budget_all_public"
+            model="ir.rule">
+        <field name="name">View All Budget</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_budget_budget"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups"
+               eval="[(4, ref('account.group_account_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

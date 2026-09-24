@@ -1,0 +1,368 @@
+body:has(.cy-menu-sidebar) .o_navbar,
+body:has(.cy-menu-sidebar) .o_action_manager {
+    padding-left: 70px !important;
+}
+
+body:has(header.o_navbar[style*="display: none"]) .o_navbar,
+body:has(header.o_navbar[style*="display: none"]) .o_action_manager {
+    padding-left: 0 !important;
+}
+
+.cy-menu-sidebar {
+    --sidebar-text-color: #BCBBA7;
+    --sidebar-bg-color: #26261A;
+    --sidebar-border-color: #373627;
+    --sidebar-bg-active: #373627;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 70px;
+    background-color: var(--sidebar-bg-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.cy-menu-sidebar::-webkit-scrollbar {
+    display: none;
+}
+
+.cy-menu-sidebar-open:has(.cy-menu-sidebar) {
+
+    .o_navbar,
+    .o_action_manager {
+        padding-left: 16% !important;
+    }
+
+    .cy-menu-sidebar {
+        width: 16%;
+    }
+}
+
+.cy-menu-sidebar-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10px;
+    position: sticky;
+    top: 0;
+    height: 60px;
+    background-color: var(--sidebar-bg-color);
+    z-index: 1;
+    border-bottom: 1px solid var(--sidebar-border-color);
+}
+
+.cy-navbar-brand-icon {
+    width: auto;
+    height: 30px;
+    object-fit: contain;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.cy-menu-sidebar-header .cy-image,
+.cy-menu-sidebar-header .cy-icons,
+.cy-menu-sidebar-header .cy-svg-container svg {
+    width: 30px;
+    height: 30px;
+    fill: currentColor;
+    color: var(--sidebar-text-color) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 25px !important;
+}
+
+.cy-menu-sidebar-current-app {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    min-width: 0;
+    color: var(--sidebar-text-color);
+    padding-left: 8px;
+}
+
+.cy-menu-sidebar-current-app span {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px;
+}
+
+.cy-menu-sidebar-home {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    color: var(--sidebar-text-color);
+    border-radius: 8px;
+    font-size: 26px;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.cy-menu-sidebar-open .cy-menu-sidebar-home {
+    background-color: var(--sidebar-bg-color);
+    color: var(--sidebar-text-color);
+}
+
+/* App icon and expand-arrow overlap in the same spot and crossfade on
+   hover, instead of a hard display swap. */
+.cy-menu-sidebar-home>.cy-svg-container,
+.cy-menu-sidebar-home>.cy-image,
+.cy-menu-sidebar-home:hover>img,
+.cy-menu-sidebar-home>i {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 1;
+    transform: scale(1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: normal;
+}
+
+.cy-menu-sidebar-home .cy-icons {
+    color: var(--sidebar-text-color) !important;
+    font-size: 30px !important;
+}
+
+.cy-menu-sidebar-home-arrow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    i {
+        line-height: normal;
+    }
+}
+
+.cy-menu-sidebar-home:hover>.cy-svg-container,
+.cy-menu-sidebar-home:hover>.cy-image,
+.cy-menu-sidebar-home:hover>img,
+.cy-menu-sidebar-home:hover>i {
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.cy-menu-sidebar-home:hover .cy-menu-sidebar-home-arrow {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.cy-menu-sidebar-home .cy-image {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.cy-menu-sidebar-home .cy-svg-container svg {
+    width: 30px;
+    height: 30px;
+
+}
+
+.cy-menu-sidebar-apps {
+    list-style: none;
+    padding: 10px 10px;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cy-menu-sidebar-apps li {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    width: 100%;
+    height: 50px;
+    padding: 5px;
+    cursor: pointer;
+    color: var(--sidebar-text-color);
+    transition: background-color 0.2s;
+    border-radius: 8px;
+}
+
+.cy-menu-sidebar-apps li:hover {
+    background-color: var(--sidebar-bg-active);
+}
+
+
+.cy-menu-sidebar-apps li.active {
+    background-color: #373627;
+    outline: 2px solid $o-brand-primary;
+    outline-offset: -1px;
+}
+
+.cy-menu-sidebar-apps .cy-image {
+    padding: 5px;
+}
+
+.cy-menu-sidebar-apps .cy-image,
+.cy-menu-sidebar-apps .cy-svg-container {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cy-menu-sidebar-apps .cy-svg-container svg {
+    width: 30px;
+    height: 30px;
+    fill: currentColor;
+}
+
+.cy-menu-sidebar-apps .cy-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    font-size: 30px !important;
+    flex-shrink: 0;
+    color: var(--sidebar-text-color) !important;
+}
+
+.cy-menu-sidebar-app-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    padding-right: 8px;
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cy-menu-sidebar-open .cy-menu-sidebar-app-name {
+    opacity: 1;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+}
+
+.cy-menu-sidebar-toggle {
+    margin-top: auto;
+    color: var(--sidebar-text-color);
+    font-size: 20px;
+    padding: 0.5em;
+    align-self: flex-end;
+    transition: color 0.2s;
+}
+
+.cy-menu-sidebar-toggle:hover {
+    color: $o-brand-primary;
+}
+
+.cy-menu-sidebar-search {
+    margin-top: auto;
+    width: 100%;
+    padding: 0;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--sidebar-bg-color);
+    border-top: 1px solid var(--sidebar-border-color);
+}
+
+.cy-menu-sidebar-search-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+    padding: 5px;
+    cursor: pointer;
+    color: var(--sidebar-text-color);
+    transition: background-color 0.2s;
+}
+
+.cy-menu-sidebar-search-container:hover {
+    background-color: var(--sidebar-bg-active);
+}
+
+.cy-menu-sidebar-search-container .ri-search-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    width: 60px;
+    height: 40px;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.cy-menu-sidebar-search-text-col {
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-right: 12px;
+}
+
+.cy-menu-sidebar-search-text {
+    display: block;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cy-menu-sidebar-search-text-hotkey {
+    background-color: var(--sidebar-bg-active);
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 0 6px;
+    opacity: 0;
+}
+
+.cy-menu-sidebar-open .cy-menu-sidebar-search-text,
+.cy-menu-sidebar-open .cy-menu-sidebar-search-text-hotkey {
+    opacity: 1;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+}
+
+@keyframes cy-menu-icon-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(5deg);
+    }
+
+    50% {
+        transform: rotate(0deg);
+    }
+
+    75% {
+        transform: rotate(-5deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}

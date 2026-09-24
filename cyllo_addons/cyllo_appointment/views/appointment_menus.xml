@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_appointment_root"
+        name="Appointments"
+        sequence="90"
+        groups="cyllo_appointment.group_appointment_user"
+        web_icon="cyllo_appointment,static/description/cyllo_appointment_tick_dark.svg"/>
+    <menuitem id="menu_appointment_main"
+        name="Appointments"
+        parent="menu_appointment_root"
+        sequence="10"/>
+    <menuitem id="menu_appointment_all"
+        name="All Appointments"
+        parent="menu_appointment_main"
+        action="action_appointment"
+        sequence="10"/>
+    <menuitem id="menu_appointment_today"
+        name="Today"
+        parent="menu_appointment_main"
+        action="action_appointment_today"
+        sequence="20"/>
+    <menuitem id="menu_appointment_config"
+        name="Configuration"
+        parent="menu_appointment_root"
+        sequence="50"
+        groups="cyllo_appointment.group_appointment_manager"/>
+    <menuitem id="menu_appointment_types"
+        name="Appointment Types"
+        parent="menu_appointment_config"
+        action="action_appointment_type"
+        sequence="10"/>
+    <menuitem id="menu_appointment_slots"
+        name="Time Slots"
+        parent="menu_appointment_config"
+        action="action_appointment_slot"
+        sequence="20"/>
+    <menuitem id="menu_appointment_resources"
+        name="Resources"
+        parent="menu_appointment_config"
+        action="action_appointment_resource"
+        sequence="30"/>
+    <menuitem id="menu_appointment_staff"
+        name="Staff Members"
+        parent="menu_appointment_config"
+        action="hr.open_view_employee_list_my"
+        sequence="40"/>
+    <record id="action_appointment_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'cyllo_appointment'}</field>
+    </record>
+    <menuitem id="menu_appointment_settings"
+        name="Settings"
+        parent="menu_appointment_config"
+        action="action_appointment_config_settings"
+        sequence="100"/>
+
+    <!-- Website Menu -->
+    <record id="menu_appointment_website" model="website.menu">
+        <field name="name">Appointments</field>
+        <field name="url">/appointment</field>
+        <field name="parent_id" search="[('url', '=', '/default-main-menu')]"/>
+        <field name="sequence" type="int">50</field>
+    </record>
+</odoo>

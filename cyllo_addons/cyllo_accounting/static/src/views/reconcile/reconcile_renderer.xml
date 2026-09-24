@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ReconcileRenderer">
+        <div tabindex="-1" class="o_reconcile_renderer o_renderer cy-template_container"
+             t-ref="root">
+            <!-- Left Section -->
+            <div class="cy-re-statement cy-re-card py-3">
+                <!-- New Record Creation Section -->
+                <t t-if="props.isCreate === true">
+                    <div class="card cy-re-create-statement">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="card-title m-0 text-primary">New Transaction</h5>
+                                <button type="button" class="btn-close" aria-label="Close"
+                                        t-on-click="onCloseCreate"/>
+                            </div>
+                            <form>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Date<span
+                                                class="text-danger">*</span></label>
+                                        <DateTimeInput
+                                                type="'date'"
+                                                onChange.bind="onDateChange"
+                                                value="state.date"
+                                            />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Payment Reference <span
+                                                class="text-danger">*</span></label>
+                                        <input
+                                                type="text"
+                                                t-attf-class="form-control {{ !state.paymentRef ? 'field_required' : '' }}"
+                                                placeholder="Enter payment reference"
+                                                t-model="state.paymentRef"
+                                        />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Partner</label>
+                                        <Many2XAutocomplete resModel="'res.partner'"
+                                                            getDomain="() => []"
+                                                            update.bind="onUpdatePartner"
+                                                            fieldString="'User'"
+                                                            activeActions="{}"
+                                                            value="state.partner?.display_name"
+                                                            placeholder="'Select a partner'"
+                                                            quickCreate="quickCreate"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Amount <span
+                                                class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="text"
+                                                   t-attf-class="form-control {{ !state.amount || state.amount == 0 ? 'field_required' : '' }}"
+                                                   placeholder="Enter amount"
+                                                   t-on-input="onChangeAmount"
+                                                   t-model="state.amount"/>
+                                            <span class="input-group-text"
+                                                  t-out="state.currency?.symbol"
+                                                  t-attf-class="{{ !state.amount || state.amount == 0 ? 'field_required' : '' }}"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Foreign Currency</label>
+                                        <Many2XAutocomplete resModel="'res.currency'"
+                                                            getDomain="() => [['id', '!=', state.currency.id]]"
+                                                            update.bind="onUpdateForeignCurrency"
+                                                            fieldString="'Foreign Currency'"
+                                                            activeActions="{}"
+                                                            value="state.foreignCurrency?.name"
+                                                            placeholder="'Select foreign currency'"
+                                                            quickCreate="quickCreate"/>
+                                    </div>
+                                    <t t-if="state.foreignCurrency">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Amount In Currency<span
+                                                    class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <input type="text"
+                                                       t-attf-class="form-control {{ state.foreignCurrency and (!state.foreignAmount || state.foreignAmount == 0) ? 'field_required' : '' }}"
+                                                       placeholder="Enter amount"
+                                                       t-on-input="onChangeForeignAmount"
+                                                       t-model="state.foreignAmount"/>
+                                                <span class="input-group-text"
+                                                      t-out="state.foreignCurrency?.symbol"
+                                                      t-attf-class="{{ !state.foreignAmount || state.foreignAmount == 0 ? 'field_required' : '' }}"/>
+                                            </div>
+                                        </div>
+                                    </t>
+
+                                    <div class="col-12 d-flex gap-2">
+                                        <button type="button"
+                                                class="btn btn-primary flex-grow-1"
+                                                t-on-click="onSaveRecord">
+                                            Save Record
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </t>
+                <!-- Records List -->
+                <div t-if="state.records.length == 0"
+                     class="h-100 d-flex align-items-center justify-content-center flex-column">
+                    <img style="height: 130px"
+                         src="/cyllo_base/static/src/img/cyllo_smiling_face.svg"/>
+                    <h3 class="text-muted mt-4">No statements to reconcile!</h3>
+                </div>
+                <t t-foreach="state.records" t-as="record" t-key="record_index"
+                   model="props.resModel">
+                    <div style="cursor: pointer;">
+                        <ReconcileLines value="record"
+                                        isActive="state.selectedRecord &amp;&amp; state.selectedRecord.id === record.id"
+                                        onClick.bind="() => this.onClickLines(record)"/>
+                    </div>
+                </t>
+            </div>
+            <!-- Right Section -->
+            <div class="col-8"
+                 style="height: 100%; overflow-y: hidden; display: flex; flex-direction: column;">
+                <div class="d-flex cy-re-button-container">
+                    <t t-if="state.showDefaultButtons and state.selectedRecord?.data.is_reconciled == false and state.selectedRecord?.data.to_check == false">
+                        <button type="button" class="btn btn-primary"
+                                style="background-color: transparent; color: #9EA700; border: 1px solid #9EA700; margin-right: 10px;"
+                                t-on-click="validateLines"
+                                t-att-disabled="!state.allowReconcile">
+                            Validate
+                        </button>
+                        <button type="button" class="btn btn-secondary"
+                                style="background-color: transparent; color: #9EA700; border: 1px solid #9EA700;"
+                                t-on-click="onMarkToCheck">
+                            To Check
+                        </button>
+                    </t>
+                    <t t-if="state.selectedRecord?.data.is_reconciled">
+                        <button type="button" class="btn btn-secondary"
+                                style="background-color: transparent; color: #007bff; border: 1px solid #007bff; margin-right: 10px;"
+                                t-on-click="onReset">
+                            Reset
+                        </button>
+                    </t>
+                    <t t-if="state.selectedRecord?.data.to_check">
+                        <button type="button" class="btn btn-secondary"
+                                style="background-color: transparent; color: #007bff; border: 1px solid #007bff;"
+                                t-on-click="onSetAsChecked">
+                            Set as Checked
+                        </button>
+                    </t>
+                    <t t-if="!state.selectedRecord?.data.is_reconciled and state.selectedRecord?.data.to_check == false">
+                        <t t-foreach="state.writeOffButtons" t-as="model" t-key="model.id">
+                            <button type="button" class="btn btn-secondary ms-2"
+                                    style="background-color: transparent; color: #9EA700; border: 1px solid #9EA700;"
+                                    t-on-click="() => this.onWriteOff(model.id)">
+                                <t t-esc="model.name"/>
+                            </button>
+                        </t>
+                    </t>
+                    <div class="ms-auto d-flex align-items-center">
+                        <Dropdown togglerClass="'btn btn-link p-0'">
+                            <t t-set-slot="toggler">
+                                <i class="fa fa-cog" style="font-size: 18px; color: #6c757d;"/>
+                            </t>
+                            <DropdownItem onSelected="() => this.actionService.doAction({
+                                type: 'ir.actions.act_window',
+                                res_model: 'account.reconcile.model',
+                                views: [[false, 'form']],
+                                target: 'new'
+                            })">
+                                Create Model
+                            </DropdownItem>
+                            <DropdownItem
+                                    onSelected="() => this.actionService.doAction('account.action_account_reconcile_model')">
+                                View Model
+                            </DropdownItem>
+                        </Dropdown>
+                    </div>
+                </div>
+                <div class="cy-re-reconcile-table cy-re-card d-flex flex-column">
+                    <!-- Loading Indicator -->
+                    <t t-if="state.isLoading">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </t>
+                    <!-- Reconcile Lines Table -->
+                    <t t-else="">
+                        <div class="overflow-auto h-100">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Account</th>
+                                        <th>Partner</th>
+                                        <th>Date</th>
+                                        <t t-if="hasAnalyticDistribution()">
+                                            <th>Analytic</th>
+                                        </t>
+                                        <th t-if="state.hasTaxes">Taxes</th>
+                                        <t t-if="!this.state.isSameCurrency">
+                                            <th>Amount in Currency</th>
+                                            <th>Currency</th>
+                                        </t>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                        <th/>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-if="selectedData">
+                                        <tr style="color: black; cursor:pointer;"
+                                            t-on-click="() => this.onLineClick(line)">
+                                            <td style="word-wrap: break-word; white-space: normal;">
+                                                <t t-if="state.selectedJournalAccount">
+                                                    <t t-out="state.selectedJournalAccount.display_name"/>
+                                                </t>
+                                                <div class="text-wrap text-muted fst-italic">
+                                                    <t t-out="selectedData.payment_ref"/>
+                                                </div>
+                                            </td>
+                                            <td style="word-wrap: break-word; white-space: normal;"
+                                                t-out="selectedData.partner_id?.[1] || ''"/>
+                                            <td style="word-wrap: break-word; white-space: normal;"
+                                                t-out="selectedData.date.toISODate()"/>
+                                            <t t-if="hasAnalyticDistribution()">
+                                                <td style="word-wrap: break-word; white-space: normal;"/>
+                                            </t>
+                                            <td t-if="state.hasTaxes"
+                                                style="word-wrap: break-word; white-space: normal;"/>
+                                            <t t-if="!this.state.isSameCurrency">
+                                                <td style="word-wrap: break-word; white-space: normal;">
+                                                    <t t-out="formatCurrency(selectedData.amount, selectedData.currency_id[0])"/>
+                                                </td>
+                                                <td style="word-wrap: break-word; white-space: normal;">
+                                                    <t t-out="selectedData.currency_id[1]"/>
+                                                </td>
+                                            </t>
+                                            <td style="word-wrap: break-word; white-space: normal;">
+                                                <t t-if="selectedData.amount_in_base &gt; 0"
+                                                   t-out="formatCurrency(selectedData.amount_in_base, state.selectedJournalAccount.currency_id?.[0])"/>
+                                            </td>
+                                            <td style="word-wrap: break-word; white-space: normal;">
+                                                <t t-if="selectedData.amount_in_base &lt; 0"
+                                                   t-out="formatCurrency(-selectedData.amount_in_base, state.selectedJournalAccount.currency_id?.[0])"/>
+                                            </td>
+                                            <td/>
+                                        </tr>
+                                        <t t-if="selectedData.is_reconciled">
+                                            <t t-set="reconcileLines"
+                                               t-value="selectedData.reconcile_data_json?.data"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-set="reconcileLines"
+                                               t-value="state.reconcileLines"/>
+                                        </t>
+                                        <t t-if="reconcileLines &amp;&amp; Array.isArray(reconcileLines)">
+                                            <tr t-if="reconcileLines" t-foreach="reconcileLines"
+                                                t-as="line" t-key="line_index"
+                                                t-on-click="() => this.onLineClick(line)"
+                                                style="cursor:pointer;">
+                                                <td style="word-wrap: break-word; white-space: normal;">
+                                                    <t t-out="line.account_id?.[1] || ''"/>
+                                                    <t t-if="line.journal_label and !line.tax_id">
+                                                        <div class="text-wrap text-muted fst-italic">
+                                                            <t t-out="line.journal_label"/>
+                                                        </div>
+                                                    </t>
+                                                    <t t-if="line.move_id">
+                                                        <div class="text-wrap text-info fst-italic"
+                                                             style="cursor: pointer;">
+                                                            <a t-out="line.move_id?.[1]"
+                                                               t-on-click="() => this.openRecord(line.move_id[0])"/>
+                                                        </div>
+                                                    </t>
+                                                    <t t-if="line.partner_account and !line.payment_ref">
+                                                        <div class="text-wrap text-muted fst-italic">
+                                                            <span>Open balance</span>
+                                                        </div>
+                                                    </t>
+                                                    <t t-elif="line.payment_ref and !line.tax_id and !line.journal_label">
+                                                        <div class="text-wrap text-muted fst-italic">
+                                                            <t t-out="line.payment_ref"/>
+                                                        </div>
+                                                    </t>
+                                                    <t t-if="line.tax_id">
+                                                        <div class="text-wrap text-muted fst-italic">
+                                                            <t t-out="line.payment_ref"/>
+                                                        </div>
+                                                    </t>
+                                                </td>
+                                                <td style="word-wrap: break-word; white-space: normal;"
+                                                    t-out="line.partner_id?.[1] || ''"/>
+                                                <td style="word-wrap: break-word; white-space: normal;">
+                                                    <t t-if="line.date" t-out="line.date"/>
+                                                    <t t-else="">
+                                                        <span class="cy-new-label" t-esc="'New'"/>
+                                                    </t>
+                                                </td>
+                                                <t t-if="hasAnalyticDistribution()">
+                                                    <td style="word-wrap: break-word; white-space: normal;"
+                                                        t-out="line.analytic"/>
+                                                </t>
+                                                <td style="word-wrap: break-word; white-space: normal;"
+                                                    t-if="state.hasTaxes">
+                                                    <t t-if="line.tax_ids and line.tax_ids.length > 0">
+                                                        <t t-foreach="line.tax_ids" t-as="tax"
+                                                           t-key="tax_index">
+                                                            <span t-esc="tax.name || tax.data?.display_name"
+                                                                  class="badge badge-pill badge-secondary"/>
+                                                        </t>
+                                                    </t>
+                                                    <t t-elif="line.tax_id">
+                                                        <span t-esc="line.tax_name || line.tax_id[1]"
+                                                              class="badge badge-pill badge-secondary"/>
+                                                    </t>
+                                                </td>
+                                                <t t-if="!this.state.isSameCurrency">
+                                                    <t t-if="line.currency_id"
+                                                       t-set="currency_id"
+                                                       t-value="line.currency_id"/>
+                                                    <t t-else=""
+                                                       t-set="currency_id"
+                                                       t-value="this.companyData.currency_id"/>
+                                                    <t t-if="line.amount_residual_currency and line.amount_residual_currency != 0"
+                                                       t-set="amount_residual"
+                                                       t-value="line.amount_residual_currency"/>
+                                                    <t t-elif="line.amount_currency and line.amount_currency != 0"
+                                                       t-set="amount_residual"
+                                                       t-value="line.amount_currency"/>
+                                                    <t t-else=""
+                                                       t-set="amount_residual"
+                                                       t-value="line.amount_residual"/>
+                                                    <t t-if="line.is_same_currency == false"
+                                                       t-set="amountInLine"
+                                                       t-value="line.amountInLine * (line.amount_residual_currency/line.amount_residual)"/>
+                                                    <t t-else=""
+                                                       t-set="amountInLine"
+                                                       t-value="line.amountInLine"/>
+                                                    <td style="word-wrap: break-word; white-space: normal;">
+                                                        <t t-if="line.amount_residual != 0">
+                                                            <span t-if="line.amountInLine"
+                                                                  style="text-decoration: line-through;"
+                                                                  class="me-2">
+                                                                <t t-if="(line.amountInLine &gt; line.amount_residual) || (line.amountInLine &lt; line.amount_residual)">
+                                                                    <t t-out="formatCurrency(amount_residual, currency_id[0])"/>
+                                                                </t>
+                                                            </span>
+                                                            <span t-if="line.amountInLine">
+                                                                <t t-out="formatCurrency(amountInLine, currency_id[0])"/>
+                                                            </span>
+                                                            <t t-if="!line.amountInLine">
+                                                                <t t-out="formatCurrency(amount_residual, currency_id[0])"/>
+                                                            </t>
+                                                        </t>
+                                                    </td>
+                                                    <td style="word-wrap: break-word; white-space: normal;">
+                                                        <t t-out="currency_id[1]"/>
+                                                    </td>
+                                                </t>
+
+                                                <td style="word-wrap: break-word; white-space: normal;">
+                                                    <t t-if="line.amount_residual &lt; 0">
+                                                        <span t-if="line.amountInLine"
+                                                              style="text-decoration: line-through;"
+                                                              class="me-2">
+                                                            <t t-if="(line.amountInLine &gt; line.amount_residual) || (line.amountInLine &lt; line.amount_residual)">
+                                                                <t t-out="formatCurrency(-line.amount_residual, state.selectedJournalAccount.currency_id?.[0])"/>
+                                                            </t>
+                                                        </span>
+                                                        <span t-if="line.amountInLine">
+                                                            <t t-out="formatCurrency(-line.amountInLine, state.selectedJournalAccount.currency_id?.[0])"/>
+                                                        </span>
+                                                        <t t-if="!line.amountInLine">
+                                                            <t t-out="formatCurrency(-line.amount_residual, state.selectedJournalAccount.currency_id?.[0])"/>
+                                                        </t>
+                                                    </t>
+                                                </td>
+                                                <td style="word-wrap: break-word; white-space: normal;">
+                                                    <t t-if="line.amount_residual &gt; 0">
+                                                        <span t-if="line.amountInLine"
+                                                              style="text-decoration: line-through;"
+                                                              class="me-2">
+                                                            <t t-if="(line.amountInLine &gt; line.amount_residual) || (line.amountInLine &lt; line.amount_residual)">
+                                                                <t t-out="formatCurrency(line.amount_residual, state.selectedJournalAccount.currency_id?.[0])"/>
+                                                            </t>
+                                                        </span>
+                                                        <span t-if="line.amountInLine">
+                                                            <t t-out="formatCurrency(line.amountInLine, state.selectedJournalAccount.currency_id?.[0])"/>
+                                                        </span>
+                                                        <t t-if="!line.amountInLine">
+                                                            <t t-out="formatCurrency(line.amount_residual, state.selectedJournalAccount.currency_id?.[0])"/>
+                                                        </t>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <t t-if="!selectedData.is_reconciled and !line.partner_account and !line.tax_id">
+                                                        <t t-if="line.is_suspense and line.tax_ids and line.tax_ids.length > 0">
+                                                            <button type="button" class="btn btn-sm"
+                                                                    t-on-click="() => this.onDeleteLine(line)">
+                                                                <i class="btn fa fa-trash-o"/>
+                                                            </button>
+                                                        </t>
+                                                        <t t-elif="!line.is_suspense">
+                                                            <button type="button" class="btn btn-sm"
+                                                                    t-on-click="() => this.onDeleteLine(line)">
+                                                                <i class="btn fa fa-trash-o"/>
+                                                            </button>
+                                                        </t>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </div>
+                <div class="cy-re-notebook cy-re-card">
+                    <Notebook t-props="noteProps"/>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

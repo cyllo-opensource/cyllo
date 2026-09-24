@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.StatusBarDialog">
+            <div class="status_bar_dialog">
+            <Dialog size="'lg'" title="'Add Statusbar'">
+                <div class="cy-modal__body py-0">
+                    <p class="cy-studio-modal_subtitle">Fill the form to add the Statusbar</p>
+                    <div class="d-flex gap-3 mb-3">
+                <div class="form-check">
+                    <label class="form-check-label cy-check_label"
+                           for="flexRadioDefault1">
+                        Existing Field
+                    </label>
+                    <input class="form-check-input cy-checked-input"
+                           id="flexRadioDefault1"
+                           type="radio" name="field"
+                           value="existing"
+                           t-model="state.field"/>
+                </div>
+                        <div class="form-check">
+                    <label class="form-check-label cy-check_label"
+                           for="flexRadioDefault2">
+                        New Field
+                    </label>
+                            <input class="form-check-input cy-checked-input"
+                                   id="flexRadioDefault2"
+                                   type="radio" name="field"
+                                   value="new"
+                                   t-model="state.field"/>
+                </div>
+            </div>
+                    <div t-if="state.field == 'existing'"
+                         class="d-flex cy-modal-main_content gap-3">
+                <div class="existing_field w-100"
+                     style="max-width: 53%;">
+                    <div class=" ">
+                        <div class="mb-4">
+                            <label for=""
+                                   class="cy-modal_label">
+                            Existing Field</label>
+                            <div class="cy-studio-custom-dropdown-dialog">
+                                <CylloStudioDropdown
+                                        options="ExistingField(existingFields)"
+                                        onChange="(value) => this.handleExistingFieldChange(value)"
+                                        defaultValue="this.state.selectedField"
+                                        searchable="true"
+                                />
+                            </div>
+                        </div>
+	                    <div class="mb-4">
+                            <label for=""
+                                   class="cy-modal_label">
+                                Visible To</label>
+
+                            <div class="cy-input-visible-to">
+                                <MultiRecordSelector
+                                        resIds="StatusBarValues.group_ids"
+                                        resModel="'res.groups'"
+                                        update="(group_ids)=> StatusBarValues.group_ids = group_ids"/>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-check-label cy-modal_label"
+                                   for="defaultCheck1">
+                                Clickable
+                            </label>
+                            <input class="form-check-input cy-checked-input mt-0"
+                                   type="checkbox"
+                                   value=""
+                                   t-model="StatusBarValues.clickable"
+                                   id="defaultCheck1"/>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-check-label cy-modal_label"
+                                   for="defaultCheck1">
+                                Foldable
+                            </label>
+                            <input class="form-check-input cy-checked-input mt-0"
+                                   type="checkbox"
+                                   value="fold"
+                                   id="defaultCheck1"/>
+                        </div>
+                    </div>
+                </div>
+                        <div class="w-100">
+                    <div class="mb-4">
+                        <label for=""
+                               class="cy-modal_label">
+                            Default Value</label>
+                        <div class="cy-studio-custom-dropdown-dialog">
+                            <CylloStudioDropdown
+                                    options="DefaultValueExistingField(state.values)"
+                                    onChange="(value) => this.handleDefaultValueExisting(value)"
+                                    searchable="true"
+                            />
+                        </div>
+                    </div>
+                            <div class="mb-4 option_visible1">
+				                <label for=""
+                                       class="cy-modal_label">
+                            Option visible</label>
+                                <div class="cy-dialog-option-visible">
+                        <MultiSelectDropDown t-props="multiSelectDropDown"
+                                             style="'background-color: white; max-height: 106px; overflow-y: auto; width: 100% important;'"/>
+                        </div>
+                    </div>
+                            <div class="mb-4">
+                    </div>
+
+                </div>
+
+            </div>
+                    <div t-else=""
+                         class="d-flex cy-modal-main_content gap-3">
+                <div class="w-100" style="max-width:53%">
+                    <div class="">
+                        <div class="mb-4">
+                            <label for="label"
+                                   class="cy-modal_label">Label Name</label>
+                            <input class="cy-input-modal"
+                                   reqired="true"
+                                   type="text"
+                                   id="label"
+                                   name="label"
+                                   t-att-value="state.newFieldLabel"
+                                   t-on-input="onInputLabel"
+                                   autocomplete="off"/>
+                        </div>
+                        <div class="mb-4">
+                            <label for="tech_name" class="cy-modal_label">
+                                Technical Name</label>
+                            <input type="text"
+                                   class="cy-input-modal"
+                                   required="true"
+                                   id="tech_name"
+                                   name="Technical Name"
+                                   t-att-value="'x_cy_' + state.newFieldTechName"
+                                   disabled="true"/>
+                        </div>
+                        <div class=" mb-4">
+                            <label for=""
+                                   class="cy-modal_label">
+                                Options</label>
+                            <div class="cy-scrollable-content">
+                                                      <div t-ref="cy-SelectionValues">
+			                    <t t-foreach="state.selectionValues" t-as="value"
+                                   t-key="value_index">
+                                   <SelectionFieldValue value="value" index="value_index"
+                                                        checkSelectionValues.bind="(value) =>this.checkSelectionValues(value)"
+                                                        changeValue.bind="(index, value)=>this.changeSelectionValue(index, value)"
+                                                        deleteValue.bind="(index)=>this.deleteSelectionValue(index)"/>
+                                </t>
+			                                                                        </div>
+                                </div>
+                            <button class="btn btn-primary mb-2 px-4"
+                                    t-on-click="addSelectionValue">Add
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-2">
+
+                                <label class="form-check-label cy-modal_label"
+                                       for="defaultCheck1">
+                                    Clickable
+                                </label>
+                                <input class="form-check-input cy-checked-input mt-0"
+                                       type="checkbox"
+                                       value=""
+                                       t-model="StatusBarValues.clickable"
+                                       id="defaultCheck1"/>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+
+                                <label class="form-check-label cy-modal_label"
+                                       for="defaultCheck1">
+                                    Foldable
+                                </label>
+                                <input class="form-check-input cy-checked-input mt-0"
+                                       type="checkbox"
+                                       value="fold"
+                                       id="defaultCheck1"/>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                        <div class="w-100" style="max-width:53%">
+                    <div class="" style="margin-bottom:26px;"
+                         t-if="state.selectionValues?.length">
+                        <label for=""
+                               class="cy-modal_label">
+                            Default Value</label>
+                        <div class="cy-studio-custom-dropdown-dialog non-clickable">
+                                <CylloStudioDropdown
+                                        options="DefaultValueNewField"
+                                        onChange="(value) => this.handleDefaultValueNewField(value)"
+                                        defaultValue="this.StatusBarValues.defaultValue"
+                                        searchable="true"
+                                />
+                            </div>
+
+                    </div>
+                            <div style="margin-bottom:26px;" class="option_visible"
+                                 t-if="state.selectionValues?.length">
+                        <label for=""
+                               class="cy-modal_label">
+                            Option visible</label>
+                                <div class="cy-input-visible-to-new-field-option-visible">
+                        <MultiSelectDropDown t-props="multiSelectDropDown"
+                                             style="'background-color: white; max-height: 90px; overflow-y: auto; padding: 0px !important;'"/>
+                        </div>
+                    </div>
+                            <div class="mb-4">
+                        <label for=""
+                               class="cy-modal_label">
+                            Visible To</label>
+                                <div class="cy-input-visible-to-new-field">
+                            <MultiRecordSelector
+                                    resIds="StatusBarValues.group_ids"
+                                    resModel="'res.groups'"
+                                    update="(group_ids)=> StatusBarValues.group_ids = group_ids"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                    <button class="cy-btn_stroke btn mt-2"
+                            t-on-click="invisibleDomain">Invisible domain <i
+                            class="ri-add-line"/> </button>
+        </div>
+                <t t-set-slot="footer">
+                    <button class="btn btn-primary"
+                            t-on-click="onConfirm">Confirm</button>
+                    <button class="btn btn-secondary"
+                            t-on-click="onDiscard">Discard</button>
+                </t>
+            </Dialog>
+            </div>
+    </t>
+</templates>

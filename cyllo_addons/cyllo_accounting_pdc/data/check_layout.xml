@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================= PAPER FORMAT ================= -->
+    <record id="paperformat_check" model="report.paperformat">
+        <field name="name">Check Paper Format</field>
+        <field name="format">custom</field>
+        <field name="page_height">80</field>
+        <field name="page_width">155</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line">False</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- ================= TEMPLATE ================= -->
+    <template id="report_custom_check">
+        <t t-foreach="docs" t-as="payment">
+            <main style="font-family: DejaVu Sans, Arial, sans-serif;">
+                <meta charset="utf-8"/>
+                <div style="
+                    width: 152mm;
+                    height: 70mm;
+                    margin: 0 auto;
+                    border: 2px solid #000;
+                    position: relative;
+                    box-sizing: border-box;
+                    background: white;
+                    page-break-inside: avoid;">
+
+                    <!-- Company Logo and Name -->
+                    <div style="position: absolute; top: 5mm; left: 8mm; display: flex; align-items: center;">
+                        <t t-if="payment.company_id.logo">
+                            <img t-att-src="'data:image/png;base64,%s' % payment.company_id.logo.decode('utf-8')"
+                                 style="max-height: 10mm; max-width: 30mm; margin-right: 5px;"
+                                 alt="Company Logo"/>
+                        </t>
+                        <div style="font-size: 16px; font-weight: bold;">
+                            <span t-esc="payment.company_id.name"/>
+                        </div>
+                    </div>
+
+                    <!-- Check Number -->
+                    <div style="position: absolute; top: 5mm; right: 10mm; font-size: 12px;">
+                        <strong>Check No:</strong>
+                        <span t-esc="payment.check_number or ''"/>
+                    </div>
+
+                    <!-- Date -->
+                    <div style="position: absolute; top: 15mm; right: 10mm; font-size: 12px;">
+                        <strong>Date:</strong>
+                        <span t-field="payment.date"/>
+                    </div>
+
+                    <!-- Pay To -->
+                    <div style="position: absolute; top: 25mm; left: 8mm; right: 70mm;">
+                        <div style="font-size: 9px; color: #666;">
+                            PAY TO THE ORDER OF
+                        </div>
+                        <div style="
+                            border-bottom: 2px solid #000;
+                            font-size: 18px;
+                            font-weight: bold;
+                            min-height: 9mm;
+                            padding: 2px 0;">
+                            <span t-esc="payment.partner_id.name"/>
+                        </div>
+                    </div>
+
+                    <!-- AMOUNT BOX -->
+                    <div style="position: absolute; top: 25mm; right: 10mm; width: 55mm;">
+                        <div style="font-size: 9px; color: #666; text-align: right;">
+                            AMOUNT
+                        </div>
+                        <div style="
+                            border: 2px solid #000;
+                            padding: 5px;
+                            font-size: 22px;
+                            font-weight: bold;
+                            text-align: right;
+                            background: #f9f9f9;">
+                            <span t-field="payment.amount"
+                                  t-options='{"widget":"monetary","display_currency":payment.currency_id}'/>
+                        </div>
+                    </div>
+
+                    <!-- Amount in Words -->
+                    <div style="position: absolute; top: 43mm; left: 8mm; right: 70mm;">
+                        <div style="font-size: 11px; min-height: 8mm;">
+                            <span t-esc="payment.currency_id.amount_to_text(payment.amount)"/>
+                        </div>
+                        <div style="border-bottom: 1px solid #000;"></div>
+                    </div>
+
+                    <!-- Reference -->
+                    <div style="position: absolute; bottom: 17mm; left: 8mm; font-size: 10px;">
+                        <strong>Ref:</strong>
+                        <span t-esc="payment.ref or ''"/>
+                    </div>
+
+                    <!-- Signature -->
+                    <div style="position: absolute; bottom: 17mm; right: 10mm; width: 45mm;">
+                        <div style="
+                            border-top: 2px solid #000;
+                            padding-top: 3px;
+                            font-size: 10px;
+                            font-weight: bold;
+                            text-align: center;">
+                            AUTHORIZED SIGNATURE
+                        </div>
+                    </div>
+
+                    <!-- MICR -->
+                    <div style="
+                        position: absolute;
+                        bottom: 5mm;
+                        left: 8mm;
+                        right: 10mm;
+                        font-family: 'Courier New', monospace;
+                        font-size: 11px;
+                        letter-spacing: 2px;
+                        border-top: 1px dotted #999;
+                        padding-top: 3mm;
+                        text-align: center;">
+                        C 123456789 A 1234567890 T
+                        <span t-esc="payment.check_number or ''"/>
+                    </div>
+                </div>
+            </main>
+        </t>
+    </template>
+    <!-- ================= REPORT ACTION ================= -->
+    <record id="action_report_cyllo_check" model="ir.actions.report">
+        <field name="name">Cyllo Check</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_accounting_pdc.report_custom_check</field>
+        <field name="report_file">cyllo_accounting_pdc.report_custom_check</field>
+        <field name="binding_model_id" ref="account.model_account_payment"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_check"/>
+        <!-- This makes filename dynamically assign the payment code -->
+        <field name="print_report_name">(object.name or 'Check')</field>
+    </record>
+</odoo>

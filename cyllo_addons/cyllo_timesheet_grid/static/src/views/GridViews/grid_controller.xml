@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template xml:space="preserve">
+    <t t-name="grid_view.GridView" owl="1">
+        <!-- The root element of the view component -->
+        <div t-ref="root" t-att-class="props.className">
+            <!-- Layout component for organizing the view -->
+            <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''"
+                    display="props.display">
+                <!-- Slot for additional actions in the control panel -->
+                <t t-set-slot="control-panel-additional-actions">
+                    <CogMenu/>
+                </t>
+                <!-- Slot for layout buttons -->
+                <t t-set-slot="layout-buttons"/>
+                <!-- Slot for layout actions -->
+                <t t-set-slot="layout-actions">
+                    <!-- SearchBar component rendered if showSearchBar is true -->
+                    <SearchBar t-if="searchBarToggler.state.showSearchBar"/>
+                </t>
+                <!-- Slot for additional navigation actions in the control panel -->
+                <t t-set-slot="control-panel-navigation-additional">
+                    <!-- Render the component specified by searchBarToggler.component -->
+                    <t t-component="searchBarToggler.component"
+                       t-props="searchBarToggler.props"/>
+                </t>
+                <!-- Render the main content using the Renderer component -->
+                <t t-component="props.Renderer" t-props="renderProps"
+                   list="model.root"/>
+            </Layout>
+        </div>
+    </t>
+</template>

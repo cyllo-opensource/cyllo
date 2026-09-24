@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--Scheduled Action for pull bank transactions-->
+    <record id="ir_cron_pull_bank_statements" model="ir.cron">
+        <field name="name">Pull Bank statements</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="model_id" ref="account.model_account_journal"/>
+        <field name="code">model._pull_bank_statements()</field>
+        <field name="state">code</field>
+    </record>
+    <record id="ir_cron_auto_validate_bank_statement_line" model="ir.cron">
+        <field name="name">Auto Reconcile Bank Statement</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="model_id" ref="account.model_account_bank_statement_line"/>
+        <field name="code">model.cron_reconcile_bank_bank_statement_line()</field>
+        <field name="state">code</field>
+    </record>
+</odoo>

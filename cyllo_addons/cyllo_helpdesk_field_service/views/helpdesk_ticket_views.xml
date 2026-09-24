@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="helpdesk_ticket_view_form_inherit_fsm" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.form.inherit.fsm</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="cyllo_helpdesk.helpdesk_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='stage_id']" position="before">
+                <button name="action_create_field_service_request" type="object"
+                        string="Create Field Service"
+                        invisible="not customer_id or not use_field_service"
+                        groups="cyllo_field_service.group_cyllo_field_service_user"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <field name="use_field_service" invisible="1"/>
+                <button name="action_view_field_service_requests" type="object"
+                        class="oe_stat_button" icon="fa-tasks"
+                        invisible="not use_field_service or field_service_request_count == 0"
+                        groups="cyllo_field_service.group_cyllo_field_service_user">
+                    <field name="field_service_request_count" widget="statinfo"
+                           string="Field Service"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="SmsNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="cy-work-auto-form d-flex flex-column">
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-between">
+                        <label for="from-label" class="form-label cy-modal-form_label">
+                            Label
+                        </label>
+                        <TypeToggler
+                                options="getEmailTypes"
+                                value="fieldState.sms_isTemplate || false"
+                                updateValue.bind="setType"
+                                width="15"
+                        />
+                    </div>
+                    <input
+                            type="text"
+                            class="o_input"
+                            autocomplete="off"
+                            placeholder="Label"
+                            t-on-focusout="(ev) => this.setLabel(ev.target.value)"
+                            t-att-value="getLabel"
+                    />
+                </div>
+                <div class="row mb-3 align-items-end">
+                    <div class="col-md-12">
+                        <label for="variable" class="form-label">
+                            Choose Recipients
+                        </label>
+                        <t t-set="multipleDataLength"
+                           t-value="this.getReceiverData().length"/>
+                        <t t-foreach="this.getReceiverData()" t-as="recipient"
+                           t-key="recipient_index">
+                            <MultiDataSelector
+                                    index="recipient_index"
+                                    getValueEditorInfo.bind="(recipient) => this.getValueEditorInfo(recipient)"
+                                    setData.bind="(value,index)=>this.setReceiverData(value,index)"
+                                    getDataValue="recipient"
+                                    toggleIncludeVariable.bind="(type,index) =>this.toggleIncludeVariable(type,index)"
+                                    removeData.bind="(index)=>this.removeData(index,'recipient')"
+                                    length="multipleDataLength"
+                                    isAdd="true"
+                                    add.bind="(index)=>this.insertData(index,'recipient')"
+                            />
+                        </t>
+                    </div>
+                </div>
+                <div>
+                    <div t-if="!getType">
+                        <label for="from-subject" class="form-label cy-modal-form_label">
+                            Message
+                        </label>
+                        <div class="position-relative">
+                            <textarea
+                                    t-ref="messageTextarea"
+                                    class="form-control bg-view px-3 border-1 text-body"
+                                    style="border:1px solid #4b464645"
+                                    rows="4"
+                                    t-on-focusout="(ev) => this.updateMessage(ev.target.value)"
+                                    t-att-value="getMessage"
+                            />
+                            <div class="position-absolute" style="top: 10px; right: 10px;">
+                                <button class="btn btn-sm btn-primary shadow-sm d-flex align-items-center" 
+                                        style="font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 6px; letter-spacing: 0.3px;" 
+                                        t-on-click.prevent="openVariablePicker">
+                                    <span class="me-2 bg-white text-primary rounded px-1" style="font-family: monospace; font-size: 12px;">{}</span>
+                                    Insert Variable
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end gap-3 overflow-hidden cy-variable-toggle" t-if="getType">
+                    <div class="w-50" t-if="getType">
+                        <label for="record" class="form-label">
+                            Choose Record
+                        </label>
+
+                        <CustomDropdown
+                                options="getRecords"
+                                defaultValue="fieldState.sms_record?.value || ''"
+                                onChange="(value) => this.updateObject(value)"
+                                placeholder="'Select a record...'"
+                                searchable="true"
+                                width="''"
+                                maxHeight="'70px'"
+                        />
+                    </div>
+                    <div class="w-50">
+                        <label for="variable" class="form-label">
+                            Choose your SMS template
+                        </label>
+                        <div class="cy-w-select">
+                            <Many2XAutocomplete
+                                    resModel="'sms.template'"
+                                    getDomain.bind="getDomain"
+                                    fieldString="'Mail templates'"
+                                    activeActions="{}"
+                                    update.bind="onSelectSms"
+                                    value="getTemplate"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

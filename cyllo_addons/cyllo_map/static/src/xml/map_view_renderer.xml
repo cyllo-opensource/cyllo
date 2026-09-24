@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<!--    View Template -->
+    <t t-name="cyllo_map.MapViewRenderer" t-ref="map-renderer" owl="1">
+		<div class="cyllo-map cy-dashboard-container">
+			<div class="row p-3 cyll-map-dashboard">
+				<div id="firstColumn" class="col flex-shrink" t-ref="contact_details">
+					<span class="cy-md-header">Contact</span>
+					<div class="cy-map__container" t-if="this.props.list.isGrouped">
+						<t t-foreach="this.props.list.groups" t-as="group" t-key="group.value">
+							<div class="cy-map__contact--list" t-if="group.list.records.length > 0">
+								<div class="cy-profile">
+									<i class="fa fa-map-marker" t-if="group.value"
+									   t-attf-style="color: rgb(#{group._rawValue[0]},#{group._rawValue[0]+(group._rawValue[0]*group._rawValue[0])},100); margin-right: 4px; font-size: 16px;"/>
+									<div class="cy-profile__avatar">
+										<img t-attf-src="/web/image/res.partner//{{group.value}}/image_1920" class="cy-profile__image" alt="Card image cap"/>
+									</div>
+									<span class="cy-profile__name" t-if="group.displayName " t-esc="group.displayName" style="font-weight: 600; font-size: 14px;"/>
+									<span class="cy-profile__name" t-else="" style="font-weight: 600; font-size: 14px;">None</span>
+								</div>
+							</div>
+							<t t-if="group.list.records.length > 0">
+								<div t-foreach="group.list.records" t-as="contact" t-key="contact.data.id" t-if="contact.data.partner_longitude">
+									<div class="cy-map__contact--list" style="padding-left:20px">
+										<div class="cy-profile">
+											<div class="cy-profile__avatar">
+												<img t-attf-src="/web/image/res.partner//{{contact.data.id}}/image_1920"
+													 class="cy-profile__image" alt="Card image cap"/>
+											</div>
+											<span class="cy-profile__name" t-esc="contact.data.name"/>
+										</div>
+									</div>
+								</div>
+							</t>
+						</t>
+					</div>
+					<t t-else="">
+						<div class="cy-map__container">
+							<t t-foreach="this.props.list.records" t-as="contact" t-key="contact.data.id" t-if="contact.data.partner_longitude">
+								<div class="cy-map__contact--list ">
+									<div class="cy-profile">
+										<div class="cy-profile__avatar">
+											<img t-attf-src="/web/image/res.partner//{{contact.data.id}}/image_1920"
+												 class="cy-profile__image" alt="Card image cap"/>
+										</div>
+										<span class="cy-profile__name" t-esc="contact.data.name"/>
+									</div>
+									<div t-attf-id="option_{{contact.data.id}}" class="cy-map__contact-detail">
+										<span class="cy-map__get-direction" title="Get Direction"
+											  t-on-click="() => this.getDirections(contact)"><i class="ri-guide-line"/></span>
+										<span class="cy-map__get-focus" title="Focus"
+											  t-on-click="() => this.focusLoc(contact)"><i class="ri-focus-3-fill"/></span>
+									</div>
+								</div>
+							</t>
+						</div>
+					</t>
+				</div>
+                <div class="cyllo-getdriection-container d-none" t-ref="route_map">
+					<div class="d-flex align-items-center justify-content-between">
+						<span class="cy-md-header">Get Direction</span>
+						<span>
+							<button class="btn cyllo-getdirection-close" t-on-click="closeNavigation">
+								<i class="ri-close-line"/>
+							</button>
+						</span>
+					</div>
+                    <t t-if="this.state.routeDirection">
+						<t t-foreach="this.state.routeDirection.routes" t-as="route" t-key="route">
+							<div class="cy-direction__detail-head">
+								<div>
+									<span class="cy-direction_sm-detail-title">Duration</span>
+									<t t-if="route.duration &lt; 3600">
+										<span class="cy-map__direction-detail--content"><t t-esc="Math.ceil(route.duration / 60)"/>
+											Min</span>
+									</t>
+									<t t-else="">
+										<span class="cy-map__direction-detail--content"><t t-esc="(route.duration / 3600).toFixed(2)"/>
+											HR</span>
+									</t>
+								</div>
+								<div>
+									<span class="cy-direction_sm-detail-title">Distance</span>
+									<t t-if="route.distance &lt; 1000">
+										<span class="cy-map__direction-detail--content"><t t-esc="route.distance"/>
+											Meter</span>
+									</t>
+									<t t-else="">
+										<span class="cy-map__direction-detail--content"><t t-esc="(route.distance / 1000).toFixed(1)"/>
+											Km</span>
+									</t>
+								</div>
+							</div>
+							<div class="my-2 cy-getdirection__box">
+								<t t-foreach="route.legs" t-as="leg" t-key="leg">
+									<t t-foreach="leg.steps" t-as="step" t-key="step">
+										<t t-if="step.maneuver.type === 'depart'">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<span class="cy-directing-icon"><i class="ri-map-pin-2-fill"/></span>
+													<span class="cy-direction__path" t-if="step.name">Start on<t t-esc="step.name"/></span>
+													<span class="cy-direction__path" t-else="">Start</span>
+												</div>
+												<span class="cy-direction_sm-detail-title" t-if="step.distance &lt; 1000">
+													<t t-esc="step.distance"/>
+													m
+												</span>
+												<span class="cy-direction_sm-detail-title" t-else="">
+													<t t-esc="Math.ceil(step.distance / 1000)"/>
+													Km
+												</span>
+											</div>
+										</t>
+										<t t-elif="step.maneuver.type === 'end of road'">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<span class="cy-directing-icon">
+														<i class="ri-corner-up-right-line" t-if="step.maneuver.modifier === 'right'"/>
+														<i class="ri-corner-up-left-line" t-if="step.maneuver.modifier === 'left'"/>
+														<img src="/cyllo_map/static/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
+														<img src="/cyllo_map/static/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
+														<img src="/cyllo_map/static/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
+													</span>
+													<span class="cy-direction__path">At the end of the road turn <t t-esc="step.maneuver.modifier"/>
+														<span> to </span><t t-esc="step.name"/>
+													</span>
+												</div>
+												<span class="cy-direction_sm-detail-title">
+													<t t-if="step.distance &lt; 1000"><t t-esc="step.distance"/>m</t>
+													<t t-else=""><t t-esc="Math.ceil(step.distance / 1000)"/>Km</t>
+												</span>
+											</div>
+										</t>
+										<t t-elif="step.maneuver.type === 'continue'">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<t t-if="step.maneuver.modifier === 'straight'">
+														<span class="cy-directing-icon">
+															<i class="ri-arrow-up-line" t-if="step.maneuver.modifier === 'straight'"/>
+														</span>
+														<span class="cy-direction__path">Continue on<t t-esc="step.name"/></span>
+													</t>
+													<t t-else="">
+														<span class="cy-directing-icon">
+															<i class="ri-corner-up-right-line" t-if="step.maneuver.modifier === 'right'"/>
+															<i class="ri-corner-up-left-line" t-if="step.maneuver.modifier === 'left'"/>
+															<img src="/cyllo_map/static/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
+															<img src="/cyllo_map/static/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
+															<img src="/cyllo_map/static/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
+															<img src="/cyllo_map/static/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
+														</span>
+														<span class="cy-direction__path">
+															<t t-esc="step.maneuver.modifier"/>
+															<span> to </span>
+															<t t-esc="step.name"/>
+															.
+														</span>
+													</t>
+												</div>
+												<span class="cy-direction_sm-detail-title">
+													<t t-if="step.distance &lt; 1000"><t t-esc="step.distance"/>
+														m</t>
+													<t t-else=""><t t-esc="Math.ceil(step.distance / 1000)"/>
+														Km</t>
+												</span>
+											</div>
+										</t>
+										<t t-elif="step.maneuver.type === 'fork'">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<span class="cy-directing-icon">
+														<i class="ri-arrow-up-line" t-if="step.maneuver.modifier === 'straight'"/>
+														<i class="ri-corner-up-right-line" t-if="step.maneuver.modifier === 'right'"/>
+														<i class="ri-corner-up-left-line" t-if="step.maneuver.modifier === 'left'"/>
+														<img src="/cyllo_map/static/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
+														<img src="/cyllo_map/static/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
+														<img src="/cyllo_map/static/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
+													</span>
+													<span class="cy-direction__path">
+														At the fork turn <t t-esc="step.maneuver.modifier"/>
+														<span> to </span>
+														<t t-esc="step.name"/>
+														.
+													</span>
+												</div>
+												<span class="cy-direction_sm-detail-title">
+													<t t-if="step.distance &lt; 1000"><t t-esc="step.distance"/>
+														m</t>
+													<t t-else=""><t t-esc="Math.ceil(step.distance / 1000)"/>
+														Km</t>
+												</span>
+											</div>
+										</t>
+										<t t-elif="step.maneuver.type === 'merge'">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<span class="cy-directing-icon">
+														<i class="ri-arrow-up-line"
+														   t-if="step.maneuver.modifier === 'straight'"/>
+														<i class="ri-corner-up-right-line"
+														   t-if="step.maneuver.modifier === 'right'"/>
+														<i class="ri-corner-up-left-line"
+														   t-if="step.maneuver.modifier === 'left'"/>
+														<img src="/cyllo_map/static/img/right.png"
+															 t-if="step.maneuver.modifier === 'slight right'"/>
+														<img src="/cyllo_map/static/img/left.png"
+															 t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/sharp_right.png"
+															 t-if="step.maneuver.modifier === 'sharp right'"/>
+														<img src="/cyllo_map/static/img/sharp_left.png"
+															 t-if="step.maneuver.modifier === 'sharp left'"/>
+													</span>
+													<span class="cy-direction__path">
+														Merge <t
+															t-esc="step.maneuver.modifier"/>
+														<span> to </span>
+														<t t-esc="step.name"/>
+														.
+													</span>
+												</div>
+												<span class="cy-direction_sm-detail-title">
+													<t t-if="step.distance &lt; 1000"><t t-esc="step.distance"/>
+														m</t>
+													<t t-else=""><t t-esc="Math.ceil(step.distance / 1000)"/>
+														Km</t>
+												</span>
+											</div>
+										</t>
+										<t t-elif="step.maneuver.type === 'turn'">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<span class="cy-directing-icon">
+														<i class="ri-arrow-up-line"
+														   t-if="step.maneuver.modifier === 'straight'"/>
+														<i class="ri-corner-up-right-line"
+														   t-if="step.maneuver.modifier === 'right'"/>
+														<i class="ri-corner-up-left-line"
+														   t-if="step.maneuver.modifier === 'left'"/>
+														<img src="/cyllo_map/static/img/right.png"
+															 t-if="step.maneuver.modifier === 'slight right'"/>
+														<img src="/cyllo_map/static/img/left.png"
+															 t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/sharp_right.png"
+															 t-if="step.maneuver.modifier === 'sharp right'"/>
+														<img src="/cyllo_map/static/img/sharp_left.png"
+															 t-if="step.maneuver.modifier === 'sharp left'"/>
+													</span>
+													<span class="cy-direction__path">
+														<span> Turn </span>
+														<t t-esc="step.maneuver.modifier"/>
+														<span t-if="step.name"> onto </span>
+														<t t-esc="step.name"/>
+														.
+													</span>
+												</div>
+												<span class="cy-direction_sm-detail-title">
+													<t t-if="step.distance &lt; 1000"><t t-esc="step.distance"/>
+														m</t>
+													<t t-else=""><t t-esc="Math.ceil(step.distance / 1000)"/>
+														Km</t>
+												</span>
+											</div>
+										</t>
+										<t t-elif="step.maneuver.type === 'new name'">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<span class="cy-directing-icon">
+														<i class="ri-arrow-up-line"
+														   t-if="step.maneuver.modifier === 'straight'"/>
+														<i class="ri-corner-up-right-line"
+														   t-if="step.maneuver.modifier === 'right'"/>
+														<i class="ri-corner-up-left-line"
+														   t-if="step.maneuver.modifier === 'left'"/>
+														<img src="/cyllo_map/static/img/right.png"
+															 t-if="step.maneuver.modifier === 'slight right'"/>
+														<img src="/cyllo_map/static/img/left.png"
+															 t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/sharp_right.png"
+															 t-if="step.maneuver.modifier === 'sharp right'"/>
+														<img src="/cyllo_map/static/img/sharp_left.png"
+															 t-if="step.maneuver.modifier === 'sharp left'"/>
+													</span>
+													<span class="cy-direction__path">
+														Go <t t-esc="step.maneuver.modifier"/>
+														<span t-if="step.name"> to </span>
+														<t t-esc="step.name"/>
+														.
+													</span>
+												</div>
+												<span class="cy-direction_sm-detail-title">
+													<t t-if="step.distance &lt; 1000">
+														<t t-esc="step.distance"/>m</t>
+													<t t-else="">
+														<t t-esc="Math.ceil(step.distance / 1000)"/>
+														Km
+													</t>
+												</span>
+											</div>
+										</t>
+										<t t-elif="step.maneuver.type === 'arrive'">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<span class="cy-direction__path">Destination reached.</span>
+												</div>
+												<span class="cy-direction_sm-detail-title">
+													<t t-if="step.distance &lt; 1000"><t t-esc="step.distance"/>
+														m</t>
+													<t t-else=""><t t-esc="Math.ceil(step.distance / 1000)"/>
+														Km</t>
+												</span>
+											</div>
+										</t>
+										<t t-else="">
+											<div class="cy-direction__route--container">
+												<div class="cy-direction--desc">
+													<span class="cy-directing-icon">
+														<i class="ri-arrow-up-line"
+														   t-if="step.maneuver.modifier === 'straight'"/>
+														<i class="ri-corner-up-right-line"
+														   t-if="step.maneuver.modifier === 'right'"/>
+														<i class="ri-corner-up-left-line"
+														   t-if="step.maneuver.modifier === 'left'"/>
+														<img src="/cyllo_map/static/img/right.png"
+															 t-if="step.maneuver.modifier === 'slight right'"/>
+														<img src="/cyllo_map/static/img/left.png"
+															 t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/sharp_right.png"
+															 t-if="step.maneuver.modifier === 'sharp right'"/>
+														<img src="/cyllo_map/static/img/sharp_left.png"
+															 t-if="step.maneuver.modifier === 'sharp left'"/>
+													</span>
+													<span class="cy-direction__path">
+														Make a <t
+															t-esc="step.maneuver.type"/>
+														<span> to </span>
+														<t t-esc="step.maneuver.modifier"/>
+													</span>
+												</div>
+												<span class="cy-direction_sm-detail-title">
+													<t t-if="step.distance &lt; 1000"><t t-esc="step.distance"/>
+														m</t>
+													<t t-else=""><t t-esc="Math.ceil(step.distance / 1000)"/>
+														Km</t>
+												</span>
+											</div>
+										</t>
+									</t>
+								</t>
+							</div>
+						</t>
+					</t>
+				</div>
+                <div id="secondColumn" class="col flex-grow">
+					<div class="cyll-map__view-container">
+						<div id="cyllo_map">
+							<div class="cy-map__search--container">
+								<div class="position-relative">
+									<input type="search" id="search_input"
+										   class="form-control cy-map-box_container cy-map__search-box"
+										   placeholder="Search..."
+										   t-ref="search_input_ref"/>
+									<span class="cy-map__search-box--icon"
+										  t-on-click="() => this.search()">
+										<i class="ri-search-line"
+										   data-tooltip="Autofill Address"
+										   aria-label="Autofill Address"/>
+									</span>
+								</div>
+							</div>
+							<div class="cy-map__location-display-box d-none"
+								 t-ref="map_notch">
+								<div>
+									<span class="cy-map__location-desc"><t t-esc="state.routeDistance"/>
+										Km</span>
+									<span class="cy-map__location-desc"><t t-esc="state.routeDuration"/>
+										Minutes</span>
+								</div>
+								<span>
+									<button t-on-click="closeNavigation"
+											class="cyllo-getdirection-close">
+										<i class="ri-close-line"/>
+									</button>
+								</span>
+							</div>
+							<div id="map" class="map"
+								 style="height: 100%; width: 100%; position: relative; outline-style: none;"/>
+							</div>
+						</div>
+					</div>
+                <div id="thirdColumn" class="col"><span class="cy-md-header">Details</span>
+                    <div class="cy-map__container cy-map-detail--section">
+						<input type="text"
+							   class="form-control cyllo_map-detail_input"
+							   id="place_name" name="place_name"
+							   placeholder="Place name"
+							   t-ref="place_name_input"/>
+                        <input type="text"
+                               class="form-control cyllo_map-detail_input"
+                               id="pincode" name="pincode"
+                               placeholder="Pin code" t-ref="pincode_input"/>
+                        <input type="text"
+                               class="form-control cyllo_map-detail_input"
+                               id="country" name="country" placeholder="Country"
+                               t-ref="country_input"/>
+                        <input type="text"
+                               class="form-control cyllo_map-detail_input"
+                               id="latitude" name="latitude"
+                               placeholder="Latitude" t-ref="latitude_input"/>
+                        <input type="text"
+                               class="form-control cyllo_map-detail_input"
+                               id="longitude" name="longitude"
+                               placeholder="Longitude" t-ref="longitude_input"/>
+					</div>
+				</div>
+                <div class="cy-warning__msg d-none" t-ref="warning_msg">
+					<button class="btn cy-warning_closing" t-on-click="closeWarningDisplay"><i class="ri-close-line"/></button>
+                    <span class="cy-warning_header"><i class="ri-error-warning-line"/>Warning</span>
+                    <p class="cy-warning_msg-content">Failed to fetch directions, there may be no  route between these places</p>
+				</div>
+			</div>
+		</div>
+	</t>
+</templates>

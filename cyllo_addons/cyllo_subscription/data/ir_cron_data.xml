@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Cron run daily basis to check subscription renewal -->
+    <record id="ir_cron_check_renewal" model="ir.cron">
+        <field name="name">Check Renewal</field>
+        <field name="model_id" ref="model_subscription_order"/>
+        <field name="state">code</field>
+        <field name="code">model.check_subscription_renewal()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record>
+    <!-- Cron run daily bases to check the subscription status and send mail to customer -->
+    <record id="ir_cron_invoice_post" model="ir.cron">
+        <field name="name">Invoice Post</field>
+        <field name="model_id" ref="model_account_move"/>
+        <field name="state">code</field>
+        <field name="code">model.ir_cron_action_post()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record>
+    <!-- Cron run daily basis to check subscription close -->
+    <record id="ir_cron_check_close" model="ir.cron">
+        <field name="name">Check Close</field>
+        <field name="model_id" ref="model_subscription_order"/>
+        <field name="state">code</field>
+        <field name="code">model.check_subscription_close()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record>
+    <!-- Cron run daily basis to automatically generate recurring invoices -->
+    <record id="ir_cron_auto_generate_invoices" model="ir.cron">
+        <field name="name">Auto-Generate Recurring Invoices</field>
+        <field name="model_id" ref="model_subscription_order"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_auto_generate_invoices()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+    </record>
+</odoo>

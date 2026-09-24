@@ -1,0 +1,142 @@
+<odoo>
+    <!-- Document Workspace record rules -->
+    <!-- Define an access rule 'Document Manager' -->
+    <record id="rule_document_workspace_manager" model="ir.rule">
+        <field name="name">Document Manager</field>
+        <field name="model_id" ref="model_document_workspace"/>
+        <field name="domain_force">['|',('privacy_visibility', '=', 'followers'),
+            ('privacy_visibility', '=', 'employees')]
+        </field>
+        <field name="groups" eval="[Command.link(ref('group_cyllo_documents_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="active" eval="True"/>
+    </record>
+    <!-- Define an access rule 'View visible Workspace' -->
+    <record id="rule_document_workspace_public" model="ir.rule">
+        <field name="name">View visible Workspace</field>
+        <field name="model_id" ref="model_document_workspace"/>
+        <field name="domain_force">['|',('privacy_visibility', '=',
+            'employees'),('message_partner_ids', 'in', [user.partner_id.id])]
+        </field>
+        <field name="groups" eval="[Command.link(ref('group_cyllo_documents_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+        <field name="active" eval="True"/>
+    </record>
+
+    <!-- Document File record rules -->
+    <!-- Define an access rule 'Document File Visibility' -->
+    <record id="rule_document_file_public" model="ir.rule">
+        <field name="name">Document File Visibility</field>
+        <field name="model_id" ref="model_document_file"/>
+        <field name="domain_force">['|',('workspace_id.privacy_visibility', '=',
+            'employees'),('workspace_id.message_partner_ids', 'in', [user.partner_id.id])]
+        </field>
+        <field name="groups" eval="[Command.link(ref('group_cyllo_documents_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+        <field name="active" eval="True"/>
+    </record>
+
+    <!-- Request Document record rules -->
+    <!-- Define an access rule 'View Own Request' -->
+    <record id="rule_request_document_public" model="ir.rule">
+        <field name="name">View Own Request</field>
+        <field name="model_id" ref="model_request_document"/>
+        <field name="domain_force">['|',('requested_by_id', '=', user.id), ('user_id', '=',
+            user.id)]
+        </field>
+        <field name="groups" eval="[Command.link(ref('group_cyllo_documents_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="active" eval="True"/>
+    </record>
+    <!-- Define an access rule 'View All Request' -->
+    <record id="rule_request_document_public" model="ir.rule">
+        <field name="name">View All Request</field>
+        <field name="model_id" ref="model_request_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('group_cyllo_documents_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="active" eval="True"/>
+    </record>
+
+    <!-- Access rule for request document based on multi-company settings.-->
+    <record id="rule_request_document_company" model="ir.rule">
+        <field name="name">Request document multi-company</field>
+        <field name="model_id" ref="model_request_document"/>
+        <field name="domain_force">['|', ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]</field>
+    </record>
+
+    <!-- Document Request Template record rules -->
+    <!-- Access rule for document templates based on multi-company settings.-->
+    <record id="rule_document_request_template_company" model="ir.rule">
+        <field name="name">Document template multi-company</field>
+        <field name="model_id" ref="model_document_request_template"/>
+        <field name="domain_force">['|', ('company_id', 'parent_of', company_ids), ('company_id',
+            '=', False)]
+        </field>
+    </record>
+
+    <!-- Document Template Request record rules -->
+    <!-- Access rule for document templates request based on multi-company settings.-->
+    <record id="rule_document_template_request_company" model="ir.rule">
+        <field name="name">Document template request multi-company</field>
+        <field name="model_id" ref="model_document_template_request"/>
+        <field name="domain_force">['|', ('company_id', 'parent_of', company_ids), ('company_id',
+            '=', False)]
+        </field>
+    </record>
+
+    <!-- Document Workspace record rules -->
+    <!-- Access rule for document workspace based on multi-company settings.-->
+    <record id="rule_document_workspace_company" model="ir.rule">
+        <field name="name">Document workspace multi-company</field>
+        <field name="model_id" ref="model_document_workspace"/>
+        <field name="domain_force">['|', ('company_id', 'parent_of', company_ids), ('company_id',
+            '=', False)]
+        </field>
+    </record>
+
+    <!-- Document File record rules -->
+    <!-- Access rule for document file based on multi-company settings.-->
+    <record id="rule_document_file_company" model="ir.rule">
+        <field name="name">Document file multi-company</field>
+        <field name="model_id" ref="model_document_file"/>
+        <field name="domain_force">['|', ('company_id', 'parent_of', company_ids), ('company_id',
+            '=', False)]
+        </field>
+    </record>
+
+    <!-- Document File record rules -->
+    <!-- Access rule for document tag based on multi-company settings.-->
+    <record id="rule_document_tag_company" model="ir.rule">
+        <field name="name">Document tag multi-company</field>
+        <field name="model_id" ref="model_document_tag"/>
+        <field name="domain_force">['|', ('company_id', 'parent_of', company_ids), ('company_id',
+            '=', False)]
+        </field>
+    </record>
+
+    <!-- Document File record rules -->
+    <!-- Access rule for document trash based on multi-company settings.-->
+    <record id="rule_document_trash_company" model="ir.rule">
+        <field name="name">Document trash multi-company</field>
+        <field name="model_id" ref="model_document_trash"/>
+        <field name="domain_force">['|', ('company_id', 'parent_of', company_ids), ('company_id',
+            '=', False)]
+        </field>
+    </record>
+</odoo>

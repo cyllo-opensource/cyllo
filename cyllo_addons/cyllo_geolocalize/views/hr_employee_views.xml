@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherited for adding new fields -->
+    <record id="view_hr_employee_form" model="ir.ui.view">
+        <field name="name">view.hr.employee.form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='personal_information']//group[@name='emergency']"
+                   position="after">
+                <group string="Work From Home" name="work_from_home">
+                    <field name="work_from_home"/>
+                    <field name="home_latitude" invisible="not work_from_home"/>
+                    <field name="home_longitude"
+                           invisible="not work_from_home"/>
+                    <field name="home_range" invisible="not work_from_home"/>
+                    <label for="wfh_street" string="WFH Address"
+                           invisible="not work_from_home"/>
+                    <div class="o_address_format"
+                         invisible="not work_from_home">
+                        <field name="wfh_street" placeholder="Street..."
+                               class="o_address_street"/>
+                        <field name="wfh_city" placeholder="City"
+                               class="o_address_city"/>
+                        <field name="wfh_state_id" class="o_address_state"
+                               placeholder="State"
+                               options="{'no_open': True, 'no_quick_create': True}"
+                               context="{'default_country_id': wfh_country_id}"/>
+                        <field name="wfh_zip" placeholder="ZIP"
+                               class="o_address_zip"/>
+                        <field name="wfh_country_id" placeholder="Country"
+                               class="o_address_country"
+                               options='{"no_open": True, "no_create": True}'/>
+                    </div>
+                    <div class="d-flex align-items-center gap-2"
+                         invisible="not work_from_home">
+
+                        <button name="geo_localize"
+                                type="object"
+                                class="btn btn-link p-0 m-0 text-nowrap"
+                                invisible="home_latitude != 0 or home_longitude != 0"
+                                title="Compute based on address">
+                            <i class="fa fa-gear me-1"/>
+                            <span>Compute based on address</span>
+                        </button>
+
+                        <button name="geo_localize"
+                                type="object"
+                                class="btn btn-link p-0 m-0 text-nowrap"
+                                invisible="home_latitude == 0 and home_longitude == 0"
+                                title="Refresh">
+                            <i class="fa fa-refresh me-1"/>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+
+

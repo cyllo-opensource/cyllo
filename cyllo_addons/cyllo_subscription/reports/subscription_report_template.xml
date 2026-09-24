@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="subscription_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <t t-set="doc"
+                       t-value="o.with_context(lang=o.partner_id.lang)"/>
+                    <t t-set="address">
+                        <div t-field="o.partner_id"
+                             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                        <p t-if="o.partner_id.vat">
+                            <t t-if="o.company_id.account_fiscal_country_id.vat_label"
+                               t-out="o.company_id.account_fiscal_country_id.vat_label"/>
+                            <t t-else="">Tax ID</t>:
+                            <span t-field="o.partner_id.vat"/>
+                        </p>
+                    </t>
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        <h2>Subscription Report #
+                            <span t-field="o.name"/>
+                        </h2>
+
+                        <div class="row mt-4 mb-2" id="informations">
+                            <div class="col-auto col-3 mw-100 mb-2"
+                                 name="customer">
+                                <strong>Customer:</strong>
+                                <br/>
+                                <span class="m-0" t-field="o.partner_id.name"/>
+                            </div>
+                            <div t-if="o.trial_end"
+                                 class="col-auto col-3 mw-100 mb-2"
+                                 name="trial_end">
+                                <strong>Trial End Date:</strong>
+                                <br/>
+                                <span class="m-0" t-field="o.trial_end"
+                                      t-options='{"widget": "date"}'/>
+                            </div>
+                            <div class="col-auto col-3 mw-100 mb-2"
+                                 name="subscription_state">
+                                <strong>Subscription State:</strong>
+                                <br/>
+                                <span class="m-0"
+                                      t-field="o.state_subscription"/>
+                            </div>
+                            <div class="col-auto col-3 mw-100 mb-2"
+                                 name="recurrence">
+                                <strong>Recurrence:</strong>
+                                <br/>
+                                <span class="m-0"
+                                      t-field="o.time_based_price_id.name"/>
+                            </div>
+                            <div class="col-auto col-3 mw-100 mb-2" name="mrr">
+                                <strong>Recurring Revenue:</strong>
+                                <br/>
+                                <span class="m-0" t-field="o.recurring_revenue"
+                                      t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                            </div>
+                        </div>
+
+                        <h3>Subscription Lines</h3>
+                        <table class="table table-sm o_main_table table-borderless mt-4">
+                            <thead style="display: table-row-group">
+                                <tr>
+                                    <th class="text-start">Product</th>
+                                    <th class="text-end">Quantity</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Taxes</th>
+                                    <th class="text-end">Subtotal</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="subscription_tbody">
+                                <t t-foreach="o.subscription_order_line_ids"
+                                   t-as="line">
+                                    <tr>
+                                        <td>
+                                            <span t-field="line.product_id.name"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.quantity"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.subtotal"
+                                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                        <td class="text-end">
+                                            <t t-set="taxes"
+                                               t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
+                                            <span t-out="taxes or 'None'"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.subtotal"
+                                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.total_price" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-end mt-3">
+                            <table class="table table-sm table-borderless" style="width: 300px;">
+                                <tr>
+                                    <td><strong>Untaxed Amount:</strong></td>
+                                    <td class="text-end">
+                                        <span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tax:</strong></td>
+                                    <td class="text-end">
+                                        <span t-field="o.amount_tax" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total:</strong></td>
+                                    <td class="text-end">
+                                        <span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+
+                        <div class="oe_structure"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

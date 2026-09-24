@@ -1,0 +1,571 @@
+// Mirrors addons/web/static/src/views/form/form_controller.scss: rules are
+// nested under their common ancestor selector instead of repeating the full
+// selector chain on every rule.
+
+.o_form_view_container {
+    .o_control_panel {
+        position: relative;
+        border-bottom: 1px solid var(--stroke);
+    }
+
+    .o_content {
+        overflow-x: hidden !important;
+        scrollbar-width: none !important;
+    }
+
+    .o_breadcrumb {
+        display: flex !important;
+        flex-direction: row !important;
+        font-size: 14px;
+        color: #505050;
+        font-weight: 500;
+        align-items: center;
+        gap: 2px;
+
+        .breadcrumb a {
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+    }
+}
+
+.breadcrumb-item+.breadcrumb-item::before {
+    content: none;
+}
+
+.o_pager_counter span {
+    font-size: 12px;
+    color: var(--dark-gray);
+    font-weight: 500;
+}
+
+.o_control_panel_navigation {
+    .o_cp_pager {
+        .btn-group {
+
+            button:first-child,
+            button:last-child {
+                background-color: #fff;
+                padding: 2px;
+                height: 26px;
+                width: 26px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            button:first-child {
+                border-bottom-left-radius: 6px !important;
+                border-top-left-radius: 6px !important;
+                border-right: 0;
+
+                &:before {
+                    content: "";
+                    background-image: url('arrow-left-s-line.svg');
+                    width: 18px;
+                    height: 18px;
+                    position: absolute;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                }
+
+                &:hover:before {
+                    background-image: url('arrow-left-s-line-hover.svg');
+                }
+            }
+
+            button:last-child {
+                border-top-right-radius: 6px !important;
+                border-bottom-right-radius: 6px !important;
+
+                &:before {
+                    content: "";
+                    background-image: url('arrow-right-s-line\ \(2\).svg');
+                    width: 18px;
+                    height: 18px;
+                    position: absolute;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                }
+
+                &:hover:before {
+                    background-image: url('arrow-right-s-line-hover.svg');
+                }
+            }
+
+            button:active {
+                border-color: var(--stroke);
+            }
+
+            .btn:not(:first-child) {
+                margin-left: 0;
+            }
+        }
+    }
+}
+
+.o_control_panel .o_control_panel_main {
+    @media (max-width: 768px) {
+        align-items: normal !important;
+        flex-direction: column;
+    }
+}
+
+// Form view: sheet, groups, labels, title
+.o_form_view {
+    background: #dfdfdf;
+
+    .o_form_renderer {
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .o_form_sheet {
+        border-color: #fff;
+        padding: 0;
+        margin-bottom: 16px;
+        --formView-sheet-padding-x: 16px;
+        --formView-sheet-padding-y: 0;
+        border: none !important;
+    }
+
+    .o_form_sheet_bg {
+        padding-top: 16px !important;
+
+        // Grid layout of inner-group label/value columns
+        .o_notebook {
+            .o_group .o_inner_group {
+                grid-template-columns: fit-content(150px) 1fr;
+
+                .g-col-sm-2 {
+                    grid-column: auto/span 2 !important;
+                }
+            }
+        }
+    }
+
+    .o_form_readonly .oe_edit_only {
+        display: inline-block !important;
+    }
+
+    .o_field_datetime,
+    .o_form_uri span {
+        color: #222222;
+        font-size: 14px;
+        padding: 12px 0;
+    }
+
+    .o_field_datetime {
+        padding: 0 !important;
+    }
+
+    .o_form_uri {
+        span:hover {
+            color: #222;
+        }
+
+        span:first-child:hover {
+            color: $o-community-color;
+        }
+    }
+
+    .o_group {
+        .o_inner_group:last-child {
+            border-right: none;
+        }
+
+        .o_field_widget>.btn.o_select_file_button {
+            padding: 5px 10px;
+            background-color: transparent !important;
+            border: 1px solid $o-community-color !important;
+            color: $o-community-color !important;
+
+            &:hover {
+                background-color: $o-community-color !important;
+                color: #fff !important;
+            }
+        }
+
+        @media (max-width: 870px) {
+            .o_inner_group {
+                display: block;
+                border-right: none;
+                max-width: none !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            padding-left: 10px;
+        }
+    }
+
+    .o_form_label {
+        color: #121212 !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+    }
+
+    .o_inner_group.oe_subtotal_footer {
+        .o_cell .o_field_widget {
+            text-align: left;
+        }
+
+        .o_wrap_field:first-child>.o_cell {
+            display: flex;
+            justify-content: right;
+        }
+    }
+
+    .o_notebook .o_inner_group {
+        grid-template-columns: fit-content(150px) 1fr;
+    }
+
+    .oe_invoice_lines_tab .o_group .o_inner_group {
+        max-width: 100% !important;
+    }
+}
+
+.o_form_renderer {
+    max-width: unset !important;
+
+    &:has(> .o_attachment_preview) {
+        flex-direction: row !important;
+    }
+
+    .o_form_sheet_bg {
+        background-color: #fff;
+        max-width: 100% !important;
+    }
+
+    // &:has(.o_attachment_preview) .o_form_sheet_bg {
+    //     overflow: scroll;
+    // }
+
+    .o_form_sheet div[name="options"] {
+        padding-top: 15px;
+    }
+}
+
+.o_form_sheet {
+    .oe_title {
+        max-width: 100%;
+        width: 100%;
+        h1 {
+            font-weight: 600;
+            font-size: 28px;
+            width: 90%;
+        }
+
+        @media (max-width: 768px) {
+            padding-left: 10px;
+        }
+    }
+
+    .o_group .o_group {
+        padding-top: unset;
+        border: none;
+    }
+
+    .o_notebook_content .o_inner_group .d-sm-contents {
+        display: contents !important;
+    }
+
+    .o_notebook {
+        @media (max-width: 768px) {
+            flex-wrap: wrap;
+        }
+
+        .o_notebook_content {
+            @media (max-width: 768px) {
+                width: 100%;
+            }
+        }
+    }
+
+    .o_inner_group {
+        @media (max-width: 768px) {
+            display: inline-block;
+        }
+    }
+}
+
+// Notebook / tabs
+.o_notebook {
+    .o_notebook_headers {
+        font-size: 14px;
+
+        @media (max-width: 768px) {
+            width: 100%;
+            border-right: none;
+        }
+    }
+}
+
+.o_notebook_content {
+    @media (max-width: 768px) {
+        max-width: 100%;
+    }
+}
+
+.o_form_sheet_bg {
+    td {
+        background: #ffffff;
+    }
+
+    thead {
+        background: #ffffff !important;
+    }
+
+    .ribbon-top-right {
+        margin-top: unset !important;
+    }
+
+    .btn.px-4.btn-link.ml16 {
+        transform: translateX(-165%);
+    }
+
+    .o_field_x2many_list_row_add .ml16 {
+        left: -46px !important;
+        margin-left: 200px !important;
+        position: relative !important;
+    }
+
+    .o_notebook_content {
+        .o_inner_group {
+            max-width: 48% !important;
+            border-right: none !important;
+            gap: 15px;
+        }
+
+        .oe_subtotal_footer {
+            .o_wrap_label {
+                text-align: inherit !important;
+            }
+
+            .text-nowrap {
+                position: relative;
+                float: right !important;
+            }
+        }
+    }
+
+    .o_notebook .oe_invoice_lines_tab {
+        justify-content: space-between !important;
+    }
+
+    .tab-pane {
+        .oe_invoice_lines_tab .o_field_account-tax-totals-field {
+            transform: translateX(0px) !important;
+        }
+    }
+
+    .o_list_renderer {
+
+        .o_data_row .o_list_record_remove,
+        .o_field_x2many_list_row_add {
+            padding: 0.5rem 0.3rem;
+        }
+    }
+}
+
+.o_field_widget {
+    .o_input_dropdown .o_dropdown_button {
+        top: 0;
+    }
+
+    .o_statusbar_status {
+        button {
+            background-color: transparent !important;
+            border: none;
+            font-size: 14px !important;
+        }
+
+        .o_arrow_button.o_arrow_button_current {
+            &.disabled {
+                background-color: #fff;
+                border: #fff;
+                color: var(--blue);
+            }
+
+            color: $link-color !important;
+            font-weight: 600 !important;
+        }
+    }
+
+    &.o_field_text,
+    &.oe_form_field_text .oe_form_text_content {
+        width: 100%;
+        white-space: unset;
+    }
+}
+
+.o_field_statusbar,
+.o_field_statusbar_duration {
+    >.o_statusbar_status>.o_arrow_button {
+        &.disabled:not(.o_arrow_button_current) {
+
+            &,
+            &:hover,
+            &:focus {
+                color: #8091A7;
+            }
+        }
+
+        &:not(:first-child) {
+
+            &:before,
+            &:after {
+                border: none;
+                background-image: url(/cyllo_base/static/src/img/cy_statusbar_arrow.svg);
+                background-position: center;
+                width: 18px;
+                height: 20px;
+                background-repeat: no-repeat;
+                top: 6px !important;
+                border-top: none !important;
+                border-bottom: none !important;
+                border-right: none !important;
+                border-left: none !important;
+            }
+        }
+    }
+}
+
+.o_field_statusbar {
+    .o_statusbar_status .o_arrow_button {
+        &:active:not(:first-child) {
+            background: transparent;
+        }
+
+        &:last-child {
+            padding-left: 0;
+        }
+    }
+}
+
+// Stat buttons (button box)
+.o-form-buttonbox {
+    .oe_stat_button {
+        order: 2;
+        height: 50px !important;
+        min-width: 7.5rem;
+
+        .o_button_icon {
+            color: var(--body-color);
+        }
+
+        &.dropdown {
+            >.o_button_more {
+                min-width: 7.5rem;
+                border-radius: 0 !important;
+                border-top: none;
+                border-bottom: none;
+                border-right: none;
+            }
+
+            .o_dropdown_more .oe_stat_button {
+                height: auto;
+                width: 100%;
+                border: 1px solid #dfdfdf;
+                padding-top: 8px;
+                padding-bottom: 8px;
+                background: white;
+            }
+        }
+    }
+
+    .o-dropdown.oe_stat_button {
+        order: 1;
+    }
+
+    .o_field_website_redirect_button {
+        order: 3;
+    }
+
+    >div.oe_stat_button:last-child>button {
+        border-radius: unset;
+    }
+}
+
+.o_rightpanel .o_rightpanel_section .o_form_view .oe_button_box {
+    background: #FFFFFF;
+}
+
+// Lists / tables
+.o_list_renderer {
+    .o_list_table {
+        tbody>tr>td:not(.o_list_record_selector):not(.o_handle_cell):not(.o_list_button):not(.o_list_record_remove).o_list_text {
+            white-space: unset;
+        }
+
+        thead th {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+        }
+    }
+}
+
+.o_list_view .o_resize {
+    padding-left: 2px !important;
+    background-color: var(--stroke) !important;
+}
+
+.table-hover tbody tr {
+
+    &:focus-within,
+    &:hover {
+        background-color: #F7F7F7;
+    }
+}
+
+// Chatter
+.o-mail-Form-chatter {
+    width: 100% !important;
+}
+
+.o-mail-Chatter {
+    background: #FFF;
+}
+
+.o-mail-Chatter-content {
+    background: #FFF;
+}
+
+// Modals
+.modal-dialog {
+    .modal-content {
+        .modal-header {
+            background: #fff;
+        }
+
+        .modal-footer {
+            background: #fff;
+        }
+    }
+}
+
+.modal.o_technical_modal.o_modal_full .modal-dialog .modal-content .modal-header {
+    background: $o-community-color;
+}
+
+.modal-body .o_form_view .o_group .o_inner_group {
+    max-width: 48% !important;
+}
+
+.modal-content .o_form_view .o_inner_group {
+    grid-template-columns: fit-content(150px) 1fr;
+    gap: 8px 16px;
+}
+
+// Settings
+.o_settings_container {
+    max-width: 992px;
+    margin-bottom: 24px;
+}
+
+.cy-right-sidebar .btn-outline-secondary {
+    @media (max-width: 768px) {
+        border: none;
+    }
+}

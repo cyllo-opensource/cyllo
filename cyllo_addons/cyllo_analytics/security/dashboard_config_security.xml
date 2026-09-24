@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--category-->
+    <record id="ir_module_category_cyllo_analytic_dashboard_access"
+            model="ir.module.category">
+        <field name="name">Cyllo Analytic Dashboard Access</field>
+        <field name="description">Category for Cyllo Analytic Dashboard module
+        </field>
+        <field name="sequence">25</field>
+    </record>
+
+    <!--user groups-->
+    <record id="group_cyllo_analytics_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id"
+               ref="cyllo_analytics.ir_module_category_cyllo_analytic_dashboard_access"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('base.group_user'))]"/>
+    </record>
+    <record id="group_cyllo_analytics_admin" model="res.groups">
+        <field name="name">Admin/Analyst</field>
+        <field name="category_id"
+               ref="cyllo_analytics.ir_module_category_cyllo_analytic_dashboard_access"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('group_cyllo_analytics_user'))]"/>
+        <field name="users"
+               eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
+
+    <!--record rules-->
+    <record id="rule_dashboard_config_public" model="ir.rule">
+        <field name="name">Dashboard Access Rule</field>
+        <field name="model_id" ref="model_dashboard_config"/>
+        <field name="domain_force">['|', ('users_ids', 'in', user.id), ('group_ids', 'in', user.groups_id.ids)]</field>
+    </record>
+    <record id="rule_dashboard_config_public_company" model="ir.rule">
+        <field name="name">Dashboard Config Company Restriction</field>
+        <field name="model_id" ref="model_dashboard_config"/>
+        <field name="domain_force">
+            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
+        </field>
+    </record>
+</odoo>

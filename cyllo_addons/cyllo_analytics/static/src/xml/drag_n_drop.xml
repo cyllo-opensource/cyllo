@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="DragItem" owl="1">
+        <div class="cy-drag-chip" t-att-data-type="props.type"
+             t-att-draggable="props.draggable"
+             t-attf-class="{{props.type}} {{state.isDragging ? 'dragging' : ''}}"
+             t-att-value="props.value"
+             t-att-data-field_type="props.field_type"
+             t-att-data-column="props.column"
+             t-att-data-is_preset="props.isPreset ? 'true' : 'false'"
+             t-att-data-raw_formula="props.rawFormula"
+             t-att-data-variables="props.variables"
+             t-att-data-variable_configs="props.variable_configs"
+             t-att-data-calculation_type="props.calculationType || props.calculation_type"
+             t-att-data-aggregate_func="props.aggregate_func"
+             t-att-data-preset_id="props.preset_id"
+             t-att-data-monetary_in_base="props.monetaryInBase"
+             t-att-data-alias="props.alias"
+             t-on-dragstart="e => this.setDragging(e, true)"
+             t-on-dragend="e => this.setDragging(e, false)">
+            <i class="ri-draggable cy-drag-handle" />
+            <span class="cy-drag-chip-label"><t t-esc="props.value"/></span>
+            <t t-if="props.options">
+                <Dropdown togglerClass="'cy-drag-chip-btn'">
+                    <t t-set-slot="toggler">
+                        <i class="ri-more-2-fill" />
+                    </t>
+                    <DropdownItem t-foreach="options" t-as="option"
+                                  t-key="option_index"
+                                  onSelected.bind="() => this.props.setOptionValue(option, this.mode)">
+                        <t t-esc="option"/>
+                    </DropdownItem>
+                </Dropdown>
+            </t>
+            <button t-if="props.onEditPreset" class="cy-drag-chip-btn"
+                    t-on-click="props.onEditPreset"
+                    title="Edit Preset">
+                <i class="ri-pencil-line" />
+            </button>
+            <button t-if="props.onToggleSort" class="cy-drag-chip-btn"
+                    t-on-click="props.onToggleSort"
+                    title="Toggle Sort Direction">
+                <i t-attf-class="{{props.sort_desc ? 'ri-sort-desc' : 'ri-sort-asc'}}" />
+            </button>
+            <button t-if="props.onRemove" class="cy-drag-chip-btn cy-drag-chip-remove"
+                    t-on-click="props.onRemove">
+                <i class="ri-close-line" />
+            </button>
+        </div>
+    </t>
+    <t t-name="DropZone" owl="1">
+        <div t-if="props.show" t-attf-class="cy-dropzone-container {{state.type}}-drop-zone {{state.highlight}}">
+            <div class="cy-dropzone-label"><span t-esc="translatedString"/></div>
+            <div class="cy-dropzone-row">
+                <div t-ref="drop"
+                    class="cy-dropzone-area"
+                    t-att-data-limit="state.limit"
+                    t-on-dragover="onDragOver"
+                    t-on-dragleave="onDragLeave"
+                    t-on-drop="onItemDrop">
+                    
+                    <t t-foreach="state.children"
+                    t-as="dropItem"
+                    t-key="dropItem_index">
+                        <t t-if="state.type == 'measure'">
+                            <DragItem t-props="dropItem"
+                                    draggable="'true'"
+                                    placedInZone="true"
+                                    sourceCategory="props.category"
+                                    sourceAxis="props.axis || ''"
+                                    sourceType="state.type"
+                                    onRemove="() => this.onItemRemove(dropItem_index, state.type)"
+                                    onEditPreset="dropItem.isPreset ? () => this.editPreset(dropItem_index) : undefined"
+                                    options="!dropItem.calculation_type || dropItem.calculation_type !== 'aggregate'"
+                                    setOptionValue.bind="(val, mode) => this.setFunctions(val, mode, dropItem_index)"/>
+                        </t>
+                        <t t-elif="state.type == 'dimension' and ['date', 'datetime'].includes(dropItem.field_type)">
+                            <DragItem t-props="dropItem"
+                                    draggable="'true'"
+                                    placedInZone="true"
+                                    sourceCategory="props.category"
+                                    sourceAxis="props.axis || ''"
+                                    sourceType="state.type"
+                                    onRemove="() => this.onItemRemove(dropItem_index, state.type)"
+                                    options="true"
+                                    setOptionValue.bind="(val, mode) => this.setDateGroupBy(val, mode, dropItem_index)"/>
+                        </t>
+                        <t t-else="">
+                            <DragItem t-props="dropItem"
+                                    draggable="'true'"
+                                    placedInZone="true"
+                                    sourceCategory="props.category"
+                                    sourceAxis="props.axis || ''"
+                                    sourceType="state.type"
+                                    onRemove="() => this.onItemRemove(dropItem_index, state.type)"
+                                    onToggleSort="state.type == 'orderBy' ? () => this.onToggleSort(dropItem_index) : undefined"
+                                    sort_desc="dropItem.sort_desc"
+                                    options="false"
+                                    setOptionValue.bind="(val, mode) => {}"/>
+                        </t>
+                    </t>
+                    <div t-if="props.info.condition" class="info-panel"
+                        t-att-class="props.info.className">
+                        <div class="px-2">
+                            <i class="ri-information-line me-1" />
+                            <span t-out="props.info.message" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </t>
+</templates>

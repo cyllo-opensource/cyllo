@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Template for breadcrumbs-->
+    <template id="support_service_ticket_portal_layout"
+              name="Portal layout : Support Service Ticket"
+              inherit_id="portal.portal_breadcrumbs" priority="66">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'support_service_tickets'"
+                class="breadcrumb-item active">
+                <span>Support Service Tickets</span>
+            </li>
+            <li t-if="page_name == 'support_service_ticket_details'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/support-service-ticket" aria-label="Home">
+                    <span>Support Service Ticket</span>
+                </a>
+                <span>/
+                    <t t-out="support_service_ticket.name"/>
+                </span>
+            </li>
+            <li t-if="page_name == 'create_ticket'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/support-service-ticket" aria-label="Home">
+                    <span>Support Service Ticket</span>
+                </a>
+                <span>/ Create</span>
+            </li>
+        </xpath>
+    </template>
+    <!--  Template that shows all my Support Service Tickets -->
+    <template id="support_service_ticket_template"
+              name="Support Service Tickets">
+        <t t-call="portal.portal_layout">
+            <div class="oe_support_service_ticket">
+                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                <t t-set="create_record" t-value="True"/>
+                <t t-set="create_title" t-value="'Create Ticket'"/>
+                <t t-set="switchView" t-value="True"/>
+                <t t-call="cyllo_portal.cyllo_portal_searchbar">
+                    <t t-set="title">Support Service Ticket</t>
+                </t>
+                <div class="row">
+                    <div class="col-md-12 col-12">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist"
+                            style="border-color: white;">
+                            <li class="nav-item" role="presentation">
+                                <a t-attf-class="nav-link cy-support_service-ticket-state-btn#{state == 'all' and ' active' or ''}"
+                                   id="profile-tab" style="border-color: white;"
+                                   t-att-href="default_url + '?' + keep_query('*', state='all')"
+                                   type="button" role="tab"
+                                   aria-controls="profile"
+                                   aria-selected="false">
+                                    All
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a t-attf-class="nav-link cy-support_service-ticket-state-btn#{state == 'draft' and ' active' or ''}"
+                                   id="profile-tab" style="border-color: white;"
+                                   t-att-href="default_url + '?' + keep_query('*', state='draft')"
+                                   data-bs-target="#draft" type="button"
+                                   role="tab" aria-controls="profile"
+                                   aria-selected="false">
+                                    Draft
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a t-attf-class="nav-link cy-support_service-ticket-state-btn#{state == 'progress' and ' active' or ''}"
+                                   id="profile-tab"
+                                   t-att-href="default_url + '?' + keep_query('*', state='progress')"
+                                   style="border-color: white;"
+                                   data-bs-target="#in_progress" type="button"
+                                   role="tab" aria-controls="profile"
+                                   aria-selected="false">
+                                    In Progress
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a t-attf-class="nav-link cy-support_service-ticket-state-btn#{state == 'hold' and ' active' or ''}"
+                                   id="profile-tab"
+                                   t-att-href="default_url + '?' + keep_query('*', state='hold')"
+                                   style="border-color: white;"
+                                   data-bs-target="#on_hold" type="button"
+                                   role="tab" aria-controls="profile"
+                                   aria-selected="false">
+                                    On Hold
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a t-attf-class="nav-link cy-support_service-ticket-state-btn#{state == 'solved' and ' active' or ''}"
+                                   t-att-href="default_url + '?' + keep_query('*', state='solved')"
+                                   id="profile-tab"
+                                   style="border-color: white;"
+                                   data-bs-target="#solved" type="button"
+                                   role="tab" aria-controls="profile"
+                                   aria-selected="false">
+                                    Solved
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a t-attf-class="nav-link cy-support_service-ticket-state-btn#{state == 'closed' and ' active' or ''}"
+                                   t-att-href="default_url + '?' + keep_query('*', state='closed')"
+                                   id="profile-tab"
+                                   style="border-color: white;"
+                                   data-bs-target="#closed" type="button"
+                                   role="tab" aria-controls="profile"
+                                   aria-selected="false">
+                                    Closed
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <t t-set="url" t-value="'/support-service-ticket/create'"/>
+                    <t t-set="description" t-value="'Currently No Tickets !'"/>
+                    <div t-attf-class="#{'o_support_ticket_layout_list' if layout_mode == 'list' else ''} tab-pane fade show w-100 active"
+                         id="ticket_content" role="tabpanel"
+                         aria-labelledby="home-tab">
+                        <t t-if="tickets">
+                            <div class="row mt16">
+                                <tbody>
+                                    <div t-foreach="bins" t-as="row_ticket"
+                                         class="row">
+                                        <t t-foreach="row_ticket"
+                                           t-as="col_ticket">
+                                            <t t-if="col_ticket">
+
+                                                <div class="td_support_ticket col-3 mt-1">
+                                                    <t t-call="cyllo_support_service.support_ticket">
+                                                        <t t-set="support_service_ticket"
+                                                           t-value="col_ticket['record']"/>
+                                                    </t>
+                                                </div>
+                                            </t>
+                                            <div t-else=""/>
+                                        </t>
+                                    </div>
+                                </tbody>
+                            </div>
+                            <div class="support_service_pager form-inline justify-content-center d-flex py-3">
+                                <t t-call="cyllo_portal.cyllo_pager"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <t t-call="cyllo_portal.no_record_portal"/>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="support_ticket" name="Support Ticket">
+        <div class="card">
+            <div class="support_ticket_row p-2">
+                <div class="d-flex">
+                    <div class="request_top">
+                        <span class="request-title">
+                            <h5>
+                                <a t-att-href="support_service_ticket.get_portal_url()"
+                                   class="support_ticket_name"
+                                   t-esc="support_service_ticket.name"/>
+                            </h5>
+                        </span>
+                        <span class="service_req_employee mr4">
+                            Employee:
+                            <t t-esc="support_service_ticket.user_id.name"/>
+                        </span>
+                        <br/>
+                        <span class="service_req_category">
+                            Category:
+                            <t t-esc="support_service_ticket.category_id.name"/>
+                        </span>
+                        <br/>
+                    </div>
+                    <div class="request_content ms-auto">
+                        <span t-if="support_service_ticket.stage_id.id == %(cyllo_support_service.support_service_stage_new)d"
+                              class="badge text-bg-primary state_badge">
+                            <t t-esc="support_service_ticket.stage_id.name"/>
+                        </span>
+                        <span t-elif="support_service_ticket.stage_id.id == %(cyllo_support_service.support_service_stage_in_progress)d"
+                              class="badge text-bg-secondary state_badge">
+                            <t t-esc="support_service_ticket.stage_id.name"/>
+                        </span>
+                        <span t-elif="support_service_ticket.stage_id.id == %(cyllo_support_service.support_service_stage_on_hold)d"
+                              class="badge text-bg-danger state_badge">
+                            <t t-esc="support_service_ticket.stage_id.name"/>
+                        </span>
+                        <span t-elif="support_service_ticket.stage_id.id == %(cyllo_support_service.support_service_stage_to_invoice)d"
+                              class="badge text-bg-info state_badge">
+                            <t t-esc="support_service_ticket.stage_id.name"/>
+                        </span>
+                        <span t-elif="support_service_ticket.stage_id.id == %(cyllo_support_service.support_service_stage_solved)d"
+                              class="badge text-bg-success state_badge">
+                            <t t-esc="support_service_ticket.stage_id.name"/>
+                        </span>
+                        <span t-elif="support_service_ticket.stage_id.id == %(cyllo_support_service.support_service_stage_canceled)d"
+                              class="badge text-bg-warning state_badge">
+                            <t t-esc="support_service_ticket.stage_id.name"/>
+                        </span>
+                        <span t-elif="support_service_ticket.stage_id.id == %(cyllo_support_service.support_service_stage_closed)d"
+                              class="badge text-bg-dark state_badge">
+                            <t t-esc="support_service_ticket.stage_id.name"/>
+                        </span>
+                        <div class="o_cyllo_support_date">
+                            <t t-if="support_service_ticket.date">
+                                <span t-esc="support_service_ticket.date.date()"
+                                      class="date"/>
+                            </t>
+                            <span class="img-rounded user_img"
+                                  t-field="support_service_ticket.create_user_avatar"
+                                  t-att-title="support_service_ticket.create_uid.name"
+                                  t-options="{'widget': 'image', 'class': 'img-rounded create_user_image'}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <!--  Template that shows details of Support Service Ticket -->
+    <template id="support_service_ticket_details"
+              name="Support Service Ticket Content"
+              inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <t t-set="o_portal_fullwidth_alert" groups="base.group_user">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url"
+                       t-value="'/web#return_label=Website&amp;model=support.service.ticket&amp;id=%s&amp;' % object.id"/>
+                </t>
+            </t>
+            <div class="row mt16 o_cy_portal_sidebar o_portal_support_service_sidebar">
+                <t t-call="cyllo_portal.cy_portal_record_sidebar"
+                   id="support_service_portal_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+                    <t t-set="title">
+                        <h2 t-esc="object.ticket"/>
+                    </t>
+                    <t t-set="entries">
+                        <div class="d-flex flex-column gap-1 order-md-last order-lg-first"
+                             id="support_service_sidebar_button">
+                            <div class="d-flex flex-column gap-4">
+                                <div class="o_download_pdf">
+                                    <a class="btn btn-primary o_print_btn d-block"
+                                       t-att-href="object.get_portal_url(report_type='pdf')"
+                                       id="print_disciplinary_report"
+                                       title="View Details" target="_blank">
+                                        <i class="fa fa-print"/>
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-4"
+                                 t-if="support_service_ticket.stage_id.id != %(cyllo_support_service.support_service_stage_closed)d">
+                                <div class="o_btn_start_service">
+                                    <a t-attf-href="/support-service-ticket/close/{{support_service_ticket.id}}"
+                                       class="btn btn-secondary mt24 w-100 mb8">
+                                        Close Ticket
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="navspy flex-grow-1 ps-0" t-ignore="true"
+                             role="complementary">
+                            <ul class="nav flex-column bs-sidenav"/>
+                        </div>
+                        <div t-if="object.date">
+                            <small>
+                                <b>Requested Date</b>
+                            </small>
+                            <div t-field="object.date"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.user_id">
+                            <h6>
+                                <small class="text-muted">Your contact</small>
+                            </h6>
+                            <div class="o_portal_contact_details d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-start align-items-center gap-2">
+                                    <img class="o_avatar o_portal_contact_img rounded"
+                                         t-if="object.user_id"
+                                         t-att-src="image_data_uri(object.user_id.avatar_1024)"
+                                         alt="Contact"/>
+                                    <img class="o_avatar o_portal_contact_img rounded"
+                                         t-else=""
+                                         t-att-alt="'%s' % object.company_id.name"
+                                         alt="Contact"/>
+                                    <div>
+                                        <h6 class="mb-0"
+                                            t-out="object.user_id.name"/>
+                                        <a href="#discussion"
+                                           class="d-flex align-items-center gap-2 small fw-bold">
+                                            Send message
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <div id="quote_content"
+                     class="col-12 col-lg justify-content-end">
+                    <div class="p-3 o_cy_portal_border border">
+                        <h2 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
+                            <t t-esc="object.ticket"/>
+                            <span class="badge text-bg-warning  state_badge mt-2"
+                                  style="font-size:15px;"
+                                  t-field="object.stage_id">
+                            </span>
+                        </h2>
+                        <br/>
+                        <div id="informations" class="row mt-4">
+                            <div id="customer_info"
+                                 class="col-12 col-lg-6 offset-lg-1 ms-auto">
+                                <hr class="my-0"/>
+                                <strong t-field="object.customer_id"/>
+                                <div t-field="object.customer_id"
+                                     t-options="{ 'widget': 'contact', 'fields': [ 'name', 'address', 'phone', 'email']}"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <section id="details" style="page-break-inside: auto;"
+                                 class="mt32 row">
+                            <h3 id="service_details" style="font-size: 20px;">
+                                Service Information
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2"
+                                 id="service_request_information">
+                                <div class="col-md-3 mb-2" t-if="object.name">
+                                    <strong>Name :</strong>
+                                    <br/>
+                                    <span t-field="object.name"/>
+                                </div>
+                                <div class="col-md-3 mb-2"
+                                     t-if="object.customer_id">
+                                    <strong>Customer Name</strong>
+                                    <br/>
+                                    <span t-field="object.customer_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.user_id">
+                                    <strong>Assigned to</strong>
+                                    <br/>
+                                    <span t-field="object.user_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.company_id">
+                                    <strong>Company</strong>
+                                    <br/>
+                                    <span t-field="object.company_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.date">
+                                    <strong>Requested Date</strong>
+                                    <br/>
+                                    <span t-field="object.date"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.deadline">
+                                    <strong>Date Deadline</strong>
+                                    <br/>
+                                    <span t-field="object.deadline"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.team_id">
+                                    <strong>Team</strong>
+                                    <br/>
+                                    <span t-field="object.team_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.category_id">
+                                    <strong>Category</strong>
+                                    <br/>
+                                    <span t-field="object.category_id"/>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="details" style="page-break-inside: auto;"
+                                 class="mt32 row"
+                                 t-if="object.description">
+                            <h3 id="service_details" style="font-size: 20px;">
+                                Service Description
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-3" style="margin-left:2px;"
+                                 id="service_request_description"
+                                 t-esc="object.description"/>
+                        </section>
+                        <!--====== Adding Chatter==========-->
+                        <div id="_communication">
+                            <h3>Communication history</h3>
+                            <t t-call="portal.message_thread"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <!--  Template of support service Ticket Form  -->
+    <template id="support_service_ticket_form">
+        <t t-call="website.layout">
+            <div id="wrap"
+                 class="oe_structure oe_empty cyllo_register_support_ticket_form">
+                <div class="service_request-request_container m-0">
+                    <br/>
+                    <h3 class="heading_align-style d-flex mt-5">
+                        Support Service Ticket
+                    </h3>
+                    <br/>
+                    <p class="support_service_description">Submit your field
+                        service requests here for quick and
+                        efficient assistance.
+                        <br/>
+                        Our team will review and address your needs as swiftly
+                        as possible.
+                    </p>
+                </div>
+                <div class="s_col_no_bgcolor container s_allow_columns w-50 property_container_style">
+                    <div class="container mt-4 mb-5 justify-content-center d-flex">
+                        <form action="/ticket/submit" method="post"
+                              enctype="multipart/form-data"
+                              class="o_mark_required cy-support_service-ticket_form"
+                              data-mark="*">
+                            <input type="hidden" name="csrf_token"
+                                   t-att-value="request.csrf_token()"/>
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="name"
+                                           class="cy-support_service_ticket-label">
+                                        Name
+                                    </label>
+                                    <input id="customer" type="hidden"
+                                           name="csrf_token"
+                                           t-att-value="request.csrf_token()"
+                                           class="form-control"/>
+                                    <input type="text"
+                                           class="form-control cy-support_service-ticket_input"
+                                           name="customer_name"
+                                           id="customer_name"
+                                           t-att-value="request.env.user.name"
+                                           required="1"
+                                           readonly="1"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="email"
+                                           class="cy-support_service_ticket-label">
+                                        Email
+                                    </label>
+                                    <input type="text"
+                                           class="form-control cy-support_service-ticket_input"
+                                           id="email"
+                                           name="email"
+                                           t-att-value="request.env.user.email or ''"
+                                           required="1"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="phone"
+                                           class="cy-support_service_ticket-label">
+                                        Phone
+                                    </label>
+                                    <input type="text"
+                                           class="form-control cy-support_service-ticket_input"
+                                           id="phone"
+                                           placeholder="+1 55 555 555"
+                                           t-att-value="request.env.user.phone"
+                                           required="1"/>
+                                </div>
+                                <div class="col-12">
+                                    <label for="ticket_name"
+                                           class="cy-support_service_ticket-label">
+                                        Ticket Subject
+                                    </label>
+                                    <input type="text"
+                                           class="form-control cy-support_service-ticket_input"
+                                           id="ticket_name" name="ticket_name"
+                                           required="1"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="category_id"
+                                           class="cy-support_service_ticket-label">
+                                        Ticket Category
+                                    </label>
+                                    <select name="category_name"
+                                            t-attf-class="form-control s_website_form_input">
+                                        <t t-foreach="categories or []"
+                                           t-as="category">
+                                            <option t-att-value="category.id">
+                                                <t t-esc="category.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="sale-order"
+                                           class="cy-support_service_ticket-label ">
+                                        Sale Order
+                                    </label>
+                                    <select name="sale_order"
+                                            t-attf-class="form-control s_website_form_input">
+                                        <t t-foreach="sale_order_items or []"
+                                           t-as="sale_order">
+                                            <option t-att-value="sale_order.id">
+                                                <t t-esc="sale_order.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="sale-order"
+                                           class="cy-support_service_ticket-label ">
+                                        Ticket Type
+                                    </label>
+                                    <select name="ticket_type"
+                                            t-attf-class="form-control s_website_form_input">
+                                        <option value="enquiries">Enquiries
+                                        </option>
+                                        <option value="issues">Issues</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6 cy_support_priority_div">
+                                    <label for="ticket_name"
+                                           class="cy-support_service_ticket-label">
+                                        Attachments
+                                    </label>
+                                    <input type="file"
+                                           class="form-control cy-support_service-ticket_input"
+                                           id="attachments" multiple="multiple"
+                                           accept="*" name="attachments"/>
+                                </div>
+
+                                <div class="col-12" id="issue_type_section"
+                                     style="display: none;">
+                                    <label for="type_of_issue"
+                                           class="cy-support_service_ticket-label">
+                                        Type Of Issue
+                                    </label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="radio" name="type_of_issue"
+                                               value="refund">Refund
+                                        </input>
+                                        <input type="radio" name="type_of_issue"
+                                               value="repair">Repair
+                                        </input>
+                                        <input type="radio" name="type_of_issue"
+                                               value="field">Field service
+                                        </input>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="description"
+                                           class="cy-support_service_ticket-label">
+                                        Description
+                                    </label>
+                                    <textarea
+                                            class="form-control cy-support_service-ticket_input"
+                                            id="description" name="description"
+                                            placeholder=""/>
+                                </div>
+                                <div class="d-flex justify-content-center mt-5">
+                                    <button class="btn btn-primary"
+                                            type="submit">
+                                        Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!--  Template shown when closing a Support service Ticket by user  -->
+    <template id="support_service_ticket_closing_template">
+        <t t-call="website.layout">
+            <div style="margin-top: 100px;" class="jumbotron text-center">
+                <h1 class="display-3">Thank You!</h1>
+                <p class="lead">Your ticket has been successfully closed.</p>
+                <a href="/support-service-ticket">Back to Tickets</a>
+            </div>
+        </t>
+    </template>
+        <!-- Template for portal document -->
+    <template id="portal_my_home_support_service" name="Support Service Ticket"
+              customize_show="True" inherit_id="portal.portal_my_home"
+              priority="35">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon"
+                   t-value="'/cyllo_support_service/static/src/img/support-service.svg'"/>
+                <t t-set="title">Support Service Ticket</t>
+                <t t-set="url" t-value="'/support-service-ticket'"/>
+                <t t-set="text">Follow or view your support service ticket
+                    requests
+                </t>
+                <t t-set="placeholder_count" t-value="'ticket_count'"/>
+            </t>
+        </div>
+    </template>
+</odoo>

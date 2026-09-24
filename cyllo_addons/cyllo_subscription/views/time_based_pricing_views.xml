@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Time-based-price tree view -->
+    <record id="view_time_based_price_tree" model="ir.ui.view">
+        <field name="name">view.time.based.price.tree</field>
+        <field name="model">time.based.price</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="subscription_unit"/>
+                <field name="duration"/>
+                <field name="trial_period"/>
+                <field name="trial_unit"/>
+                <field name="trial_pricing_type"/>
+                <field name="trial_value"
+                       optional="show"
+                       invisible="trial_pricing_type in ('percentage_discount') or not trial_pricing_type"/>
+                <field name="trial_percentage"
+                       optional="show"
+                       invisible="trial_pricing_type != 'percentage_discount'"/>
+                <field name="cost"/>
+                <field name="currency_id" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Action for time-based-price -->
+    <record id="action_view_time_based_price_tree" model="ir.actions.act_window">
+        <field name="name">Time Based Pricing</field>
+        <field name="res_model">time.based.price</field>
+        <field name="view_mode">tree</field>
+    </record>
+</odoo>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="ConditionNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="condition-node">
+                <div class="mb-2">
+                    <label for="labelInput" class="form-label mb-1">Condition Label</label>
+                    <input style="border-radius: 0px !important;" type="text" t-ref="labelInput" class="o_input" autocomplete="off"
+                           placeholder="Enter a descriptive label" t-on-focusout="(ev) => this.setLabel(ev.target.value)"
+                           t-att-value="getLabel"/>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+                     CRON MODE: Simplified UI — just pick the search variable.
+                     The IF branch runs on those records; the ELSE branch
+                     automatically gets the complement recordset injected.
+                ════════════════════════════════════════════════════════════════ -->
+                <t t-if="isCronMode">
+                    <div class="mb-3">
+                        <h6 class="mb-2">Select Search Variable</h6>
+                        <p class="text-muted small mb-2">
+                            Choose the recordset variable produced by a <strong>Search</strong> node.
+                            The <em>If</em> branch will execute for those records;
+                            the <em>Else</em> branch will execute for the <strong>complement</strong>
+                            (records <em>not</em> in the search result).
+                        </p>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(ev) => this.selectCronVariable(ev.target.value || null)">
+                            <option value="">— select a variable —</option>
+                            <t t-foreach="recordsetVariables" t-as="rv" t-key="rv.id">
+                                <option t-att-value="rv.id"
+                                        t-att-selected="state.cronVariableId === rv.id">
+                                    <t t-esc="rv.variable_name"/>
+                                    <t t-if="rv.modelName"> (<t t-esc="rv.modelName"/>)</t>
+                                </option>
+                            </t>
+                        </select>
+
+                        <!-- Preview the generated if / else-complement lines -->
+                        <t t-if="state.cronVariableId and selectedCronVariable">
+                            <div class="mt-2 p-2 bg-light border rounded small font-monospace">
+                                <div class="text-success fw-semibold">if branch:</div>
+                                <div class="ms-2 text-dark">if <t t-esc="selectedCronVariable.variable_name"/>:</div>
+                                <div class="text-danger fw-semibold mt-1">else branch (complement):</div>
+                                <div class="ms-2 text-dark">
+                                    <t t-esc="selectedCronVariable.variable_name"/>_complement
+                                    = env['<t t-esc="selectedCronVariable.modelName || selectedCronVariable.modelId"/>'].search(
+                                        [('id', 'not in', <t t-esc="selectedCronVariable.variable_name"/>.ids)]
+                                    )
+                                </div>
+                            </div>
+                        </t>
+
+
+                        <t t-if="recordsetVariables.length === 0">
+                            <div class="alert alert-warning small mt-2">
+                                No recordset variables found. Add a <strong>Search</strong> node before this
+                                Condition and configure it first.
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+                     NORMAL MODE: Full condition-builder (unchanged)
+                ════════════════════════════════════════════════════════════════ -->
+                <t t-else="">
+                <h6 class="mb-2">Build Your Condition</h6>
+                <div class="condition-groups mb-3">
+                    <t t-foreach="state.groups" t-as="group" t-key="group_index">
+                        <t t-if="group_index > 0">
+                            <div class="group-connector d-flex justify-content-center align-items-center my-2">
+                                <div class="connector-line bg-primary" style="height: 2px; width: 30px;"/>
+                                <select class="form-select form-select-sm mx-1 bg-primary text-dark border-0 rounded-pill"
+                                        style="width: auto; font-size: 0.7rem;"
+                                        t-on-change="(ev) => this.updateGroupOperator(group_index, ev.target.value)">
+                                    <option value="and" t-att-selected="group.groupOperator === 'and'">AND</option>
+                                    <option value="or" t-att-selected="group.groupOperator === 'or'">OR</option>
+                                </select>
+                                <div class="connector-line bg-primary" style="height: 2px; width: 30px;"/>
+                            </div>
+                        </t>
+                        <GroupComponent group="group" groupIndex="group_index" addCondition.bind="addCondition"
+                                        removeCondition.bind="removeCondition" updateGroupOperator.bind="updateGroupOperator"
+                                        setComplexCondition.bind="setComplexCondition" removeGroup.bind="removeGroup"
+                                        variables="props.variables"/>
+                    </t>
+                </div>
+                <button class="btn btn-primary btn-sm mb-3" t-on-click="addGroup">
+                    <i class="ri-add-line"/> Add New Group
+                </button>
+                </t>
+
+                <div t-if="debug">
+                    <h6 class="mb-2 text-info fw-bold">Generated Python Code:</h6>
+                    <pre class="bg-dark text-light p-2 rounded"><code><t t-esc="pythonCode"/></code></pre>
+                </div>
+            </div>
+        </xpath>
+    </t>
+    <t t-name="GroupComponent">
+        <div class="condition-group mb-3 p-2 border rounded">
+            <h4 class="mb-2 text-primary fw-bold">Group <t t-esc="props.groupIndex + 1"/></h4>
+            <div class="conditions mb-2">
+                <t t-foreach="props.group.conditions" t-as="condition" t-key="condition_index">
+                    <t t-if="condition_index > 0">
+                        <div class="condition-connector d-flex justify-content-start align-items-center my-1">
+                            <div class="connector-line bg-primary" style="height: 2px; width: 15px;"/>
+                            <select class="form-select form-select-sm mx-1 bg-primary text-dark border-0 rounded-pill"
+                                    style="width: auto; font-size: 0.7rem;"
+                                    t-on-change="(ev) => this.updateCondition(condition, 'logicalOperator', ev.target.value)">
+                                <option value="and" t-att-selected="condition.logicalOperator === 'and'">AND</option>
+                                <option value="or" t-att-selected="condition.logicalOperator === 'or'">OR</option>
+                            </select>
+                            <div class="connector-line bg-primary" style="height: 2px; width: 15px;"/>
+                        </div>
+                    </t>
+                    <ConditionComponent condition="condition" groupIndex="props.groupIndex"
+                                        conditionIndex="condition_index" fields="props.fields" operators="props.operators"
+                                        removeCondition.bind="props.removeCondition" variables="props.variables"/>
+                </t>
+            </div>
+            <div class="mb-2">
+                <button class="btn btn-outline-primary btn-sm me-1" t-on-click="addCondition">
+                    <i class="ri-add-line"/> Add
+                </button>
+                <button class="btn btn-outline-danger btn-sm" t-on-click="() => props.removeGroup(props.groupIndex)"
+                        t-if="props.groupIndex > 0">
+                    <i class="ri-delete-bin-6-line"/> Remove
+                </button>
+            </div>
+        </div>
+    </t>
+    <t t-name="ConditionComponent">
+        <div class="condition-row mb-2 p-2 rounded d-flex align-items-end gap-2"
+             t-attf-class="{{state.isValid ? '' : 'border border-danger'}}">
+            <div class="d-flex flex-grow-1 gap-2 align-items-end">
+                <t t-if="props.condition.type === 'simple'">
+                    <div t-attf-style="flex: {{ ['not_set', 'set'].includes(props.condition.operator) ? '60%' : '40%' }}">
+                        <FieldSelector variables="props.variables" field="props.condition.field" fieldType="props.condition.fieldType"
+                                       update.bind="(value) => this.updateConditionField('field', value)"
+                                       updateFieldType.bind="handleUpdateFieldType"/>
+                    </div>
+
+                    <div t-attf-style="flex: {{ ['not_set', 'set'].includes(props.condition.operator) ? '40%' : '20%' }}">
+                        <t t-set="info" t-value="this.getOperatorEditorInfo()"/>
+                        <t t-set="update" t-value="(value) => this.updateConditionOperator('operator', value)"/>
+                        <t t-component="info.component" t-props="info.extractProps({value: props.condition.operator, update})"/>
+                    </div>
+                    <div t-if="!['not_set', 'set'].includes(props.condition.operator)" style="flex:40%">
+                        <ValueSelector variables="props.variables"
+                                       update.bind="(value) => this.updateConditionValue('value', value)"
+                                       condition="props.condition" updateFieldType.bind="handleUpdateValueFieldType"
+                                       value="props.condition.value.value" fieldType="props.condition.value.fieldType"/>
+                    </div>
+                </t>
+                <t t-if="props.condition.type === 'complex'">
+                    <textarea class="form-control form-control-sm"
+                              t-on-input="(ev) => this.updateCondition('expression', ev.target.value)"
+                              placeholder="Enter custom Python expression"><t t-esc="props.condition.expression"/></textarea>
+                </t>
+            </div>
+            <button class="btn btn-outline-danger btn-sm"
+                    t-on-click="() => props.removeCondition(props.groupIndex, props.conditionIndex)">
+                <i class="ri-close-fill"/>
+            </button>
+        </div>
+    </t>
+</templates>

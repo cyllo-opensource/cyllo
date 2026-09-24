@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_batch_payment_tree" model="ir.ui.view">
+        <field name="name">view.batch.payment.tree</field>
+        <field name="model">batch.payment</field>
+        <field name="arch" type="xml">
+            <tree string="Batch Payment">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="total_amount"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_account_batch_payment_search" model="ir.ui.view">
+        <field name="name">view.batch.payment.search</field>
+        <field name="model">batch.payment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="batch_type"/>
+                <field name="journal_id"/>
+                <filter string="Unreconciled" name="unreconciled" domain="[('state', '!=', 'reconciled')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Batch Type" name="batch_type" context="{'group_by': 'batch_type'}"/>
+                    <filter string="State" name="state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_account_batch_payment_form" model="ir.ui.view">
+        <field name="name">view.batch.payment.form</field>
+        <field name="model">batch.payment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Create Batch" class="oe_highlight"
+                            name="action_create_batch" data-hotkey="c"
+                            invisible="not payment_ids or state != 'draft'" type="object"/>
+                    <button string="Reset to Draft" name="reset_to_draft" type="object"
+                            data-hotkey="d" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <br/>
+                <br/>
+                <sheet>
+                    <h4>
+                        <field name="name"/>
+                    </h4>
+                    <group>
+                        <group>
+                            <field name="batch_type"/>
+                            <field name="journal_id" required="1"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="payment_method"/>
+                            <br/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Batch Content">
+                            <field name="payment_ids"
+                                   readonly="state != 'draft'"
+                                   options="{'create': False}">
+
+                                <tree editable="bottom">
+                                    <field name="name" string="Number"/>
+                                    <field name="date" string="Date"/>
+                                    <field name="amount" string="Amount"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer"
+                                   invisible="not payment_ids">
+                                <field name="total_amount"
+                                       class="oe_subtotal_footer_separator"
+                                />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_customer_batch_payment" model="ir.actions.act_window">
+        <field name="name">Customer Batch payment</field>
+        <field name="res_model">batch.payment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_account_batch_payment_search"/>
+        <field name="domain">[('batch_type', '=', 'inbound')]</field>
+        <field name="context">{'default_batch_type': 'inbound','search_default_unreconciled': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new batch payment...
+            </p>
+        </field>
+    </record>
+
+    <record id="action_vendor_batch_payment" model="ir.actions.act_window">
+        <field name="name">Vendor Batch payment</field>
+        <field name="res_model">batch.payment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_account_batch_payment_search"/>
+        <field name="domain">[('batch_type', '=', 'outbound')]</field>
+        <field name="context">{'default_batch_type': 'outbound','search_default_unreconciled': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new batch payment...
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

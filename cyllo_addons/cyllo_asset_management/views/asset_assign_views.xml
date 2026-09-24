@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Tree view of the asset assign model-->
+    <record id="view_asset_assign_tree" model="ir.ui.view">
+        <field name="name">view.asset.assign.tree</field>
+        <field name="model">asset.assign</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="asset_id"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="assign_date"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Search view of the asset assign model-->
+    <record id="view_asset_assign_search" model="ir.ui.view">
+        <field name="name">view.asset.assign.search</field>
+        <field name="model">asset.assign</field>
+        <field name="arch" type="xml">
+            <search string="Assigned Asset">
+                <field name="asset_id"/>
+                <field name="employee_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Asset" name="asset_item" domain="[]" context="{'group_by':'asset_id'}"/>
+                    <filter string="Employee" name="employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--    Wizard view of the asset assign model-->
+    <record id="view_asset_assign_form2" model="ir.ui.view">
+        <field name="name">view.asset.assign.form2</field>
+        <field name="model">asset.assign</field>
+        <field name="arch" type="xml">
+            <form string="Assign">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id" invisible="1"/>
+                            <field name="employee_id"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="department_id"/>
+                            <field name="assign_date"/>
+                        </group>
+                        <group>
+                            <field name="assign_note"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button type="object" name="action_assign" string="Assign" class="oe_highlight"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Form view of the asset assign model-->
+    <record id="view_asset_assign_form" model="ir.ui.view">
+        <field name="name">view.asset.assign.form</field>
+        <field name="model">asset.assign</field>
+        <field name="arch" type="xml">
+            <form string="Assign">
+                <header>
+                    <button type="object" name="action_assign" string="Assign" class="oe_highlight"
+                            invisible="status != 'draft'"/>
+                    <button type="object" name="action_unassign" string="Unassign" class="oe_highlight"
+                            invisible="status != 'assign'"/>
+                    <button type="object" name="action_reset_to_draft" string="Reset to Draft" class="btn-secondary"
+                            invisible="status != 'cancel'"
+                            groups="cyllo_asset_management.group_cyllo_asset_admin"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,assign"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_ids" invisible="True"/>
+                            <field name="asset_id"
+                                   domain="[('is_lease','=', False), ('is_assign','=', False), ('is_rental','=', False),
+                                   ('id', 'in', asset_ids),
+                                   ('status', 'not in', ('sell', 'disposed', 'cancel', 'lost'))]"/>
+                            <field name="assign_date"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="department_id"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="assign_note"/>
+                        </group>
+                    </group>
+                </sheet>
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--    Action for the asset assign model-->
+    <record id="action_view_assign" model="ir.actions.act_window">
+        <field name="name">Assign</field>
+        <field name="res_model">asset.assign</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!--   MenuItem for the Assign-->
+    <menuitem id="menu_assign" name="Assign"
+              parent="cyllo_asset_management.menu_assets_categ"
+              action="action_view_assign"
+              sequence="3"/>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template xml:space="preserve">
+    <t t-name="ReconcileView" owl="1">
+        <div t-ref="root" t-att-class="props.className">
+            <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''"
+                    display="props.display">
+                <!-- Create button in the control panel -->
+                <t t-set-slot="control-panel-create-button">
+                    <button type="button"
+                            class="btn btn-primary o_list_button_add"
+                            data-hotkey="c"
+                            t-on-click="onClickCreate"
+                            data-bounce-button="">
+                        New
+                    </button>
+                </t>
+                <t t-set-slot="layout-actions">
+                    <SearchBar t-if="searchBarToggler.state.showSearchBar" autofocus="firstLoad"/>
+                </t>
+                <t t-set-slot="control-panel-navigation-additional">
+                    <t t-component="searchBarToggler.component" t-props="searchBarToggler.props"/>
+                </t>
+
+                <!-- Render the main content using the Renderer component -->
+                <t t-component="props.Renderer"
+                   list="model.root"
+                   isCreate="state.isCreate"
+                   toggleIsCreate.bind="toggleIsCreate"
+                   createNew="state.new"
+                   activeActions="activeActions"
+                   archInfo="archInfo"
+                   allowSelectors="props.allowSelectors"
+                   onOpenFormView="onOpenFormView"
+                   openRecord.bind="openRecord"
+                   noContentHelp="props.info.noContentHelp"
+                   onAdd.bind="createRecord"
+                   onOptionalFieldsChanged.bind="onOptionalFieldsChanged"
+                   evalViewModifier.bind="evalViewModifier"/>
+            </Layout>
+        </div>
+    </t>
+</template>
+

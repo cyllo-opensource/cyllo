@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="dateRange">
+        <div class="drop cy_date_range filter d-flex ms-auto">
+            <Dropdown togglerClass="'btn dropdown-toggle time_range'">
+                <t t-set-slot="toggler">
+                    <span t-attf-class="{{(!filters.startDate or !filters.endDate) and 'class-date-alert'}}">
+                        <span class="fa fa-calendar"
+                              title="Dates"
+                              role="img"
+                              aria-label="Dates"/>
+                        <span class="mx-2" t-out="dateFilterValue"/>
+                    </span>
+                </t>
+                <t t-foreach="timeFrame" t-as="time" t-key="time_index">
+                    <div t-if="time_index === separateAt" role="separator"
+                         class="dropdown-divider"/>
+                    <DropdownItem t-if="time !== 'custom'"
+                                  class="'btn d-flex align-items-center px-2 py-2 m-0'"
+                                  title="timeFrame[time]" onSelected="() => this.onSelectTimeFrame(time)">
+                        <i t-if="time === filters.dateFilterValue" class="ri-check-line"/>
+                        <span class="mx-2" t-out="timeFrame[time]"/>
+                    </DropdownItem>
+                </t>
+                <t t-if="dateFilterTemplate">
+                    <div role="separator"
+                         class="dropdown-divider"/>
+                    <t t-call="{{dateFilterTemplate}}"/>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+    <t t-name="toAndFromDateFilter">
+        <label for="start_date" class="dropdown-item" style="margin-left: -2%">Start Date:
+            <input type="date" t-model="filters.startDate" id="start_date"
+               t-on-change="(ev) => this.onDateChange(ev, 'startDate')"
+               t-attf-class="{{!filters.startDate and 'class-date-alert'}}"
+               name="start_date" class="form-control datepicker dropdown-item" t-att-max="filters.endDate"/>
+        </label>
+        <label for="end_date" class="dropdown-item" style="margin-left: -2%">End Date:
+            <input type="date" id="end_date" t-model="filters.endDate"
+                   t-attf-class="{{!filters.endDate and 'class-date-alert'}}"
+                   t-on-change="(ev) => this.onDateChange(ev, 'endDate')" name="end_date"
+                   class="form-control datepicker dropdown-item" t-att-min="filters.startDate"/>
+        </label>
+    </t>
+    <t t-name="reportComparison">
+        <div class="drop comparison_range">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-signal fa-signal"
+                          title="Comparison"
+                          role="img"
+                          aria-label="Comparison"/>
+                    Comparison
+                </t>
+                <DropdownItem class="'report-filter-button cy-report-filter'" onSelected.bind="setDefaultComparison">
+                    No Comparison
+                </DropdownItem>
+                <div role="separator" class="dropdown-divider"/>
+                <div class="form-control datepicker dropdown-item">
+                    <div class="mt-2">Number of Periods:</div>
+                    <input class="mt-2 form-control datepicker dropdown-item minimal-border" type="number"
+                           min="1" max="5" t-model="state.comparisonCopy"
+                    />
+                    <button class="m-2 btn btn-primary report-comparison-apply-btn"
+                            type="button"
+                            t-on-click="() => this.applyComparison()">
+                        Apply
+                    </button>
+                </div>
+            </Dropdown>
+        </div>
+    </t>
+    <t t-name="journalTemplate">
+        <div class="drop journals_filter dropdown">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-book"/>
+                    Journals
+                    <span class="code"/>
+                </t>
+                <t t-foreach="journalsByCompany" t-as="group" t-key="group_index">
+                    <div class="dropdown-menu_group dropdown-header" t-out="group.companyName"/>
+                    <DropdownItem parentClosingMode="'none'" t-foreach="group.journals" t-as="journal" t-key="journal.id"
+                                  onSelected="() => this.addFilters(journal.id, 'journal_ids')">
+                        <div class="ms-3 d-flex align-items-center">
+                            <i t-if="filterState.journal_ids.includes(journal.id)" class="ri-check-line me-1"/>
+                            <span t-out="journal.name"/>
+                        </div>
+                    </DropdownItem>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+    <t t-name="accountTemplate">
+        <div class="drop accounts_filter">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-book"/>
+                    Accounts
+                    <span class="account"/>
+                </t>
+                <t t-foreach="accountsByCompany" t-as="group" t-key="group_index">
+                    <div class="dropdown-menu_group dropdown-header" t-out="group.companyName"/>
+                    <DropdownItem parentClosingMode="'none'" t-foreach="group.accounts" t-as="account"
+                                  t-key="account.id"
+                                  onSelected="() => this.addFilters(account.id, 'account_ids')">
+                        <div class="ms-3 d-flex align-items-center">
+                            <i t-if="filterState.account_ids.includes(account.id)" class="ri-check-line me-1"/>
+                            <span t-out="account.name"/>
+                        </div>
+                    </DropdownItem>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+    <t t-name="reportExtraOptions">
+        <div class="drop search_Target_move">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-filter"/>
+                    Options
+                    <span class="target"/>
+                </t>
+                <DropdownItem parentClosingMode="'none'" onSelected="() => this.addFilters('draft', 'target_move')">
+                    <i t-if="filterState.target_move.includes('draft')" class="ri-check-line"/>
+                    <span class="mx-2">Include Draft Entries</span>
+                </DropdownItem>
+                <DropdownItem parentClosingMode="'none'" onSelected.bind="toggleUnfold">
+                    <span t-if="state.isFolded" class="mx-2">UnFold All</span>
+                    <span t-else="" class="mx-2">Fold All</span>
+                </DropdownItem>
+            </Dropdown>
+            <t t-if="anotherDropdown" t-call="{{anotherDropdown}}"/>
+        </div>
+    </t>
+    <t t-name="analyticAccountTemplate">
+        <div class="drop analytic_filter">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-folder-open"/>
+                    Analytic Accounts
+                    <span class="analytic"/>
+                </t>
+                <t t-foreach="analyticsByCompany" t-as="group" t-key="group_index">
+                    <div class="dropdown-menu_group dropdown-header" t-out="group.companyName"/>
+                    <DropdownItem parentClosingMode="'none'" t-foreach="group.analytics" t-as="analytic"
+                                  t-key="analytic.id"
+                                  onSelected="() => this.addFilters(analytic.id, 'analytic_ids')">
+                        <div class="ms-3 d-flex align-items-center">
+                            <i t-if="filterState.analytic_ids.includes(analytic.id)" class="ri-check-line me-1"/>
+                            <span t-out="analytic.display_name"/>
+                        </div>
+                    </DropdownItem>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+</templates>

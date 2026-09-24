@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_payment_tree" model="ir.ui.view">
+        <field name="name">view.account.payment.tree</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/field[@name='amount_company_currency_signed']" position="replace">
+                <field name="total_payment_amount" string="Amount"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_account_payment_form" model="ir.ui.view">
+        <field name="name">view.account.payment.form</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_post']" position="attributes">
+                <attribute name="invisible">multi_invoice_payment == True or state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_cancel']" position="before">
+                <button name="action_confirm_invoice_payment" string="Confirm" type="object" class="oe_highlight"
+                        invisible="multi_invoice_payment == False or state != 'draft'"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name='multi_invoice_payment' invisible="partner_id == False or is_internal_transfer == True"
+                       readonly="state != 'draft'"/>
+            </xpath>
+            <xpath expr="//label[@for='amount']" position="attributes">
+                <attribute name="invisible">multi_invoice_payment == True</attribute>
+            </xpath>
+            <xpath expr="//div[@name='amount_div']" position="attributes">
+                <attribute name="invisible">multi_invoice_payment == True</attribute>
+            </xpath>
+            <xpath expr="//group" position="after">
+                <field name="state" invisible="1"/>
+                <field name="payment_line_ids" invisible="1"/>
+                <notebook>
+                    <page string="Lines" name="invoices"
+                          invisible="state == 'posted' or multi_invoice_payment == False">
+                        <field name="move_ids"
+                               context="{'default_move_type': 'out_invoice', 'default_partner_id': partner_id, 'default_create_from_payment': True}"
+                               domain="[('partner_id', '=', partner_id), ('move_type', '=', 'out_invoice'), ('payment_state', '!=', 'paid'),('state', '=', 'posted')]"
+                               invisible="multi_invoice_payment == False or payment_type != 'inbound'"
+                               readonly="state != 'draft'">
+                            <tree editable="bottom">
+                                <field name="currency_id" column_invisible="True"/>
+                                <field name="name"/>
+                                <field name="state" column_invisible="1"/>
+                                <field name="company_id" column_invisible="1"/>
+                                <field name="create_from_payment" column_invisible="1"/>
+                                <field name="partner_id"/>
+                                <field name="amount_total"/>
+                                <field name="amount_residual" string="Pay Amount" readonly="0"/>
+                                <field name="residual_amount" column_invisible="1"/>
+                            </tree>
+                        </field>
+                        <field name="move_ids"
+                               context="{'default_move_type': 'in_invoice', 'default_partner_id': partner_id,  'default_create_from_payment': True}"
+                               domain="[('partner_id', '=', partner_id), ('move_type', '=', 'in_invoice'), ('payment_state', '!=', 'paid'),('state', '=', 'posted')]"
+                               invisible="multi_invoice_payment == False or payment_type != 'outbound'"
+                               readonly="state != 'draft'">
+                            <tree editable="bottom">
+                                <field name="currency_id" column_invisible="True"/>
+                                <field name="name"/>
+                                <field name="state" column_invisible="1"/>
+                                <field name="company_id" column_invisible="1"/>
+                                <field name="create_from_payment" column_invisible="1"/>
+                                <field name="partner_id"/>
+                                <field name="amount_total"/>
+                                <field name="amount_residual" string="Pay Amount" readonly="0"/>
+                                <field name="residual_amount" column_invisible="1"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Lines" name="payment_lines"
+                          invisible="state != 'posted' or multi_invoice_payment == False">
+                        <field name="payment_line_ids">
+                            <tree>
+                                <field name="currency_id" column_invisible="True"/>
+                                <field name="move_id"/>
+                                <field name="partner_id"/>
+                                <field name="total_amount"/>
+                                <field name="paid_amount" string="Paid Amount"/>
+                                <field name="pay_amount"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+                <group col="12" class="oe_invoice_lines_tab">
+                    <group colspan="8">
+                    </group>
+                    <group colspan="4">
+                        <group class="oe_subtotal_footer oe_right">
+                            <field name="total_invoice_amount" string="Total to Pay"
+                                   invisible="multi_invoice_payment == False or state == 'posted'"/>
+                            <field name="total_invoice_amount" string="Total Paid"
+                                   invisible="multi_invoice_payment == False or state != 'posted'"/>
+                        </group>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

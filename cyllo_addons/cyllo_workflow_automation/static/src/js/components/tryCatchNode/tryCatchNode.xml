@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="TryCatchNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="try-catch-node">
+
+                <!-- ── Info Banner ───────────────────────────────────────────── -->
+                <div class="alert alert-info small py-2 mb-3 d-flex align-items-start gap-2">
+                    <i class="fa fa-shield mt-1"/>
+                    <span>
+                        The <strong>Try/Catch</strong> node wraps downstream nodes in a
+                        <code>try … except</code> block.
+                        Connect nodes to the <em>Try</em> port for guarded steps and to the
+                        <em>Catch</em> port for error-recovery steps.
+                        The <em>Continue</em> port runs after either branch.
+                    </span>
+                </div>
+
+                <!-- ── Label ────────────────────────────────────────────────── -->
+                <div class="mb-3">
+                    <label class="form-label mb-1 fw-semibold">Node Label</label>
+                    <input
+                        style="border-radius:0px !important;"
+                        type="text"
+                        t-ref="labelInput"
+                        class="o_input"
+                        autocomplete="off"
+                        placeholder="e.g. Try send email"
+                        t-att-value="fieldState.label or ''"
+                        t-on-input="(ev) => this.setLabel(ev.target.value)"
+                    />
+                    <div t-if="tryCatchState.labelError" class="text-danger small mt-1">
+                        Label is required.
+                    </div>
+                </div>
+
+                <!-- ── Exception Types ───────────────────────────────────────── -->
+                <div class="mb-3">
+                    <label class="form-label mb-1 fw-semibold">Exception Types to Catch</label>
+                    <input
+                        style="border-radius:0px !important;"
+                        type="text"
+                        class="o_input"
+                        autocomplete="off"
+                        placeholder="e.g. Exception  or  UserError, ValidationError"
+                        t-att-value="tryCatchState.errorTypes"
+                        t-on-input="(ev) => this.setErrorTypes(ev.target.value)"
+                    />
+                    <div class="form-text text-muted small">
+                        Comma-separated Python exception class names.
+                        Use <code>Exception</code> to catch everything.
+                    </div>
+                    <div t-if="tryCatchState.typesError" class="text-danger small mt-1">
+                        At least one exception type is required.
+                    </div>
+                </div>
+
+                <!-- ── Error Variable ────────────────────────────────────────── -->
+                <div class="mb-3">
+                    <label class="form-label mb-1 fw-semibold">Error Variable Name</label>
+                    <input
+                        style="border-radius:0px !important;"
+                        type="text"
+                        class="o_input"
+                        autocomplete="off"
+                        placeholder="e.g. error"
+                        t-att-value="tryCatchState.errorVariable"
+                        t-on-input="(ev) => this.setErrorVariable(ev.target.value)"
+                    />
+                    <div class="form-text text-muted small">
+                        Python variable that will hold the caught exception in the
+                        <em>Catch</em> branch (e.g. <code>str(error)</code>).
+                    </div>
+                    <div t-if="tryCatchState.varError" class="text-danger small mt-1">
+                        Error variable name is invalid.
+                    </div>
+                </div>
+
+                <!-- ── Port Summary ──────────────────────────────────────────── -->
+                <div class="border rounded p-2 bg-light small mb-1">
+                    <div class="fw-semibold mb-1">Output Ports</div>
+                    <div class="d-flex flex-column gap-1">
+                        <div>
+                            <span class="badge bg-success me-1">1 — Try</span>
+                            Nodes executed inside the guarded block.
+                        </div>
+                        <div>
+                            <span class="badge bg-danger me-1">2 — Catch</span>
+                            Nodes executed when an exception is caught
+                            (variable: <code t-esc="tryCatchState.errorVariable or 'error'"/>).
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary me-1">3 — Continue</span>
+                            Nodes that always run after the try/except block.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="plm_eco_company_rule" model="ir.rule">
+        <field name="name">PLM Eco Multi Company Rule</field>
+        <field name="model_id" ref="model_plm_eco"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+
+    </record>
+
+    <record id="plm_eco_type_company_rule" model="ir.rule">
+        <field name="name">PLM Eco Type Multi Company Rule</field>
+        <field name="model_id" ref="model_plm_eco_type"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+
+    </record>
+
+    <record id="plm_document_file_company_rule" model="ir.rule">
+        <field name="name">PLM Document File Multi Company Rule</field>
+        <field name="model_id" ref="model_document_file"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+
+    </record>
+
+
+    <record id="module_category_cyllo_plm" model="ir.module.category">
+        <field name="name">Product Lifecycle Management (PLM)</field>
+        <field name="description">User access levels for PLM module</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="group_plm_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="cyllo_plm.module_category_cyllo_plm"/>
+        <field name="implied_ids" eval="[
+        Command.link(ref('base.group_user')),
+        Command.link(ref('mrp.group_mrp_user')),
+    ]"/>
+    </record>
+
+
+    <record id="group_plm_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="cyllo_plm.module_category_cyllo_plm"/>
+        <field name="implied_ids" eval="[
+        Command.link(ref('group_plm_user')),
+        Command.link(ref('mrp.group_mrp_manager')),
+    ]"/>
+        <field name="users"
+               eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
+
+
+</odoo>

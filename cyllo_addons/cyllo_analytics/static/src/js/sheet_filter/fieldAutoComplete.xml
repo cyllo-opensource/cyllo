@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="FieldAutoComplete" owl="1">
+        <div class="o-autocomplete" t-ref="root">
+            <input type="text"
+                   class="o-autocomplete--input o_input"
+                   autocomplete="off"
+                   t-att-placeholder="props.placeholder"
+                   t-model="state.value"
+                   t-on-input="onInput"
+                   t-on-blur="onInputBlur"
+                   t-on-focus="onInput"
+                   t-ref="input"/>
+            <ul t-if="state.open"
+                class="o-autocomplete--dropdown-menu ui-widget show dropdown-menu ui-autocomplete"
+                t-on-mousedown.prevent=""
+                t-ref="sourcesList">
+                <t t-foreach="state.data" t-as="option" t-key="option_index">
+                    <li class="o-autocomplete--dropdown-item ui-menu-item d-block"
+                        t-on-click="() => this.onOptionClick(option)">
+                        <a href="#" class="dropdown-item ui-menu-item-wrapper text-truncate">
+                            <t t-esc="option.label"/>
+                        </a>
+                    </li>
+                </t>
+            </ul>
+        </div>
+        <t t-foreach="state.domain" t-as="domain" t-key="domain.id">
+             <DomainCreator domain="domain"
+                            index="domain_index"
+                            addToDomain="props.addToDomain"
+                            remove.bind="onClickRemove"/>
+        </t>
+    </t>
+    <t t-inherit="FieldAutoComplete"
+       t-inherit-mode="primary"
+       t-name="FieldAutoCompleteGlobal"
+       owl="1">
+        <xpath expr="//t[@t-foreach='state.domain']" position="replace"/>
+    </t>
+</templates>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.ButtonProperties">
+        <div class="button_properties">
+            <div class="mb-2">
+                <label for="" class="cy-navbar_label">Label Name</label>
+                <input class="cy-input cy-input-field-align cy-studio-input-placeholder" reqired="true" type="text"
+                       id="label" name="label" placeholder="Enter the label name" autocomplete="off"
+                       t-model="buttonProperties.string" t-on-input="handleLabelChange"
+                       t-on-change="() => this.autoSave()"/>
+            </div>
+            <div class="mb-2">
+                <label for="" class="cy-navbar_label ">Class</label>
+                <div class="cy-input-background-color cy-button-custom">
+                    <CustomSelection class="cy-selection-custom" onChange.bind="handleClassChange"
+                                     defaultClass="buttonProperties.class"/>
+                </div>
+                <t t-if="props.viewDetails.viewType !== 'form'">
+                    <input type="text" class="cy-input form-control " t-model="buttonProperties.class"
+                           t-on-change="() => this.autoSave()"/>
+                </t>
+            </div>
+            <t t-if="props.viewDetails.viewType !== 'form'">
+                <div class="dropdown-checkbox-container mb-2">
+                    <label class="cy-navbar_label customCheckbox-label" for="onStyle">Style
+                    </label>
+                    <div class="cy-studio-custom-dropdown">
+                        <CylloStudioDropdown options="onStyleChange" defaultValue="state.style"
+                                             onChange="(value) => this.handleOnStyleChange(value)" searchable="true"/>
+                    </div>
+                </div>
+            </t>
+            <t t-if="props.viewDetails.viewType !== 'form'">
+                <div class="mb-2 custom_icon">
+                    <label for="" class="cy-navbar_label">Icon</label>
+                    <div class="cy-studio-custom-dropdown">
+                        <IconPicker icons="IconClass" value="buttonProperties.icon || ''"
+                                    onChange="(v) => { buttonProperties.icon = v; }"/>
+                    </div>
+                </div>
+            </t>
+            <div class="dropdown-checkbox-container" style="margin-bottom:8px;">
+                <label class="cy-navbar_label customCheckbox-label" for="defaultGroupBy">Type
+                </label>
+                <div class="cy-studio-custom-dropdown">
+                    <CylloStudioDropdown onChange="(value) => this.handleOnTypeChange(value)" options="onTypeChange"
+                                         defaultValue="buttonProperties.type"/>
+                </div>
+            </div>
+            <t t-if="buttonProperties.type === 'object'">
+                <div class="dropdown-checkbox-container">
+                    <label class="cy-navbar_label customCheckbox-label">
+                        Function
+                    </label>
+                    <div class="cy-studio-custom-dropdown">
+                        <CylloStudioDropdown onChange="(value) => this.handleButtonFunctionChange(value)"
+                                             options="ButtonFunctionChange(functions)"
+                                             defaultValue="buttonProperties.name" searchable="true"/>
+                    </div>
+                </div>
+                <div class="functionInfo d-none">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex">
+                            <svg fill="#c6b8b8" width="20px" height="20px" class="alert-icon"
+                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+                            </svg>
+                        </div>
+                        <span class="text-start fs-6">
+                            Please verify function stability before applying
+                            changes.
+                        </span>
+                    </div>
+                </div>
+            </t>
+            <t t-if="buttonProperties.type === 'action'">
+                <div class="dropdown-checkbox-container">
+                    <label class="cy-navbar_label customCheckbox-label">Action</label>
+                    <div class="cy-studio-custom-dropdown">
+                        <CylloStudioDropdown
+                                onChange="(value) => this.handleActionChange(value)"
+                                options="actionOptions"
+                                defaultValue="buttonProperties.name"
+                                searchable="true"/>
+                    </div>
+                </div>
+            </t>
+            <div class="dropdown-checkbox-container button_visible" style=" margin-top: 8px;">
+                <label for="" class="cy-navbar_label">Button Visibility</label>
+                <div class="cy-studio-custom-dropdown cy-studio-visible-to-drop-align">
+                    <MultiSelectDropDown allValues="groupsAllValues" selectedValues="groupsSelectedValues"
+                                         onUpdate="(v) => this.updateGroupIds(v)"/>
+                </div>
+            </div>
+            <div class="cy-prop-toggle-row">
+                <span class="cy-toggle-label">Invisible</span>
+                <div class="cy-prop-toggle-right">
+                    <button class="cy-basedOn" data-attribute="invisible" t-on-click="onDomainClick">
+                        <span>Based on</span>
+                        <i class="fa fa-cog cy-setting-icon"/>
+                    </button>
+                    <label class="cy-switch">
+                        <input type="checkbox" name="invisible" t-on-click="onDomainRadioClick"
+                               t-att-checked="['false', 'undefined', undefined].includes(buttonProperties.invisible) ? null : 'checked'"/>
+                        <span class="cy-slider"/>
+                    </label>
+                </div>
+            </div>
+            <div class="d-flex btn_div w-100 my-3 gap-2">
+                <button class="btn btn-secondary w-100" t-on-click.stop="RemoveButton">
+                    <t t-esc="this.state.newButton ? 'Cancel' : 'Remove'"/>
+                </button>
+            </div>
+        </div>
+    </t>
+</templates>

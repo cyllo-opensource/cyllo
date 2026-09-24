@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_helpdesk_ticket_form">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <t t-set="data_report_margin_top" t-value="12"/>
+                    <t t-set="data_report_header_spacing" t-value="9"/>
+                    <t t-set="data_report_dpi" t-value="110"/>
+                    <div class="page helpdesk-ticket-report">
+                        <style type="text/css">
+                            .helpdesk-ticket-report { color: #212529; font-family: Arial, sans-serif; font-size: 11px; }
+                            .helpdesk-ticket-report .report-title { font-size: 20px; font-weight: bold; margin: 0 0 6px; text-align: center; }
+                            .helpdesk-ticket-report .ticket-name { border-bottom: 1px solid #b8b8b8; font-size: 14px; font-weight: bold; margin: 0 0 18px; padding-bottom: 9px; text-align: center; }
+                            .helpdesk-ticket-report .report-table { border-collapse: collapse; margin: 0 0 18px; width: 100%; }
+                            .helpdesk-ticket-report .report-table th, .helpdesk-ticket-report .report-table td { border: 1px solid #d0d0d0; padding: 8px 10px; vertical-align: top; }
+                            .helpdesk-ticket-report .report-table thead th, .helpdesk-ticket-report .section-heading { background: #808080; color: #fff; font-weight: bold; }
+                            .helpdesk-ticket-report .report-table .field-label { background: #f1f1f1; font-weight: bold; width: 15%; }
+                            .helpdesk-ticket-report .report-table .field-value { width: 35%; }
+                            .helpdesk-ticket-report .report-table .section-heading { font-size: 12px; letter-spacing: .2px; text-align: left; }
+                            .helpdesk-ticket-report .description-content { line-height: 1.45; min-height: 28px; }
+                        </style>
+                        <div class="oe_structure"/>
+
+                        <div class="report-title">Helpdesk Ticket</div>
+                        <div class="ticket-name"><span t-esc="o.name"/></div>
+
+                        <table class="report-table" t-if="o.ticket or o.customer_id or o.email or o.phone">
+                            <thead>
+                                <tr><th colspan="4">Ticket &amp; Contact Information</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th class="field-label" t-if="o.ticket">Ticket ID</th>
+                                    <td class="field-value" t-if="o.ticket"><span t-field="o.ticket"/></td>
+                                    <th class="field-label" t-if="o.customer_id">Customer</th>
+                                    <td class="field-value" t-if="o.customer_id"><span t-field="o.customer_id"/></td>
+                                </tr>
+                                <tr t-if="o.email or o.phone">
+                                    <th class="field-label" t-if="o.email">Email</th>
+                                    <td class="field-value" t-if="o.email"><span t-field="o.email"/></td>
+                                    <th class="field-label" t-if="o.phone">Phone</th>
+                                    <td class="field-value" t-if="o.phone"><span t-field="o.phone"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="report-table" t-if="o.category_id or o.priority or o.team_id or o.user_id or o.stage_id or o.date or o.closed_date or o.sla_deadline or o.source or o.tag_id or o.tag_ids or o.company_id">
+                            <thead>
+                                <tr><th colspan="4">Ticket Details</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-if="o.category_id or o.priority">
+                                    <th class="field-label" t-if="o.category_id">Category</th>
+                                    <td class="field-value" t-if="o.category_id"><span t-field="o.category_id"/></td>
+                                    <th class="field-label" t-if="o.priority">Priority</th>
+                                    <td class="field-value" t-if="o.priority"><span t-field="o.priority"/></td>
+                                </tr>
+                                <tr t-if="o.team_id or o.user_id">
+                                    <th class="field-label" t-if="o.team_id">Helpdesk Team</th>
+                                    <td class="field-value" t-if="o.team_id"><span t-field="o.team_id"/></td>
+                                    <th class="field-label" t-if="o.user_id">Assigned To</th>
+                                    <td class="field-value" t-if="o.user_id"><span t-field="o.user_id"/></td>
+                                </tr>
+                                <tr t-if="o.stage_id or o.date">
+                                    <th class="field-label" t-if="o.stage_id">Status</th>
+                                    <td class="field-value" t-if="o.stage_id"><span t-field="o.stage_id"/></td>
+                                    <th class="field-label" t-if="o.date">Submitted Date</th>
+                                    <td class="field-value" t-if="o.date"><span t-field="o.date" t-options='{"widget": "datetime"}'/></td>
+                                </tr>
+                                <tr t-if="o.closed_date or o.sla_deadline">
+                                    <th class="field-label" t-if="o.closed_date">Closed Date</th>
+                                    <td class="field-value" t-if="o.closed_date"><span t-field="o.closed_date" t-options='{"widget": "datetime"}'/></td>
+                                    <th class="field-label" t-if="o.sla_deadline">SLA Deadline</th>
+                                    <td class="field-value" t-if="o.sla_deadline"><span t-field="o.sla_deadline" t-options='{"widget": "datetime"}'/></td>
+                                </tr>
+                                <tr t-if="o.source or o.tag_id or o.tag_ids">
+                                    <th class="field-label" t-if="o.source">Source</th>
+                                    <td class="field-value" t-if="o.source"><span t-field="o.source"/></td>
+                                    <th class="field-label" t-if="o.tag_id or o.tag_ids">Tags</th>
+                                    <td class="field-value" t-if="o.tag_id or o.tag_ids">
+                                        <span t-if="o.tag_ids" t-esc="', '.join(o.tag_ids.mapped('name'))"/>
+                                        <span t-elif="o.tag_id" t-field="o.tag_id"/>
+                                    </td>
+                                </tr>
+                                <tr t-if="o.company_id">
+                                    <th class="field-label">Company</th>
+                                    <td class="field-value" colspan="3"><span t-field="o.company_id"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="report-table" t-if="o.description">
+                            <thead><tr><th>Description</th></tr></thead>
+                            <tbody><tr><td class="description-content"><div t-field="o.description"/></td></tr></tbody>
+                        </table>
+                        <table class="report-table" t-if="o.internal_notes">
+                            <thead><tr><th>Internal Notes</th></tr></thead>
+                            <tbody><tr><td class="description-content"><div t-field="o.internal_notes"/></td></tr></tbody>
+                        </table>
+                        <div class="oe_structure"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

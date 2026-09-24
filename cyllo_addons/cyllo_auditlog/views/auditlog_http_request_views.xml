@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_auditlog_http_request_tree" model="ir.ui.view">
+        <field name="name">audit.http.request.tree</field>
+        <field name="model">audit.http.request</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" sample="1">
+                <field name="path" class="fw-bold"/>
+                <field name="create_date" string="Created on"/>
+                <field name="session_id" string="Session"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="method" optional="hide"/>
+                <field name="ip_address" optional="hide"/>
+                <field name="response_code" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_auditlog_http_request_form" model="ir.ui.view">
+        <field name="name">audit.http.request.form</field>
+        <field name="model">audit.http.request</field>
+        <field name="arch" type="xml">
+            <form string="HTTP Request" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="path" string="Path"/>
+                        <h1>
+                            <field name="path"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Request Info">
+                            <field name="url"/>
+                            <field name="method"/>
+                            <field name="response_code"/>
+                            <field name="create_date" string="Created on"/>
+                        </group>
+                        <group string="Session Info">
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="session_id"/>
+                            <field name="ip_address"/>
+                            <field name="user_agent"/>
+                        </group>
+                    </group>
+                    <group string="Request Data" invisible="not request_data">
+                        <field name="request_data" nolabel="1" widget="pre"/>
+                    </group>
+                    <notebook>
+                        <page name="logs" string="Audit Logs">
+                            <field name="log_ids">
+                                <tree>
+                                    <field name="create_date" string="Date"/>
+                                    <field name="record_name" string="Resource Name"/>
+                                    <field name="model_name" string="Model"/>
+                                    <field name="res_id" string="Resource ID"/>
+                                    <field name="operation" string="Action"/>
+                                    <field name="user_id" string="User" widget="many2one_avatar_user"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_auditlog_http_request_search" model="ir.ui.view">
+        <field name="name">audit.http.request.search</field>
+        <field name="model">audit.http.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="path"/>
+                <field name="user_id"/>
+                <field name="session_id"/>
+                <field name="ip_address"/>
+                <filter name="filter_today" string="Today" date="create_date" default_period="today"/>
+                <filter name="filter_this_week" string="This Week" date="create_date" default_period="this_week"/>
+                <filter name="filter_this_month" string="This Month" date="create_date" default_period="this_month"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_session" string="Session" context="{'group_by': 'session_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_auditlog_http_request" model="ir.actions.act_window">
+        <field name="name">HTTP Requests</field>
+        <field name="res_model">audit.http.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No HTTP requests logged yet.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.ComputeDialog">
+    <Dialog title="'Compute Field'">
+        <div class="modal-body">
+            <label class="cy-navbar_label text-dark">Dependencies</label>
+            <div class="d-flex gap-2 mb-3">
+                <input class="cy-input w-100"
+                       t-model="state.deps"
+                       placeholder=""
+                       t-on-click="openDependenciesPopover"/>
+
+<!--                <button class="btn btn-light"-->
+<!--                        t-on-click="clearDeps">-->
+<!--                    clear-->
+<!--                </button>-->
+            </div>
+            <label class="cy-navbar_label text-dark">Compute</label>
+            <div class="cy-compute-editor" >
+    <CodeEditor
+            value="state.code"
+            theme="'monokai'"
+            lang="'python'"
+            height="220"
+            onChange="(val) => this.onComputeCodeChange(val)"/>
+            </div>
+
+            <div class="cy-compute-help mt-3">
+    <h3 class="cy-help-title">How to define a computed field</h3>
+
+    <p>
+        Computed fields are defined using <strong>Dependencies</strong> and
+        <strong>Compute</strong>.
+    </p>
+
+    <p>
+        The <strong>Dependencies</strong> field lists the fields that this computed
+        field depends on (comma-separated).
+        Example: <code>name, size</code>
+        It can also access relational fields:
+        <code>partner_id.company_id.name</code>
+    </p>
+
+    <p>
+        The <strong>Compute</strong> field contains Python code that assigns a value
+        to the field for each record:
+    </p>
+
+    <pre class="cy-code-example">
+for record in self:
+    record['size'] = len(record.name)
+    </pre>
+
+    <p>Available predefined variables:</p>
+    <ul>
+        <li><code>self</code> (the recordset)</li>
+        <li><code>datetime</code> (Python module)</li>
+        <li><code>dateutil</code> (Python module)</li>
+        <li><code>time</code> (Python module)</li>
+    </ul>
+
+    <p>
+        You can also access environment features via
+        <code>self.env</code>, etc.
+    </p>
+</div>
+
+        </div>
+        <t t-set-slot="footer">
+            <button class="btn btn-primary" t-on-click="confirm">Confirm</button>
+            <button class="btn btn-secondary" t-on-click="onCancel">Cancel</button>
+        </t>
+    </Dialog>
+    </t>
+</templates>

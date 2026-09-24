@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="RecordPathSelector">
+        <!-- Main container for the record path selector component, allowing users to select a record and a corresponding field path. -->
+        <div class="cy-record-path-selector d-flex align-items-end">
+            <div t-attf-style="{{state.selectedRecord ? 'width:48%': 'width:100%'}}">
+                <Select
+                        value="state.selectedRecord"
+                        options="options"
+                        update.bind="handleUpdateRecord"
+                />
+            </div>
+            <span t-if="state.selectedRecord" style="width:2%">></span>
+            <div t-if="state.selectedRecord and state.model" style="width:50%">
+                <ModelFieldSelector
+                        readonly="false"
+                        path="state.path"
+                        resModel="state.model.model"
+                        update.bind="updatePath"
+                        filter.bind="filterFields"
+                        showSearchInput="true"
+                        allowEmpty="true"
+                />
+            </div>
+        </div>
+    </t>
+</templates>

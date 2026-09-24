@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="WebhookNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="py-2">
+                <!-- ══════════════════════════════════════════════════════════
+                     LABEL  (unchanged field: fieldState.label)
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Label</label>
+                    <input type="text"
+                           class="form-control cy-modal-form_input"
+                           t-model="fieldState.label"
+                           t-on-change="(ev) => this.setLabel(ev.target.value)"
+                           placeholder="e.g. Notify MultiSafepay"/>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     SECRET URL  (read-only, auto-generated inbound trigger)
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">
+                        Secret URL
+                        <span class="text-muted ms-1" style="font-size:11px; font-weight:normal;">
+                            — share with external systems to trigger this webhook
+                        </span>
+                    </label>
+                    <div class="input-group">
+                        <!-- Read-only URL display -->
+                        <input type="text"
+                               readonly="readonly"
+                               class="form-control cy-modal-form_input font-monospace"
+                               style="font-size:11px; background:#f8f9fa; color:#495057; cursor:default;"
+                               t-att-value="uiState.secretUrl || '(generating…)'"
+                               title="Secret inbound URL — copy and share with external callers"/>
+
+                        <!-- Copy to clipboard -->
+                        <button type="button"
+                                class="btn"
+                                style="border: 1px solid #ced4da; color: #9ea700; background: white;"
+                                title="Copy Secret URL"
+                                t-att-disabled="!uiState.secretUrl"
+                                t-on-click="copySecretUrl">
+                            <t t-if="uiState.secretUrlCopied"><i class="ri-check-line"/></t>
+                            <t t-else=""><i class="ri-file-copy-line"/></t>
+                        </button>
+
+                        <!-- Regenerate token -->
+                        <button type="button"
+                                class="btn btn-outline-warning"
+                                style="font-size:12px; white-space:nowrap;"
+                                title="Generate a new Secret URL — the old one will stop working immediately"
+                                t-att-disabled="uiState.regenerating"
+                                t-on-click="regenerateSecretUrl">
+                            <t t-if="uiState.regenerating">
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+                                Regenerating…
+                            </t>
+                            <t t-else=""><i class="ri-refresh-line me-1"/>Regenerate</t>
+                        </button>
+                    </div>
+                    <div class="text-muted mt-1" style="font-size:10px; color:#856404 !important;">
+                        <i class="ri-alert-line"/> Regenerating immediately invalidates the current Secret URL.
+                        Update any external callers before regenerating.
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     METHOD (tags widget) + URL
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Method</label>
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <t t-foreach="getMethodOptions" t-as="option" t-key="option.value">
+                            <span t-att-style="fieldState.webhook_method === option.value ? 'background-color: #9ea700; color: white; border: 1px solid #9ea700; padding: 4px 12px; font-size: 12px; cursor: pointer;' : 'background-color: transparent; color: #9ea700; border: 1px solid #9ea700; padding: 4px 12px; font-size: 12px; cursor: pointer;'"
+                                  class="badge rounded-pill"
+                                  t-on-click="() => this.fieldState.webhook_method = option.value">
+                                <t t-esc="option.label"/>
+                            </span>
+                        </t>
+                    </div>
+
+                    <label class="form-label cy-modal-form_label mt-1">URL</label>
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control cy-modal-form_input"
+                               t-model="fieldState.webhook_url"
+                               placeholder="https://api.example.com/v1/endpoint"/>
+                        <!-- Copy URL button (UI-only, no fieldState change) -->
+                        <button type="button"
+                                class="btn"
+                                style="border: 1px solid #ced4da; color: #9ea700; background: white;"
+                                title="Copy URL"
+                                t-on-click="copyUrl">
+                            <t t-if="uiState.urlCopied"><i class="ri-check-line"/></t>
+                            <t t-else=""><i class="ri-file-copy-line"/></t>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     HEADERS  (unchanged field: fieldState.webhook_headers)
+                     Two modes: raw JSON textarea (original) + visual
+                     key/value builder that syncs back to the same field.
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label cy-modal-form_label mb-0">
+                            Headers
+                            <span class="text-muted ms-1" style="font-size:11px;font-weight:normal;">
+                                (JSON)
+                            </span>
+                        </label>
+                        <!-- Toggle between raw JSON and visual builder -->
+                        <button type="button"
+                                class="btn btn-link btn-sm p-0 text-decoration-none"
+                                style="font-size:12px; color: #9ea700;"
+                                t-on-click="toggleHeaderBuilder">
+                            <t t-if="uiState.headerBuilderOpen">
+                                <i class="ri-code-line me-1"/>Edit as JSON
+                            </t>
+                            <t t-else="">
+                                <i class="ri-layout-grid-line me-1"/>Visual Builder
+                            </t>
+                        </button>
+                    </div>
+
+                    <!-- Original raw JSON input (always present, always synced) -->
+                    <input type="text"
+                           class="form-control cy-modal-form_input font-monospace"
+                           style="font-size:12px;"
+                           t-model="fieldState.webhook_headers"
+                           t-att-class="uiState.headerBuilderOpen ? 'd-none' : ''"
+                           placeholder='{"Content-Type": "application/json", "api_key": "YOUR_KEY"}'/>
+
+                    <!-- Visual key/value builder (UI-only panel) -->
+                    <t t-if="uiState.headerBuilderOpen">
+                        <div class="border rounded p-2 bg-light">
+                            <t t-foreach="uiState.headerRows" t-as="row" t-key="row_index">
+                                <div class="d-flex align-items-center mb-1 gap-1">
+                                    <input type="text"
+                                           class="form-control form-control-sm font-monospace"
+                                           placeholder="Key"
+                                           t-att-value="row.key"
+                                           t-on-input="(ev) => this.onHeaderKeyChange(row_index, ev)"/>
+                                    <span class="text-muted px-1">:</span>
+                                    <input type="text"
+                                           class="form-control form-control-sm"
+                                           placeholder="Value"
+                                           t-att-value="row.value"
+                                           t-on-input="(ev) => this.onHeaderValueChange(row_index, ev)"/>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            style="flex-shrink:0;"
+                                            t-on-click="() => this.removeHeaderRow(row_index)">
+                                        <i class="ri-close-line"/>
+                                    </button>
+                                </div>
+                            </t>
+                            <button type="button"
+                                    class="btn btn-sm mt-1"
+                                    style="border: 1px solid #9ea700; color: #9ea700; background: transparent;"
+                                    t-on-click="addHeaderRow">
+                                <i class="ri-add-line me-1"/>Add Header
+                            </button>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     PAYLOAD  (unchanged field: fieldState.webhook_payload)
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label cy-modal-form_label mb-0">
+                            Payload (JSON)
+                        </label>
+                    </div>
+
+                    <!-- M2M-like field selector to generate JSON payload -->
+                    <div class="mb-2 border rounded p-1 bg-white cy-w-o-input" style="min-height: 38px; height: auto;">
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                            <!-- Selected Tags -->
+                            <t t-foreach="selectedPayloadTags" t-as="tag" t-key="tag.key">
+                                <span class="badge rounded-pill" style="background:#f5f6e6;color:#9ea700;border:1px solid #9ea700;font-size:11px;font-weight:normal;padding:4px 8px;">
+                                    <t t-esc="tag.label"/>
+                                    <i class="ri-close-line ms-1 cursor-pointer" t-on-click="() => this.removePayloadTag(tag.key)" title="Remove"></i>
+                                </span>
+                            </t>
+                        </div>
+                    </div>
+                    <!-- Payload Mode Toggle and Inputs -->
+                    <div class="d-flex flex-column gap-2 mb-2 p-2 border rounded bg-light">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted" style="font-size:12px; font-weight:600;">Add to Payload:</span>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn" t-att-class="uiState.payloadMode === 'fields' ? 'btn-primary' : 'btn-outline-primary'" t-on-click="() => this.uiState.payloadMode = 'fields'">Fields</button>
+                                <button type="button" class="btn" t-att-class="uiState.payloadMode === 'custom' ? 'btn-primary' : 'btn-outline-primary'" t-on-click="() => this.uiState.payloadMode = 'custom'">Custom</button>
+                            </div>
+                        </div>
+
+                        <!-- Fields Mode -->
+                        <div t-if="uiState.payloadMode === 'fields'" class="d-flex align-items-center gap-2">
+                            <t t-if="currentRecordModelName">
+                                <div class="flex-grow-1 bg-white border rounded">
+                                    <ModelFieldSelector
+                                        readonly="false"
+                                        path="uiState.payloadFieldPath"
+                                        resModel="currentRecordModelName"
+                                        update.bind="updatePayloadFieldPath"
+                                        showSearchInput="true"
+                                    />
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary text-white" t-on-click="addFieldPathToPayload" t-att-disabled="!uiState.payloadFieldPath">Add</button>
+                            </t>
+                            <t t-else="">
+                                <div class="text-muted fst-italic" style="font-size:12px;">Model not available.</div>
+                            </t>
+                        </div>
+
+                        <!-- Custom Mode -->
+                        <div t-if="uiState.payloadMode === 'custom'" class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm" placeholder="Key (e.g. custom_id)" t-model="uiState.customPayloadKey"/>
+                            <input type="text" class="form-control form-control-sm" placeholder="Value (e.g. 12345 or string)" t-model="uiState.customPayloadValue"/>
+                            <button type="button" class="btn btn-sm btn-primary text-white" t-on-click="addCustomPayload" t-att-disabled="!uiState.customPayloadKey">Add</button>
+                        </div>
+                    </div>
+
+                    <!-- Original textarea — fieldState.webhook_payload, rows unchanged -->
+                    <textarea class="form-control cy-modal-form_input font-monospace mt-2"
+                              style="font-size:12px;"
+                              t-model="fieldState.webhook_payload"
+                              rows="8"
+                              placeholder='{"record_name": "{{current_record.name}}"}'>
+                    </textarea>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     RESPONSE ACTIONS — fieldState.webhook_actions (JSON array)
+                     Zero platform-specific logic: purely data-driven dispatch.
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+
+                    <!-- Section header / toggle -->
+                    <div class="d-flex align-items-center justify-content-between mb-2"
+                         style="border-bottom: 2px solid #9ea700; padding-bottom: 6px;">
+                        <label class="form-label cy-modal-form_label mb-0" style="font-size:13px; font-weight:600; color:#9ea700;">
+                            <i class="ri-flashlight-line me-1"/>Response Actions
+                            <span class="text-muted ms-1" style="font-size:11px; font-weight:normal;">
+                                — what to do with the API response
+                            </span>
+                        </label>
+                        <button type="button"
+                                class="btn btn-link btn-sm p-0 text-decoration-none"
+                                style="font-size:12px; color:#9ea700;"
+                                t-on-click="toggleResponseActions">
+                            <t t-if="uiState.responseActionsOpen"><i class="ri-arrow-up-s-line me-1"/>Collapse</t>
+                            <t t-else=""><i class="ri-arrow-down-s-line me-1"/>Expand</t>
+                        </button>
+                    </div>
+
+                    <t t-if="uiState.responseActionsOpen">
+
+                        <!-- Quick-tip banner -->
+                        <div class="alert alert-info py-2 px-3 mb-2" style="font-size:11px; background:#f5f6e6; border:1px solid #9ea700; color:#5a5a2a; border-radius:6px;">
+                            <i class="ri-lightbulb-line"/> Add one action per field you want to extract from the API response.
+                            Use <strong>dot notation</strong> for nested paths, e.g.
+                            <code>data.payment_url</code> or <code>links.0.href</code>.
+                            Actions run in order after every successful webhook call.
+                        </div>
+
+                        <!-- Saved actions list -->
+                        <t t-if="responseActions.length === 0">
+                            <div class="text-muted text-center py-3" style="font-size:12px; border:1px dashed #ced4da; border-radius:6px;">
+                                No response actions configured yet.<br/>
+                                Click <strong>+ Add Action</strong> below to start.
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="mb-2">
+                                <t t-foreach="responseActions" t-as="act" t-key="act_index">
+                                    <div class="d-flex align-items-start gap-2 mb-2 p-2 border rounded"
+                                         style="background:#fafafa; font-size:12px;">
+                                        <!-- Reorder buttons -->
+                                        <div class="d-flex flex-column" style="gap:2px; flex-shrink:0;">
+                                            <button type="button" class="btn btn-sm p-0 border-0"
+                                                    style="line-height:1; color:#9ea700;"
+                                                    t-on-click="() => this.moveActionUp(act_index)"
+                                                    title="Move Up"><i class="ri-arrow-up-s-line"/></button>
+                                            <button type="button" class="btn btn-sm p-0 border-0"
+                                                    style="line-height:1; color:#9ea700;"
+                                                    t-on-click="() => this.moveActionDown(act_index)"
+                                                    title="Move Down"><i class="ri-arrow-down-s-line"/></button>
+                                        </div>
+                                        <!-- Action details -->
+                                        <div class="flex-grow-1">
+                                            <div style="font-weight:600; color:#333;" class="d-flex align-items-center flex-wrap gap-2">
+                                                <t t-esc="actionTypeLabel(act.action_type)"/>
+                                                <t t-if="act.action_type === 'store_variable' and act.variable_name">
+                                                    <span style="display:inline-flex;align-items:center;gap:4px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;">
+                                                        <i class="ri-archive-line"/> <t t-esc="act.variable_name"/>
+                                                        <span style="font-weight:normal;color:#66bb6a;">&#8212; accessible in following nodes</span>
+                                                    </span>
+                                                </t>
+                                            </div>
+                                            <div class="text-muted mt-1" style="font-size:11px;">
+                                                <t t-esc="actionSummary(act)"/>
+                                            </div>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary me-1"
+                                                style="flex-shrink:0;"
+                                                t-on-click="() => this.editResponseAction(act_index)"
+                                                title="Edit Action"><i class="ri-edit-line"/></button>
+                                        <!-- Remove -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                style="flex-shrink:0;"
+                                                t-on-click="() => this.removeResponseAction(act_index)"
+                                                title="Remove Action"><i class="ri-close-line"/></button>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- ── Add-action form ─────────────────────────────── -->
+                        <t t-if="uiState.showAddActionForm">
+                            <div class="border rounded p-3 mb-2" style="background:#f5f6e6; font-size:12px;">
+                                <div class="fw-semibold mb-2" style="color:#5a5a2a; font-size:13px;">
+                                    <t t-if="uiState.editingActionIndex !== null">Edit Response Action</t>
+                                    <t t-else="">New Response Action</t>
+                                </div>
+
+                                <!-- Action Type -->
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:11px; font-weight:600;">Action Type</label>
+                                    <select class="form-select form-select-sm"
+                                            t-model="uiState.newActionType">
+                                        <t t-foreach="actionTypeOptions" t-as="opt" t-key="opt.value">
+                                            <option t-att-value="opt.value"><t t-esc="opt.label"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+
+                                <!-- Extract Path -->
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:11px; font-weight:600;">
+                                        Response Path
+                                        <span class="text-muted fw-normal">(dot-path into the JSON response)</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control form-control-sm font-monospace"
+                                           placeholder="e.g. data.payment_url  or  links.0.href"
+                                           t-model="uiState.newActionExtractPath"/>
+                                </div>
+
+                                <!-- Label -->
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:11px; font-weight:600;">
+                                        Label
+                                        <span class="text-muted fw-normal">(shown in chatter / email)</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control form-control-sm"
+                                           placeholder="e.g. Payment URL"
+                                           t-model="uiState.newActionLabel"/>
+                                </div>
+
+                                <!-- Conditional extra fields -->
+                                <t t-if="uiState.newActionType === 'write_field'">
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1" style="font-size:11px; font-weight:600;">
+                                            Field Technical Name
+                                            <span class="text-muted fw-normal">(on the trigger record)</span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control form-control-sm font-monospace"
+                                               placeholder="e.g. payment_url"
+                                               t-model="uiState.newActionFieldToWrite"/>
+                                    </div>
+                                </t>
+
+                                <t t-if="uiState.newActionType === 'store_variable'">
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1" style="font-size:11px; font-weight:600;">Variable Name</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm font-monospace"
+                                               placeholder="e.g. payment_url"
+                                               t-model="uiState.newActionVariableName"/>
+                                    </div>
+                                </t>
+
+                                <t t-if="uiState.newActionType === 'send_email'">
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1" style="font-size:11px; font-weight:600;">
+                                            Recipients
+                                            <span class="text-muted fw-normal">(leave blank to use record partner email)</span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               placeholder="email@example.com, another@example.com"
+                                               t-model="uiState.newActionEmailRecipients"/>
+                                    </div>
+                                </t>
+
+                                <t t-if="uiState.newActionType === 'redirect_url'">
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1" style="font-size:11px; font-weight:600;">Open In</label>
+                                        <select class="form-select form-select-sm"
+                                                t-model="uiState.newActionTarget">
+                                            <option value="new">New Tab</option>
+                                            <option value="self">Same Tab</option>
+                                        </select>
+                                    </div>
+                                </t>
+
+                                <!-- Form buttons -->
+                                <div class="d-flex gap-2 mt-2">
+                                    <button type="button"
+                                            class="btn btn-sm"
+                                            style="background:#9ea700; color:white;"
+                                            t-on-click="saveResponseAction">
+                                        <i class="ri-check-line me-1"/>Add Action
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            t-on-click="cancelAddAction">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Show form trigger -->
+                        <t t-if="!uiState.showAddActionForm">
+                            <button type="button"
+                                    class="btn btn-sm mt-1"
+                                    style="border:1px solid #9ea700; color:#9ea700; background:transparent;"
+                                    t-on-click="openAddActionForm">
+                                <i class="ri-add-line me-1"/>Add Action
+                            </button>
+                        </t>
+
+                    <!-- ═══════════════════════════════════════════════════════
+                         Variables Created by This Webhook
+                         Shown only when store_variable actions exist.
+                         Gives users a clear view of which variables will be
+                         registered and accessible in following nodes.
+                    ══════════════════════════════════════════════════════════ -->
+                    <t t-if="storeVariableActions.length">
+                        <div style="margin-top:12px;border:1px solid #a5d6a7;border-radius:8px;overflow:hidden;">
+                            <div style="background:#e8f5e9;padding:8px 12px;display:flex;align-items:center;gap:8px;">
+                                <i class="ri-archive-line" style="font-size:16px;color:#2e7d32;"/>
+                                <span style="font-weight:600;color:#2e7d32;font-size:13px;">Variables Created by This Webhook</span>
+                                <span style="font-size:11px;color:#66bb6a;margin-left:auto;">These will be accessible in all following nodes</span>
+                            </div>
+                            <div style="background:#fff;padding:8px 12px;">
+                                <t t-foreach="storeVariableActions" t-as="sv" t-key="sv_index">
+                                    <div style="display:flex;align-items:center;gap:10px;padding:6px 0;
+                                                border-bottom:1px solid #f0f0f0;" t-att-style="sv_last ? 'border-bottom:none;' : ''">
+                                        <!-- Variable name pill -->
+                                        <span style="background:#2e7d32;color:#fff;border-radius:6px;
+                                                     padding:3px 10px;font-size:12px;font-weight:700;
+                                                     font-family:monospace;white-space:nowrap;">
+                                            <t t-esc="sv.variable_name"/>
+                                        </span>
+                                        <!-- Arrow -->
+                                        <i class="ri-arrow-left-line" style="color:#9e9e9e;font-size:12px;"/>
+                                        <!-- Extract path -->
+                                        <span style="font-size:11px;color:#555;font-family:monospace;">
+                                            response.<t t-esc="sv.extract_path or '(whole response)'"/>
+                                        </span>
+                                        <!-- Usage hint -->
+                                        <span style="margin-left:auto;font-size:10px;color:#9e9e9e;">Use in Code: </span>
+                                        <code style="font-size:11px;background:#f5f5f5;padding:2px 6px;
+                                                     border-radius:4px;color:#2e7d32;">
+                                            <t t-esc="sv.variable_name"/>
+                                        </code>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    </t><!-- /responseActionsOpen -->
+                </div>
+
+            </div>
+        </xpath>
+    </t>
+</templates>

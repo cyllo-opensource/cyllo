@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="cyllo_appointment_restaurant.BookingScreen">
+        <div class="booking-screen screen h-100 d-flex flex-column bg-100"
+             t-att-class="{ 'd-none': !props.isShown }">
+
+            <!-- ── Header ──────────────────────────────────────────────── -->
+            <div class="screen-header d-flex align-items-center justify-content-between p-3 bg-white border-bottom shadow-sm">
+                <button class="btn btn-lg btn-light" t-on-click="onClickClose">
+                    <i class="fa fa-angle-double-left me-1"/> Back
+                </button>
+                <h4 class="m-0 fw-bold">
+                    <i class="fa fa-calendar-check-o me-2 text-primary"/>
+                    Table Bookings
+                </h4>
+                <span class="badge text-bg-primary rounded-pill px-3 py-2 fs-6"
+                      t-esc="bookings.length"/>
+            </div>
+
+            <!-- ── Date tabs ───────────────────────────────────────────── -->
+            <div class="booking-tabs d-flex gap-2 px-3 pt-3 pb-1 bg-white border-bottom">
+                <t t-foreach="tabs" t-as="tab" t-key="tab.key">
+                    <button t-attf-class="btn btn-sm rounded-pill px-3 {{ state.activeTab === tab.key ? 'btn-primary' : 'btn-outline-secondary' }}"
+                            t-on-click="() => this.onSelectTab(tab.key)">
+                        <t t-esc="tab.label"/>
+                        <span t-attf-class="badge rounded-pill ms-1 {{ state.activeTab === tab.key ? 'text-bg-light text-primary' : 'text-bg-secondary' }}"
+                              t-esc="getTabCount(tab.key)"/>
+                    </button>
+                </t>
+            </div>
+
+            <!-- ── Body ───────────────────────────────────────────────── -->
+            <div class="d-flex flex-grow-1 overflow-hidden">
+
+                <!-- Left: booking list -->
+                <div class="d-flex flex-column flex-grow-1 overflow-y-auto">
+                    <t t-if="bookings.length === 0">
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                            <i class="fa fa-calendar-o fa-4x mb-3 opacity-50"/>
+                            <span class="fs-5">No bookings for this period</span>
+                        </div>
+                    </t>
+
+                    <t t-else="">
+                        <div class="booking-list px-3 pt-2">
+                            <div class="header-row fw-bold text-bg-700 p-2 rounded-1">
+                                <div>When</div>
+                                <div>Table</div>
+                                <div>Customer</div>
+                                <div class="text-center">Guests</div>
+                                <div class="text-center">Status</div>
+                            </div>
+
+                            <t t-foreach="bookings" t-as="booking" t-key="booking.id">
+                                <div class="booking-row p-2 rounded-1 my-1"
+                                     t-att-class="{ 'selected': isSelected(booking), 'opacity-50': isPast(booking) }"
+                                     t-on-click="() => this.onClickBooking(booking)">
+
+                                    <div class="fw-semibold text-primary">
+                                        <t t-esc="getFormattedDateTime(booking.start_datetime)"/>
+                                    </div>
+                                    <div class="text-truncate">
+                                        <i class="fa fa-cutlery me-1 text-muted"/>
+                                        <t t-esc="getTableName(booking)"/>
+                                    </div>
+                                    <div class="text-truncate">
+                                        <i class="fa fa-user me-1 text-muted"/>
+                                        <t t-esc="getCustomerName(booking)"/>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="badge text-bg-light border">
+                                            <i class="fa fa-users me-1"/>
+                                            <t t-esc="booking.attendee_count || 1"/>
+                                        </span>
+                                    </div>
+                                    <div class="text-center">
+                                        <span t-attf-class="badge rounded-pill {{ getStatusClass(booking.state) }}">
+                                            <t t-esc="getStatusLabel(booking.state)"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Right: detail panel -->
+                <t t-if="state.selectedBooking">
+                    <t t-set="appt" t-value="state.selectedBooking"/>
+                    <div class="booking-detail d-flex flex-column border-start bg-white shadow-sm p-4">
+                        <h5 class="fw-bold border-bottom pb-2 mb-3">
+                            <i class="fa fa-info-circle me-2 text-primary"/>
+                            Booking Detail
+                        </h5>
+                        <div class="mb-2">
+                            <span class="text-muted small">Table</span>
+                            <div class="fw-semibold" t-esc="getTableName(appt)"/>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted small">Customer</span>
+                            <div class="fw-semibold" t-esc="getCustomerName(appt)"/>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted small">Date</span>
+                            <div class="fw-semibold" t-esc="getFormattedDateTime(appt.start_datetime)"/>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted small">End Time</span>
+                            <div class="fw-semibold" t-esc="getFormattedTime(appt.end_datetime)"/>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted small">Guests</span>
+                            <div class="fw-semibold" t-esc="appt.attendee_count || 1"/>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small">Status</span>
+                            <div>
+                                <span t-attf-class="badge rounded-pill {{ getStatusClass(appt.state) }}">
+                                    <t t-esc="getStatusLabel(appt.state)"/>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column gap-2 mt-auto">
+                            <button t-if="['draft', 'confirmed'].includes(appt.state)"
+                                    class="btn btn-success fw-bold"
+                                    t-on-click="() => this.onClickCheckIn(appt)">
+                                <i class="fa fa-check me-1"/> Check In
+                            </button>
+                            <button t-if="['draft', 'confirmed'].includes(appt.state)"
+                                    class="btn btn-outline-danger"
+                                    t-on-click="() => this.onClickCancel(appt)">
+                                <i class="fa fa-times me-1"/> Cancel Booking
+                            </button>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <!-- ── Navbar patch: keep exactly as before ─────────────────────────── -->
+    <t t-name="cyllo_appointment_restaurant.NavbarBookings"
+       t-inherit="point_of_sale.Navbar"
+       t-inherit-mode="extension">
+        <xpath expr="//li[hasclass('ticket-button')]" position="after">
+            <li class="bookings-button" t-on-click="() => this.onBookingsButtonClick()">
+                <a class="dropdown-item with-badge py-2">
+                    Bookings
+                    <span t-if="todayBookingCount > 0"
+                          class="badge text-bg-success rounded-pill py-1 ms-2"
+                          t-esc="todayBookingCount"/>
+                </a>
+            </li>
+        </xpath>
+    </t>
+
+</templates>

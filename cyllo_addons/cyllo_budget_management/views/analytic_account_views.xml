@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Defines the Inherited View of Analytic Account-->
+    <record id="view_account_analytic_account_form" model="ir.ui.view">
+        <field name="name">view.account.analytic.account.form</field>
+        <field name="model">account.analytic.account</field>
+        <field name="inherit_id"
+               ref="analytic.view_account_analytic_account_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='plan_id']" position="after">
+                <field name="analytic_account_id" string="Parent"
+                       readonly="analytic_account_ids"/>
+                <field name="parent_ids" invisible="1"/>
+                <field name="analytic_account_ids" string="Child"
+                       widget="many2many_tags"/>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Budget">
+                        <field name="budget_line_ids" widget="one2many_list"
+                               create="0" edit="0">
+                            <tree string="Budget Lines">
+                                <field name="currency_id" column_invisible="1"/>
+                                <field name="budget_id"/>
+                                <field name="display_name"/>
+                                <field name="planned_amount" sum="total"/>
+                                <field name="practical_amount" sum="total"/>
+                                <field name="achievement" sum="total"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="cyllo_studio_ai.PromptDialog">
+    <div class="cy-ai_chat">
+      <!--Sidebar Panel-->
+        <div class="cy-ai-sidebar" id="sidebar">
+        <div class="cy-sidebarsticky">
+          <div class="d-flex  align-items-center justify-content-between">
+            <!--     Cyllo logo           -->
+              <div>
+              <img src="/cyllo_studio_ai/static/src/img/cyllo-logo.svg" alt=""/>
+            </div>
+              <!-- Sidebar toggle button -->
+              <button class="btn-sidebar toggle-btn" t-on-click="hideSidebar">
+              <img src="/cyllo_studio_ai/static/src/img/sidebar.svg" alt=""/>
+            </button>
+          </div>
+            <button class="cy-newchat_btn" t-on-click="startNewChat">
+            <span>
+              <img src="/cyllo_studio_ai/static/src/img/IconSet.svg" alt=""/>
+            </span>
+                New Chat
+          </button>
+        </div>
+            <div class="cy-chat_history" t-if="state.savedConversations and state.savedConversations.length > 0">
+          <h4>Recent Searches :</h4>
+                <ul>
+            <li class="cy-chat_items d-flex align-items-center" t-foreach="state.savedConversations"
+                t-as="conversation" t-key="conversation.id">
+              <button class="btn btn-link w-100 text-start"
+                      t-on-click="() => this.loadConversation(conversation.id)">
+                <t t-esc="conversation.summary"/>
+              </button>
+                <!-- Delete button -->
+                <span>
+                <i class="fa fa-solid fa-trash" style="font-size:16px; border:none; color:#9EA700"
+                   t-on-click="() => this.deleteConversation(conversation.id)"/>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+        <!--    initial Chat area     -->
+        <div class="cy-modal_content_ai" t-if="!state.updates.length">
+        <!-- Exit icon-->
+            <button class="cy-exit-btn toggle-btn" t-on-click="exitToHome" title="Exit to Studio Home">
+          <img src="/cyllo_studio_ai/static/src/img/exit-icon-new.svg"/>
+        </button>
+            <!-- Loading blur spinner-->
+            <div t-if="this.state.loading" class="loading-container">
+          <div class="spinner-wrapper">
+            <div class="spinner"/>
+          </div>
+                <p class="mt-3 text-gray-700">Loading, please wait...</p>
+        </div>
+            <div t-att-class="state.loading ? 'blur-background' : ''" style="w-100;h-100;"/>
+            <!--   Sidebar toggle button  -->
+            <button class="cy-sidebar_toggle-btn toggle-btn" t-on-click="showSidebar">
+          <img src="/cyllo_studio_ai/static/src/img/sidebar.svg" alt=""/>
+        </button>
+            <div class=" cy-modal_body_ai">
+          <div>
+            <iframe src="https://lottie.host/embed/f44dd487-2810-485e-a159-fb4377a8db29/jODYvOf9p9.lottie"/>
+              <h2 class="cy-modal-header">AI Assistant</h2>
+              <p>Your intelligent companion for creating cyllo modules</p>
+              <!--     Initial input prompt container           -->
+              <div class="cy-ai_search-container">
+              <span class="cy-ai_search--icon" style="left: 0;">
+                <img src="/cyllo_studio_ai/static/src/img/magic-tool.png" alt=""/>
+              </span>
+                  <textarea type="text" placeholder="Build a module for hotel management...."
+                            t-model="state.prompt"
+                            t-on-focus="showSuggestions" t-on-input="onInput"
+                            t-on-focusout="onInput"
+                            t-on-keydown="handleKeyDown"
+                  />
+                  <span class="cy-ai_send-icon d-none">
+                <i class="fa fa-paper-plane"
+                   style="font-size:18px; border:none; color:#9EA700"/>
+              </span>
+            </div>
+              <div class="cy-ai_search--options">
+              <button class="cy-ai_option-list" t-on-click="() => this.selectPrompt('Create a module for ')">
+                <span>
+                  <img src="/cyllo_studio_ai/static/src/img/shopping-bag-line.svg" alt=""/>
+                </span>
+                  Create a Module for
+
+              </button>
+                  <button class="cy-ai_option-list" t-on-click="() => this.selectPrompt('Build an app for ')">
+                <span>
+                  <img src="/cyllo_studio_ai/static/src/img/ion_business-outline.svg" alt=""/>
+                </span>
+                      Build an app for
+
+              </button>
+                  <button class="cy-ai_option-list" t-on-click="() => this.selectPrompt('Build a module for')">
+                <span>
+                  <img src="/cyllo_studio_ai/static/src/img/guidance_bank.svg" alt=""/>
+                </span>
+                      Build a module for
+
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+        <!-- Chat area-->
+        <div class="cy-modal_content_ai " t-if="state.updates.length">
+        <!-- Exit icon-->
+            <button class="cy-exit-btn toggle-btn" t-on-click="exitToHome" title="Exit to Studio Home">
+          <img src="/cyllo_studio_ai/static/src/img/exit-icon-new.svg"/>
+        </button>
+            <div class="cy-chat_container">
+          <!-- Loading blur spinner-->
+                <div t-if="this.state.loading" class="loading-container">
+            <div class="spinner-wrapper">
+              <div class="spinner"/>
+            </div>
+                    <p class="mt-3 text-gray-700">Loading, please wait...</p>
+          </div>
+                <div t-att-class="state.loading ? 'blur-background' : ''" style="w-100;h-100;"/>
+                <!--   Sidebar toggle button  -->
+                <button class="cy-sidebar_toggle-btn toggle-btn" t-on-click="showSidebar">
+            <img src="/cyllo_studio_ai/static/src/img/sidebar.svg" alt=""/>
+          </button>
+                <div class="cy-chating--content">
+            <ul class="cy-chat_list" t-foreach="state.updates" t-as="update"
+                t-key="update_index">
+              <li class="chat-prompt">
+                <div class="msg-list">
+                  <img t-att-src="state.user_image" alt="User avatar" class="user-avatar"/>
+                    <span t-esc="update.prompt"/>
+                </div>
+              </li>
+                <li class="chat-reply">
+                <div class="msg-list">
+                  <ul class="my-4 p-0">
+                    <li class="cy-chat_fields-content">
+                      <strong>
+                        <span class="cy-field_icons">
+                          <i class="ri-box-3-line"/>
+                        </span>
+                          Module
+                          Name :
+                      </strong>
+                        <span t-esc="update.description.module_name"/>
+                    </li>
+                  </ul>
+                    <strong>
+                    <p t-esc="update.description.summary" class="mb-3"/>
+                  </strong>
+                    <div class="cy-field_container" t-foreach="update.description.models"
+                         t-as="model"
+                         t-key="model.model_name">
+                    <li class="cy-chat_fields-content">
+                      <strong>
+                        <span class="cy-field_icons">
+                          <i class="ri-database-2-line"/>
+                        </span>
+                          Model
+                          Name :
+                      </strong>
+                        <span t-esc="model.model_name"/>
+                    </li>
+                        <strong>Fields</strong>
+                        <ul class="my-3 p-0" t-foreach="model.fields"
+                            t-as="field"
+                            t-key="field.field_name">
+                      <li class="cy-fields-list_item">
+                        <span class="cy-field_name">
+                          <span class="cy-field_icons">
+                            <i class="ri-instance-line"/>
+                          </span>
+                            <span>
+                            <t t-esc="field.string"/>(
+                                <t t-esc="field.field_name"/>)
+                          </span>
+                        </span>
+                          :
+
+                          <span t-esc="field.field_type"/>
+                          (
+                          <span t-esc="field.field_description"/>)
+
+                          <t t-if="field.relation">
+                          <span style="display: block; font-size: 13px; color: #999; margin-top: 5px;">
+                            <i class="fa fa-link" style="color: #6e850b; margin-right: 5px;"/>
+                              Relation:
+                              <span t-esc="field.relation"/></span>
+                        </t>
+                          <t t-if="field.field_type == 'selection' and field.options">
+                              <span style="display: block; font-size: 13px; color: #999; margin-top: 5px;">
+                                <i class="fa fa-link" style="color: #6e850b; margin-right: 5px;"/>
+                                  Options: [
+                                  <t t-foreach="field.options" t-as="item" t-key="item_index">
+                                      "<t t-esc="field.options[item]"/>"
+                                </t>
+                                  ]
+                            </span>
+                        </t>
+                      </li>
+                    </ul>
+                  </div>
+                    <t>
+                    <button class="cy-newchat_btn cy-confirm-btn"
+                            title="Click to confirm this response"
+                            data-bs-toggle="modal"
+                            data-bs-target="#create_confirmation_modal">
+                      <img src="/cyllo_studio_ai/static/src/img/confirm-icon.svg" alt=""/>
+                        Create
+
+                    </button>
+                  </t>
+                </div>
+              </li>
+            </ul>
+          </div>
+                <!-- search Prompt input area below the chat    -->
+                <div class="cy-ai_search-container  w-100">
+            <span class="cy-ai_search--icon"
+            >
+              <img src="/cyllo_studio_ai/static/src/img/magic-tool.png" alt=""
+              />
+            </span>
+                    <textarea type="text"
+                              placeholder="Ask something"
+                              t-model="state.prompt"
+                              t-on-keydown="handleKeyDown"/>
+                    <span class="cy-ai_send-icon">
+              <i class="fa fa-paper-plane"
+                 style="font-size:18px; border:none; color:#9EA700"/>
+            </span>
+          </div>
+                <!--   Confirmation Modal on clicking create button   -->
+                <div class="cyst3 modal fade"
+                     id="create_confirmation_modal"
+                     aria-hidden="true"
+                     aria-labelledby="exampleModalToggleLabel"
+                     tabindex="-1"
+                     style="z-index:1111;">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content p-0">
+                <header class="modal-header"
+                        style="border-bottom: 1px solid var(--border-color, #dee2e6);">
+                  <h4 class="modal-title fs-5">User
+                            Confirmation
+                        </h4>
+                    <button type="button"
+                            class="confirm-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            style="font-size:21px">×
+                        </button>
+                </header>
+                  <div class="modal-body p-4">
+                  <p class="text-prewrap">By clicking the
+                    <strong>
+                            Confirm
+                        </strong>
+                      button,
+                      you will create
+                      a new app with
+                      the
+                      details
+                      generated by AI.
+                      Please ensure
+                      all
+                      the information
+                      is correct
+                      before
+                      proceeding.
+
+                  </p>
+                </div>
+                  <div class="modal-footer"
+                       style="gap:10px;">
+                  <button class="btn btn-secondary"
+                          style="height: 40px;width: 92px;"
+                          data-bs-dismiss="modal"
+                          aria-label="Close">Cancel
+                        </button>
+                      <button class="btn btn-transparent btn-primary" data-bs-dismiss="modal"
+                              t-on-click="createModule">Confirm
+                        </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+</templates>

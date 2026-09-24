@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="sign_request_portal_layout"
+              name="Portal layout : Sign Request"
+              inherit_id="portal.portal_breadcrumbs" priority="66">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'sign_request'"
+                class="breadcrumb-item active">
+                <span>Sign Requests</span>
+            </li>
+            <li t-if="page_name == 'sign_request_details'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/sign_request" aria-label="Home">
+                    <span>Sign Request</span>
+                </a>
+                <span>/
+                    <t t-out="sign_request.name"/>
+                </span>
+            </li>
+            <li t-if="page_name == 'create_ticket'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/sign_request" aria-label="Home">
+                    <span>Sign Request</span>
+                </a>
+                <span>/ Create</span>
+            </li>
+        </xpath>
+    </template>
+    <!-- Template for portal document -->
+    <template id="portal_my_home_helpdesk" name="Sign Request"
+              customize_show="True" inherit_id="portal.portal_my_home"
+              priority="55">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/purchase/static/src/img/rfq.svg'"/>
+                <t t-set="title">Sign Request</t>
+                <t t-set="url" t-value="'/sign_request'"/>
+                <t t-set="text">Follow or view your Sign requests</t>
+                <t t-set="placeholder_count" t-value="'sign_request_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="sign_request_template" name="Sign Request">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Sign Request</t>
+            </t>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist"
+                        style="border-color: white;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link helpdesk-ticket-state-btn active"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#all" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">All
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link helpdesk-ticket-state-btn"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#draft" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Draft
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link helpdesk-ticket-state-btn"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#sent"
+                                    type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Partially Signed
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link helpdesk-ticket-state-btn"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#signed"
+                                    type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Signed
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link helpdesk-ticket-state-btn"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#cancel"
+                                    type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Cancelled
+                            </button>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+            <div class="tab-content">
+                <t t-set="description" t-value="'Currently No Request !'"/>
+                <div class="tab-pane fade show active w-100" id="all"
+                     role="tabpanel" aria-labelledby="home-tab">
+                    <t t-if="sign_request_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <table class="table mt16 mb40">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Sign Requests
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                    <th>
+                                        Date
+                                    </th>
+                                    <th>
+                                        Created By
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="sign_requests"
+                                   t-as="sign_request">
+                                    <tr>
+                                        <td>
+                                            <span>
+                                                <h6>
+                                                    <a t-attf-href="/sign_request/details/{{sign_request.id}}"
+                                                       t-esc="sign_request.name"/>
+                                                </h6>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span t-if="sign_request.state == 'draft'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="sign_request.state"/>
+                                            </span>
+                                            <span t-if="sign_request.state == 'partial'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="sign_request.state"/>
+                                            </span>
+                                            <span t-if="sign_request.state == 'signed'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="sign_request.state"/>
+                                            </span>
+                                            <span t-if="sign_request.state == 'cancel'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="sign_request.state"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <t t-if="sign_request.create_date">
+                                                <span t-field="sign_request.create_date"
+                                                      class="date"/>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <span t-field="sign_request.create_uid.name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+                <div class="tab-pane w-100 fade" id="draft" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="draft_sign_requests_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <table class="table mt16 mb40">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Sign Requests
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                    <th>
+                                        Date
+                                    </th>
+                                    <th>
+                                        Created By
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="draft_sign_requests"
+                                   t-as="draft_sign_request">
+                                    <tr>
+                                        <td>
+                                            <span>
+                                                <h6>
+                                                    <a t-attf-href="/sign_request/details/{{draft_sign_request.id}}"
+                                                       t-esc="draft_sign_request.name"/>
+                                                </h6>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span t-if="draft_sign_request.state == 'draft'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="draft_sign_request.state"/>
+                                            </span>
+                                            <span t-if="draft_sign_request.state == 'partial'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="draft_sign_request.state"/>
+                                            </span>
+                                            <span t-if="draft_sign_request.state == 'signed'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="draft_sign_request.state"/>
+                                            </span>
+                                            <span t-if="draft_sign_request.state == 'cancel'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="draft_sign_request.state"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <t t-if="draft_sign_request.create_date">
+                                                <span t-field="draft_sign_request.create_date"
+                                                      class="date"/>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <span t-field="draft_sign_request.create_uid.name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+                <div class="tab-pane w-100 fade" id="sent" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="sent_sign_requests_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <table class="table mt16 mb40">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Sign Requests
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                    <th>
+                                        Date
+                                    </th>
+                                    <th>
+                                        Created By
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="sent_sign_requests"
+                                   t-as="sent_sign_request">
+                                    <tr>
+                                        <td>
+                                            <span>
+                                                <h6>
+                                                    <a t-attf-href="/sign_request/details/{{sent_sign_request.id}}"
+                                                       t-esc="sent_sign_request.name"/>
+                                                </h6>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span t-if="sent_sign_request.state == 'draft'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="sent_sign_request.state"/>
+                                            </span>
+                                            <span t-if="sent_sign_request.state == 'partial'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="sent_sign_request.state"/>
+                                            </span>
+                                            <span t-if="sent_sign_request.state == 'signed'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="sent_sign_request.state"/>
+                                            </span>
+                                            <span t-if="sent_sign_request.state == 'cancel'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="sent_sign_request.state"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <t t-if="sent_sign_request.create_date">
+                                                <span t-field="sent_sign_request.create_date"
+                                                      class="date"/>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <span t-field="sent_sign_request.create_uid.name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+                <div class="tab-pane w-100 fade" id="signed" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="signed_sign_requests_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <table class="table mt16 mb40">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Sign Requests
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                    <th>
+                                        Date
+                                    </th>
+                                    <th>
+                                        Created By
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="signed_sign_requests"
+                                   t-as="signed_sign_request">
+                                    <tr>
+                                        <td>
+                                            <span>
+                                                <h6>
+                                                    <a t-attf-href="/sign_request/details/{{signed_sign_request.id}}"
+                                                       t-esc="signed_sign_request.name"/>
+                                                </h6>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span t-if="signed_sign_request.state == 'draft'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="signed_sign_request.state"/>
+                                            </span>
+                                            <span t-if="signed_sign_request.state == 'partial'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="signed_sign_request.state"/>
+                                            </span>
+                                            <span t-if="signed_sign_request.state == 'signed'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="signed_sign_request.state"/>
+                                            </span>
+                                            <span t-if="signed_sign_request.state == 'cancel'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="signed_sign_request.state"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <t t-if="signed_sign_request.create_date">
+                                                <span t-field="signed_sign_request.create_date"
+                                                      class="date"/>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <span t-field="signed_sign_request.create_uid.name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+                <div class="tab-pane w-100 fade" id="cancel" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="cancel_sign_requests_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <table class="table mt16 mb40">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Sign Requests
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                    <th>
+                                        Date
+                                    </th>
+                                    <th>
+                                        Created By
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="cancel_sign_requests"
+                                   t-as="cancel_sign_request">
+                                    <tr>
+                                        <td>
+                                            <span>
+                                                <h6>
+                                                    <a t-attf-href="/sign_request/details/{{cancel_sign_request.id}}"
+                                                       t-esc="cancel_sign_request.name"/>
+                                                </h6>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span t-if="cancel_sign_request.state == 'draft'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="cancel_sign_request.state"/>
+                                            </span>
+                                            <span t-if="cancel_sign_request.state == 'partial'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="cancel_sign_request.state"/>
+                                            </span>
+                                            <span t-if="cancel_sign_request.state == 'signed'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="cancel_sign_request.state"/>
+                                            </span>
+                                            <span t-if="cancel_sign_request.state == 'cancel'"
+                                                  class="badge text-bg-info cy_sign_state">
+                                                <t t-esc="cancel_sign_request.state"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <t t-if="cancel_sign_request.create_date">
+                                                <span t-field="cancel_sign_request.create_date"
+                                                      class="date"/>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <span t-field="cancel_sign_request.create_uid.name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+
+            </div>
+        </t>
+    </template>
+    <template id="sign_request_details" name="Sign Request Content"
+              inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <t t-set="o_portal_fullwidth_alert" groups="base.group_user">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url"
+                       t-value="'/web#return_label=Website&amp;model=sign.request&amp;id=%s&amp;' % object.id"/>
+                </t>
+            </t>
+            <div class="row mt16 o_cy_portal_sidebar o_portal_helpdesk_sidebar cy-sign-portal">
+                <t t-call="cyllo_portal.cy_portal_record_sidebar"
+                   id="sign_request_portal_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+                    <t t-set="entries">
+                        <div class="d-flex flex-column gap-1 order-md-last order-lg-first"
+                             id="sign_request_sidebar_button">
+                            <div class="d-flex flex-column gap-4">
+                                <t t-set="requester_ids"
+                                   t-value="object.requester_ids.filtered(lambda r: r.partner_id.id == env.user.partner_id.id)"/>
+                                <div t-if="object.state != 'cancel' and object.state != 'signed'"
+                                     class="o_download_pdf d-flex flex-column gap-1">
+                                    <t t-set="requester_ids"
+                                       t-value="object.requester_ids.filtered(lambda r: r.partner_id.id == env.user.partner_id.id)"/>
+                                    <a class="btn btn-primary o_print_btn sign-portal-btn d-block"
+                                       id="print_disciplinary_report"
+                                       title="View Details" target="_blank"
+                                       t-attf-href="/web/portal/sign?res_model=sign.template&amp;res_id=#{object.template_id.id}&amp;request_id=#{object.id}&amp;to_sign=true&amp;requester_ids=#{requester_ids.ids}&amp;role=#{requester_ids.role_id.ids}&amp;partner_id=#{env.user.partner_id.id}">
+                                        <i class="fa fa-print"/>
+                                        Sign
+                                    </a>
+                                    <a t-attf-href="/sign_request/refuse/{{object.id}}"
+                                       class="btn btn-primary o_print_btn sign-portal-btn d-block">
+                                        Refuse
+                                    </a>
+                                </div>
+                                <div t-if="object.state == 'signed'"
+                                     class="o_download_pdf">
+                                    <a class="btn btn-primary o_print_btn sign-portal-btn d-block"
+                                       id="print_disciplinary_report"
+                                       title="View Details" target="_blank"
+                                       t-attf-href="/web/sign/download?res_id=#{object.id}">
+                                        <i class="fa fa-print"/>
+                                        Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="navspy flex-grow-1 ps-0" t-ignore="true"
+                             role="complementary">
+                            <ul class="nav flex-column bs-sidenav"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.create_date">
+                            <small>
+                                <b>Requested Date</b>
+                            </small>
+                            <div t-field="object.create_date"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.create_uid">
+                            <h6>
+                                <small class="text-muted">Your contact</small>
+                            </h6>
+                            <div class="o_portal_contact_details d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-start align-items-center gap-2">
+                                    <img class="o_avatar o_portal_contact_img rounded"
+                                         t-if="object.create_uid"
+                                         t-att-src="image_data_uri(object.create_uid.avatar_1024)"
+                                         alt="Contact"/>
+                                    <img class="o_avatar o_portal_contact_img rounded"
+                                         t-else=""
+                                         t-att-alt="company"
+                                         alt="Contact"/>
+                                    <div>
+                                        <h6 class="mb-0"
+                                            t-out="object.create_uid.name"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <div id="quote_content"
+                     class="col-12 col-lg justify-content-end">
+                    <div class="p-3 o_cy_portal_border border">
+                        <h3 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0 fw-bold">
+                            Request -
+                            <t t-esc="object.name"/>
+                            <span class="badge text-bg-warning  state_badge mt-2"
+                                  style="font-size:15px;"
+                                  t-field="object.state">
+                            </span>
+                        </h3>
+                        <hr/>
+                        <section id="details" style="page-break-inside: auto;"
+                                 class="mt32 row">
+                            <h3 id="service_details" style="font-size: 20px;">
+                                Request Information
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2"
+                                 id="service_request_information">
+                                <div class="col-md-3 mb-2"
+                                     t-if="object.template_id">
+                                    <strong>Sign Template</strong>
+                                    <br/>
+                                    <span t-field="object.template_id.name"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.create_date">
+                                    <strong>Requested Date</strong>
+                                    <br/>
+                                    <span t-field="object.create_date"/>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="details" style="page-break-inside: auto;"
+                                 class="mt32 row">
+                            <h3 id="service_details" style="font-size: 20px;">
+                                Signers
+                            </h3>
+                            <table t-att-data-order-id="object.id"
+                                   class="table table-sm">
+                                <thead class="bg-100">
+                                    <tr>
+                                        <th class="text-center">Partner</th>
+                                        <th class="text-center">Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="sale_tbody">
+                                    <t t-foreach="object.requester_ids"
+                                       t-as="signer" t-key="signer.id">
+                                        <tr class="bg-200 o_line_section">
+                                            <td class="text-center">
+                                                <span t-field="signer.partner_id.name"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-field="signer.role_id.name"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                            <br/>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

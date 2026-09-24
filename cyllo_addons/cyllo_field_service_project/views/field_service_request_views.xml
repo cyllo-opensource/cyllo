@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--Adding fields to service request form view-->
+    <record id="view_field_service_request_form" model="ir.ui.view">
+        <field name="name">view.field.service.request.form</field>
+        <field name="model">field.service.request</field>
+        <field name="inherit_id" ref="cyllo_field_service.view_field_service_request_form"/>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='sale_order_id']" position="after">
+                <field name="available_task_ids" invisible="1"/>
+                <field name="project_id" readonly="state in ['completed', 'cancel']" domain="[('is_fsm', '=', True)]"/>
+                <field name="task_id" readonly="state in ['completed', 'cancel']" domain="[('id', 'in', available_task_ids)]"/>
+                <field name="workers_ids" invisible="1"/>
+                <field name="is_invoiced" invisible="1"/>
+            </xpath>
+            <xpath expr="//page[@name='service_workers']" position="after">
+                <page name="timesheets" string="Timesheets" invisible="not task_id">
+                    <field name="timesheet_ids" context="{'service_id': active_id}">
+                        <tree editable="bottom">
+                            <field name="date"/>
+                            <field name="employee_id" domain="[('id', 'in', workers_ids)]" widget="selection"/>
+                            <field name="name"/>
+                            <field name="unit_amount" widget="timesheet_uom" string="Hours Spent"/>
+                            <field name="service_id" column_invisible="1"/>
+                            <field name="workers_ids" column_invisible="1"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//button[@name='action_create_invoice']" position="attributes">
+                <attribute name="invisible">is_invoiced or state != 'completed'</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

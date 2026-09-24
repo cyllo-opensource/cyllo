@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--   Database backup destination views   -->
+    <record id="view_backup_destination_kanban" model="ir.ui.view">
+        <field name="name">view.backup.destination.kanban</field>
+        <field name="model">backup.destination</field>
+        <field name="arch" type="xml">
+            <kanban create="false" class="o_modules_kanban"
+                    action="action_view_configurations" type="object">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="image"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_module_vignette">
+                            <img t-att-src="kanban_image('backup.destination', 'image', record.id.raw_value)"
+                                 alt="Approvals Types Image"
+                                 class="oe_kanban_avatar float-start me-3"
+                                 width="80" height="80"/>
+                            <div class="oe_module_desc">
+                                <h4 class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </h4>
+                                <div>
+                                    <button type="object"
+                                            class="btn btn-primary btn-sm float-end"
+                                            name="action_create_request"
+                                            context="{'backup_destination':'active_id'}">
+                                        Create
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="action_view_backup_configuration" model="ir.actions.act_window">
+        <field name="name">Database Backup destination</field>
+        <field name="res_model">backup.destination</field>
+        <field name="view_mode">kanban</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No backup configured!
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_automatic_database_backup_categ"
+              name="Automatic Database Backup"
+              parent="base.menu_custom" sequence="10"/>
+    <menuitem id="menu_backup_configuration"
+              parent="menu_automatic_database_backup_categ"
+              name="Backup Configuration"
+              action="action_view_backup_configuration"/>
+</odoo>

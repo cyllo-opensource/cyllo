@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Form view for the asset modify-->
+    <record id="view_asset_modify_form" model="ir.ui.view">
+        <field name="name">view.asset.modify.form</field>
+        <field name="model">asset.modify</field>
+        <field name="arch" type="xml">
+            <form string="Asset">
+                <sheet>
+                    <group>
+                        <group string="Depreciation">
+                            <field name="asset_asset_id" invisible="1"/>
+                            <field name="depreciation_date"/>
+                            <field name="salvage_value" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <label for="method_duration" name="method_duration" string="Duration"/>
+                            <div class="o_row">
+                                <field name="method_duration" style="width:25% !important;"/>
+                                <field name="duration_period" nolabel="1"/>
+                            </div>
+                            <field name="depreciation_method"/>
+                            <field name="reference_note"/>
+                        </group>
+                        <group string="Accounting">
+                            <field name="asset_journal_id"/>
+                            <field name="fixed_asset_account_id"/>
+                            <field name="asset_depreciation_account_id"/>
+                            <field name="asset_expense_account_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button type="object" name="action_revaluate" string="Revaluate" class="oe_highlight"/>
+                    <button special="cancel" string="Cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <!--Action for the asset modify-->
+    <record id="action_view_asset_modify" model="ir.actions.act_window">
+        <field name="name">Modify Asset</field>
+        <field name="res_model">asset.modify</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

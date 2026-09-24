@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Confirmation Email Template -->
+    <record id="email_template_appointment_confirmation" model="mail.template">
+        <field name="name">Appointment: Confirmation</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="subject">Your Appointment Confirmed - {{ object.display_name }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <!-- Header -->
+    <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: #9EA700; margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px;">APPOINTMENT</h1>
+        <p style="color: #BCBBA7; margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 3px;">Confirmation</p>
+    </div>
+
+    <!-- Body -->
+    <div style="padding: 40px 30px; background: #f8f9fa;">
+        <p style="font-size: 16px; color: #121212; margin: 0 0 20px;">Dear <strong><t t-out="object.partner_id.name"/></strong>,</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">Your appointment has been <strong style="color: #9EA700;">confirmed</strong>. Here are your details:</p>
+
+        <!-- Appointment Details Card -->
+        <div style="background: #ffffff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #9EA700; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px 0; color: #718096; font-size: 13px; width: 40%; text-transform: uppercase; letter-spacing: 1px;">Type</td>
+                    <td style="padding: 10px 0; color: #121212; font-size: 14px; font-weight: 600;"><t t-out="object.appointment_type_id.name"/></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px 0; color: #718096; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Reference</td>
+                    <td style="padding: 10px 0; color: #121212; font-size: 14px; font-weight: 600;"><t t-out="object.name"/></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px 0; color: #718096; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Date &amp; Time</td>
+                    <td style="padding: 10px 0; color: #121212; font-size: 14px; font-weight: 600;"><t t-out="format_datetime(object.start_datetime, dt_format='full')"/></td>
+                </tr>
+                <t t-if="object.staff_id">
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px 0; color: #718096; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Staff</td>
+                    <td style="padding: 10px 0; color: #121212; font-size: 14px; font-weight: 600;"><t t-out="object.staff_id.name"/></td>
+                </tr>
+                </t>
+                <t t-if="object.location">
+                <tr>
+                    <td style="padding: 10px 0; color: #718096; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Location</td>
+                    <td style="padding: 10px 0; color: #121212; font-size: 14px; font-weight: 600;"><t t-out="object.location"/></td>
+                </tr>
+                </t>
+            </table>
+        </div>
+
+        <p style="font-size: 14px; color: #718096; line-height: 1.6;">If you need to reschedule or cancel, you can manage your appointment online.</p>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a t-attf-href="/appointment/manage/{{object.access_token}}" style="background-color: #9EA700; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+                Manage Appointment
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #373627; padding: 20px 30px; text-align: center; border-radius: 0 0 8px 8px;">
+        <p style="color: #BCBBA7; font-size: 12px; margin: 0;"><t t-out="object.company_id.name"/> • <t t-out="object.company_id.email or ''"/></p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Reminder Email Template -->
+    <record id="email_template_appointment_reminder" model="mail.template">
+        <field name="name">Appointment: Reminder</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="subject">Reminder: Your Appointment Tomorrow - {{ object.display_name }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: #9EA700; margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px;">REMINDER</h1>
+        <p style="color: #BCBBA7; margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 3px;">Appointment Coming Up</p>
+    </div>
+    <div style="padding: 40px 30px; background: #f8f9fa;">
+        <p style="font-size: 16px; color: #121212; margin: 0 0 20px;">Hi <strong><t t-out="object.partner_id.name"/></strong>,</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">This is a friendly reminder about your upcoming appointment:</p>
+        <div style="background: #ffffff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #9EA700; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <p style="margin: 0; font-size: 20px; font-weight: 700; color: #121212;"><t t-out="object.appointment_type_id.name"/></p>
+            <p style="margin: 8px 0 0; font-size: 16px; color: #9EA700;"><t t-out="format_datetime(object.start_datetime, dt_format='full')"/></p>
+            <t t-if="object.location"><p style="margin: 8px 0 0; font-size: 14px; color: #718096;">📍 <t t-out="object.location"/></p></t>
+        </div>
+        <p style="font-size: 14px; color: #718096;">Reference: <strong><t t-out="object.name"/></strong></p>
+        <p style="font-size: 14px; color: #718096; line-height: 1.6; margin-top: 20px;">If you need to reschedule or cancel, you can manage your appointment online.</p>
+        <div style="text-align: center; margin-top: 30px;">
+            <a t-attf-href="/appointment/manage/{{object.access_token}}" style="background-color: #9EA700; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+                Manage Appointment
+            </a>
+        </div>
+    </div>
+    <div style="background: #373627; padding: 20px 30px; text-align: center; border-radius: 0 0 8px 8px;">
+        <p style="color: #BCBBA7; font-size: 12px; margin: 0;"><t t-out="object.company_id.name"/></p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Follow-up Email Template -->
+    <record id="email_template_appointment_followup" model="mail.template">
+        <field name="name">Appointment: Follow-up</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="subject">Thank you for your visit - {{ object.display_name }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: #9EA700; margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px;">THANK YOU</h1>
+        <p style="color: #BCBBA7; margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 3px;">We appreciate your visit</p>
+    </div>
+    <div style="padding: 40px 30px; background: #f8f9fa;">
+        <p style="font-size: 16px; color: #121212;">Dear <strong><t t-out="object.partner_id.name"/></strong>,</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">Thank you for your recent appointment. We hope everything went smoothly!</p>
+        <p style="font-size: 14px; color: #718096;">Your appointment: <strong><t t-out="object.appointment_type_id.name"/></strong> on <t t-out="format_datetime(object.start_datetime, dt_format='full')"/></p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">We'd love to hear your feedback or help you schedule your next visit.</p>
+    </div>
+    <div style="background: #373627; padding: 20px 30px; text-align: center; border-radius: 0 0 8px 8px;">
+        <p style="color: #BCBBA7; font-size: 12px; margin: 0;"><t t-out="object.company_id.name"/></p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Rescheduled Email Template (Customer) -->
+    <record id="email_template_appointment_rescheduled" model="mail.template">
+        <field name="name">Appointment: Rescheduled (Customer)</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="subject">Appointment Rescheduled - {{ object.display_name }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: #9EA700; margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px;">UPDATE</h1>
+        <p style="color: #BCBBA7; margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 3px;">Appointment Rescheduled</p>
+    </div>
+    <div style="padding: 40px 30px; background: #f8f9fa;">
+        <p style="font-size: 16px; color: #121212; margin: 0 0 20px;">Dear <strong><t t-out="object.partner_id.name"/></strong>,</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">Your appointment has been <strong style="color: #9EA700;">rescheduled</strong>.</p>
+        <t t-if="object.reschedule_reason">
+            <p style="font-size: 14px; color: #718096; line-height: 1.6; font-style: italic;">Reason: <t t-out="object.reschedule_reason"/></p>
+        </t>
+        <div style="background: #ffffff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #9EA700; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <p style="margin: 0; font-size: 20px; font-weight: 700; color: #121212;"><t t-out="object.appointment_type_id.name"/></p>
+            <p style="margin: 8px 0 0; font-size: 16px; color: #9EA700;"><t t-out="format_datetime(object.start_datetime, dt_format='full')"/></p>
+            <t t-if="object.location"><p style="margin: 8px 0 0; font-size: 14px; color: #718096;">📍 <t t-out="object.location"/></p></t>
+        </div>
+        <p style="font-size: 14px; color: #718096;">Reference: <strong><t t-out="object.name"/></strong></p>
+    </div>
+    <div style="background: #373627; padding: 20px 30px; text-align: center; border-radius: 0 0 8px 8px;">
+        <p style="color: #BCBBA7; font-size: 12px; margin: 0;"><t t-out="object.company_id.name"/></p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Rescheduled Email Template (Staff) -->
+    <record id="email_template_appointment_rescheduled_staff" model="mail.template">
+        <field name="name">Appointment: Rescheduled (Staff)</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="subject">Appointment Rescheduled - {{ object.display_name }}</field>
+        <field name="email_to">{{ object.staff_id.work_email }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: #9EA700; margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px;">UPDATE</h1>
+        <p style="color: #BCBBA7; margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 3px;">Appointment Rescheduled</p>
+    </div>
+    <div style="padding: 40px 30px; background: #f8f9fa;">
+        <p style="font-size: 16px; color: #121212; margin: 0 0 20px;">Hi <strong><t t-out="object.staff_id.name"/></strong>,</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">An appointment assigned to you has been <strong style="color: #9EA700;">rescheduled</strong>.</p>
+        <t t-if="object.reschedule_reason">
+            <p style="font-size: 14px; color: #718096; line-height: 1.6; font-style: italic;">Reason: <t t-out="object.reschedule_reason"/></p>
+        </t>
+        <div style="background: #ffffff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #9EA700; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <p style="margin: 0; font-size: 20px; font-weight: 700; color: #121212;"><t t-out="object.appointment_type_id.name"/></p>
+            <p style="margin: 8px 0 0; font-size: 16px; color: #9EA700;"><t t-out="format_datetime(object.start_datetime, dt_format='full')"/></p>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #718096;">Customer: <t t-out="object.partner_id.name"/></p>
+            <t t-if="object.location"><p style="margin: 8px 0 0; font-size: 14px; color: #718096;">📍 <t t-out="object.location"/></p></t>
+        </div>
+        <p style="font-size: 14px; color: #718096;">Reference: <strong><t t-out="object.name"/></strong></p>
+    </div>
+    <div style="background: #373627; padding: 20px 30px; text-align: center; border-radius: 0 0 8px 8px;">
+        <p style="color: #BCBBA7; font-size: 12px; margin: 0;"><t t-out="object.company_id.name"/></p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Confirmed Email Template (Staff) -->
+    <record id="email_template_appointment_confirmed_staff" model="mail.template">
+        <field name="name">Appointment: Confirmed (Staff)</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="subject">New Appointment Confirmed - {{ object.display_name }}</field>
+        <field name="email_to">{{ object.staff_id.work_email }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: #9EA700; margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px;">NEW BOOKING</h1>
+        <p style="color: #BCBBA7; margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 3px;">Appointment Confirmed</p>
+    </div>
+    <div style="padding: 40px 30px; background: #f8f9fa;">
+        <p style="font-size: 16px; color: #121212; margin: 0 0 20px;">Hi <strong><t t-out="object.staff_id.name"/></strong>,</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">You have a new appointment <strong style="color: #9EA700;">confirmed</strong> in your calendar.</p>
+        <div style="background: #ffffff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #9EA700; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <p style="margin: 0; font-size: 20px; font-weight: 700; color: #121212;"><t t-out="object.appointment_type_id.name"/></p>
+            <p style="margin: 8px 0 0; font-size: 16px; color: #9EA700;"><t t-out="format_datetime(object.start_datetime, dt_format='full')"/></p>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #718096;">Customer: <t t-out="object.partner_id.name"/></p>
+            <t t-if="object.location"><p style="margin: 8px 0 0; font-size: 14px; color: #718096;">📍 <t t-out="object.location"/></p></t>
+        </div>
+        <p style="font-size: 14px; color: #718096;">Reference: <strong><t t-out="object.name"/></strong></p>
+    </div>
+    <div style="background: #373627; padding: 20px 30px; text-align: center; border-radius: 0 0 8px 8px;">
+        <p style="color: #BCBBA7; font-size: 12px; margin: 0;"><t t-out="object.company_id.name"/></p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Cancelled Email Template (Staff) -->
+    <record id="email_template_appointment_cancelled_staff" model="mail.template">
+        <field name="name">Appointment: Cancelled (Staff)</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="subject">Appointment Cancelled - {{ object.display_name }}</field>
+        <field name="email_to">{{ object.staff_id.work_email }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: #e53e3e; margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px;">CANCELLED</h1>
+        <p style="color: #BCBBA7; margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 3px;">Booking Removed</p>
+    </div>
+    <div style="padding: 40px 30px; background: #f8f9fa;">
+        <p style="font-size: 16px; color: #121212; margin: 0 0 20px;">Hi <strong><t t-out="object.staff_id.name"/></strong>,</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">An appointment naturally assigned to you has been <strong style="color: #e53e3e;">cancelled</strong>.</p>
+        <t t-if="object.cancellation_reason">
+            <p style="font-size: 14px; color: #718096; line-height: 1.6; font-style: italic;">Reason: <t t-out="object.cancellation_reason"/></p>
+        </t>
+        <div style="background: #ffffff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #e53e3e; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <p style="margin: 0; font-size: 20px; font-weight: 700; color: #121212;"><t t-out="object.appointment_type_id.name"/></p>
+            <p style="margin: 8px 0 0; font-size: 16px; color: #e53e3e;"><t t-out="format_datetime(object.start_datetime, dt_format='full')"/></p>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #718096;">Customer: <t t-out="object.partner_id.name"/></p>
+            <t t-if="object.location"><p style="margin: 8px 0 0; font-size: 14px; color: #718096;">📍 <t t-out="object.location"/></p></t>
+        </div>
+        <p style="font-size: 14px; color: #718096;">Reference: <strong><t t-out="object.name"/></strong></p>
+    </div>
+    <div style="background: #373627; padding: 20px 30px; text-align: center; border-radius: 0 0 8px 8px;">
+        <p style="color: #BCBBA7; font-size: 12px; margin: 0;"><t t-out="object.company_id.name"/></p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Cancellation Email Template (Customer) -->
+    <record id="email_template_appointment_cancellation" model="mail.template">
+        <field name="name">Appointment: Cancellation (Customer)</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="subject">Your Appointment has been Cancelled - {{ object.display_name }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: #e53e3e; margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px;">CANCELLED</h1>
+        <p style="color: #BCBBA7; margin: 8px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 3px;">Appointment Update</p>
+    </div>
+    <div style="padding: 40px 30px; background: #f8f9fa;">
+        <p style="font-size: 16px; color: #121212; margin: 0 0 20px;">Hi <strong><t t-out="object.partner_id.name"/></strong>,</p>
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">This email is to confirm that your appointment has been <strong style="color: #e53e3e;">cancelled</strong>.</p>
+        <t t-if="object.cancellation_reason">
+            <p style="font-size: 14px; color: #718096; line-height: 1.6; font-style: italic;">Reason: <t t-out="object.cancellation_reason"/></p>
+        </t>
+        <div style="background: #ffffff; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid #e53e3e; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <p style="margin: 0; font-size: 20px; font-weight: 700; color: #121212;"><t t-out="object.appointment_type_id.name"/></p>
+            <p style="margin: 8px 0 0; font-size: 16px; color: #e53e3e;"><t t-out="format_datetime(object.start_datetime, dt_format='full')"/></p>
+            <t t-if="object.location"><p style="margin: 8px 0 0; font-size: 14px; color: #718096;">📍 <t t-out="object.location"/></p></t>
+        </div>
+        <p style="font-size: 14px; color: #718096; line-height: 1.6;">If you would like to book a new appointment, please click below.</p>
+        <div style="text-align: center; margin-top: 30px;">
+            <a t-attf-href="{{ object.get_base_url() }}/appointment" style="background-color: #9EA700; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; display: inline-block;">
+                Book New Appointment
+            </a>
+        </div>
+        <p style="font-size: 14px; color: #718096; margin-top: 20px;">Reference: <strong><t t-out="object.name"/></strong></p>
+    </div>
+    <div style="background: #373627; padding: 20px 30px; text-align: center; border-radius: 0 0 8px 8px;">
+        <p style="color: #BCBBA7; font-size: 12px; margin: 0;"><t t-out="object.company_id.name"/></p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Scheduled action for reminders -->
+    <record id="ir_cron_appointment_reminders" model="ir.cron">
+        <field name="name">Appointment Pro: Send Reminders</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="state">code</field>
+        <field name="code">model._send_reminder_emails()</field>
+        <field name="interval_number">30</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

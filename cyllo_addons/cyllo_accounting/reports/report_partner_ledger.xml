@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Template for printing Partner Ledger PDF report -->
+<odoo>
+    <template id="partner_ledger">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="data_report_margin_top" t-value="12"/>
+                <t t-set="data_report_header_spacing" t-value="9"/>
+                <t t-set="data_report_dpi" t-value="110"/>
+                <div class="page">
+                    <center>
+                        <span class="fw-bolder h1" t-esc="report_name"/>
+                    </center>
+                    <br/>
+                    <br/>
+                    <table class="table table-sm o_main_table">
+                            <thead class="filter_table"
+                                   style="background:#808080;">
+                                <tr>
+                                    <th>Date Range</th>
+                                    <th>Options</th>
+                                    <th>Partners</th>
+                                    <th>Account</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size:11px;font-weight:100;">
+                                <tr>
+                                    <th>
+                                            <t t-if="start_date" t-out="start_date"/>
+                                            <t t-if="end_date">
+                                                to
+                                                <t t-out="end_date"/>
+                                            </t>
+                                    </th>
+                                    <th>
+                                        <span t-out="options"/>
+                                    </th>
+                                    <th>
+                                        <span t-out="partners"/>
+                                    </th>
+                                    <th>
+                                        <span t-out="account_type"/>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    <br/>
+                    <table class="table table-sm o_main_table">
+                        <thead class="text-nowrap h5">
+                            <tr>
+                                <th>Invoice Date</th>
+                                <th>JRNL</th>
+                                <th>Account</th>
+                                <th>Accounting Date</th>
+                                <th>Due Date</th>
+                                <th>Matching Number</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                                <th>Amount Currency</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="partner_totals" t-as="partner_ledger_total">
+                                <tr>
+                                    <th colspan="6" class="fw-bolder h5 text-start ps-2">
+                                        <t t-esc="partner_totals[partner_ledger_total]['partner_name']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-if="partner_totals[partner_ledger_total]['total_debit']"
+                                           t-esc="partner_totals[partner_ledger_total]['format_total_debit']"/>
+                                    </th>
+                                    <th class="text-end text-nowrap">
+                                        <t t-if="partner_totals[partner_ledger_total]['total_credit']"
+                                           t-esc="partner_totals[partner_ledger_total]['format_total_credit']"/>
+                                    </th>
+                                    <th/>
+                                    <th class="text-end text-nowrap">
+                                        <t t-esc="partner_totals[partner_ledger_total]['format_balance']"/>
+                                    </th>
+                                </tr>
+                                <t t-foreach="partner_totals[partner_ledger_total]['move_lines']" t-as="move_line"
+                                   t-key="move_line_index">
+                                    <tr>
+                                        <td>
+                                            <span class="d-flex gap-2">
+                                                <t t-esc="move_line['move_name']"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <t t-esc="move_line['jrnl']"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <t t-esc="move_line['code']"/>
+                                            </span>
+                                        </td>
+                                        <th class="text-end">
+                                            <span>
+                                                <span t-esc="move_line['date']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <t t-esc="move_line['date_maturity']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <t t-esc="move_line['matching_number']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span>
+                                                <span class="ms-1" t-esc="move_line['format_debit']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <span>
+                                                <span class="ms-1" t-esc="move_line['format_credit']"/>
+                                            </span>
+                                        </th>
+                                        <th>
+                                            <span>
+                                                <t t-esc="move_line['amount_currency']"/>
+                                            </span>
+                                        </th>
+                                        <th class="text-end text-nowrap">
+                                            <t t-esc="move_line['format_balance']"/>
+                                        </th>
+                                    </tr>
+                                </t>
+                            </t>
+                            <tr>
+                                <th class="fw-bolder" colspan="6">
+                                    Total
+                                </th>
+                                <th class="fw-bolder text-end text-nowrap">
+                                            <span t-out="format_totalDebitSum"/>
+                                        </th>
+                                        <th class="fw-bolder text-end text-nowrap">
+                                            <span t-out="format_totalCreditSum"/>
+                                        </th>
+                                        <th colspan="2" class="fw-bolder text-end text-nowrap">
+                                            <span t-esc="format_totalBalanceSum"/>
+                                        </th>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

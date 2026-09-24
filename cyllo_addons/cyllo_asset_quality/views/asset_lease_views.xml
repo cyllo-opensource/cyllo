@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_asset_lease_form_inherit_asset_quality" model="ir.ui.view">
+        <field name="name">asset.lease.form.inherit.asset.quality</field>
+        <field name="model">asset.lease</field>
+        <field name="inherit_id" ref="cyllo_asset_management.view_asset_lease_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='email']" position="after">
+                <field name="is_quality_point" invisible="1" />
+                <field name="show_validate_quality" invisible="1" />
+                <field name="show_revalidate_quality" invisible="1"/>
+                <field name="quality_check_ids" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//div[@class='oe_button_box']" position="inside">
+                <button name="view_quality_checks"
+                        type="object"
+                        icon="oi-view-list"
+                        class="oe_stat_button" invisible="not quality_check_ids" >
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_text">Quality checks</span>
+                        </div>
+                </button>
+
+            </xpath>
+
+
+            <xpath expr="//button[@name='action_return_asset']" position="before">
+                <button type="object" name="action_validate_quality" string="Validate Quality" class="oe_highlight"
+                        invisible="status != 'lease' or not show_validate_quality or not is_quality_point"/>
+                <button type="object" name="action_revalidate_quality" string="ReValidate Quality" class="oe_highlight"
+                        invisible="status != 'lease' or not show_revalidate_quality or not is_quality_point"/>
+            </xpath>
+            <xpath expr="//button[@name='action_return_asset']" position="attributes">
+                <attribute name="invisible">status != 'lease' or show_validate_quality or show_revalidate_quality</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

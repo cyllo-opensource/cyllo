@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.Field" t-inherit="web.Field">
+        <div position="replace">
+            <t t-if="!fieldComponentProps.viewMode">
+                <div t-if="this.props.record.data[this.props.name] || (env.config?.viewType == 'list' and this.props.record.data[this.props.name] == 0) || ['binary', 'boolean','selection'].some(type => field.supportedTypes?.includes(type)) || cyStudioReadonly" t-ref="fieldRef" t-on-click="(e)=> env.config?.viewSubType != 'n_list' ? this.onItemClick(e) : ''" t-att-view_ref="props.view_ref" t-att-cy-xpath="props.fieldInfo.MainPath" t-att-name="props.name" t-att-class="classNames" t-attf-class="#{env.config?.viewSubType != 'n_list' ? 'cy-studio-readonly cy-studio-field-h overflow-auto' : 'overflow-auto'}" t-att-style="props.style" t-att-data-tooltip-template="tooltip and 'web.FieldTooltip'" t-att-data-tooltip-info="tooltip">
+                    <t t-component="field.component" t-props="fieldComponentProps"/>
+                </div>
+                <div t-elif="field.supportedTypes" t-ref="fieldRef" t-on-click="(e)=> env.config?.viewSubType != 'n_list' ? this.onItemClick(e) : ''" t-att-view_ref="props.view_ref" t-att-cy-xpath="props.fieldInfo.MainPath" t-att-name="props.name" t-att-class="classNames" t-attf-class="#{env.config?.viewSubType != 'n_list' ? 'cy-studio-readonly cy-studio-field-h' : ''}" t-att-style="'background-color: #f2f2f2;' + (props.style || '')" t-att-data-tooltip-template="tooltip and 'web.FieldTooltip'" t-att-data-tooltip-info="tooltip">
+                    <span class="o_input">
+                        <t t-esc="this.FieldPlaceholder.placeholder || this.props.fieldInfo.string || this.props.name"/>
+                    </span>
+                </div>
+            </t>
+            <div t-else="" class="position-relative cy-overlay-parent" t-att-cy-xpath="props.fieldInfo.MainPath">
+                <div t-att-name="props.name" class="pe-none position-relative" t-att-class="classNames" t-att-style="props.style" t-att-data-tooltip-template="tooltip and 'web.FieldTooltip'" t-att-data-tooltip-info="tooltip">
+                    <t t-component="field.component" t-props="fieldComponentProps"/>
+                    <div class="cy-studio-overlay opacity-0 opacity-50-hover">
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-primary" t-on-click="onItemClick">Edit Field Properties</button>
+                            <button class="btn btn-primary text-capitalize ms-1" t-on-click="onViewModeClick">Edit <t t-esc="props.fieldInfo.viewMode"/> View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

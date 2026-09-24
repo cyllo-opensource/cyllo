@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_flow_report_template_reports" model="ir.actions.report">
+        <field name="name">Whatsapp Flows Analysis report</field>
+        <field name="model">whatsapp.flows</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_whatsapp_automation.flow_analysis_report_template</field>
+        <field name="report_file">cyllo_whatsapp_automation.flow_analysis_report_template</field>
+    </record>
+    <template id="flow_analysis_report_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page">
+                    <center>
+                        <h2 class="" t-esc="data['flow_name']"/>
+                    </center>
+                    <div class="screen" style="margin-top:50px">
+                        <t t-foreach="data['screens']" t-as="screen">
+                            <div class="screen"
+                                 style="background-color: #ECEBDE;margin-top:15px">
+                                <div style="padding: 30px">
+                                    <h5 class="text-center">Screen:
+                                        <t t-esc="screen['screen_name']"/>
+                                    </h5>
+                                    <t t-foreach="screen['contents']"
+                                       t-as="content">
+                                        <p>
+                                            <t t-esc="content['label']"/>
+                                        </p>
+                                        <table t-if="content['user_responses']"
+                                               class="table table-bordered"
+                                               style="border: 1px solid black;border-collapse: collapse;">
+                                            <thead>
+                                                <tr style="border: 1px solid black;border-collapse: collapse;">
+                                                    <th style="border: 1px solid black;border-collapse: collapse;">
+                                                        Response
+                                                    </th>
+                                                    <th style="border: 1px solid black;border-collapse: collapse;">
+                                                        User
+                                                    </th>
+                                                    <th style="border: 1px solid black;border-collapse: collapse;">
+                                                        WhatsApp Number
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="content['user_responses']"
+                                                   t-as="response">
+                                                    <tr style="border: 1px solid black;border-collapse: collapse;">
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="response['user_input']"/>
+                                                        </td>
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="response['partner']"/>
+                                                        </td>
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="response['whatsapp_number']"/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                        <t t-else="">
+                                            <p>No response</p>
+                                        </t>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

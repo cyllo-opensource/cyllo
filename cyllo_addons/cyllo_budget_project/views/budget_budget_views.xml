@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Defines the Inherited View of budget-->
+    <record id="view_budget_budget_form" model="ir.ui.view">
+        <field name="name">view.budget.budget.form</field>
+        <field name="model">budget.budget</field>
+        <field name="inherit_id"
+               ref="cyllo_budget_management.view_budget_budget_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_reset_to_draft']"
+                   position="before">
+                <button type="action"
+                        name="%(cyllo_budget_project.action_view_budget_project_wizard)d"
+                        string="Add Project"
+                        class="btn btn-primary"
+                        invisible="check_project == True"
+                        context="{'default_budget_id': id}"/>
+                <field name="check_project" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_project"
+                            class="oe_stat_button"
+                            icon="fa-tasks"
+                            type="object">
+                        <div class="o_stat_info">
+                            <span class="o_stat_text">Project</span>
+                        </div>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

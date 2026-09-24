@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo noupdate="1">
+    <!-- Email Template for the employee resignation report-->
+    <record id="mail_template_resignation_request" model="mail.template">
+        <field name="name">Resignation Request</field>
+        <field name="model_id" ref="cyllo_payroll_management.model_employee_resignation"/>
+        <field name="email_from">{{ (object.employee_id.work_email or user.email_formatted) }}</field>
+        <field name="subject">Employee Resignation Request - "{{ object.employee_id.name }}"</field>
+        <field name="description">Sent Resignation Request To The Manager</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                    Hi&#155;Team,
+                    <br/>
+                    I hereby submit my resignation from the position of&#155;
+                    <span t-out="object.employee_id.job_id.name or ''">
+                    </span>
+                    <br/>
+                    Please find more details from the attached Resignation
+                    Request of&#155;
+                    <t t-if="object.employee_id">
+                        "<span t-out="object.employee_id.name or ''">
+                    </span>"
+                    </t>
+                    <br/>
+                    <br/>
+                </p>
+            </div>
+        </field>
+        <field name="lang">{{ object.employee_id.lang }}</field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+</odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="helpdesk_ticket_merge_wizard_view_form" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.merge.wizard.view.form</field>
+        <field name="model">helpdesk.ticket.merge.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Merge Tickets">
+                <group>
+                    <field name="ticket_ids" widget="many2many_tags" readonly="1"/>
+                    <field name="dst_ticket_id" domain="[('id', 'in', ticket_ids)]"/>
+                </group>
+                <footer>
+                    <button name="action_merge" string="Merge" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="helpdesk_ticket_merge_wizard_action" model="ir.actions.act_window">
+        <field name="name">Merge Tickets</field>
+        <field name="res_model">helpdesk.ticket.merge.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_helpdesk_ticket"/>
+        <field name="binding_view_types">list</field>
+    </record>
+</odoo>

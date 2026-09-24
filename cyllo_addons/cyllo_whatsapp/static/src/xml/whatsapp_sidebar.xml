@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template">
+    <!-- WhatsappSidebar Template -->
+    <t t-name="WhatsappSidebar" owl="1">
+        <div class="chatbox-left-content p-3">
+            <div class="chatbox-left-container w-100">
+                <div class="d-flex align-items-center w-100 justify-space-between ">
+                    <div class="flex-shrink-0 me-3 align-self-center">
+                        <img class="img-fluid rounded-circle border avatar-img me-3"
+                             style="object-fit:cover"
+                             t-attf-src="/web/image/res.users/{{env.session.uid}}/image_1920"
+                             alt=""
+                             t-on-click="onClickProfilePicture"
+                        />
+                        <input type="file" t-ref="profileImagePicker" id="profileImagePicker" accept="image/*"
+                               style="display: none;" t-on-change="onImageSelected"/>
+                    </div>
+                    <div class="flex-grow-1" t-on-click="getUserProfile">
+                        <h5 class="font-size-16 mb-0">
+                            <a href="#" class="text-dark">
+                                <t t-esc="this.env.session.name"/>
+                            </a>
+                        </h5>
+                        <p class="text-muted mb-0">Available</p>
+                    </div>
+                    <div class="profile-option">
+
+                        <Dropdown class="'cy-profile-dropdown'" position="'bottom-end'">
+                            <t t-set-slot="toggler">
+                                <a>
+                                    <i class="fa fa-ellipsis-v fa-fw "/>
+                                </a>
+                            </t>
+                            <DropdownItem>
+                                <a class="dropdown-item"
+                                   t-on-click="getUserProfile">
+                                    Profile
+                                </a>
+                            </DropdownItem>
+                            <DropdownItem>
+                                <a class="dropdown-item"
+                                   t-on-click="getTemplate">
+                                    Template
+                                </a>
+                            </DropdownItem>
+                            <DropdownItem>
+                                <a class="dropdown-item"
+                                   t-on-click="openConfig">
+                                    Configuration
+                                </a>
+                            </DropdownItem>
+                        </Dropdown>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cy-whatsapp-modal d-none" t-ref="configModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content cyllo-modal_content">
+                    <div class="modal-header cy-modal_header">
+                        <div>
+                            <h5 class="modal-title cy-modal-title cy-profile-title" id="exampleModalLabel">Whatsapp
+                                Account Configuration
+                            </h5>
+                        </div>
+                        <button type="button" t-on-click="openConfig" class="btn-close" aria-label="Close" tabindex="-1"/>
+                    </div>
+                    <div class="modal-body cy-modal_body">
+                        <form action="">
+                            <div class="form-group cy-form_group cy-whatsapp-modal-input d-flex justify-content-between">
+                                <label class="cy-modal__label"
+                                       for="app_uid">App ID
+                                    <span
+                                            class="cy-required">*
+                                    </span>
+                                </label>
+                                <div class="cy-input-container w-75">
+                                    <input type="text"
+                                           class="form-control cy-input_control"
+                                           t-attf-value="{{state.user['app_uid']}}"
+                                           name="app_uid"
+                                           t-ref="app_uid"/>
+                                </div>
+                            </div>
+                            <div class="form-group cy-form_group cy-whatsapp-modal-input d-flex justify-content-between">
+                                <label class="cy-modal__label"
+                                       for="phone_uid">Phone Number ID
+                                    <span
+                                            class="cy-required">*
+                                    </span>
+                                </label>
+                                <div class="cy-input-container w-75">
+                                    <input type="text"
+                                           class="form-control cy-input_control"
+                                           t-attf-value="{{state.user['phone_uid']}}"
+                                           name="phone_uid"
+                                           t-ref="phone_uid"/>
+                                </div>
+                            </div>
+                            <div class="form-group cy-form_group cy-whatsapp-modal-input d-flex justify-content-between">
+                                <label class="cy-modal__label"
+                                       for="account_uid">Business Account ID
+                                    <span
+                                            class="cy-required">*
+                                    </span>
+                                </label>
+                                <div class="cy-input-container w-75">
+                                    <input type="text"
+                                           class="form-control cy-input_control"
+                                           t-attf-value="{{state.user['account_uid']}}"
+                                           name="account_uid"
+                                           t-ref="account_uid"/>
+                                </div>
+                            </div>
+                            <div class="form-group cy-form_group cy-whatsapp-modal-input d-flex justify-content-between">
+                                <label class="cy-modal__label"
+                                       for="token">Access Token
+                                    <span
+                                            class="cy-required">*
+                                    </span>
+                                </label>
+                                <div class="cy-input-container w-75">
+                                    <input type="text"
+                                           class="form-control cy-input_control"
+                                           t-attf-value="{{state.user['token']}}"
+                                           name="token"
+                                           t-ref="token"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer cy-modal_footer">
+                        <button type="button"
+                                class="btn btn-primary cy-primary_btn fs-14"
+                                t-on-click="updateConfig">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cy-whatsapp-modal d-none" t-ref="userConfigModal">
+            <div class="modal-dialog whatsapp_profile_modal" role="document">
+                <div class="modal-content cyllo-modal_content">
+                    <div class="modal-header cy-modal_header cy-modal_profile-header">
+                        <div>
+                            <p class="modal-title cy-modal-title cy-profile-title" id="exampleModalLabel">Profile</p>
+                            <p class="cy-modal_sub-title">Details of user
+                            </p>
+                        </div>
+                        <button type="button" t-on-click="getUserProfile" class="btn-close" aria-label="Close" tabindex="-1"/>
+                    </div>
+                    <div class="modal-body cy-modal_body pb-0">
+                        <form action="">
+                            <div class="form-group cy-form_group cy-whatsapp-modal-input whatsapp_profile_input">
+                                <div class="cy-input-container whatsapp_profile_div border">
+                                    <img t-attf-src="/web/image/res.users/{{state.user['id']}}/avatar_128"
+                                         alt="Registration"
+                                         class="whatsapp_profile_img"/>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center mb-3 px-2">
+                                <i class="ri-user-line whatsapp_profile_icon"/>
+                                <div class="form-group w-100 cy-form_group whatsapp_profile_modal_div">
+                                    <div class="cy-input-container">
+                                        <input type="text"
+                                               class="form-control cy-input_control whatsapp_profile_data_input"
+                                               t-attf-value="{{state.user['name']}}"
+                                               name="user_name"
+                                               t-ref="user_name"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center mb-3 px-2">
+                                <i class="ri-mail-line whatsapp_profile_icon"/>
+                                <div class="form-group w-100 cy-form_group  whatsapp_profile_modal_div">
+                                    <div class="cy-input-container">
+                                        <input type="text"
+                                               class="form-control cy-input_control whatsapp_profile_data_input"
+                                               t-attf-value="{{state.user['user_email']}}"
+                                               name="user_email"
+                                               t-ref="user_email"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer cy-modal_footer">
+                        <button type="button"
+                                class="btn btn-primary cy-primary_btn"
+                                t-on-click="updateUserConfig">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div t-ref="contact-container">
+            <div class="search-partner w-100 px-3">
+                <Dropdown position="'bottom-end'">
+                    <t t-set-slot="toggler">
+                        <div class="ch-search-box position-relative">
+                            <i class="ri-search-line checkbox-search  icon-style"/>
+                            <input type="text"
+                                   class="form-control chatbox-inputbox"
+                                   data-hotkey="k"
+                                   t-on-focus="onKeyUpSearch"
+                                   t-on-keyup="onKeyUpSearch" t-ref="search"
+                                   placeholder=" Search Partner (ALT+K)"/>
+                        </div>
+                    </t>
+                    <t t-if="state.partnerHistory.length >= 1">
+                        <DropdownItem t-if="state.dropdown"
+                                      t-foreach="state.partnerHistory"
+                                      t-as="partner" t-key="partner.id"
+                                      t-out="partner.name"
+                                      onSelected.bind="() => this.onSelectPartner(partner)"/>
+                    </t>
+                    <t t-else="">
+                        <DropdownItem>
+                            <div>
+                                No Partner Found
+                            </div>
+                        </DropdownItem>
+                    </t>
+                </Dropdown>
+            </div>
+            <ul class="nav nav-pills nav-justified bg-light-subtle p-1 pb-0" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a t-on-click="() => this.switchTab('chat')"
+                       data-bs-toggle="tab" aria-expanded="true"
+                       class="nav-link active" aria-selected="true" role="tab">
+                        <i class="bx bx-chat font-size-20 d-sm-none"/>
+                        <span class="d-none d-sm-block pb-1">Chat</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a t-on-click="() => this.switchTab('contact')"
+                       data-bs-toggle="tab" aria-expanded="false"
+                       class="nav-link" aria-selected="false" tabindex="-1"
+                       role="tab">
+                        <i class="bx bx-book-content font-size-20 d-sm-none"/>
+                        <span class="d-none d-sm-block pb-1">Contacts</span>
+                    </a>
+                </li>
+            </ul>
+            <div t-ref="chat" class="overflow-auto" style="height: 68vh;">
+                <t t-foreach="props.channels" t-as="channel" t-key="channel.id">
+                    <WhatsappPartnerProfile channel="channel"/>
+                </t>
+            </div>
+            <div t-ref="contact" class="overflow-auto d-none" style="height: 68vh;">
+                <t t-foreach="state.partnerHistory" t-as="partner"
+                   t-key="partner.id">
+                    <div class="d-flex py-3 border-bottom px-2 align-items-center whatsapp-partner-profile"
+                         t-on-click="() => this.onSelectPartner(partner)">
+                        <div class="flex-shrink-0 align-self-center mx-2 ps-2">
+                            <img class="img-fluid rounded-circle border avatar-img"
+                                 t-attf-src="/web/image/res.partner/{{partner.id}}/image_1920"
+                                 alt="loading..."/>
+                        </div>
+                        <div class="flex-grow-1 text-start mr-1">
+                            <div t-out="partner.name"
+                                 class="flex-grow-1 overflow-hidden"/>
+                            <div t-out="partner.whatsapp_number"
+                                 class="flex-grow-1 overflow-hidden text-muted"/>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+        <div class="mt-2 d-flex justify-content-center pt-2 ps-3 pe-3 d-none" t-ref="configuration-container">
+            <div class="w-100">
+                <div>
+                    <div>
+                        <label for="app_id" class="form-label cy-whatsapp-label">App Id</label>
+                        <input name="app_id" class="form-control mb-2" t-model="state.appid"/>
+                        <p class="fs-10">App ID is a unique ID assigned to a Facebook app when it's created by a Meta
+                            developer
+                        </p>
+                    </div>
+                    <div>
+                        <label for="phone_number" class="form-label cy-whatsapp-label">Phone Number</label>
+                        <input name="phone_number" class="form-control mb-2" t-model="state.phone_number"/>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label for="business_account" class="form-label cy-whatsapp-label">Business Account Id</label>
+                        <input name="business_account" class="form-control mb-2" t-model="state.business_account"/>
+                    </div>
+                    <div>
+                        <label for="access_token" class="form-label cy-whatsapp-label">Access Token</label>
+                        <input name="access_token" class="form-control mb-2" t-model="state.access_token"/>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-3 gap-1">
+                    <button class="btn btn-primary" t-on-click="onClickSave">Save</button>
+                    <button class="btn btn-secondary" t-on-click="onClickCancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

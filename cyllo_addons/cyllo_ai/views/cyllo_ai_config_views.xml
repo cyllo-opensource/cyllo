@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_cyllo_ai_config_tree" model="ir.ui.view">
+        <field name="name">cyllo.ai.config.tree</field>
+        <field name="model">cyllo.ai.config</field>
+        <field name="arch" type="xml">
+            <tree string="Cyllo AI Configurations">
+                <field name="name" />
+                <field name="provider" />
+                <field name="state" widget="badge"
+                    decoration-success="state == 'tested'"
+                    decoration-info="state == 'configured'"
+                    decoration-muted="state == 'draft'" />
+                <field name="is_active" string="Use For AI" widget="boolean_toggle" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_cyllo_ai_config_form" model="ir.ui.view">
+        <field name="name">cyllo.ai.config.form</field>
+        <field name="model">cyllo.ai.config</field>
+        <field name="arch" type="xml">
+            <form string="Cyllo AI Configuration">
+                <header>
+                    <button name="action_test_connection" type="object"
+                        string="Test connection" class="btn-primary"
+                        invisible="not is_configured" />
+                    <button string="Test connection" class="btn-secondary"
+                        invisible="is_configured"
+                        title="Fill in provider, API key and model first." />
+                    <field name="state" widget="statusbar" clickable="0" />
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="In Use" bg_color="text-bg-success"
+                        invisible="not is_active" />
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. OpenAI Production" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="is_active"
+                                help="Cyllo AI uses this configuration. Selecting it deselects any other." />
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Provider">
+                            <field name="provider" />
+                            <field name="llm_model_id"
+                                invisible="provider == 'OpenRouter'"
+                                options="{'no_create': True, 'no_open': True}" />
+                            <field name="openrouter_model"
+                                invisible="provider != 'OpenRouter'"
+                                placeholder="e.g. openai/gpt-4o" />
+                            <field name="api_key" password="True" />
+                        </group>
+                        <group string="Status">
+                            <field name="is_configured" />
+                            <field name="last_test_ok" />
+                            <field name="last_tested" />
+                        </group>
+                    </group>
+
+                    <div class="text-muted" invisible="provider != 'ChatOpenAI'">
+                        <a href="https://platform.openai.com/api-keys" target="_blank">
+                                Get your OpenAI API key</a>
+                    </div>
+                    <div class="text-muted" invisible="provider != 'ChatGoogleGenerativeAI'">
+                        <a href="https://ai.google.dev/gemini-api/docs" target="_blank">
+                                Get your Gemini API key</a>
+                    </div>
+                    <div class="text-muted" invisible="provider != 'OpenRouter'">
+                        <a href="https://openrouter.ai/keys" target="_blank">
+                                Get your OpenRouter API key</a>
+                        &#8226;
+                        <a href="https://openrouter.ai/models" target="_blank">
+                                Browse OpenRouter models</a>
+                    </div>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- New id: the old action_cyllo_ai_config xmlid is an ir.actions.server
+         on existing databases, and a record can't change model in place. -->
+    <record id="action_cyllo_ai_config_window" model="ir.actions.act_window">
+        <field name="name">Configuration</field>
+        <field name="res_model">cyllo.ai.config</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a Cyllo AI configuration
+            </p>
+            <p>
+                Create one per provider you want on hand, then toggle
+                "Use For AI" on the one Cyllo AI should actually call.
+            </p>
+        </field>
+    </record>
+</odoo>

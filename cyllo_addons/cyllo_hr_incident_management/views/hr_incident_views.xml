@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--Tree view of hr.incident-->
+    <record id="view_hr_incident_tree" model="ir.ui.view">
+        <field name="name">view.hr.incident.tree</field>
+        <field name="model">hr.incident</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="date_done" optional="hide"/>
+                <field name="incident_initiator_id"/>
+                <field name="incident_receptor_id"/>
+                <field name="incident_initiator_department_id" optional="hide"/>
+                <field name="incident_receptor_department_id" optional="hide"/>
+                <field name="incident_category_id"/>
+                <field name="incident_stage"/>
+            </tree>
+        </field>
+    </record>
+    <!--Form view of hr.incident-->
+    <record id="view_hr_incident_form" model="ir.ui.view">
+        <field name="name">view.hr.incident.form</field>
+        <field name="model">hr.incident</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="incident_stage" widget="statusbar"/>
+                    <button name="action_submit_incident_request" type="object"
+                            string="Submit" class="btn-primary"
+                            invisible="incident_stage != 'new'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            class="btn-primary"
+                            invisible="incident_stage == 'cancel'"/>
+                    <button name="action_assign_handler" type="object"
+                            string="Assign"
+                            class="btn-primary"
+                            invisible="incident_stage not in ['submitted']"/>
+                    <button name="action_start_incident_enquiry" type="object"
+                            string="Start"
+                            class="btn-primary"
+                            invisible="incident_stage != 'assigned'"/>
+                    <button name="action_mark_as_done" type="object"
+                            string="Mark as Done"
+                            class="btn-primary"
+                            invisible="incident_stage != 'ongoing' "/>
+                    <button name="action_set_to_new" type="object"
+                            string="Reset to New"
+                            class="btn-primary"
+                            invisible="incident_stage != 'cancel' "/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"
+                                   placeholder="e.g. Problem Solver"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Incident Information">
+                            <field name="incident_category_id"
+                                   readonly="incident_stage != 'new'"/>
+                            <field name="incident_description"
+                                   readonly="incident_stage != 'new'"/>
+                            <field name="incident_action_description"
+                                   invisible="incident_stage not in ['ongoing','completed']"
+                                   readonly="incident_receptor_id != current_user_employee_id or not is_hr_manager or incident_stage == 'completed'"/>
+                        </group>
+                        <group string="Date Information">
+                            <field name="date"/>
+                            <field name="date_done"/>
+                            <field name="is_submitted" invisible="1"/>
+                            <field name="is_hr_manager" invisible="1"/>
+                            <field name="current_user_employee_id"
+                                   invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Initiator's Details">
+                            <group>
+                                <field name="incident_initiator_id"
+                                       readonly="incident_stage != 'new'"/>
+                                <field name="incident_initiator_department_id"/>
+                                <field name="incident_initiator_email"/>
+                                <field name="incident_initiator_phone"/>
+                            </group>
+                        </page>
+                        <page string="Receptor's Details">
+                            <group>
+                                <field name="incident_receptor_id"
+                                       readonly="incident_stage != 'new'"/>
+                                <field name="incident_receptor_department_id"/>
+                                <field name="incident_receptor_email"/>
+                                <field name="incident_receptor_phone"/>
+                            </group>
+                        </page>
+                        <page string="Handler's Details"
+                              invisible="incident_stage == 'new'">
+                            <group>
+                                <group>
+                                    <field name="incident_handler_id"
+                                           readonly="incident_stage != 'submitted' or incident_receptor_id != current_user_employee_id and not is_hr_manager"/>
+                                    <field name="incident_handler_department_id"/>
+                                    <field name="incident_handler_email"/>
+                                    <field name="incident_handler_phone"/>
+                                </group>
+                                <group>
+                                    <button name="action_assign_to_me"
+                                            type="object" string="Assign to me"
+                                            class="btn-primary"
+                                            invisible="incident_stage not in ['submitted']"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"
+                           groups="base.group_user"/>
+                    <field name="message_ids"/>
+                    <field name="activity_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Kanban view for hr incident-->
+    <record id="view_hr_incident_kanban" model="ir.ui.view">
+        <field name="name">view.hr.incident.kanban</field>
+        <field name="model">hr.incident</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="incident_stage" records_draggable="false">
+                <field name="incident_stage"/>
+                <field name="incident_category_id"/>
+                <field name="incident_receptor_id"/>
+                <field name="incident_initiator_id"/>
+                <field name="incident_handler_id"/>
+                <field name="is_submitted"/>
+                <progressbar field="incident_stage" help=""
+                             colors='{"new": "success", "submitted": "success", "ongoing": "warning", "completed": "success", "cancel": "danger"}'/>
+                <templates>
+                    <t t-name="kanban-menu">
+                        <t t-if="widget.editable">
+                            <a role="menuitem" type="edit"
+                               class="dropdown-item">Edit
+                            </a>
+                        </t>
+                        <t t-if="widget.deletable">
+                            <a role="menuitem" type="delete"
+                               class="dropdown-item">Delete
+                            </a>
+                        </t>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <div class="oe_kanban_content">
+                                <div class="oe_kanban_details">
+                                    <div class="o_kanban_record_title">
+                                        <div class="text-truncate">
+                                            <strong class="o_kanban_record_title">
+                                                <field name="incident_category_id"
+                                                       class="align-items-center"/>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                    <div class="o_kanban_record_subtitle">
+                                        <em>
+                                            <field name="incident_receptor_id"
+                                                   widget="many2one_avatar"/>
+                                        </em>
+                                    </div>
+                                    <div class="o_kanban_record_subtitle">
+                                        <span class="o_stat_text">
+                                            <strong>Initiator:</strong>
+                                        </span>
+                                        <em>
+                                            <field name="incident_initiator_id"
+                                                   class="text-danger"/>
+                                        </em>
+                                    </div>
+                                    <hr class="mt4 mb4"/>
+                                    <span>
+                                        <i class="fa fa-calendar" role="img"
+                                           aria-label="Submit Date"
+                                           title="Submit Date"/>
+                                        <field name="date"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--Search view for hr incident-->
+    <record id="view_hr_incident_search" model="ir.ui.view">
+        <field name="name">view.hr.incident.search</field>
+        <field name="model">hr.incident</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="date"/>
+                <field name="incident_category_id"/>
+                <field name="incident_handler_id"/>
+                <field name="incident_receptor_id"/>
+                <field name="incident_initiator_id"/>
+                <filter string="My Incident requests"
+                        name="incident_receptor_id"
+                        domain="[('incident_initiator_id.user_id','=', uid)]"/>
+                <filter string="My Received requests"
+                        name="incident_receptor_id"
+                        domain="[('incident_receptor_id.user_id','=', uid)]"/>
+                <filter string="My Handle requests" name="incident_receptor_id"
+                        domain="[('incident_handler_id.user_id','=', uid)]"/>
+                <filter string="Completed" name="completed"
+                        domain="[('incident_stage', '=', 'completed')]"/>
+                <group expand="1" string="Group by">
+                    <filter string="Category" name="category"
+                            context="{'group_by': 'incident_category_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--HR Manager action for hr.incident-->
+    <record id="action_view_all_incident_requests"
+            model="ir.actions.act_window">
+        <field name="name">All Incident Requests</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.incident</field>
+        <field name="view_mode">kanban,tree,form,search</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your incident requests
+            </p>
+            <p>
+                You can create incident requests if you need any kind of
+                support from the upper management
+            </p>
+        </field>
+    </record>
+    <!--    HR User action for hr.incident-->
+    <record id="action_view_my_incident_requests" model="ir.actions.act_window">
+        <field name="name">My Incident Requests</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.incident</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="domain">[('incident_initiator_id.user_id.id', '=', uid)]
+        </field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your incident requests
+            </p>
+            <p>
+                You can create incident requests if you need any kind of
+                support from the upper management
+            </p>
+        </field>
+    </record>
+    <record id="action_view_my_received_requests" model="ir.actions.act_window">
+        <field name="name">My Received Requests</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.incident</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="domain">[('incident_receptor_id.user_id.id', '=', uid)]
+        </field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your incident requests
+            </p>
+            <p>
+                You can create incident requests if you need any kind of
+                support from the upper management
+            </p>
+        </field>
+    </record>
+    <record id="action_view_my_handle_requests" model="ir.actions.act_window">
+        <field name="name">My Handle Requests</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.incident</field>
+        <field name="view_mode">tree,form,search</field>
+        <field name="domain">[('incident_handler_id.user_id.id', '=', uid)]
+        </field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your incident requests
+            </p>
+            <p>
+                You can create incident requests if you need any kind of
+                support from the upper management
+            </p>
+        </field>
+    </record>
+    <!--Incident Management menu-->
+    <menuitem id="menu_incident_management_categ" name="Incident Management"
+              parent="cyllo_hr.menu_services_categ"/>
+    <!--Defined menu All Incident Requests for Manager-->
+    <menuitem id="menu_all_incident_requests" name="All Incident Requests"
+              sequence="1"
+              parent="cyllo_hr_incident_management.menu_incident_management_categ"
+              groups="hr.group_hr_user"
+              action="action_view_all_incident_requests"/>
+    <!--    Defined My Incident Requests menu for Users-->
+    <menuitem id="menu_my_incident_requests" name="My Incident Requests"
+              sequence="2"
+              parent="cyllo_hr_incident_management.menu_incident_management_categ"
+              groups="hr.group_hr_user"
+              action="action_view_my_incident_requests"/>
+    <menuitem id="menu_my_received_requests" name="My Received Requests"
+              sequence="3"
+              parent="cyllo_hr_incident_management.menu_incident_management_categ"
+              groups="hr.group_hr_user"
+              action="action_view_my_received_requests"/>
+    <menuitem id="menu_my_handle_requests" name="My Handle Requests"
+              sequence="4"
+              parent="cyllo_hr_incident_management.menu_incident_management_categ"
+              groups="hr.group_hr_user"
+              action="action_view_my_handle_requests"/>
+</odoo>

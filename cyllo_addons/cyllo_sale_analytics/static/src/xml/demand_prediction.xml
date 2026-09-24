@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="DemandPredictionDashboard" owl="1">
+        <t t-if="demandState.showTable">
+            <div class="demand_prediction-pdf cyllo-background cy_prediction_container"
+                 t-ref="root">
+                <div class="d-flex justify-content-between align-items-center demand cy-sale-analysis_nav p-2 pb-4"
+                     t-att-class="getHeaderClass">
+                    <div class="cy_prediction-child">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="prediction-heading cy-sale-analysis_head">Demand Prediction Dashboard</span>
+                            <a href="/cyllo_sale_analytics/static/docs/Demand_Forecasting_User_Manual.pdf" target="_blank" class="text-success fs-4" title="Documentation">
+                                <i class="ri-question-line"/>
+                            </a>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <div class="cy-churn-main_head">
+                                    Predicted Demand For
+                                    <t t-esc="demandState.formattedDate.period"/>
+                                <t t-if="demandState.formattedDate.frequency == 'D'"><span> Days</span></t>
+                                <t t-elif="demandState.formattedDate.frequency == 'M'"><span> Months</span></t>
+                                <t t-elif="demandState.formattedDate.frequency == 'Y'"><span> Years</span></t>
+                                </div>
+                            <div class="cy-template-title-info-container-box">
+                            <t t-if="this.demandState.formattedDate.startDate and this.demandState.formattedDate.endDate">
+                                <span class="badge rounded-pill cy-churn-daterange-pill"
+                                      t-att-title="'Actual Sales is from ' + demandState.formattedDate.startDate + ' to ' + demandState.formattedDate.endDate">
+                                    <i class="ri-information-line me-1"/>
+                                    <t t-esc="demandState.formattedDate.startDate"/> – <t t-esc="demandState.formattedDate.endDate"/>
+                                </span>
+                            </t>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center gap-2 mx-3 justify-content-end flex-wrap">
+                            <t t-if="demandState.chartData.length">
+                                <button t-if="state.typeChart == 'line'"
+                                        class="btn cy-btn-green toggle-chart-button"
+                                        t-on-click="() => this.onClickChartType('bar')">
+                                    <i class="ri-bar-chart-fill sf-chart-image"
+                                       title="Bar Graph"/>
+                                </button>
+                                <button t-if="state.typeChart == 'bar'"
+                                        class="btn cy-btn-green toggle-chart-button"
+                                        t-on-click="() => this.onClickChartType('line')">
+                                    <i class="ri-line-chart-line sf-chart-image"
+                                       title="Line Graph"/>
+                                </button>
+                            </t>
+                            <FilterDropdown mainClass="'dropdown-filters-sale'"
+                                            onClick.bind="datePeriod"
+                                            display_name="demandState.labels.filters || 'Filters'"
+                                            name="demandState.labels.filters || 'Demand filters'">
+                                <t t-set-slot="contents">
+                                    <div class="col-12">
+                                        <label for="act-start-date"
+                                               class="cy-marketing-auto-dialog-txt">Start Date:</label>
+                                        <div>
+                                            <input type="date"
+                                                   id="act-start-date"
+                                                   t-att-max="dateToday"
+                                                   class="start_date w-100 form-control"
+                                                   name="start-date"
+                                                   t-model="demandState.actStartDate"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-12  my-3">
+                                        <label for="end-date"
+                                               class="cy-marketing-auto-dialog-txt">End Date:</label>
+                                        <div>
+                                            <input type="date"
+                                                   id="act-end-date"
+                                                   t-att-max="dateToday"
+                                                   class="end_date w-100 form-control"
+                                                   name="end-date"
+                                                   t-model="demandState.actEndDate"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-12  my-3">
+                                        <label for="period-dmd">Future Periods:</label>
+                                        <input class="form-control cy-button-stroke"
+                                               type="number"
+                                               min="0"
+                                               max="500"
+                                               id="period-dmd"
+                                               value="30"
+                                               placeholder="Future Period"
+                                               t-model="demandState.periodDemand"
+                                               title="Period for Forcasting"/>
+                                    </div>
+                                    <div class="col-12  my-3">
+                                        <label for="frequency">Frequency:</label>
+                                        <select id="frequency"
+                                                class="form-select cy-button-stroke"
+                                                t-model="demandState.frequencyDemand"
+                                                title="Frequency for Forcasting">
+                                            <option value="D">Day</option>
+                                            <option value="M">Month</option>
+                                            <option value="Y">Year</option>
+                                        </select>
+                                    </div>
+                                </t>
+                            </FilterDropdown>
+                            <div class="position-relative">
+                                <Dropdown
+                                        class="'btn-group flex-grow-1 flex-md-grow-0 dropdown-fit-content'"
+                                        togglerClass="'btn cy-btn-green cy-export-dropdown'"
+                                        showCaret="true">
+                                    <t t-set-slot="toggler">
+                                        <span class="ri-upload-line"/>
+                                        Export
+                                    </t>
+                                    <DropdownItem
+                                            onSelected.bind="exportDemandPDF">
+                                        <span class="ri-file-pdf-line"/>
+                                        <span class="ms-2">PDF</span>
+                                    </DropdownItem>
+                                    <DropdownItem
+                                            onSelected.bind="exportDemandPNG">
+                                        <span class="ri-file-image-line"/>
+                                        <span class="ms-2">PNG</span>
+                                    </DropdownItem>
+                                    <DropdownItem
+                                            onSelected.bind="exportDemandXLSX">
+                                        <span class="ri-file-excel-line"/>
+                                        <span class="ms-2">XLSX</span>
+                                    </DropdownItem>
+                                </Dropdown>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row cyllo_demand_prdt_main-container card-border-shadow demand-graph-container-card"
+                     t-att-class="getBodyClass">
+                    <div class="col-lg-3 col-md-3">
+                        <div class="demand-product-list-container d-flex flex-column gap-4">
+                            <div class="pt-1 input-group search-demand-products">
+                                <span class="input-group-text cy-search cy-templates_search-icon">
+                                    <i class="ri-search-line cy-search-icon cy-sheet_font"/>
+                                </span>
+                                <input class="form-control cy-dem-prod-search cy-template_search-bar cy-sheet_font "
+                                       type="search"
+                                       placeholder=" Search"
+                                       t-model="state.search"
+                                       aria-label="Search"/>
+                            </div>
+                            <div class="demand-search-items">
+                                <ul class="demand-prediction-products height-fit">
+                                    <t t-if="state.prodList">
+                                        <t t-foreach="state.prodList"
+                                           t-as="prod" t-key="prod_index">
+                                            <t t-set="prod"
+                                               t-value="Object.values(prod)[0]"/>
+                                            <li t-on-click="() => this.onClickProduct(prod)"
+                                                class="cy-demand_predict-btn text-left">
+                                                <div class="o_kanban_image me-1">
+                                                    <img alt="Product"
+                                                         class="o_image_40_contain"
+                                                         loading="lazy"
+                                                         t-attf-src="/web/image/product.product/{{ prod[0] }}/image_1920"/>
+                                                </div>
+                                                <span>
+                                                    <t t-esc="prod[1]"/>
+                                                </span>
+                                            </li>
+                                        </t>
+                                    </t>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <t t-if="demandState.noData">
+                        <div class="col-lg-9 col-md-9 demand-common-graph">
+                            <t t-if="demandState.status !== 'none'">
+                                <div class="cy-demand-prdt_sm-head mt-4">
+                                <div class="d-flex"
+                                     t-if="demandState.defaultProduct.length">
+                                    <div class="product-name-font">
+                                        <span>Product:</span>
+                                        <span class="ms-1"
+                                              t-esc="demandState.defaultProduct[1]"/>
+                                    </div>
+                                </div>
+                            </div>
+                                <div class="row cy-demand_prediction-table flex-nowrap">
+                                    <div class="col-12 p-0 cy-demand_sub-table">
+                                        <div class="row cy-demand_prediction-table flex-nowrap">
+                                            <div class="col-4 col-lg-2 p-0 cy-demand_sub-table cy-demand_label-col">
+                                                <table class="cy-demand_prediction-table_list">
+                                                    <thead class="cy-demand_prediction-head">
+                                                        <tr>
+                                                            <th class="text-center">Measures</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th class="cy-demand-prdt_sm-head ">Periods</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="cy-demand-prdt_sm-head ">Quantity Sold</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="cy-demand-prdt_sm-head ">Average Sales Price</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="cy-demand-prdt_sm-head ">Revenue</th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-5 p-0 cy-demand_sub-table">
+                                                <table class="cy-demand_prediction-table_list">
+                                                    <thead class="cy-demand_prediction-head">
+                                                        <tr class="cy-table_mainhead-row">
+                                                            <th class="text-center cy-demand-prdt_sm-head ">Actual
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <t t-if="analyticsTable.analysisTableActual">
+                                                            <tr>
+                                                                <t t-foreach="analyticsTable.analysisTableActual"
+                                                                   t-as="data"
+                                                                   t-key="data_index">
+                                                                    <td class="cy-demand-predict-subhead">
+                                                                        <t t-esc="data.date"/>
+                                                                    </td>
+                                                                </t>
+                                                            </tr>
+                                                            <tr>
+                                                                <t t-foreach="analyticsTable.analysisTableActual"
+                                                                   t-as="data"
+                                                                   t-key="data_index">
+                                                                    <td>
+                                                                        <t t-esc="data.qty"/>
+                                                                    </td>
+                                                                </t>
+                                                            </tr>
+                                                            <tr>
+                                                                <t t-foreach="analyticsTable.analysisTableActual"
+                                                                   t-as="data"
+                                                                   t-key="data_index">
+                                                                    <td>
+                                                                        <t t-esc="data.avg_price"/>
+                                                                    </td>
+                                                                </t>
+                                                            </tr>
+                                                            <tr>
+                                                                <t t-foreach="analyticsTable.analysisTableActual"
+                                                                   t-as="data"
+                                                                   t-key="data_index">
+                                                                    <td>
+                                                                        <t t-esc="data.sub_total"/>
+                                                                    </td>
+                                                                </t>
+                                                            </tr>
+                                                        </t>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-5 p-0 cy-demand_sub-table">
+                                                <table class="cy-demand_prediction-table_list">
+                                                    <thead class="cy-demand_prediction-head">
+                                                        <tr class="cy-table_mainhead-row">
+                                                            <th class="text-center cy-demand-prdt_sm-head ">Forecast
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <t t-if="analyticsTable.analysisTableForecast">
+                                                            <tr>
+                                                                <t t-foreach="analyticsTable.analysisTableForecast"
+                                                                   t-as="data"
+                                                                   t-key="data_index">
+                                                                    <td class="cy-demand-predict-subhead">
+                                                                        <t t-esc="data.date"/>
+                                                                    </td>
+                                                                </t>
+                                                            </tr>
+                                                            <tr>
+                                                                <t t-foreach="analyticsTable.analysisTableForecast"
+                                                                   t-as="data"
+                                                                   t-key="data_index">
+                                                                    <td>
+                                                                        <t t-esc="data.qty"/>
+                                                                    </td>
+                                                                </t>
+                                                            </tr>
+                                                            <tr>
+                                                                <t t-foreach="analyticsTable.analysisTableForecast"
+                                                                   t-as="data"
+                                                                   t-key="data_index">
+                                                                    <td>
+                                                                        <t t-esc="data.avg_price"/>
+                                                                    </td>
+                                                                </t>
+                                                            </tr>
+                                                            <tr>
+                                                                <t t-foreach="analyticsTable.analysisTableForecast"
+                                                                   t-as="data"
+                                                                   t-key="data_index">
+                                                                    <td>
+                                                                        <t t-esc="data.subtotal"/>
+                                                                    </td>
+                                                                </t>
+                                                            </tr>
+                                                        </t>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card cy-demand_prediction-container"
+                                     t-ref="chart-container">
+                                    <div id="demand_prediction_chart"
+                                         class="chart-col demand_prediction_chart"/>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="cy-dashboard_container mt-3 w-100 h-95 d-flex justify-content-center align-items-center flex-column">
+                                     <div class="cy-dashboard_chart">
+                                         <div class="loader demand-loader"/>
+                                    </div>
+                                    <div class="demand-loading-text">Loading your data...</div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="col-lg-9 col-md-9 demand-common-graph">
+                            <div class="col h-100">
+                                <div class=" row cy-no_data text-center align-items-center justify-content-center h-100">
+                                    <div class="w-100 d-flex align-items-center justify-content-center flex-column">
+                                        <div>
+                                            <i class="ri-close-circle-fill no-data-forbid"/>
+                                        </div>
+                                        <h3 class="cy-demand-predit_head">Not enough data for
+                                            <t t-if="demandState.defaultProduct.length">
+                                                <t t-esc="demandState.defaultProduct[1]"/>
+                                            </t>
+                                            .
+                                        </h3>
+                                        <p class="cy-empty_text">Sales Data is Insufficient for this Frequency.
+                                            Increase the Sales Data by adjusting the Start Date and End Date.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+               </div>
+            </div>
+        </t>
+        <t t-else="">
+            <div class="col-12 position-relative">
+                <div class="col-12 pt-3 ps-4 d-flex align-items-center gap-2">
+                    <span class="cy-sale-analysis_head cy-template-title py-4 pe-0 ps-0 mb-0">Demand Prediction Dashboard</span>
+                    <a href="/cyllo_sale_analytics/static/docs/Demand_Forecasting_User_Manual.pdf" target="_blank" class="text-success fs-4" title="Documentation">
+                        <i class="ri-question-line"/>
+                    </a>
+                </div>
+                <div class="col h-100">
+                    <div class="row cy-empty_data text-center align-items-center justify-content-center h-100">
+                        <div class="d-flex align-items-center justify-content-center flex-column">
+                            <div>
+                                <i class="ri-folder-forbid-fill no-data-forbid"/>
+                            </div>
+                            <h3 class="cy-demand-predit_head">No Data has been Recorded.</h3>
+                            <p class="cy-empty_text">There should be sale orders for demand prediction. The dataset is
+                                too small to perform a meaningful prediction.<br/>
+                                The model may have limited accuracy due to the
+                                small
+                                dataset size.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </t>
+</templates>

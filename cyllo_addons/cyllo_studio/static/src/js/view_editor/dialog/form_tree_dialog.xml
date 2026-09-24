@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+	<t t-name="cyllo_studio.FormTreeDialog">
+		<Dialog size="'md'" title="''" bodyClass="'overflow-visible'">
+			<div>
+				<!-- Modal -->
+                <div class="cy-form_tree_dialog">
+					<div class="cy-modal_dialog">
+						<div class="cy-modal_content">
+							<div class="cy-studio_head">
+								<div>
+									<h5 class="cy-modal-title" id="exampleModalLabel">Form Tree</h5>
+                                    <p class="cy-studio-modal_subtitle">Fill the form to add the Form Tree</p>
+								</div>
+							</div>
+                            <div class="cy-modal__body">
+								<div class="d-flex gap-3 mb-3">
+									<div class="form-check">
+										<label class="form-check-label cy-check_label"> One2Many </label>
+                                        <input class="form-check-input cy-checked-input" type="radio"
+                                               name="exampleRadios"
+                                               value="one2many" checked="1" t-model="state.selected_value"/>
+									</div>
+                                    <div class="form-check">
+										<label class="form-check-label cy-check_label"> Many2Many </label>
+                                        <input class="form-check-input cy-checked-input" type="radio"
+                                               name="exampleRadios"
+                                               value="many2many" t-model="state.selected_value"/>
+									</div>
+								</div>
+                                <div class="d-flex cy-modal-main_content gap-3">
+									<div class="w-100" style="max-width: 53%;">
+										<div class=" ">
+											<div class="mb-4">
+												<label for="" class="cy-modal_label">Label:</label>
+                                                <input reqired="true" type="text" class="form-control"
+                                                       t-model="state.label"
+                                                       t-on-input="computeTechName"/>
+											</div>
+                                            <div class="mb-4">
+												<div t-if="state.selected_value == 'many2many'">
+													<label>Related Model:</label>
+                                                    <div class="cy-studio-custom-dropdown-dialog-related-model">
+														<CylloRecordSelector resId="state.model" resModel="'ir.model'"
+                                                                             update="(resId)=> state.model=resId"
+                                                                             domain="[['model', '!=', props.resModel]]"/>
+													</div>
+												</div>
+                                                <div t-if="state.selected_value == 'one2many'">
+													<label class="cy-modal_label">Related Model Field:</label>
+                                                    <div class="cy-studio-custom-dropdown-dialog-related-model-field">
+														<CylloStudioDropdown
+                                                                options="getDictFromArrayRelatedModelField(related_model_fields)"
+                                                                onChange="(value) => this.handleRelatedModelFieldChange(value)"
+                                                                defaultValue="RelatedModelField"
+                                                                searchable="true"
+                                                        />
+													</div>
+                                                    <span style="text-align: left;font-size: 12px;" class="text-warning"
+                                                          t-if="state.onetomany">
+														<i class="fa fa-info-circle"/>
+                                                        A relational field must be defined in this model
+
+													</span>
+												</div>
+											</div>
+										</div>
+									</div>
+                                    <div class="w-100">
+										<div class="mb-4">
+											<label class="cy-modal_label">Technical Name:</label>
+                                            <input class="form-control" readonly="true" type="text"
+                                                   t-model="state.technical_name"/>
+										</div>
+                                        <div class="mb-4">
+											<div t-if="state.model_id">
+												<label>Select Fields:</label>
+                                                <div class="cy-input-visible-to cy-select-field-dialog">
+													<CylloMultiRecordSelector resIds="state.field_ids"
+                                                                              resModel="'ir.model.fields'"
+                                                                              update="(field_ids)=> state.field_ids = field_ids"
+                                                                              domain="[['model_id', '=', state.model_id]]"/>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+            <t t-set-slot="footer">
+				<button class="btn btn-primary" t-on-click="onConfirm">Confirm</button>
+                <button class="btn btn-secondary" t-on-click="onDiscard">Discard</button>
+			</t>
+		</Dialog>
+	</t>
+</templates>

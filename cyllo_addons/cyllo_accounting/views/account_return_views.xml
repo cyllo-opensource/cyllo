@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_account_return_tree" model="ir.ui.view">
+        <field name="name">account.return.tree</field>
+        <field name="model">account.return</field>
+        <field name="arch" type="xml">
+            <tree js_class="tax_return_list" default_order="date_from desc">
+                <field name="name"/>
+                <field name="periodicity"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="output_tax" string="Sales Tax"/>
+                <field name="input_tax" string="Purchase Tax"/>
+                <field name="net_tax"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'"
+                       decoration-success="state == 'posted'" decoration-danger="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_account_return_form" model="ir.ui.view">
+        <field name="name">account.return.form</field>
+        <field name="model">account.return</field>
+        <field name="arch" type="xml">
+            <form string="Tax Return" create="0">
+
+                <header>
+                    <!-- Compute -->
+                    <button name="action_compute" string="Compute" type="object" class="btn-primary"
+                             invisible="state != 'draft'"/>
+
+                    <!-- Run Checks -->
+                    <button name="action_validate_checks" string="Run Checks" type="object" class="btn-secondary"
+                             invisible="state != 'draft'"/>
+
+                    <!-- Post -->
+                    <button name="action_post" string="Post" type="object" class="btn-secondary"
+                             invisible="state != 'draft'"/>
+
+                    <!-- Cancel -->
+                    <button name="action_cancel" string="Cancel" type="object" class="btn-secondary"
+                             invisible="state == 'cancel'"/>
+
+                    <!-- Reset to Draft -->
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary"
+                             invisible="state == 'draft'"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,posted,cancel"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Reference"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group name="period_details" string="Period Details">
+                            <field name="date_from" readonly="1"/>
+                            <field name="date_to" readonly="1"/>
+                            <field name="periodicity" readonly="1"/>
+                        </group>
+                        <group name="accounting_details" string="Accounting">
+                            <field name="journal_id" readonly="1"/>
+                            <field name="move_id" invisible="not move_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+
+                    <separator string="Tax Summary"/>
+
+                    <div class="row mt-3 mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm" style="background-color: #f8f9fa; border-left: 4px solid #9ea700 !important;">
+                                <div class="card-body py-3 px-4">
+                                    <div class="text-uppercase text-muted small fw-bold">Sales Tax (Output)</div>
+                                    <div class="h3 mb-0 fw-bold text-dark mt-1">
+                                        <field name="output_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm" style="background-color: #f8f9fa; border-left: 4px solid #6c757d !important;">
+                                <div class="card-body py-3 px-4">
+                                    <div class="text-uppercase text-muted small fw-bold">Purchase Tax (Input)</div>
+                                    <div class="h3 mb-0 fw-bold text-dark mt-1">
+                                        <field name="input_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm" style="background-color: #ebedc8; border-left: 4px solid #9ea700 !important;">
+                                <div class="card-body py-3 px-4">
+                                    <div class="text-uppercase text-muted small fw-bold">Net Tax</div>
+                                    <div class="h3 mb-0 fw-bold mt-1" style="color: #9ea700;">
+                                        <field name="net_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-0 shadow-sm" style="background-color: #e3f2fd; border-left: 4px solid #0d47a1 !important;">
+                                <div class="card-body py-3 px-4">
+                                    <div class="text-uppercase text-muted small fw-bold">Balance</div>
+                                    <div class="h3 mb-0 fw-bold mt-1" style="color: #0d47a1;">
+                                        <field name="balance_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <notebook>
+                        <page string="Validation Checks" name="validation_checks">
+                            <field name="check_ids">
+                                <tree decoration-success="state == 'passed'"
+                                      decoration-danger="state == 'failed' and is_mandatory"
+                                      decoration-warning="state == 'failed' and not is_mandatory" editable="bottom">
+                                    <field name="template_id" options="{'no_create': True}" string="Check Name"/>
+                                    <field name="is_mandatory"/>
+                                    <field name="record_count"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'passed'"
+                                           decoration-danger="state == 'failed' and is_mandatory"
+                                           decoration-warning="state == 'failed' and not is_mandatory"/>
+                                    <field name="result_message"/>
+                                    <button name="action_view_failed_records" string="View Records" type="object"
+                                            icon="fa-external-link" invisible="record_count == 0"/>
+                                    <button name="action_run_validation" string="Re-run" type="object"
+                                            icon="fa-refresh"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_account_return_search" model="ir.ui.view">
+        <field name="name">account.return.search</field>
+        <field name="model">account.return</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Posted" name="posted" domain="[('state', '=', 'posted')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_account_return" model="ir.actions.act_window">
+        <field name="name">Tax Returns</field>
+        <field name="res_model">account.return</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_account_return_search"/>
+        <field name="context">{'search_default_draft': 1}</field>
+    </record>
+
+</odoo>

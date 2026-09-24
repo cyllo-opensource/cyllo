@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit account.account form to add Automation tab for asset settings -->
+    <record id="view_account_account_form" model="ir.ui.view">
+        <field name="name">view.account.account.form</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='accounting']" position="after">
+                <page name="automation" string="Automation" invisible="account_type != 'asset_fixed'">
+                    <group>
+                        <group>
+                            <field name="asset_creation" widget="radio"/>
+                            <field name="multiple_asset" invisible="asset_creation == 'no'"/>
+                            <field name="asset_model_id" invisible="asset_creation == 'no'"
+                                   required="asset_creation in ('draft', 'validate')"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

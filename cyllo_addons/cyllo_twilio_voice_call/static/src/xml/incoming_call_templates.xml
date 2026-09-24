@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+	<t t-name="incoming_call" owl="1">
+		<t t-if="this.state.showIncomingCall">
+			<div class="cy-dial__pad"
+                 t-ref="incoming">
+				<button class="cy-dial-actionbtn"
+                        t-on-click="_onClickMinimise" style="margin-top:-8px;">
+					<i class="minimise ri-subtract-fill mini"/>
+				</button>
+                <div class="show-incoming">
+					<t t-if="!this.state.isPartner">
+						<div align="center" style="height:233px;">
+							<span class="fw-bolder text-truncate"
+                                  align="center"
+                                  style="font-size:19px;margin-top:5px;">
+								<t t-esc="this.state.incomingCallNumber"/>
+							</span>
+                            <br/>
+                            <img alt="Avatar"
+                                 class="o_dial_phonecall_avatar"
+                                 src="cyllo_twilio_voice_call/static/src/img/images.png"
+                                 style="height:200px;width:200px;margin-top:30px"/>
+                            <br/>
+                            <span class="call-duration"
+                                  t-ref="callDuration"
+                                  style="display: block; text-align: center; font-weight: bold; font-size:23px;">
+								<t t-esc="timeFormatted"/>
+							</span>
+						</div>
+					</t>
+                    <t t-if="this.state.isPartner">
+						<div align="center" style="height:250px;">
+							<img alt="Avatar"
+                                 class="o_dial_phonecall_avatar"
+                                 t-att-src="this.state.selectedPartner.image_1920 ? 'data:image/png;base64,' + this.state.selectedPartner.image_1920 : '/cyllo_twilio_voice_call/static/src/img/images.png'"
+                                 style="height:200px;width:200px;margin-top:30px"/>
+                            <t t-if="this.state.selectedPartner.partner_name">
+								<br/>
+                                <b class="fw-bolder text-truncate"
+                                   style="font-size: 17px;"
+                                   t-att-title="this.state.selectedPartner.partner_name"
+                                   t-esc="this.state.selectedPartner.partner_name"/>
+							</t>
+                            <br/>
+                            <span class="fw-bolder text-truncate"
+                                  align="center" style="font-size:16px;">
+								<t t-esc="this.state.incomingCallNumber"/>
+							</span>
+                            <span class="call-duration"
+                                  t-ref="callDuration"
+                                  style="display: block; text-align: center; font-weight: bold; font-size:22px;">
+								<t t-esc="timeFormatted"/>
+							</span>
+						</div>
+					</t>
+                    <div class="cy-dial_pad-callprocess"
+                         style="margin-top:75px;">
+						<button class="btn cy-dial-process-btn cy-call-btn ongoing-call"
+                                id="call"
+                                t-on-click="_onClickAccept">
+							<i class="ri-phone-fill call-icon"/>
+						</button>
+                        <button class="btn cy-dial-process-btn cy-callend-btn "
+                                t-on-click="_onClickReject">
+							<i class="ri-phone-fill cy-callend-icon"/>
+						</button>
+					</div>
+				</div>
+			</div>
+		</t>
+	</t>
+</templates>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Module Category -->
+    <record id="module_category_green_metrics" model="ir.module.category">
+        <field name="name">Green Metrics</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <!-- User Group -->
+    <record id="group_carbon_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="module_category_green_metrics"/>
+    </record>
+
+    <!-- Manager Group -->
+    <record id="group_carbon_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="module_category_green_metrics"/>
+        <field name="implied_ids" eval="[(4, ref('cyllo_green_metrics.group_carbon_user'))]"/>
+    </record>
+
+    <!-- Add Admin to Manager -->
+    <record id="base.user_admin" model="res.users">
+        <field name="groups_id" eval="[(4, ref('cyllo_green_metrics.group_carbon_manager'))]"/>
+    </record>
+
+    <data noupdate="1">
+        <!-- Multi-Company Rules -->
+        <record id="carbon_calc_rule_multicompany" model="ir.rule">
+            <field name="name">Carbon Calculation Multi-Company Rule</field>
+            <field name="model_id" ref="model_carbon_calc"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="carbon_activity_rule_multicompany" model="ir.rule">
+            <field name="name">Carbon Activity Multi-Company Rule</field>
+            <field name="model_id" ref="model_carbon_activity"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="carbon_assign_rule_rule_multicompany" model="ir.rule">
+            <field name="name">Carbon Assign Rule Multi-Company Rule</field>
+            <field name="model_id" ref="model_carbon_assign_rule"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="carbon_factor_rule_multicompany" model="ir.rule">
+            <field name="name">Carbon Factor Multi-Company Rule</field>
+            <field name="model_id" ref="model_carbon_factor"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="carbon_source_rule_multicompany" model="ir.rule">
+            <field name="name">Carbon Source Multi-Company Rule</field>
+            <field name="model_id" ref="model_carbon_source"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="carbon_scope_rule_multicompany" model="ir.rule">
+            <field name="name">Carbon Scope Multi-Company Rule</field>
+            <field name="model_id" ref="model_carbon_scope"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="carbon_unit_rule_multicompany" model="ir.rule">
+            <field name="name">Carbon Unit Multi-Company Rule</field>
+            <field name="model_id" ref="model_carbon_unit"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+    </data>
+</odoo>

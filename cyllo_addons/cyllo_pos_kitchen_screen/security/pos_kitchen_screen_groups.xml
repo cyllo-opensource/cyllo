@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Kitchen screen group for cook-->
+    <record id="ir_module_category_pos_kitchen_screen" model="ir.module.category">
+        <field name="name">Pos Kitchen Screen</field>
+        <field name="description">Kitchen Access Groups</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="group_cyllo_pos_kitchen_screen_user" model="res.groups">
+        <field name="name">Kitchen User</field>
+        <field name="category_id"
+               ref="cyllo_pos_kitchen_screen.ir_module_category_pos_kitchen_screen"/>
+        <field name="implied_ids" eval="[(4, ref('point_of_sale.group_pos_user'))]"/>
+    </record>
+
+    <record id="group_cyllo_pos_kitchen_screen" model="res.groups">
+        <field name="name">Kitchen Cook</field>
+        <field name="category_id"
+               ref="cyllo_pos_kitchen_screen.ir_module_category_pos_kitchen_screen"/>
+        <field name="implied_ids" eval="[(4, ref('cyllo_pos_kitchen_screen.group_cyllo_pos_kitchen_screen_user'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
+</odoo>

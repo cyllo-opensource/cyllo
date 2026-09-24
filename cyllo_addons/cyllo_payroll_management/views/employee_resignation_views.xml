@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View-->
+    <record id="view_employee_resignation_form" model="ir.ui.view">
+        <field name="name">view.employee.resignation.form</field>
+        <field name="model">employee.resignation</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button string="Confirm" type="object" name="action_confirm_request"
+                            invisible="state != 'draft'" class="oe_highlight"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                    <button name="action_send_mail" string="Send Request"
+                            type="object" icon="fa-paper-plane" class="oe_highlight"
+                            invisible="state not in ('confirm')"/>
+                    <button string="Cancel" type="object" name="action_cancel_request"
+                            invisible="state not in ('confirm', 'draft')"/>
+                    <button string="Approve" type="object" name="action_approve_request"
+                            invisible="state != 'waiting'" class="oe_highlight"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                    <button string="Reject" type="object" name="action_reject_request"
+                            invisible="state in ('cancel', 'draft')"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                    <button string="Set to Draft" type="object" name="action_reset_to_draft"
+                            invisible="state in ('draft')"
+                            groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <div class="d-flex">
+                                <field name="reference" class="text-break"/>
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <group>
+                                <separator string="Employee Details"/>
+                                <field name="employee_id" readonly="state in('confirm','approved')"
+                                       widget="many2one_avatar_user"/>
+                                <field name="company_id" readonly="state in('confirm','approved')"/>
+                                <field name="contract_id" readonly="state in('confirm','approved')"
+                                       groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+                                <field name="department_id"
+                                       readonly="state in('confirm','approved')"/>
+                            </group>
+                            <group>
+                                <separator string="Resignation Details"/>
+                                <field name="resignation_type_id"
+                                       readonly="state in('confirm','approved')"/>
+                                <field name="reason" readonly="state in('confirm','approved')"/>
+                            </group>
+                        </group>
+                        <separator string="Dates"/>
+                        <group>
+                            <group>
+                                <label for="joining_date" string="Contract Period"
+                                       readonly="state in('confirm','approved')"/>
+                                <div class="o_row no-gutters d-flex">
+                                    <div class="o_row">
+                                        <field name="joining_date" class="text-left"
+                                               readonly="state in('confirm','approved')"/>
+                                        -
+                                        <field name="end_date"
+                                               readonly="state in('confirm','approved')"/>
+                                    </div>
+                                </div>
+                                <field name="confirmed_date"
+                                       readonly="state in('confirm','approved')"/>
+                            </group>
+                            <group>
+                                <field name="approved_date"
+                                       readonly="state in('confirm','approved')"/>
+                                <label for="notice_period"/>
+                                <div id="notice_period">
+                                    <field name="notice_period"
+                                           readonly="state in('confirm','approved')"
+                                           class="oe_inline"/>
+                                    <span invisible="not notice_period">Days</span>
+                                </div>
+                                <field name="leaving_date"
+                                       readonly="state in('confirm','approved')"/>
+                                <field name="gratuity_settlement_id"
+                                       readonly="state in('confirm','approved')" invisible="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <separator string="Gratuity Settlement Details"
+                                       invisible="not gratuity_settlement_id"/>
+                            <group>
+                                <group>
+                                    <field name="basic_salary"
+                                           invisible="not gratuity_settlement_id"
+                                           readonly="state in('confirm','approved')"/>
+                                    <field name="total_working_years"
+                                           invisible="not gratuity_settlement_id"
+                                           readonly="state in('confirm','approved')"/>
+                                </group>
+                                <group>
+                                    <field name="gratuity_years"
+                                           invisible="not gratuity_settlement_id"
+                                           readonly="state in('confirm','approved')"/>
+                                    <field name="leave_taken"
+                                           invisible="not gratuity_settlement_id"
+                                           readonly="state in('confirm','approved')"/>
+                                    <field name="gratuity_amount"
+                                           invisible="not gratuity_settlement_id"
+                                           readonly="state in('confirm','approved')"/>
+                                </group>
+                            </group>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- List View -->
+    <record id="view_employee_resignation_tree" model="ir.ui.view">
+        <field name="name">view.employee.resignation.tree</field>
+        <field name="model">employee.resignation</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="reference"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="approved_date"/>
+                <field name="resignation_type_id"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-info="state == 'confirm'"
+                       decoration-muted="state == 'draft'"
+                       decoration-danger="state == 'rejected'"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Search view -->
+    <record id="view_employee_resignation_search" model="ir.ui.view">
+        <field name="name">view.employee.resignation.search</field>
+        <field name="model">employee.resignation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="reference"/>
+                <field name="employee_id"/>
+                <field name="contract_id"/>
+                <field name="department_id"/>
+                <field name="resignation_type_id"/>
+                <filter name="waiting_or_confirm" string="Waiting or Confirm"
+                        domain="[('state','in',('waiting','confirm'))]"
+                        groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+            </search>
+        </field>
+    </record>
+    <!-- Action-->
+    <record id="action_view_employee_resignation" model="ir.actions.act_window">
+        <field name="name">Employee Resignation Request</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">employee.resignation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_waiting_or_confirm':1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Employee Resignation Request
+            </p>
+            <p>
+                Employee Can Create Resignation Request Here
+            </p>
+        </field>
+    </record>
+    <record id="action_view_approved_resignations" model="ir.actions.act_window">
+        <field name="name">Approved Resignation</field>
+        <field name="res_model">employee.resignation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', '=', 'approved')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Approved Resignations
+            </p>
+        </field>
+    </record>
+</odoo>

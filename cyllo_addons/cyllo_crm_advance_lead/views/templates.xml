@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Referral modal template-->
+    <template id="inherit_confirmation_view"
+              inherit_id="website_sale.confirmation"
+              name="Referral">
+        <xpath expr="//input[hasclass('js_plausible_push')]" position="after">
+            <div id="referral_modal">
+                <div id="location_temp"
+                     style="display:none; position:absolute;">
+                    <div class="location_modal_container"
+                         style="position: fixed; inset: 0; z-index: 1050; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">
+                        <div class="bg-white rounded-3 shadow-lg"
+                             style="width: 100%; max-width: 500px;">
+                            <!-- Modal Header -->
+                            <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+                                <h5 class="modal-title mb-0">
+                                    <i class="fa fa-share-alt me-2 text-primary"/>
+                                    Refer Your Purchase
+                                </h5>
+                                <input name="order" t-att-value="order.id"
+                                       type='hidden' id="order"/>
+                                <input name="is_referral" t-att-value="referral"
+                                       type='hidden' id="is_referral"/>
+                                <button type="button" class="btn-close"
+                                        id="close"
+                                        aria-label="Close"/>
+                            </div>
+                            <!-- Modal Body -->
+                            <div class="p-4">
+                                <div class="text-center mb-3">
+                                    <i class="fa fa-gift text-primary"
+                                       style="font-size: 2.5rem;"/>
+                                    <h4 class="mt-3">Share with a Friend</h4>
+                                    <p class="text-muted">
+                                        Would you like to recommend these
+                                        products
+                                        to someone?
+                                    </p>
+                                </div>
+                                <div class="alert alert-info d-flex align-items-center">
+                                    <i class="fa fa-info-circle me-2"/>
+                                    <small>Your friend will get personalized
+                                        recommendations
+                                    </small>
+                                </div>
+                            </div>
+                            <!-- Modal Footer -->
+                            <div class="d-flex justify-content-end gap-3 p-4 border-top">
+                                <button type="button" class="btn btn-primary"
+                                        id="refer">
+                                    <i class="fa fa-paper-plane me-2"/>Yes,
+                                    Refer
+                                </button>
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        id="close">
+                                    <i class="fa fa-times me-2"/>No Thanks
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <!--Thanks Page template-->
+    <template id="referral_thank_you" name="Referral Submission Thank You">
+        <t t-call="website.layout">
+            <div class="container o_referral_thankyou_container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6 text-center">
+                        <div class="o_referral_thankyou_content">
+                            <i class="fa fa-check-circle fa-5x text-success mb-4"/>
+
+                            <h1 class="mb-3">You're Amazing! Thanks for the
+                                Referral!
+                            </h1>
+                            <p class="lead text-muted mb-4">
+                                Because of you, your friend is one step closer
+                                to discovering something amazing! We truly
+                                appreciate your support. Keep sharing the love!
+                            </p>
+                            <div class="o_referral_actions">
+                                <a href="/" class="btn btn-primary me-2">
+                                    <i class="fa fa-home me-1"/>
+                                    Return to Home
+                                </a>
+                                <a href="/shop"
+                                   class="btn btn-outline-secondary">
+                                    <i class="fa fa-shopping-cart me-1"/>
+                                    Continue Shopping
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!--  Inherits ControlPanel to modify the view of control panel in all form.-->
+    <t t-inherit="web.ControlPanel" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_control_panel')]" position="attributes">
+            <attribute name="class" remove="px-3 pt-2 pb-3 gap-3 gap-lg-1" separator=" "/>
+            <attribute name="class" add="gap-0 gap-lg-0" separator=" "/>
+        </xpath>
+        <xpath expr="//nav[hasclass('o_cp_switch_buttons')]" position="replace">
+            <div class="cy-aligned-icons view_buttons d-print-none d-none d-xl-inline-flex">
+                <t t-foreach="env.config.viewSwitcherEntries" t-as="view"
+                   t-key="view.type">
+                    <i t-attf-class="o_{{view.type}} {{view.active and view.icon.endsWith('-line') ? view.icon.slice(0, -5) + '-fill' : view.icon}} {{view.active ? 'active' : ''}}"
+                       t-att-data-tooltip="view.name"
+                       t-on-click="() => this.onViewClicked(view.type)"/>
+                </t>
+            </div>
+        </xpath>
+    </t>
+    <t t-inherit="web.Pager" t-inherit-mode="extension" owl="1">
+        <xpath expr="//span[hasclass('o_pager_counter')]" position="attributes">
+            <attribute name="class" add="cy-page-count" separator=" "
+                       remove="o_pager_counter"/>
+        </xpath>
+        <xpath expr="//span[hasclass('d-print-none')]" position="replace">
+            <div class="cy-aligned-icons p-0">
+                <a class="ri-arrow-left-s-line cy-navigation-icon px-2"
+                   aria-label="Previous" data-tooltip="Previous" tabindex="-1"
+                   t-att-class="state.isDisabled or isSinglePage ? '': 'active'"
+                   t-att-data-hotkey="props.withAccessKey ? 'p' : false"
+                   t-att-disabled="state.isDisabled or isSinglePage"
+                   t-on-click.stop="() => this.navigate(-1)"/>
+                <a class="ri-arrow-right-s-line cy-navigation-icon px-2"
+                   t-att-class="state.isDisabled or isSinglePage ? '': 'active'"
+                   aria-label="Next" data-tooltip="Next" tabindex="-1"
+                   t-att-data-hotkey="props.withAccessKey ? 'n' : false"
+                   t-att-disabled="state.isDisabled or isSinglePage"
+                   t-on-click.stop="() => this.navigate(1)"/>
+            </div>
+        </xpath>
+    </t>
+    <t t-inherit="web.Breadcrumbs" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[@class='o_last_breadcrumb_item active d-flex fs-4 min-w-0 align-items-center']"
+               position="attributes">
+            <attribute name="class">
+                cy-navigation-btn
+            </attribute>
+        </xpath>
+    </t>
+</templates>

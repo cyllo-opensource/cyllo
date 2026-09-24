@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Drink Tree View -->
+    <record id="frontdesk_drink_view_tree" model="ir.ui.view">
+        <field name="name">frontdesk.drink.view.tree</field>
+        <field name="model">frontdesk.drink</field>
+        <field name="arch" type="xml">
+            <tree string="Drinks">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="notify_user_ids" widget="many2many_tags"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Drink Form View -->
+    <record id="frontdesk_drink_view_form" model="ir.ui.view">
+        <field name="name">frontdesk.drink.view.form</field>
+        <field name="model">frontdesk.drink</field>
+        <field name="arch" type="xml">
+            <form string="Drink">
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_1920'}"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Coffee, Sparkling Water"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="notify_user_ids" widget="many2many_tags" placeholder="Who should prepare this drink..."/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Drink Search View -->
+    <record id="frontdesk_drink_view_search" model="ir.ui.view">
+        <field name="name">frontdesk.drink.view.search</field>
+        <field name="model">frontdesk.drink</field>
+        <field name="arch" type="xml">
+            <search string="Search Drinks">
+                <field name="name"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_frontdesk_drink" model="ir.actions.act_window">
+        <field name="name">Drinks</field>
+        <field name="res_model">frontdesk.drink</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="frontdesk_drink_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new drink option!
+            </p>
+            <p>
+                Configure beverages and refreshments that can be offered to visitors.
+            </p>
+        </field>
+    </record>
+</odoo>

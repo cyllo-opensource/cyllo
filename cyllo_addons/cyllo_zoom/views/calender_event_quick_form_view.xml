@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_calendar_event_form_quick_create_cyllo_zoom"
+            model="ir.ui.view">
+        <field name="name">view.calendar.event.form.quick_create.cyllo.zoom
+        </field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id"
+               ref="calendar.view_calendar_event_form_quick_create"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='videocall_location']" position="replace">
+
+                <field name="videocall_location"
+                       invisible="is_zoom_meet"/>
+
+                <group invisible="not is_zoom_meet"
+                       string="Zoom Meeting"
+                       class="mt-2 mb-2">
+
+                    <field name="zoom_meet_url"
+                           placeholder="https://us05web.zoom.us..."
+                           widget="CopyClipboardChar"
+                           class="mb-2"/>
+
+                    <button name="action_zoom_meet_url"
+                            string="Join Meeting"
+                            type="object"
+                            class="btn-primary mb-3"/>
+
+                    <field name="zoom_meet_code"
+                           widget="CopyClipboardChar"
+                           class="mb-2"/>
+
+                    <field name="zoom_event" invisible="1"/>
+
+                </group>
+
+            </xpath>
+
+            <xpath expr="//field[@name='start']" position="after">
+                 <field name="alarm_ids" widget="many2many_tags"/>
+
+                <field name="is_zoom_meet" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

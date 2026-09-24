@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Define a record for extending the marketing activity form view -->
+    <record id="view_marketing_activity_form" model="ir.ui.view">
+        <field name="name">view.marketing.activity.form</field>
+        <field name="model">marketing.activity</field>
+        <field name="inherit_id"
+               ref="cyllo_marketing_automation.view_marketing_activity_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group/group/field[@name='type']"
+                   position="after">
+                <field name="whatsapp_template_id"
+                       domain="[('model_id.model', '=', 'marketing.activity'),('state', '=', 'approved')]"
+                       invisible="type != 'whatsapp'"
+                       required="type == 'whatsapp'"/>
+                <field name="image_template"
+                       invisible="type != 'whatsapp'"
+                       required="type == 'whatsapp'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

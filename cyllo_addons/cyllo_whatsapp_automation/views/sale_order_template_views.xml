@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!--    Inheriting sale_order_template form view-->
+    <record id="sale_order_template_view_form" model="ir.ui.view">
+        <field name="name">sale.order.template.view.form.inherit.cyllo.whatsapp</field>
+        <field name="model">sale.order.template</field>
+        <field name="inherit_id"
+               ref="sale_management.sale_order_template_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_send_whatsapp_template"
+                            string="Send Template"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="not template_id"/>
+                    <button name="action_create_whatsapp_flow"
+                            string="Create Whatsapp Flow" type="object"
+                            invisible="flow_id"/>
+                    <button name="action_create_whatsapp_template"
+                            string="Create Whatsapp Template" type="object"
+                            class="oe_highlight" invisible="template_id or not flow_id"/>
+                    <button name="action_remove_wa_template"
+                            string="Remove WhatsApp Template"
+                            type="object"
+                            invisible="not template_id"/>
+                </header>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_flow"
+                            type="object"
+                            class="oe_stat_button"
+                            string="Flows"
+                            invisible="not flow_id"
+                            icon="fa-whatsapp text-primary">
+                    </button>
+                    <button name="action_view_template"
+                            type="object"
+                            class="oe_stat_button"
+                            string="Template"
+                            invisible="not template_id"
+                            icon="fa-whatsapp text-primary">
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//page[@name='optional_products']" position="after">
+                <page string="Whatsapp Template">
+                    <div class="d-flex flex-row mt-2">
+                        <div class="px-3">
+                            <field name="template_id" readonly="1"/>
+                            <field name="flow_id" readonly="1"/>
+                        </div>
+                    </div>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

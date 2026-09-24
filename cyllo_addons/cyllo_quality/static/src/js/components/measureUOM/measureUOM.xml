@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_quality.measureUOM">
+        <div t-ref="root" class="o_form_group d-flex align-items-center" t-on-click="handleClick">
+            <t t-if="dependField">
+                <t t-if="state.editMode">
+                    <div style="background: #dfdfdf;" class="o_form_field o_field_widget o_field_number me-2 position-relative">
+                        <!-- Input field for measurement value -->
+                        <input t-att-readonly="isReadonly" type="number" class="o_input form-control o_survey_question_numerical_box" t-on-input="onInputChange" placeholder="Measure" t-model="jsonValue.value" t-on-click="() => console.log(this)" style="width: 80px; border: 2px ; border-radius: 0.25rem; padding: 0.375rem 0.75rem; transition: border-color 0.3s;" />
+                    </div>
+                    <div class="o_form_field o_field_widget o_field_selection position-relative">
+
+                        <!-- Dropdown to select UOM -->
+                        <select class="o_input form-control" t-on-change="onUOMChange" t-att-value="jsonValue.unit.id" t-attf-class="{{isReadonly ? 'cy-readonly' : ''}}" t-att-disabled="isReadonly" style="border: 2px; background: #dfdfdf; border-radius: 0.25rem; padding: 0.375rem 0.75rem; transition: border-color 0.3s;">
+                            <option value="">Unit of Measure</option>
+                            <t t-foreach="state.uomOptions" t-as="uom" t-key="uom.id">
+                                <option t-att-value="uom.id" t-esc="uom.name" t-att-selected="uom.id === jsonValue.unit.id" />
+                            </t>
+                        </select>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="d-flex gap-1">
+                        <div t-out="jsonValue.value" />
+                        <div t-out="jsonValue.unit.name" />
+                    </div>
+                </t>
+            </t>
+            <t t-else="">
+                None
+            </t>
+
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="ValueSelector">
+        <div class="cy-w-field-selector d-flex align-items-end gap-2">
+            <t t-set="info" t-value="getFieldInfo"/>
+            <t t-if="info?.component">
+                <t t-component="info.component" t-props="info.extractProps({ value: getDefaultValue, update: (value) => this.handleUpdateValue(value) })"/>
+            </t>
+            <t t-else="">
+                <input type="text" class="o_input" placeholder="Input values"/>
+            </t>
+            <div t-if="info?.component" class="d-flex align-items-enter justify-content-end">
+                <FieldTypeDropdown
+                    currentLabel="getDropdownLabel(state.fieldType)"
+                    onSelected="(type) => this.selectFieldType(type)"
+                />
+            </div>
+        </div>
+    </t>
+</templates>

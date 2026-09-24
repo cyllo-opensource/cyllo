@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_repair_order_form_inherit_time" model="ir.ui.view">
+        <field name="name">repair.order.form.inherit.time</field>
+        <field name="model">repair.order</field>
+        <field name="inherit_id" ref="repair.view_repair_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='schedule_date']" position="after">
+                <field name="is_timer_running" invisible="1"/>
+                <field name="total_accumulated_time" invisible="1"/>
+                <field name="operator_ids" widget="many2many_tags"
+                       options="{'no_create': True}"
+                       invisible="state == 'draft'"/>
+                <field name="current_start_time" readonly="1"
+                       invisible="1"/>
+                <field name="actual_duration" widget="float_time" readonly="1"
+                       invisible="state not in ['under_repair', 'done']"/>
+                <field name="allocation_policy_id"
+                       options="{'no_create': True}"/>
+                <field name="allocated_duration" widget="float_time"/>
+                <field name="progress_percentage" widget="progressbar"/>
+                <field name="time_status" widget="badge" 
+                       decoration-success="time_status == 'on_track'"
+                       decoration-warning="time_status == 'warning'"
+                       decoration-danger="time_status == 'overdue'"
+                       invisible="not time_status"/>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_repair_pause" string="Pause Repair" type="object" class="btn-warning"
+                        invisible="state != 'under_repair' or not is_timer_running"/>
+                <button name="action_repair_start" string="Resume Repair" type="object" class="btn-info"
+                        invisible="state != 'under_repair' or is_timer_running"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

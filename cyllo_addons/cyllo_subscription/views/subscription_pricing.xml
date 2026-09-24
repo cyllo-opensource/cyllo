@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="subscription_pricing" model="ir.ui.view">
+        <field name="name">subscription.pricing</field>
+        <field name="model">subscription.pricing</field>
+        <field name="arch" type="xml">
+           <form string="Subscription Pricing">
+                <sheet>
+                    <group string="Subscription Period" invisible="not product_tmpl_id.is_subscription">
+                       <field name="product_tmpl_id" string="Subscription Product"
+                                   domain="[('is_subscription', '=', True)]" required="1"
+                                   options="{'no_create': True}"/>
+                            <field name="subscription_unit" string="Unit" required="1"/>
+                            <field name="duration" string="Duration" required="1"/>
+                            <field name="min_quantity" string="Min. Qty"/>
+                            <field name="fixed_price" string="Price" widget="monetary"/>
+                            <field name="date_start" string="Start Date" optional="show"/>
+                            <field name="date_end" string="End Date" optional="show"/>
+                            <field name="currency_id" column_invisible="True"/>
+                            <field name="company_id" column_invisible="True"/>
+                    </group>
+                </sheet>
+           </form>
+        </field>
+    </record>
+    <record id="product_pricelist_view_inherit_subscription" model="ir.ui.view">
+        <field name="name">product.pricelist.form.inherit.subscription</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='pricelist_config']" position="before">
+                <page name="subscription_rules" string="Time based Price Rules">
+                    <field name="subscription_pricing_ids" nolabel="1" domain="[('product_tmpl_id.is_subscription', '=', True)]">
+                        <tree string="Subscription Price Rules" editable="bottom">
+                            <field name="product_tmpl_id" string="Subscription Product"
+                                   domain="[('is_subscription', '=', True)]" required="1"
+                                   options="{'no_create': True}"/>
+                            <field name="subscription_unit" string="Unit" required="1"/>
+                            <field name="duration" string="Duration" required="1"/>
+                            <field name="min_quantity" string="Min. Qty"/>
+                            <field name="fixed_price" string="Price" widget="monetary"/>
+                            <field name="date_start" string="Start Date" optional="show"/>
+                            <field name="date_end" string="End Date" optional="show"/>
+                            <field name="currency_id" column_invisible="True"/>
+                            <field name="company_id" column_invisible="True"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

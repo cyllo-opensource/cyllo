@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_commission_type_tree" model="ir.ui.view">
+        <field name="name">view.commission.type.tree</field>
+        <field name="model">commission.type</field>
+        <field name="arch" type="xml">
+            <tree string="Commission Type">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Form View -->
+    <record id="view_commission_type_form" model="ir.ui.view">
+        <field name="name">view.commission.type.form</field>
+        <field name="model">commission.type</field>
+        <field name="arch" type="xml">
+            <form string="Commission Type">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group colspan="2">
+                            <group>
+                                <field name="type"/>
+                            </group>
+                            <group>
+                                <field name="crm_rule_to_apply" string="Rules"
+                                       widget="domain"
+                                       options="{'model': 'crm.lead'}"
+                                       invisible="type != 'crm'"/>
+                                <field name="sales_rule_to_apply" string="Rules"
+                                       widget="domain"
+                                       options="{'model': 'sale.order.line'}"
+                                       invisible="type != 'sale'"/>
+                            </group>
+                        </group>
+                    </group>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail.activity"/>
+                </div>
+            </form>
+        </field>
+    </record>
+        <!--Search View-->
+    <record id="view_commission_type_search" model="ir.ui.view">
+        <field name="name">view.commission.type.search</field>
+        <field name="model">commission.type</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter string="Archived" name="active"
+                        domain="[('active', '=',False)]"/>
+                <filter string="CRM" name="crm"
+                        domain="[('type', '=','crm')]"/>
+            </search>
+        </field>
+    </record>
+    <!-- Action -->
+    <record id="action_commission_type" model="ir.actions.act_window">
+        <field name="name">Commission Type</field>
+        <field name="res_model">commission.type</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create the first one!
+            </p>
+        </field>
+    </record>
+</odoo>

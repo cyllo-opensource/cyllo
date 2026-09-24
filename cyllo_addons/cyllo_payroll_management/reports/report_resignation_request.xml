@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action for the pdf report of resignation request -->
+    <record id="report_resignation_request" model="ir.actions.report">
+        <field name="name">Resignation Request</field>
+        <field name="model">employee.resignation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_payroll_management.resignation_request</field>
+        <field name="report_file">cyllo_payroll_management.resignation_request</field>
+        <field name="print_report_name">'Resignation Request - %s' % (object.employee_id.name)</field>
+        <field name="binding_model_id" ref="cyllo_payroll_management.model_employee_resignation"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="resignation_request">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 align="center">Resignation Request - <span t-field="o.employee_id.name"/></h2>
+                        <p>
+                            Hi Team,
+                            <br/>
+                            I trust this message finds you well. <br/>It is with mixed emotions
+                            that I submit my resignation from the position of
+                            <strong><span t-field="o.employee_id.job_id.name"/></strong>.
+                        </p>
+                        <table class="table table-bordered" style="width:100%">
+                            <tr>
+                                <th>Employee Name</th>
+                                <th>Job Position</th>
+                                <th>Confirmed Date</th>
+                            </tr>
+                            <tr>
+                                <td align="center">
+                                    <span t-field="o.employee_id.name"/>
+                                </td>
+                                <td align="center">
+                                    <span t-field="o.employee_id.job_id.name"/>
+                                </td>
+                                <td align="center">
+                                    <span t-field="o.confirmed_date"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Resignation Type</th>
+                                <th>Reason</th>
+                                <th>State</th>
+                            </tr>
+                            <tr>
+                                <td align="center">
+                                    <span t-field="o.resignation_type_id.name"/>
+                                </td>
+                                <td align="center">
+                                    <span t-field="o.reason"/>
+                                </td>
+                                <td align="center">
+                                    <span t-field="o.state"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <br/>
+                        <t t-if="o.gratuity_settlement_id">
+                            <strong>Gratuity Settlement Details:</strong>
+                            <table class="table table-bordered" style="width:100%">
+                                <tr>
+                                    <th>Basic Salary</th>
+                                    <th>Total Years Worked</th>
+                                    <th>Gratuity Calculation Years</th>
+                                    <th>Training Period(Years)</th>
+                                    <th>Gratuity Amount</th>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <span t-field="o.basic_salary"/>
+                                    </td>
+                                    <td align="center">
+                                        <span t-esc="round(o.total_working_years,2)"/>
+                                    </td>
+                                    <td align="center">
+                                        <span t-esc="round(o.gratuity_years,2)"/>
+                                    </td>
+                                    <td align="center">
+                                        <span t-esc="round(o.leave_taken,2)"/>
+                                    </td>
+                                    <td align="center">
+                                        <span t-esc="o.gratuity_amount"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                        <br/>
+                        <p>
+                            <t t-if="o.approved_date">
+                                <strong>Approved Date:</strong>
+                                <span t-field="o.approved_date"/>
+                            </t>
+                            <br/>
+                            <t t-if="o.leaving_date">
+                                <strong>Leaving Date:</strong>
+                                <span t-field="o.leaving_date"/>
+                            </t>
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

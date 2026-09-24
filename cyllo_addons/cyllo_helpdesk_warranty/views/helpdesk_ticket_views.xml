@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="helpdesk_ticket_view_form_inherit_warranty" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.form.inherit.warranty</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="cyllo_helpdesk.helpdesk_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//widget[@name='web_ribbon']" position="after">
+                <field name="use_product_warranty" invisible="1"/>
+                <field name="warranty_status" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='sale_order_line_id']" position="replace">
+                <label for="sale_order_line_id" invisible="not use_sale_order" groups="sales_team.group_sale_salesman,sales_team.group_sale_manager"/>
+                <div class="o_row" invisible="not use_sale_order" groups="sales_team.group_sale_salesman,sales_team.group_sale_manager">
+                    <field name="sale_order_line_id"
+                           domain="[('order_id', '=', sale_order_id)]"
+                           placeholder="Select Order Line..."/>
+                    <field name="is_under_warranty_evaluation" invisible="1"/>
+                    <span class="fa fa-shield text-success"
+                          invisible="not is_under_warranty_evaluation"
+                          title="Under Warranty"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="helpdesk_ticket_view_tree_inherit_warranty" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.tree.inherit.warranty</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="cyllo_helpdesk.helpdesk_ticket_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage_id']" position="after">
+                <field name="use_product_warranty" column_invisible="True"/>
+                <field name="warranty_status" widget="badge" optional="show"
+                    invisible="not use_product_warranty"
+                    decoration-success="warranty_status == 'under_warranty'"
+                    decoration-danger="warranty_status == 'expired'"
+                    decoration-muted="warranty_status == 'none'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

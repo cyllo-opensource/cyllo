@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.FieldProperties">
+        <t></t>
+        <div class="overall_container_list cy-from-type-field" t-ref="cy-Properties">
+            <div class="accordion cy-form-overall-view-field-button" id="accordionExample">
+                <div class="overall_container_list cy-from-type-field">
+                    <div>
+                        <div class="mb-2">
+                            <label for="" class="cy-navbar_label">Field Name
+                            </label>
+                            <input class="cy-input cy-input-field-align cy-studio-input-placeholder"
+                                reqired="true" type="text" id="label" name="label"
+                                placeholder="Eg: Name" autocomplete="off" t-model="state.string"
+                                t-on-keyup="(ev) => props.edit != true ? this.onCellKeydown(ev, state.string) : ''"
+                                t-on-change="() => this.autoSave()" />
+                        </div>
+                        <div class="mb-2">
+                            <label for="" class="cy-navbar_label">Technical
+                                Name
+                            </label>
+                            <input class="cy-input" readonly="true" type="text" id="technical_name"
+                                placeholder="x_studio_" name="technical_name" t-model="state.name" />
+                        </div>
+                        <div class="mb-2">
+                            <label for="" class="cy-navbar_label">Field Type</label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    onChange="(value) => this.handleFieldTypeChange(value)"
+                                    defaultValue="state.selectedFieldType || state.fieldType[0]"
+                                    options="fieldType" searchable="true" disabled="props.edit" />
+                            </div>
+                        </div>
+                        <div class="mb-2"
+                            t-if="state.selectedFieldType == 'selection' and !state.widget and props.edit != true">
+                            <label for="" class="cy-navbar_label">Values</label>
+                            <div t-ref="cy-SelectionValues">
+                                <t t-foreach="state.selectionValues" t-as="value"
+                                    t-key="value_index">
+                                    <SelectionFieldValue value="value" index="value_index"
+                                        checkSelectionValues="checkSelectionValues.bind(this)"
+                                        changeValue="changeSelectionValue.bind(this)"
+                                        deleteValue="deleteSelectionValue.bind(this)" />
+                                </t>
+                            </div>
+                            <button class="btn btn-primary mb-2 px-4" t-on-click="addSelectionValue">
+                                Add
+                            </button>
+                        </div>
+                        <div
+                            t-if="['many2one', 'many2many'].includes(state.selectedFieldType) and props.edit != true"
+                            class="mb-2">
+                            <label for="" class="cy-navbar_label">Related Model</label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown defaultValue="state.related_model"
+                                    options="RelatedModel(this.state.models)"
+                                    onChange="(value) => this.handleRelatedModelChange(value)"
+                                    searchable="true" />
+                            </div>
+                        </div>
+                        <div t-if="state.selectedFieldType == 'one2many' and props.edit != true"
+                            class="mb-2">
+                            <label for="" class="cy-navbar_label">Related Model Field</label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown
+                                    options="RelatedModelField(this.state.related_model_field)"
+                                    onChange="(value) => this.handleRelatedModelFieldChange(value)"
+                                    defaultValue="state.relatedModelField" searchable="true" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion" id="accordionExample">
+                <div class="overall_container_list">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button cy-heading cy-studio_accordion collapsed"
+                            type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+                            aria-expanded="false" aria-controls="collapseTwo">
+                            Details
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse hide mt-3"
+                        aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                        <div>
+                            <div class="mb-2">
+                                <label for="" class="cy-navbar_label">Widget</label>
+                                <div class="cy-studio-custom-dropdown">
+                                    <CylloStudioDropdown defaultValue="this.state.widget"
+                                        options="newFieldWidgets"
+                                        onChange="(value) => this.handleFieldWidgetChange(value)"
+                                        searchable="true" />
+                                </div>
+                            </div>
+                            <div class="cy-widget_sub ">
+                                <div id="dynamic-container" />
+                            </div>
+                        </div>
+                        <div class="mb-2"
+                            t-if="!['many2one','many2many','one2many','binary'].includes(state.selectedFieldType)">
+                            <label class="cy-navbar_label">Default</label>
+
+                            <div class="cy-studio-custom-dropdown">
+
+                                <t t-if="state.selectedFieldType == 'selection'">
+                                    <CylloStudioDropdown
+                                        onChange="(value) => this.handleDefaultValueChange(value)"
+                                        defaultValue="state.default_value"
+                                        options="defaultValueSelectionOptions"
+                                        searchable="true" />
+                                </t>
+                                <t t-else="">
+                                    <input type="text" class="cy-input" id="default_value"
+                                        name="default_value" t-model="state.default_value"
+                                        t-on-change="() => this.autoSave()"
+                                        placeholder="" />
+                                </t>
+
+                                <t t-if="['date','datetime'].includes(state.selectedFieldType)">
+                                    <span class="cy-calendar-icon" t-on-click="openCalendarPopover"
+                                        style="position:absolute; right:10px; top:8px; cursor:pointer; z-index:10;">
+                                        <i class="fa fa-calendar"/>
+                                    </span>
+                                </t>
+
+                            </div>
+                        </div>
+                        <div class="mb-2" t-if="!props.edit">
+                            <label for="" class="cy-navbar_label">Related Field</label>
+                            <input class="cy-input" type="text" readonly="true"
+                                t-on-click="openFieldSelector"
+                                t-att-value="state.relatedField || ''" />
+                        </div>
+                        <div class="mb-2 "
+                            t-if="['many2one', 'one2many', 'many2many'].includes(state.selectedFieldType)">
+                            <div class="mb-2">
+                                <label for="" class="cy-navbar_label">Context
+                                </label>
+                                <input class="cy-input" type="text" id="context" name="context"
+                                    autocomplete="off" t-model="state.context"
+                                    t-on-change="() => this.autoSave()" />
+                            </div>
+                            <div class="mb-2">
+                                <label for="" class="cy-navbar_label">Domain
+                                </label>
+                                <input class="cy-input" type="text" id="domain" name="domain"
+                                    t-on-click="fieldsDomain" t-model="state.domain" />
+                            </div>
+                        </div>
+                        <div class="mb-2"
+                            t-if="state.selectedFieldType =='selection' and state.widget">
+                            <div class="mb-2 cy-option-visible cy-option-side_menu">
+                                <label for="" class="cy-navbar_label">Option Visible</label>
+                                <div class="cy-studio-custom-dropdown">
+                                    <MultiSelectDropDown t-props="multiSelectDropDown" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-2 ">
+                            <label for="" class="cy-navbar_label">Help</label>
+                            <input type="text" id="help" name="help" t-model="state.help"
+                                class="cy-input" autocomplete="off"
+                                t-on-change="() => this.autoSave()" />
+                        </div>
+                        <div class="mb-2">
+                            <label for="" class="cy-navbar_label">Placeholder
+                            </label>
+                            <input class="cy-input" type="text" id="placeholder" name="placeholder"
+                                t-att-value="getPlaceholderDisplay()"
+                                t-on-input="handlePlaceholderInput"
+                                t-on-focus="() => this.state.isPlaceholderFocused = true"
+                                t-on-blur="() => { this.state.isPlaceholderFocused = false; this.autoSave(); }"
+                                autocomplete="off" />
+                        </div>
+                        <div class="mb-2">
+                            <label for="" class="cy-navbar_label">Dynamic Placeholder
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown defaultValue="state.dynamic_placeholder"
+                                    options="getDynamicPlaceholderOptions()"
+                                    onChange="(value) => this.handleDynamicPlaceholderChange(value)"
+                                    searchable="true" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div t-if="props.viewType === 'tree'" class="cy-prop-toggle-row">
+                    <span class="cy-toggle-label">Optional</span>
+                    <label class="cy-switch">
+                        <input type="checkbox" t-on-click="onOptionalClick"
+                            t-att-checked="state.optional == 'hide' ? 'checked' : null"/>
+                        <span class="cy-slider"/>
+                    </label>
+                </div>
+                <div t-if="props.viewType === 'tree'" class="cy-prop-toggle-row">
+                    <span class="cy-toggle-label">Column Invisible</span>
+                    <label class="cy-switch">
+                        <input type="checkbox" t-on-click="handleColumnInvisibleChange"
+                            t-att-checked="[0,'0','false', 'undefined', undefined].includes(state.column_invisible) ? null : 'checked'"/>
+                        <span class="cy-slider"/>
+                    </label>
+                </div>
+                <div t-if="state.show_compute_section" class="cy-prop-toggle-row">
+                    <span class="cy-toggle-label">Compute</span>
+                    <div class="cy-prop-toggle-right">
+                        <button class="cy-basedOn" data-attribute="computed" t-on-click="openComputeDialog">
+                            <span>Based on</span>
+                            <i class="fa fa-cog cy-setting-icon"/>
+                        </button>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-on-click="(ev) => this.toggleIsComputed(ev)"
+                                t-att-checked="state.is_computed ? 'checked' : null"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                </div>
+                <div class="cy-prop-toggle-row">
+                    <span class="cy-toggle-label">Invisible</span>
+                    <div class="cy-prop-toggle-right">
+                        <button class="cy-basedOn" data-attribute="invisible"
+                            t-on-click="(ev) => this.attrDomain(ev)">
+                            <span>Based on</span>
+                            <i class="fa fa-cog cy-setting-icon"/>
+                        </button>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-on-click="handleInvisibleChange"
+                                t-att-checked="['false', 'undefined', undefined].includes(state.invisible) ? null : 'checked'"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                </div>
+                <div class="cy-prop-toggle-row">
+                    <span class="cy-toggle-label">Readonly</span>
+                    <div class="cy-prop-toggle-right">
+                        <button class="cy-basedOn" data-attribute="readonly"
+                            t-on-click="(ev) => this.attrDomain(ev)">
+                            <span>Based on</span>
+                            <i class="fa fa-cog cy-setting-icon"/>
+                        </button>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-on-click="handleReadonlyChange"
+                                t-att-checked="['false', 'undefined', undefined].includes(state.readonly) ? null : 'checked'"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                </div>
+                <div class="cy-prop-toggle-row">
+                    <span class="cy-toggle-label">Required</span>
+                    <div class="cy-prop-toggle-right">
+                        <button class="cy-basedOn" data-attribute="required"
+                            t-on-click="(ev) => this.attrDomain(ev)">
+                            <span>Based on</span>
+                            <i class="fa fa-cog cy-setting-icon"/>
+                        </button>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-on-click="handleRequiredChange"
+                                t-att-checked="['false', 'undefined', undefined].includes(state.required) ? null : 'checked'"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                </div>
+                <div t-if="state.show_compute_section and ['many2one', 'many2many', 'one2many','html','binary'].includes(state.selectedFieldType) === false"
+                    class="cy-prop-toggle-row">
+                    <span class="cy-toggle-label">Constraints</span>
+                    <div class="cy-prop-toggle-right">
+                        <button class="cy-basedOn" t-on-click="(ev) => this.openConstraintDialog()">
+                            <span>Based on</span>
+                            <i class="fa fa-cog cy-setting-icon"/>
+                        </button>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-on-click="(ev)=>this.handleConstrainsChange(ev)"
+                                t-att-checked="state.constraintEnabled ? 'checked' : false"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div t-if="sqlConstraints and sqlConstraints.length > 0" class="px-2 mt-3 mb-4">
+                <label class="cy-navbar_label">Constraints</label>
+                <ul class="mb-0" style="list-style: none; padding-left: 0;">
+                    <t t-foreach="sqlConstraints" t-as="constraint" t-key="constraint.key">
+                        <li
+                            style="padding: 8px; border-radius: 8px; position: relative; padding-right: 45px;"
+                            class="cy-input cy-input-field-align">
+                            <div style="display: block;">
+                                <small
+                                    style="color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; display: block;">
+                                    <code t-esc="constraint.definition" class="cy-navbar_label" />
+                                </small>
+                            </div>
+                            <button class="btn btn-sm text-danger"
+                                t-on-click="(ev) => this.removeConstraint(sqlConstraints.indexOf(constraint))"
+                                style="padding: 4px 8px; position: absolute; top: 50%; right: 8px; transform: translateY(-50%); flex-shrink: 0;">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </li>
+                    </t>
+                </ul>
+            </div>
+            <div class="d-flex btn_div w-100 my-3 gap-2">
+                <!-- Create mode: explicit Save + Cancel (new field needs name + type first).
+                     Edit mode: changes auto-apply on each edit, so only Remove is shown. -->
+                <button t-if="props.create" class="btn btn-primary w-100"
+                    t-on-click="createField">Save</button>
+                <button t-if="props.create" class="btn btn-secondary w-100" t-on-click="cancelField">
+                    Cancel</button>
+                <button t-else="" class="btn btn-danger w-100"
+                    t-on-click="deleteField">Remove</button>
+            </div>
+        </div>
+    </t>
+</templates>

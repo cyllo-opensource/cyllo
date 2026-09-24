@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.RibbonDialog" owl="1">
+        <Dialog title="'Ribbons'" size="'lg'" bodyClass="'overflow-visible'">
+            <div class="d-flex ribbon-dialogue">
+                <div class="cy-field__box">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="ri-code-box-fill cy-content-header-icon"/>
+                        <h3 class="cy-content_header">
+                            <t t-if="!state.hasEdit">
+                                Editor
+                            </t>
+                            <t t-else="">
+                                Properties
+                            </t>
+                        </h3>
+                    </div>
+                    <!--      updated code for scroll adding     -->
+                    <div class="cy-addable__list cy-scrollable-calendar overflow-auto border-0"
+                         style="max-height: 400px;overflow: visible !important;">
+                        <!--               first dialog for viewing all created ribbons and its preview  -->
+                        <div t-if="!state.hasEdit" class="cy-ribbon-list" style="max-height: 350px; overflow-y: auto;">
+                            <t t-foreach="state.ribbons" t-as="ribbon" t-key="ribbon_index">
+                                <div class="cy-drag-input_container mb-2">
+                                    <button t-if="ribbon.hasDelete" class="cy-drag_edit-btn cy-drag_save"
+                                            t-on-click="()=> ribbon.hasDelete = false">
+                                        <i class="ri-arrow-go-forward-line cy-studio-icon"/>
+                                    </button>
+                                    <button t-else="" class="btn btn-secondary cy-drag_edit-btn" type="button"
+                                            t-on-click="()=>this.handleRibbon(ribbon.arrayIndex)">
+                                        <i t-att-class="state.selectedIndex === ribbon.arrayIndex ? 'ri-checkbox-fill text-primary' : 'ri-checkbox-blank-fill cy-studio-icon'"/>
+                                    </button>
+                                    <div class="w-100 cy-draginput--box p-1">
+                                        <span class="cy-content-text">
+                                            <t t-esc="ribbon.firstElementContent"/>
+                                        </span>
+                                    </div>
+                                    <t t-if="ribbon.hasDelete">
+                                        <div class="text-danger border border-secondary p-1 fw-bolder">
+                                            Deleted
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <button class="cy-drag_edit-btn cy-drag_save"
+                                                t-on-click="()=> this.handleEdit(ribbon)">
+                                            <i class="ri-edit-2-fill cy-studio-icon"/>
+                                        </button>
+                                        <button class="cy-drag_edit-btn cy-drag_delete"
+                                                t-on-click="()=>this.handleDelete(ribbon.arrayIndex)">
+                                            <i class="ri-delete-bin-6-fill cy-studio-icon" style="color:red;"/>
+                                        </button>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                        <!-- demo code  need to delete  -->
+                        <div t-else="">
+                            <t t-set="ribbon" t-value="state.ribbons[state.selectedIndex]"/>
+                            <div class="mb-2">
+                                <label for="" class="cy-navbar_label">Label</label>
+                                <input class="form-control" name="label"
+                                       t-on-input="({target})=> this.onChangeText(target.value)"
+                                       t-att-value="ribbon.firstElementContent" placeholder="Enter a label"/>
+                            </div>
+                            <div class="mb-2 position-relative">
+                                <label for="" class="cy-navbar_label">Color</label>
+                                <div class="cy-kanban-ribbon-dialog cy-input cursor-pointer"
+                                     t-on-click="()=> state.showDropdown = !state.showDropdown">
+                                    <div class="d-flex justify-content-between align-items-center p-1">
+                                        <div class=" " style="color: #525960;">
+                                            <span t-esc="colors[ribbon.color]"/>
+                                        </div>
+                                        <div>
+                                            <div style="width:20px; height:20px;" t-att-class="ribbon.color"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div t-if="state.showDropdown" class="position-absolute w-100 cy-kandan-dialog-dropdown"
+                                     style="z-index: 10; background-color: #ffffff;color: #4a5158;border: 1px solid #e2e2e2;
+                                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)">
+                                    <t t-foreach="Object.keys(colors)" t-as="color" t-key="color">
+                                        <div class="p-1 cursor-pointer opacity-75-hover"
+                                             t-on-click="()=> this.handleSelectColor(color)">
+                                            <div class="d-flex justify-content-between align-items-center p-2">
+                                                <div>
+                                                    <span t-esc="colors[color]"/>
+                                                </div>
+                                                <div>
+                                                    <div style="width:20px; height:20px;" t-att-class="color"/>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                            <div class="checkbox-can-create pt-2 d-flex">
+                                <input class="inp-can_create_label d-none  ViewCheck" type="checkbox" name="invisible"
+                                       id="ribbon_invisible"
+                                       t-on-click="onDomainRadioClick"
+                                       t-att-checked="!['0', 'false', 'False', null].includes(ribbon.invisible)"/>
+                                <label class="can_create_label customCheckbox-label" for="ribbon_invisible">
+                                    <span>
+                                        <svg width="12px" height="9px" viewbox="0 0 12 9">
+                                            <polyline points="1 5 4 8 11 1"/>
+                                        </svg>
+                                    </span>
+                                    <span>Invisible</span>
+                                </label>
+
+                                <button class="cy-basedOn ms-2" data-attribute="invisible" t-on-click="onDomainClick">
+                                    <span>Based on</span>
+                                    <span class="cy-setting-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                            <path fill="none" d="M0 0h24v24H0z"/>
+                                            <path d="M2.13127 13.6308C1.9492 12.5349 1.95521 11.434 2.13216 10.3695C3.23337 10.3963 4.22374 9.86798 4.60865 8.93871C4.99357 8.00944 4.66685 6.93557 3.86926 6.17581C4.49685 5.29798 5.27105 4.51528 6.17471 3.86911C6.9345 4.66716 8.0087 4.99416 8.93822 4.60914C9.86774 4.22412 10.3961 3.23332 10.369 2.13176C11.4649 1.94969 12.5658 1.9557 13.6303 2.13265C13.6036 3.23385 14.1319 4.22422 15.0612 4.60914C15.9904 4.99406 17.0643 4.66733 17.8241 3.86975C18.7019 4.49734 19.4846 5.27153 20.1308 6.1752C19.3327 6.93499 19.0057 8.00919 19.3907 8.93871C19.7757 9.86823 20.7665 10.3966 21.8681 10.3695C22.0502 11.4654 22.0442 12.5663 21.8672 13.6308C20.766 13.6041 19.7756 14.1324 19.3907 15.0616C19.0058 15.9909 19.3325 17.0648 20.1301 17.8245C19.5025 18.7024 18.7283 19.4851 17.8247 20.1312C17.0649 19.3332 15.9907 19.0062 15.0612 19.3912C14.1316 19.7762 13.6033 20.767 13.6303 21.8686C12.5344 22.0507 11.4335 22.0447 10.3691 21.8677C10.3958 20.7665 9.86749 19.7761 8.93822 19.3912C8.00895 19.0063 6.93508 19.333 6.17532 20.1306C5.29749 19.503 4.51479 18.7288 3.86862 17.8252C4.66667 17.0654 4.99367 15.9912 4.60865 15.0616C4.22363 14.1321 3.23284 13.6038 2.13127 13.6308ZM11.9997 15.0002C13.6565 15.0002 14.9997 13.657 14.9997 12.0002C14.9997 10.3433 13.6565 9.00018 11.9997 9.00018C10.3428 9.00018 8.99969 10.3433 8.99969 12.0002C8.99969 13.657 10.3428 15.0002 11.9997 15.0002Z">
+                                            </path>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Preview -->
+                <div class="vr"/>
+                <div class="cy-field__box border-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="ri-gallery-fill cy-content-header-icon"/>
+                        <h3 class="cy-content_header">Preview</h3>
+                    </div>
+                    <div class="m-3 w-100 d-flex">
+                        <div class="card-box">
+                            <!-- Card Content -->
+                            <div class="card-content position-relative p-3 border rounded shadow-sm"
+                                 style="width: 300px;">
+                                <!-- Ribbon in top-right -->
+                                <div class="ribbon ribbon-top-right" style="margin-top: -16px">
+                                    <span t-ref="PreviewRef">Preview</span>
+                                </div>
+                                <div class="fw-bold fs-5 mb-3 border p-3"></div>
+                                <div class="fw-bold fs-5 mb-1 border p-5"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button t-if="state.hasEdit" class="btn btn-primary mt-3" t-on-click="handleDone">Done</button>
+                <t t-else="">
+                    <button class="btn btn-primary" t-on-click="handelSave">Save</button>
+                    <button class="btn btn-secondary" t-on-click="handelDiscard">Discard</button>
+                </t>
+            </t>
+        </Dialog>
+    </t>
+</templates>

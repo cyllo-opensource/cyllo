@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Tree view of the asset item model-->
+    <record id="view_asset_item_tree" model="ir.ui.view">
+        <field name="name">view.asset.item.tree</field>
+        <field name="model">asset.item</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="depreciation_method"/>
+                <field name="method_duration"/>
+                <field name="duration_period"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Form view of the asset item model-->
+    <record id="view_asset_item_form" model="ir.ui.view">
+        <field name="name">view.asset.item.form</field>
+        <field name="model">asset.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" name="asset__item_name" string="Asset Model Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Laptop Book"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="brand_id"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="vendor_id"/>
+                        </group>
+                        <notebook>
+                            <page name="depreciation_accounting"
+                                  string="Depreciation and Accounting">
+                                <group>
+                                    <group string="DEPRECIATION">
+                                        <field name="depreciation_method"/>
+                                        <field name="is_auto_calculate"
+                                               invisible="depreciation_method == 'straight_line'"/>
+                                        <field name="depreciating_factor" widget="percentage"
+                                               invisible="depreciation_method == 'straight_line' or is_auto_calculate != False"
+                                               readonly="is_auto_calculate"/>
+                                        <label for="method_duration" name="method_duration"
+                                               string="Duration"/>
+                                        <div class="o_row">
+                                            <field name="method_duration"
+                                                   style="width:25% !important;"/>
+                                            <field name="duration_period" nolabel="1"/>
+                                        </div>
+                                        <field name="computation_method"/>
+                                        <field name="prorata_date"
+                                               required="computation_method != 'no_prorata'"
+                                               invisible="computation_method == 'no_prorata'"/>
+                                    </group>
+                                    <group string="ACCOUNTING">
+                                        <field name="asset_journal_id"/>
+                                        <field name="fixed_asset_account_id"/>
+                                        <field name="asset_depreciation_account_id"/>
+                                        <field name="asset_expense_account_id"/>
+                                        <field name="asset_loss_account_id"/>
+                                    </group>
+                                    <group string="MAINTENANCE">
+                                        <field name="automatic_maintenance"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page name="quality_check" string="Quality Check">
+                                <group>
+                                    <field name="is_quality"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </group>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="message_ids"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--   Action for the asset item model-->
+    <record id="action_view_asset_items" model="ir.actions.act_window">
+        <field name="name">Asset Items</field>
+        <field name="res_model">asset.item</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!--    Menuitem for the asset on configuration-->
+    <menuitem id="menu_asset_categ"
+              name="Configuration"
+              parent="cyllo_asset_management.menu_assets_categ"
+              groups="cyllo_asset_management.group_cyllo_asset_admin"
+              sequence="30"/>
+
+    <!--    Menuitem for the asset item-->
+    <menuitem id="menu_asset_items"
+              name="Asset Items"
+              parent="cyllo_asset_management.menu_asset_categ"
+              action="action_view_asset_items"
+              sequence="20"/>
+</odoo>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<t t-name="cyllo_studio.Form.StudioOuterGroup" t-inherit="web.Form.OuterGroup">
+		<div class="o_group row align-items-start" position="attributes">
+			<attribute name="class" add="ps-3" separator=" "/>
+            <attribute name="t-ref">cy-OuterRoot</attribute>
+            <attribute name="t-att-cy-xpath">props['cy-xpath']</attribute>
+		</div>
+	</t>
+    <t t-name="cyllo_studio.Form.StudioInnerGroup" t-inherit="web.Form.InnerGroup">
+		<div class="o_inner_group grid" position="replace">
+			<div t-attf-class="{{ allClasses }}" t-on-mouseenter="ev => this.over(ev)"
+                 t-on-mouseleave="ev => this.overoff(ev)" t-att-cy-xpath="props['cy-xpath']"
+                 class="o_inner_group grid  dd-container cy-studio-inner position-relative"
+                 t-att-style="props.style ? props.style + 'min-height: 51px;padding-bottom: 30px;padding-top: 22px;':'min-height: 51px;padding-bottom: 30px;padding-top: 22px;' "
+                 t-ref="cy-root">
+				<div class="text-end cy_group_delete cy-inner-trash-container"
+                     t-att-class="state.hover ? 'opacity-100' : 'opacity-0'">
+					<i t-att-class="state.hover ? 'opacity-100' : 'opacity-0'" class="btn fa  fa-trash-o"
+                       style="font-size: 12px;padding: 7px;"
+                       t-on-click="(ev)=>this.itemOnDelete(ev)"/>
+				</div>
+                <div t-if="props.slots and props.slots.title" t-attf-class="g-col-sm-{{ props.maxCols }}">
+					<t t-slot="title"/>
+				</div>
+                <div t-foreach="getRows()" t-as="row" t-key="row_index" style="user-select: none"
+                     class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0 dd-box cy-container"
+                     t-if="row.isVisible">
+					<t t-foreach="row" t-as="cell" t-key="cell_index">
+						<t t-if="cell.subType === 'item_component'">
+							<t t-call="web.Form.InnerGroup.ItemComponent">
+								<t t-set="cell" t-value="cell"/></t>
+						</t>
+                        <t t-else="">
+							<div
+                                    class="o_cell flex-grow-1 flex-sm-grow-0 position-relative"
+                                    t-attf-style="{{ cell.itemSpan > 1 ? 'grid-column: span ' + cell.itemSpan + ';' : '' }}{{ cell.width ? 'width: ' + cell.width + '%' + ';' : '' }}"
+                                    t-attf-class="{{ cell.subType === 'label' ? 'o_wrap_label w-100 text-break text-900' : null }}"
+                                    t-att-class="cell.invisibleStriped ? 'cy-studio-striped' : (cell.subType === 'label' ? cell.striped : null)"
+                                    t-if="cell.isVisible">
+								<t t-slot="{{ cell.name }}"/>
+                                <div t-if="cell.subType != 'label' and cell['cy-xpath']"
+                                     class="position-absolute top-0 end-0 cy-studio-field-icons h-100 d-flex align-items-center">
+									<div class="cy-field-panel-menu" t-on-click="(ev) => this.handlePanelMenu(ev)">
+										<i class="ri-arrow-left-s-fill"/>
+									</div>
+                                    <div id="field-container" t-if="state.panelMenu">
+									<i class="fw-bold fst-normal" t-if="state.sibling">
+										<span id="newButtonLabel" class="cy-studio-icon mx-1 " data-bs-toggle="tooltip"
+                                              data-bs-placement="bottom"
+                                              title="As sibling"
+                                              t-on-click="(ev)=>this.addSibling(ev,cell)">Sibling
+            		</span>
+									</i>
+                                        <i class="ri-add-circle-line ri-lg cy-studio-icon mx-1 position-relative "
+                                           t-on-click.stop="onAddClick"
+                                           data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                           title="Add field or button"/>
+                                        <i class="ri-delete-bin-7-line ri-lg cy-studio-icon mx-1 position-relative"
+                                           data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                           t-on-click="deleteElement"
+                                           title="Delete entire element"/>
+				</div>
+								</div>
+							</div>
+						</t>
+					</t>
+				</div>
+			</div>
+		</div>
+	</t>
+    <t t-name="web.Form.InnerGroup.ItemComponent" t-inherit="web.Form.InnerGroup.ItemComponent"
+       t-inherit-mode="extension">
+		<xpath expr="//div[hasclass('o_wrap_label')]" position="attributes">
+			<attribute name="t-att-cy-xpath">cell['cy-xpath']</attribute>
+            <attribute name="t-att-class">cell.props.fieldInfo.striped || (cell.invisibleStriped ? 'cy-studio-striped ' : '')</attribute>
+		</xpath>
+        <xpath expr="//div[hasclass('o_wrap_input')]" position="attributes">
+			<attribute name="t-att-cy-xpath">cell['cy-xpath']</attribute>
+            <attribute name="class" add="position-relative" separator=" "/>
+            <attribute name="t-att-class">cell.props.fieldInfo.striped || (cell.invisibleStriped ? 'cy-studio-striped ' : '')</attribute>
+		</xpath>
+        <xpath expr="//div[hasclass('o_wrap_input')]" position="inside">
+			<div class="position-absolute top-0 end-0 cy-studio-field-icons h-100 d-flex align-items-center">
+				<div class="cy-field-panel-menu" t-on-click="(ev) => this.handlePanelMenu(ev)">
+				<i class="ri-arrow-left-s-fill"/>
+				</div>
+
+                <div id="field-container" t-if="state.panelMenu">
+				<i class="fw-bold fst-normal" t-if="state.sibling">
+
+					<span class="cy-studio-icon mx-1 " data-bs-toggle="tooltip" data-bs-placement="bottom"
+                          title="As sibling"
+                          t-on-click="(ev)=>this.addSibling(ev,cell)">Sibling
+            </span>
+				</i>
+                    <i class="ri-add-circle-line ri-lg cy-studio-icon mx-1 position-relative "
+                       t-on-click.stop="onAddClick"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add field or button"/>
+                    <i class="ri-delete-bin-7-line ri-lg cy-studio-icon mx-1 position-relative "
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" t-on-click="deleteElement"
+                       title="Delete entire element"/>
+				</div>
+			</div>
+		</xpath>
+        <xpath expr="//div[hasclass('o_wrap_field_boolean')]" position="attributes">
+			<attribute name="t-att-cy-xpath">cell['cy-xpath']</attribute>
+		</xpath>
+        <xpath expr="//div[hasclass('o_wrap_field_boolean')]//div[hasclass('o_wrap_label')]" position="attributes">
+			<attribute name="t-att-class">cell.props.fieldInfo.striped || (cell.invisibleStriped ? 'cy-studio-striped' : '')</attribute>
+		</xpath>
+        <xpath expr="//div[hasclass('o_wrap_field_boolean')]//div[hasclass('o_wrap_input')]" position="attributes">
+			<attribute name="class" add="position-relative" separator=" "/>
+            <attribute name="t-att-class">cell.props.fieldInfo.striped || (cell.invisibleStriped ? 'cy-studio-striped' : '')</attribute>
+		</xpath>
+        <xpath expr="//div[hasclass('o_wrap_field_boolean')]//div[hasclass('o_wrap_input')]" position="inside">
+			<div class="position-absolute top-0 end-0 cy-studio-field-icons h-100 d-flex align-items-center">
+				<div class="cy-field-panel-menu" t-on-click="(ev) => this.handlePanelMenu(ev)">
+				<i class="ri-arrow-left-s-fill"/>
+				</div>
+                <div id="field-container" t-if="state.panelMenu">
+				<i class="fw-bold fst-normal" t-if="state.sibling">
+
+                    <span class="cy-studio-icon mx-1 " data-bs-toggle="tooltip" data-bs-placement="bottom"
+                          title="As sibling"
+                          t-on-click="(ev)=>this.addSibling(ev,cell)">Sibling
+            </span>
+				</i>
+                    <i class="ri-add-circle-line ri-lg cy-studio-icon mx-1 position-relative "
+                       t-on-click.stop="onAddClick"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add field or button"/>
+                    <i class="ri-delete-bin-7-line ri-lg cy-studio-icon mx-1 position-relative "
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" t-on-click="deleteElement"
+                       title="Delete entire element"/>
+			</div>
+			</div>
+		</xpath>
+	</t>
+</templates>

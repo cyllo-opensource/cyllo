@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_bank_statement_line_reconcile" model="ir.ui.view">
+        <field name="name">view.account.bank.statement.line.reconcile</field>
+        <field name="model">account.bank.statement.line</field>
+        <field name="arch" type="xml">
+            <reconcile string="Reconciliation">
+                <field name="payment_ref"/>
+                <field name="create_date"/>
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="partner_id"/>
+                <field name="tax_ids"/>
+                <field name="move_id"/>
+                <field name="id"/>
+                <field name="currency_id"/>
+                <field name="is_reconciled"/>
+                <field name="reconcile_data_json"/>
+                <field name="to_check"/>
+                <field name="account_id"/>
+                <field name="reconcile_session_data"/>
+                <field name="amount_currency"/>
+                <field name="amount_in_base"/>
+                <field name="currency_rate"/>
+                <field name="foreign_currency_id"/>
+                <field name="foreign_currency_rate"/>
+            </reconcile>
+        </field>
+    </record>
+
+    <record id="view_account_bank_statement_line_tree" model="ir.ui.view">
+        <field name="name">view.account.bank.statement.line.tree</field>
+        <field name="model">account.bank.statement.line</field>
+        <field name="arch" type="xml">
+            <tree editable="top" multi_edit="1" js_class="bank_rec_list"
+                  decoration-muted="state == 'draft'"
+                  default_order="internal_index desc">
+                <field name="currency_id" column_invisible="True"/>
+                <field name="company_id" column_invisible="True"/>
+                <field name="date" readonly="is_reconciled and amount != 0"/>
+                <field name="move_id" optional="hidden" required="0"/>
+                <field name="state" column_invisible="True"/>
+                <field name="statement_complete" column_invisible="True"/>
+                <field name="statement_valid" column_invisible="True"/>
+                <field name="is_reconciled" column_invisible="True"/>
+                <field name="payment_ref" required="1" readonly="is_reconciled and amount != 0"/>
+                <field name="partner_id" readonly="is_reconciled and amount != 0"/>
+                <field name="account_number" optional="hidden"/>
+                <field name="narration" string="Notes" readonly="is_reconciled and amount != 0"
+                       optional="hidden"/>
+                <field name="ref" readonly="is_reconciled and amount != 0" optional="hidden"/>
+                <field name="transaction_type" optional="hidden"/>
+                <field name="foreign_currency_id" optional="hidden"
+                       groups="base.group_multi_currency"
+                       domain="[('id', '!=', currency_id)]"
+                       options="{'no_open': True, 'no_create': True}"
+                       readonly="is_reconciled and amount != 0"/>
+                <field name="amount_currency" optional="hidden" groups="base.group_multi_currency"
+                       invisible="not foreign_currency_id"
+                       readonly="is_reconciled and amount != 0"/>
+                <field name="amount" readonly="is_reconciled and amount != 0"/>
+                <field name="journal_id" domain="[('type', 'in', ['bank','cash'])]"
+                       column_invisible="bool(context.get('default_journal_id'))"
+                       readonly="(statement_id or is_reconciled) and amount != 0"/>
+                <field name="running_balance" class="oe_read_only"/>
+                <field name="statement_id" optional="show" options="{'no_quick_create': True}"
+                       domain="['|',('journal_id', '=', journal_id),('journal_id', '=', False)]"
+                       context="{'default_journal_id':journal_id, 'st_line_id':id,}"
+                       decoration-danger="statement_complete == False or statement_valid == False"
+                       readonly="not id"/>
+                <field name="id" invisible="not id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_view_reconciliation" model="ir.actions.act_window">
+        <field name="name">Reconciliation</field>
+        <field name="res_model">account.bank.statement.line</field>
+        <field name="view_mode">reconcile,tree</field>
+        <field name="context">
+            {
+                'search_default_not_matched': 1,
+                'search_default_journal_id': [active_id]
+            }
+        </field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new bank statement...
+            </p>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_account_bank_statement_line_search">
+        <field name="name">view.account.bank.statement.line.search</field>
+        <field name="model">account.bank.statement.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="payment_ref"/>
+                <field name="amount"/>
+                <filter name="not_matched" string="Not Matched"
+                        domain="[('is_reconciled', '=', False)]"/>
+                <field name="journal_id" string="journal" invisible="1"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

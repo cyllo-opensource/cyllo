@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Mail template of the mail to send when workers are assigned -->
+    <record id="mail_template_field_service_request" model="mail.template">
+        <field name="name">Field Service Request</field>
+        <field name="model_id" ref="cyllo_field_service.model_field_service_request"/>
+        <field name="subject">Assigned to {{ object.name }}</field>
+        <field name="body_html" type="html">
+            <table border="0" cellpadding="0" cellspacing="0"
+                   style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748;border-collapse:separate;">
+                <tr>
+                    <td align="center">
+                        <table border="0" cellpadding="0" cellspacing="0" width="590"
+                               style="padding: 16px; background-color: white; color: #454748; border-collapse:separate;  margin-bottom: 20px;">
+                            <tbody>
+                                <!-- CONTENT -->
+                                <tr>
+                                    <td align="center"
+                                        style="min-width: 590px;">
+                                        <table border="0" cellpadding="0"
+                                               cellspacing="0" width="590"
+                                               style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                            <tr>
+                                                <td valign="top"
+                                                    style="font-size: 13px;">
+                                                    <div>
+                                                        Dear
+                                                        <t t-out="ctx.get('name')"/>
+                                                        ,
+                                                        <br/>
+                                                        <br/>
+                                                        Your have been assigned to service request
+                                                        <span>
+                                                            <t t-out="object.name"/>
+                                                        </span>
+                                                        <br/>
+                                                        <br/>
+                                                        Request No :
+                                                        <span>
+                                                            <t t-out="object.name"/>
+                                                        </span>
+                                                        <br/>
+                                                        <br/>
+                                                        Priority:
+                                                        <span>
+                                                            <t t-out="dict(object._fields['priority'].selection).get(object.priority)"/>
+                                                        </span>
+                                                        <br/>
+                                                        <br/>
+                                                        Category :
+                                                        <span>
+                                                            <t t-out="object.skill_category_id.name"/>
+                                                        </span>
+                                                        <br/>
+                                                        <br/>
+                                                        <span t-if="object.description">Description : <t t-out="object.description"/></span>
+                                                        <div style="margin: 16px 0px 16px 0px; text-align: center;">
+                                                            <a t-att-href='object.get_portal_url()'
+                                                               style="display: inline-block; padding: 10px; text-decoration: none; font-size: 12px; background-color: #875A7B; color: #fff; border-radius: 5px;">
+                                                                <strong>
+                                                                    View Request
+                                                                </strong>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </field>
+        <field name="report_template_ids"
+               eval="[(4, ref('cyllo_field_service.report_field_service_form_print_pdf'))]"/>
+        <field name="lang">{{ object.partner_id.lang }}</field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+    <!-- Mail template of the mail to send deadline reminder -->
+    <record id="mail_template_field_service_request_deadline" model="mail.template">
+        <field name="name">Field Service Request Deadline</field>
+        <field name="model_id" ref="cyllo_field_service.model_field_service_request"/>
+        <field name="subject">Reminder: Service Request Deadline Approaching</field>
+        <field name="body_html" type="html">
+            <table border="0" cellpadding="0" cellspacing="0"
+                   style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748;border-collapse:separate;">
+                <tr>
+                    <td align="center">
+                        <table border="0" cellpadding="0" cellspacing="0" width="590"
+                               style="padding: 16px; background-color: white; color: #454748; border-collapse:separate;  margin-bottom: 20px;">
+                            <tbody>
+                                <!-- CONTENT -->
+                                <tr>
+                                    <td align="center"
+                                        style="min-width: 590px;">
+                                        <table border="0" cellpadding="0"
+                                               cellspacing="0" width="590"
+                                               style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                            <tr>
+                                                <td valign="top"
+                                                    style="font-size: 13px;">
+                                                    <div>
+                                                        Dear
+                                                        <t t-out="ctx.get('name')"/>
+                                                        ,
+                                                        <br/>
+                                                        <br/>
+                                                        This is a friendly reminder that your service request (Reference: <t t-out="object.name"/>) is nearing its deadline. The service is scheduled to be completed by <t t-out="object.date_deadline.date()"/>,
+                                                        Please ensure that all necessary preparations are in place to facilitate a smooth and timely resolution.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </field>
+    </record>
+
+    <record id="mail_template_field_service_request_creation" model="mail.template">
+        <field name="name">Field Service Request Notification</field>
+        <field name="model_id" ref="cyllo_field_service.model_field_service_request"/>
+        <field name="subject">Reception of Field Service Request</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="body_html" type="html">
+            <p>Dear <t t-out="object.partner_id.name or 'Customer'"/>
+            </p>
+            <p>Thank you for contacting us. We appreciate your interest in our products/services.
+                Our team is currently reviewing your inquiry and will respond to your email as soon as possible.
+                If you have any further questions or concerns in the meantime, please do not hesitate to let us know. We are here to help.
+                </p>
+            <p>Thank you for your patience.</p>
+            <p>Best regards.</p>
+        </field>
+    </record>
+
+</odoo>

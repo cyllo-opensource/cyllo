@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_audit_log_tree" model="ir.ui.view">
+        <field name="name">audit.log.tree</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" sample="1">
+                <field name="create_date" widget="datetime"
+                       string="Date"
+                       optional="show"
+                       decoration-info="log_level == 'info'"
+                       decoration-warning="log_level == 'warning'"
+                       decoration-danger="log_level == 'critical'"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="model_id" optional="show"/>
+                <field name="record_name" string="Record" class="fw-bold"/>
+                <field name="operation" widget="badge" 
+                       decoration-success="operation == 'create'"
+                       decoration-info="operation == 'write'" 
+                       decoration-muted="operation == 'read'"
+                       decoration-danger="operation == 'unlink'"
+                       string="Action"/>
+                <field name="field_name" optional="hide"/>
+                <field name="log_level" widget="badge" 
+                       decoration-info="log_level == 'info'"
+                       decoration-warning="log_level == 'warning'" 
+                       decoration-danger="log_level == 'critical'"
+                       optional="hide"/>
+                <field name="ip_address" optional="hide"/>
+                <field name="session_id" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Session Tree View -->
+    <record id="view_audit_session_tree" model="ir.ui.view">
+        <field name="name">audit.session.tree</field>
+        <field name="model">audit.session</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="is_active"
+                  decoration-muted="not is_active" create="false" edit="false" sample="1">
+                <field name="login_time" string="Start"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="name" string="Session ID" optional="hide"/>
+                <field name="ip_address"/>
+                <field name="log_count" string="Logs Captured" sum="Total Logs"/>
+                <field name="is_active" widget="boolean_toggle" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Session Kanban View -->
+    <record id="view_audit_session_kanban" model="ir.ui.view">
+        <field name="name">audit.session.kanban</field>
+        <field name="model">audit.session</field>
+        <field name="arch" type="xml">
+            <kanban create="false" sample="1">
+                <field name="id"/>
+                <field name="user_id"/>
+                <field name="login_time"/>
+                <field name="logout_time"/>
+                <field name="log_count"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click container">
+                            <div class="row">
+                                <div class="col-4">
+                                    <field name="user_id" widget="image" options="{'preview_image': 'avatar_128'}" class="oe_avatar"/>
+                                </div>
+                                <div class="col-8">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="user_id"/>
+                                    </strong>
+                                    <div class="text-muted">
+                                        <field name="ip_address"/>
+                                    </div>
+                                    <div class="o_kanban_record_bottom mt-2">
+                                        <div class="oe_kanban_bottom_left">
+                                            <span class="badge rounded-pill text-bg-info">
+                                                <t t-esc="record.log_count.value"/> Logs
+                                            </span>
+                                        </div>
+                                        <div class="oe_kanban_bottom_right">
+                                            <field name="logout_time" widget="remaining_days"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Session Form View -->
+    <record id="view_audit_session_form" model="ir.ui.view">
+        <field name="name">audit.session.form</field>
+        <field name="model">audit.session</field>
+        <field name="arch" type="xml">
+            <form string="Audit Session" class="o_audit_session_form" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="login_time"/>
+                            <field name="logout_time"/>
+                            <field name="is_active" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="ip_address"/>
+                            <field name="user_agent"/>
+                            <field name="log_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="logs" string="Audit Logs">
+                            <field name="log_ids" readonly="1">
+                                <tree>
+                                    <field name="create_date" string="Date"/>
+                                    <field name="record_name" string="Resource Name"/>
+                                    <field name="model_id" string="Model"/>
+                                    <field name="operation" string="Action"/>
+                                    <field name="user_id" string="User" widget="many2one_avatar_user"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action must be defined before view that uses it in context/buttons -->
+    <record id="action_audit_log" model="ir.actions.act_window">
+        <field name="name">Audit Logs</field>
+        <field name="res_model">audit.log</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No audit logs yet.
+            </p>
+            <p>
+                Audit logs will appear here when you create audit rules
+                and perform operations on tracked models.
+            </p>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_audit_log_form" model="ir.ui.view">
+        <field name="name">audit.log.form</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <form string="Audit Log" class="o_audit_log_form" create="false" edit="false">
+                <header>
+                    <field name="log_level" widget="statusbar" statusbar_visible="info,warning,critical" invisible="1"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_audit_log)d" type="action" class="oe_stat_button" icon="fa-history" context="{'search_default_res_id': res_id, 'search_default_model_id': model_id}">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Record History</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Critical" bg_color="text-bg-danger" invisible="log_level != 'critical'"/>
+                    <widget name="web_ribbon" title="Warning" bg_color="text-bg-warning" invisible="log_level != 'warning'"/>
+                    
+                    <div class="oe_title">
+                        <label for="record_name" string="Audited Record"/>
+                        <h1>
+                            <field name="record_name" placeholder="N/A"/>
+                        </h1>
+                        <div class="d-flex gap-2">
+                            <field name="operation" widget="badge" decoration-success="operation == 'create'"
+                                   decoration-info="operation == 'write'" decoration-danger="operation == 'unlink'"/>
+                            <span class="text-muted">|</span>
+                            <field name="create_date" widget="datetime"/>
+                        </div>
+                    </div>
+                    
+                    <group>
+                        <group name="info" string="Execution Context">
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="ip_address"/>
+                            <field name="session_id" context="{'form_view_ref': 'cyllo_auditlog.view_audit_session_form'}"/>
+                            <field name="http_request_id" context="{'form_view_ref': 'cyllo_auditlog.view_auditlog_http_request_form'}"/>
+                        </group>
+                        <group name="model" string="Model Metadata">
+                            <field name="model_id" options="{'no_open': True}"/>
+                            <field name="res_id"/>
+                            <field name="model" groups="base.group_no_one"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page name="changes" string="Modifications" invisible="operation == 'create' and not line_ids">
+                            <div class="alert alert-info mt-3" role="alert" invisible="not field_name or line_ids">
+                                <i class="fa fa-info-circle me-2"/> Primary change detected in field: <field name="field_name" class="fw-bold"/>.
+                            </div>
+                            
+                            <group invisible="not field_name or line_ids">
+                                <field name="old_value" widget="pre" class="text-danger bg-light p-2 border rounded" string="Before"/>
+                                <field name="new_value" widget="pre" class="text-success bg-light p-2 border rounded" string="After"/>
+                            </group>
+                            
+                            <field name="line_ids" readonly="1" invisible="not line_ids">
+                                <tree limit="10">
+                                    <field name="field_label" class="fw-bold"/>
+                                    <field name="old_value" class="text-danger" decoration-danger="1"/>
+                                    <field name="new_value" class="text-success" decoration-success="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_audit_log_graph" model="ir.ui.view">
+        <field name="name">audit.log.graph</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <graph type="bar">
+                <field name="create_date" type="row" interval="day"/>
+                <field name="operation" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_audit_log_pivot" model="ir.ui.view">
+        <field name="name">audit.log.pivot</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="create_date" type="row" interval="month"/>
+                <field name="model_id" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_audit_log_search" model="ir.ui.view">
+        <field name="name">audit.log.search</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <field name="model_id"/>
+                <field name="rule_id"/>
+                <field name="record_name"/>
+                <field name="ip_address"/>
+
+                <filter name="filter_today" string="Today" date="create_date" default_period="today"/>
+                <filter name="filter_this_week" string="This Week" date="create_date" default_period="this_week"/>
+                <filter name="filter_this_month" string="This Month" date="create_date" default_period="this_month"/>
+
+                <separator/>
+                <filter name="filter_create" string="Create" domain="[('operation', '=', 'create')]"/>
+                <filter name="filter_write" string="Update" domain="[('operation', '=', 'write')]"/>
+                <filter name="filter_read" string="Read" domain="[('operation', '=', 'read')]"/>
+                <filter name="filter_unlink" string="Delete" domain="[('operation', '=', 'unlink')]"/>
+                <separator/>
+                <filter name="filter_info" string="Info" domain="[('log_level', '=', 'info')]"/>
+                <filter name="filter_warning" string="Warning" domain="[('log_level', '=', 'warning')]"/>
+                <filter name="filter_critical" string="Critical" domain="[('log_level', '=', 'critical')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_model" string="Model" context="{'group_by': 'model_id'}"/>
+                    <filter name="group_operation" string="Operation" context="{'group_by': 'operation'}"/>
+                    <filter name="group_level" string="Log Level" context="{'group_by': 'log_level'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'create_date:day'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Audit Session Action -->
+    <record id="action_audit_session" model="ir.actions.act_window">
+        <field name="name">User Sessions</field>
+        <field name="res_model">audit.session</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('user_id.share', '=', False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No user sessions recorded yet.
+            </p>
+        </field>
+    </record>
+
+
+    <!-- Report Action -->
+    <record id="action_audit_report" model="ir.actions.act_window">
+        <field name="name">Log Report</field>
+        <field name="res_model">audit.log</field>
+        <field name="view_mode">graph,pivot</field>
+        <field name="help" type="html">
+            <p>
+                Log statistics and analysis.
+            </p>
+        </field>
+    </record>
+</odoo>

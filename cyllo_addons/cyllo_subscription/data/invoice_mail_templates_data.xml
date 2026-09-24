@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo noupdate="1">
+    <record id="mail_template_invoice_for_subscription" model="mail.template">
+        <field name="name">Invoice for Subscription</field>
+        <field name="model_id" ref="model_account_move"/>
+        <field name="email_to">{{object.partner_id.email}}</field>
+        <field name="subject">Invoice for the subscription of {{object.invoice_line_ids.product_id.name}}</field>
+        <field name="body_html" type="html">
+            <div id="invoice_html" style="margin: 0px; padding: 0px;">
+                <div id="wrapwrap" style="align-items:center;justify-content: center;border: 2px solid; border-color:#9ea700; padding:0.6rem;padding-left: 35px;text-decoration: none; border-radius: 5px; font-size:13px;width:40%">
+                    <h2>
+                        Hi,
+                        <t t-out="object.partner_id.name"/>
+                    </h2>
+                    <div>
+                        <h3>
+                            Thank you so much for choosing our subscription
+                            service!
+                            We are truly grateful for your trust and
+                            excited to provide
+                            you with exceptional value. Your decision means
+                            a lot to us,
+                            and we look forward to exceeding your
+                            expectations!
+                        </h3>
+                    </div>
+                    <div>
+                        <h3>
+                            Find your Invoice for the subscription of
+                            <t t-out="object.invoice_line_ids.product_id.name"/>
+                        </h3>
+                    </div>
+                </div>
+                <br/>
+                <div style="display: flex;justify-content: center;align-items:center; background-color: #9ea700; padding:0.6rem;padding-left: 15px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:7%">
+                    <a t-attf-href="/my/invoices/{{object.id}}" style="text-decoration:none;color:#fff;">
+                        Invoice
+                    </a>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>

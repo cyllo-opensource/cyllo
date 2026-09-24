@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Appointment Pro Security Groups -->
+    <record id="module_category_appointment" model="ir.module.category">
+        <field name="name">Appointment</field>
+        <field name="description">Manage appointments, resources, and staff</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <!-- User Group -->
+    <record id="group_appointment_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="module_category_appointment"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('sales_team.group_sale_salesman_all_leads'))]"/>
+    </record>
+
+    <!-- Manager Group -->
+    <record id="group_appointment_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="module_category_appointment"/>
+        <field name="implied_ids" eval="[(4, ref('group_appointment_user')),(4, ref('sales_team.group_sale_salesman_all_leads'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- Portal Record Rules -->
+    <record id="appointment_appointment_portal_rule" model="ir.rule">
+        <field name="name">Appointments: Portal users see their own appointments</field>
+        <field name="model_id" ref="cyllo_appointment.model_appointment_appointment"/>
+        <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+
+    <!-- Multi-company Rules -->
+    <record id="appointment_appointment_comp_rule" model="ir.rule">
+        <field name="name">Appointment multi-company</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="appointment_type_comp_rule" model="ir.rule">
+        <field name="name">Appointment Type multi-company</field>
+        <field name="model_id" ref="model_appointment_type"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="appointment_resource_comp_rule" model="ir.rule">
+        <field name="name">Appointment Resource multi-company</field>
+        <field name="model_id" ref="model_appointment_resource"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="appointment_slot_comp_rule" model="ir.rule">
+        <field name="name">Appointment Slot multi-company</field>
+        <field name="model_id" ref="model_appointment_slot"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!-- Appointment User: Edit only own appointments -->
+    <record id="appointment_user_edit_own_rule" model="ir.rule">
+        <field name="name">Appointment User - Edit Own</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="groups" eval="[(4, ref('group_appointment_user'))]"/>
+        <field name="domain_force">['|',('create_uid', '=', user.id),('staff_id.user_id','=', user.id)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Appointment Manager: Edit ALL appointments -->
+    <record id="appointment_manager_edit_all_rule" model="ir.rule">
+        <field name="name">Appointment Manager - Edit All</field>
+        <field name="model_id" ref="model_appointment_appointment"/>
+        <field name="groups" eval="[(4, ref('group_appointment_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+</odoo>

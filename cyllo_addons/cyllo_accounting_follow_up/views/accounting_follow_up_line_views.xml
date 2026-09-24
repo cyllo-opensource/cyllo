@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_accounting_followup_line_tree" model="ir.ui.view">
+        <field name="name">view.accounting.followup.line.tree</field>
+        <field name="model">accounting.followup.line</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="title"/>
+                <field name="due_date"/>
+                <field name="send_mail"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_accounting_followup_line_form" model="ir.ui.view">
+        <field name="name">view.accounting.followup.line.form</field>
+        <field name="model">accounting.followup.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="title"/>
+                        <h1>
+                            <field name="title"
+                                   placeholder="e.g. 1 Week Follow Up Email"/>
+                        </h1>
+                    </div>
+                    <div class="oe_inline">
+                        Remainder Days
+                        <field name="due_date"/>
+                        <label for="due_date" string=""/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="send_mail"/>
+                            <field name="mail_template_id"
+                                   invisible="not send_mail"/>
+                        </group>
+                        <group>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_view_accounting_followup_line"
+            model="ir.actions.act_window">
+        <field name="name">Follow Ups</field>
+        <field name="res_model">accounting.followup.line</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                No Follow Ups Found
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_accounting_followup_line" name="Follow-Up Levels"
+              action="action_view_accounting_followup_line"
+              parent="account.account_management_menu"/>
+</odoo>

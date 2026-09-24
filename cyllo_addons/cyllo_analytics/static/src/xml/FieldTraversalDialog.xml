@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="FieldTraversalDialog" owl="1">
+        <Dialog size="'md'" title="props.title">
+            <t t-set-slot="header">
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <button t-if="state.stack.length &gt; 1" t-on-click="onBack" type="button" class="btn btn-sm btn-secondary">
+                            <i class="ri-arrow-left-line"/>
+                        </button>
+                        <div>
+                            <h4 class="mb-0">Select Field from Related Model</h4>
+                            <small class="text-muted" t-esc="pathLabel"/>
+                        </div>
+                    </div>
+                    <button t-on-click="props.close" type="button" class="btn-close" aria-label="Close"/>
+                </div>
+            </t>
+            
+            <div class="p-3">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="ri-search-line"/></span>
+                    <input type="text" class="form-control" placeholder="Search fields..." t-model="state.search"/>
+                </div>
+                
+                <div class="field-selection-list" style="max-height: 400px; overflow-y: auto;">
+                    <div t-foreach="filteredFields" t-as="field" t-key="field.name"
+                         t-on-click="() => this.onSelect(field)"
+                         class="field-item p-2 border-bottom d-flex align-items-center justify-content-between cursor-pointer"
+                         t-att-class="state.selectedField and state.selectedField.name === field.name ? 'cy-field-selected' : 'hover-bg-light'">
+                        <div class="flex-grow-1">
+                            <span class="fw-bold" t-esc="field.label"/>
+                            <small class="ms-2 opacity-75" t-esc="'(' + field.name + ')'"/>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-pill bg-secondary text-white" t-esc="field.type" style="font-size: 10px;"/>
+                            <button t-if="field.is_relational" t-on-click.stop="() => this.onNavigate(field)" class="btn btn-sm btn-outline-secondary cy-traversal-nav-btn" title="Traverse to related model">
+                                <i class="ri-arrow-right-line" style="pointer-events: none;"/>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="confirm" t-att-disabled="!state.selectedField">
+                    Confirm Selection
+                </button>
+                <button class="btn btn-secondary" t-on-click="props.close">
+                    Cancel
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

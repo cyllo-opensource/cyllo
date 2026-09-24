@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data noupdate="1">
+<!--Subscription Report Email Template-->
+        <record id="crm_subscription_report_email_template" model="mail.template">
+            <field name="name">CRM Subscription Report</field>
+            <field name="model_id" ref="cyllo_crm.model_crm_subscription_report"/>
+            <field name="subject">{{ object.frequency.title()}} Subscription Report : {{ object.name.title()}}</field>
+            <field name="email_from">{{ object.company_id.email}}</field>
+            <field name="email_to">{{ object.user_id.partner_id.email }}</field>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Hi <t t-esc="object.user_id.name"/>,</p>
+
+                    <p>
+                        Your scheduled subscription report
+                        <strong>"<t t-esc="object.name.title()"/>"</strong>has been generated.
+                    </p>
+
+                    <p>
+                        <strong>Report Frequency:</strong>
+                        <t t-esc="object.frequency.title()"/>
+                        <br/>
+                    </p>
+
+                    <p>
+                        Please find the report attached with this email.
+                    </p>
+
+                    <p style="margin-top: 20px;">
+                        Best regards,
+                        <br/>
+                        <strong>
+                            <t t-esc="object.company_id.name"/>
+                        </strong>
+                    </p>
+                </div>
+            </field>
+        </record>
+<!--Advance Followup Email Template-->
+        <record id="email_template_activity_assigned" model="mail.template">
+            <field name="name">CRM Lead Activity Assignment</field>
+            <field name="email_from">{{ object.company_id.email }}</field>
+            <field name="email_to">{{ ctx.get('email_to') }}</field>
+            <field name="subject">{{ ctx.get('activity_name') }} Activity Assigned on Lead {{ ctx.get('lead_name') }}</field>
+            <field name="model_id" ref="model_crm_stage_activity"/>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;">
+                    <div style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px;">
+                        <h2 style="color: #007bff; margin: 0;">Activity Assigned on Lead</h2>
+                    </div>
+
+                    <p>Dear <strong><t t-out="ctx.get('user_name')"/></strong>,</p>
+
+                    <p>An activity has been assigned to you on the lead <strong>"<t t-out="ctx.get('lead_name')"/>"</strong> (Stage: <t t-out="ctx.get('stage_name')"/>).</p>
+
+                    <div style="background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0;"><strong>Activity:</strong> <t t-out="ctx.get('activity_name')"/></p>
+                        <p style="margin: 5px 0 0 0;"><strong>Due Date:</strong> <t t-out="ctx.get('due_date')"/></p>
+                    </div>
+
+                    <p>Kindly ensure this activity is completed by the due date to maintain workflow efficiency.</p>
+
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                        <p style="margin: 0;">Best regards,</p>
+                        <p style="margin: 5px 0 0 0;"><strong>CRM Team</strong></p>
+                        <t t-if="object.company_id.name">
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+                                <t t-out="object.company_id.name"/>
+                            </p>
+                        </t>
+                    </div>
+                </div>
+            </field>
+        </record>
+<!--Deal Reminder Mail Template-->
+        <record id="deal_reminder" model="mail.template">
+           <field name="name">Deal Reminder</field>
+           <field name="model_id" ref="cyllo_crm.model_crm_lead"/>
+           <field name="subject">{{ object.name }}</field>
+           <field name="email_from">{{ object.company_id.email }}</field>
+           <field name="email_to">{{ object.user_id.email }}</field>
+           <field name="description">Add Description</field>
+           <field name="body_html" type="html">
+               <div>
+                   <p>
+                       Hello
+                       <t t-out="object.user_id.name"/>,
+                       <br/>
+                       <br/>
+                       The lead "<t t-out="object.name"/>" assigned to you has been idle for a while.
+                   <br/>
+                        🔹 Lead Name: <t t-out="object.name"/>
+                       <br/>
+                        🔹 Customer:  <t t-out="object.partner_id.name"/>
+                       <br/>
+                        🔹 Last Activity: <t t-out="object.last_stage_update_date"/>
+                       <br/>
+                        🔹 Days Since Last Update: <t t-out="object.lead_idle_days"/>
+                       <br/>
+                       <br/>
+
+Please take the necessary action to follow up. If this lead is no longer relevant, consider updating its status.
+                       <br/>
+                       <br/>
+                       <br/>
+                       <br/>
+                       Thanks and regards
+                   </p>
+               </div>
+           </field>
+       </record>
+    </data>
+</odoo>

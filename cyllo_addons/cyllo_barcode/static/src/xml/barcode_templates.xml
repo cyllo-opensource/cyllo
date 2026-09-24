@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <!--    templates for the Barcode views-->
+    <t t-name="cyllo_barcode.Barcode" owl="1">
+        <div class="o_cyllo_barcode_main" t-ref="BarcodeRoot">
+            <div class="container-fluid barcode_board">
+                <div class="row cyllo-barcode_section">
+                    <div class="barcode-header-container is-small">
+                                <t t-call="web.NavBar.AppsMenu">
+                                    <t t-set="apps" t-value="menuService.getApps()"/>
+                                </t>
+                        <div class="cyllo-barcode--header ms-1">Barcode Scanner</div>
+                        </div>
+                    <div class="cyllo-barcode--container">
+                        <div class="barcode-header-container">
+                            <div class="cyllo-barcode--header ms-1">Barcode Scanner</div>
+                        </div>
+                        <div>
+                        <div class="cyllo-barcode__scanner-section">
+                            <div class="barcode-reader">
+                                <img src="/cyllo_barcode/static/src/img/ReadBarcode.gif"
+                                     t-on-click="_onClickScanProduct" alt=""/>
+                                <span class="info-text"><i class="fa fa-camera" />
+                                    Click here to open camera</span>
+                            </div>
+                            <ul class="barcode-point__list">
+                                <li class="cy-barcode-point--list_item">Scan an <b>operation</b> type
+                                    to create a new
+                                    transfer.</li>
+                                <li class="cy-barcode-point--list_item">Scan a <b>location</b> to
+                                    create a new transfer
+                                    from this location.</li>
+                                <li class="cy-barcode-point--list_item">Scan a <b>product</b> to
+                                    show its location and
+                                    quantity.</li>
+                                <li class="cy-barcode-point--list_item">Scan a <b>document</b> to
+                                    open it.</li>
+                            </ul>
+
+                        </div>
+                            </div>
+                        <t t-if="isSmall">
+                            <div class="mt-3"/>
+                            <t t-call="cyllo_barcode.operation_button"/>
+                            <t t-call="cyllo_barcode.move_operations_small"/>
+                        </t>
+                        <t t-else="">
+                            <t t-call="cyllo_barcode.move_operations"/>
+                            <t t-call="cyllo_barcode.operation_button"/>
+                        </t>
+
+                    </div>
+                </div>
+                <div id="BarcodeMainModal" class="barcode-modal">
+                    <!-- Modal content -->
+                    <div class="barcode-modal-content">
+                        <div class="cyllo-barcode--header">Operation</div>
+                        <i class="ri-close-line barcode-close"
+                           t-on-click="() => this.root.el.querySelector('#BarcodeMainModal').style.display = 'none'"/>
+                        <div class="cy-barcode_option--container operation_modal">
+                            <t t-foreach="state.types" t-as="type" t-key="type.id">
+                                <div class="cy-barcode_option--box">
+                                    <h3 class="cybarcode_option-head" t-esc="type.name"/>
+                                    <div class="cy-barcode_state-container">
+                                        <div class="d-flex-mobile-view">
+                                            <div class="cy-barcode__state">
+                                                <span class="">Draft</span>
+                                                <span class="cy-barcode__state-count cy-barcode__draft"
+                                                      t-esc="type.PickingDraft"/>
+                                            </div>
+                                            <div class="cy-barcode__state">
+                                                <span>Ready</span>
+                                                <span class="cy-barcode__state-count cy-barcode__ready"
+                                                      t-esc="type.PickingReady"/>
+                                            </div>
+                                            <div class="cy-barcode__state">
+                                                <span>Done</span>
+                                                <span class="cy-barcode__state-count cy-barcode__done"
+                                                      t-esc="type.PickingDone"/>
+                                            </div>
+                                        </div>
+                                        <button class="cy-barcode__btn "
+                                                t-on-click="(ev) => this._onClickOperation(type.id, type.name)">
+                                            <t t-esc="type.name"/>
+                                            <i class="ri-arrow-right-s-line"/>
+                                        </button>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="cyllo_barcode.move_operations_small">
+         <div class="cy-barcode_option--container" style="min-height:240px !important;">
+            <t t-if="availableOperations.length > 0">
+                <t t-foreach="availableOperations" t-as="type" t-key="type.id">
+                    <div class="cy-barcode_option--box">
+                        <h3 class="cybarcode_option-head" t-esc="type.name"/>
+                        <div class="cy-barcode_state-container">
+                            <div class="d-flex-mobile-view">
+                                <div class="cy-barcode__state">
+                                    <span class="">Draft</span>
+                                    <span class="cy-barcode__state-count cy-barcode__draft" t-esc="type.PickingDraft"/>
+                                </div>
+                                <div class="cy-barcode__state">
+                                    <span>Ready</span>
+                                    <span class="cy-barcode__state-count cy-barcode__ready" t-esc="type.PickingReady"/>
+                                </div>
+                                <div class="cy-barcode__state">
+                                    <span>Done</span>
+                                    <span class="cy-barcode__state-count cy-barcode__done" t-esc="type.PickingDone"/>
+                                </div>
+                            </div>
+                            <button class="cy-barcode__btn"
+                                    t-on-click="(ev) => this._onClickOperation(type.id, type.name)">
+                                View
+                                <t t-esc="type.name"/>
+                                <i class="ri-arrow-right-s-line"/>
+                            </button>
+                        </div>
+                    </div>
+                </t>
+            </t>
+             <t t-else="">
+                <div class="cy-barcode_option_skeleton cy-barcode_option--box"/>
+                 <div class="cy-barcode_option_skeleton cy-barcode_option--box"/>
+                 <div class="cy-barcode_option_skeleton cy-barcode_option--box"/>
+                 <div class="cy-barcode_option_skeleton cy-barcode_option--box"/>
+            </t>
+        </div>
+        <div class="cy-barcode-view-more" t-if="hasShowMore">
+            <button class="cy-barcode-viemore-btn" t-on-click="handleShowMore"><i class="fa fa-chevron-circle-down" />
+                More operations</button>
+        </div>
+
+    </t>
+    <t t-name="cyllo_barcode.move_operations">
+        <div class="cy-barcode_option--container" style="min-height:240px !important;">
+            <t t-set="i" t-value="0"/>
+            <t t-if="state.types.length > 0">
+                <t t-foreach="state.types" t-as="type" t-key="type.id">
+                    <t t-if="i lt 4">
+                        <div class="cy-barcode_option--box">
+                            <h3 class="cybarcode_option-head" t-esc="type.name"/>
+                            <div class="cy-barcode_state-container">
+                                <div class="d-flex-mobile-view">
+                                    <div class="cy-barcode__state">
+                                        <span class="">Draft</span>
+                                        <span class="cy-barcode__state-count cy-barcode__draft"
+                                              t-esc="type.PickingDraft"/>
+                                    </div>
+                                    <div class="cy-barcode__state">
+                                        <span>Ready</span>
+                                        <span class="cy-barcode__state-count cy-barcode__ready"
+                                              t-esc="type.PickingReady"/>
+                                    </div>
+                                    <div class="cy-barcode__state">
+                                        <span>Done</span>
+                                        <span class="cy-barcode__state-count cy-barcode__done"
+                                              t-esc="type.PickingDone"/>
+                                    </div>
+                                </div>
+                                <button class="cy-barcode__btn"
+                                        t-on-click="(ev) => this._onClickOperation(type.id, type.name)">
+                                    View
+                                    <t t-esc="type.name"/>
+                                    <i class="ri-arrow-right-s-line"/>
+                                </button>
+                            </div>
+                        </div>
+                        <t t-set="i" t-value="i + 1"/>
+                    </t>
+                </t>
+            </t>
+            <t t-else="">
+                <div class="cy-barcode_option_skeleton cy-barcode_option--box"/>
+                <div class="cy-barcode_option_skeleton cy-barcode_option--box"/>
+                <div class="cy-barcode_option_skeleton cy-barcode_option--box"/>
+                <div class="cy-barcode_option_skeleton cy-barcode_option--box"/>
+            </t>
+        </div>
+        <div class="cy-barcode-view-more" t-if="hasShowMore">
+            <button class="cy-barcode-viemore-btn" t-on-click="handleShowMore"><i class="fa fa-chevron-circle-down" />
+                More operations</button>
+        </div>
+    </t>
+    <t t-name="cyllo_barcode.operation_button">
+        <div class="d-flex">
+            <button type="button" class="btn btn-secondary w-50 col-md-4 mr-3 main-barcode-button"
+                    t-on-click="_onClickOpenInventoryAdjustment">Inventory Adjustment</button>
+            <button type="button" class="btn btn-secondary w-50 main-barcode-button" t-on-click="_onClickOpenBatch">Batch Transfer</button>
+        </div>
+    </t>
+</templates>

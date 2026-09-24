@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="email_template_sign_request" model="mail.template">
+            <field name="name">Sign Request Email</field>
+            <field name="model_id" ref="model_sign_request"/>
+            <field name="subject">{{ object.custom_subject or 'Sign Request: ' + object.name }}</field>
+            <field name="body_html" type="html">
+                <table border="0" cellpadding="0" cellspacing="0"
+                       style="padding-top: 16px; background-color: #9ea700; font-family:Verdana, Arial,sans-serif; color: #454748;border-collapse:separate;">
+                    <tr>
+                        <td align="center">
+                            <table border="0" cellpadding="0" cellspacing="0"
+                                   width="590"
+                                   style="padding: 16px; background-color: white; color: #454748; border-collapse:separate; margin-bottom: 20px;">
+                                <tbody>
+                                    <!-- CONTENT-->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width: 590px;">
+                                            <table border="0" cellpadding="0"
+                                                   cellspacing="0" width="590"
+                                                   style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                                                <tr>
+                                                    <td valign="top"
+                                                        style="font-size: 13px;">
+
+                                                        <p>Dear <t
+                                                                t-esc="ctx.get('name')"/>
+                                                            ,
+                                                        </p>
+                                                        <t t-if="ctx.get('custom_message')">
+                                                            <div t-raw="ctx.get('custom_message')"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <p>You are requested
+                                                                to sign the
+                                                                document:
+                                                                <strong>
+                                                                    <t t-esc="object.name"/>
+                                                                </strong>
+                                                                .
+                                                            </p>
+                                                            <p>Please click the
+                                                                button below to
+                                                                review and sign:
+                                                            </p>
+                                                        </t>
+                                                        <a t-att-href="object.get_sign_url(ctx.get('signer_id'), ctx.get('role').id)"
+                                                           style="display: inline-block; padding: 5px; font-size: 10px; margin: 10px;
+                                                            color: #ffffff; background-color: #9ea700; text-decoration: none;
+                                                            border-radius: 5px;">
+                                                            Sign Document
+                                                        </a>
+                                                        <span>
+                                                            <div style="opacity: 0.7;">
+                                                                <strong>
+                                                                    Warning
+                                                                </strong>
+                                                                do not forward
+                                                                this email to
+                                                                other people!
+                                                                <br/>
+                                                                They will be
+                                                                able to access
+                                                                this document
+                                                                and
+                                                                sign it as
+                                                                yourself.
+                                                                <br/>
+                                                            </div>
+                                                        </span>
+                                                        <p>Thank you,</p>
+                                                        <p>
+                                                            <t t-esc="object.user_id.name"/>
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </field>
+        </record>
+    </data>
+</odoo>

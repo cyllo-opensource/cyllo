@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="LoopNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="loop-node">
+
+                <!-- ── Label ────────────────────────────────────────────────── -->
+                <div class="mb-3">
+                    <label for="labelInput" class="form-label mb-1 fw-semibold">Loop Label</label>
+                    <input
+                        style="border-radius:0px !important;"
+                        type="text"
+                        t-ref="labelInput"
+                        class="o_input"
+                        autocomplete="off"
+                        placeholder="e.g. Loop over order lines"
+                        t-att-value="fieldState.label or ''"
+                        t-on-input="(ev) => this.setLabel(ev.target.value)"
+                    />
+                    <div t-if="loopState.labelError" class="text-danger small mt-1">
+                        Label is required.
+                    </div>
+                </div>
+
+                <!-- ── How to explain the loop ──────────────────────────────── -->
+                <div class="alert alert-info small py-2 mb-3">
+                    <i class="ri-information-line me-1"/>
+                    The Loop node iterates over a <strong>One2Many / Many2Many field</strong>
+                    or a <strong>recordset variable</strong> from a Search node,
+                    executing the nodes connected below for <em>each</em> record in turn.
+                </div>
+
+                <!-- ── Source Type ──────────────────────────────────────────── -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Iterate over</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                id="loop_src_field"
+                                name="loop_source_type"
+                                value="field"
+                                t-att-checked="loopState.sourceType === 'field'"
+                                t-on-change="() => this.setSourceType('field')"
+                            />
+                            <label class="form-check-label" for="loop_src_field">
+                                Record Field <small class="text-muted">(e.g. <code>order_line</code>)</small>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                id="loop_src_var"
+                                name="loop_source_type"
+                                value="variable"
+                                t-att-checked="loopState.sourceType === 'variable'"
+                                t-on-change="() => this.setSourceType('variable')"
+                            />
+                            <label class="form-check-label" for="loop_src_var">
+                                Variable <small class="text-muted">(from a Search node)</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Collection: Field Name ───────────────────────────────── -->
+                <t t-if="loopState.sourceType === 'field'">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Field Name</label>
+                        <input
+                            type="text"
+                            class="o_input"
+                            style="border-radius:0px !important;"
+                            autocomplete="off"
+                            placeholder="e.g. order_line, invoice_line_ids"
+                            t-att-value="loopState.collection"
+                            t-on-input="(ev) => this.setCollection(ev.target.value)"
+                        />
+                        <div class="form-text text-muted">
+                            Enter the technical name of the One2Many or Many2Many field on <code>current_record</code>.
+                        </div>
+                        <div t-if="loopState.collectionError" class="text-danger small mt-1">
+                            Field name is required.
+                        </div>
+                        <!-- Field suggestions -->
+                        <t t-if="loopState.loadingFields">
+                            <div class="text-muted small mt-2">
+                                <i class="ri-loader-2-line me-1"/>Loading available fields…
+                            </div>
+                        </t>
+                        <t t-elif="loopState.relationalFields.length > 0">
+                            <div class="mt-2">
+                                <span class="text-muted small fw-semibold me-1">Suggestions:</span>
+                                <t t-foreach="loopState.relationalFields" t-as="rf" t-key="rf.name">
+                                    <button
+                                        type="button"
+                                        t-att-class="'btn btn-sm me-1 mb-1 px-2 py-0 ' + (loopState.collection === rf.name ? 'btn-primary' : 'btn-outline-secondary')"
+                                        t-att-title="rf.field_description + ' (' + rf.ttype + ' → ' + rf.relation + ')'"
+                                        t-on-click="() => this.selectFieldSuggestion(rf.name)"
+                                    >
+                                        <t t-esc="rf.name"/>
+                                    </button>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- ── Collection: Variable Dropdown ────────────────────────── -->
+                <t t-else="">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Variable</label>
+                        <t t-if="recordsetVariables.length === 0">
+                            <div class="alert alert-warning small py-2">
+                                No recordset variables found. Add a <strong>Search</strong> node first and configure it.
+                            </div>
+                        </t>
+                        <select
+                            t-else=""
+                            class="form-select"
+                            t-on-change="(ev) => this.setCollection(ev.target.value)"
+                        >
+                            <option value="">— select a variable —</option>
+                            <t t-foreach="recordsetVariables" t-as="rv" t-key="rv.id">
+                                <option
+                                    t-att-value="rv.id"
+                                    t-att-selected="loopState.collection === rv.id"
+                                >
+                                    <t t-esc="rv.variable_name"/>
+                                    <t t-if="rv.modelName"> (<t t-esc="rv.modelName"/>)</t>
+                                </option>
+                            </t>
+                        </select>
+                        <div t-if="loopState.collectionError" class="text-danger small mt-1">
+                            Please select a variable.
+                        </div>
+                    </div>
+                </t>
+
+                <!-- ── Loop Variable Name ───────────────────────────────────── -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Loop Variable Name</label>
+                    <input
+                        type="text"
+                        class="o_input"
+                        style="border-radius:0px !important;"
+                        autocomplete="off"
+                        placeholder="e.g. current_line"
+                        t-att-value="loopState.loopVariableName"
+                        t-on-input="(ev) => this.setLoopVariableName(ev.target.value)"
+                        t-ref="loopVarInput"
+                    />
+                    <div class="form-text text-muted">
+                        This name will represent each item inside the loop body.
+                        Use it in connected Mail / Write nodes, e.g. <code>current_line.product_id.name</code>.
+                    </div>
+                    <div t-if="loopState.varNameError" class="text-danger small mt-1">
+                        A valid Python identifier is required (letters, numbers, underscores; start with letter/underscore).
+                    </div>
+                    <!-- Variable name suggestions -->
+                    <t t-if="loopVariableSuggestions.length > 0">
+                        <div class="mt-2">
+                            <span class="text-muted small fw-semibold me-1">Suggestions:</span>
+                            <t t-foreach="loopVariableSuggestions" t-as="s" t-key="s">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary me-1 mb-1 px-2 py-0"
+                                    t-on-click="() => this.selectVariableSuggestion(s)"
+                                >
+                                    <t t-esc="s"/>
+                                </button>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- ── Live Code Preview ────────────────────────────────────── -->
+                <t t-if="loopState.loopVariableName and loopState.collection">
+                    <div class="mb-3 p-2 bg-dark text-light rounded small font-monospace">
+                        <div class="text-success fw-semibold mb-1">Generated code preview:</div>
+                        <div>
+                            <span class="text-warning">for </span>
+                            <t t-esc="loopState.loopVariableName"/>
+                            <span class="text-warning"> in </span>
+                            <t t-esc="collectionExpression"/>
+                            <span class="text-warning">:</span>
+                        </div>
+                        <div class="ms-4 text-muted">    # nodes connected below run here</div>
+                    </div>
+                </t>
+
+                <!-- ── Port Guide ───────────────────────────────────────────── -->
+                <div class="mt-1 mb-2 small text-muted border-top pt-2">
+                    <strong>Connection guide:</strong><br/>
+                    <span class="badge bg-success me-1">output 1</span> → Connect one or more nodes to run for each record in the loop
+                </div>
+
+            </div>
+        </xpath>
+    </t>
+</templates>

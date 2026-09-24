@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+    <!--  Add new language switching option in systray -->
+    <t t-name="cyllo_whatsapp.WhatsappIcon" owl="1">
+        <!--Current user's language displayed in systray -->
+        <Dropdown position="'bottom-end'">
+            <t t-set-slot="toggler">
+                <div data-tooltip="Whatsapp" class="cy-systray-parent-class">
+                    <div>
+                        <i class="ri-whatsapp-line cy-icons cy-stray-icon-sp" role="img" aria-label="Messages"/>
+                        <span t-if="this.state.counter" class="o-mail-MessagingMenu-counter badge badge-clock">
+                            <t t-esc="this.state.counter"/>
+                        </span>
+                    </div>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Whatsapp
+                    </span>
+                </div>
+            </t>
+            <t t-set-slot="default">
+                <div t-att-class="`${discussSystray.contentClass} o-mail-MessagingMenu`">
+                    <div class="o-mail-MessagingMenu-header d-flex"
+                         t-att-class="{'text-uppercase border-start-0 border-end-0': ui.isSmall, 'cy-view border-bottom': !ui.isSmall, 'd-flex flex-shrink-0': !env.inDiscussApp }">
+                        <t t-if="!ui.isSmall">
+                            <button class="btn btn-link py-2 rounded-0"
+                                    t-att-class="store.discuss.activeTab === 'chat' ? 'fw-bold' : 'text-muted'"
+                                    type="button" role="tab"
+                                    t-on-click="() => store.discuss.activeTab = 'chat'">
+                                Chats
+                            </button>
+                            <div class="flex-grow-1"/>
+                            <button t-if="!ui.isSmall or (ui.isSmall and store.discuss.activeTab !== 'channel' and !state.addingChat and !(env.inDiscussApp and store.discuss.activeTab === 'main'))"
+                                    t-att-class="ui.isSmall ? 'w-100 p-2 btn btn-secondary m-1' : 'btn btn-link p-2'"
+                                    t-on-click.stop="configureChats">
+                                <t t-if="ui.isSmall">Start a conversation</t>
+                                <t t-else="">New Message</t>
+                            </button>
+                        </t>
+                    </div>
+                    <div t-if="!env.inDiscussApp or store.discuss.activeTab !== 'main'"
+                         class="d-flex flex-column overflow-auto flex-grow-1 list-group-flush">
+                        <t t-foreach="this.state.channel" t-as="channel"
+                           t-key="channel.id">
+                            <button class="o-mail-NotificationItem list-group-item d-flex cursor-pointer align-items-center cy-view w-100 gap-2"
+                                    t-att-class="{ 'o-important': props.muted === 0, 'text-muted': props.muted === 1, 'opacity-50': props.muted === 2, 'border-start-0 border-end-0': ui.isSmall, 'border-top-0': props.first, 'p-2 pe-3': !ui.isSmall }"
+                                    t-on-click="() => this.getChannel(channel)">
+                                <div class="position-relative bg-inherit m-1 flex-shrink-0"
+                                     style="width:40px;height:40px;">
+                                    <img class="o_avatar w-100 h-100 rounded"
+                                         alt="Notification Item Image"
+                                         t-attf-src="/web/image/res.partner/{{channel.partner_id[0]}}/image_1920"/>
+                                    <t t-slot="icon"/>
+                                </div>
+                                <div class="d-flex flex-column flex-grow-1 align-self-start overflow-auto">
+                                    <div class="d-flex text-nowrap">
+                                        <span class="o-mail-NotificationItem-name text-truncate fw-bold"
+                                              t-esc="channel.name"/>
+                                    </div>
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1 text-start">
+                                            <span t-if="channel.last_messenger">
+                                                <t t-esc="channel.last_messenger"/>
+                                                :
+                                            </span>
+                                            <span t-if="channel.last_message"
+                                                  t-esc="channel.last_message"/>
+                                            <span t-else=""><i
+                                                    class="fa fa-paperclip btn border-0 rounded-pill"/>
+                                                Media
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <span t-if="channel.message_count != 0"
+                                                  t-attf-class="o-mail-NotificationItem-badge o-discuss-badge {{props.muted === 2 ? 'o-muted' : ''}} d-flex align-items-center justify-content-center m-0 badge rounded-pill fw-bold o-mail-NotificationItem-counter">
+                                                <t t-esc="channel.message_count "/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                        </t>
+                        <div class="d-flex justify-content-center py-4 px-2 text-muted"
+                             t-if="this.state.channel.length &lt;= 0">
+                            No conversation yet...
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </Dropdown>
+        <div t-ref="whatsapp_window"
+             class="o-mail-ChatWindow border border-bottom-0 position-fixed bottom-0 overflow-hidden d-flex flex-column rounded-top-3 d-none"
+             t-attf-style="position: absolute; right: 10px; bottom: 0px;max-width: 360px;top: 49vh;background: white;border: 1px solid black;min-height: 400px;">
+            <div class="o-mail-ChatWindow-header d-flex align-items-center flex-shrink-0 bg-100 cursor-pointer border-bottom">
+                <div class="text-truncate fw-bold border border-transparent me-1 my-0 ms-3"
+                     title="New message">
+                    New message
+                </div>
+                <div class="flex-grow-1"/>
+                <button class="o-mail-ChatWindow-command btn d-flex p-2 opacity-75 opacity-100-hover me-1"
+                        title="Close New Chat Window"
+                        t-on-click.stop="configureChats">
+                    <i class="fa fa-fw fa-close"/>
+                </button>
+            </div>
+            <div class="align-items-center m-3">
+                <div class="d-flex">
+                    <span class="flex-shrink-0 me-2">To :</span>
+                    <div class="o-discuss-ChannelSelector d-flex flex-wrap form-control rounded p-1">
+                        <input class="text-truncate form-control flex-grow-1 border-0 px-2 py-0"
+                               type="text" maxlength="100"
+                               placeholder="Start a conversation"
+                               data-hotkey="k" autofocus='true'
+                               t-on-focus="onKeyUpSearch"
+                               t-on-keyup="onKeyUpSearch" t-ref="searchBox"/>
+                    </div>
+                </div>
+                <div class="o-mail-NavigableList cy-view o-discuss-ChannelSelector-list z-index-1"
+                     style="padding-left: 2rem;">
+                    <div class="o-mail-NavigableList-item o-discuss-ChannelSelector-suggestion"
+                         t-foreach="this.state.partnerHistory" t-as="channel"
+                         t-key="channel.id"
+                         t-on-click="() => this.onSelectPartner(channel)">
+                        <a href="#"
+                           class="d-flex align-items-center w-100 py-2 px-4 o-mail-NavigableList-active bg-300">
+                            <div class="o-mail-ImStatus d-flex justify-content-center flex-shrink-0 align-items-center rounded-circle bg-inherit"
+                                 style=""/>
+                            <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate">
+                                <span class="o-mail-NotificationItem-name text-truncate fw-bold"
+                                      t-esc="channel.name"/>
+                            </strong>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <!-- Dropdown list of available active languages, user can switch language -->
+    <t t-name="bg_language_switch.SwitchLanguageItem" owl="1">
+        <DropdownItem class="'p-0 bg-white'">
+            <t t-set="isCurrentLang" t-value="lang.code == userLang"/>
+            <div class="d-flex" data-menu="lang" t-att-data-lang-id="lang.id"
+                 style="padding:0.4rem 0.8rem;">
+                <div role="button"
+                     t-att-aria-pressed="isCurrentLang ? 'true' : 'false'"
+                     t-att-aria-label="'Switch to ' + lang.name "
+                     t-att-title="'Switch to ' + lang.name " tabindex="0"
+                     class="toggle_company"
+                     t-attf-class="{{isCurrentLang ? 'border-primary' : ''}}"
+                     t-on-click="() => this.switchLanguage(lang)">
+                    <div>
+                        <t t-if="lang.flag_image">
+                            <img t-attf-src="data:image/png;base64,{{lang.flag_image}}"
+                                 style="width :25px; height: 20px;"
+                                 t-att-alt="language"/>
+                        </t>
+                        <span class="lang_label ps-2">
+                            <t t-esc="lang.name"/>
+                        </span>
+                    </div>
+                </div>
+                <br/>
+            </div>
+        </DropdownItem>
+    </t>
+    <t t-inherit="mail.ChatWindowContainer" t-inherit-mode="extension">
+        <xpath expr="//t[@t-foreach='chatWindowService.visible']" position="replace">
+        <t t-foreach="chatWindowService.visible" t-as="chatWindow" t-key="chatWindow.thread?.localId">
+            <ChatWindow chatWindow="chatWindow" right="CHAT_WINDOW_END_GAP_WIDTH + (chatWindow_index+this.chatWindowService.whatsapp) * (CHAT_WINDOW_WIDTH + CHAT_WINDOW_INBETWEEN_WIDTH * 2)"/>
+        </t>
+        </xpath>
+    </t>
+</templates>

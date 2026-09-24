@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Tree view of the asset lease model-->
+    <record id="view_asset_lease_tree" model="ir.ui.view">
+        <field name="name">view.asset.lease.tree</field>
+        <field name="model">asset.lease</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="asset_id"/>
+                <field name="customer_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Search view of the asset lease model-->
+    <record id="view_asset_lease_search" model="ir.ui.view">
+        <field name="name">view.asset.lease.search</field>
+        <field name="model">asset.lease</field>
+        <field name="arch" type="xml">
+            <search string="Leased Asset">
+                <field name="asset_id"/>
+                <field name="customer_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Asset" name="asset_item" domain="[]" context="{'group_by':'asset_id'}"/>
+                    <filter string="Customer" name="customer" domain="[]" context="{'group_by':'customer_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--    Wizard view of the asset lease model-->
+    <record id="view_asset_lease_form2" model="ir.ui.view">
+        <field name="name">view.asset.lease.form2</field>
+        <field name="model">asset.lease</field>
+        <field name="arch" type="xml">
+            <form string="Lease">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id" invisible="1"/>
+                            <field name="customer_id"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="lease_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"/>
+                            <field name="end_date" invisible="1"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button type="object" name="action_create_lease" string="Create Lease" class="oe_highlight"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Form view of the asset lease model-->
+    <record id="view_asset_lease_form" model="ir.ui.view">
+        <field name="name">view.asset.lease.form</field>
+        <field name="model">asset.lease</field>
+        <field name="arch" type="xml">
+            <form string="Lease">
+                <header>
+                    <button type="object" name="action_create_lease" string="Create Lease" class="oe_highlight"
+                            invisible="status != 'draft'"/>
+                    <button type="object" name="action_return_asset" string="Return Asset" class="oe_highlight"
+                            invisible="status != 'lease'"/>
+                    <button type="object" name="action_reset_to_draft" string="Reset to Draft" class="btn-secondary"
+                            invisible="status != 'cancel'"
+                            groups="cyllo_asset_management.group_cyllo_asset_admin"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,lease"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoice" type="object"
+                            class="oe_stat_button" icon="fa-pencil-square-o" invisible="is_invoice != True">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Invoice</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="alert alert-warning" invisible="not availability_warning">
+                        <field name="availability_warning" readonly="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="asset_ids" invisible="True"/>
+                            <field name="asset_id" domain="[('is_confirm', '=', True),('is_assign', '=', False),
+                                  ('status','not in', ['sell', 'disposed', 'cancel']), ('is_lease_asset', '=', True)]"/>
+                            <field name="customer_id" readonly="status != 'draft'"/>
+                            <field name="email" readonly="status != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="lease_amount" widget="monetary" options="{'currency_field': 'currency_id'}"
+                                   readonly="status != 'draft'"/>
+                            <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"
+                                   readonly="status != 'draft' or not asset_id"/>
+                            <field name="company_id" readonly="status != 'draft'"/>
+                            <field name="end_date" invisible="1"/>
+                            <field name="is_invoice" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--    parent menuitem for asset operations-->
+    <menuitem id="menu_operations" name="Operations"
+              parent="cyllo_asset_management.menu_assets_categ"
+              sequence="9"
+              groups="cyllo_asset_management.group_cyllo_asset_admin,cyllo_asset_management.group_cyllo_asset_users"/>
+
+    <!--   Action for the asset lease model-->
+    <record id="action_view_lease" model="ir.actions.act_window">
+        <field name="name">Lease</field>
+        <field name="res_model">asset.lease</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!--    Menuitem for asset lease -->
+    <menuitem id="menu_lease" name="Lease"
+              parent="cyllo_asset_management.menu_operations"
+              action="action_view_lease"
+              sequence="10"/>
+</odoo>

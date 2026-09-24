@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Deferred Revenue: Form view -->
+    <record id="view_account_asset_asset_deferred_revenue_form" model="ir.ui.view">
+        <field name="name">view.account.asset.asset.deferred.revenue.form</field>
+        <field name="model">account.asset.asset</field>
+        <field name="arch" type="xml">
+            <form string="Deferred Revenues">
+                <header>
+                    <button name="action_confirm" invisible="state != 'draft'" string="Confirm"
+                            type="object" class="oe_highlight"/>
+                    <button name="%(cyllo_accounting.action_view_account_asset_modify)d" string="Modify Revenue"
+                            type="action" invisible="state != 'running'" class="oe_highlight"/>
+                    <button name="action_running" string="Set to Running" type="object" invisible="state != 'close'"/>
+                    <button name="action_compute" invisible="state != 'draft'" string="Compute"
+                            type="object" data-hotkey="e"/>
+                    <button name="action_save_template" invisible="state not in ['running','close']"
+                            string="Save Template" type="object"/>
+                    <button name="action_close" invisible="state != 'running'" string="Close" type="object"/>
+                    <field name="state" statusbar_visible="draft,running" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_get_entries"
+                                class="oe_stat_button" icon="fa-book" invisible="entries_count == 0">
+                            <field name="entries_count" string="Journal Entries" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name">Deferred revenue name</label>
+                        <h1>
+                            <field name="name" string="Deferred revenue name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="asset_type_id" string="Deferred revenue type"
+                                   readonly="state != 'draft'"
+                                   domain="[('type', '=', 'revenue')]"
+                                   context="{'default_type': 'revenue', 'form_view_ref': 'cyllo_accounting.view_account_asset_type_deferred_revenue_form'}"
+                                   />
+                            <field name="asset_type" invisible="1"/>
+                            <field name="total_value" invisible="1"/>
+                            <field name="journal_id" readonly="state != 'draft'"/>
+                            <field name="account_id" string="Deferred Revenue Account"
+                                   help="Account for deferred revenue" readonly="state != 'draft'"
+                                   domain="[('account_type', '=', 'liability_current')]"/>
+                            <field name="expense_account_id" string="Revenue Account"
+                                   help="Account for recognizing the revenue" readonly="state != 'draft'"
+                                   domain="[('account_type', 'in', ('income', 'income_other'))]"/>
+                            <field name="computation_method" readonly="state != 'draft'"/>
+                            <field name="prorata_date" invisible="computation_method == 'no_prorata'"
+                                   required="computation_method != 'no_prorata'"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="entries_count" invisible="1"/>
+                            <field name="first_recognition_date" readonly="state != 'draft'"/>
+                            <field name="original_value" readonly="state != 'draft'"/>
+                            <field name="not_depreciable_value" readonly="state != 'draft'"/>
+                            <field name="gross_value" invisible="gross_value == 0" readonly="state != 'draft'"/>
+                            <field name="total_modify_value" string="Total Amount"/>
+                            <field name="residual_value" invisible="1"/>
+                            <field name="book_value" string="Deferred revenue amount"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="number_of_entries" readonly="state != 'draft'"/>
+                            <field name="period" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Revenue Board" name="revenue_board" invisible="not depreciation_move_ids" autofocus="autofocus">
+                            <field name="depreciation_move_ids">
+                                <tree decoration-info="state == 'draft'" create="0"  default_order="asset_date asc, id asc" editable="top">
+                                    <field name="asset_date" string="Revenue Date"/>
+                                    <field name="state" column_invisible="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                    <field name="asset_amount" string="Revenue"/>
+                                    <field name="asset_residual_amount" string="Recognized revenue"/>
+                                    <field name="total_residual" string="Residual"/>
+                                    <field name="name" string="Journal Entry"/>
+                                    <field name="asset_days" column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Related Sales" name="related_revenues">
+                            <field name="invoice_line_ids" readonly="state in ('posted', 'close')"
+                                   domain="[('parent_state', '=', 'posted'), ('debit', '=', '0'),
+                                            ('company_id', '=', company_id),
+                                            ('account_id.account_type', '=', 'liability_current')]"
+                                   context="{'disable_preview': 1, 'tree_view_ref': 'account_asset.view_move_line_tree_asset'}">
+                                <tree create="0">
+                                    <field name="date"/>
+                                    <field name="account_id"/>
+                                    <field name="name"/>
+                                    <field name="debit" widget="monetary"/>
+                                    <field name="credit" widget="monetary"/>
+                                    <field name="company_currency_id" column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Deferred Revenue: Tree view -->
+    <record id="view_account_asset_asset_deferred_revenue_tree" model="ir.ui.view">
+        <field name="name">view.account.asset.asset.deferred.revenue.tree</field>
+        <field name="model">account.asset.asset</field>
+        <field name="arch" type="xml">
+            <tree string="Deferred Revenues">
+                <field name="name" string="Deferred revenue"/>
+                <field name="date"/>
+                <field name="company_id"/>
+                <field name="residual_value" column_invisible="1"/>
+                <field name="book_value"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Deferred Revenue: Search view -->
+    <record id="view_account_asset_asset_deferred_revenue_search" model="ir.ui.view">
+        <field name="name">view.account.asset.asset.deferred.revenue.search</field>
+        <field name="model">account.asset.asset</field>
+        <field name="arch" type="xml">
+            <search string="Deferred Revenues">
+                <field name="name"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Deferred Revenue Type" name="asset_type_id" context="{'group_by':'asset_type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Deferred Revenue: Window action -->
+    <record id="action_view_deferred_revenues" model="ir.actions.act_window">
+        <field name="name">Deferred Revenues</field>
+        <field name="res_model">account.asset.asset</field>
+        <field name="search_view_id" ref="view_account_asset_asset_deferred_revenue_search"/>
+        <field name="domain">[('asset_type', '=', 'revenue')]</field>
+        <field name="context">{'asset_type': 'revenue', 'default_asset_type': 'revenue'}</field>
+        <field name="view_ids" eval="[Command.clear(),
+            Command.create({'view_mode': 'tree', 'view_id': ref('view_account_asset_asset_deferred_revenue_tree')}),
+            Command.create({'view_mode': 'form', 'view_id': ref('view_account_asset_asset_deferred_revenue_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new deferred revenue
+            </p>
+        </field>
+    </record>
+
+    <!-- Deferred Expense: Form view -->
+    <record id="view_account_asset_asset_deferred_expense_form" model="ir.ui.view">
+        <field name="name">view.account.asset.asset.deferred.expense.form</field>
+        <field name="model">account.asset.asset</field>
+        <field name="arch" type="xml">
+            <form string="Deferred Expenses">
+                <header>
+                    <button name="action_confirm" invisible="state != 'draft'" string="Confirm"
+                            type="object" class="oe_highlight"/>
+                    <button name="%(cyllo_accounting.action_view_account_asset_modify)d" string="Modify Expense"
+                            type="action" invisible="state != 'running'" class="oe_highlight"/>
+                    <button name="action_running" string="Set to Running"
+                            type="object" invisible="state != 'close'"/>
+                    <button name="action_compute" invisible="state != 'draft'" string="Compute"
+                            type="object" data-hotkey="e"/>
+                    <button name="action_save_template" invisible="state not in ['running','close']"
+                            string="Save Template" type="object"/>
+                    <button name="action_close" invisible="state != 'running'" string="Close" type="object"/>
+                    <field name="state" statusbar_visible="draft,running" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_get_entries"
+                                class="oe_stat_button" icon="fa-book" invisible="entries_count == 0">
+                            <field name="entries_count" string="Journal Entries" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name">Deferred expense name</label>
+                        <h1>
+                            <field name="name" string="Deferred expense name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="asset_type_id" string="Deferred expense type"
+                                   domain="[('type', '=', 'expense')]"
+                                   context="{'default_type': 'expense', 'form_view_ref': 'cyllo_accounting.view_account_asset_type_deferred_expense_form'}"
+                                   readonly="state != 'draft'"/>
+                            <field name="asset_type" invisible="1"/>
+                            <field name="total_value" invisible="1"/>
+                            <field name="journal_id" readonly="state != 'draft'"/>
+                            <field name="account_id" string="Deferred Expense Account"
+                                   help="Account for deferred expense"
+                                   domain="[('account_type', 'in', ('asset_current', 'asset_prepayments'))]"
+                                   readonly="state != 'draft'"/>
+                            <field name="expense_account_id" string="Expense Account"
+                                   help="Account for recognizing the expense"
+                                   domain="[('account_type', '=', 'expense')]"
+                                   readonly="state != 'draft'"/>
+                            <field name="computation_method" readonly="state != 'draft'"/>
+                            <field name="prorata_date" invisible="computation_method == 'no_prorata'"
+                                   required="computation_method != 'no_prorata'"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="entries_count" invisible="1"/>
+                            <field name="first_recognition_date" readonly="state != 'draft'"/>
+                            <field name="original_value" readonly="state != 'draft'"/>
+                            <field name="not_depreciable_value" readonly="state != 'draft'"/>
+                            <field name="gross_value" invisible="gross_value == 0" readonly="state != 'draft'"/>
+                            <field name="total_modify_value" string="Total Amount"/>
+                            <field name="residual_value" invisible="1"/>
+                            <field name="book_value" string="Deferred expense amount"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="number_of_entries" readonly="state != 'draft'"/>
+                            <field name="period" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Expense Board" name="expense_board" invisible="not depreciation_move_ids" autofocus="autofocus">
+                            <field name="depreciation_move_ids">
+                                <tree decoration-info="state == 'draft'" create="0"  default_order="asset_date asc, id asc" editable="top">
+                                    <field name="asset_date" string="Expense Date"/>
+                                    <field name="state" column_invisible="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                    <field name="asset_amount" string="Expense"/>
+                                    <field name="asset_residual_amount" string="Recognized expense"/>
+                                    <field name="total_residual" string="Residual"/>
+                                    <field name="asset_days" column_invisible="1"/>
+                                    <field name="name" string="Journal Entry"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Related Expenses" name="related_expenses">
+                            <field name="invoice_line_ids" readonly="state in ('posted', 'close')"
+                                   domain="[('parent_state', '=', 'posted'), ('credit', '=', '0'),
+                                   ('company_id', '=', company_id),
+                                   ('account_type', 'in', ('asset_current', 'asset_prepayments'))]"
+                                   context="{'disable_preview': 1, 'tree_view_ref': 'account_asset.view_move_line_tree_asset'}">
+                                <tree create="0">
+                                    <field name="date"/>
+                                    <field name="account_id"/>
+                                    <field name="name"/>
+                                    <field name="debit" widget="monetary"/>
+                                    <field name="credit" widget="monetary"/>
+                                    <field name="company_currency_id" column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Deferred Expense: Tree view -->
+    <record id="view_account_asset_asset_deferred_expense_tree" model="ir.ui.view">
+        <field name="name">view.account.asset.asset.deferred.expense.tree</field>
+        <field name="model">account.asset.asset</field>
+        <field name="arch" type="xml">
+            <tree string="Deferred Expenses">
+                <field name="name" string="Deferred expense"/>
+                <field name="date"/>
+                <field name="company_id"/>
+                <field name="residual_value" column_invisible="1"/>
+                <field name="book_value"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Deferred Expense: Search view -->
+    <record id="view_account_asset_asset_deferred_expense_search" model="ir.ui.view">
+        <field name="name">view.account.asset.asset.deferred.expense.search</field>
+        <field name="model">account.asset.asset</field>
+        <field name="arch" type="xml">
+            <search string="Deferred Expenses">
+                <field name="name"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Deferred Expense Type" name="asset_type_id" context="{'group_by':'asset_type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Deferred Expense: Window action -->
+    <record id="action_view_deferred_expenses" model="ir.actions.act_window">
+        <field name="name">Deferred Expenses</field>
+        <field name="res_model">account.asset.asset</field>
+        <field name="search_view_id" ref="view_account_asset_asset_deferred_expense_search"/>
+        <field name="domain">[('asset_type', '=', 'expense')]</field>
+        <field name="context">{'asset_type': 'expense', 'default_asset_type': 'expense'}</field>
+        <field name="view_ids" eval="[Command.clear(),
+            Command.create({'view_mode': 'tree', 'view_id': ref('view_account_asset_asset_deferred_expense_tree')}),
+            Command.create({'view_mode': 'form', 'view_id': ref('view_account_asset_asset_deferred_expense_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new deferred expense
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Field create view form -->
+    <record id='view_field_create_form' model='ir.ui.view'>
+        <field name="name">view.field.create.form</field>
+        <field name="model">field.create</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="name"/>
+                        <field name="same_name" invisible="1"/>
+                        <field name="name_x_" invisible="1"/>
+                        <span style="color: red;" invisible="not same_name">
+                            Field name already exists
+                        </span>
+                        <span style="color: red; width: 180%; display: block;"
+                              invisible="not name_x_">Custom fields must have a
+                            name that starts with 'x_'
+                        </span>
+                        <field name="field_type"/>
+                        <field name="widget_id"
+                               options='{"no_open": True, "no_create": True}'
+                               invisible="not field_type"/>
+                        <field name="selection_ids"
+                               invisible="field_type != 'selection'">
+                            <tree editable="bottom">
+                                <field name="value"/>
+                                <field name="name"/>
+                            </tree>
+                        </field>
+                        <field name="ref_model_id"
+                               options='{"no_open": True, "no_create": True}'
+                               required="field_type in ['many2one','many2many']"
+                               invisible="field_type not in ['many2one','many2many']"/>
+                        <field name="display_name"/>
+                        <field name="model" invisible="1"/>
+                        <field name="field_id"
+                               options='{"no_open": True, "no_create": True}'/>
+                        <field name="position"/>
+                        <field name="form_view_external_id" class="xml_id"/>
+                    </group>
+                    <group>
+                        <field name="required"/>
+                        <field name="readonly"/>
+                        <field name="store"/>
+                        <field name="index"
+                               invisible="field_type in ['selection']"/>
+                        <field name="copied"/>
+                    </group>
+                    <group>
+                        <field name="help"/>
+                    </group>
+                </group>
+                <footer>
+                    <button id="add_field" name="action_create_field"
+                            string="Create Field"
+                            type="object" class="oe_highlight"/>
+                    <button id="cancel_btn" string="Cancel" class="oe_link"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

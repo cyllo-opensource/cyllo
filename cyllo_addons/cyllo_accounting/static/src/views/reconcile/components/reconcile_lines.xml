@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ReconcileLines" owl="1">
+        <div tabindex="-1" class="o_reconcile_lines o_lines row cy-template_container" t-ref="root" >
+            <div class="d-flex flex-column align-items-start gap-1" style="height: fit-content;">
+                <div class="card w-100">
+                    <div t-attf-class="card-body {{ props.isActive ? 'active' : '' }}" t-on-click="props.onClick">
+                        <span class="card-title">
+                            <ul class="list-unstyled">
+                                <li class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex flex-column justify-content-center overflow-hidden" style="flex-grow: 1; height: 50px">
+                                        <span class="text-truncate d-inline-block w-100">
+                                            <t t-esc="props.value.data.payment_ref" />
+                                        </span>
+
+                                        <span class="text-truncate text-muted">
+                                            <t t-esc="props.value.data.date.toISODate()" />
+                                            <t t-if="props.value.data.partner_id"> |
+                                                <t class="text-truncate text-muted" t-esc="props.value.data.partner_id?.[1] || ''" />
+                                            </t>
+                                        </span>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end">
+                                        <span t-att-class="props.value.data.amount &lt; 0 ? 'text-danger ms-4' : 'ms-4'" style="font-weight: bold;">
+                                            <t t-esc="formatCurrency(props.value.data.amount, props.value.data.currency_id[0])" />
+                                        </span>
+                                        <div class="badge bg-warning mt-1 text-dark" t-if="props.value.data.to_check">
+                                            <span>To Check</span>
+                                        </div>
+                                        <div class="fa fa-check mt-1 bg-primary text-light" style="border-radius: 4px;" t-if="props.value.data.is_reconciled"/>
+                                    </div>
+                                </li>
+                            </ul>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

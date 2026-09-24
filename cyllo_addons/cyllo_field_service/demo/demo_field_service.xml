@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+
+        <!--  ─── Service Products ───────────────────────────────────────  -->
+        <record id="demo_product_electrical_inspection" model="product.product">
+            <field name="name">Electrical Inspection</field>
+            <field name="detailed_type">service</field>
+            <field name="lst_price">150.00</field>
+            <field name="uom_id" ref="uom.product_uom_hour"/>
+            <field name="uom_po_id" ref="uom.product_uom_hour"/>
+        </record>
+        <record id="demo_product_plumbing_repair" model="product.product">
+            <field name="name">Plumbing Repair</field>
+            <field name="detailed_type">service</field>
+            <field name="lst_price">120.00</field>
+            <field name="uom_id" ref="uom.product_uom_hour"/>
+            <field name="uom_po_id" ref="uom.product_uom_hour"/>
+        </record>
+        <record id="demo_product_hvac_maintenance" model="product.product">
+            <field name="name">HVAC Maintenance</field>
+            <field name="detailed_type">service</field>
+            <field name="lst_price">200.00</field>
+            <field name="uom_id" ref="uom.product_uom_hour"/>
+            <field name="uom_po_id" ref="uom.product_uom_hour"/>
+        </record>
+        <record id="demo_product_network_setup" model="product.product">
+            <field name="name">Network Setup</field>
+            <field name="detailed_type">service</field>
+            <field name="lst_price">180.00</field>
+            <field name="uom_id" ref="uom.product_uom_hour"/>
+            <field name="uom_po_id" ref="uom.product_uom_hour"/>
+        </record>
+        <!--  ─── Skill Categories ───────────────────────────────────────  -->
+        <record id="demo_skill_category_electrical" model="field.service.skill.category">
+            <field name="name">Electrical Services</field>
+            <field name="description">Service requests requiring certified electrical skills and
+                equipment.
+            </field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="service_checklist_ids"
+                   eval="[ Command.create({ 'product_id': ref('demo_product_electrical_inspection'), 'required': True, 'time_required': 2.0, 'service_cost': 150.00, }), ]"/>
+        </record>
+        <record id="demo_skill_category_plumbing" model="field.service.skill.category">
+            <field name="name">Plumbing Services</field>
+            <field name="description">Service requests covering pipe repair, leak detection, and
+                fixture installation.
+            </field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="service_checklist_ids"
+                   eval="[ Command.create({ 'product_id': ref('demo_product_plumbing_repair'), 'required': True, 'time_required': 3.0, 'service_cost': 120.00, }), ]"/>
+        </record>
+        <record id="demo_skill_category_hvac" model="field.service.skill.category">
+            <field name="name">HVAC Services</field>
+            <field name="description">Heating, ventilation, and air-conditioning maintenance and
+                repair.
+            </field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="service_checklist_ids"
+                   eval="[ Command.create({ 'product_id': ref('demo_product_hvac_maintenance'), 'required': True, 'time_required': 4.0, 'service_cost': 200.00, }), ]"/>
+        </record>
+        <record id="demo_skill_category_it" model="field.service.skill.category">
+            <field name="name">IT &amp; Network Services</field>
+            <field name="description">On-site IT infrastructure setup, cabling, and network
+                configuration.
+            </field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="service_checklist_ids"
+                   eval="[ Command.create({ 'product_id': ref('demo_product_network_setup'), 'required': True, 'time_required': 5.0, 'service_cost': 180.00, }), ]"/>
+        </record>
+        <!--  ─── Field Service Requests ─────────────────────────────────  -->
+        <!--  Request 1 — Draft, Low Priority  -->
+        <record id="demo_fsr_001" model="field.service.request">
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="priority">a</field>
+            <field name="state">draft</field>
+            <field name="skill_category_id" ref="demo_skill_category_electrical"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="date_deadline"
+                   eval="(DateTime.now() + relativedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="description" type="html">
+                <p>Routine electrical panel inspection at the client premises. Check all circuit
+                    breakers, wiring connections, and earthing.
+                </p>
+            </field>
+            <field name="service_checklist_ids"
+                   eval="[ Command.create({ 'product_id': ref('demo_product_electrical_inspection'), 'required': True, 'time_required': 2.0, 'service_cost': 150.00, 'status': 'pending', }), ]"/>
+        </record>
+        <!--  Request 2 — Submitted, Medium Priority  -->
+        <record id="demo_fsr_002" model="field.service.request">
+            <field name="partner_id" ref="base.res_partner_2"/>
+            <field name="priority">b</field>
+            <field name="state">submit</field>
+            <field name="skill_category_id" ref="demo_skill_category_plumbing"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="submit_date" eval="DateTime.now().strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_deadline"
+                   eval="(DateTime.now() + relativedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="description" type="html">
+                <p>Burst pipe under the kitchen sink causing water leakage. Immediate repair
+                    required to prevent further water damage.
+                </p>
+            </field>
+            <field name="service_checklist_ids"
+                   eval="[ Command.create({ 'product_id': ref('demo_product_plumbing_repair'), 'required': True, 'time_required': 3.0, 'service_cost': 120.00, 'status': 'pending', }), ]"/>
+        </record>
+        <!--  Request 3 — Assigned, High Priority  -->
+        <record id="demo_fsr_003" model="field.service.request">
+            <field name="partner_id" ref="base.res_partner_3"/>
+            <field name="priority">c</field>
+            <field name="state">assigned</field>
+            <field name="skill_category_id" ref="demo_skill_category_hvac"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="submit_date"
+                   eval="(DateTime.now() - relativedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_assigned" eval="DateTime.now().strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_deadline"
+                   eval="(DateTime.now() + relativedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="description" type="html">
+                <p>Annual HVAC preventive maintenance — clean filters, check refrigerant levels,
+                    inspect compressor and fan units.
+                </p>
+            </field>
+            <field name="service_checklist_ids"
+                   eval="[ Command.create({ 'product_id': ref('demo_product_hvac_maintenance'), 'required': True, 'time_required': 4.0, 'service_cost': 200.00, 'status': 'pending', }), ]"/>
+        </record>
+        <!--  Request 4 — Completed, Very High Priority  -->
+        <record id="demo_fsr_004" model="field.service.request">
+            <field name="partner_id" ref="base.res_partner_12"/>
+            <field name="priority">d</field>
+            <field name="state">completed</field>
+            <field name="skill_category_id" ref="demo_skill_category_it"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="submit_date"
+                   eval="(DateTime.now() - relativedelta(days=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_assigned"
+                   eval="(DateTime.now() - relativedelta(days=4)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="confirmation_date"
+                   eval="(DateTime.now() - relativedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_deadline"
+                   eval="(DateTime.now() - relativedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="description" type="html">
+                <p>Full network infrastructure setup for the new office branch — structured cabling,
+                    switch configuration, Wi-Fi access points, and firewall rules.
+                </p>
+            </field>
+            <field name="service_checklist_ids"
+                   eval="[ Command.create({ 'product_id': ref('demo_product_network_setup'), 'required': True, 'time_required': 5.0, 'service_cost': 180.00, 'status': 'completed', }), ]"/>
+        </record>
+    </data>
+</odoo>

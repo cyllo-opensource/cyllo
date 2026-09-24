@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <t t-name="cyllo_studio.SearchView">
+<!--        added style below to enable scrolling-->
+        <div class="cy-content-wrapper cy_search_view" t-att-class="state.visibleSearchElement ? 'cy-show-invisible-search' : ''" style="max-height: 80vh; overflow-y: auto; padding: 10px;">
+            <div class="cy-field__box">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ri-magic-fill cy-content-header-icon"/>
+                    <h3 class="cy-content_header">Autocomplete Fields</h3>
+                </div>
+                <div t-if="searchFields.length" t-ref="searchFieldRef" class="my-3 cy-addable__list">
+                    <t t-foreach="searchFields" t-as="item" t-key="item.id">
+                        <div class="cy-drag-input_container mb-2" t-att-class="item.striped ? 'cy-studio-striped':''" t-att-cy-xpath="item.cyXpath">
+                            <button class="btn btn-secondary handle-drag cy-drag_edit-btn" type="button">
+                                <i class="ri-drag-move-line handle-drag"/>
+                            </button>
+                            <div class="w-100  cy-draginput--box p-1"><span class="cy-content-text"><t t-esc="item.description"/></span></div>
+                            <button class="cy-drag_edit-btn cy-drag_save" t-on-click="()=> this.editSearchField(item)"><i class="ri-edit-2-fill"/></button>
+                            <button class="cy-drag_edit-btn cy-drag_delete" t-on-click="()=> this.removeItem(item.cyXpath)"><i class="ri-delete-bin-6-fill"/></button>
+                        </div>
+                    </t>
+                </div>
+                <t t-else="" t-call="SampleSearchData"/>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="cy-btn-primary" t-on-click="()=> this.addSearchField(searchFields[searchFields.length -1])"><i class="ri-add-line me-1"/>Add Search Field</button>
+                </div>
+            </div>
+            <div class="vr"/>
+            <div class="cy-field__box">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ri-filter-2-fill cy-content-header-icon"/>
+                    <h3 class="cy-content_header">Filters</h3>
+                </div>
+                <div t-if="filterItems.length" t-ref="filterRef" class="my-3 cy-addable__list">
+                    <t t-foreach="filterItems" t-as="item" t-key="item.id">
+                        <div class="cy-drag-input_container mb-2" t-att-class="item.striped ? 'cy-studio-striped':''" t-att-cy-xpath="item.cyXpath">
+                            <button class="btn btn-secondary handle-drag cy-drag_edit-btn"><i class="ri-drag-move-line handle-drag"/></button>
+                            <div class="w-100  cy-draginput--box p-1">
+                                <span class="cy-content-text">
+                                    <t t-if="item.type == 'filterSeparator'" t-esc="'separator'"/>
+                                    <t t-else="" t-esc="item.description"/>
+                                </span>
+                            </div>
+                            <button t-if="item.type != 'filterSeparator'" class="cy-drag_edit-btn cy-drag_save" t-on-click="()=> this.editFilter(item)"><i class="ri-edit-2-fill"/></button>
+                            <button class="cy-drag_edit-btn cy-drag_delete" t-on-click="()=> this.removeItem(item.cyXpath)"><i class="ri-delete-bin-6-fill"/></button>
+                        </div>
+                    </t>
+                </div>
+                <t t-else="" t-call="SampleSearchData"/>
+                <div class="d-flex align-items-center gap-2">
+                    <button t-if="filterItems.length" t-att-class="filterItems[filterItems.length -1].type == 'filterSeparator' ? 'disabled' : ''" class="cy-btn-primary" t-on-click="()=> this.addSeperator(filterItems[filterItems.length -1])"><i class="ri-add-line me-1"/>Add Separator</button>
+                    <button class="cy-btn-primary" t-on-click="()=> this.addFilter(filterItems[filterItems.length -1])"><i class="ri-add-line me-1"/>Add Filter</button>
+                </div>
+            </div>
+            <div class="vr"/>
+            <div class="cy-field__box">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ri-stack-fill cy-content-header-icon"/>
+                    <h3 class="cy-content_header">Group By</h3>
+                </div>
+                <div t-if="groupByItems.length" t-ref="groupRef" class="my-3 cy-addable__list">
+                    <t t-foreach="groupByItems" t-as="item" t-key="item.id">
+                        <div class="cy-drag-input_container mb-2" t-att-class="item.striped ? 'cy-studio-striped':''" t-att-cy-xpath="item.cyXpath">
+                            <button class="cy-drag_edit-btn btn btn-secondary handle-drag"><i class="ri-drag-move-line handle-drag"/></button>
+                            <div class="w-100  cy-draginput--box p-1"><span class="cy-content-text"><t t-if="item.type == 'groupSeparator'" t-esc="'separator'"/>
+                                <t t-else="" t-esc="item.description"/></span>
+                            </div>
+                            <button t-if="item.type != 'groupSeparator'" class="cy-drag_edit-btn cy-drag_save" t-on-click="()=> this.editGroupBy(item)"><i class="ri-edit-2-fill"/></button>
+                            <button class="cy-drag_edit-btn cy-drag_delete" t-on-click="()=> this.removeItem(item.cyXpath)"><i class="ri-delete-bin-6-fill" /></button>
+                        </div>
+                    </t>
+                </div>
+                <t t-else="" t-call="SampleSearchData"/>
+                <div class="d-flex align-items-center gap-1">
+                    <button t-if="groupByItems.length" class="cy-btn-primary" t-att-class="groupByItems[groupByItems.length -1].type == 'groupSeparator' ? 'disabled' : ''" t-on-click="()=> this.addSeperator(groupByItems[groupByItems.length -1])"><i class="ri-add-line me-1"/>Add Separator</button>
+                    <button class="cy-btn-primary" t-on-click="()=> this.addGroupBy(groupByItems[groupByItems.length -1])"><i class="ri-add-line me-1"/>Add Group By</button>
+                </div>
+            </div>
+            <div class="vr"/>
+            <div class="cy-field__box">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ri-menu-search-fill cy-content-header-icon"/>
+                    <h3 class="cy-content_header">Search Panel</h3>
+                </div>
+                <div t-ref="searchPanelRef" t-if="state.searchPanelItems.size" class="my-3 cy-addable__list">
+                    <t t-foreach="state.searchPanelItems" t-as="key" t-key="key">
+                        <t t-set="item"  t-value="searchPanelItems.get(key)"/>
+                        <div class="cy-drag-input_container mb-2" t-att-class="item.striped ? 'cy-studio-striped':''" t-att-cy-xpath="item.cyXpath">
+                            <button class="btn btn-secondary handle-drag cy-drag_edit-btn"><i class="ri-drag-move-line handle-drag"/></button>
+                            <div class="w-100  cy-draginput--box p-1"><span class="cy-content-text"><t t-esc="item.description"/></span></div>
+                            <button class="cy-drag_edit-btn cy-drag_save" t-on-click="()=> this.SearchPanelValue(item)"><i class="ri-edit-2-fill"/></button>
+                            <button class="cy-drag_edit-btn cy-drag_delete" t-on-click="()=> this.removeItem(item.cyXpath)"><i class="ri-delete-bin-6-fill"/></button>
+                        </div>
+                    </t>
+                </div>
+                <t t-else="" t-call="SampleSearchData"/>
+                <div class="d-flex align-items-center gap-2">
+                    <t t-if="searchPanelInfo.cyXpath">
+                        <button class="cy-btn-primary" t-att-class="searchPanelInfo.isInvisible ? 'mx-5' : 'mx-2'" t-on-click="editSearchPanel"><i class="ri-add-line me-1"/>Edit Search Panel</button>
+                        <button class="cy-btn-primary" t-if="!searchPanelInfo.isInvisible" t-on-click="()=>this.SearchPanelValue()"><i class="ri-add-line me-1"/>Add Value</button>
+                    </t>
+                    <button t-else="" class="cy-btn-primary" t-on-click="addSearchPanel"><i class="ri-add-line me-1"/>Add Search Panel</button>
+                </div>
+            </div>
+
+        </div>
+    </t>
+    <t t-name="SampleSearchData">
+        <div class="my-3 cy-addable__list">
+            <t t-foreach="sampleValues" t-as="value" t-key="value_index">
+                <div class="cy-drag-input_container mb-2 opacity-25">
+                    <button class="btn btn-secondary cy-drag_edit-btn"><i class="ri-drag-move-line"/></button>
+                    <div class="w-100  cy-draginput--box p-1"><span class="cy-content-text"><t t-esc="value"/></span></div>
+                    <button class="cy-drag_edit-btn cy-drag_save"><i class="ri-edit-2-fill"/></button>
+                    <button class="cy-drag_edit-btn cy-drag_delete"><i class="ri-delete-bin-6-fill"/></button>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

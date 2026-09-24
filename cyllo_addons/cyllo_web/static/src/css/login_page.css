@@ -1,0 +1,938 @@
+:root {
+    --cy-primary: #9EA700;
+    --cy-primary-dark: #7d8400;
+    --cy-text-main: #111111;
+    --cy-text-muted: #686B6F;
+    --cy-text-light: #505050;
+    --cy-border: #e5e7eb;
+    --cy-input-bg: #f2f2f2;
+    --cy-card-bg: #ffffff;
+    --cy-card-radius: 24px;
+    --cy-card-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    --cy-font-bold: "Cyllo-Font-Bold", "Cyllo-Bold", sans-serif;
+    --cy-font: "Cyllo-Font-Bold", "Cyllo-Bold", 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+/* ─── Custom scrollbar ────────────────────────────────────── */
+
+*::-webkit-scrollbar {
+    visibility: hidden;
+    width: 5px;
+    height: 5px;
+}
+
+*:hover::-webkit-scrollbar {
+    visibility: visible;
+}
+
+*:hover::-webkit-scrollbar-track {
+    background: rgba(233, 237, 241, 0.3);
+    border-radius: 25px;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+    background: hsl(213, 22%, 84%);
+    border-radius: 25px;
+}
+
+*:hover::-webkit-scrollbar-thumb:hover {
+    background: hsl(216, 18%, 64%);
+}
+
+/* ─── Instance (login / signup / reset) wrapper ───────────── */
+
+.cy-instance {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: relative;
+}
+
+.cy-instance_box {
+    min-height: 500px;
+    height: 100%;
+}
+
+.cy-instance_content {
+    background-color: var(--cy-card-bg);
+    border-radius: var(--cy-card-radius);
+    padding: 40px;
+    width: 480px;
+    height: 100%;
+    min-height: 570px;
+    box-shadow: var(--cy-card-shadow);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ─── Logo ────────────────────────────────────────────────── */
+
+.cy-login-logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.cy-login-logo-img {
+    height: auto;
+    width: auto;
+    max-height: 36px;
+}
+
+.cy-current-db-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cy-primary-dark);
+    background-color: rgba(158, 167, 0, 0.12);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(158, 167, 0, 0.25);
+    letter-spacing: 0.02em;
+}
+
+/* ─── Headings / subtitle ─────────────────────────────────── */
+
+.cy-instance-title {
+    font-family: var(--cy-font-bold);
+    color: var(--cy-text-main);
+    font-size: 26px;
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.cy-login-subtitle {
+    font-size: 14px;
+    color: var(--cy-text-muted);
+    text-align: center;
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+/* ─── Floating label inputs ───────────────────────────────── */
+
+.floating-label-group {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.floating-label-group input {
+    background: var(--cy-input-bg);
+    border: none;
+    border-radius: 12px;
+    padding: 0 12px;
+    height: 50px;
+    font-size: 14px;
+    outline: none;
+    outline-offset: -2px;
+    width: 100%;
+    transition: outline 0.3s ease, background 0.2s ease;
+
+    &[readonly] {
+        background: var(--cy-input-bg);
+        cursor: not-allowed;
+    }
+}
+
+.floating-label-group input:not(:placeholder-shown) {
+    outline: 2px solid #dadada;
+    background: var(--cy-card-bg);
+}
+
+.floating-label-group input:focus {
+    background: var(--cy-card-bg);
+    outline: 2px solid var(--cy-primary);
+    box-shadow: 0 0 0 0.25rem #f5f6e2;
+}
+
+.floating-label-group input.cy-input--error {
+    outline: 2px solid #ff8a8a;
+}
+
+.floating-label-group label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--cy-text-light);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    padding: 1px 4px;
+    line-height: 1;
+}
+
+.floating-label-group input:focus+label,
+.floating-label-group input:not(:placeholder-shown)+label {
+    top: 0;
+    left: 12px;
+    font-size: 12px;
+    background: var(--cy-card-bg);
+}
+
+.floating-select-label select {
+    padding: 10px 12px;
+}
+
+.floating-select-label label {
+    top: 0;
+    z-index: 1;
+    font-size: 14px;
+}
+
+.floating-select-label select:focus {
+    border-color: var(--cy-primary);
+    box-shadow: none;
+}
+
+/* ─── Buttons ─────────────────────────────────────────────── */
+
+.cy-login-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.cy-instance .btn,
+.cy-authentication .btn {
+    height: 40px;
+    padding: 8px 15px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.8rem;
+    transition: background-color 0.3s;
+}
+
+.cy-instance .btn:focus,
+.cy-authentication .btn:focus {
+    box-shadow: none;
+}
+
+.cy-instance .btn.btn1,
+.cy-authentication .btn.btn1 {
+    flex: 1 0;
+    background-color: var(--cy-primary);
+}
+
+.cy-instance .btn.btn1:hover,
+.cy-authentication .btn.btn1:hover {
+    background-color: var(--cy-primary-dark);
+    color: #fff;
+}
+
+.cy-instance .btn.btn1:disabled,
+.cy-authentication .btn.btn1:disabled {
+    background-color: #cbd5c0;
+    color: #ffffff;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+.cy-instance .btn.btn2,
+.cy-authentication .btn.btn2 {
+    width: 160px;
+    background-color: rgba(158, 167, 0, 0.2);
+    color: var(--cy-primary-dark);
+}
+
+.cy-instance .btn.btn2:hover,
+.cy-authentication .btn.btn2:hover {
+    background-color: var(--cy-primary-dark);
+    color: #fff;
+}
+
+/* ─── Utility ─────────────────────────────────────────────── */
+
+.cy-hidden {
+    display: none;
+}
+
+.cy-input-error {
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: -8px;
+    margin-bottom: 10px;
+    margin-left: 4px;
+}
+
+.cy-input {
+    padding: 13px 12px;
+}
+
+.cy-check:checked {
+    background-color: var(--cy-primary);
+}
+
+/* ─── Login actions / bottom links ────────────────────────── */
+
+.cy-login-actions {
+    margin-top: 4px;
+}
+
+.cy-login-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border: 1px solid #fcd34d;
+    border-radius: 12px;
+    background: #fffbeb;
+    color: #b45309;
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+.cy-login-warning i {
+    font-size: 1rem;
+    line-height: 1.2;
+    margin-top: 1px;
+}
+
+.cy-login_bottom {
+    margin-top: 2rem;
+}
+
+.cy-login-signup-row,
+.cy-login-forgot-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.cy-login-db-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    height: 30px;
+}
+
+.cy-instance .para,
+.cy-authentication .para {
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.cy-instance .click,
+.cy-authentication .click {
+    color: var(--cy-primary-dark);
+    transition: color 0.2s;
+    font-weight: 500;
+    margin-left: 4px;
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+.cy-instance .click:hover,
+.cy-authentication .click:hover {
+    color: #545800;
+}
+
+.db-click {
+    color: #5f650b;
+}
+
+.cy-login-dashboard-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.cy-forgot {
+    color: var(--cy-primary);
+    font-weight: 600;
+    font-size: 11px;
+}
+
+/* ─── Background decoration ───────────────────────────────── */
+
+.cy-instance_bg {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.cy-instance_bg-img {
+    width: 100%;
+}
+
+/* ─── Password group (hidden by default, JS-toggled) ─────── */
+
+.cy-password-group {
+    display: none;
+}
+
+#password_group.fade-in {
+    display: block !important;
+    animation: cy-slide-down 0.5s ease-out forwards;
+}
+
+/* ─── Server-side error (hidden; consumed by JS toast) ────── */
+
+.cy-server-error-hidden {
+    display: none !important;
+}
+
+/* ─── Animations ──────────────────────────────────────────── */
+
+@keyframes cy-slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cy-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── Toast notifications ─────────────────────────────────── */
+
+.cy-toast-container {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+}
+
+.cy-toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    pointer-events: all;
+    min-width: 320px;
+    max-width: 480px;
+    opacity: 0;
+    transform: translateY(-12px) scale(0.97);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    will-change: opacity, transform;
+}
+
+.cy-toast--visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.cy-toast--error {
+    background: #fff1f1;
+    border: 1.5px solid #fca5a5;
+    color: #b91c1c;
+}
+
+.cy-toast--success {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    color: #15803d;
+}
+
+.cy-toast--warning {
+    background: #fffbeb;
+    border: 1.5px solid #fcd34d;
+    color: #b45309;
+}
+
+.cy-toast--error .cy-toast__icon {
+    color: #dc2626;
+}
+
+.cy-toast--success .cy-toast__icon {
+    color: #16a34a;
+}
+
+.cy-toast--warning .cy-toast__icon {
+    color: #d97706;
+}
+
+.cy-toast__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.cy-toast__msg {
+    flex: 1;
+}
+
+.cy-toast__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.5;
+    padding: 2px;
+    border-radius: 4px;
+    line-height: 1;
+    color: inherit;
+    transition: opacity 0.15s ease;
+    flex-shrink: 0;
+}
+
+.cy-toast__close:hover {
+    opacity: 1;
+}
+
+@keyframes cy-toast-shake {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-6px); }
+    40%  { transform: translateX(6px); }
+    60%  { transform: translateX(-4px); }
+    80%  { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+}
+
+.cy-toast--shake {
+    animation: cy-toast-shake 0.35s ease;
+}
+
+/* ─── OAuth providers (injected by Odoo OAuth module) ─────── */
+
+.login_form_right_form .o_auth_oauth_providers {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.login_form_right_form .o_auth_oauth_providers .list-group-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    font-size: 16px;
+    color: #333;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.login_form_right_form .o_auth_oauth_providers .list-group-item:hover {
+    background-color: #e6f7ff;
+    transform: translateY(-2px);
+}
+
+.login_form_right_form .o_auth_oauth_providers .list-group-item i {
+    margin-right: 12px;
+    font-size: 20px;
+    color: #0056b3;
+    transition: transform 0.3s ease;
+}
+
+.login_form_right_form .o_auth_oauth_providers .list-group-item:hover i {
+    transform: scale(1.1);
+}
+
+/* ─── cy-authentication (database selector / webclient layout) */
+
+.cy-authentication .wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    height: 75vh;
+}
+
+.cy-authentication .wrapper .items:nth-child(1) {
+    flex: 1 1 47%;
+    width: 47%;
+    background-color: #F7F6EE;
+}
+
+.cy-authentication .wrapper .items:nth-child(1) .login_img_wrapper {
+    display: flex;
+    justify-content: flex-start;
+    position: absolute;
+    top: 40px;
+    left: 36px;
+    z-index: 2;
+}
+
+.cy-authentication .login_form_left {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-direction: column;
+    position: relative;
+    padding: 40px 36px;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+.cy-authentication .login_form_left .owl-carousel {
+    width: 100%;
+    margin: auto 0;
+    flex: 1;
+    align-self: center;
+}
+
+.cy-authentication .login_form_left .owl-stage-outer {
+    text-align: left;
+}
+
+.cy-authentication .login_form_left .owl-item {
+    text-align: left;
+}
+
+.cy-authentication .wrapper .login_thumbnail_wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0;
+    text-align: left;
+}
+
+.cy-authentication .wrapper .login_typographic_content {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.cy-authentication .wrapper .login_accent_bar {
+    width: 3px;
+    align-self: stretch;
+    background: #A9C23F;
+    border-radius: 0;
+    margin-top: 6px;
+    min-height: 110px;
+    flex-shrink: 0;
+}
+
+.cy-authentication .wrapper .login_thumb_details {
+    text-align: left;
+}
+
+.cy-authentication .wrapper .login_thumb_details .login_capability_tag {
+    font-size: 13px;
+    font-weight: 500;
+    color: #7C9A1E;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+}
+
+.cy-authentication .wrapper .login_thumb_details .login_title {
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #1F2417;
+    margin: 0 0 16px;
+    max-width: 280px;
+}
+
+.cy-authentication .wrapper .login_thumb_details .login_subtitle {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #5B5F52;
+    margin: 0;
+    max-width: 270px;
+}
+
+/* ─── Owl Dots — pill style (database selector left panel) ── */
+
+.cy-authentication .login_form_left .owl-theme .owl-dots {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    margin-top: 40px !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+.cy-authentication .login_form_left .owl-theme .owl-dots .owl-dot {
+    display: inline-flex !important;
+    outline: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+}
+
+.cy-authentication .login_form_left .owl-theme .owl-dots .owl-dot span {
+    width: 8px !important;
+    height: 4px !important;
+    border-radius: 2px !important;
+    background: #D8D6C6 !important;
+    margin: 0 !important;
+    display: block !important;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.cy-authentication .login_form_left .owl-theme .owl-dots .owl-dot.active span,
+.cy-authentication .login_form_left .owl-theme .owl-dots .owl-dot:hover span {
+    width: 24px !important;
+    background: #A9C23F !important;
+    border-radius: 2px !important;
+}
+
+.cy-authentication .items:nth-child(2) {
+    background: #fff;
+    width: 50%;
+}
+
+.cy-authentication .login_form_right {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.cy-authentication .form-group {
+    margin-bottom: 1rem;
+}
+
+.cy-authentication .login_form_right .login_form_right_form {
+    width: 100%;
+    padding: 0 40px 10px;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .form_heading {
+    margin-bottom: 30px;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .form_heading h4 {
+    color: #000;
+    font-family: var(--cy-font);
+    padding-top: 22px;
+    font-weight: 600;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .form_heading p {
+    color: var(--cy-text-muted);
+    font-size: 16px;
+    padding-top: 10px;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .form-group label {
+    color: #455360;
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 0.5rem;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .form-control {
+    padding: 10px;
+    height: auto;
+    border: 1px solid #D0D5DD;
+    border-radius: 4px;
+    transition: border-color 0.3s ease-in-out;
+    font-size: 13px;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .form-control:hover,
+.cy-authentication .login_form_right .login_form_right_form .form-control:focus,
+.cy-authentication .login_form_right .login_form_right_form .form-control:active {
+    border-color: var(--cy-primary);
+    outline: none;
+    box-shadow: none;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .form-select:focus,
+.cy-authentication .login_form_right .login_form_right_form .form-select:active {
+    border-color: var(--cy-primary);
+    box-shadow: none;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .forgot {
+    color: var(--cy-primary);
+    font-weight: 600;
+    display: block;
+    font-size: small;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .forgot:hover {
+    color: var(--cy-primary-dark);
+    text-decoration: none;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .sign_up {
+    padding-top: 6px;
+    text-align: center;
+    color: #000;
+    font-size: medium;
+}
+
+.cy-authentication .login_form_right .login_form_right_form .sign_up a {
+    color: var(--cy-primary);
+}
+
+.cy-authentication .login_form_right .login_form_right_form .sign_up a:hover {
+    color: var(--cy-primary-dark);
+    text-decoration: none;
+}
+
+.cy-authentication form .form-control::placeholder {
+    font-size: 14px;
+}
+
+/* ─── Reset password success box ─────────────────────────── */
+
+.cy-success-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 2rem;
+}
+
+.cy-success-box p {
+    color: #909090;
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.cy-success-box .reset-success-tick {
+    font-size: 6rem;
+    line-height: normal;
+    margin-bottom: 8px;
+}
+
+/* ─── Form layout (cy-step4 / cy-form) ───────────────────── */
+
+.cy-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.cy-form_title {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.cy-form input {
+    width: 400px;
+}
+
+.oe_signup_form {
+    padding: 2.5rem 0;
+    max-width: 100%;
+    margin: 24px auto;
+}
+
+/* ─── Owl carousel base ───────────────────────────────────── */
+
+.no-js .owl-carousel,
+.owl-carousel.owl-loaded {
+    display: block;
+}
+
+.owl-dot:focus {
+    outline: none;
+}
+
+.owl-theme .owl-dots .owl-dot span {
+    width: 8px;
+    height: 8px;
+    margin: 5px 4px;
+    background: #DFDFDF;
+    display: block;
+    transition: opacity 0.2s ease;
+    border-radius: 30px;
+}
+
+.owl-theme .owl-dots .owl-dot.active span,
+.owl-theme .owl-dots .owl-dot:hover span {
+    background: var(--cy-primary);
+    width: 30px;
+}
+
+/* ─── Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .cy-instance {
+        height: 100%;
+    }
+
+    .cy-instance_content {
+        width: auto;
+        min-height: 100vh;
+        height: auto;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+        min-width: 100%;
+    }
+
+    .cy-instance_box {
+        max-height: none;
+        height: auto;
+    }
+
+    .cy-form input {
+        width: 100%;
+    }
+
+    .cy-authentication .wrapper {
+        height: auto;
+        margin-bottom: 50px;
+    }
+
+    .cy-authentication .wrapper .items:nth-child(1) {
+        padding-bottom: 30px;
+        padding-left: 15px;
+        padding-right: 15px;
+        display: none;
+    }
+
+    .cy-authentication .items:nth-child(1),
+    .cy-authentication .items:nth-child(2) {
+        flex-basis: 100%;
+    }
+
+    .cy-authentication .login_form_right {
+        padding: 40px 0;
+    }
+
+    .cy-authentication .login_form_right .login_form_right_form {
+        padding: 0 15px 10px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .cy-authentication .container {
+        max-width: 1140px;
+    }
+}

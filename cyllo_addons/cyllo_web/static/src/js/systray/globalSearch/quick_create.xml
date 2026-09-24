@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- QuickCreateDropdown template -->
+    <t t-name="QuickCreateDropdown" owl="1">
+        <div t-if="props.data.length != 0" class="quick-create_container">
+            <!-- General category -->
+            <div class="column-quick-search" t-if="this.general == true">
+                <div class="heading-01">
+                    <span>GENERAL</span>
+                </div>
+                <ul class="general-list" style="list-style-type:none;">
+                    <!-- Iterate over state.result and filter models by 'general' category -->
+                    <t t-foreach="props.data" t-as="model" t-key="model_index">
+                        <t t-if="model.categories == 'general'">
+                            <li class="qc-list-02">
+                                <a class="quick-create-form" t-on-click="(event) => this.openModelWizard(model.model)">
+                                    <i t-if="model.fa_icon" t-attf-class="fa fa-{{ model.fa_icon }}" style="padding: 0px 5px" />
+                                    <span t-esc="model.name" style="text-overflow:ellipsis;font-size:15px;" />
+                                </a>
+                            </li>
+                        </t>
+                    </t>
+                </ul>
+            </div>
+            <!-- Sale category -->
+            <div class="column-quick-search" t-if="this.sale == true">
+                <div class="heading-01">
+                    <span>SALE</span>
+                </div>
+                <ul class="general-list" style="list-style-type:none;">
+                    <!-- Iterate over state.result and filter models by 'sale' category -->
+                    <t t-foreach="props.data" t-as="model" t-key="model_index">
+                        <t t-if="model.categories == 'sale'">
+                            <li class="qc-list-02">
+                                <a class="quick-create-form" t-on-click="(event) => this.openModelWizard(model.model)">
+                                    <i t-if="model.fa_icon" t-attf-class="fa fa-{{ model.fa_icon }}" style="padding: 0px 5px" />
+                                    <span t-esc="model.name" style="text-overflow:ellipsis;font-size:15px;" />
+                                </a>
+                            </li>
+                        </t>
+                    </t>
+                </ul>
+            </div>
+            <!-- Purchase category -->
+            <div class="column-quick-search" t-if="this.purchase == true">
+                <div class="heading-01">
+                    <span>PURCHASE</span>
+                </div>
+                <ul class="general-list" style="list-style-type:none;">
+                    <!-- Iterate over state.result and filter models by 'purchase' category -->
+                    <t t-foreach="props.data" t-as="model" t-key="model_index">
+                        <t t-if="model.categories == 'purchase'">
+                            <li class="qc-list-02">
+                                <a class="quick-create-form" t-on-click="(event) => this.openModelWizard(model.model)">
+                                    <i t-if="model.fa_icon" t-attf-class="fa fa-{{ model.fa_icon }}" style="padding: 0px 5px" />
+                                    <span t-esc="model.name" style="text-overflow:ellipsis;font-size:15px;" />
+                                </a>
+                            </li>
+                        </t>
+                    </t>
+                </ul>
+            </div>
+            <!-- Accounting category -->
+            <div class="column-quick-search" t-if="this.accounting == true">
+                <div class="heading-01">
+                    <span>ACCOUNTING</span>
+                </div>
+                <ul class="general-list" style="list-style-type:none;">
+                    <!-- Iterate over state.result and filter models by 'accounting' category -->
+                    <t t-foreach="props.data" t-as="model" t-key="model_index">
+                        <t t-if="model.categories == 'accounting'">
+                            <li class="qc-list-02">
+                                <a class="quick-create-form" t-on-click="(event) => this.openModelWizard(model.model)">
+                                    <i t-if="model.fa_icon" t-attf-class="fa fa-{{ model.fa_icon }}" style="padding: 0px 5px" />
+                                    <!--                                                    '/web/image/<string:model>/<int:id>/<string:field>/<int:width>x<int:height>',-->
+
+                                    <span t-esc="model.name" style="text-overflow:ellipsis;font-size:15px;" />
+                                </a>
+                            </li>
+                        </t>
+                    </t>
+                </ul>
+            </div>
+        </div>
+        <div t-else="" class="quick-create_container p-5" style="margin-top: 116px;background: white;
+                z-index: 111;position: absolute;top: -70px; width: fit-content; box-shadow:rgb(0 0 0 / 24%) 0px 3px 8px;">
+            <p class="fs-6">
+                Make sure to enable
+                <span style="color:var(--primary);">Add to Quick Create</span>
+                in Settings ->
+                Technical ->
+                <span style="color:var(--primary); font-weight:600; cursor:pointer" t-on-click="onClickModel">Model</span>
+                to add quick create
+            </p>
+        </div>
+    </t>
+
+    <t t-name="QuickCreate" owl="1">
+        <!-- Set the role attribute to 'quickcreate' for the div with role='menu' -->
+        <!-- Insert the quick create button inside the dropdown-toggle button -->
+        <t t-set-slot="toggler">
+            <div t-ref="root" data-tooltip="Quick Create" t-if="!(env.services.website and env.services.website.currentWebsite)" class="cy-systray-parent-class" t-on-click="getModels">
+                <div class="quick_create_container">
+                    <i id='quick_create' position="'bottom-end'" class="ri-add-large-line quick_create_button" role="img" data-hotkey="U" />
+                    <t t-if="state.open === true">
+                        <QuickCreateDropdown data="state.result" getModels.bind="getModels" />
+                    </t>
+                </div>
+                <span t-if="props.nameShow" class="cy-systray-label">Quick Create</span>
+            </div>
+        </t>
+    </t>
+</templates>

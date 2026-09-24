@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Tree-->
+    <record id="view_commission_plan_tree" model="ir.ui.view">
+        <field name="name">view.commission.tree</field>
+        <field name="model">commission.plan</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+            </tree>
+        </field>
+    </record>
+    <!--Search View-->
+    <record id="view_commission_plan_search" model="ir.ui.view">
+        <field name="name">view.commission.plan.search</field>
+        <field name="model">commission.plan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter string="Archived" name="active"
+                        domain="[('active', '=',False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Sales Team" name="team"
+                            context="{'group_by': 'team_id'}"/>
+                    <filter string="Sales People" name="user"
+                            context="{'group_by': 'user_ids'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--Form-->
+    <record id="view_commission_plan_form" model="ir.ui.view">
+        <field name="name">view.commission.form</field>
+        <field name="model">commission.plan</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" type="object"
+                            groups="sales_team.group_sale_manager"
+                            string="Approve" class="btn-primary"
+                            invisible="state != 'draft'" data-hotkey="w"/>
+                    <button name="action_reject" type="object"
+                            string="Rejected" class="btn-secondary"
+                            invisible="state != 'draft'" data-hotkey="w"/>
+                    <button name="action_done" type="object"
+                            string="Mark as done" class="btn-secondary"
+                            invisible="state != 'approved'" data-hotkey="w"/>
+                    <button name="action_draft" type="object"
+                            string="Reset to draft" class="btn-secondary"
+                            invisible="state == 'draft'" data-hotkey="d"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,approved,done"/>
+                </header>
+                <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button name="action_open_commission" type="object"
+                                class="oe_stat_button" icon="fa-dollar">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Commissions</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" string="Commission Plan"/>
+                        <h1>
+                            <field name="name"
+                                   placeholder="i.e. Commissions plan 2025"
+                                   class="d-block"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <label for="type" string="Based on"
+                                   readonly="state != 'draft'"/>
+                            <div>
+                                <field name="type" class="oe_inline"
+                                       readonly="state != 'draft'"/>
+                                per
+                                <field name="user_type" class="oe_inline"
+                                       readonly="state != 'draft'"/>
+                            </div>
+                            <field name="is_bonus_commission" invisible="1"/>
+                            <field name="sales_people_user_ids" invisible="1"
+                                   widget="many2many_tags"/>
+                            <field name="duplicate_user_ids" invisible="1"
+                                   widget="many2many_tags"/>
+                            <field name="type_ids" invisible="1"
+                                   widget="many2many_tags"/>
+                            <field name="total_commission" invisible="1"/>
+                            <field name="team_id"
+                                   invisible="user_type != 'team'"
+                                   readonly="state != 'draft'"
+                                   help="Commission plan applied for every salesperson in the team."/>
+                            <field name="commission_amount"
+                                   readonly="state != 'draft'"
+                                   invisible="type != 'target'"/>
+                            <field name="company_id"
+                                   options="{'no_create': True}"
+                                   invisible="1"/>
+                        </group>
+                        <group>
+                            <label for="date_from" string="Effective Period"/>
+                            <div class="d-inline-flex">
+                                <field name="date_from" string="Date"
+                                       widget="daterange"
+                                       options="{'end_date_field': 'date_to'}"
+                                       readonly="state in ['approved','done','cancel']"/>
+                                <field name="date_to" invisible="1"/>
+                            </div>
+                            <field name="frequency"
+                                   readonly="state != 'draft'"/>
+                            <field name="type_id"
+                                   readonly="state != 'draft'"
+                                   invisible="type != 'target'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Contributions"
+                              invisible="type != 'contribution'">
+                            <field name="contribution_ids"
+                                   readonly="state != 'draft'" nolabel="1">
+                                <tree editable="bottom" create="true"
+                                      delete="true">
+                                    <control>
+                                        <create string="Add a new contributions"/>
+                                    </control>
+                                    <field name="plan_id" column_invisible="1"/>
+                                    <field name="type_id"/>
+                                    <field name="rate" widget="percentage"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Commissions" invisible="type != 'target'">
+                            <field name="target_commission_ids"
+                                   readonly="state != 'draft'" nolabel="1">
+                                <tree editable="bottom"
+                                      default_order="target_rate" create="true"
+                                      delete="true">
+                                    <control>
+                                        <create string="Add a new commission level"/>
+                                    </control>
+                                    <field name="target_rate"
+                                           widget="percentage"/>
+                                    <field name="amount" force_save="1"
+                                           widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="amount_rate"
+                                           widget="percentage" force_save="1"
+                                           optional="hide"/>
+                                    <field name="currency_id"
+                                           column_invisible="1" force_save="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Targets" invisible="type != 'target'">
+                            <field name="commission_frequency_ids"
+                                   readonly="state != 'draft'" nolabel="1">
+                                <tree editable="bottom" create="0"
+                                      delete="0">
+                                    <field name="name" force_save="1"/>
+                                    <field name="date_from" force_save="1"
+                                           optional="hide" widget="date"/>
+                                    <field name="date_to" force_save="1"
+                                           optional="hide" widget="date"/>
+                                    <field name="amount" force_save="1"
+                                           widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="currency_id"
+                                           column_invisible="1" force_save="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Frequencies"
+                              invisible="type != 'contribution'">
+                            <field name="commission_frequency_ids"
+                                   readonly="state != 'draft'" nolabel="1">
+                                <tree editable="bottom" create="0"
+                                      delete="0">
+                                    <field name="name" force_save="1"/>
+                                    <field name="date_from" force_save="1"
+                                           optional="hide" widget="date"/>
+                                    <field name="date_to" force_save="1"
+                                           optional="hide" widget="date"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Sales People"
+                              invisible="user_type != 'person'">
+                            <field name="user_ids"
+                                   readonly="state != 'draft'" nolabel="1">
+                                <tree editable="bottom" create="true"
+                                      delete="true">
+                                    <control>
+                                        <create string="Add a new Sales People"/>
+                                    </control>
+                                    <field name="assigned_users"
+                                           column_invisible="1"/>
+                                    <field name="plan_id" column_invisible="1"/>
+                                    <field name="user_id" domain="[('share', '=', False)]"/>
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="other_plan_ids"
+                                           widget="many2many_tags"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"
+                           groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--Action-->
+    <record id="action_commission_plan" model="ir.actions.act_window">
+        <field name="name">Commissions</field>
+        <field name="res_model">commission.plan</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

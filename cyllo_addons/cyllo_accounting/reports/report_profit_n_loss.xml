@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_profit_n_loss">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="data_report_margin_top" t-value="12"/>
+                <t t-set="data_report_header_spacing" t-value="9"/>
+                <t t-set="data_report_dpi" t-value="110"/>
+                <div class="page">
+                    <h3>
+                        <center>
+                            <b>
+                                <span t-esc="report_name"/>
+                            </b>
+                        </center>
+                    </h3>
+                    <br/>
+                    <br/>
+                    <div class="filters">
+                        <table class="table table-sm table-reports">
+                            <thead class="filter_table"
+                                   style="background:#FFFFFF;">
+                                <tr>
+                                    <th>Date Range</th>
+                                    <th>Comparison</th>
+                                    <th>Account</th>
+                                    <th>Journal</th>
+                                    <th>Analytic Account</th>
+                                    <th>Target move</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size:11px;font-weight:100;">
+                                <tr>
+                                    <th>
+                                        <t t-if="filter_by">
+                                            <t t-esc="filter_by"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="comparison_type">
+                                            <t t-if="comparison">
+                                                <t t-esc="comparison_type"/>
+                                                :
+                                                <t t-esc="comparison"/>
+                                            </t>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="accounts">
+                                            <t t-esc="','.join(accounts)"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="journals">
+                                            <t t-esc="','.join(journals)"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="journals">
+                                            <t t-esc="','.join(account_analytic)"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="data['filterData']['target_move']">
+                                            <t t-esc="','.join(data['filterData']['target_move'])"/>
+                                        </t>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <table cellspacing="0" width="100%"
+                           style="border: 1px solid white; text-align: left;">
+                        <thead>
+                            <tr class="o_heading">
+                                <th colspan="9"/>
+                                <t t-if="data['periods']">
+                                    <t t-foreach="data['periods']"
+                                       t-as="periodData"
+                                       t-key="periodData_index">
+                                        <th class="text-end">
+                                            <t t-esc="periodData"/>
+                                        </th>
+                                    </t>
+                                </t>
+                            </tr>
+                            <tr class="o_heading">
+                                <th colspan="9"/>
+                                <t t-if="data['periods']">
+                                    <t t-foreach="data['periods']"
+                                       t-as="periodData"
+                                       t-key="periodData_index">
+                                        <th class="text-end">Balance</th>
+                                    </t>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th colspan="9">
+                                    <span class="fw-bolder">
+                                        Net Profit
+                                    </span>
+                                </th>
+
+                                <th t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span class="fw-bolder">
+                                        <t t-if="data['total']">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['total']"/>
+                                        </t>
+                                    </span>
+                                </th>
+                            </tr>
+                            <tr style="border-bottom: 1.5px solid black;">
+                                <th colspan="9">
+                                    <span class="fw-bolder ms-2">
+                                        Income
+                                    </span>
+                                </th>
+                                <th t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span class="fw-bolder">
+                                        <t t-if="data['total_income']">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['total_income']"/>
+                                        </t>
+                                    </span>
+                                </th>
+                            </tr>
+                            <tr class="border-bottom border-gainsboro">
+                                <th colspan="9" style="font-weight: normal;">
+                                    <span class="fw-bolder ms-3">
+                                        Gross Profit
+                                    </span>
+                                </th>
+                                <th t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span class="fw-bolder">
+                                        <t t-if="data['gross_profit']">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['gross_profit']"/>
+                                        </t>
+                                    </span>
+                                </th>
+                            </tr>
+                            <tr class="border-bottom border-gainsboro">
+                                <th colspan="9" style="font-weight: normal;">
+                                    <span class="ms-4">Operating Income</span>
+                                </th>
+                                <td t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span>
+                                        <t t-if="data['income'] and data['income'][2] != 0">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['income'][1]"/>
+                                        </t>
+                                    </span>
+                                </td>
+                            </tr>
+                            <t t-set="account_lines"
+                               t-value="self.get_account_lines('income', pdf_data)"/>
+                            <t t-if="len(account_lines) != 0">
+                                <tr t-if="len(account_lines) != 0" t-foreach="account_lines[0][0]" t-as="account"
+                                    t-key="account_index" class="border-bottom border-gainsboro cy-report-line-acc">
+                                    <t t-set="accAmountIncome"
+                                       t-value="self.get_account_line(account['id'], account_lines)"/>
+                                    <th t-if="len(accAmountIncome)" colspan="9">
+                                        <span class="ms-5" t-esc="account['name']"/>
+                                    </th>
+                                    <td t-if="len(accAmountIncome)" t-foreach="accAmountIncome" t-as="amountIncome"
+                                        t-key="amountIncome_index" class="text-end">
+                                        <span>
+                                            <t t-out="currency_symbol[0]"/>
+                                            <span class="mx-1" t-esc="amountIncome['format_amount']"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+                            <tr class="border-bottom border-gainsboro">
+                                <th colspan="9" style="font-weight: normal;">
+                                    <span class="ms-3">Cost of
+                                        Revenue
+                                    </span>
+                                </th>
+                                <td t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span>
+                                        <t t-if="data['expense_direct_cost'] and data['expense_direct_cost'][2] != 0">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['expense_direct_cost'][1]"/>
+                                        </t>
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <t t-set="account_lines"
+                               t-value="self.get_account_lines('expense_direct_cost', pdf_data)"/>
+                            <t t-if="len(account_lines) != 0">
+                                <tr t-if="len(account_lines) != 0" t-foreach="account_lines[0][0]" t-as="account"
+                                    t-key="account_index" class="border-bottom border-gainsboro cy-report-line-acc">
+                                    <t t-set="accAmountIncome"
+                                       t-value="self.get_account_line(account['id'], account_lines)"/>
+                                    <th t-if="len(accAmountIncome)" style="font-weight: normal;">
+                                        <span class="ms-5" t-esc="account['name']"/>
+                                    </th>
+                                    <td t-if="len(accAmountIncome)" t-foreach="accAmountIncome" t-as="amountIncome"
+                                        t-key="amountIncome_index" class="text-end">
+                                        <span>
+                                            <t t-out="currency_symbol[0]"/>
+                                            <span class="mx-1" t-esc="amountIncome['format_amount']"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+
+                            <tr class="border-bottom">
+                                <th colspan="9" style="font-weight: normal;">
+                                    <span class="ms-3">Other Income
+                                    </span>
+                                </th>
+                                <td t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span>
+                                        <t t-if="data['income_other'] and data['income_other'][2] != 0">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['income_other'][1]"/>
+                                        </t>
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <t t-set="account_lines"
+                               t-value="self.get_account_lines('income_other', pdf_data)"/>
+                            <t t-if="len(account_lines) != 0">
+                                <tr t-if="len(account_lines) != 0" t-foreach="account_lines[0][0]" t-as="account"
+                                    t-key="account_index" class="border-bottom border-gainsboro cy-report-line-acc">
+                                    <t t-set="accAmountIncome"
+                                       t-value="self.get_account_line(account['id'], account_lines)"/>
+                                    <th t-if="len(accAmountIncome)" style="font-weight: normal;">
+                                        <span class="ms-5" t-esc="account['name']"/>
+                                    </th>
+                                    <td t-if="len(accAmountIncome)" t-foreach="accAmountIncome" t-as="amountIncome"
+                                        t-key="amountIncome_index" class="text-end">
+                                        <span>
+                                            <t t-out="currency_symbol[0]"/>
+                                            <span class="mx-1" t-esc="amountIncome['format_amount']"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+
+                            <tr class="border-bottom">
+                                <th colspan="9">
+                                    <span class="fw-bolder ms-2">
+                                        Total Income
+                                    </span>
+                                </th>
+                                <td t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span class="fw-bolder">
+                                        <t t-if="data['total_income']">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['total_income']"/>
+                                        </t>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr style="border-bottom: 1.5px solid black;">
+                                <th colspan="9">
+                                    <span class="fw-bolder ms-1">
+                                        Expenses
+                                    </span>
+                                </th>
+                                <td t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span class="fw-bolder">
+                                        <t t-if="data['total_expense']">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['total_expense']"/>
+                                        </t>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="border-bottom"
+                                style="border-right:0px solid transparent;">
+                                <th colspan="9" style="font-weight: normal;">
+                                    <span class="ms-3">Expenses</span>
+                                </th>
+                                <td t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span>
+                                        <t t-if="data['expense'] and data['expense'][2] != 0">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['expense'][1]"/>
+                                        </t>
+                                    </span>
+                                </td>
+                            </tr>
+                            <t t-set="account_lines"
+                               t-value="self.get_account_lines('expense', pdf_data)"/>
+                            <t t-if="len(account_lines) != 0">
+                                <tr t-if="len(account_lines) != 0" t-foreach="account_lines[0][0]" t-as="account"
+                                    t-key="account_index" class="border-bottom border-gainsboro cy-report-line-acc">
+                                    <t t-set="accAmountIncome"
+                                       t-value="self.get_account_line(account['id'], account_lines)"/>
+                                    <th t-if="len(accAmountIncome)" style="font-weight: normal;">
+                                        <span class="ms-5" t-esc="account['name']"/>
+                                    </th>
+                                    <td t-if="len(accAmountIncome)" t-foreach="accAmountIncome" t-as="amountIncome"
+                                        t-key="amountIncome_index" class="text-end">
+                                        <span>
+                                            <t t-out="currency_symbol[0]"/>
+                                            <span class="mx-1" t-esc="amountIncome['format_amount']"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+                            <tr class="border-bottom border-gainsboro">
+                                <th colspan="9" style="font-weight: normal;">
+                                    <span class="ms-3">Depreciation
+                                    </span>
+                                </th>
+                                <td t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span>
+                                        <t t-if="data['expense_depreciation'] and data['expense_depreciation'][2] != 0">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['expense_depreciation'][1]"/>
+                                        </t>
+                                    </span>
+                                </td>
+                            </tr>
+                            <t t-set="account_lines"
+                               t-value="self.get_account_lines('expense_depreciation', pdf_data)"/>
+                            <t t-if="len(account_lines) != 0">
+                                <tr t-if="len(account_lines) != 0" t-foreach="account_lines[0][0]" t-as="account"
+                                    t-key="account_index" class="border-bottom border-gainsboro cy-report-line-acc">
+                                    <t t-set="accAmountIncome"
+                                       t-value="self.get_account_line(account['id'], account_lines)"/>
+                                    <th t-if="len(accAmountIncome)" style="font-weight: normal;">
+                                        <span class="ms-5" t-esc="account['name']"/>
+                                    </th>
+                                    <td t-if="len(accAmountIncome)" t-foreach="accAmountIncome" t-as="amountIncome"
+                                        t-key="amountIncome_index" class="text-end">
+                                        <span>
+                                            <t t-out="currency_symbol[0]"/>
+                                            <span class="mx-1" t-esc="amountIncome['format_amount']"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+
+                            <tr class="border-bottom">
+                                <th colspan="9">
+                                    <span class="fw-bolder ms-2">Total Expenses
+                                    </span>
+                                </th>
+                                <td t-foreach="pdf_data[0]" t-as="data" t-key="data_index" class="text-end">
+                                    <span class="fw-bolder">
+                                        <t t-if="data['total_expense']">
+                                            <t t-out="data['currency_symbol']"/>
+                                            <span class="mx-1" t-esc="data['total_expense']"/>
+                                        </t>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

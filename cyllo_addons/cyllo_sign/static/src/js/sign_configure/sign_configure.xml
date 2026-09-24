@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <t t-name="cyllo_sign.SignConfigureAction">
+        <div class="d-flex mainRow-cy">
+            <main class="container-fluid cy-maincontent" t-ref="root">
+                <div class="row">
+                    <!-- Sign template PDF preview -->
+                    <div class="d-flex align-selfflex-start justify-content-between align-items-center px-3 py-1 cy-sign-top_nav position-sticky top-0">
+                        <div class="d-flex justify-content-start align-items-center">
+                            <button class="btn fs-1 p-0 me-2" t-if="!this.props.portal" t-on-click="goBack"><i class="ri-arrow-left-s-line"/></button>
+                            <span class="cy-signtitle"><t t-esc="state.signDatas.template[0]?.name"/></span>
+                        </div>
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" t-if="!this.state.isRequestModel and !this.props.portal" t-on-click="sendPdf">Send</button>
+                            <button class="btn btn-primary" t-if="this.state.isRequestModel || this.props.portal" t-on-click="savePdf">Validate Document </button>
+                        </div>
+                    </div>
+                    <div t-att-class="!this.state.isRequestModel and !this.props.portal ? 'col-md-7 col-lg-9 cy-signmain_container order-2 order-md-1' : 'col-12 col-md-12 col-lg-12 cy-signmain_container order-2 order-md-1'">
+                        <div class="cy-signboard">
+                            <div class="cy-document">
+                                <iframe class="o_sign_iframe" t-ref="sign_iframe" id="my_iframe" alt="PDF file"
+                                        t-att-src="this.pdfjs_url">
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Sign template fields -->
+                    <div class="p-0 col-md-5 col-lg-3 order-1 order-md-2" t-if="!this.state.isRequestModel and !this.props.portal">
+                        <div class="cy-sign_editor">
+                            <t t-foreach="state.signDatas.fields" t-as="field" t-key="field.id">
+                                <div class="cy-sign_editor-option"
+                                     t-att-data-field-id="field.id"
+                                     t-att-data-field-name="field.name"
+                                     t-att-data-field-height="field.default_height"
+                                     t-att-data-field-width="field.default_width"
+                                     t-att-data-field-placeholder="field.placeholder"
+                                     t-att-data-field-type="field.field_type">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="cy-sign_dragicon"
+                                                 viewBox="0 0 24 24" fill="currentColor">
+                                            <path fill="none" d="M0 0h24v24H0z"/>
+                                                <path
+                                                        d="M8.5 7C9.32843 7 10 6.32843 10 5.5C10 4.67157 9.32843 4 8.5 4C7.67157 4 7 4.67157 7 5.5C7 6.32843 7.67157 7 8.5 7ZM8.5 13.5C9.32843 13.5 10 12.8284 10 12C10 11.1716 9.32843 10.5 8.5 10.5C7.67157 10.5 7 11.1716 7 12C7 12.8284 7.67157 13.5 8.5 13.5ZM10 18.5C10 19.3284 9.32843 20 8.5 20C7.67157 20 7 19.3284 7 18.5C7 17.6716 7.67157 17 8.5 17C9.32843 17 10 17.6716 10 18.5ZM15.5 7C16.3284 7 17 6.32843 17 5.5C17 4.67157 16.3284 4 15.5 4C14.6716 4 14 4.67157 14 5.5C14 6.32843 14.6716 7 15.5 7ZM17 12C17 12.8284 16.3284 13.5 15.5 13.5C14.6716 13.5 14 12.8284 14 12C14 11.1716 14.6716 10.5 15.5 10.5C16.3284 10.5 17 11.1716 17 12ZM15.5 20C16.3284 20 17 19.3284 17 18.5C17 17.6716 16.3284 17 15.5 17C14.6716 17 14 17.6716 14 18.5C14 19.3284 14.6716 20 15.5 20Z">
+                                            </path>
+                                            </svg>
+                                        </span>
+                                        <span t-esc="field.name"/>
+                                    </div>
+                                    <span class="cy-sign_editingfeature">
+                                    <t t-if="field.icon">
+                                            <i t-attf-class="{{field.icon}} ri-lg"/>
+                                    </t>
+                                        <t t-else="">
+                                        <i class="ri-text ri-lg"/>
+                                    </t>
+                                    </span>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Sign template modals -->
+        <DialogContainer dialogs="dialogs"/>
+        <div class="modal fade" id="FieldEditModal" tabindex="-1"
+             role="dialog" aria-labelledby="FieldEditModal"
+             t-ref="FieldEditModal" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        Edit Fields
+                         <button type="button" class="btn-close"
+                                 data-bs-dismiss="modal"
+                                 aria-label="Close"/>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-6 flex-column d-flex">
+                                <label class="form-control-label" style="font-weight: bold;">Field Name</label>
+                                <select name="field_id"
+                                        t-att-value="state.modalValues.field_id"
+                                        style="border: 1px solid #dfdfdf;padding: 0.3rem;border-radius: 5px; cursor: default;"
+                                        t-on-change="(e) => this.updateModalValue('field_id', e.target.value)"
+                                        disabled="true">
+                                    <t t-foreach="state.signDatas.fields" t-as="field"
+                                       t-key="field.id">
+                                        <option t-att-value="field.id" t-out="field.name"/>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="form-group col-sm-6 flex-column d-flex">
+                                <label class="form-control-label" style="font-weight: bold;">Filled by</label>
+                                <select name="role_id"
+                                        t-att-value="state.modalValues.role_id"
+                                        style="border: 1px solid #dfdfdf;padding: 0.3rem;border-radius: 5px;"
+                                        t-on-change="(e) => this.updateModalValue('role_id', e.target.value)">
+                                    <t t-foreach="state.signDatas.roles" t-as="role"
+                                       t-key="role.id">
+                                        <option t-att-value="role.id" t-out="role.name"/>
+                                    </t>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row justify-content-between text-left mt-3">
+                            <div class="form-group col-sm-6 flex-column d-flex w-100">
+                                <label class="form-control-label" style="font-weight: bold;">Placeholder</label>
+                                <input style="border: 1px solid #dfdfdf;padding: 0.3rem;border-radius: 5px;"
+                                       type="text"
+                                       name="placeholder"
+                                       t-att-value="state.modalValues.placeholder"
+                                       t-on-change="(e) => this.updateModalValue('placeholder', e.target.value)"/>
+                            </div>
+                            <div class="form-check mt-2" style="padding-left:2.5rem !important;">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="required"
+                                       t-att-checked="state.modalValues.required"
+                                       t-on-change="(e) => this.updateModalValue('required', e.target.checked)"/>
+                                <label class="form-check-label" style="font-weight: bold;">
+                                    Required
+                                  </label>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="modal-footer" style="gap:5px;">
+                        <button class="btn btn-primary " style="width: 14%;font-size: 110% !important;"
+                                t-on-click="() => this.ModalSaveField()">Save</button>
+                        <button class="btn btn-danger " style="border-radius:6px;width: 14%;font-size: 110% !important;"
+                                t-on-click="(e) => this.DeleteItem(e)">Delete</button>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

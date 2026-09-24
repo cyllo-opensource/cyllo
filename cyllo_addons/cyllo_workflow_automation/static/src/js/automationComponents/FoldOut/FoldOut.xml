@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <!-- Define a template named "FoldOut" -->
+    <t t-name="FoldOut">
+        <div class="fold-out">
+            <!-- Header of the fold-out component, which includes a toggle icon and a title.
+                 The 'toggleExpand' method is triggered when the header is clicked -->
+            <div class="fold-out-header" t-on-click="toggleExpand">
+                <!-- Dynamically set the class of the icon based on the `expanded` state.
+                     If expanded, show a 'down' chevron, otherwise show a 'right' chevron -->
+                <i t-attf-class="fa fa-chevron-{{ state.expanded ? 'down' : 'right' }}"/>
+                <!-- Display the title passed through props -->
+                <span t-esc="props.title"/>
+            </div>
+            <!-- If the `expanded` state is true, render the content inside the fold-out component -->
+            <div t-if="state.expanded" class="fold-out-content">
+                <!-- Render the default slot where additional content can be placed -->
+                <t t-slot="default"/>
+            </div>
+        </div>
+    </t>
+</templates>

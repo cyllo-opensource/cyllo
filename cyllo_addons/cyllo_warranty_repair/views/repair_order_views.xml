@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_repair_order_form_inherit_warranty" model="ir.ui.view">
+        <field name="name">repair.order.view.form.inherit.warranty</field>
+        <field name="model">repair.order</field>
+        <field name="inherit_id" ref="repair.view_repair_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Ribbons -->
+            <xpath expr="//sheet/*[1]" position="before">
+                <field name="warranty_status" invisible="1"/>
+                <widget name="web_ribbon" title="Under Warranty" bg_color="text-bg-success"
+                        invisible="warranty_status != 'under_warranty'"/>
+                <widget name="web_ribbon" title="Warranty Expired" bg_color="text-bg-danger"
+                        invisible="warranty_status != 'expired'"/>
+                <widget name="web_ribbon" title="No Warranty" bg_color="text-bg-info"
+                        invisible="warranty_status != 'none'"/>
+            </xpath>
+
+            <!-- Add Sale Order fields -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="sale_order_id"
+                       domain="[('partner_id', 'child_of', partner_id), ('state', 'in', ['sale', 'done'])]"
+                       readonly="0"/>
+                <field name="sale_order_line_id" domain="[('order_id', '=', sale_order_id)]"
+                       invisible="not sale_order_id" required="sale_order_id" readonly="0"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.IconPicker">
+        <div class="custom-dropdown o-autocomplete cy-icon-picker" t-ref="dropdown">
+            <!-- Trigger -->
+            <div class="d-flex align-items-center o-autocomplete--input o_input input_drop"
+                style="cursor:pointer; gap:6px; padding: 2px 0px; min-height:23.5px;"
+                t-on-click.stop="toggleDropdown">
+                <i t-if="state.selected"
+                    t-att-class="(state.selected.startsWith('ri-') ? state.selected : 'fa ' + state.selected) + ' selected-icon'"
+                    style="font-size:14px; color: var(--text-color); flex-shrink:0;" />
+                <input type="text" readonly="true"
+                    t-att-placeholder="state.selected ? state.selected.replace('ri-','').split('-').join(' ') : 'Choose icon...'"
+                    style="flex:1; min-width:0; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; border:none; outline:none; background:transparent; color:inherit; font-size:13px; cursor:pointer; pointer-events:none;"
+                />
+                <i t-if="state.selected" t-on-click.stop="clearIcon"
+                    class="fa fa-times cy-icon-clear" style="flex-shrink:0;"
+                />
+                <i t-att-class="state.isOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down'"
+                    class="cy-dropdown-icon" style="cursor:pointer; margin-top: 0; flex-shrink:0;" />
+            </div>
+            <!-- Grid panel -->
+            <t t-if="state.isOpen">
+                <div class="cy-icon-picker-panel o-autocomplete--dropdown-menu ui-widget show"
+                    t-ref="gridPanel">
+                    <div class="pb-2">
+                        <input type="text" t-ref="searchInput"
+                            t-model="state.searchTerm"
+                            t-on-input="onInput"
+                            placeholder="Search icon..."
+                            autocomplete="off"
+                            class="cy-input"
+                            style="font-size:12px; padding:4px 8px; outline:none;"
+                        />
+                    </div>
+                    <t t-if="filteredIcons.length === 0">
+                        <span class="no-results" style="padding:8px 12px; display:block;">No results
+                            found</span>
+                    </t>
+                    <div class="cy-icon-picker-grid">
+                        <t t-foreach="filteredIcons" t-as="cls" t-key="cls">
+                            <div class="cy-icon-picker-item"
+                                t-att-class="state.selected === cls ? 'cy-icon-picker-item--active' : ''"
+                                t-att-title="cls.replace('ri-','').split('-').join(' ')"
+                                t-on-click.stop="() => this.selectIcon(cls)">
+                                <i t-att-class="cls.startsWith('ri-') ? cls : 'fa ' + cls" />
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

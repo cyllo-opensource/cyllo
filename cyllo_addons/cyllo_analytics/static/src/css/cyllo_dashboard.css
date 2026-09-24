@@ -1,0 +1,370 @@
+/* cyllo_dashboard.css — restructured from the former monolithic style.css.
+   Shared rules, :root vars and @media/@keyframes live in style.css. */
+
+/* --- Navbar --- */
+
+.cy-dashboard-navbar {
+    background: #FAFAFA;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.cy-dashboard-navbar .dashbd-info {
+    gap: 8px;
+}
+
+.cy-dashboard-navbar .dashboard-header-title {
+    letter-spacing: -0.4px;
+    color: var(--body-color);
+    line-height: 1;
+    padding-left: 4px;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.cy-dashboard-navbar .info-content {
+    height: 26px;
+    font-size: 11.5px;
+    padding: 0 10px;
+    border-radius: 30px;
+    border: 1.5px solid var(--primary, #9ea700);
+    background: rgba(158, 167, 0, 0.05);
+    color: #444;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.cy-dashboard-navbar .info-content i {
+    color: var(--primary, #9ea700);
+    font-size: 12px !important;
+}
+
+.cy-dashboard-navbar .cy-dashboard-tools-systray-primary {
+    gap: 8px;
+    align-items: center;
+}
+
+.cy-dashboard-navbar button i {
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.cy-dashboard-navbar .cy_analytic_i {
+    color: #333 !important;
+    font-size: 16px;
+}
+
+/* --- Navbar: Search icon box --- */
+
+.cy-dashboard-navbar .dash_searchbar {
+    position: relative;
+    font-size: 21px;
+    display: none;
+}
+
+.cy-dashboard-navbar .dash_searchbar input[type="text"] {
+    padding: 0;
+    height: 33px;
+    border-radius: 5px;
+    border: 0;
+    transition: all 0.3s ease;
+    width: 0px;
+}
+
+/* --- Navbar: Icon-only tool buttons (print, presentation, more) --- */
+
+.cy-dashboard-navbar .border-box-tools {
+    background: transparent !important;
+    padding: 0 !important;
+    height: auto !important;
+    gap: 6px;
+    display: flex;
+    align-items: center;
+}
+
+/* --- End Navbar --- */
+
+/* --- Dashboard styles --- */
+
+.cy-dashboard-graph {
+    padding: 0 10px 10px;
+    transition: width 0.5s, height 0.5s, background-color 0.5s;
+    background: #fafafa;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: calc(100dvh - 120px);
+}
+
+/* Empty state */
+
+.cy-dashboard-graph .cy_dash_info_how_to {
+    width: fit-content;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 15px;
+}
+
+.cy-dashboard-graph .cy_dash_info_how_to .no-graph-info-list {
+    padding-right: 14px;
+}
+
+.cy-dashboard-graph .dashboard_info_text {
+    font-family: "Plus Jakarta Sans", sans-serif !important;
+    padding-bottom: 6px;
+    color: var(--dashboard-text-color);
+}
+
+.cy-dashboard-graph .dashboard_info_text.dashboard_info_head {
+    font-size: 20px;
+    font-weight: 600;
+    padding-left: 15px;
+}
+
+.cy-dashboard-background .info-dashboard-name {
+    font-weight: 600;
+}
+
+/* Empty state redesign */
+
+.cy-grid-loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--o-view-background-color, #f9f9f9);
+    pointer-events: none;
+}
+
+.cy-grid-loading-overlay.cy-overlay-visible {
+    display: flex;
+    pointer-events: auto;
+}
+
+.cy-grid-loading-spinner {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.cy-grid-loading-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dashboard-primary-color, #aabc14);
+    animation: cy-grid-dot-bounce 1.2s infinite ease-in-out;
+}
+
+.cy-grid-loading-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.cy-grid-loading-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.cy-grid-loading-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.cy-print-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cy-print-loading-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 28px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.cy-print-loading-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+    letter-spacing: 0.2px;
+}
+
+.cy-empty-state-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px 20px;
+}
+
+.cy-empty-state-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+    background: #fff;
+    border: 0.5px solid var(--border-color);
+    border-radius: 16px;
+    padding: 40px 36px 36px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.cy-empty-state-icon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 52px);
+    grid-template-rows: repeat(3, 52px);
+    gap: 8px;
+    margin-bottom: 28px;
+}
+
+.cy-empty-state-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: #1a1d23;
+    margin: 0 0 10px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.cy-empty-state-sub {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0 0 28px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.cy-empty-state-actions {
+    margin-bottom: 28px;
+}
+
+.cy-empty-state-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    border-top: 1px solid #f0f1f3;
+    padding-top: 20px;
+}
+
+.cy-empty-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: left;
+    font-size: 13px;
+    color: #6b7280;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    line-height: 1.5;
+}
+
+.cy-empty-step-num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #f4f6f9;
+    color: var(--dashboard-primary-color, #9ea700);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}
+
+/* Tile options */
+
+.cy-dashboard-graph .cy_options_container-tile {
+    display: flex;
+    width: 100%;
+    gap: 5px;
+    position: relative;
+    align-items: center;
+}
+
+.cy-dashboard-graph .cy-graph-option-container {
+    justify-content: flex-end;
+    padding-right: 2px;
+    background: transparent;
+    position: absolute;
+    height: 24px;
+    font-size: 18px;
+    top: 9px;
+    right: 15px;
+}
+
+.cy-ai-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+
+    img {
+        width: 18px;
+        height: 18px;
+        object-fit: contain;
+        pointer-events: none;
+    }
+
+    &:focus,
+    &:hover {
+        background-color: #eeeeee;
+    }
+}
+
+.cy-graph_filter .cy-sheet_card-progress-count h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0rem;
+    color: var(--dashboard-text-color);
+}
+
+.cy-dashboard_selection-dropdown {
+    overflow: auto;
+    width: 100%;
+    transform: translateY(45px) !important;
+    background-color: var(--dashboard-modal-background-color);
+}
+
+.dashbd-info:hover .cy-analytic-db-info-date {
+    display: none;
+}
+
+.dashbd-info:hover .cy-analytic-db--hover {
+    display: block;
+}
+
+.cy-filter-drop-head-text {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.cy-graph_filter .cy-sheet_card-progress-count h3.cy-kpi-query-data {
+    font-size: 0.9rem;
+}
+
+.cy-dashboard-tools-systray-primary button {
+    font-size: 14px;
+    padding: 5px 10px;
+}
+
+/* --- List Views --- */
+
+.apply-filter-btn {
+    text-align: center;
+}

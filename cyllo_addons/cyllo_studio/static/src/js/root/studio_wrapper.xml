@@ -1,0 +1,64 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="cyllo_studio.StudioWrapper">
+        <div class="d-flex" style="height: calc(100dvh - 84px);">
+            <div class="d-flex gap-2 w-100">
+                <div class="cy-studio overflow-hidden">
+                    <div t-if="props.info?.componentProps?.action?.tag == 'report_view'" class="cy-window-view d-flex gap-2 py-2 ps-3">
+                        <t class="st-breadcrumbs" style="display: flex;">
+                            <nav aria-label="st-breadcrumb">
+                                <div class="st-breadcrumb">
+                                    <div class="st-breadcrumb-item cy-breadcrumb-active" style="font-family:inter, sans-serif; font-size:13px;">
+                                        <!-- x2many breadcrumb moved to navbar (cy-bc-trail) -->
+                                        <!-- Report breadcrumb -->
+                                        <t t-if="props.info?.componentProps?.action?.tag == 'report_view'">
+                                            <a t-if="props.info?.componentProps?.action?.context?.parent_model" t-on-click="handleReportBack" href="#">
+                                                <t t-esc="props.info?.componentProps?.action?.context?.parent_name"/>
+                                                <img class="breadcrumb_image_arrow" style="height: 16px; width: 17px" src="/cyllo_base/static/src/img/cy_statusbar_arrow.svg" alt=""/>
+                                            </a>
+                                            <span class="breadcrumb_nav" style="color:#d3d3d3">
+                                                <t t-esc="'Reports'"/>
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+                            </nav>
+                        </t>
+                    </div>
+                    <div class="o_action_manager d-flex position-relative">
+                        <StudioMenuSideBar/>
+                        <div class="d-flex flex-column" style="flex: 1; min-width: 0; min-height: 0;">
+                            <div class="d-flex justify-content-end h-100" style="min-height: 0;">
+                                <div t-if="props.info and props.info?.componentProps?.action ||
+                                props.info and props.info?.componentProps?.type == 'hierarchy' ||
+                                props.info and props.info?.componentProps?.type == 'grid' ||
+                                props.info?.componentProps?.type == 'form' and state.isPreviewMode" class="position-relative" style="height: 100%; min-height: 0; flex: 1; display: flex; flex-direction: column;">
+                                    <t t-if="props.info.Component" t-component="props.info.Component" className="'o_action'" t-props="props.info.componentProps" t-key="props.info.id"/>
+                                    <div t-if="props.info?.componentProps?.action?.tag !== 'PromptDialog'"
+                                         class="cy-studio-overlay opacity-0 opacity-75-hover w-100"
+                                         style="background: #25251a !important; height: 100% !important; pointer-events: auto; cursor: not-allowed;">
+                                        <div class="text-center">
+                                            <i class="ri-lock-2-line text-danger" style="font-size: 10rem;"/>
+                                            <h2 class="fw-bolder text-danger">
+                                                <t t-esc="props.info?.componentProps.action?.display_name"/>
+                                                Editing Restricted !
+                                            </h2>
+                                       </div>
+                                    </div>
+                                </div>
+                                <t t-elif="props.info.Component" t-component="props.info.Component" className="'o_action'" t-props="props.info.componentProps" t-key="props.info.id"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <t t-if="asideBarAvailable || state?.isAnimatingSidebar">
+                    <t t-if="!state.activity_view">
+                        <AsideBar t-props="asideProps"/>
+                    </t>
+                    <t t-if="state.activity_view and props.edit">
+                        <ActivityDialog t-props="activityProps"/>
+                    </t>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

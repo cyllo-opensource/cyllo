@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Search View -->
+    <record id="view_bom_stock_report_search" model="ir.ui.view">
+        <field name="name">bom.stock.report.search</field>
+        <field name="model">bom.stock.report</field>
+        <field name="arch" type="xml">
+            <search string="Search BOM Stock Report">
+                <field name="production_id" string="Manufacturing Order"/>
+                <field name="product_id" string="Component"/>
+                <field name="workcenter_id" string="Work Center/Workstation"/>
+                
+                <filter string="Draft" name="state_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmed" name="state_confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="In Progress" name="state_progress" domain="[('state', '=', 'progress')]"/>
+                <filter string="Done" name="state_done" domain="[('state', '=', 'done')]"/>
+                
+                <separator/>
+                <filter string="Quantity on Hand > 0" name="qty_on_hand_positive" domain="[('qty_on_hand', '>', 0)]"/>
+                <filter string="Deficit" name="deficit" domain="[('is_deficit', '=', True)]"/>
+                
+                <group expand="0" string="Group By...">
+                    <filter string="Manufacturing Order" name="group_by_production" context="{'group_by': 'production_id'}"/>
+                    <filter string="Component Product" name="group_by_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Work Center/Workstation" name="group_by_workcenter" context="{'group_by': 'workcenter_id'}"/>
+                    <filter string="MO State" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Scheduled Start Month" name="group_by_date" context="{'group_by': 'date_start:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- List (Tree) View -->
+    <record id="view_bom_stock_report_tree" model="ir.ui.view">
+        <field name="name">bom.stock.report.tree</field>
+        <field name="model">bom.stock.report</field>
+        <field name="arch" type="xml">
+            <tree string="BOM Stock Report" create="false" edit="false" delete="false" sample="1">
+                <field name="production_id"/>
+                <field name="product_id"/>
+                <field name="workcenter_id" optional="show"/>
+                <field name="qty_demanded" sum="Total Demanded"/>
+                <field name="qty_consumed" sum="Total Consumed"/>
+                <field name="qty_on_hand"/>
+                <field name="qty_forecasted"/>
+                <field name="product_uom_id" string="UoM"/>
+                <field name="date_start" optional="show"/>
+                <field name="date_finished" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state in ('done', 'to_close')"
+                       decoration-warning="state == 'progress'"
+                       decoration-info="state == 'confirmed'"
+                       decoration-danger="state == 'cancel'"
+                       decoration-muted="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_bom_stock_report_pivot" model="ir.ui.view">
+        <field name="name">bom.stock.report.pivot</field>
+        <field name="model">bom.stock.report</field>
+        <field name="arch" type="xml">
+            <pivot string="BOM Stock Analysis" sample="1">
+                <field name="product_id" type="row"/>
+                <field name="qty_demanded" type="measure"/>
+                <field name="qty_consumed" type="measure"/>
+                <field name="qty_on_hand" type="measure"/>
+                <field name="qty_forecasted" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_bom_stock_report_graph" model="ir.ui.view">
+        <field name="name">bom.stock.report.graph</field>
+        <field name="model">bom.stock.report</field>
+        <field name="arch" type="xml">
+            <graph string="BOM Stock Analysis" sample="1" stacked="0">
+                <field name="product_id"/>
+                <field name="qty_consumed" type="measure"/>
+                <field name="qty_on_hand" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Gantt View -->
+    <record id="view_bom_stock_report_gantt" model="ir.ui.view">
+        <field name="name">bom.stock.report.gantt</field>
+        <field name="model">bom.stock.report</field>
+        <field name="arch" type="xml">
+            <gantt date_start="date_start" date_stop="date_finished" string="BOM Stock Gantt" default_group_by="workcenter_id" create="0" delete="0" edit="0">
+                <field name="qty_demanded"/>
+                <field name="qty_consumed"/>
+                <templates>
+                    <div t-name="gantt-popover" class="container-fluid">
+                        <div class="row g-0">
+                            <div class="col">
+                                <ul class="ps-1 mb-0 list-unstyled">
+                                    <li><strong>Component: </strong> <t t-esc="product_id[1]"/></li>
+                                    <li><strong>Demanded: </strong> <t t-esc="qty_demanded"/></li>
+                                    <li><strong>Consumed: </strong> <t t-esc="qty_consumed"/></li>
+                                    <li><strong>On Hand: </strong> <t t-esc="qty_on_hand"/></li>
+                                    <li><strong>Forecasted: </strong> <t t-esc="qty_forecasted"/></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </templates>
+            </gantt>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_bom_stock_report" model="ir.actions.act_window">
+        <field name="name">BOM Stock</field>
+        <field name="res_model">bom.stock.report</field>
+        <field name="view_mode">tree,pivot,graph,gantt</field>
+        <field name="search_view_id" ref="view_bom_stock_report_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                BOM Stock Report
+            </p>
+            <p>
+                Track the component consumption and stock availability based on Manufacturing Orders and Workstations.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item under Manufacturing -> Reporting -->
+    <menuitem id="menu_bom_stock_report"
+              name="BOM Stock"
+              parent="mrp.menu_mrp_reporting"
+              action="action_bom_stock_report"
+              sequence="25"/>
+</odoo>

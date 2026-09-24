@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Record for defining a tree view named 'marketing.activity.tree' for the model 'marketing.activity' -->
+    <record id="view_marketing_activity_tree" model="ir.ui.view">
+        <field name="name">view.marketing.activity.tree</field>
+        <field name="model">marketing.activity</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Record for defining a form view named 'marketing.activity.form' for the model 'marketing.activity' -->
+    <record id="view_marketing_activity_form" model="ir.ui.view">
+        <field name="name">view.marketing.activity.form</field>
+        <field name="model">marketing.activity</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Activity"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="type" widget="radio"/>
+                            <field name="create_uid" invisible="1"/>
+                            <field name="mailing_mailing_id"
+                                   domain="[
+                                        ('mailing_model_id', '=', model_id),('mailing_type','=','mail')]"
+                                   context="{
+                                    'default_state': 'done',
+                                    'default_mailing_model_id': model_id,
+                                    'default_campaign_id':campaign_id,
+                                    'default_cy_automation_template':True,
+                                    'form_view_ref': 'cyllo_marketing_automation.view_mailing_mailing_form'}"
+                                   invisible="type != 'mail' and type != 'sms'"
+                                   options="{'no_quick_create': True}"
+                                   required="type == 'mail'"/>
+                            <field name="server_action_id"
+                                   domain="[('model_id', '=', model_id)]"
+                                   invisible="type != 'server'"
+                                   required="type == 'server'"/>
+                            <field name="campaign_id" invisible="1"/>
+                            <field name="model_id" invisible="1"/>
+                            <field name="parent_activity_id" invisible="1"/>
+                            <field name="trigger_schedule_type" invisible="1"/>
+                            <field name="test_date_started" readonly="1"/>
+                            <field name="state" invisible="1"/>
+                        </group>
+                        <group>
+                            <label for="activity_trigger" string="Trigger"/>
+                            <div>
+                                <div>
+                                    <field name="activity_trigger"
+                                           class="w-25" nolabel="1"/>
+                                    <field name="activity_trigger_type"
+                                           nolabel="1" class="w-75"/>
+                                </div>
+                                <div>
+                                    <span class="w-25">After</span>
+                                    <field name="trigger_schedule_type"
+                                           class="trigger-style-cy w-75"
+                                           nolabel="1"/>
+                                </div>
+                                <field name="sub_parent_activity_id"/>
+                            </div>
+                        </group>
+                        <group>
+                            <field name="model_name" invisible="1"/>
+                            <field name="domain_activity"
+                                   string="Activity Domain" widget="domain"
+                                   options="{'model': 'model_name'}"
+                                   invisible="1"/>
+                            <field name="domain" string="Domain"
+                                   widget="domain"
+                                   options="{'model': 'model_name'}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Record for defining an action window named 'marketing_activity_actions' for the model 'marketing.activity' -->
+    <record id="action_view_marketing_activity_actions"
+            model="ir.actions.act_window">
+        <field name="name">Activity</field>
+        <field name="res_model">marketing.activity</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

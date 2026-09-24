@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="cyllo_studio.MenuSideBarNew" owl="1">
+        <nav class="d-flex position-absolute top-0 cy-left-sidebar-nav"
+             t-attf-style="width: {{ state.isSidebarOn ? '16%' : state.isCollapseOn ? '70px' : '16%'}}"
+             t-ref="cy-left-sidebar">
+            <div class="cy-left-sidebar"
+                 t-attf-style="width: {{ state.isSidebarOn ? '100%' : ''}}; min-width:{{state.isCollapseOn ? '100%' : ''}};">
+                <t t-if="state.isHomeActive">
+                    <div class="ps-3 py-3" t-if="state.isSidebarOn">
+                        <img src="/cyllo_base/static/src/img/Logo.svg"
+                             style="width:90px;"/>
+                    </div>
+                </t>
+                <ul class="nav flex-column  justify-content-center">
+                    <li class="nav-item p-2 pt-0" t-if="state.isSidebarOn">
+                        <div class="p-2 cy-menu-searchbar d-flex justify-content-center gap-1">
+                            <span class="ri-search-line"/>
+                            <input type="text"
+                                   class="form-input cy-menu-searchbar"
+                                   t-on-keyup="onKeyupSearch"
+                                   placeholder="Search for menu"
+                                   data-hotkey="s"/>
+                        </div>
+                    </li>
+                    <div class="position-sticky cy_dashboard_back-btn" t-else=""
+                         style="background:#26261A;">
+                        <a href="#"><span class="cy-cyllo_back"  t-on-click="onClickHome" accesskey="H">
+                            <i class="ri-home-line"/>
+                        </span></a>
+                    </div>
+                    <t t-foreach="this.state.apps" t-as="app" t-key="app_index">
+                        <li class="nav-item mb-2"
+                            t-attf-id="app_main{{app.id}}"
+                            t-att-class="state.currentSelectedApp == app.id ? 'cy_active_menu cy_active_main_menu': ''">
+                            <a class="nav-link d-flex align-items-center gap-2 cy-sidebar-nav position-relative"
+                               href="#"
+                               t-on-click="() => { this.onClickMenu(app.id, true); this.resetSelectMenu();}">
+                                <t t-call="cyllo_base.AppIcon"/>
+                                <!-- App Name Display -->
+                                <t t-if="state.isSidebarOn" t-esc="app.name"/>
+                                <div t-if="!state.isSidebarOn"
+                                     class="cy-app-hover-name">
+                                    <t t-esc="app.name"/>
+                                </div>
+                            </a>
+                        </li>
+                    </t>
+                </ul>
+            </div>
+            <div class="cy-submenu-box"
+                 t-attf-style="width: {{ state.isSidebarOn ? '0%' : '77%'}}; max-width:{{state.isCollapseOn ? '0%' : '77%'}};">
+                <div class="cy-submenu-logo">
+                    <img src="/cyllo_base/static/src/img/Logo.svg"
+                         style="height:38px;"/>
+                </div>
+                <ul class="nav flex-column cy-submenu-lists d-flex"
+                    id="accordionSidebar">
+                    <li class="nav-item mb-1">
+                        <a class="nav-link cy-sidebar-heading cy-sidebar-heading mt-0 w-100"
+                           href="#">
+                            <t t-esc="state.selectedAppName"/>
+                        </a>
+                    </li>
+                    <t t-foreach="this.state.menus" t-as="menu"
+                       t-key="menu_index">
+                        <t t-if="!menu.avoidClick &amp;&amp; !dropCheck(menu)">
+                            <a class="nav-link d-flex align-items-center gap-2  cy-sidebar-nav"
+                               href="#"
+                               t-attf-id="main_menu{{menu.id}}"
+                               t-on-click="() => {this.onClickMenu(menu.id, false); this.resetSelectMenu(menu.id);}"><t t-esc="menu.name"/></a>
+                        </t>
+                        <t t-if="dropCheck(menu)">
+                            <li class="nav-item">
+                                <t t-call="cyllo_studio.Accordian">
+                                    <t t-set="menuChildren"
+                                       t-value="menu.childrenTree"/>
+                                    <t t-set="icon" t-value="false"/>
+                                    <t t-set="name" t-value="menu.name"/>
+                                    <t t-set="menuId" t-value="menu.id"/>
+                                    <t t-set="actionID"
+                                       t-value="menu.actionID"/>
+                                    <t t-set="pin" t-value="true"/>
+                                    <t t-set="children_ids"
+                                       t-value="menu.children  || []"/>
+                                </t>
+                            </li>
+                        </t>
+                    </t>
+                </ul>
+            </div>
+        </nav>
+    </t>
+    <t t-name="cyllo_studio.Accordian" owl="1">
+        <a class="nav-link d-flex align-items-center gap-2 cy-sidebar-nav position-relative w-100 justify-content-between cy-accordian collapsed"
+           type="button"
+           data-bs-toggle="collapse"
+           t-attf-class="{{menuId == 'recent_apps' ? 'menuId w-100 mb-1' : 'menuId'}}"
+           t-att-data-bs-target="'#app'+menuId"
+           t-attf-data-id="{{actionID}}">
+            <i class="cy-icons" t-att-class="icon" t-if="icon"
+               t-att-title="name"/>
+            <t>
+                <t t-esc="name"/>
+                <i class="ri-arrow-down-s-line"/>
+            </t>
+        </a>
+        <t t-set="parentId"
+           t-value="parentId ? '#app'+parentId : '#accordionSidebar'"/>
+        <ul t-att-id="'app'+menuId"
+            t-on-contextmenu="openContextMenu"
+            t-att-data-bs-parent="parentId"
+            class="accordion-collapse collapse accordion-bg nav flex-column"
+            t-att-class="children_ids.includes(state.currentSelectedMenu) ? 'show': ''"
+            style="padding-left: 0px;">
+            <t t-if="menuChildren">
+                <t t-foreach="menuChildren" t-as="ch_menu"
+                   t-key="ch_menu_index">
+                    <t t-if="ch_menu.childrenTree &amp;&amp; ch_menu.childrenTree.length">
+                        <t t-call="cyllo_studio.Accordian">
+                            <t t-set="menuChildren"
+                               t-value="ch_menu.childrenTree"/>
+                            <t t-set="icon" t-value="false"/>
+                            <t t-set="name" t-value="ch_menu.name"/>
+                            <t t-set="parentId" t-value="menuId"/>
+                            <t t-set="menuId" t-value="ch_menu.id"/>
+                            <t t-set="actionID" t-value="ch_menu.actionID"/>
+                            <t t-set="pin" t-value="true"/>
+                            <t t-set="children_ids"
+                               t-value="ch_menu.children || []"/>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <li class="nav-item"
+                            t-on-click.prevent="() => this.accordianMenuClick(ch_menu)"
+                            t-attf-id="menu{{ch_menu.id}}"
+                            t-att-class="state.currentSelectedMenu == ch_menu.id ? 'cy_active_menu': ''">
+                            <a class="nav-link d-flex align-items-center gap-2 cy-sidebar-nav w-100">
+                                <t t-esc="ch_menu.name"/>
+                                <t t-if="pin">
+                                    <t t-if="state.pinnedMenu.map(res => res['app_id']).includes(ch_menu.id)">
+                                        <i class="ri-pushpin-line"/>
+                                    </t>
+                                </t>
+                                <div class="context-menu position-absolute">
+                                    <ul>
+                                        <t t-set="isShortcutAdded"
+                                           t-value="state.isAddedToShortcut.map(
+                                           item => item.window_action_id &amp;&amp; item.window_action_id[0] === ch_menu.actionID ||
+                                           item.client_action_id &amp;&amp; item.client_action_id[0] === ch_menu.actionID ||
+                                           item.menu_id &amp;&amp; item.menu_id[0] === ch_menu.id
+                                           &amp;&amp; item.create_uid &amp;&amp; item.create_uid[0] === session.uid).includes(true)"/>
+                                        <li t-if="isShortcutAdded"
+                                            t-on-click.stop="() => this.RemoveFromShortcut(ch_menu)">
+                                            <a class="cy-context-menu-a"
+                                               data-bs-toggle="tooltip"
+                                               title="Remove from shortcuts">Remove from shortcut</a>
+                                        </li>
+                                        <li t-if="!isShortcutAdded"
+                                            t-on-click.stop="() => this.AddToShortcuts(ch_menu)">
+                                            <a class="cy-context-menu-a"
+                                               data-bs-toggle="tooltip"
+                                               title="Add to shortcuts">Add to shortcuts</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </a>
+                        </li>
+                    </t>
+                </t>
+            </t>
+        </ul>
+    </t>
+</templates>

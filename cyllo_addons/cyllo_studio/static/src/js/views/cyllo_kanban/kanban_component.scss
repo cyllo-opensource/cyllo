@@ -1,0 +1,376 @@
+// General
+// Touch / emulated-touch drag support.
+// SortableJS uses Pointer Events, and with pointer events calling
+// preventDefault() on pointermove does NOT stop the browser from scrolling —
+// only `touch-action: none` does. Without it, touching a palette item and
+// moving is interpreted by the browser as a scroll/pan gesture, which fires
+// pointercancel and aborts the drag, so the ghost never follows the finger
+// on touch devices or under Chrome's "Toggle device toolbar".
+.cy-studio-kanban-component,
+.cy-studio-kanban-component .cy-component-container,
+.cy-studio-grab,
+.cy-studio-handle {
+  touch-action: none;
+  -ms-touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+// The SortableJS fallback ghost (the clone that should follow the finger) is a
+// copy of a palette tile, so it inherits the tile's `transition: transform 0.3s`.
+// SortableJS repositions the ghost by rewriting its `transform` every frame, but
+// that transition animates each change over 300ms, so the ghost perpetually eases
+// toward a target that has already moved — it lags so far behind it looks frozen
+// near the source. SortableJS only clears the *inline* transition (which a
+// stylesheet rule overrides), so we must force it off here with `none`.
+.sortable-fallback,
+.sortable-drag {
+  transition: none !important;
+  animation: none !important;
+}
+
+.kanban-component {
+  align-items: center;
+  padding: 6px 15px;
+  gap: 8px; /* Added gap between icon and text */
+}
+
+.kanban-component-text {
+  font-style: normal;
+  font-weight: normal; /* Explicitly set normal weight */
+  white-space: nowrap; /* Prevent text wrapping */
+  margin-left: 20px;
+}
+
+.cy-studio-kanban-component {
+  font-style: normal;
+  font-weight: normal; /* Changed from 500 to normal */
+}
+
+.cy-component-container {
+  color: #222;
+  background: #f5f6e6;
+  width: 130px;
+}
+
+.kanban-component-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+  transition: 0.25s;
+  &.active {
+    .fabTrigger {
+      transform: scale(1);
+      .icon {
+        background: transparent;
+        transition: background 0.3s ease;
+        &,
+        &:before,
+        &:after {
+          height: 3px;
+        }
+        &:before,
+        &:after {
+          width: 20px;
+          transform-origin: 50% 50%;
+          transition: all 100ms ease, width 100ms 100ms ease,
+            transform 300ms 200ms cubic-bezier(0.28, 0.55, 0.385, 1.65);
+        }
+        &:before {
+          left: 50%;
+          transform: translateX(-50%) rotate(45deg);
+        }
+        &:after {
+          right: 50%;
+          transform: translateX(50%) rotate(-45deg);
+        }
+      }
+    }
+    .fabNav {
+      a {
+        opacity: 1;
+        visibility: visible;
+        transition: 0.35s cubic-bezier(0.4, 2.08, 0.55, 1);
+      }
+    }
+  }
+  .fabTrigger {
+    position: relative;
+    z-index: 1;
+    width: 60px;
+    height: 60px;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    border: 0;
+    border-radius: 100px;
+    background: #9ea700;
+    transform: scale(0.675);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2),
+      0 2px 0 rgba(108, 46, 185, 0.2);
+    transition: 0.35s cubic-bezier(0.4, 2.08, 0.55, 1);
+    .icon {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: background 0.3s ease;
+      &,
+      &:before,
+      &:after {
+        position: absolute;
+        display: block;
+        background: #fff;
+        width: 6px;
+        height: 6px;
+        border-radius: 10px;
+      }
+      &:before,
+      &:after {
+        content: "";
+        transition: all 100ms ease, right 100ms 100ms ease,
+          left 100ms 100ms ease;
+      }
+      &:before {
+        left: -11px;
+        transform: translateX(-50%);
+      }
+      &:after {
+        right: -11px;
+        transform: translateX(50%);
+      }
+    }
+  }
+  .fabNav {
+    display: flex;
+    align-items: center;
+    a {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 12px;
+      width: 75px;
+      height: 40px;
+      font-family: "Noto Sans", sans-serif;
+      outline: none;
+      border: 0;
+      text-decoration: none;
+      border-radius: 10px;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0),
+        0 2px 0 rgba(108, 46, 185, 0.2);
+      opacity: 0.0001;
+      visibility: hidden;
+      will-change: transform;
+      transition: 0.35s cubic-bezier(0.4, 2.08, 0.55, 1);
+      &:before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        background-color: #9ea700;
+        transition: 0.25s;
+      }
+      span {
+        color: #fff;
+        transition: 0.25s;
+      }
+      &:hover {
+        &:before {
+          background-color: #26261a;
+        }
+        span {
+          color: #fff;
+        }
+        .fabTooltip {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+    }
+  }
+  .fabTooltip {
+    position: absolute;
+    z-index: -2;
+    padding: 5px;
+    color: #fff;
+    font-size: 12px;
+    border-radius: 5px;
+    background: rgba(#000, 0.8);
+    opacity: 0;
+    visibility: hidden;
+    cursor: default;
+    pointer-events: none;
+    transition: 0.5s;
+  }
+}
+
+// Horizontal
+.fabHorizontal {
+  flex-direction: row;
+  bottom: 100px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  &.active {
+    .fabNav {
+      &.fabNav--left {
+        a {
+          left: 0;
+          transform: scale(1) translateX(0);
+        }
+      }
+      &.fabNav--right {
+        a {
+          right: 0;
+          transform: scale(1) translateX(0);
+        }
+      }
+    }
+  }
+  .fabTrigger {
+    margin: 0 12px;
+  }
+  .fabNav {
+    flex-direction: row;
+    a {
+      &:hover {
+        .fabTooltip {
+          top: -100%;
+          transform: translate(-50%, 50%) scale(1);
+        }
+      }
+    }
+    &.fabNav--left {
+      a {
+        left: 45px;
+        transform: scale(0.8) translateX(10px);
+        &:nth-child(1) {
+          transition-delay: 0.3s;
+        }
+        &:nth-child(2) {
+          transition-delay: 0.2s;
+        }
+        &:nth-child(3) {
+          transition-delay: 0.1s;
+        }
+      }
+    }
+    &.fabNav--right {
+      a {
+        right: 45px;
+        transform: scale(0.8) translateX(-10px);
+        &:nth-child(1) {
+          transition-delay: 0.1s;
+        }
+        &:nth-child(2) {
+          transition-delay: 0.2s;
+        }
+        &:nth-child(3) {
+          transition-delay: 0.3s;
+        }
+      }
+    }
+  }
+  .fabTooltip {
+    top: -80%;
+    left: 50%;
+    transform-origin: center center;
+    transform: translate(-50%, 50%) scale(0);
+  }
+}
+
+// Vertical
+.fabVertical {
+  flex-direction: column;
+  top: 50%;
+  right: 15px;
+  transform: translate(0, -50%);
+  &.active {
+    .fabNav {
+      &.fabNav--left {
+        a {
+          left: 0;
+          transform: scale(1) translateX(0);
+        }
+      }
+      &.fabNav--right {
+        a {
+          right: 0;
+          transform: scale(1) translateX(0);
+        }
+      }
+    }
+  }
+  .fabTrigger {
+    margin: 12px 0;
+  }
+  .fabNav {
+    flex-direction: column;
+    a {
+      margin: 12px 0;
+      &:hover {
+        .fabTooltip {
+          right: calc(100% + 10px);
+          transform: translate(0, -50%) scale(1);
+        }
+      }
+    }
+    &.fabNav--left {
+      a {
+        left: 0;
+        transform: scale(0.8) translateY(10px);
+        &:nth-child(1) {
+          transition-delay: 0.3s;
+        }
+        &:nth-child(2) {
+          transition-delay: 0.2s;
+        }
+        &:nth-child(3) {
+          transition-delay: 0.1s;
+        }
+      }
+    }
+    &.fabNav--right {
+      a {
+        left: 0%;
+        transform: scale(0.8) translateY(-10px);
+        &:nth-child(1) {
+          transition-delay: 0.1s;
+        }
+        &:nth-child(2) {
+          transition-delay: 0.2s;
+        }
+        &:nth-child(3) {
+          transition-delay: 0.3s;
+        }
+      }
+    }
+  }
+  .fabTooltip {
+    top: 50%;
+    right: 0;
+    transform-origin: center right;
+    transform: translate(0, -50%) scale(0);
+  }
+}
+
+.sortable-ghost-source {
+    /* Dim the placeholder left in the sidebar during drag without
+       changing its size — removing height/width: auto prevented the
+       fixed 40px row height from collapsing and hiding icons. */
+    opacity: 0.4 !important;
+    box-shadow: none !important;
+    border: 2px dashed #999 !important;
+    transform: none !important;
+}

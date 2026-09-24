@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="user_profile_view_form" model="ir.ui.view">
+        <field name="name">user.profile.view.form</field>
+        <field name="model">user.profile</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_show_access_rights" type="object"
+                                groups="cyllo_access_management.group_access_management_admin"
+                                class="oe_stat_button" icon="fa-list">
+                            <field string="Access Rights" name="access_count" widget="statinfo"/>
+                        </button>
+                        <button name="action_show_record_rules" type="object"
+                                groups="cyllo_access_management.group_access_management_admin"
+                                class="oe_stat_button" icon="fa-list-ul">
+                            <field string="Record Rules" name="rule_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="ms-1">
+                        <div class="oe_title">
+                            <h1 class="mb-32">
+                                <group>
+                                    <field name="name"/>
+                                </group>
+                            </h1>
+                            <group>
+                                <field name="user_ids" widget="many2many_tags"/>
+                                <field name="company_ids" widget="many2many_tags"/>
+                                <field name="color" widget="color_picker"/>
+                            </group>
+                        </div>
+                    </div>
+                    <notebook>
+                        <page string="Access Rights">
+                            <field name="group_ids">
+                                <tree>
+                                    <field name="full_name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="user_profile_view_tree" model="ir.ui.view">
+        <field name="name">user.profile.view.tree</field>
+        <field name="model">user.profile</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="user_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_user_profile" model="ir.actions.act_window">
+        <field name="name">User Profile</field>
+        <field name="res_model">user.profile</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face"></p>
+        </field>
+    </record>
+</odoo>

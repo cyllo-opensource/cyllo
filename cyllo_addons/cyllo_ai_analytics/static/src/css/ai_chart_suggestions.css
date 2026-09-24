@@ -1,0 +1,16 @@
+/* Split layout for the docked AI chat.
+
+   When the chat is docked AND expanded on a sheet, the chatbot marks the body
+   with `cy-ai-docked-open`. We then reserve a right gutter the width of the chat
+   rail on the action container so the sheet reflows *beside* the chat instead of
+   being overlaid. The sheet is fully fluid (root width:100%, `.main` flex:1, the
+   chart has its own ResizeObserver), so narrowing the container reflows
+   everything — chart and builder rows — automatically. Gated on `cy-sheet-active`
+   so only the analytics sheet is affected. */
+body.cy-sheet-active .o_action_manager {
+    box-sizing: border-box;
+    transition: padding-right 0.3s ease;
+}
+body.cy-sheet-active.cy-ai-docked-open .o_action_manager {
+    padding-right: 380px;
+}

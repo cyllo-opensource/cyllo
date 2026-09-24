@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+    <!-- Chat History Template -->
+    <t t-name="WhatsappChatHistory" owl="1">
+        <div t-if="props.history.length"
+             class="chatting-container overflow-auto d-flex flex-column-reverse"
+             t-ref="chatter_history">
+            <div class="chat-list-container mb-0">
+                <div class="cy-whatsapp-chat-search nav-item d-flex w-50">
+                    <div class="icon align-content-center me-2" data-hotkey="s"
+                         style="cursor: pointer;"
+                         t-on-click="MessageSearch">
+                        <i class="ri-search-line"
+                           style="font-size: 17px;"/>
+                    </div>
+                    <input class="o_searchview_input o_input d-print-none flex-grow-1"
+                           autocomplete="off"
+                           type="text"
+                           t-ref="search"
+                           t-on-keyup="MessageSearch"
+                           placeholder="Search..."/>
+                    <div class="px-1 icon align-content-center border-end"
+                         style="cursor: pointer;"
+                         t-on-click="clearSearch"
+                         t-if="state.searchResults.length &gt; 1">
+                        <i class="ri-close-line"
+                           style="font-size: 17px;"/>
+                    </div>
+                    <div class="px-1 icon align-content-center border-end"
+                         style="cursor: pointer;"
+                         t-on-click="previousResult"
+                         t-if="state.searchResults.length &gt; 1">
+                        <i class="ri-arrow-up-s-line"
+                           style="font-size: 17px;"/>
+                    </div>
+                    <div class="px-1 icon align-content-center"
+                         style="cursor: pointer;"
+                         t-on-click="nextResult"
+                         t-if="state.searchResults.length &gt; 1">
+                        <i class="ri-arrow-down-s-line"
+                           style="font-size: 17px;"/>
+                    </div>
+                </div>
+                <div t-if="state.message_loaded and props.history.length >12"
+                     t-on-click="LoadMoreChat" class="previous_msg_div">
+                    <span class="previous_msg_span">View All Previous Message
+                    </span>
+                </div>
+                <t t-foreach="props.history" t-as="data" t-key="data.id">
+                    <div class="d-flex align-items-center w-100">
+                        <div t-if="previousMessageDate != data.date"
+                             class="d-flex align-items-center w-100 my-3">
+                            <hr class="ms-3 flex-grow-1"/>
+                            <span class="px-3 text-muted">
+                                <t t-esc="props.today === data.date ? 'Today' : data.date"/>
+                            </span>
+                            <hr class="me-3 flex-grow-1"/>
+                        </div>
+                    </div>
+                    <t t-set="user_message" t-value="data.flag"/>
+                    <div t-att-class="{'chat-reply': user_message }">
+                        <div class="msg-lists">
+                            <div class="text-mg-wrapper position-relative"
+                                 t-att-id="data.id">
+                                <div class="mg-wrapper-content">
+                                    <div class="d-flex align-items-end justify-content-between">
+                                        <div class="mb-0"
+                                             t-if="!data.is_template">
+                                            <t t-call="ImageAttachment"
+                                               t-if="data.message_type == 'image'"/>
+                                            <t t-if="data.message_type == 'voice' || data.message_type == 'audio'">
+                                                <VoiceNote
+                                                        is_voice="data.is_voice"
+                                                        state="data.state" flag="data.flag"
+                                                        partnerId="props.partner.partner_id[0]"
+                                                        attachmentId="data.attachment_id[0]"/>
+                                            </t>
+                                            <t t-call="DocumentAttachment"
+                                               t-if="data.message_type == 'document'"/>
+                                            <t t-call="StickerAttachment"
+                                               t-if="data.message_type == 'sticker'"/>
+                                            <t t-call="VideoAttachment"
+                                               t-if="data.message_type == 'video'"/>
+                                            <div t-if="data.message" style="max-width: 380px; text-align: left;"
+                                                 class="cy_whatsapp_message">
+                                                <t t-esc="data.message"/>
+                                            </div>
+                                        </div>
+                                        <div style="width: 200px;display: block;text-align: center; padding-top:5px;"
+                                             t-if="data.is_template">
+                                            <t t-call="DocumentAttachment"
+                                               t-if="data.message_type == 'document'"/>
+                                            <t t-call="ImageAttachment"
+                                               t-if="data.message_type == 'image'"/>
+                                            <div style="padding: 0px 2px;width:100%; word-wrap: break-word;">
+                                                <t t-if="data.template_body"
+                                                   t-out="getMarkup(data.template_body)"/>
+                                            </div>
+                                            <div t-if="data.is_button"
+                                                 style="padding: 0.5rem 0.5rem;text-align: center;border-top: 1px solid #e4e3e3;display: flex;justify-content: center;">
+                                                <span style="color: #0000EE;">
+                                                    <i class="ri-external-link-line"/>
+                                                    <a t-attf-href="#{data.button_url}"
+                                                       t-esc="data.button_name"/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <t t-set="previousMessageDate"
+                                           t-value="data.date"/>
+                                        <ChatOption message="data"/>
+                                    </div>
+                                    <div class="d-flex justify-content-end align-items-end position-absolute info-section">
+                                        <span class="conv-time">
+                                            <t t-esc="data.time"/>
+                                        </span>
+                                        <div class="d-flex justify-content-end gap-1 pe-2" style="font-size: 18px;">
+                                            <div class="d-flex justify-content-end gap-1 align-items-center">
+                                                <t t-call="MessageStatus"
+                                                   t-if="data.flag"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+    <!-- DocumentAttachment Template -->
+    <t t-name="DocumentAttachment" owl="1">
+        <div class="bg-opacity-10 p-1 document-message cursor-pointer"
+             style="display: grid;grid-template-columns: 45px auto;"
+             t-on-click="() => this.viewDocument(data.attachment_id)">
+            <t t-set='fileType'
+               t-value="getFileExtension(data.attachment_id[1])"/>
+            <img t-attf-src="/cyllo_whatsapp/static/images/{{fileType}}"
+                 style="width: 100%; padding-right: 5px;object-fit: contain;">
+            </img>
+            <div class="pt-2 pe-2 doc-name" style="text-align:left;">
+                <t t-esc="data.attachment_id[1]"/>
+            </div>
+            <span class="doc-file-type" t-esc="data.attachment_id[1]?.split('.').pop().toUpperCase() || 'DOC'"/>
+        </div>
+    </t>
+    <!-- ImageAttachment Template -->
+    <t t-name="ImageAttachment" owl="1">
+        <img class="bg-white image-attachment cursor-pointer"
+             t-attf-src="/web/image/whatsapp.message/{{data.id}}/image"
+             style="object-fit: cover;"
+             t-on-click="() => this.viewDocument(data.attachment_id)"/>
+        <div class="img-gradient"/>
+    </t>
+    <!-- StickerAttachment Template -->
+    <t t-name="StickerAttachment" owl="1">
+        <img class="bg-transparent sticker-attachment cursor-pointer"
+             t-attf-src="/web/image/ir.attachment/{{data.attachment_id[0]}}/datas"
+             style="object-fit: cover;"/>
+    </t>
+    <!-- VideoAttachment Template -->
+    <t t-name="VideoAttachment" owl="1">
+        <div class="video-thumbnail image-attachment cursor-pointer d-flex justify-content-center align-items-center"
+             t-attf-style="object-fit: cover; background: {{randomStatusGradient}}"
+             t-on-click="() => this.viewDocument(data.attachment_id)">
+            <div class="video-play d-flex justify-content-center align-items-center">
+                <i class="ri-play-fill"/>
+            </div>
+        </div>
+        <div class="img-gradient"/>
+    </t>
+    <!-- MessageStatus Template -->
+    <t t-name="MessageStatus" owl="1">
+        <i class="ri-check-double-line" t-if="data.state == 'delivered'"/>
+        <i class="ri-check-double-line ri-double-line-read"
+           t-if="data.state == 'read'"/>
+        <i class="ri-check-line" t-if="data.state == 'sent'"/>
+    </t>
+</templates>

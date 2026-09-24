@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="studio.CylloGraphView">
+        <div t-att-class="props.className" t-ref="root">
+            <Layout model="props.resModel"  className="model.useSampleModel ? 'o_view_sample_data' : ''" display="props.display">
+                <t t-if="model.data">
+                    <t t-if="!model.hasData() or model.useSampleModel and props.info.noContentHelp" t-call="web.ActionHelper">
+                        <t t-set="noContentHelp" t-value="props.info.noContentHelp"/>
+                    </t>
+                    <t t-component="props.Renderer" model="model" buttonTemplate="props.buttonTemplate" />
+                </t>
+                <t t-else="" t-call="web.NoContentHelper">
+                    <t t-set="title">Invalid data</t>
+                    <t t-set="description">Pie chart cannot mix positive and negative numbers. Try to change your domain to only display positive results</t>
+                </t>
+            </Layout>
+        </div>
+    </t>
+
+    <t t-inherit="web.GraphView.Buttons" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('btn-group')]" position="replace">
+        </xpath>
+        <xpath expr="//div[hasclass('cyllo_graph_buttons')]" position="replace">
+        </xpath>
+        <xpath expr="//button[@data-tooltip='Stacked']" position="replace">
+        </xpath>
+        <xpath expr="//button[@data-tooltip='Stacked']" position="replace">
+        </xpath>
+        <xpath expr="//button[@data-tooltip='Cumulative']" position="replace">
+        </xpath>
+        <xpath expr="//button[@data-tooltip='Descending']" position="replace">
+        </xpath>
+        <xpath expr="//button[@data-tooltip='Ascending']" position="replace">
+        </xpath>
+    </t>
+
+    <t t-name="studio.GraphView.Buttons" owl="1">
+
+    </t>
+</templates>

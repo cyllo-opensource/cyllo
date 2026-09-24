@@ -1,0 +1,702 @@
+/* ============================================================================
+   Cyllo AI — Response Message Component (chat_response.xml)
+   ========================================================================= */
+
+p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+/* 1. Main Response Message Container */
+.response-message {
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.chat-message.response-message {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--cy-ai-space-2);
+}
+
+/* 2. Response Header (Avatar, Live Label & Worked Summary/Caret) */
+.cy-ai-response-head {
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-2);
+    min-height: 28px;
+}
+
+.bot-avatar {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    background: var(--cy-ai-brand-deco-soft);
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.cy-ai-head-icon {
+    font-size: 13px;
+    color: var(--cy-ai-text-faint);
+}
+
+.cy-ai-head-live {
+    font-size: 12.5px;
+    color: var(--cy-ai-text-faint);
+    animation: cyllo-activity-pulse 1.4s ease-in-out infinite;
+}
+
+.cy-ai-head-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cy-ai-space-1);
+    padding: 2px var(--cy-ai-space-2);
+    margin-left: -2px;
+    border: none;
+    background: none;
+    border-radius: var(--cy-ai-radius-xxs);
+    font-size: 12.5px;
+    color: var(--cy-ai-text-faint);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.cy-ai-head-summary:hover:not(:disabled) {
+    background: var(--cy-ai-surface-hover);
+    color: var(--cy-ai-text-muted);
+}
+
+.cy-ai-head-summary:focus-visible {
+    outline: 2px solid var(--cy-ai-accent);
+    outline-offset: 2px;
+}
+
+.cy-ai-head-summary.cy-ai-head-static {
+    cursor: default;
+    padding-left: 0;
+}
+
+.cy-ai-head-caret {
+    font-size: 14px;
+    transition: transform 0.15s ease;
+}
+
+.cy-ai-head-caret.open {
+    transform: rotate(180deg);
+}
+
+/* 3. Trajectory / Tool Execution Steps */
+.cy-ai-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-left: var(--cy-ai-space-4);
+    padding: var(--cy-ai-space-2) 0 var(--cy-ai-space-2) var(--cy-ai-space-4);
+    border-left: 2px solid var(--cy-ai-border);
+}
+
+.cy-ai-step {
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-2);
+    font-size: 12.5px;
+    color: var(--cy-ai-text-muted);
+}
+
+.cy-ai-step-ok {
+    color: var(--cy-ai-accent);
+}
+
+.cy-ai-step-bad {
+    color: var(--cy-ai-danger);
+}
+
+/* 4. Chat Bubble Wrapper & Bot Bubble Typography */
+.chat-bubble-wrapper {
+    min-width: 0;
+    max-width: 100%;
+    padding: 0 36px;
+}
+
+.response-message .chat-bubble.bot {
+    color: var(--cy-ai-text);
+    max-width: 100%;
+    min-width: 0;
+    position: relative;
+}
+
+.chat-bubble.bot>*+* {
+    margin-top: 0.7em;
+}
+
+.chat-bubble.bot ul,
+.chat-bubble.bot ol {
+    padding-left: 1.3em;
+}
+
+.chat-bubble.bot li+li {
+    margin-top: 0.25em;
+}
+
+.chat-bubble.bot a {
+    color: var(--cy-ai-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.chat-bubble.bot strong {
+    font-weight: 600;
+    color: var(--cy-ai-text-strong);
+}
+
+.chat-bubble.bot table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.7em auto 0;
+    font-size: 13px;
+    color: var(--cy-ai-text);
+    table-layout: auto;
+}
+
+.cy-ai-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.chat-bubble.bot pre {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.chat-bubble.bot th {
+    background: transparent;
+    white-space: normal;
+    color: var(--cy-ai-text-faint);
+    font-weight: 600;
+    font-size: 12px;
+    text-align: left;
+    padding: var(--cy-ai-space-2) var(--cy-ai-space-3);
+    border-bottom: 1px solid var(--cy-ai-border);
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.chat-bubble.bot td {
+    text-align: left;
+    padding: var(--cy-ai-space-2) var(--cy-ai-space-3);
+    box-sizing: border-box;
+    white-space: normal;
+    border-bottom: 1px solid var(--cy-ai-border-soft);
+}
+
+.chat-bubble.bot h1,
+.chat-bubble.bot h2,
+.chat-bubble.bot h3,
+.chat-bubble.bot h4,
+.chat-bubble.bot h5 {
+    color: var(--cy-ai-text-strong);
+    font-weight: 600;
+    line-height: 1.35;
+    margin-top: 1.1em;
+}
+
+.chat-bubble.bot h1 {
+    font-size: 1.05rem;
+}
+
+.chat-bubble.bot h2 {
+    font-size: 1rem;
+}
+
+.chat-bubble.bot h3 {
+    font-size: 0.95rem;
+}
+
+.chat-bubble.bot h4,
+.chat-bubble.bot h5 {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+    .chat-bubble.bot table {
+        font-size: 12px;
+        border: none;
+    }
+}
+
+/* 5. Inner Attachments inside Wrapper */
+.chat-bubble-wrapper>.cy-ai-chat-chart,
+.chat-bubble-wrapper>.cy-ai-chat-widget,
+.chat-bubble-wrapper>.cy-ai-suggestions,
+.chat-bubble-wrapper>.chart-config {
+    margin-top: var(--cy-ai-space-4);
+}
+
+.chat-bubble-wrapper>.chart-config+.cyllo-msg-footer,
+.chat-bubble-wrapper>.cy-ai-chat-chart+.cyllo-msg-footer {
+    margin-top: var(--cy-ai-space-3);
+}
+
+/* 6. Suggestions Component */
+.cy-ai-suggestions {
+    margin: var(--cy-ai-space-2) 0 2px;
+}
+
+.cy-ai-card {
+    border: 1px solid var(--cy-ai-border);
+    border-radius: var(--cy-ai-radius-sm);
+    padding: var(--cy-ai-space-4);
+    margin-bottom: 10px;
+    background: var(--cy-ai-surface);
+}
+
+.cy-ai-card-title {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.cy-ai-card-question {
+    font-size: 12px;
+    color: var(--cy-ai-text-faint);
+    font-style: italic;
+    margin-bottom: var(--cy-ai-space-3);
+}
+
+.cy-ai-card-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cy-ai-space-2);
+    margin-bottom: var(--cy-ai-space-3);
+}
+
+.cy-ai-chip {
+    font-size: 11px;
+    padding: 2px var(--cy-ai-space-3);
+    border-radius: var(--cy-ai-radius-xs);
+    background: var(--cy-ai-surface-sunken);
+    color: var(--cy-ai-text-muted);
+    border: 1px solid var(--cy-ai-border);
+}
+
+.cy-ai-chip-measure {
+    background: var(--cy-ai-accent-tint);
+    color: var(--cy-ai-accent);
+    border-color: var(--cy-ai-accent-line);
+}
+
+.cy-ai-card-why {
+    font-size: 11px;
+    color: var(--cy-ai-accent);
+    margin-bottom: 10px;
+}
+
+.cy-ai-apply {
+    background: var(--cy-ai-accent);
+    color: var(--cy-ai-surface);
+    border: none;
+    font-weight: 500;
+}
+
+.cy-ai-apply:hover {
+    background: var(--cy-ai-accent-strong);
+    color: var(--cy-ai-surface);
+}
+
+/* 7. Chart Config & Popups */
+.chart-config {
+    display: flex;
+}
+
+/* .chart-config reuses ".chat-bubble.bot" for its inner card (see
+   chat_response.xml) so it can share bubble styling, but it is not prose —
+   the >*+* rule above was bleeding a gap between the chart head row and the
+   canvas. Kill it only here; text bubbles keep the paragraph spacing. */
+.chart-config .chat-bubble.bot>*+* {
+    margin-top: 0;
+}
+
+.cy-ai-chart-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cy-ai-space-3);
+}
+
+.cy-ai-chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cy-ai-text-strong);
+    line-height: 1.3;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.graph-icon {
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--cy-ai-text-faint);
+    border-radius: var(--cy-ai-radius-xxs);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.graph-icon:hover {
+    color: var(--cy-ai-text);
+}
+
+.chart-type-popup {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 99;
+    position: absolute;
+    top: 45px;
+    right: 10px;
+    display: grid;
+    background-color: var(--cy-ai-surface);
+    padding: 10px;
+    grid-template-columns: repeat(5, 40px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+}
+
+.chart-type-popup.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.chart-close-btn {
+    background-color: var(--cy-ai-nudge-bg);
+    border: none;
+    color: var(--cy-ai-surface);
+}
+
+.gov-popup {
+    position: fixed;
+    top: 50%;
+    left: 58%;
+    transform: translate(-50%, -50%);
+    background: var(--cy-ai-surface);
+    z-index: 9999;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    width: 75%;
+    height: 90%;
+}
+
+.gov-popup-header {
+    background: var(--cy-ai-nudge-bg);
+    color: var(--cy-ai-surface);
+    padding: var(--cy-ai-space-3) 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.gov-popup-body {
+    padding: var(--cy-ai-space-4);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+/* 8. Message Footer (Copy, Play, Unsaved Badge & Meta Timing) */
+.cyllo-msg-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-3);
+    margin-top: 10px;
+}
+
+.cyllo-copy-icon,
+.cyllo-play-icon {
+    font-size: 16px;
+    color: var(--cy-ai-text-faint);
+    cursor: pointer;
+    transition: color 0.15s ease;
+    line-height: normal;
+    padding: 5px;
+
+    &:hover {
+        color: var(--cy-ai-accent);
+        background: var(--cy-ai-surface-hover);
+        border-radius: var(--cy-ai-radius-sm);
+    }
+}
+
+.cy-ai-unsaved {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--cy-ai-danger);
+    cursor: help;
+}
+
+.cyllo-msg-meta {
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--cy-ai-text-faint);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    user-select: none;
+    padding-left: var(--cy-ai-space-3);
+}
+
+.chat-message.response-message:hover .cyllo-msg-meta,
+.cyllo-msg-footer:focus-within .cyllo-msg-meta {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    .cyllo-msg-meta {
+        opacity: 1;
+    }
+}
+
+/* 9. Pending-Write Confirmation Card */
+.cy-ai-confirm-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cy-ai-space-4);
+    background: var(--cy-ai-surface);
+    border: 1px solid var(--cy-ai-accent-line);
+    border-radius: var(--cy-ai-radius-md);
+    padding: var(--cy-ai-space-5);
+}
+
+.cy-ai-confirm-head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--cy-ai-space-3);
+}
+
+.cy-ai-confirm-icon {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--cy-ai-radius-pill);
+    font-size: 1.05rem;
+    background: var(--cy-ai-accent-tint);
+    color: var(--cy-ai-accent);
+}
+
+.cy-ai-confirm-icon-create {
+    background: rgba(30, 123, 52, 0.12);
+    color: var(--cy-ai-success);
+}
+
+.cy-ai-confirm-icon-delete {
+    background: rgba(192, 57, 43, 0.12);
+    color: var(--cy-ai-danger);
+}
+
+.cy-ai-confirm-headtext {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.cy-ai-confirm-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--cy-ai-text-faint);
+}
+
+.cy-ai-confirm-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--cy-ai-text-strong);
+}
+
+.cy-ai-confirm-verb {
+    text-transform: capitalize;
+    color: var(--cy-ai-accent);
+}
+
+.cy-ai-confirm-verb-create {
+    color: var(--cy-ai-success);
+}
+
+.cy-ai-confirm-verb-delete {
+    color: var(--cy-ai-danger);
+}
+
+.cy-ai-confirm-technical {
+    flex: none;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    color: var(--cy-ai-text-faint);
+    background: var(--cy-ai-surface-sunken);
+    border: 1px solid var(--cy-ai-border-soft);
+    border-radius: var(--cy-ai-radius-xxs);
+    padding: 2px var(--cy-ai-space-2);
+}
+
+.cy-ai-confirm-match {
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-2);
+    font-size: 0.82rem;
+}
+
+.cy-ai-confirm-rows {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--cy-ai-border-soft);
+}
+
+.cy-ai-confirm-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--cy-ai-space-4);
+    padding: var(--cy-ai-space-2) 0;
+    border-bottom: 1px solid var(--cy-ai-border-soft);
+    font-size: 0.85rem;
+}
+
+.cy-ai-confirm-row:last-child {
+    border-bottom: none;
+}
+
+.cy-ai-confirm-key {
+    flex: none;
+}
+
+.cy-ai-confirm-val {
+    color: var(--cy-ai-text-strong);
+    font-weight: 500;
+    text-align: right;
+    word-break: break-word;
+}
+
+.cy-ai-confirm-actions {
+    display: flex;
+    gap: var(--cy-ai-space-2);
+}
+
+.cy-ai-confirm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cy-ai-space-1);
+    border: 1px solid transparent;
+    border-radius: var(--cy-ai-radius-xs);
+    padding: var(--cy-ai-space-2) var(--cy-ai-space-4);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+.cy-ai-confirm-proceed {
+    background: var(--cy-ai-success);
+    color: var(--cy-ai-surface);
+}
+
+.cy-ai-confirm-proceed:hover {
+    filter: brightness(1.08);
+}
+
+.cy-ai-confirm-edit {
+    background: var(--cy-ai-surface);
+    border-color: var(--cy-ai-border);
+    color: var(--cy-ai-text-muted);
+}
+
+.cy-ai-confirm-edit:hover {
+    background: var(--cy-ai-surface-hover);
+}
+
+.cy-ai-confirm-cancel {
+    background: var(--cy-ai-surface);
+    border-color: var(--cy-ai-border);
+    color: var(--cy-ai-danger);
+}
+
+.cy-ai-confirm-cancel:hover {
+    background: rgba(192, 57, 43, 0.08);
+}
+
+.cy-ai-confirm-done {
+    display: flex;
+    align-items: center;
+    gap: var(--cy-ai-space-1);
+    font-size: 0.82rem;
+    color: var(--cy-ai-text-faint);
+}
+
+/* 10. Interrupted Execution Action Icons */
+.action-icons {
+    display: flex;
+    gap: var(--cy-ai-space-1);
+    font-size: 1.1rem;
+    margin-top: 2px;
+    align-self: flex-start;
+    margin-left: 9px;
+}
+
+.action-icons i {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    padding: var(--cy-ai-space-1);
+    border-radius: 50%;
+    height: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.proceed-icon {
+    color: var(--cy-ai-success);
+}
+
+.proceed-icon:hover {
+    background-color: var(--cy-ai-success);
+    color: var(--cy-ai-surface);
+}
+
+.edit-icon {
+    color: var(--cy-ai-accent);
+}
+
+.edit-icon:hover {
+    background-color: var(--cy-ai-accent);
+    color: var(--cy-ai-surface);
+}
+
+.cancel-icon {
+    color: var(--cy-ai-danger);
+}
+
+.cancel-icon:hover {
+    background-color: var(--cy-ai-danger);
+    color: var(--cy-ai-surface);
+}
+
+/* 11. Dark Reader Support */
+[data-darkreader-scheme="dark"] .chatbot-modal .chat-bubble.bot td {
+    border: 1px solid #2f2f2f;
+}
+
+[data-darkreader-scheme="dark"] .chatbot-modal .chat-bubble.bot table {
+    color: #b1b59eeb;
+}
+
+[data-darkreader-scheme="dark"] .chatbot-modal .chat-bubble.bot a {
+    color: #b6c697;
+}

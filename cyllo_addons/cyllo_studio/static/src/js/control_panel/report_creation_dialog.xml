@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.ReportCreationDialog">
+        <Dialog title="'Create New Report'" size="'lg'">
+            <div class="o_form_view">
+                <div class="o_form_sheet border-0 p-0">
+
+                    <!-- Step indicator -->
+                    <div class="d-flex align-items-center mb-4">
+                        <t t-foreach="[1,2,3]" t-as="s" t-key="s">
+                            <div class="d-flex flex-column align-items-center" style="cursor:pointer; min-width: 70px;"
+                                 t-on-click="() => this.goToStep(s)">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                     t-att-class="s === state.step ? 'bg-primary text-white' : (s &lt; state.step ? 'bg-success text-white' : 'bg-light text-muted border')"
+                                     style="width: 28px; height: 28px; font-size: 13px;">
+                                    <t t-esc="s"/>
+                                </div>
+                                <span class="small mt-1 text-center" t-att-class="s === state.step ? 'fw-semibold' : 'text-muted'">
+                                    <t t-if="s === 1">Details</t>
+                                    <t t-if="s === 2">Starting Point</t>
+                                    <t t-if="s === 3">Review</t>
+                                </span>
+                            </div>
+                            <div t-if="s != 3" class="flex-fill"
+                                 style="height: 2px; margin: 0 4px 18px 4px;"
+                                 t-att-style="s &lt; state.step ? 'background-color:#198754;' : 'background-color:#dee2e6;'"/>
+                        </t>
+                    </div>
+
+                    <!-- Step 1: Report identity -->
+                    <t t-if="state.step === 1">
+                        <div class="row mb-3">
+                            <label class="col-sm-4 col-form-label fw-bold">Report Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" t-model="state.name"
+                                       placeholder="e.g. Custom Invoice" autofocus="autofocus"/>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-4 col-form-label fw-bold">Model</label>
+                            <div class="col-sm-8">
+                                <AutoComplete
+                                    sources="autoCompleteSources"
+                                    value="state.modelLabel"
+                                    onSelect="(res) => this.onModelSelected(res)"
+                                    placeholder="'Search a model...'"
+                                />
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Step 2: Starting point -->
+                    <!-- Step 2: Starting point -->
+<t t-if="state.step === 2">
+    <div class="mb-4">
+        <label class="fw-bold mb-2 d-block">Starting Point</label>
+        <div class="d-flex gap-3">
+            <label class="border rounded-3 px-3 py-3 flex-fill d-flex align-items-start gap-2"
+                   t-att-style="state.startPoint === 'blank' ? 'border-color:#9ea700; background-color:rgba(158,167,0,0.06);' : ''"
+                   style="cursor: pointer; border-width: 1.5px;">
+                <input type="radio" name="report_start_point" value="blank" class="mt-1"
+                       t-att-checked="state.startPoint === 'blank'"
+                       t-on-change="() => state.startPoint = 'blank'"/>
+                <i class="ri-file-add-line" style="font-size: 20px; color:#9ea700;"/>
+                <div>
+                    <div class="fw-semibold">Blank Report</div>
+                    <div class="small text-muted">Start from an empty page.</div>
+                </div>
+            </label>
+            <label class="border rounded-3 px-3 py-3 flex-fill d-flex align-items-start gap-2"
+                   t-att-style="state.startPoint === 'template' ? 'border-color:#9ea700; background-color:rgba(158,167,0,0.06);' : ''"
+                   style="cursor: pointer; border-width: 1.5px;">
+                <input type="radio" name="report_start_point" value="template" class="mt-1"
+                       t-att-checked="state.startPoint === 'template'"
+                       t-on-change="() => state.startPoint = 'template'"/>
+                <i class="ri-file-copy-2-line" style="font-size: 20px; color:#9ea700;"/>
+                <div>
+                    <div class="fw-semibold">Use Template</div>
+                    <div class="small text-muted">Start from a saved report template.</div>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <div t-if="state.startPoint === 'template'">
+        <label class="fw-bold mb-2 d-block">Template</label>
+        <div t-if="!state.templates.length" class="text-muted small border rounded p-3">
+            No saved templates found. Save a report as a template first.
+        </div>
+        <div t-else="" class="d-flex border rounded-3 overflow-hidden" style="min-height: 320px;">
+
+            <!-- Category rail -->
+            <div style="width: 170px; background:#f8f9fa; border-right:1px solid #e9ecef; flex-shrink:0; overflow-y:auto; max-height:360px;">
+                <div class="px-3 py-2 small fw-bold text-uppercase text-muted" style="font-size:10px; letter-spacing:0.5px;">
+                    Categories
+                </div>
+                <div class="px-3 py-2"
+                     t-att-style="state.activeCategory === 'all' ? 'background-color:rgba(158,167,0,0.12); border-left:3px solid #9ea700; font-weight:600;' : 'border-left:3px solid transparent;'"
+                     style="cursor:pointer; font-size: 13px;"
+                     t-on-click="() => this.selectCategory('all')">
+                    All Templates
+                </div>
+                <div t-foreach="categoryList" t-as="cat" t-key="cat"
+                     class="px-3 py-2"
+                     t-att-style="state.activeCategory === cat ? 'background-color:rgba(158,167,0,0.12); border-left:3px solid #9ea700; font-weight:600;' : 'border-left:3px solid transparent;'"
+                     style="cursor:pointer; font-size: 13px;"
+                     t-on-click="() => this.selectCategory(cat)">
+                    <t t-esc="cat"/>
+                </div>
+            </div>
+
+            <!-- Template tile grid -->
+            <div class="flex-fill p-3" style="overflow-y:auto; max-height:360px;">
+                <div class="d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                    <div t-foreach="visibleTemplates" t-as="template" t-key="template.id"
+                         class="border rounded-3 p-3 position-relative"
+                         t-att-style="state.templateId === template.id ? 'border-color:#9ea700; background-color:rgba(158,167,0,0.06);' : ''"
+                         style="cursor: pointer; border-width: 1.5px;"
+                         t-on-click="() => state.templateId = template.id">
+                        <div t-if="state.templateId === template.id"
+                             class="position-absolute d-flex align-items-center justify-content-center"
+                             style="top: 8px; right: 8px; width: 18px; height: 18px; border-radius: 50%; background-color:#9ea700;">
+                            <i class="ri-check-line text-white" style="font-size: 12px;"/>
+                        </div>
+                        <i class="ri-file-text-line mb-2 d-block" style="font-size: 22px; color:#9ea700;"/>
+                        <div class="fw-semibold mb-1"><t t-esc="template.name"/></div>
+                        <div t-if="template.description" class="small text-muted mb-2" style="line-height:1.3;">
+                            <t t-esc="template.description"/>
+                        </div>
+                        <span t-if="template.source_model" class="badge text-bg-light border small fw-normal">
+                            <t t-esc="template.source_model"/>
+                        </span>
+                    </div>
+                </div>
+                <div t-if="!visibleTemplates.length" class="text-muted small text-center py-5">
+                    No templates in this category.
+                </div>
+            </div>
+        </div>
+    </div>
+</t>
+
+                    <!-- Step 3: Review -->
+                    <t t-if="state.step === 3">
+                        <div class="row mb-2">
+                            <label class="col-sm-4 col-form-label fw-bold">Report Name</label>
+                            <div class="col-sm-8 d-flex align-items-center">
+                                <t t-esc="state.name"/>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-4 col-form-label fw-bold">Model</label>
+                            <div class="col-sm-8 d-flex align-items-center">
+                                <t t-esc="state.modelLabel"/>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-4 col-form-label fw-bold">Starting Point</label>
+                            <div class="col-sm-8 d-flex align-items-center">
+                                <t t-if="state.startPoint === 'blank'">Blank Report</t>
+                                <t t-if="state.startPoint === 'template'">Template</t>
+                            </div>
+                        </div>
+                        <div t-if="state.startPoint === 'template'" class="row mb-2">
+                            <label class="col-sm-4 col-form-label fw-bold">Template</label>
+                            <div class="col-sm-8 d-flex align-items-center">
+                                <t t-if="selectedTemplateName"><t t-esc="selectedTemplateName"/></t>
+                                <t t-else=""><span class="text-danger small">No template selected</span></t>
+                            </div>
+                        </div>
+                    </t>
+
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button t-if="state.step &lt; 3" class="btn btn-primary px-4" t-on-click="nextStep">Next</button>
+                <button t-if="state.step === 3" class="btn btn-primary px-4" t-on-click="_onCreate">Create</button>
+                <button class="btn btn-light border px-4" t-on-click="onCancelClick">
+                    <t t-if="state.step > 1">Back</t>
+                    <t t-else="">Cancel</t>
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

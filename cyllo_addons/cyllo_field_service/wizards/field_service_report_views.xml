@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- form and tree view for fs report-->
+    <record id="view_field_service_report_form" model="ir.ui.view">
+        <field name="name">view.field.service.report.form</field>
+        <field name="model">field.service.report</field>
+        <field name="arch" type="xml">
+            <form string="Field Service Request Report">
+                <group>
+                    <group>
+                        <field name="filter" widget="radio"/>
+                        <field name="group_by" widget="radio"/>
+                    </group>
+                    <group>
+                        <field name="partner_ids"
+                               invisible="filter != 'customer_wise'"
+                               widget="many2many_tags"/>
+                        <field name="state"
+                               invisible="filter != 'state_wise'"/>
+                        <field name="sale_order_ids"
+                               invisible="filter != 'sale_order_wise'"
+                               widget="many2many_tags"/>
+                    </group>
+                    <group>
+                        <field name="from_date"/>
+                    </group>
+                    <group>
+                        <field name="to_date"/>
+                    </group>
+                    <group>
+                        <footer>
+                            <button name="action_print" string="Print PDF"
+                                    type="object" class="oe_highlight"/>
+                            <button name="action_xlsx_print" string="Print Xlsx"
+                                    type="object" class="oe_highlight"/>
+                            <button special="cancel" data-hotkey="x"
+                                    string="Cancel" type="object"
+                                    class="btn btn-secondary oe_inline"/>
+                        </footer>
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+    <record id="action_view_reports" model="ir.actions.act_window">
+        <field name="name">Field Service Request Report</field>
+        <field name="res_model">field.service.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

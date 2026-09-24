@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template xml:space="preserve">
+    <!-- Create sticky note template from systray-->
+    <t t-name="StickyNotes" owl="1">
+        <body class="menu cy-sticky_notes" t-ref="menuRef">
+            <div class="header cy-note-header d-flex m-2 justify-content-between">
+                <h1 class="m-0">Notes</h1>
+                <button type="button" class="btn-close" id="close_to_do_sidebar" t-on-click="_close_note"  aria-label="close"/>
+            </div>
+            <hr class="o_sticky_line"/>
+            <div class="content cyllo-notes-content" style="height: 90vh; padding: 10px; overflow: auto;">
+                <StickyNoteAdd t-if="!this.state.edit_note_id" mode="this.state.isEdit" t-on-click="() => (this.state.isEdit = !this.state.isEdit)"/>
+                <br/>
+                <StickyNoteCreate t-if="this.state.isEdit"/>
+                <t t-foreach="this.state.notes" t-as="notes" t-key="notes.id">
+                    <StickyNoteItem id="notes.id" title="notes.title" description="notes.description"
+                                    create_date="notes.create_date" colour="notes.colour" is_edit="this.state.edit_note_id === notes.id" show_remove="!state.edit_note_id"/>
+                </t>
+            </div>
+        </body>
+    </t>
+</template>

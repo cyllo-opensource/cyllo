@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_plm_eco_type_tree" model="ir.ui.view">
+        <field name="name">view.plm.eco.type.tree</field>
+        <field name="model">plm.eco.type</field>
+        <field name="priority" eval="16"/>
+        <field name="arch" type="xml">
+            <tree string="ECO Types">
+                <field name="name"/>
+                <field name="eco_type"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_plm_eco_type_form" model="ir.ui.view">
+        <field name="name">view.plm.eco.type.form</field>
+        <field name="model">plm.eco.type</field>
+        <field name="priority" eval="16"/>
+        <field name="arch" type="xml">
+            <form string="ECO Type">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="eco_type"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description_page">
+                            <field name="description" placeholder="Describe the purpose of this ECO type..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_plm_eco_type_search" model="ir.ui.view">
+        <field name="name">view.plm.eco.type.search</field>
+        <field name="model">plm.eco.type</field>
+        <field name="priority" eval="16"/>
+        <field name="arch" type="xml">
+            <search string="Search ECO Type">
+                <field name="name"/>
+                <field name="eco_type"/>
+                <group expand="0" string="Group By">
+                    <filter string="Type Category" name="group_by_eco_type" context="{'group_by': 'eco_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_view_plm_eco_type" model="ir.actions.act_window">
+        <field name="name">ECO Types</field>
+        <field name="res_model">plm.eco.type</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_plm_eco_type_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Define a new ECO Type
+            </p>
+            <p>
+                ECO Types are used to categorize Engineering Change Orders.
+                Examples: Product Changes, Bill of Materials Changes, etc.
+            </p>
+        </field>
+    </record>
+</odoo>

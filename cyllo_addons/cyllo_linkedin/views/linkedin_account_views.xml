@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_linkedin_account_tree" model="ir.ui.view">
+        <field name="name">linkedin.account.tree</field>
+        <field name="model">linkedin.account</field>
+        <field name="arch" type="xml">
+            <tree string="LinkedIn Accounts">
+                <field name="name"/>
+                <field name="company_id"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'connected'"
+                       decoration-info="state == 'not connected'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_linkedin_account_form" model="ir.ui.view">
+        <field name="name">linkedin.account.form</field>
+        <field name="model">linkedin.account</field>
+        <field name="arch" type="xml">
+            <form string="LinkedIn Account">
+                <header>
+                    <button name="action_connect_linkedin" type="object" string="Connect LinkedIn"
+                            class="btn-primary" invisible="state == 'connected'"/>
+                    <button name="action_fetch_linkedin_feeds" type="object" string="Fetch Feeds"
+                            class="btn-secondary" invisible="state != 'connected'"/>
+                    <button name="action_disconnect" type="object" string="Disconnect"
+                            invisible="state == 'not connected'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="eg: LinkedIn Profile"/></h1>
+                    </div>
+                    <group>
+                        <group string="Account Information">
+                            <field name="username"/>
+                            <field name="linkedin_access_token" readonly="1"/>
+                            <field name="state" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                        </group>
+                        <group string="OAuth App Credentials">
+                            <field name="oauth_provider_id" invisible="1"/>
+                            <field name="client_id"/>
+                            <field name="client_secret" password="True"/>
+                        </group>
+                    </group>
+                    <notebook invisible="state != 'connected'">
+                        <page string="Managed Organizations" name="organizations">
+                            <field name="org_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="org_urn"/>
+                                    <field name="type"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'active'"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_linkedin_account" model="ir.actions.act_window">
+        <field name="name">LinkedIn Accounts</field>
+        <field name="res_model">linkedin.account</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_linkedin_accounts"
+              name="LinkedIn Accounts"
+              parent="cyllo_social_media_marketing.menu_configuration_categ"
+              action="action_linkedin_account"
+              sequence="30"/>
+</odoo>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.ListOverall">
+        <div class="cy-container">
+            <div class="cy-heading">
+                <span>Attributes</span>
+            </div>
+            <div class="list-container">
+                <div class="list-checkbox-group studioTree">
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Can Create</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-model="props.mode.activeActions.create"
+                                t-on-click="(ev)=> this.props.handleView('create',!props.mode.activeActions.create)"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Can Edit</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-model="props.mode.activeActions.edit"
+                                t-on-click="(ev)=> this.props.handleView('edit',!props.mode.activeActions.edit)"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Can Delete</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-model="props.mode.activeActions.delete"
+                                t-on-click="(ev)=> this.props.handleView('delete',!props.mode.activeActions.delete)"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Show Invisible Elements</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-att-checked="props.showInvisible"
+                                t-on-click="(ev)=> this.props.showInvisibleFields(ev)"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Show Optional Fields</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-att-checked="props.showOptional"
+                                t-on-click="(ev)=> this.props.showOptionalFields(ev)"/>
+                            <span class="cy-slider"/>
+                        </label>
+                    </div>
+                    <t t-if="props.mode.activeActions.edit">
+                        <div class="cy-toggle-row">
+                            <span class="cy-toggle-label">Mass Edit</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.multiEdit"
+                                    t-on-click="(ev)=> this.props.handleView('multi_edit',!props.mode.multiEdit)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+                    </t>
+
+
+                    <div style="margin-top:5%">
+
+                        <div class="input-overall">
+                            <label class="cy-overall-label" for="sort_select_by_input">Group by
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown options="sortValues" defaultValue="props.mode.defaultGroupBy || 'Default' " onChange="(field)=> this.props.handleView('default_group_by',field)" searchable="true"/>
+                            </div>
+                        </div>
+
+                        <div class="input-overall">
+                            <label class="cy-overall-label" for="sort_select_by_input">Sort by
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown options="sortValues" defaultValue="defaultSortValue || 'Default'" onChange="(field)=> this.props.handleView('default_order',field || 'id', 'asc')" searchable="true"/>
+                            </div>
+                        </div>
+                        <div t-if="defaultSortValue">
+                            <div class="checkbox-item">
+                                <input class="checkbox-input d-none ViewCheck" type="radio" id="asc" name="default_order" value="asc" t-att-checked="props.mode.defaultOrder[0]?.asc" t-on-change="(ev) => this.props.handleView('default_order',defaultSortValue, 'asc')"/>
+                                <label class="checkbox-label" for="asc">
+                                    <span class="checkbox-indicator">
+                                        <svg width="12px" height="9px" viewBox="0 0 12 9">
+                                            <polyline points="1 5 4 8 11 1"></polyline>
+                                        </svg>
+                                    </span>
+                                    <span class="label-text">Ascending</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input class="checkbox-input d-none ViewCheck" type="radio" id="desc" name="default_order" value="desc" t-att-checked="!props.mode.defaultOrder[0]?.asc" t-on-change="(ev) => this.props.handleView('default_order',defaultSortValue, 'desc')"/>
+                                <label class="checkbox-label" for="desc">
+                                    <span class="checkbox-indicator">
+                                        <svg width="12px" height="9px" viewBox="0 0 12 9">
+                                            <polyline points="1 5 4 8 11 1"></polyline>
+                                        </svg>
+                                    </span>
+                                    <span class="label-text">Descending</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="input-overall">
+                            <label class="cy-overall-label" for="sort_select_by_input">Select
+                                    Position
+                            </label>
+                            <div class="cy-studio-custom-dropdown">
+                                <CylloStudioDropdown options="position" defaultValue="defaultPosition" onChange="(field)=> this.props.handleView('editable',field)" searchable="true"/>
+                            </div>
+                        </div>
+                        <t t-if="state.isStudioModel">
+                            <div class="input-overall">
+                                <label class="cy-overall-label" for="sort_select_by_input">Display Name
+                                </label>
+                                <div class="cy-studio-custom-dropdown">
+                                    <CylloStudioDropdown t-props="{
+                                                    defaultValue: state.currentRecName,
+                                                    options: state.recordNameOptions,
+                                                    onChange: onRecordNameChange,
+                                                    searchable: true,
+                                                }"/>
+                                </div>
+                            </div>
+                        </t>
+
+                        <div class="cy-toggle-row" t-if="defaultPosition">
+                            <span class="cy-toggle-label">Show Link To Record</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.openFormView"
+                                    t-on-click="(ev) => this.props.handleView('open_form_view', !props.mode.openFormView)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

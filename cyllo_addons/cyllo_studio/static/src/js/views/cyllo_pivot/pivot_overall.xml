@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.PivotOverall">
+        <div class="cy-pivot-panel">
+
+            <!-- Toggles section -->
+            <div class="cy-pivot-section">
+                <div class="cy-pivot-toggle-row">
+                    <span class="cy-pivot-toggle-label">Disable Link To Record</span>
+                    <label class="cy-pivot-switch">
+                        <input type="checkbox" t-model="props.mode.disableLinking"
+                            t-on-click="(ev)=> this.props.handleView('disable_linking',!props.mode.disableLinking)" />
+                        <span class="cy-pivot-slider" />
+                    </label>
+                </div>
+                <div class="cy-pivot-toggle-row">
+                    <span class="cy-pivot-toggle-label">Sticky Pivot</span>
+                    <label class="cy-pivot-switch">
+                        <input type="checkbox" t-model="props.mode.sticky"
+                            t-on-click="(ev)=> this.props.handleView('sticky',!props.mode.sticky)" />
+                        <span class="cy-pivot-slider" />
+                    </label>
+                </div>
+                <div class="cy-pivot-toggle-row">
+                    <span class="cy-pivot-toggle-label">Display Quantity</span>
+                    <label class="cy-pivot-switch">
+                        <input type="checkbox" t-model="props.mode.displayQuantity"
+                            t-on-click="({target})=>this.updatePivot('display_quantity', target.checked)" />
+                        <span class="cy-pivot-slider" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- Column Grouping -->
+            <div class="cy-pivot-section">
+                <div class="cy-pivot-section-header">
+                    <span class="cy-pivot-section-title">Column Grouping</span>
+                    <button t-if="state.addNew.colGroupBys" class="cy-pivot-add-btn"
+                        t-on-click="()=>this.handleInputGrouping('colGroupBys')"
+                        title="Add Column Grouping">
+                        <i class="fa fa-plus" />
+                    </button>
+                </div>
+                <div class="cy-pivot-items" id="columnGrouping">
+                    <t t-foreach="state.colGroupBys" t-as="colGroupBys" t-key="colGroupBys_index">
+                        <div class="cy-pivot-item">
+                            <t t-if="colGroupBys">
+                                <span class="cy-pivot-item-label">
+                                    <t t-set="value"
+                                        t-value="colGroupBys.includes(':') ? colGroupBys.split(':')[0] : colGroupBys" />
+                                    <t t-set="interval"
+                                        t-value="colGroupBys.includes(':') ? colGroupBys.split(':')[1] : false" />
+                                    <t t-esc="props.activeFields[value].string" />
+                                    <t t-if="interval"> · <t t-esc="interval" /></t>
+                                </span>
+                            </t>
+                            <t t-else="">
+                                <div class="cy-studio-custom-dropdown" style="flex:1;">
+                                    <CylloStudioDropdown
+                                        options="groupByFields"
+                                        onChange="(v) => this.selectGroupField(v, 'col')"
+                                        searchable="true"
+                                        placeholder="'Select a field'"/>
+                                </div>
+                            </t>
+                            <button class="cy-pivot-delete-btn"
+                                t-on-click="() => this.handleRemoveGroup('colPath', colGroupBys_index, 'colGroupBys')">
+                                <i class="ri-close-line" />
+                            </button>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- Row Grouping -->
+            <div class="cy-pivot-section">
+                <div class="cy-pivot-section-header">
+                    <span class="cy-pivot-section-title">Row Grouping</span>
+                    <button t-if="state.addNew.rowGroupBys" class="cy-pivot-add-btn"
+                        t-on-click="()=>this.handleInputGrouping('rowGroupBys')"
+                        title="Add Row Grouping">
+                        <i class="fa fa-plus" />
+                    </button>
+                </div>
+                <div class="cy-pivot-items" id="rowGrouping">
+                    <t t-if="state.rowGroupBys">
+                        <t t-foreach="state.rowGroupBys" t-as="rowGroupBys"
+                            t-key="rowGroupBys_index">
+                            <div class="cy-pivot-item">
+                                <t t-if="rowGroupBys">
+                                    <span class="cy-pivot-item-label">
+                                        <t t-set="value"
+                                            t-value="rowGroupBys.includes(':') ? rowGroupBys.split(':')[0] : rowGroupBys" />
+                                        <t t-set="interval"
+                                            t-value="rowGroupBys.includes(':') ? rowGroupBys.split(':')[1] : false" />
+                                        <t t-esc="props.activeFields[value].string" />
+                                        <t t-if="interval"> · <t t-esc="interval" /></t>
+                                    </span>
+                                </t>
+                                <t t-else="">
+                                    <div class="cy-studio-custom-dropdown" style="flex:1;">
+                                        <CylloStudioDropdown
+                                            options="groupByFields"
+                                            onChange="(v) => this.selectGroupField(v, 'row')"
+                                            searchable="true"
+                                            placeholder="'Select a field'"/>
+                                    </div>
+                                </t>
+                                <button class="cy-pivot-delete-btn"
+                                    t-on-click="() => this.handleRemoveGroup('rowPath', rowGroupBys_index, 'rowGroupBys')">
+                                    <i class="ri-delete-bin-fill" />
+                                </button>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+            </div>
+
+            <!-- Measure -->
+            <div class="cy-pivot-section">
+                <div class="cy-pivot-section-header">
+                    <span class="cy-pivot-section-title">Measure</span>
+                    <button t-if="state.addNew.activeMeasures" class="cy-pivot-add-btn"
+                        t-on-click="()=>this.handleInputGrouping('activeMeasures')"
+                        title="Add Measure">
+                        <i class="fa fa-plus" />
+                    </button>
+                </div>
+                <div class="cy-pivot-items" id="measure">
+                    <t t-if="state.loadedActiveMeasures">
+                        <t t-foreach="state.loadedActiveMeasures?.filter(m => m !== '__count')"
+                            t-as="loadedActiveMeasure" t-key="loadedActiveMeasure_index">
+                            <div class="cy-pivot-item">
+                                <span class="cy-pivot-item-label"
+                                    t-esc="props.activeFields[loadedActiveMeasure].string" />
+                            </div>
+                        </t>
+                    </t>
+                    <t t-if="state?.activeMeasures">
+                        <t t-foreach="state.activeMeasures.filter(m => m !== '__count')"
+                            t-as="activeMeasure" t-key="activeMeasure_index">
+                            <div class="cy-pivot-item">
+                                <t t-if="activeMeasure">
+                                    <span class="cy-pivot-item-label"
+                                        t-esc="props.activeFields[activeMeasure].string" />
+                                </t>
+                                <t t-else="">
+                                    <div class="cy-studio-custom-dropdown">
+                                        <CylloStudioDropdown
+                                            options="measureFields"
+                                            onChange="(v) => this.selectGroupField(v, 'measure')"
+                                            searchable="true"
+                                            placeholder="'Select a field'"/>
+                                    </div>
+                                </t>
+                                <button class="cy-pivot-delete-btn"
+                                    t-on-click="(ev) => this.handleRemoveGroup('measurePath', activeMeasure_index, 'activeMeasures')">
+                                    <i class="ri-delete-bin-fill" />
+                                </button>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+            </div>
+
+        </div>
+    </t>
+</templates>

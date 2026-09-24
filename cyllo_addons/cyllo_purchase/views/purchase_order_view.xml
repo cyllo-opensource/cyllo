@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Inherited Purchase order form to add Global discount-->
+    <record id="view_purchase_order_form" model="ir.ui.view">
+        <field name="name">view.purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='notes']" position="before">
+                <field name="is_global_discount"/>
+                <field name="discount_type"
+                       invisible="is_global_discount == False"
+                       required="is_global_discount == True"/>
+                <field name="discount_amount"
+                       invisible=" discount_type != 'amount' or is_global_discount == False"
+                       required="discount_type == 'amount' or is_global_discount == True"/>
+                <field name="discount_percentage"
+                       invisible=" discount_type != 'percentage' or is_global_discount == False"
+                       required="discount_type == 'percentage' or is_global_discount == True"/>
+                <button name="action_apply_discount" type="object"
+                        string="Apply" class="btn btn-primary"
+                        invisible="is_global_discount == False"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

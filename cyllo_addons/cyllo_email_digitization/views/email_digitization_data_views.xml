@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_email_digitization_data_tree" model="ir.ui.view">
+        <field name="name">view.email.digitization.data.tree</field>
+        <field name="model">email.digitization.data</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_email_digitization_data_form" model="ir.ui.view">
+        <field name="name">view.email.digitization.data.form</field>
+        <field name="model">email.digitization.data</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_digitize"
+                            type="object"
+                            string="Digitize"
+                            class="oe_highlight"
+                            invisible="state in ['done', 'error']"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <div role="status"
+                     class="alert alert-success mb8 text-center"
+                     invisible="state != 'done'">
+                    Digitization Successfully completed
+                    <button type="object"
+                            name="action_retry_digitization"
+                            class="btn btn-link">
+                        Retry
+                    </button>
+                </div>
+                <div role="status" class="alert alert-danger mb8 text-center"
+                     invisible="state != 'error'">
+                    <field name="digitize_message"/>
+                    <button type="object"
+                            name="action_retry_digitization"
+                            class="btn btn-link">
+                        Retry
+                    </button>
+                </div>
+                <sheet>
+                    <field name="order_id" invisible="1"/>
+                    <div class="oe_button_box" name="button_box"
+                         invisible="not order_id">
+                        <button type="object"
+                                name="action_view_order"
+                                class="oe_stat_button"
+                                icon="fa-pencil-square-o"
+                                invisible="model_name!='purchase.order'">
+                            Purchase Order
+                        </button>
+                        <button type="object"
+                                name="action_view_order"
+                                class="oe_stat_button"
+                                icon="fa-pencil-square-o"
+                                invisible="model_name!='sale.order'">
+                            Sale Order
+                        </button>
+                    </div>
+                    <h1 class="oe_title">
+                        <field name="name"/>
+                    </h1>
+                    <group>
+                        <field name="data"/>
+                        <field name="html"/>
+                        <field name="attachment_ids" widget="many2many_tags"/>
+                        <field name="email_digitization_config_id"/>
+                        <field name="model_id" options="{'no_create': True, 'no_quick_create': True}"/>
+                        <field name="model_name" invisible="1" />
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- actions -->
+    <record id="action_view_email_digitization_data"
+            model="ir.actions.act_window">
+        <field name="name">Email Digitization Data</field>
+        <field name="res_model">email.digitization.data</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="menu_email_digitization_categ"
+              name="Email Digitization"
+              parent="cyllo_ocr_digitization.menu_cyllo_ocr_digitization_root"
+              sequence="1"/>
+    <menuitem id="menu_email_digitization_data"
+              name="Email Digitization Data"
+              parent="cyllo_email_digitization.menu_email_digitization_categ"
+              action="action_view_email_digitization_data"
+              sequence="1"/>
+</odoo>

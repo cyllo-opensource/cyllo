@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="WhatsAppNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="cy-work-auto-form">
+                <div t-if="!waState.isInstalled and !waState.checking"
+                     class="alert alert-warning d-flex align-items-center gap-2 mb-3">
+                    <i class="fa fa-exclamation-triangle"/>
+                    <span>
+                        <strong>cyllo_whatsapp is not installed.</strong>
+                        This node will be skipped at runtime. Install and configure the WhatsApp module first.
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label cy-modal-form_label">Label</label>
+                        <TypeToggler
+                            options="getTogglerOptions"
+                            value="isTemplateMode"
+                            updateValue.bind="updateMode"
+                            width="18"
+                        />
+                    </div>
+                    <input
+                        type="text"
+                        class="o_input"
+                        autocomplete="off"
+                        placeholder="e.g. Send WhatsApp to customer"
+                        t-on-focusout="setLabel"
+                        t-att-value="getLabel"
+                    />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Source Record</label>
+                    <small class="text-muted d-block mb-1">
+                        Pick the workflow variable that holds the record you want to message.
+                    </small>
+                    <CustomDropdown
+                        options="getRecordVariables"
+                        defaultValue="getSelectedRecord"
+                        onChange="(val) => this.updateRecord(val)"
+                        placeholder="'Select record variable...'"
+                        searchable="true"
+                        width="''"
+                    />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Partner Field Path</label>
+                    <small class="text-muted d-block mb-1">
+                        Choose whether to send to a fixed contact, a workflow variable, or a related field path -- the resolved partner must have a WhatsApp number.
+                    </small>
+                    <t t-set="partnerInfo" t-value="this.getPartnerValueEditorInfo()"/>
+                    <div class="d-flex mb-1">
+                        <div class="flex-grow-1 me-2">
+                            <t t-component="partnerInfo.component"
+                               t-props="getPartnerComponentProps(partnerInfo)"/>
+                        </div>
+                        <FieldTypeDropdown
+                                currentLabel="getPartnerDropdownLabel()"
+                                onSelected="(type) => this.togglePartnerFieldType(type)"
+                        />
+                    </div>
+                </div>
+
+                <div t-if="isTemplateMode" class="mb-3">
+                    <label class="form-label cy-modal-form_label">WhatsApp Template</label>
+                    <small class="text-muted d-block mb-1">
+                        Only approved templates are shown. Templates are managed under WhatsApp -> Templates.
+                    </small>
+                    <Many2XAutocomplete
+                        resModel="'whatsapp.template'"
+                        getDomain.bind="getTemplateDomain"
+                        fieldString="'WhatsApp Templates'"
+                        activeActions="{}"
+                        update.bind="onSelectTemplate"
+                        value="getTemplateName"
+                    />
+                </div>
+
+                <div t-if="!isTemplateMode" class="mb-3">
+                    <label class="form-label cy-modal-form_label">Message</label>
+                    <small class="text-muted d-block mb-1">
+                        Free-form messages only work within Meta's 24-hour customer service window.
+                        Use templates for first-contact or marketing messages.
+                    </small>
+                    <textarea
+                        class="form-control"
+                        rows="4"
+                        placeholder="Type your message here..."
+                        t-on-focusout="setFreeMessage"
+                        t-att-value="getFreeMessage"
+                    />
+                </div>
+
+                <div class="mb-3 mt-3">
+                    <label class="form-label cy-modal-form_label">Attachments</label>
+                    <CustomDropdown
+                        options="getAttachmentModeOptions"
+                        defaultValue="getAttachmentMode"
+                        onChange="(val) => this.updateAttachmentMode(val)"
+                        placeholder="'No Attachment'"
+                        searchable="false"
+                        width="''"
+                    />
+                </div>
+
+                <div class="mb-3" t-if="getAttachmentMode === 'static'">
+                    <label class="form-label cy-modal-form_label">Upload Files</label>
+                    <small class="text-muted d-block mb-2">
+                        Files uploaded here are stored in the system and sent whenever this node runs.
+                    </small>
+
+                    <div t-if="getStaticAttachments.length" class="mb-2">
+                        <div
+                            t-foreach="getStaticAttachments"
+                            t-as="att"
+                            t-key="att.id"
+                            class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1 bg-light"
+                        >
+                            <span class="text-truncate me-2">
+                                <i class="fa fa-paperclip me-1 text-muted"/>
+                                <t t-esc="att.name"/>
+                            </span>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-link text-danger p-0"
+                                t-on-click="() => this.removeStaticAttachment(att.id)"
+                            >
+                                <i class="fa fa-times"/>
+                            </button>
+                        </div>
+                    </div>
+
+                    <input
+                        type="file"
+                        class="d-none"
+                        t-ref="wa_file_input"
+                        t-on-change="onFileInputChange"
+                    />
+                    <button
+                        t-if="!waState.uploadingFile"
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        t-on-click="openFilePicker"
+                    >
+                        <i class="fa fa-upload me-1"/> Add File
+                    </button>
+                    <span t-if="waState.uploadingFile" class="text-muted">
+                        <i class="fa fa-spinner fa-spin me-1"/> Uploading...
+                    </span>
+                </div>
+
+                <div class="mb-3" t-if="getAttachmentMode === 'auto'">
+                    <label class="form-label cy-modal-form_label">Report / Document Type</label>
+                    <small class="text-muted d-block mb-1">
+                        Render a PDF from the selected record each time this workflow runs.
+                    </small>
+                    <div t-if="!getSelectedRecord" class="alert alert-warning py-2 px-3 mb-0">
+                        <i class="ri-exclamation-circle-line me-1"/>
+                        Select a <strong>Source Record</strong> above to filter reports.
+                    </div>
+                    <Many2XAutocomplete
+                        t-if="getSelectedRecord"
+                        resModel="'ir.actions.report'"
+                        getDomain.bind="getAutoReportDomain"
+                        fieldString="'Reports'"
+                        activeActions="{}"
+                        update.bind="onSelectAutoReport"
+                        value="getAutoReportName"
+                    />
+                </div>
+
+                <div class="mb-3" t-if="getAttachmentMode === 'auto' and waState.autoReportRequiresFilters">
+                    <label class="form-label cy-modal-form_label">Report Filters</label>
+                    <small class="text-muted d-block mb-2">
+                        This report is generated from a date range and accounting filters rather
+                        than the selected record. They are recalculated fresh every time the
+                        workflow runs.
+                    </small>
+
+                    <div class="mb-2">
+                        <label class="form-label cy-modal-form_label">Date Range</label>
+                        <CustomDropdown
+                            options="getDatePresetOptions"
+                            defaultValue="getDatePreset"
+                            onChange="(val) => this.updateDatePreset(val)"
+                            placeholder="'Select date range...'"
+                            searchable="false"
+                            width="''"
+                        />
+                    </div>
+
+                    <div class="row mb-2" t-if="getDatePreset === 'custom'">
+                        <div class="col-md-6">
+                            <label class="form-label cy-modal-form_label">Start Date</label>
+                            <input type="date" class="o_input" t-on-change="setCustomStartDate" t-att-value="getCustomStartDate"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label cy-modal-form_label">End Date</label>
+                            <input type="date" class="o_input" t-on-change="setCustomEndDate" t-att-value="getCustomEndDate"/>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label cy-modal-form_label">Journals (optional)</label>
+                        <div t-if="getReportJournals.length" class="mb-2">
+                            <div
+                                t-foreach="getReportJournals"
+                                t-as="journal"
+                                t-key="journal.id"
+                                class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1 bg-light"
+                            >
+                                <span class="text-truncate me-2"><t t-esc="journal.name"/></span>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-link text-danger p-0"
+                                    t-on-click="() => this.removeReportJournal(journal.id)"
+                                >
+                                    <i class="fa fa-times"/>
+                                </button>
+                            </div>
+                        </div>
+                        <Many2XAutocomplete
+                            resModel="'account.journal'"
+                            getDomain.bind="getReportJournalDomain"
+                            fieldString="'Journals'"
+                            activeActions="{}"
+                            update.bind="onAddReportJournal"
+                            value="''"
+                        />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label cy-modal-form_label">Analytic Accounts (optional)</label>
+                        <div t-if="getReportAnalytics.length" class="mb-2">
+                            <div
+                                t-foreach="getReportAnalytics"
+                                t-as="analytic"
+                                t-key="analytic.id"
+                                class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1 bg-light"
+                            >
+                                <span class="text-truncate me-2"><t t-esc="analytic.name"/></span>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-link text-danger p-0"
+                                    t-on-click="() => this.removeReportAnalytic(analytic.id)"
+                                >
+                                    <i class="fa fa-times"/>
+                                </button>
+                            </div>
+                        </div>
+                        <Many2XAutocomplete
+                            resModel="'account.analytic.account'"
+                            getDomain.bind="getReportAnalyticDomain"
+                            fieldString="'Analytic Accounts'"
+                            activeActions="{}"
+                            update.bind="onAddReportAnalytic"
+                            value="''"
+                        />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label cy-modal-form_label">Target Move</label>
+                        <CustomDropdown
+                            options="getTargetMoveOptions"
+                            defaultValue="getTargetMove"
+                            onChange="(val) => this.updateTargetMove(val)"
+                            placeholder="'Select target move...'"
+                            searchable="false"
+                            width="''"
+                        />
+                    </div>
+                </div>
+
+                <div t-if="waState.isInstalled" class="alert alert-info d-flex gap-2 mt-2 mb-0">
+                    <i class="fa fa-info-circle mt-1"/>
+                    <small>
+                        The sending user must have their WhatsApp account configured
+                        (Settings -> Users -> WhatsApp Account tab). If not configured,
+                        execution will raise a warning and halt the workflow.
+                    </small>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

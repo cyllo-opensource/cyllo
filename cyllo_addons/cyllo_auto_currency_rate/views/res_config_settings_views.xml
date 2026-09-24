@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_config_settings_inherit_currency_form"
+            model="ir.ui.view">
+        <field name="name">view.res.config.settings.inherit.currency.form
+        </field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='main_currency']" position="after">
+                <setting id="enable_currency_update" company_dependent="1"
+                         string="Currency Rate Auto-Update"
+                         help="Automatically update currency exchange rates">
+                    <field name="enable_currency_update"/>
+                    <div class="content-group mt16"
+                         invisible="not enable_currency_update">
+                        <div id="currency_update_service" class="row mt16">
+                            <label for="currency_update_service"
+                                   string="Service"
+                                   class="o_light_label"/>
+                            <field name="currency_update_service"
+                                   class="mt-1"
+                                   required="enable_currency_update"/>
+                        </div>
+
+                        <div class="row mt8">
+                            <field name="fixer_api_key"
+                                   class="mt-1"
+                                   invisible="currency_update_service != 'fixer'"
+                                   required="currency_update_service == 'fixer'"/>
+                        </div>
+
+                        <div class="row mt8">
+                            <label for="currency_update_interval"
+                                   string="Update Interval"
+                                   class="o_light_label"/>
+                            <field name="currency_update_interval"
+                                   class="mt-1"
+                                   required="enable_currency_update"/>
+                        </div>
+
+                        <div class="row mt8"
+                             invisible="currency_update_interval == 'manual'">
+                            <label for="currency_next_execution_date"
+                                   string="Next Scheduled Update"
+                                   class="o_light_label"/>
+                            <field name="currency_next_execution_date"
+                                   class="mt-1 ms-3"/>
+                        </div>
+
+                        <div class="row mt16">
+                            <div class="col-lg-12">
+                                <button name="action_update_currency_rates_now"
+                                        string="Update Now"
+                                        type="object"
+                                        class="btn-primary"
+                                        icon="fa-refresh"/>
+                                <span class="text-muted ms-2">
+                                    Manually trigger currency rate update
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

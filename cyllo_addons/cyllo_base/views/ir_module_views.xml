@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--link to stores-->
+    <record id="base.action_third_party" model="ir.actions.act_url">
+        <field name='name'>Third-Party Apps</field>
+        <field name='url'>https://apps.cyllo.com/</field>
+    </record>
+    <record model='ir.actions.act_url' id='base.action_theme_store'>
+        <field name='name'>Theme Store</field>
+        <field name='url'>https://apps.cyllo.com/apps/themes</field>
+    </record>
+    <!--Remove learn more option from Apps menu-->
+    <record id="view_ir_module_module_form" model="ir.ui.view">
+        <field name="name">view.ir.module.module.form</field>
+        <field name="model">ir.module.module</field>
+        <field name="inherit_id" ref="base.module_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='website']" position="replace">
+            </xpath>
+        </field>
+    </record>
+    <!--Adding Upgrade Button and Uninstall Button to app tile-->
+    <record id="view_ir_module_module_kanban" model="ir.ui.view">
+        <field name="name">view.ir.module.module.kanban</field>
+        <field name="model">ir.module.module</field>
+        <field name="inherit_id" ref="base.module_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_module_action')]"
+                   position="replace">
+                <div class="oe_module_action d-flex flex-wrap justify-content-between">
+                    <button type="object" name="button_immediate_install"
+                            class="btn btn-primary btn-sm"
+                            invisible="state != 'uninstalled'"
+                            t-if="! record.to_buy.raw_value"
+                            groups="base.group_system">Activate
+                    </button>
+                    <div t-if="installed"
+                         class="d-flex align-items-center text-muted float-start">
+                        Installed
+                    </div>
+                    <a href="https://odoo.com/pricing?utm_source=db&amp;utm_medium=module#hosting=on_premise"
+                       target="_blank" class="btn btn-info btn-sm"
+                       invisible="state not in ['uninstalled', 'uninstallable']"
+                       t-if="record.to_buy.raw_value" role="button"
+                       groups="base.group_system">Upgrade
+                    </a>
+                    <button type="object" name="button_uninstall_cancel"
+                            invisible="state != 'to remove'"
+                            class="btn btn-sm btn-primary"
+                            groups="base.group_system">Cancel Uninstall
+                    </button>
+                    <button type="object" name="button_install_cancel"
+                            invisible="state != 'to install'"
+                            class="btn btn-sm btn-primary"
+                            groups="base.group_system">Cancel Install
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//div[@t-if='installed']" position="after">
+                <button type="object" name="button_immediate_upgrade"
+                        t-if="installed"
+                        class="btn btn-sm btn-primary float-end" role="menuitem"
+                        groups="base.group_system">
+                    Upgrade
+                </button>
+                <button type="object" name="button_uninstall_wizard"
+                        t-if="installed"
+                        class="btn btn-sm btn-secondary" role="menuitem"
+                        groups="base.group_system">
+                    Uninstall
+                </button>
+            </xpath>
+            <xpath expr="//a[@t-att-href='record.website.raw_value']"
+                   position="replace"/>
+        </field>
+    </record>
+<!--    Search view for apps-->
+    <record id="view_ir_module_module_filter" model="ir.ui.view">
+        <field name="name">ir.module.module.filter</field>
+        <field name="model">ir.module.module</field>
+        <field name="inherit_id" ref="base.view_module_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <filter
+                    name="cyllo_modules"
+                    string="Cyllo"
+                    domain="['|', '|', ('summary', 'ilike', 'cyllo'), ('shortdesc', 'ilike', 'cyllo'), ('name', 'ilike', 'cyllo')]"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <!--    Setting attribute for author-->
+    <record id="view_ir_module_module_tree" model="ir.ui.view">
+        <field name="name">view.ir.module.module.tree</field>
+        <field name="model">ir.module.module</field>
+        <field name="inherit_id" ref="base.module_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='author']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='website']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_view_main_apps" model="ir.actions.act_window">
+        <field name="name">Apps</field>
+        <field name="res_model">ir.module.module</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('to_buy','=', False)]</field>
+        <field name="context">{'search_default_cyllo_modules': 1 }</field>
+        <field name="search_view_id" ref="base.view_module_filter"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No module found!
+            </p>
+            <p>
+                You should try other search criteria.
+            </p>
+        </field>
+    </record>
+    <!-- Menu item for Apps and Main Apps-->
+    <menuitem id="base.menu_apps" name="Apps" parent="base.menu_management"
+              sequence="5"/>
+    <menuitem id="base.menu_module_tree" parent="base.menu_apps"
+              name="Main Apps" sequence="5"
+              action="action_view_main_apps"/>
+</odoo>

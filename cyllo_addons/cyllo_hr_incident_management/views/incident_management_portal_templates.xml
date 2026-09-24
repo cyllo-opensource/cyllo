@@ -1,0 +1,618 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Template for showing breadcrumbs-->
+    <template id="incident_request_portal_layout"
+              name="Portal layout : Incident Requests"
+              inherit_id="portal.portal_breadcrumbs" priority="66">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'incident_page'"
+                class="breadcrumb-item active">
+                <span>Incident Requests</span>
+            </li>
+            <li t-if="page_name == 'incident_details'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/incident_management" aria-label="Home">
+                    <span>Incident Requests</span>
+                </a>
+                <span>/
+                    <t t-out="incident_req.name"/>
+                </span>
+            </li>
+            <li t-if="page_name == 'create_incident'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/incident_management" aria-label="Home">
+                    <span>Incident Requests</span>
+                </a>
+                <span>/ Create</span>
+            </li>
+        </xpath>
+    </template>
+    <!-- Table content of incident requests -->
+    <template id="portal_incident_management_table"
+              name="Table incident Portal">
+        <t t-if="table_content">
+            <table class="table mt16">
+                <tbody>
+                    <t t-foreach="table_content" t-as="incident_request">
+                        <tr>
+                            <td>
+                                <div>
+                                    <div class="row">
+                                        <div class="request_top col-md-8">
+                                            <span class="request-title">
+                                                <h5>
+                                                    <a t-att-href="incident_request.get_portal_url()"
+                                                       class="disciplinary_tracking_name"
+                                                       t-esc="incident_request.name"/>
+                                                </h5>
+                                            </span>
+                                            <span class=" mr4">
+                                                Initiator:
+                                                <t t-esc="incident_request.incident_initiator_id.name"/>
+                                            </span>
+                                            <br/>
+                                            <span>
+                                                Category:
+                                                <t t-esc="incident_request.incident_category_id.name"/>
+                                            </span>
+                                            <br/>
+                                        </div>
+                                        <div class="request_content col-md-4">
+                                            <span t-if="incident_request.incident_stage == 'new'"
+                                                  class="badge text-bg-info state_badge">
+                                                New
+                                            </span>
+                                            <span t-elif="incident_request.incident_stage == 'submitted'"
+                                                  class="badge text-bg-info state_badge">
+                                                Submitted
+                                            </span>
+                                            <span t-elif="incident_request.incident_stage == 'ongoing'"
+                                                  class="badge text-bg-info state_badge">
+                                                Ongoing
+                                            </span>
+                                            <span t-elif="incident_request.incident_stage == 'completed'"
+                                                  class="badge text-bg-info state_badge">
+                                                Completed
+                                            </span>
+                                            <div class="o_cyllo_support_date">
+                                                <t t-if="incident_request.create_date">
+                                                    <span t-field="incident_request.create_date"
+                                                          class="date"/>
+                                                </t>
+                                                <span class="img-rounded user_img"
+                                                      t-field="incident_request.incident_initiator_id.image_1920"
+                                                      t-att-title="incident_request.incident_initiator_id.name"
+                                                      t-options="{'widget': 'image', 'class': 'img-rounded create_user_image'}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </t>
+    </template>
+    <!--  Template that shows all user incident requests -->
+    <template id="incident_request_template" name="Incident Requests">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Incident Request</t>
+            </t>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist"
+                        style="border-color: white;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-incident-requests-state-btn active"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#all" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">All
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-incident-requests-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#new" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">New
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-incident-requests-state-btn"
+                                    id="profile-tab"
+                                    data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#submitted" type="button"
+                                    role="tab"
+                                    aria-controls="profile"
+                                    aria-selected="false">Submitted
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-incident-requests-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#ongoing" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Ongoing
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cy-incident-requests-state-btn"
+                                    id="profile-tab" data-bs-toggle="tab"
+                                    style="border-color: white;"
+                                    data-bs-target="#completed" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Completed
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-6  d-flex justify-content-end">
+                    <a href="/incident_management/create"
+                       class="btn btn-primary cy-create_btn mt24 mb8">
+                        Create Incident
+                    </a>
+                </div>
+            </div>
+            <div class="tab-content">
+                <t t-set="url" t-value="'/incident_management/create'"/>
+                <t t-set="description" t-value="'Currently No Incidents !'"/>
+                <div class="tab-pane fade show active w-100" id="all"
+                     role="tabpanel" aria-labelledby="home-tab">
+                    <t t-if="incident_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="user_incidents"/>
+                        <t t-call="cyllo_hr_incident_management.portal_incident_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="new" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="new_incidents_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="new_incidents"/>
+                        <t t-call="cyllo_hr_incident_management.portal_incident_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="submitted" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="submitted_incidents_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="submitted_incidents"/>
+                        <t t-call="cyllo_hr_incident_management.portal_incident_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane w-100 fade" id="ongoing" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="ongoing_incidents_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="ongoing_incidents"/>
+                        <t t-call="cyllo_hr_incident_management.portal_incident_management_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="completed" role="tabpanel"
+                     aria-labelledby="profile-tab">
+                    <t t-if="completed_incidents_count == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="completed_incidents"/>
+                        <t t-call="cyllo_hr_incident_management.portal_incident_management_table"/>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!--  Template that shows details of incident requests -->
+    <template id="incident_requests_details" name="Incident Requests Content"
+              inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <t t-set="o_portal_fullwidth_alert" groups="base.group_user">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url"
+                       t-value="'/web#return_label=Website&amp;model=hr.incident&amp;id=%s&amp;' % object.id"/>
+                </t>
+            </t>
+            <div class="row mt16 o_cy_portal_sidebar">
+                <t t-call="cyllo_portal.cy_portal_record_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+                    <t t-set="title">
+                        <h3 t-esc="object.name"/>
+                    </t>
+                    <t t-set="entries">
+                        <div class="d-flex flex-column gap-1 order-md-last order-lg-first">
+                            <div class="d-flex flex-column gap-4">
+                                <div class="o_download_pdf">
+                                    <a class="btn btn-primary o_print_btn d-block"
+                                       t-att-href="object.get_portal_url(report_type='pdf')"
+                                       title="View Details" target="_blank">
+                                        <i class="fa fa-print"/>
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-4"
+                                 t-if="object.is_submitted == False">
+                                <div>
+                                    <a t-attf-href="/incident_request/submit/{{object.id}}"
+                                       class="btn btn-secondary mt24 w-100 mb8">
+                                        Submit Request
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="navspy flex-grow-1 ps-0" t-ignore="true"
+                             role="complementary">
+                            <ul class="nav flex-column bs-sidenav"/>
+                        </div>
+                        <div t-if="object.date">
+                            <small>
+                                <b>Requested Date</b>
+                            </small>
+                            <div t-field="object.date"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.incident_initiator_id">
+                            <h6>
+                                <small class="text-muted">Your contact</small>
+                            </h6>
+                            <div class="o_portal_contact_details d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-start align-items-center gap-2">
+                                    <img class="o_avatar o_portal_contact_img rounded"
+                                         t-if="object.incident_initiator_id"
+                                         t-att-src="image_data_uri(object.incident_initiator_id.avatar_1024)"
+                                         alt="Contact"/>
+                                    <img class="o_avatar o_portal_contact_img rounded"
+                                         t-else=""
+                                         t-att-alt="'%s' % object.company_id.name"
+                                         alt="Contact"/>
+                                    <div>
+                                        <h6 class="mb-0"
+                                            t-out="object.incident_initiator_id.name"/>
+                                        <a href="#discussion"
+                                           class="d-flex align-items-center gap-2 small fw-bold">
+                                            Send message
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <div id="quote_content"
+                     class="col-12 col-lg justify-content-end">
+                    <div class="p-3 o_cy_portal_border border">
+                        <h2 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
+                            <span class="badge text-bg-warning  state_badge mt-2"
+                                  style="font-size:15px;"
+                                  t-field="object.incident_stage">
+                            </span>
+                        </h2>
+                        <br/>
+                        <div id="incident_name" class="row mt-4">
+                            <div class="col-2 ml-4">
+                                <hr class="my-0"/>
+                                <div>
+                                    <h1>
+                                        <t t-esc="object.name"/>
+                                    </h1>
+                                </div>
+                            </div>
+                            <div id="customer_info"
+                                 class="col-10 col-lg-6 offset-lg-1 ms-auto">
+                                <hr class="my-0"/>
+                                <strong t-esc="object.incident_initiator_id.name"/>
+                                <div t-field="object.incident_initiator_id.address_id"
+                                     t-options="{ 'widget': 'contact', 'fields': [ 'name', 'address', 'phone', 'email']}"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <section id="details" style="page-break-inside: auto;"
+                                 class="mt32 row">
+                            <h3>
+                                Incident Information
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2">
+                                <div class="col-md-3 mb-2" t-if="object.name">
+                                    <strong>Name :</strong>
+                                    <br/>
+                                    <span t-field="object.name"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.incident_initiator_id">
+                                    <strong>Initiator</strong>
+                                    <br/>
+                                    <span t-field="object.incident_initiator_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.company_id">
+                                    <strong>Company</strong>
+                                    <br/>
+                                    <span t-field="object.company_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.date">
+                                    <strong>Submitted Date</strong>
+                                    <br/>
+                                    <span t-field="object.date"/>
+                                    <span/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.date_done">
+                                    <strong>Completion Date</strong>
+                                    <br/>
+                                    <span t-field="object.date_done"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.incident_category_id">
+                                    <strong>Category</strong>
+                                    <br/>
+                                    <span t-field="object.incident_category_id"/>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="initiator_details"
+                                 style="page-break-inside: auto;"
+                                 class="mt32 row">
+                            <h3>
+                                Initiator Details
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2">
+                                <div class="col-md-3 mb-2" t-if="object.name">
+                                    <strong>Initiator :</strong>
+                                    <br/>
+                                    <span t-field="object.incident_initiator_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.incident_initiator_id">
+                                    <strong>Department</strong>
+                                    <br/>
+                                    <span t-field="object.incident_initiator_department_id"/>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="receptors_details"
+                                 style="page-break-inside: auto;"
+                                 class="mt32 row"
+                                 t-if="object.incident_receptor_id">
+                            <h3>
+                                Receptors Details
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2">
+                                <div class="col-md-3 mb-2" t-if="object.name">
+                                    <strong>Receptor :</strong>
+                                    <br/>
+                                    <span t-field="object.incident_receptor_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.incident_initiator_id">
+                                    <strong>Department</strong>
+                                    <br/>
+                                    <span t-field="object.incident_receptor_department_id"/>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="handlers_details"
+                                 style="page-break-inside: auto;"
+                                 class="mt32 row"
+                                 t-if="object.incident_handler_id">
+                            <h3>
+                                Handlers Details
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2">
+                                <div class="col-md-3 mb-2" t-if="object.name">
+                                    <strong>Receptor :</strong>
+                                    <br/>
+                                    <span t-field="object.incident_handler_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.incident_initiator_id">
+                                    <strong>Department</strong>
+                                    <br/>
+                                    <span t-field="object.incident_receptor_department_id"/>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="details" style="page-break-inside: auto;"
+                                 class="mt32 row"
+                                 t-if="object.incident_description">
+                            <h3>
+                                Description
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-3" style="margin-left:2px;"
+                                 t-esc="object.incident_description"/>
+                        </section>
+                        <!--====== Adding Chatter==========-->
+                        <div id="_communication">
+                            <h3>Communication history</h3>
+                            <t t-call="portal.message_thread"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <!--  Template of incident request ticket Form  -->
+    <template id="incident_request_form">
+        <t t-call="website.layout">
+            <div id="wrap"
+                 class="oe_structure oe_empty cyllo_register_support_ticket_form">
+                <div class="incident_management-request_container m-0">
+                    <br/>
+                    <h3 class="heading_align-style d-flex mt-5">
+                        Incident Request
+                    </h3>
+                    <br/>
+                    <p class="incident_service_description">Report employee
+                        incidents through our portal for prompt and efficient
+                        handling.
+                        <br/>
+                        We'll ensure every incident is logged, tracked, and
+                        resolved as quickly as possible.
+                    </p>
+                </div>
+                <div class="s_col_no_bgcolor container s_allow_columns w-50 property_container_style">
+                    <div class="container mt-4 mb-5 justify-content-center d-flex">
+                        <form action="/request/incident/submit" method="post"
+                              enctype="multipart/form-data"
+                              class="o_mark_required cy-incident_requests_form"
+                              data-mark="*">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="name"
+                                           class="cy-incident_management-label">
+                                        Name
+                                    </label>
+                                    <input type="hidden" name="csrf_token"
+                                           t-att-value="request.csrf_token()"
+                                           class="form-control"/>
+                                    <input type="text"
+                                           class="form-control cy-incident_requests_input"
+                                           name="customer_name"
+                                           t-att-value="request.env.user.employee_ids.name"
+                                           readonly="1"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="email"
+                                           class="cy-incident_management-label">
+                                        Email
+                                    </label>
+                                    <input type="text"
+                                           class="form-control cy-incident_requests_input"
+                                           id="email"
+                                           name="email"
+                                           t-att-value="request.env.user.employee_ids.work_email or ''"
+                                           required="1"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="phone"
+                                           class="cy-incident_management-label">
+                                        Phone
+                                    </label>
+                                    <input type="text"
+                                           class="form-control cy-incident_requests_input"
+                                           id="phone"
+                                           placeholder="+1 55 555 555"
+                                           t-att-value="request.env.user.employee_ids.mobile_phone"
+                                           required="1"/>
+                                </div>
+                                <div class="col-12">
+                                    <label for="incident_desc"
+                                           class="cy-incident_management-label">
+                                        Incident Description
+                                    </label>
+                                    <textarea
+                                            class="form-control cy-incident_requests_input"
+                                            name="incident_desc"
+                                            placeholder="Related to the incident"
+                                            required="1"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="incident_category_id"
+                                           class="cy-incident_management-label">
+                                        Category
+                                    </label>
+                                    <select name="category_name"
+                                            t-attf-class="form-control s_website_form_input"
+                                            required="1">
+                                        <option value=""/>
+                                        <t t-foreach="categories or []"
+                                           t-as="category">
+                                            <option t-att-value="category.id">
+                                                <t t-esc="category.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="initiator"
+                                           class="cy-incident_management-label ">
+                                        Initiator
+                                    </label>
+                                    <select name="initiator"
+                                            t-attf-class="form-control s_website_form_input"
+                                            required="1"
+                                            t-att-disabled="'disabled' if not is_manager else None">
+                                        <option value=""/>
+                                        <t t-foreach="employee_ids or []"
+                                           t-as="employee">
+                                            <option t-att-value="employee.id"
+                                                    t-att-selected="employee.id == request.env.user.employee_ids.id">
+                                                <t t-esc="employee.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="receptor"
+                                           class="cy-incident_management-label ">
+                                        Receptor
+                                    </label>
+                                    <select name="receptor"
+                                            t-attf-class="form-control s_website_form_input"
+                                            required="1">
+                                        <option value=""/>
+                                        <t t-foreach="employee_ids or []"
+                                           t-as="employee">
+                                            <option t-att-value="employee.id"
+                                                    t-att-selected="employee.id == request.env.user.employee_id.parent_id.id">
+                                                <t t-esc="employee.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="attachment"
+                                           class="field_request-label">
+                                        Attachments
+                                    </label>
+                                    <br/>
+                                    <input type="file" multiple="true"
+                                           class="file form-control"
+                                           name="attachment_id"
+                                           id="attachment_id"/>
+                                </div>
+                                <div class="d-flex justify-content-left mt-5">
+                                    <button class="btn btn-primary"
+                                            type="submit">
+                                        Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!--      Template shown when submit incident request by user  -->
+    <template id="incident_request_submitting_template">
+        <t t-call="website.layout">
+            <div style="margin-top: 100px;" class="jumbotron text-center">
+                <h1 class="display-3">Thank You!</h1>
+                <p class="lead">Your request has been successfully submitted.
+                </p>
+                <a href="/incident_management">Back to requests</a>
+            </div>
+        </t>
+    </template>
+</odoo>

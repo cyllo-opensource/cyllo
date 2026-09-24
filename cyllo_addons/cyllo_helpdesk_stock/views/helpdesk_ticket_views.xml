@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="helpdesk_ticket_view_form_inherit_stock" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.form.inherit.stock</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="cyllo_helpdesk.helpdesk_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='stage_id']" position="before">
+                <button name="action_create_return" type="object" string="Create Return" invisible="not customer_id or not use_returns "
+                                groups="sales_team.group_sale_salesman,sales_team.group_sale_manager"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_pickings" type="object" class="oe_stat_button" icon="fa-truck" invisible="not use_returns or picking_count == 0">
+                    <field name="picking_count" widget="statinfo" string="Returns"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

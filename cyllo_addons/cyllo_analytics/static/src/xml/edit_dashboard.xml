@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_analytics.EditDashboard"
+       t-inherit="cyllo_analytics.CylloDashboard" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('date_records')]" position="replace">
+            <div class="save d-flex justify-content-end align-items-center m-1 p-2 gap-2"
+                 style="width: 35%">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary themed-bg"
+                            t-if="state.change"
+                            t-on-click="onSave">
+                            <i class="ri-check-line"></i>
+                            Save
+                        </button>
+                    <button class="btn btn-secondary themed-bg"
+                            t-if="state.change"
+                            t-on-click="onDiscard">
+                            <i class="ri-close-line"></i>
+                            Discard
+                        </button>
+                    <button class="btn btn-secondary themed-bg"
+                            t-if="state.rearrange"
+                            t-att-disabled="state.editLoading"
+                            t-on-click="rearrange">
+                            <i class="ri-arrow-left-right-line"></i>
+                            Rearrange
+                        </button>
+                    <button class="btn btn-secondary themed-bg"
+                            t-on-click="onBack">
+                            <i class="ri-arrow-left-line"></i>
+                            Back
+                        </button>
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('stack-item')]" position="replace">
+            <div class="cy-edit-grid-items"
+                 t-att-style="state.editLoading ? 'position:relative; min-height:calc(100dvh - 120px);' : 'position:relative;'">
+                <div t-ref="chart-container" class="grid_stack_item"
+                     t-att-class="{'cy-grid-initializing': state.editLoading}"/>
+            </div>
+        </xpath>
+    </t>
+</templates>

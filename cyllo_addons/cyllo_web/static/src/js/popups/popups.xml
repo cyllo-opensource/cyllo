@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ConfirmationPopup" owl="1">
+    <div t-if="state.isOpen" class="confirmation-popup" t-att-class="{ 'closing': state.isClosing }" t-ref="popup">
+        <div class="confirmation-popup-backdrop" t-on-click="onCancel"/>
+        <div class="confirmation-popup-content">
+            <t t-if="props.lottie">
+                <div class="lottie-container d-flex justify-content-center">
+                    <LottieAnimation src="props.lottiePath"
+                                     style="'width: 80px; height: auto; max-width: 200px;'"
+                                     loop="true"
+                    />
+                </div>
+            </t>
+            <div t-else="" class="confirmation-popup-icon">
+                    <t t-if="props.image">
+                        <img t-att-src="props.image" alt="Confirmation Image" class="confirmation-popup-image"/>
+                    </t>
+                        <t t-elif="props.icon">
+                        <i t-att-class="props.icon"/>
+                    </t>
+                        <t t-else="">
+                        <i class="fa fa-question-circle"/>
+                    </t>
+            </div>
+            <h2 class="confirmation-popup-title"><t t-esc="props.title"/></h2>
+            <p class="confirmation-popup-message"><t t-esc="props.message"/></p>
+            <div class="confirmation-popup-footer">
+                <button t-if="props.showCancel" class="btn btn-secondary confirmation-popup-btn" t-on-click="onCancel">
+                    <t t-esc="props.cancelText || 'Cancel'"/>
+                </button>
+                <button t-if="props.showConfirm" class="btn btn-primary confirmation-popup-btn" t-on-click="onConfirm">
+                    <t t-esc="props.confirmText || 'Confirm'"/>
+                </button>
+            </div>
+        </div>
+    </div>
+</t>
+</templates>

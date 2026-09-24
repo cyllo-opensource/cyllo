@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_move_form" model="ir.ui.view">
+        <field name="name">view.account.move.</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position='after'>
+                <field name="ocr_digitize_completed" invisible="1"/>
+                <div role="status"
+                     class="alert alert-success mb8 text-center"
+                     invisible="ocr_digitize_completed != True or state != 'draft'">
+                    Digitization Successfully completed
+                    <button type="object"
+                            name="action_retry_digitization"
+                            class="btn btn-link">
+                        Retry
+                    </button>
+                </div>
+                <field name="ocr_digitize_failed" invisible="1"/>
+                <div role="status"
+                     class="alert alert-danger mb8 text-center"
+                     invisible="ocr_digitize_failed != True or state != 'draft'">
+                    <field name="ocr_digitize_message"/>
+                    <button type="object"
+                            name="action_retry_digitization"
+                            class="btn btn-link">
+                        Retry
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//button[@name='button_cancel']"
+                   position="after">
+                <field name="ocr_digitize_enabled" invisible="1"/>
+                <button name="action_send_digitization"
+                        type="object"
+                        string="Send To Digitization"
+                        title="Digitization"
+                        invisible="ocr_digitize_enabled != True or state != 'draft' or ocr_digitize_completed != False"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

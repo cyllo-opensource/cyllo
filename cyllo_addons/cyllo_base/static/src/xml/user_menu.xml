@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.UserMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//Dropdown" position="replace">
+            <Dropdown t-if="!env.isSmall"
+                      class="'o_user_menu d-none d-md-block pe-0'"
+                      togglerClass="'py-1 py-lg-0'">
+                <t t-set-slot="toggler">
+                    <a class="nav-link cy-nav-links d-flex align-items-center pt-0 pb-0">
+                        <div class="cy-user-menu-text d-flex flex-column align-items-end position-relative"
+                             t-ref="companySwitcher">
+                            <span class="cy-user-menu-name" t-esc="user.name"/>
+                            <span class="cy-user-menu-company" t-if="companyName"
+                                  t-esc="companyName"/>
+                        </div>
+                        <img class="profile-pic" t-att-src="source" alt="User"/>
+                    </a>
+                </t>
+                <a class="dropdown-item">
+                    <i class="fa fa-database oi-small me-1"/>
+                    <t t-esc="user.db.name"/>
+                </a>
+                <div role="separator" class="dropdown-divider"/>
+                <a class="dropdown-item" t-on-click="profile">
+                    View Account
+                </a>
+                <a class="dropdown-item d-flex justify-content-between align-items-center"
+                   href="#" t-on-click.stop.prevent="handleEdit">
+                    Auto Edit
+                    <label for="cy_auto_edit"
+                           class="cy-auto-edit-label text-muted"
+                           title="Enable this to auto-edit the field.">
+                        <div>
+                            <label class="switch switch-auto-edit">
+                                <input type="checkbox"
+                                       name="cy_auto_edit"
+                                       class="auto-edit-checkbox"
+                                       t-ref="auto_edit_checkbox"
+                                       t-att-checked="state.autoEdit"
+                                       t-model="state.autoEdit"/>
+                                <span class="slider round slider-auto-edit"/>
+                            </label>
+                        </div>
+                    </label>
+                </a>
+                <t t-foreach="getElements()" t-as="element"
+                   t-key="element_index">
+                    <t t-if="!element.hide">
+                        <DropdownItem
+                                t-if="element.type == 'item' || element.type == 'switch'"
+                                href="element.href"
+                                dataset="{ menu: element.id }"
+                                onSelected="element.callback">
+                            <CheckBox
+                                    t-if="element.type == 'switch'"
+                                    value="element.isChecked"
+                                    className="'form-switch d-flex flex-row-reverse justify-content-between p-0 w-100'"
+                                    onChange="element.callback">
+                                <t t-out="element.description"/>
+                            </CheckBox>
+                            <t t-else="" t-out="element.description"/>
+                        </DropdownItem>
+                        <div t-if="element.type == 'separator'" role="separator"
+                             class="dropdown-divider"/>
+                    </t>
+                </t>
+            </Dropdown>
+        </xpath>
+    </t>
+</templates>

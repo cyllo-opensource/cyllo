@@ -1,0 +1,63 @@
+<odoo>
+    <!-- Tree View -->
+    <record id="view_crm_subscription_report_tree" model="ir.ui.view">
+        <field name="name">crm.subscription.report.tree</field>
+        <field name="model">crm.subscription.report</field>
+        <field name="arch" type="xml">
+            <tree string="Review Processes">
+                <field name="name"/>
+                <field name="frequency"/>
+                <field name="lead_fields"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_crm_subscription_report_form" model="ir.ui.view">
+        <field name="name">crm.subscription.report.form</field>
+        <field name="model">crm.subscription.report</field>
+        <field name="arch" type="xml">
+            <form string="Subscription Report">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"
+                                   placeholder="eg: Performance Analysis"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group colspan="2">
+                            <group>
+                                <field name="frequency"/>
+                                <field name="lead_fields"
+                                       widget="many2many_tags"
+                                       options="{'no_create': True}"/>
+                            </group>
+                            <group>
+                                <field name="rule_to_apply" string="Rules"
+                                       widget="domain"
+                                       options="{'model': 'crm.lead'}"/>
+                            </group>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_crm_subscription_report" model="ir.actions.act_window">
+        <field name="name">Crm Subscription Report</field>
+        <field name="res_model">crm.subscription.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No subscriptions found. Create the first one!
+            </p>
+        </field>
+    </record>
+    <!--Menu-->
+    <menuitem id="menu_crm_subscription_report" name="Subscription Report"
+              parent="crm.crm_menu_config" action="action_crm_subscription_report"
+              sequence="20"/>
+</odoo>

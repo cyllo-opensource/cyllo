@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- SEARCH VIEW -->
+        <record id="view_asset_report_search" model="ir.ui.view">
+            <field name="name">asset.report.search</field>
+            <field name="model">asset.report</field>
+            <field name="arch" type="xml">
+                <search string="Asset Activity Analysis">
+                    <field name="asset_id"/>
+                    <separator/>
+                    <filter name="filter_maintenance"
+                            string="Maintenance" domain="[('activity_type','=','maintenance')]"/>
+                    <filter name="filter_lease" string="Lease" domain="[('activity_type','=','lease')]"/>
+                    <filter name="filter_rent" string="Rental" domain="[('activity_type','=','rent')]"/>
+                    <separator/>
+                    <group string="Group By">
+                        <filter name="group_by_asset" string="Asset" context="{'group_by':'asset_id'}"/>
+                        <filter name="group_by_activity" string="Activity Type"
+                                context="{'group_by':'activity_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- GRAPH VIEW (STACKED BAR) -->
+        <record id="view_asset_report_graph" model="ir.ui.view">
+            <field name="name">asset.report.graph</field>
+            <field name="model">asset.report</field>
+            <field name="arch" type="xml">
+                <graph string="Asset Activity Analysis"
+                       type="bar"
+                       stacked="True"><field name="asset_id"/>
+                    <field name="activity_type"/>
+                    <field name="activity_count" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- PIVOT VIEW -->
+        <record id="view_asset_report_pivot" model="ir.ui.view">
+            <field name="name">asset.report.pivot</field>
+            <field name="model">asset.report</field>
+            <field name="arch" type="xml">
+                <pivot string="Asset Activity Analysis">
+                    <field name="asset_id" type="row"/>
+                    <field name="activity_type" type="col"/>
+                    <field name="activity_count" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- ACTION -->
+        <record id="action_asset_report_all" model="ir.actions.act_window">
+            <field name="name">Asset Activity Analysis</field>
+            <field name="res_model">asset.report</field>
+            <field name="view_mode">graph,pivot</field>
+            <field name="search_view_id" ref="view_asset_report_search"/>
+            <field name="help">
+                This report shows Maintenance, Lease and Rental counts per Asset,
+                along with Original and Salvage values.
+            </field>
+        </record>
+
+        <!-- MENU -->
+        <menuitem id="menu_reporting_asset"
+                  name="Reporting"
+                  parent="cyllo_asset_management.menu_assets_categ"
+                  sequence="10"
+                  groups="cyllo_asset_management.group_cyllo_asset_admin"/>
+
+        <menuitem id="menu_asset_activity_report"
+                  name="Asset Operations"
+                  parent="menu_reporting_asset"
+                  action="action_asset_report_all"
+                  sequence="20"/>
+
+    </data>
+</odoo>

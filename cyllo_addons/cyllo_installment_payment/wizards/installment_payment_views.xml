@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_installment_payment_form" model="ir.ui.view">
+        <field name="name">view.installment.payment.form</field>
+        <field name="model">installment.payment</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="communication" readonly="1"/>
+                            <label string="Installment PayAmount"
+                                   for="pay_amount"/>
+                            <div class="oe_inline">
+                                <field name="pay_amount" class="oe_inline"
+                                       readonly="1"/>
+                                <field name="currency_id" readonly="1"/>
+                            </div>
+                        </group>
+                        <group>
+                            <field name="payment_method_line_id"
+                                   options="{'no_create': True, 'no_create_edit':True}"/>
+                            <field name="journal_id"
+                                   options="{'no_create': True, 'no_create_edit':True}"
+                                   domain="[('type','in',['bank', 'cash'])]"/>
+                            <field name="date" options="{'datepicker': {'minDate': 'today'}}"/>
+                            <field name="company_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="action_validate_payment" type="object"
+                                string="Create Payment" class="oe_highlight"/>
+                        <button string="Cancel" class="btn-default"
+                                special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_view_installment_payment_action"
+            model="ir.actions.act_window">
+        <field name="name">Installment Payment</field>
+        <field name="res_model">installment.payment</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inheritance  res config settings -->
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="70"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Field Service" string="Field Service"
+                     name="cyllo_field_service"
+                     logo="/cyllo_field_service/static/description/field-services.png"
+                     groups="cyllo_field_service.group_cyllo_field_service_manager">
+                    <block title="Integrations"
+                           name="cyllo_field_service_setting_container">
+                        <setting id="field_service_project_settings"
+                                 help="Enable this field to bring the features of project module to field service"
+                                 title="Enable this field to bring the features of project module to field service">
+                            <field name="module_cyllo_field_service_project"/>
+                        </setting>
+                        <setting id="field_service_fleet_settings"
+                                 help="Enable this field to bring the features of fleet module to field service"
+                                 title="Enable this field to bring the features of fleet module to field service">
+                            <field name="module_cyllo_field_service_fleet"/>
+                        </setting>
+                        <setting id="field_service_equipment_settings"
+                                 help="Enable this field to bring the features of maintenance module to field service"
+                                 title="Enable this field to bring the features of maintenance module to field service">
+                            <field name="module_cyllo_field_service_equipment"/>
+                        </setting>
+                    </block>
+                    <block title="Reminder" name="cyllo_field_service_deadline">
+                        <setting id="field_service_deadline_reminder"
+                                 help="Send a reminder a few days before the deadline."
+                                 title="Send a reminder a few days before the deadline.">
+                            <field name="deadline_reminder"
+                                   class="w-25 text-center"/>
+                            <span class="col-auto ms-2">days before</span>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_view_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'cyllo_field_service', 'bin_size':
+            False}
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Define a new template based on an existing one -->
+    <template id="fs_service_request_details"
+              inherit_id="cyllo_field_service.fs_service_request_details"
+              name="Field Service Request | My Website">
+        <!-- Insert additional content after a specific element -->
+        <xpath expr="//section[@id='check_list']" position="after">
+            <!-- Add a new section for displaying equipment information -->
+            <section id="equipment_list"
+                     style="page-break-inside: auto;"
+                     class="mt32 row"
+                     t-if="object.field_service_equipments_ids">
+                <h3 id="equipment_details" style="font-size: 20px;">
+                    Equipments Information
+                </h3>
+                <br/>
+                <!-- Table for displaying equipment details -->
+                <div class="row mt-2 mb-3" style="margin-left:2px;"
+                     id="equipment_request_list">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Initialize a counter variable for numbering rows -->
+                            <t t-set="sl_no" t-value="1"/>
+                            <tr t-foreach="object.field_service_equipments_ids"
+                                t-as="equipment">
+                                <th scope="row">
+                                    <t t-esc="sl_no"/>
+                                    <t t-set="sl_no"
+                                       t-value="sl_no + 1"/>
+                                </th>
+                                <td>
+                                    <t t-esc="equipment.display_name"/>
+                                </td>
+                                <td>
+                                    <span t-field="equipment.category_id.name"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </xpath>
+    </template>
+</odoo>

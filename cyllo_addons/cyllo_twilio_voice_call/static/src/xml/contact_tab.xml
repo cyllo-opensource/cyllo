@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="contacts_tab" owl="1">
+        <div class="cy-dial__pad"
+             t-ref="contact" t-if="this.props.hidden">
+            <div class="cy-dial__pad-action">
+                <button class="cy-dial-actionbtn"
+                        t-on-click="_onClickMinimise">
+                    <i class="ri-subtract-fill"/>
+                </button>
+                <button class="cy-dial-actionbtn"
+                        t-on-click="() => this.env.toggle_keypad()">
+                    <i class="ri-close-line"/>
+                </button>
+            </div>
+            <t t-if="!this.state.showPartner">
+                <div class="cy-recent__container">
+                    <div class="cy-dial_search-box">
+                        <i class="ri-search-line cy-dial-search__icon"/>
+                        <input class="cy-search_input"
+                               placeholder="Search Contacts"
+                               t-on-input="searchContacts"
+                               t-att-value="this.state.showPartner ? '' : this.state.searchTerms"/>
+                    </div>
+                    <div class="cy-dial__recent-list">
+                        <t t-if="this.filteredPartners.length === 0">
+                            <div align="center">No results found 🙁</div>
+                        </t>
+                        <t t-elif="this.filteredPartners.length === 0">
+                            <div align="center">
+                                There is nothing in your contact!
+                                <br/>
+                                Create a new contact right now to have it
+                                listed here.🤓
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <t t-foreach="this.filteredPartners" t-as="partner"
+                               t-key="partner['id']">
+                                <div class="cy-recent__list-item"
+                                     t-on-click="() => this.getContact(partner)">
+                                    <div>
+                                        <img class="o_image_40_cover rounded"
+                                             t-att-src="getImage(partner)"
+                                             alt="Contact Image"
+                                             style="height: 30px; width: 30px; margin-right: 10px;"/>
+                                        <span class="ps-2">
+                                            <b class="fw-bolder text-truncate"
+                                               t-att-title="partner.name"
+                                               t-esc="partner.name"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+                    </div>
+                </div>
+            </t>
+            <t t-if="this.state.showPartner">
+                <div class="cy-dialer__contact-profile">
+                    <div align="left">
+                        <button class="btn cy-dial_backbtn"
+                                t-on-click="_OnBack">
+                            <i class="ri-arrow-left-s-line"/>
+                        </button>
+                    </div>
+                    <div style="height:307px;" align="center">
+                        <img alt="Avatar"
+                             class="twilio-avatar border rounded"
+                             t-att-src="getImageView(selectedContact)"
+                             style="height:150px;width:150px;bottom:290px;"/>
+                        <br/>
+                        <span class="ps-2">
+                            <t t-if="this.state.selectedPartner.name">
+                                <h4 class="fw-bolder text-truncate"
+                                    t-att-title="this.state.selectedPartner.name"
+                                    t-esc="this.state.selectedPartner.name"/>
+                            </t>
+                            <t t-if="this.state.selectedPartner.phone">
+                                <h4 class="fw-bolder text-truncate"
+                                    t-att-title="this.state.selectedPartner.phone"
+                                    t-esc="this.state.selectedPartner.phone"/>
+                            </t>
+                        </span>
+                        <t t-if="this.state.call">
+                            <span class="call-duration" t-ref="callDuration"
+                                  style="display: block; text-align: center; font-weight: bold; font-size:23px;margin-bottom:10px;">
+                                <t t-esc="timeFormatted"/>
+                            </span>
+                        </t>
+                    </div>
+                </div>
+            </t>
+            <div class="cy-dial_footer--btns">
+                <button class="cy-dial_footer-btn-item fa fa-keyboard-o"
+                        style="font-size:24px;"
+                        t-on-click="_OnClickNumPad"/>
+                <button class="cy-dial_footer-btn-item"
+                        style="font-size:24px;"
+                        t-on-click="_OnRecent">
+                    <i class="ri-history-line"/>
+                </button>
+                <t t-if="this.state.showPartner">
+                    <t t-if="!this.state.call">
+                        <button class="cy-dial_footer-btn-item ri-phone-fill"
+                                t-on-click="_OnClickCall"
+                                style="margin-right: 5px;font-size:24px;"/>
+                    </t>
+                </t>
+                <t t-if="this.state.call">
+                    <button class="cy-dial_footer-end_btn-item ri-phone-fill"
+                            t-on-click="_onClickCancel"
+                            style="margin-right: 5px; color:red;font-size:24px;"/>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

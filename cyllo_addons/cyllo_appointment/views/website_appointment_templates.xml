@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="appointment_type_list" name="Book an Appointment">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <section class="s_text_image pt72 pb72 bg-200" data-snippet="s_text_image">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6 pt16 pb16">
+                                <h2>Book an Appointment</h2>
+                                <p class="lead text-muted">Select an appointment type below to get started.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="pt48 pb48">
+                    <div class="container">
+                        <div class="row">
+                            <t t-foreach="appointment_types" t-as="type">
+                                <div class="col-md-4 mb32">
+                                    <div class="card h-100 shadow-sm border-0" style="transition: transform 0.2s; border-radius: 12px;">
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <span class="badge bg-primary rounded-pill"><t t-esc="dict(type.fields_get(allfields=['category'])['category']['selection'])[type.category]"/></span>
+                                            </div>
+                                            <h4 class="card-title"><t t-esc="type.name"/></h4>
+                                            <div class="text-muted mb-4 small">
+                                                <span><i class="fa fa-clock-o me-1"/> <t t-esc="type.duration"/> h</span>
+                                                <span class="ms-3" t-if="type.location_type"><i class="fa fa-map-marker me-1"/> <t t-esc="dict(type.fields_get(allfields=['location_type'])['location_type']['selection'])[type.location_type]"/></span>
+                                            </div>
+                                            <div t-if="type.description" class="card-text mb-4 text-muted small" t-raw="type.description"/>
+                                            <a t-attf-href="/appointment/{{type.id}}" class="btn btn-primary d-block mt-auto w-100" style="border-radius: 8px;">Book Now</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <template id="appointment_selection" name="Select Appointment Time">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty bg-100">
+                <div class="container py-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="card shadow border-0" style="border-radius: 16px; overflow: hidden;">
+                                <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                                    <h3><t t-esc="appointment_type.name"/></h3>
+                                    <p class="text-muted">Fill out the details below to complete your booking.</p>
+                                </div>
+                                <div class="card-body p-4">
+                                    <t t-if="error_message">
+                                        <div class="alert alert-danger shadow-sm mb-4" role="alert" style="border-radius: 10px;">
+                                            <i class="fa fa-exclamation-circle me-2"></i><strong>Booking Failed:</strong> <t t-esc="error_message"/>
+                                        </div>
+                                    </t>
+                                    <form t-attf-action="/appointment/{{appointment_type.id}}/submit" method="post" id="appointment_form">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <input type="hidden" name="is_dynamic" id="is_dynamic_input" value="false"/>
+                                        <input type="hidden" name="dynamic_slot_datetime" id="dynamic_slot_datetime"/>
+                                        <input type="hidden" name="slot_id" id="predefined_slot_id"/>
+                                        <!-- Data providers for external JS -->
+                                        <input type="hidden" id="appointment_type_id_value" t-att-value="appointment_type.id"/>
+                                        <input type="hidden" id="type_max_attendees_value" t-att-value="appointment_type.max_attendees"/>
+
+                                        <div class="row">
+                                            <!-- Step 1: Staff Selection (Dynamic/Required Staff only) -->
+                                            <t t-if="staffs">
+                                                <div class="col-md-6 mb-4">
+                                                    <label class="form-label fw-bold">Select Staff</label>
+                                                    <select name="staff_id" id="staff_select" class="form-select form-select-lg" required="1" style="border-radius: 8px;">
+                                                        <option value="" t-if="len(staffs) > 1">-- Choose a Provider --</option>
+                                                        <t t-foreach="staffs" t-as="staff">
+                                                            <option t-att-value="staff.id" t-att-selected="len(staffs) == 1"><t t-esc="staff.name"/></option>
+                                                        </t>
+                                                    </select>
+                                                </div>
+                                            </t>
+                                            <!-- Step 1.5: Resource Selection (Required Resource only) -->
+                                            <t t-if="resources">
+                                                <div class="col-md-6 mb-4">
+                                                    <label class="form-label fw-bold">Select Resource</label>
+                                                    <select name="resource_id" id="resource_select" class="form-select form-select-lg" required="1" style="border-radius: 8px;">
+                                                        <option value="">-- Choose a Resource --</option>
+                                                        <t t-foreach="resources" t-as="res">
+                                                            <option t-att-value="res.id"><t t-esc="res.name"/></option>
+                                                        </t>
+                                                    </select>
+                                                </div>
+                                            </t>
+                                            <!-- Step 2: Date Selection -->
+                                            <div t-attf-class="{{'col-md-6' if staffs or resources else 'col-md-12'}} mb-4">
+                                                <label class="form-label fw-bold">Select Date</label>
+                                                <input type="date" id="date_select" class="form-control form-control-lg" required="1" style="border-radius: 8px;"/>
+                                            </div>
+                                        </div>
+                                        <!-- Available Slots Rendered via JS -->
+                                        <div class="mb-4" id="slots_container" style="display:none;">
+                                            <label class="form-label fw-bold">Available Times</label>
+                                            <div class="row g-2" id="slots_grid">
+                                                <!-- Populated by JS -->
+                                            </div>
+                                            <div id="no_slots_msg" class="alert alert-warning mt-2" style="display:none; border-radius: 8px;">
+                                                No available slots on this date. Please try another day.
+                                            </div>
+                                        </div>
+                                        <!-- Attendee Count Selection -->
+                                        <div t-if="appointment_type.max_attendees &gt; 1" class="mb-4" id="attendees_section" style="display:none;">
+                                            <label class="form-label fw-bold">Number of Attendees</label>
+                                            <select name="attendee_count" id="attendee_count" class="form-select bg-light" style="border-radius: 8px; border:0;">
+                                                <option value="1">1 Person</option>
+                                            </select>
+                                        </div>
+                                        <hr class="my-4"/>
+                                        <!-- Customer Information -->
+                                        <h5 class="fw-bold mb-3">Your Details</h5>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Full Name</label>
+                                                <input type="text" name="name" class="form-control bg-light" required="1" style="border-radius: 8px; border:0;"/>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" name="email" class="form-control bg-light" required="1" style="border-radius: 8px; border:0;"/>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Phone Number</label>
+                                                <input type="tel" name="phone" class="form-control bg-light" required="1" style="border-radius: 8px; border:0;"/>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="form-label">Notes / Reasons for visit</label>
+                                            <textarea name="notes" class="form-control bg-light" rows="3" style="border-radius: 8px; border:0;"></textarea>
+                                        </div>
+                                        <div id="additional_attendees_container"></div>
+                                        <button type="submit" id="submit_btn" class="btn btn-primary btn-lg w-100 mt-2" disabled="disabled" style="border-radius: 8px; font-weight: 600;">Confirm Booking</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="appointment_success" name="Appointment Confirmed">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty bg-100">
+                <div class="container py-5">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 text-center text-md-start">
+                            <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                                <div class="bg-success text-white py-5 text-center">
+                                    <i class="fa fa-check-circle fa-5x mb-3"/>
+                                    <h1 class="display-5 fw-bold">Booking Confirmed!</h1>
+                                    <p class="lead mb-0">Your appointment has been successfully scheduled.</p>
+                                </div>
+                                <div class="card-body p-5">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6 border-end">
+                                            <h5 class="text-muted text-uppercase small fw-bold mb-1">Service</h5>
+                                            <p class="fs-5 mb-0"><t t-esc="appointment.appointment_type_id.name"/></p>
+                                        </div>
+                                        <div class="col-md-6 ps-md-4 mt-3 mt-md-0">
+                                            <h5 class="text-muted text-uppercase small fw-bold mb-1">Date &amp; Time</h5>
+                                            <p class="fs-5 fw-bold text-primary mb-0"><span t-field="appointment.start_datetime" t-options="{'widget': 'datetime', 'time_only': False, 'format': 'medium'}"/></p>
+                                        </div>
+                                    </div>
+                                    <div class="row bg-light rounded-3 p-4 mb-4">
+                                        <div class="col-12" t-if="appointment.staff_id">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-white rounded-circle p-2 shadow-sm me-3">
+                                                    <i class="fa fa-user-md text-primary fs-4"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="text-muted small fw-bold mb-0">Provider</p>
+                                                    <p class="mb-0 fw-bold"><t t-esc="appointment.staff_id.name"/></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center mt-5">
+                                        <a t-attf-href="/appointment/manage/{{appointment.access_token}}"
+                                           class="btn btn-outline-primary btn-lg"
+                                           style="border-radius: 10px;">
+                                            <i class="fa fa-edit me-1"/>Manage Appointment
+                                        </a>
+                                        <a href="/" class="btn btn-outline-secondary btn-lg ms-2" style="border-radius: 10px;">Return Home</a>
+                                        <a href="/appointment" class="btn btn-primary btn-lg ms-2" style="border-radius: 10px;">Book Another</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Appointment Type Form View -->
+    <record id="view_appointment_type_form" model="ir.ui.view">
+        <field name="name">appointment.type.form</field>
+        <field name="model">appointment.type</field>
+        <field name="arch" type="xml">
+            <form string="Appointment Type">
+                <header>
+                    <button name="action_view_appointments" type="object" string="View Appointments"
+                            class="btn-primary" icon="fa-calendar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_appointments" type="object" class="oe_stat_button"
+                                icon="fa-calendar">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="upcoming_appointment_count"/>
+                                </span>
+                                <span class="o_stat_text">Upcoming</span>
+                            </div>
+                        </button>
+                        <button name="action_view_appointments" type="object" class="oe_stat_button"
+                                icon="fa-history">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="appointment_count"/>
+                                </span>
+                                <span class="o_stat_text">Total</span>
+                            </div>
+                        </button>
+                        <field name="is_published" widget="website_redirect_button"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Appointment Type Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="General">
+                            <field name="category"/>
+                            <field name="scheduling_type"/>
+                            <field name="location_type"/>
+                            <field name="location" invisible="location_type == 'online'"/>
+                            <field name="color" widget="color_picker"/>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Billing &amp; Payment">
+                            <field name="is_paid"/>
+                            <field name="product_id" invisible="is_paid == False" required="is_paid"
+                                   context="{'default_detailed_type': 'service', 'default_type': 'service'}"/>
+                        </group>
+                        <group string="Duration &amp; Slots">
+                            <field name="duration" widget="float_time"/>
+                            <field name="slot_interval"/>
+                            <field name="min_booking_notice"/>
+                            <field name="max_booking_days"/>
+                            <field name="max_attendees"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <!-- Resources & Staff Tab -->
+                        <page string="Resources &amp; Staff" name="resources">
+                            <group>
+                                <group string="Working Hours">
+                                    <field name="working_hours_id"/>
+                                </group>
+                                <group string="Options">
+                                    <field name="require_resource"/>
+                                    <field name="require_staff"/>
+                                </group>
+                            </group>
+                            <group string="Assigned Resources">
+                                <field name="resource_ids" widget="many2many_tags"
+                                       options="{'color_field': 'color'}"/>
+                            </group>
+                            <group string="Assigned Staff">
+                                <field name="staff_ids" widget="many2many_tags"
+                                       options="{'color_field': 'color'}"/>
+                            </group>
+                        </page>
+                        <!-- Rescheduling Tab -->
+                        <page string="Booking &amp; Rescheduling" name="rescheduling">
+                            <group>
+                                <group string="Rescheduling">
+                                    <field name="allow_reschedule"/>
+                                    <field name="reschedule_deadline_hours"
+                                           invisible="allow_reschedule == False"/>
+                                </group>
+                                <group string="Cancellation">
+                                    <field name="cancel_policy" widget="radio"/>
+                                    <field name="cancel_deadline_hours"
+                                           invisible="cancel_policy != 'up_to'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <!-- Notifications Tab -->
+                        <page string="Notifications &amp; Reminders" name="notifications">
+                            <group>
+                                <group string="Confirmation">
+                                    <field name="send_confirmation"/>
+                                    <field name="confirmation_template_id"
+                                           invisible="send_confirmation == False"
+                                           required="send_confirmation == True"/>
+                                    <field name="send_whatsapp_confirmation"/>
+                                    <field name="whatsapp_confirmation_template_id"
+                                           invisible="send_whatsapp_confirmation == False"
+                                           required="send_whatsapp_confirmation == True"/>
+                                </group>
+                                <group string="Reminders">
+                                    <field name="send_reminder"/>
+                                    <field name="reminder_hours_before"
+                                           invisible="send_reminder == False"
+                                           required="send_reminder == True"
+                                           help="Comma-separated hours: e.g. 24,2 means 24h and 2h before"/>
+                                    <field name="reminder_template_id"
+                                           invisible="send_reminder == False"
+                                           required="send_reminder == True"/>
+                                    <field name="send_sms_reminder"
+                                           invisible="send_reminder == False"/>
+                                    <field name="sms_reminder_template_id"
+                                           invisible="send_sms_reminder == False"
+                                           required="send_sms_reminder == True"/>
+                                    <field name="send_whatsapp_reminder"
+                                           invisible="send_reminder == False"/>
+                                    <field name="whatsapp_reminder_template_id"
+                                           invisible="send_whatsapp_reminder == False"
+                                           required="send_whatsapp_reminder == True"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Follow-up">
+                                    <field name="send_followup"/>
+                                    <field name="followup_hours_after"
+                                           invisible="send_followup == False"
+                                           required="send_followup == True"/>
+                                    <field name="followup_template_id"
+                                           invisible="send_followup == False"
+                                           required="send_followup == True"/>
+                                    <field name="send_whatsapp_followup"
+                                           invisible="send_followup == False"/>
+                                    <field name="whatsapp_followup_template_id"
+                                           invisible="send_whatsapp_followup == False"
+                                           required="send_whatsapp_followup == True"/>
+                                </group>
+                                <group string="Cancellation">
+                                    <field name="send_cancellation"/>
+                                    <field name="cancellation_template_id"
+                                           invisible="send_cancellation == False"
+                                           required="send_cancellation == True"/>
+                                    <field name="send_whatsapp_cancellation"
+                                           invisible="send_cancellation == False"/>
+                                    <field name="whatsapp_cancellation_template_id"
+                                           invisible="send_whatsapp_cancellation == False"
+                                           required="send_whatsapp_cancellation == True"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Refund Policy" name="refund_policy"
+                              invisible="is_paid == False">
+                            <group>
+                                <group string="Refund Configuration">
+                                    <field name="refund_policy" widget="radio"/>
+                                    <field name="refund_percentage"
+                                           invisible="refund_policy not in ['partial']"
+                                           required="refund_policy == 'partial'"/>
+                                    <field name="refund_validity_days"
+                                           invisible="refund_policy != 'credit'"
+                                           required="refund_policy == 'credit'"/>
+                                </group>
+                                <group string="Policy Summary" invisible="refund_policy == 'none'">
+                                    <field name="cancel_policy" readonly="1"
+                                           string="Cancellation Window"/>
+                                    <field name="cancel_deadline_hours" readonly="1"
+                                           invisible="cancel_policy != 'up_to'"/>
+                                </group>
+                            </group>
+                            <group string="Time-Based Refund Tiers"
+                                   invisible="refund_policy != 'partial'">
+                                <field name="refund_tier_ids" nolabel="1" colspan="2">
+                                    <tree editable="bottom">
+                                        <field name="name" placeholder="e.g. Full Refund"/>
+                                        <field name="hours_before"
+                                               string="Cancelled More Than (hrs before)"/>
+                                        <field name="refund_percentage" string="Refund %"/>
+                                    </tree>
+                                </field>
+                                <div class="text-muted" style="margin-top: 4px;" colspan="2">
+                                    <i class="fa fa-info-circle"/>
+                                    Tiers are evaluated from most to least generous.
+                                    If no tier matches, no refund is issued.
+                                    Leave empty to use the flat Refund Percentage above.
+                                </div>
+                            </group>
+                        </page>
+                        <!-- Description Tab -->
+                        <page string="Description" name="description">
+                            <field name="description" widget="html"
+                                   placeholder="Add a description for this appointment type..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Appointment Type List View -->
+    <record id="view_appointment_type_list" model="ir.ui.view">
+        <field name="name">appointment.type.list</field>
+        <field name="model">appointment.type</field>
+        <field name="arch" type="xml">
+            <tree string="Appointment Types" decoration-muted="active == False">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="category"/>
+                <field name="duration" widget="float_time"/>
+                <field name="slot_interval"/>
+                <field name="min_booking_notice"/>
+                <field name="max_attendees"/>
+                <field name="scheduling_type"/>
+                <field name="allow_reschedule" widget="boolean_toggle"/>
+                <field name="cancel_policy"/>
+                <field name="send_confirmation" widget="boolean_toggle"/>
+                <field name="send_reminder" widget="boolean_toggle"/>
+                <field name="upcoming_appointment_count" string="Upcoming"/>
+                <field name="active" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Appointment Type Kanban View -->
+    <record id="view_appointment_type_kanban" model="ir.ui.view">
+        <field name="name">appointment.type.kanban</field>
+        <field name="model">appointment.type</field>
+        <field name="arch" type="xml">
+            <kanban class="o_appointment_type_kanban" default_group_by="category">
+                <field name="name"/>
+                <field name="category"/>
+                <field name="color"/>
+                <field name="upcoming_appointment_count"/>
+                <field name="appointment_count"/>
+                <field name="duration"/>
+                <field name="slot_interval"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="apt-type-card oe_kanban_global_click">
+                            <div t-attf-class="apt-type-color-bar color_#{record.color.raw_value}"/>
+                            <div class="apt-type-card-body">
+                                <div class="apt-type-header">
+                                    <span class="apt-type-category">
+                                        <t t-esc="record.category.value"/>
+                                    </span>
+                                </div>
+                                <strong class="apt-type-name">
+                                    <t t-esc="record.name.value"/>
+                                </strong>
+                                <div class="apt-type-meta">
+                                    <span>
+                                        <i class="fa fa-clock-o"/>
+                                        <t t-esc="record.duration.value"/>h
+                                    </span>
+                                    <span>
+                                        <i class="fa fa-refresh"/>
+                                        <t t-esc="record.slot_interval.value"/>
+                                    </span>
+                                </div>
+                                <div class="apt-type-stats">
+                                    <div class="apt-stat">
+                                        <span class="apt-stat-value">
+                                            <t t-esc="record.upcoming_appointment_count.value"/>
+                                        </span>
+                                        <span class="apt-stat-label">Upcoming</span>
+                                    </div>
+                                    <div class="apt-stat">
+                                        <span class="apt-stat-value">
+                                            <t t-esc="record.appointment_count.value"/>
+                                        </span>
+                                        <span class="apt-stat-label">Total</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="apt-type-footer">
+                                <button name="action_view_appointments" type="object"
+                                        class="btn btn-sm btn-light">
+                                    <i class="fa fa-calendar"/>
+                                    View Appointments
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_appointment_type_search" model="ir.ui.view">
+        <field name="name">appointment.type.search</field>
+        <field name="model">appointment.type</field>
+        <field name="arch" type="xml">
+            <search string="Appointment Types">
+                <field name="name"/>
+                <field name="category"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Consultation" name="consultation"
+                        domain="[('category', '=', 'consultation')]"/>
+                <filter string="Service" name="service" domain="[('category', '=', 'service')]"/>
+                <filter string="Meeting" name="meeting" domain="[('category', '=', 'meeting')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category" name="group_category"
+                            context="{'group_by': 'category'}"/>
+                    <filter string="Company" name="company" context="{'group_by':'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Action -->
+    <record id="action_appointment_type" model="ir.actions.act_window">
+        <field name="name">Appointment Types</field>
+        <field name="res_model">appointment.type</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_appointment_type_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first appointment type!
+            </p>
+            <p>Define appointment types with time slots, staff, resources, and notifications.</p>
+        </field>
+    </record>
+</odoo>

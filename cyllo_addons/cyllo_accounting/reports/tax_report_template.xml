@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="tax_report">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="data_report_margin_top" t-value="12"/>
+                <t t-set="data_report_header_spacing" t-value="9"/>
+                <t t-set="data_report_dpi" t-value="110"/>
+                <div class="page">
+                    <h3>
+                        <center>
+                            <b>
+                                <span t-esc="report_name"/>
+                            </b>
+                        </center>
+                    </h3>
+                    <br/>
+                    <br/>
+                    <div class="filters">
+                        <table class="table table-sm table-reports">
+                            <thead class="filter_table"
+                                   style="background:#808080;">
+                                <tr>
+                                    <th>Date Range</th>
+                                    <th>Comparison</th>
+                                    <th>Options</th>
+                                    <th>Report</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size:11px;font-weight:100;">
+                                <tr>
+                                    <th>
+                                        <t t-if="int(comparison[0]) == 1">
+                                            <t t-if="filters['startDate']" t-out="filters['startDate']"/>
+                                            <t t-if="filters['endDate']">
+                                                to
+                                                <t t-out="filters['endDate']"/>
+                                            </t>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="int(comparison[0]) > 1">
+                                            <t t-out="comparison[1]"/>
+                                            :
+                                            <t t-out="comparison[0]"/>
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-foreach="filters['options']"
+                                           t-as="selected_options"
+                                           t-key="options_index">
+                                            <t t-out="selected_options"/>,
+                                        </t>
+                                    </th>
+                                    <th>
+                                        <t t-if="report_name"
+                                           t-out="report_name"/>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <table class="table table-sm table-reports" style="width: fit-content;">
+                        <thead style="background:#808080;">
+                            <tr class="o_heading">
+                                <th colspan="6" />
+                                <th t-foreach="period_data" t-as="period" t-key="period_index" class="text-center" t-out="period" />
+                            </tr>
+                            <tr class="o_heading">
+                                <th colspan="6" />
+                                <th t-foreach="period_data" t-as="period" t-key="period_index" class="text-center">
+                                    <div class="row">
+                                        <div class="col-6">NET</div>
+                                        <div class="col-6">TAX</div>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="report_data['report_type'] == 'generic'" t-call="cyllo_accounting.generic_tax_report"/>
+                            <t t-elif="report_data['report_type'] == 'account'" t-call="cyllo_accounting.account_tax_report"/>
+                            <t t-elif="report_data['report_type'] == 'tax'" t-call="cyllo_accounting.tax_tax_report"/>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="generic_tax_report">
+        <t t-foreach="report_data['report_data']" t-as="data" t-key="data_index">
+            <tr class="border-bottom cy-report-line-acc" style="border-spacing: 0 10px;background:#dfdfdf;">
+                <th colspan="100%" class="text-start">
+                    <span style="font-size: 16px;" t-out="'Sales ' if data['key'] == 'sale' else 'Purchase '"/>
+                </th>
+            </tr>
+            <t t-foreach="data['values']" t-as="value" t-key="value_index">
+                <tr>
+                    <th t-esc="value['display_name']"/>
+                    <th colspan="5"/>
+                    <t t-foreach="value['values']" t-as="val" t-key="val_index">
+                        <th class="text-center">
+                            <div class="row">
+                                <div class="col-6"><t t-esc="val['format_net']"/></div>
+                                <div class="col-6"><t t-out="val['format_tax']"/></div>
+                            </div>
+                        </th>
+                    </t>
+
+                </tr>
+            </t>
+            <tr class="border-bottom cy-report-line-acc" style="border-spacing: 0 10px;background:#fff0f0;">
+                <th><span t-out="'Sales ' if data['key'] == 'sale' else 'Purchase '"/>Total</th>
+                <th colspan="5"/>
+                <t t-foreach="data['totals']" t-as="total" t-key="total_index">
+                    <th class="text-center">
+                        <div class="row">
+                            <div class="col-6"><t t-esc="total['format_net']"/></div>
+                            <div class="col-6"><t t-out="total['format_tax']"/></div>
+                        </div>
+                    </th>
+                </t>
+            </tr>
+        </t>
+    </template>
+
+    <template id="account_tax_report">
+        <t t-foreach="report_data['report_data']" t-as="key" t-key="key_index">
+            <tr class="border-bottom cy-report-line-acc" style="border-spacing: 0 10px;background:#dfdfdf;"><th class="text-start" scope="row" colspan="100%"><span style="font-size: 16px;" t-out="'Sales' if key['key'] == 'sale' else 'Purchase'"/></th></tr>
+            <t t-foreach="key['data']" t-as="line" t-key="line_index">
+                <tr>
+                    <th class="text-start" colspan="100%" scope="row"><span t-out="line['account']['name']"/></th>
+                </tr>
+                <t t-foreach="line['values']" t-as="value" t-key="value_index">
+                    <tr>
+                        <th t-out="value['display_name']"/>
+                        <th colspan="5" />
+                        <t t-foreach="value['values']" t-as="val" t-key="val_index">
+                            <th class="text-center">
+                                <div class="row">
+                                    <div class="col-6" t-out="val['format_net']"/>
+                                    <div class="col-6" t-out="val['format_tax']"/>
+                                </div>
+                            </th>
+
+                        </t>
+                    </tr>
+
+                </t>
+            </t>
+            <tr class="border-bottom cy-report-line-acc" style="border-spacing: 0 10px;background:#fff0f0;">
+                <th class="text-center"><t t-out="'Sales ' if key['key'] == 'sale' else 'Purchase '"/> Total</th>
+                <th colspan="5"/>
+                <t t-foreach="key['totals']" t-as="total" t-key="total_index">
+                    <th class="text-center">
+                        <div class="row">
+                            <div class="col-6" t-out="total['format_net']"/>
+                            <div class="col-6" t-out="total['format_tax']"/>
+                        </div>
+                    </th>
+                </t>
+            </tr>
+            <tr/>
+        </t>
+    </template>
+
+    <template id="tax_tax_report">
+        <t t-foreach="report_data['report_data']" t-as="key" t-key="key_index">
+            <tr class="border-bottom cy-report-line-acc" style="border-spacing: 0 10px;background:#dfdfdf;"><th class="text-start" scope="row" colspan="100%"><span style="font-size: 16px;" t-out="'Sales' if key['key'] == 'sale' else 'Purchase'"/></th></tr>
+            <t t-foreach="key['data']" t-as="line" t-key="line_index">
+                <tr>
+                    <th class="text-start" colspan="100%" scope="row"><t t-out="line['display_name']"/></th>
+                </tr>
+                <t t-foreach="line['values']" t-as="value" t-key="value_index">
+                    <tr>
+                        <th t-out="value['account']['name']"/>
+                        <th colspan="5" />
+                        <t t-foreach="value['values']" t-as="val" t-key="val_index">
+                            <th class="text-center">
+                                <div class="row">
+                                    <div  class="col-6" t-out="val['format_net']"/>
+                                    <div  class="col-6" t-out="val['format_tax']"/>
+                                </div>
+                            </th>
+
+                        </t>
+                    </tr>
+
+                </t>
+            </t>
+            <tr class="border-bottom cy-report-line-acc" style="border-spacing: 0 10px;background:#fff0f0;">
+                <th><t t-out="'Sales ' if key['key'] == 'sale' else 'Purchase '"/> Total</th>
+                <th colspan="5"/>
+                <t t-foreach="key['totals']" t-as="total" t-key="total_index">
+                    <th class="text-center">
+                        <div class="row">
+                            <div class="col-6" t-out="total['format_net']"/>
+                            <div class="col-6" t-out="total['format_tax']"/>
+                        </div>
+                    </th>
+                </t>
+            </tr>
+
+        </t>
+    </template>
+</odoo>

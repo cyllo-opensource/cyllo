@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="custom_report.qr_wizard">
+        <div t-if="state.showQrWizard" class="qr-wizard-overlay" t-on-click.self="onQrWizardCancel">
+            <div class="qr-wizard-modal">
+                <!-- Header -->
+                <div class="qr-wizard-header">
+                    <h5>QR Code Wizard</h5>
+                    <button class="qr-wizard-close" t-on-click="onQrWizardCancel">✕</button>
+                </div>
+
+                <div class="qr-wizard-content">
+
+                    <!-- ── Step 1: Purpose Selector ────────────────────── -->
+                    <div t-if="state.qr.step === 1" class="qr-step-container">
+                        <div class="qr-type-grid">
+                            <div t-att-class="'qr-type-card' + (state.qr.type === 'portal' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectQrType('portal')">
+                                <i class="fa fa-external-link qr-card-icon"/>
+                                <div class="qr-card-title">Portal link</div>
+                                <div class="qr-card-desc">Customer scans → opens this document in the Odoo portal.</div>
+                                <div class="qr-card-preview">yoursite.com/my/invoices/42</div>
+                            </div>
+                            <div t-att-class="'qr-type-card' + (state.qr.type === 'plain' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectQrType('plain')">
+                                <i class="fa fa-file-text-o qr-card-icon"/>
+                                <div class="qr-card-title">Plain reference</div>
+                                <div class="qr-card-desc">Encodes the document number. Staff scan to pull up records.</div>
+                                <div class="qr-card-preview">INV/2025/00142</div>
+                            </div>
+                            <div t-if="state.reportInfo.model === 'account.move'"
+                                 t-att-class="'qr-type-card' + (state.qr.type === 'upi' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectQrType('upi')">
+                                <i class="fa fa-mobile qr-card-icon"/>
+                                <div class="qr-card-title">UPI payment</div>
+                                <div class="qr-card-desc">India — customer scans with GPay/PhonePe, amount pre-filled.</div>
+                                <div class="qr-card-preview">upi://pay?pa=...&amp;am=150.00</div>
+                            </div>
+                            <div t-att-class="'qr-type-card' + (state.qr.type === 'custom' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectQrType('custom')">
+                                <i class="fa fa-code qr-card-icon"/>
+                                <div class="qr-card-title">Custom expression</div>
+                                <div class="qr-card-desc">Write your own field path or URL. For developers.</div>
+                                <div class="qr-card-preview">object.name + '-' + object.id</div>
+                            </div>
+                            <div t-att-class="'qr-type-card' + (state.qr.type === 'pdf_link' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectQrType('pdf_link')">
+                                <i class="fa fa-file-pdf-o qr-card-icon"/>
+                                <div class="qr-card-title">Link to PDF Report</div>
+                                <div class="qr-card-desc">Customer scans → downloads PDF version of this report.</div>
+                                <div class="qr-card-preview">yoursite.com/report/pdf/...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Step 2: Configure ───────────────────────────── -->
+                    <div t-if="state.qr.step === 2" class="qr-step-container qr-config-panel">
+                        <div class="qr-detected-info">
+                            <div>
+                                <span class="opacity-50">Detected report:</span>
+                                <strong class="ms-2"><t t-esc="state.reportInfo.model"/></strong>
+                                <span class="ms-2 text-muted fw-normal"><t t-esc="state.reportInfo.name"/></span>
+                            </div>
+                        </div>
+
+                        <!-- Plain -->
+                        <div t-if="state.qr.type === 'plain'">
+                            <div class="mb-3">
+                                <label class="qr-label-sm mb-2 d-block">Field</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" t-att-value="state.qr.config.field"
+                                           t-on-change="(ev) => this.updateQrConfig('field', ev.target.value)"/>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="qr-label-sm mb-2 d-block">Common fields</label>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button t-foreach="['object.name', 'object.ref', 'object.partner_id.ref', 'object.origin']"
+                                            t-as="f" t-key="f"
+                                            class="btn btn-xs btn-outline-secondary py-1 px-2 text-nowrap"
+                                            style="font-size: 10px;"
+                                            t-on-click="() => this.updateQrConfig('field', f)">
+                                        <t t-esc="f"/>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Portal -->
+                        <div t-if="state.qr.type === 'portal'">
+                            <div t-if="state.qr.warnings.portalNotSupported" class="qr-warning-msg mb-3">
+                                <i class="fa fa-warning me-2"/> Portal link not available for this report type. Switching to Plain reference.
+                            </div>
+                            <div class="mb-3">
+                                <label class="qr-label-sm mb-2 d-block">Base URL</label>
+                                <input type="text" class="form-control form-control-sm" t-att-value="state.qr.config.baseUrl"
+                                       t-on-change="(ev) => this.updateQrConfig('baseUrl', ev.target.value)"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="qr-label-sm mb-2 d-block">Portal path</label>
+                                <input type="text" class="form-control form-control-sm bg-light" readonly="1" t-att-value="state.qr.config.portalPath"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="qr-label-sm mb-2 d-block">Access token</label>
+                                <select class="form-select form-select-sm" t-on-change="(ev) => this.updateQrConfig('tokenType', ev.target.value)">
+                                    <option value="auto" t-att-selected="state.qr.config.tokenType === 'auto'">Append automatically</option>
+                                    <option value="none" t-att-selected="state.qr.config.tokenType === 'none'">None (public portal)</option>
+                                </select>
+                                <div t-if="state.qr.config.tokenType === 'auto' and !state.qr.config.tokenExpr" class="small text-muted mt-1">
+                                    Note: No token method found for this model.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UPI -->
+                        <div t-if="state.qr.type === 'upi'">
+                            <div class="mb-3">
+                                <label class="qr-label-sm mb-2 d-block">UPI VPA</label>
+                                <input type="text"
+                                       t-att-class="'form-control form-control-sm' + (state.qr.errors.upi_vpa ? ' is-invalid' : '')"
+                                       t-att-value="state.qr.config.upiVpa"
+                                       t-on-change="(ev) => this.updateQrConfig('upiVpa', ev.target.value)"/>
+                                <div t-if="!state.qr.config.upiVpa" class="qr-warning-msg mt-2">
+                                    Set your UPI VPA in Settings → Company → Accounting first.
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="qr-label-sm mb-2 d-block">Amount field</label>
+                                    <select class="form-select form-select-sm" t-on-change="(ev) => this.updateQrConfig('amountField', ev.target.value)">
+                                        <option value="amount_residual">amount_residual</option>
+                                        <option value="amount_total">amount_total</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="qr-label-sm mb-2 d-block">Note / reference</label>
+                                    <select class="form-select form-select-sm" t-on-change="(ev) => this.updateQrConfig('noteField', ev.target.value)">
+                                        <option value="object.name">object.name</option>
+                                        <option value="object.ref">object.ref</option>
+                                        <option value="custom">Custom...</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Expression -->
+                        <div t-if="state.qr.type === 'custom'">
+                            <div class="mb-3">
+                                <label class="qr-label-sm mb-2 d-block">Expression</label>
+                                <textarea class="form-control form-control-sm" rows="3"
+                                          placeholder="e.g. 'https://example.com/' + str(object.id)"
+                                          t-att-value="state.qr.config.expression"
+                                          t-on-change="(ev) => this.updateQrConfig('expression', ev.target.value)"/>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <button class="btn btn-sm btn-outline-dark" t-on-click="validateQrExpression">Validate expression</button>
+                                <span t-if="state.qr.validationResult === 'valid'" class="text-success small"><i class="fa fa-check"/> Valid</span>
+                                <span t-if="state.qr.validationResult === 'invalid'" class="text-danger small">
+                                    <i class="fa fa-times"/> Invalid: <t t-esc="state.qr.validationError"/>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- PDF Link -->
+                        <div t-if="state.qr.type === 'pdf_link'">
+                            <div class="mb-3">
+                                <div class="qr-label-sm mb-2 d-block">PDF Download Options</div>
+                                <div class="border rounded p-3 bg-light" style="border-color: #dee2e6 !important;">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" checked="1" disabled="1" id="qrPdfGen"/>
+                                        <label class="form-check-label small" for="qrPdfGen">Generate PDF when scanned</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="qrRequireAuth"
+                                               t-att-checked="state.qr.config.requireAuth"
+                                               t-on-change="(ev) => this.updateQrConfig('requireAuth', ev.target.checked)"/>
+                                        <label class="form-check-label small" for="qrRequireAuth">Require login to download</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="qrTrackAnalytics"
+                                               t-att-checked="state.qr.config.trackAnalytics"
+                                               t-on-change="(ev) => this.updateQrConfig('trackAnalytics', ev.target.checked)"/>
+                                        <label class="form-check-label small" for="qrTrackAnalytics">Track scan analytics</label>
+                                    </div>
+                                    <div class="form-check d-flex align-items-center mb-0">
+                                        <input class="form-check-input me-2 mt-0" type="checkbox" id="qrExpireCheck"
+                                               t-att-checked="state.qr.config.hasExpiry"
+                                               t-on-change="(ev) => this.updateQrConfig('hasExpiry', ev.target.checked)"/>
+                                        <label class="form-check-label small me-2" for="qrExpireCheck" style="margin-bottom: 0;">Expire after:</label>
+                                        <input type="number" class="form-control form-control-sm"
+                                               style="width: 60px; padding: 2px 5px;" min="1"
+                                               t-att-disabled="!state.qr.config.hasExpiry"
+                                               t-att-value="state.qr.config.expiresDays"
+                                               t-on-change="(ev) => this.updateQrConfig('expiresDays', ev.target.value || 30)"/>
+                                        <span class="small ms-2">days</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="qr-label-sm mb-2 d-block">Filename format</label>
+                                <input type="text" class="form-control form-control-sm bg-white" readonly="1" value="Report_{doc.name}.pdf"/>
+                            </div>
+                            <div class="alert alert-info py-2 small mb-0">
+                                <i class="fa fa-info-circle me-1"/> When printed, the QR will point to this specific report instance.
+                            </div>
+                        </div>
+
+                        <div class="qr-preview-str mt-auto">
+                            <div class="qr-label-sm mb-1" style="font-size: 9px; opacity: 0.7;">Built string preview</div>
+                            <div class="text-break"><t t-out="state.qr.previewStr"/></div>
+                        </div>
+                    </div>
+
+                    <!-- ── Step 3: Preview and Style ──────────────────── -->
+                    <div t-if="state.qr.step === 3" class="qr-step-container">
+                        <div class="qr-preview-container">
+                            <div class="qr-preview-left">
+                                <div class="qr-image-box shadow-sm"
+                                     t-att-style="'width: ' + state.qr.config.size + 'px; height: ' + state.qr.config.size + 'px;'">
+                                    <div t-if="state.qr.previewLoading"
+                                         class="position-absolute inset-0 d-flex align-items-center justify-content-center bg-white bg-opacity-75">
+                                        <i class="fa fa-spinner fa-spin text-muted"/>
+                                    </div>
+                                    <img t-if="!state.qr.previewError"
+                                         t-att-src="state.qr.previewImgUrl"
+                                         t-on-load="() => state.qr.previewLoading = false"
+                                         t-on-error="onQrPreviewError"/>
+                                    <div t-else="" class="text-center p-2">
+                                        <i class="fa fa-unlink fa-2x text-danger opacity-25 mb-1"/>
+                                        <div class="small text-muted" style="font-size: 9px;">Preview unavailable — will render correctly at print time.</div>
+                                    </div>
+                                </div>
+                                <div class="qr-label-sm mt-1 fw-bold"><t t-esc="state.qr.config.size"/>px</div>
+                            </div>
+
+                            <div class="qr-preview-right">
+                                <div class="qr-style-row">
+                                    <label class="qr-label-sm">Size</label>
+                                    <input type="range" class="form-range" min="40" max="200" step="10"
+                                           t-att-value="state.qr.config.size"
+                                           t-on-input="(ev) => this.updateQrConfig('size', ev.target.value)"/>
+                                </div>
+                                <div class="qr-style-row">
+                                    <label class="qr-label-sm">Alignment</label>
+                                    <div class="qr-align-buttons">
+                                        <div t-att-class="'qr-align-btn' + (state.qr.config.align === 'left'   ? ' active' : '')" t-on-click="() => this.updateQrConfig('align', 'left')"><i class="fa fa-align-left"/></div>
+                                        <div t-att-class="'qr-align-btn' + (state.qr.config.align === 'center' ? ' active' : '')" t-on-click="() => this.updateQrConfig('align', 'center')"><i class="fa fa-align-center"/></div>
+                                        <div t-att-class="'qr-align-btn' + (state.qr.config.align === 'right'  ? ' active' : '')" t-on-click="() => this.updateQrConfig('align', 'right')"><i class="fa fa-align-right"/></div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <label class="qr-label-sm mb-1 d-block">Error correction</label>
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="(ev) => this.updateQrConfig('errorCorrection', ev.target.value)"
+                                                title="Higher = more reliable scan but larger QR.">
+                                            <option value="L">L (Low)</option>
+                                            <option value="M" selected="1">M (Medium)</option>
+                                            <option value="Q">Q</option>
+                                            <option value="H">H</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="qr-label-sm mb-1 d-block">Caption text</label>
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control form-control-sm" maxlength="40"
+                                                   placeholder="None"
+                                                   t-att-value="state.qr.config.caption"
+                                                   t-on-input="(ev) => this.updateQrConfig('caption', ev.target.value)"/>
+                                            <div class="position-absolute end-0 top-100 mt-1 small opacity-50" style="font-size: 8px;">
+                                                <t t-esc="state.qr.config.caption.length"/>/40
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-4 pb-4">
+                            <div class="qr-label-sm mb-2 opacity-75">Will render in report as</div>
+                            <div class="qr-qweb-code">
+                                <t t-out="state.qr.qwebPreview"/>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /.qr-wizard-content -->
+
+                <!-- Wizard Footer -->
+                <div class="qr-footer">
+                    <div class="qr-nav-dots">
+                        <div t-att-class="'qr-dot' + (state.qr.step === 1 ? ' active' : (state.qr.step > 1 ? ' completed' : ''))"
+                             t-on-click="() => this.qrGoToStep(1)"/>
+                        <div t-att-class="'qr-dot' + (state.qr.step === 2 ? ' active' : (state.qr.step > 2 ? ' completed' : ''))"
+                             t-on-click="state.qr.step > 1 ? () => this.qrGoToStep(2) : null"/>
+                        <div t-att-class="'qr-dot' + (state.qr.step === 3 ? ' active' : '')"
+                             t-on-click="state.qr.step > 2 ? () => this.qrGoToStep(3) : null"/>
+                    </div>
+
+                    <div class="qr-step-indicator">Step <t t-esc="state.qr.step"/> of 3</div>
+
+                    <div class="d-flex gap-2">
+                        <button t-if="state.qr.step > 1" class="qr-btn-secondary" t-on-click="qrPrevStep">Back</button>
+                        <button t-if="state.qr.step &lt; 3" class="qr-btn-primary"
+                                t-att-disabled="state.qr.step === 2 and state.qr.errors.hasErrors"
+                                t-on-click="qrNextStep"
+                                t-att-title="state.qr.step === 2 and state.qr.errors.hasErrors ? 'Fix the errors above first.' : ''">
+                            Next
+                        </button>
+                        <button t-if="state.qr.step === 3" class="qr-btn-primary px-4" t-on-click="onQrWizardConfirm">Insert QR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

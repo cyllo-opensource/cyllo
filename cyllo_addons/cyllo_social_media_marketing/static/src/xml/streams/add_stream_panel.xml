@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.AddStreamPanel">
+        <div class="o_add_stream_backdrop" t-on-click="() => props.onClose()">
+            <div class="o_add_stream_panel" t-on-click.stop="">
+                <div class="o_add_stream_header">
+                    <span t-if="state.step !== 'account' and !props.editColumn" class="o_add_stream_back"
+                        t-on-click="back">
+                        <i class="ri-arrow-left-line" />
+                    </span>
+                    <h5 t-esc="props.editColumn ? 'Edit Stream' : 'Add a stream'" />
+                    <span class="o_add_stream_close" t-on-click="() => props.onClose()">
+                        <i class="ri-close-large-line" />
+                    </span>
+                </div>
+
+                <div class="o_add_stream_body">
+                    <t t-if="state.loading">
+                        <div class="o_stream_column_loading">Loading accounts...</div>
+                    </t>
+
+                    <t t-elif="state.step === 'account'">
+                        <div class="o_add_stream_empty" t-if="!state.accounts.length">
+                            <i class="ri-link-unlink-m o_add_stream_empty_icon" />
+                            <p class="o_add_stream_empty_title">No connected accounts</p>
+                            <p class="o_add_stream_empty_text">Connect a social account first to start adding streams.</p>
+                        </div>
+                        <t t-foreach="groupedAccounts" t-as="group" t-key="group[0]">
+                            <div class="o_add_stream_group_label" t-esc="streamPlatforms.get(group[0], false)?.label" />
+                            <div class="o_add_stream_account_row" t-foreach="group[1]" t-as="account"
+                                t-key="account.id" t-on-click="() => this.selectAccount(account)">
+                                <img t-if="account.avatar_url" t-att-src="account.avatar_url"
+                                    class="o_add_stream_account_avatar" />
+                                <i t-else="" t-attf-class="o_add_stream_account_avatar_icon {{ streamPlatforms.get(group[0], false)?.icon }}" />
+                                <span t-esc="account.name" />
+                            </div>
+                        </t>
+                    </t>
+
+                    <t t-elif="state.step === 'type'">
+                        <div class="o_add_stream_selected_account">
+                            <img t-if="state.selectedAccount.avatar_url" t-att-src="state.selectedAccount.avatar_url"
+                                class="o_add_stream_account_avatar" />
+                            <span t-esc="state.selectedAccount.name" />
+                        </div>
+                        <div class="o_add_stream_type_row" t-foreach="typesForSelectedPlatform" t-as="streamType"
+                            t-key="streamType" t-on-click="() => this.selectType(streamType)">
+                            <span t-esc="streamTypeLabels[streamType] || streamType" />
+                            <i class="ri-arrow-right-s-line" />
+                        </div>
+                    </t>
+
+                    <t t-elif="state.step === 'config'">
+                        <div class="o_add_stream_config">
+                            <t t-if="state.selectedType === 'hashtag_recent' or state.selectedType === 'hashtag_trending'">
+                                <label>Hashtag</label>
+                                <input type="text" placeholder="e.g. mybrand" t-model="state.hashtag" />
+                            </t>
+                            <t t-if="state.selectedType === 'search'">
+                                <label>Search YouTube</label>
+                                <input type="text" placeholder="Enter search keywords" t-model="state.searchQuery" />
+                                <label>Sort by</label>
+                                <select t-model="state.searchOrder">
+                                    <t t-foreach="youtubeSearchOrderOptions" t-as="opt" t-key="opt.value">
+                                        <option t-att-value="opt.value" t-esc="opt.label" />
+                                    </t>
+                                </select>
+                            </t>
+                            <t t-if="state.selectedType === 'playlist'">
+                                <div t-if="state.loadingPlaylists" class="o_stream_column_loading">
+                                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status" />
+                                    Loading playlists...
+                                </div>
+                                <t t-else="">
+                                    <label>Playlist</label>
+                                    <select t-model="state.selectedPlaylistId">
+                                        <option value="">Select a playlist...</option>
+                                        <t t-foreach="state.playlists" t-as="playlist" t-key="playlist.id">
+                                            <option t-att-value="playlist.id" t-esc="playlist.title" />
+                                        </t>
+                                    </select>
+                                </t>
+                            </t>
+                            <button class="btn btn-primary o_add_stream_finish" t-on-click="finish"
+                                t-att-disabled="state.saving">
+                                <t t-esc="props.editColumn ? 'Save' : 'Add stream'" />
+                            </button>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Template for the AddressFromMap component -->
+    <t t-name="cyllo_map.AddressFromMap" t-inherit="web.CharField" owl="1">
+        <xpath expr="//input" position="replace">
+            <div class="d-inline-flex">
+                <input class="o_input" t-att-class="{'o_field_translate': isTranslatable}"
+                       t-att-id="props.id" t-att-type="props.isPassword ? 'password' : 'text'"
+                       t-att-autocomplete="props.autocomplete or (props.isPassword ? 'new-password' : 'off')"
+                       t-att-maxlength="maxLength > 0 and maxLength" t-att-placeholder="props.placeholder"
+                       t-ref="input"/>
+                <a class="ms-3 d-inline-flex align-items-center" t-on-click="() => this.OpenMap()">
+                    <i class="fa fa-map-marker" data-tooltip="Choose From Map" aria-label="Choose From Map"/>
+                </a>
+            </div>
+            <div class="d-none" style="margin-top: 0; position: absolute; z-index: 100;" t-ref="open_street_map">
+                <div class="modal-dialog cy-onboarding_modalbox modal_style" style="width: 678px;">
+                    <div class="modal-content cy-modal_content" style="width: 1000px;">
+                        <div class="modal-header d-flex pt-2 pb-2">
+                            <h2 class="mb-0">Map</h2>
+                            <a role="button" t-on-click="CloseMap" class="o_survey_session_close"><i class="fa fa-close"/></a>
+                        </div>
+                        <div class="modal-body cy-modal_main-body pb-0">
+                            <div style="display: flex;">
+                                <div style="width: 350px; margin-right:10px;">
+                                    <div class="form-group mb-4">
+                                        <div class="">
+                                            <input type="text" class="form-control cyllo_map-detail_input"
+                                                   id="place_name" name="place_name"
+                                                   placeholder="Place name" t-ref="place_name_input"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <div class="">
+                                            <input type="text" class="form-control cyllo_map-detail_input"
+                                                   id="place_name" name="city" placeholder="City"
+                                                   t-ref="city_input"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <div class="">
+                                            <input type="text" class="form-control cyllo_map-detail_input"
+                                                   id="pincode" name="pincode" placeholder="Pin code"
+                                                   t-ref="pincode_input"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <div class="">
+                                            <input type="text" class="form-control cyllo_map-detail_input"
+                                                   id="country" name="country" placeholder="Country"
+                                                   t-ref="country_input"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <div class="">
+                                            <input type="text" class="form-control cyllo_map-detail_input"
+                                                   id="state" name="state" placeholder="State"
+                                                   t-ref="state_input"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <div class="">
+                                            <input type="text" class="form-control cyllo_map-detail_input"
+                                                   id="latitude" name="latitude" placeholder="Latitude"
+                                                   t-ref="latitude_input"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <div class="">
+                                            <input type="text" class="form-control cyllo_map-detail_input"
+                                                   id="longitude" name="longitude" placeholder="Longitude"
+                                                   t-ref="longitude_input"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="position: relative;">
+                                    <div style="position: absolute;z-index: 401;margin: 1rem;width: 50%;margin-left: 80px;">
+                                        <div style="width: 68%;position: relative;margin-bottom: 1rem;">
+                                            <input type="text" id="search_input" placeholder="Search..."
+                                                   t-ref="search_input_ref" class="cy_map-input"
+                                                   style="flex: 1; margin-right: 10px;"/>
+                                            <a class="ms-3 d-inline-flex align-items-center"
+                                               style="position: absolute; right: 6px; margin-top: -11%;"
+                                               t-on-click="() => this.SearchOnMap()">
+                                                <i class="ri-search-line" data-tooltip="Autofill Address" aria-label="Autofill Address"/>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div id="map" class="map" style="height: 375px; width: 750px; position: relative; outline-style: none;"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cy-modal_footer">
+                            <div class="d-flex justify-content-end p-2 pt-0">
+                                <button class="btn cy-button-primary-stroke" t-on-click="() => this.SaveAddress()">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

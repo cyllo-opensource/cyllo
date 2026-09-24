@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.ShareDialog">
+        <Dialog footer="false" size="'md'" title="'Share post'" contentClass="'o_share_dialog'">
+            <div class="o_share_dialog_search">
+                <i class="ri-search-line" />
+                <input type="text" placeholder="Search" t-att-value="state.query" t-on-input="onSearchInput" />
+            </div>
+            <div class="o_share_dialog_grid">
+                <div class="o_share_dialog_tile" t-on-click="copyLink">
+                    <div class="o_share_dialog_avatar o_share_dialog_copy_icon">
+                        <i class="ri-link" />
+                    </div>
+                    <span>Copy link</span>
+                </div>
+                <t t-foreach="state.users" t-as="shareUser" t-key="shareUser.id">
+                    <div class="o_share_dialog_tile" t-on-click="() => this.sendToUser(shareUser)">
+                        <img class="o_share_dialog_avatar" t-att-src="avatarUrl(shareUser.id)" />
+                        <span t-esc="shareUser.name" />
+                    </div>
+                </t>
+                <div class="o_share_dialog_empty" t-if="!state.users.length">No users found.</div>
+            </div>
+        </Dialog>
+    </t>
+</templates>

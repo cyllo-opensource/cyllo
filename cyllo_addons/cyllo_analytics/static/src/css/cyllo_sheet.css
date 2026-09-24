@@ -1,0 +1,807 @@
+/* cyllo_sheet.css — restructured from the former monolithic style.css.
+   Shared rules, :root vars and @media/@keyframes live in style.css. */
+
+.cy_sheet_nav_bar {
+    border-bottom: 0.5px solid var(--border-color);
+}
+
+/* ── Sheet view loader ─────────────────────────────────────────────────────
+   Full-screen overlay that masks the async data + chart render when entering.*/
+.cy-sheet-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+    justify-content: center;
+    background: var(--o-view-background-color, #f9f9f9);
+    opacity: 1;
+    visibility: visible;
+}
+
+.cy-sheet-loading-overlay.cy-overlay-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.cy-sheet-loading-label {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--cy-text-muted, #6b7280);
+}
+
+.cy-sheet-loading-overlay.cy-sheet-loading-blur {
+    background: rgba(120, 120, 120, 0.14);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+
+.cy-sheet-saving-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 26px 36px;
+    border-radius: 12px;
+    background: var(--o-view-background-color, #ffffff);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+.cy-sheet-saving-icon {
+    font-size: 34px;
+    line-height: 1;
+    color: var(--dashboard-primary-color, #aabc14);
+    animation: cy-sheet-spin 0.9s linear infinite;
+}
+
+@keyframes cy-sheet-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cy-sheet-saving-label {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--cy-text-muted, #6b7280);
+}
+
+.presets-sidebar-section .cy-sheet-selection_box {
+    height: 150px !important;
+}
+
+.cy-sheets-previewContainer .o_input_dropdown {
+    width: 30%;
+}
+
+/* unified sidebar */
+
+.cy-unified-sidebar {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    width: 300px !important;
+    min-width: 240px;
+    flex-shrink: 0;
+}
+
+.cy-sidebar-field-group {
+    padding: 16px;
+}
+
+.cy-sidebar-static-label {
+    display: block;
+    font-size: 14px;
+    color: #666;
+    /* text-transform: uppercase; */
+    letter-spacing: 0.4px;
+}
+
+/* Sheet / Options tab strip */
+
+.cy-sidebar-tabs {
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Tab content area fills remaining height */
+
+.cy-sidebar-tab-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.cy-sidebar-sheet-pane {
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.cy-sidebar-options-pane {
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sheet filter items */
+
+.cy-options-filter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 6px;
+    cursor: pointer;
+    background: #fff;
+    font-size: 12px;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.cy-options-filter-item:hover {
+    border-color: var(--primary);
+}
+
+.cy-filter-cb {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1.5px solid #ccc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+    background: #fff;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.cy-filter-cb.cy-filter-cb-checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.cy-options-filter-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.cy-options-filter-btn {
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    color: #888;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+    font-size: 16px;
+    transition: color 0.15s;
+}
+
+.cy-options-filter-btn:hover {
+    color: #333;
+}
+
+.cy-options-filter-del:hover {
+    color: #dc3545;
+}
+
+/* Global filter */
+
+.cy-options-gf-label {
+    font-size: 14px;
+    color: #666;
+    letter-spacing: 0.04em;
+}
+
+.cy-options-gf-card {
+    border: 1px solid var(--border-color);
+    background: rgba(128, 128, 128, 0.06);
+    transition: background 0.15s;
+    border-radius: 8px;
+    padding: 8px 16px;
+}
+
+.cy-options-gf-card:hover {
+    border: 1px solid var(--primary);
+}
+
+/* Filter group modal */
+
+.cy-gf-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+}
+
+.cy-gf-modal {
+    position: fixed;
+    width: 280px;
+    z-index: 1055;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cy-gf-modal-header {
+    border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+    font-size: 13px;
+}
+
+.cy-options-gf-name {
+    font-size: 12px;
+    white-space: nowrap;
+    min-width: 60px;
+    color: #444;
+}
+
+/* Color mapping card */
+/* Mapping chip (list view) */
+
+.cy-mapping-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    background: #fff;
+    font-size: 12px;
+}
+
+.cy-mapping-chip-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.cy-mapping-chip-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #333;
+    font-size: 12px;
+}
+
+.cy-mapping-chip-range {
+    color: #aaa;
+    font-size: 11px;
+    margin-left: 2px;
+}
+
+.cy-mapping-chip-btn {
+    background: none;
+    border: none;
+    padding: 0 3px;
+    font-size: 16px;
+    color: #bbb;
+    cursor: pointer;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.15s;
+}
+
+.cy-mapping-chip-btn:hover {
+    color: #555;
+}
+
+.cy-mapping-chip-del:hover {
+    color: #e53e3e;
+}
+
+.cy-options-mapping-field {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.cy-options-mapping-label {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 3px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.cy-options-mapping-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #d0d0d0;
+    border-radius: 0;
+    padding: 3px 0;
+    font-size: 14px;
+    color: #222;
+    outline: none;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.cy-options-mapping-input:focus {
+    border-bottom-color: var(--primary);
+    box-shadow: none;
+}
+
+.cy-options-mapping-input::placeholder {
+    color: #bbb;
+}
+
+.cy-options-mapping-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+    padding-right: 16px;
+    cursor: pointer;
+}
+
+.cy-options-mapping-color-input {
+    width: 48px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid #d0d0d0;
+    border-radius: 0;
+    cursor: pointer;
+    background: transparent;
+    margin-top: 6px;
+}
+
+/* Empty hint */
+
+.cy-options-empty-hint {
+    font-size: 11px;
+    color: #aaa;
+    text-align: center;
+    padding: 12px 0;
+}
+
+.cy-sheets-previewContainer {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: calc(100dvh - 60.67px);
+}
+
+#fieldListAccordion .accordion-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 16px;
+}
+
+#fieldListAccordion .accordion-body .cy-sidebar-field-group {
+    padding: 8px 0px;
+}
+
+/* Smooth accordion expand/collapse. Bootstrap animates the panel's height from 0
+   to its full content height; the field lists are long and each row is a heavy
+   component, so re-laying-out + repainting the whole list every frame drops frames.
+   `contain` isolates the panel's layout/paint to its subtree and `will-change`
+   lets the browser composite the height change cheaply. */
+/* Isolate layout/paint ONLY while the panel is animating. Bootstrap adds
+   .collapsing for the duration of the height transition and removes it once
+   settled. Applying `contain` permanently turned the body into a containing
+   block AND a paint-clip box for the autocomplete dropdowns inside (they are
+   position:fixed via usePosition), which cropped them. Scoping to .collapsing
+   keeps the animation perf win without clipping any open dropdown. */
+#fieldListAccordion .accordion-collapse.collapsing,
+#optionsAccordion .accordion-collapse.collapsing {
+    will-change: height;
+    contain: layout paint style;
+}
+
+#fieldListAccordion .cy-sheet-selection_box {
+    height: auto !important;
+    min-height: 60px;
+    overflow: visible;
+}
+
+.cy_dashboard_sheet .graph-container {
+    max-height: 770px;
+    min-height: 350px;
+    height: calc(100dvh - 380px);
+    flex: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px !important;
+}
+
+.cy-sheet_query-container {
+    height: 240px;
+    overflow: auto;
+}
+
+.cy_dashboard_sheet {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+}
+
+.cy_dashboard_sheet {
+    .sidebar .accordion-item {
+        box-shadow: none !important;
+        border-bottom: 0.5px solid var(--border-color) !important;
+        margin-bottom: 0;
+    }
+
+    .accordion-item>.accordion-header>.accordion-button {
+        border-radius: 0;
+        border: none;
+        padding: 16px !important;
+        font-weight: normal !important;
+        background-color: #f4f4f4 !important;
+
+        &:hover {
+            background-color: #ececec !important;
+        }
+
+    }
+}
+
+.cy_dashboard_sheet .cy-navitem-list {
+    align-items: baseline;
+}
+
+.cy_dashboard_sheet .card-header {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: none;
+    background-color: unset;
+    color: #505050;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: "Inter", sans-serif;
+}
+
+.cy-chart-type-strip .cy-sheet-img {
+    width: 100%;
+    height: 100%;
+    -o-object-fit: contain;
+    object-fit: contain;
+    padding: 10px;
+    transition: padding 0.15s ease-in-out;
+}
+
+/* ── Chart type vertical strip ── */
+
+.cy-chart-type-strip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100px;
+    min-width: 80px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px solid var(--border-color);
+    padding: 16px 0;
+    gap: 4px;
+    background: #fff;
+    scrollbar-width: none;
+}
+
+.cy-chart-type-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 68px;
+    padding: 6px 4px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+}
+
+.cy-chart-type-item:hover .cy-chart-type-icon {
+    border-color: #999;
+
+    .cy-sheet-img {
+        padding: 6px;
+    }
+}
+
+.cy-chart-type-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4f4f4;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cy-chart-type-icon img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.cy-chart-type-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+    text-align: center;
+    margin-top: 4px;
+    line-height: 1.2;
+    max-width: 64px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cy-sheet-filter_container {
+    border-top: 1px solid #DFDFDF;
+    z-index: 1;
+    background: #fff;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.cy-new-chat-button {
+    background-color: var(--primary);
+    padding: 0.75rem 1.5rem 0.75rem 1.5rem;
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: 5px;
+    color: white;
+    border: none;
+    -webkit-box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.1);
+    -webkit-transition: all 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
+}
+
+.cy-new-chat-button:hover {
+    background-color: #849600;
+    -webkit-transition: all 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
+}
+
+.cy-new-chat-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.cy-pill-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    border: none;
+    background: #d0d0d0;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.cy-pill-toggle.cy-pill-toggle-on {
+    background: var(--o-brand-primary, #aabc14);
+}
+
+.cy-pill-thumb {
+    position: absolute;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: left 0.2s ease;
+}
+
+.cy-pill-toggle.cy-pill-toggle-on .cy-pill-thumb {
+    left: 23px;
+}
+
+.cy-toggle-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #999;
+    transition: color 0.15s;
+    user-select: none;
+}
+
+.cy-toggle-label.cy-toggle-label-active {
+    color: #333;
+    font-weight: 600;
+}
+
+.cy-sheet-title {
+    color: #0E3A5D;
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 1rem 0;
+}
+
+.cy-sheet-selection_box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    height: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: none !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    scrollbar-width: none;
+    padding: 8px 0 16px 0;
+}
+
+.cy-templates_search-icon {
+    background-color: #fff;
+}
+
+.cy-sheet_font {
+    font-size: 0.8rem;
+}
+
+.on-delete-sheet:hover {
+    color: red;
+}
+
+.cy_global_filter-tab span {
+    min-width: 90px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+}
+
+.cy_dashboard_sheet .cy-search {
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    padding: 0 10px;
+    flex: 1;
+}
+
+.cy_dashboard_sheet .cy-search .cy-search-icon {
+    color: #333;
+    font-size: 16px;
+}
+
+.cy_dashboard_sheet .cy-search input {
+    background-color: transparent !important;
+    border: none;
+    outline: none;
+    color: #212529;
+}
+
+.cy-sheets-previewContainer table {
+    table-layout: fixed;
+}
+
+.cy-template-title {
+    color: #505050;
+}
+
+.cy_sheet_nav_bar {
+    position: sticky;
+    top: 0;
+    background: #ffffff;
+    z-index: 50;
+}
+
+.cy_kpi_parent .cy-sheet_card-heading {
+    color: black !important;
+}
+
+.cy_kpi_parent .cy_kpi_around {
+    justify-content: center;
+}
+
+.cy_kpi_parent .cy-sheet_progress-card {
+    max-height: 205px;
+    height: 10.7rem;
+}
+
+.cy_kpi_parent .heading-min-h {
+    min-height: 161px;
+    align-items: center;
+}
+
+.cy_dashboard_sheet .cy_kpi_icon {
+    margin-left: -12px;
+}
+
+.cy_dashboard_sheet .cy-sheet_card-heading {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.cy_dashboard_sheet .cy-sheet_progress-card {
+    width: 50%;
+}
+
+.cy_dashboard_sheet .kpi_description_box {
+    width: 94%;
+}
+
+.cy_dashboard_sheet .cy_kpi_icon .kpi-icon {
+    font-size: 6rem;
+}
+
+.cy_dashboard_sheet .cy_kpi_icon .chart-maker-view.kpi-icon {
+    font-size: 4rem;
+}
+
+.cy_sheet_helper-img {
+    overflow: hidden;
+    /* padding: 24px 13%; */
+}
+
+.cy_dashboard_sheet .cy-custom-search {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.cy_sheet_helper-gif {
+    padding: 10px 8px;
+    object-fit: contain;
+    height: calc(100dvh - 350px);
+}
+
+.cy_kpi_sheet.cy_kpi_parent {
+    justify-content: center;
+    align-items: center;
+}
+
+.cy-time-range-section .form-select-sm {
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+/* Sheet Configuration accordion caret */
+
+.cy-config-accordion-btn::after {
+    display: none;
+}
+
+.cy-accordion-caret {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+    /* Default: open state — arrow points down */
+    transform: rotate(0deg);
+}
+
+/* Collapsed state — rotate arrow to point right */
+.cy-config-accordion-btn[aria-expanded="false"] .cy-accordion-caret {
+    transform: rotate(-90deg);
+}
+
+.cy-sheet-img {
+    font-size: 2.6rem;
+    color: #454745;
+    padding-left: 5px;
+}

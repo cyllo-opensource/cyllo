@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_quant_handle_wizard_form" model="ir.ui.view">
+        <field name="name">stock.quant.handle.wizard.form</field>
+        <field name="model">stock.quant.handle.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Manage Expiring Product">
+                <sheet>
+                    <field name="quant_id" invisible="1"/>
+                    <field name="expiry_risk_level" invisible="1"/>
+                    <div class="row">
+                        <!-- Left pane: product and risk details card -->
+                        <div class="col-md-5 border-end pe-3">
+                            <h4 class="mb-3 text-primary">Product Details</h4>
+                            <div class="mb-3">
+                                <span class="o_form_label fw-bold text-muted d-block small">Product</span>
+                                <span class="fs-5 fw-bold text-dark">
+                                    <field name="product_id" readonly="1"/>
+                                </span>
+                            </div>
+
+                            <!-- Dynamic alert banner based on risk level -->
+                            <div invisible="expiry_risk_level != 'high'" role="alert"
+                                 class="alert alert-danger p-2 d-flex align-items-center gap-2 mb-3">
+                                <i class="fa fa-exclamation-triangle fa-lg text-danger" title="High Risk"/>
+                                <div>
+                                    <strong>High Expiry Risk!</strong>
+                                    Alert date has passed.
+                                </div>
+                            </div>
+                            <div invisible="expiry_risk_level != 'medium'" role="alert"
+                                 class="alert alert-warning p-2 d-flex align-items-center gap-2 mb-3">
+                                <i class="fa fa-warning fa-lg text-warning" title="Medium Risk"/>
+                                <div>
+                                    <strong>Medium Expiry Risk!</strong>
+                                    Expiring in less than 30 days.
+                                </div>
+                            </div>
+                            <div invisible="expiry_risk_level != 'low'" role="alert"
+                                 class="alert alert-success p-2 d-flex align-items-center gap-2 mb-3">
+                                <i class="fa fa-check-circle fa-lg text-success" title="Low Risk"/>
+                                <div>
+                                    <strong>Low Expiry Risk.</strong>
+                                    Product has active shelf life.
+                                </div>
+                            </div>
+
+                            <div class="card bg-light border-0 p-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom small">
+                                    <span class="text-muted fw-bold">On Hand Qty</span>
+                                    <span class="fw-bold text-dark">
+                                        <field name="qty"/>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom small">
+                                    <span class="text-muted fw-bold">Location</span>
+                                    <span class="fw-bold text-dark">
+                                        <field name="location_id"/>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom small">
+                                    <span class="text-muted fw-bold">Lot/Serial</span>
+                                    <span class="fw-bold text-dark">
+                                        <field name="lot_id"/>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small">
+                                    <span class="text-muted fw-bold">Expiration Date</span>
+                                    <span class="fw-bold text-dark">
+                                        <field name="expiration_date"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right pane: Action selections -->
+                        <div class="col-md-7 ps-3">
+                            <h4 class="mb-3 text-primary">Handling Action</h4>
+
+                            <div class="mb-3">
+                                <field name="action_type" widget="radio" class="fw-bold"/>
+                            </div>
+
+                            <!-- Contextual Hints and Inputs -->
+                            <div invisible="action_type != 'discount'" class="card bg-light border-0 p-3 mb-3">
+                                <h6 class="text-primary mb-2">
+                                    <i class="fa fa-percent me-1"/>
+                                    Discount Setup
+                                </h6>
+                                <p class="text-muted small mb-3">Specify the discount percentage. This discount will be
+                                    automatically applied to any future Sales Orders for this product.
+                                </p>
+                                <div class="row align-items-center">
+                                    <div class="col-sm-6">
+                                        <div class="input-group">
+                                            <field name="discount" placeholder="e.g. 10.0" class="form-control"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div invisible="action_type != 'scrap'" class="card bg-light border-0 p-3 mb-3">
+                                <h6 class="text-danger mb-2">
+                                    <i class="fa fa-trash me-1"/>
+                                    Move to Scrap
+                                </h6>
+                                <p class="text-muted small mb-3">Choose the scrap location. The system will
+                                    automatically create and validate a scrap order to write off this stock.
+                                </p>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <field name="scrap_location_id" options="{'no_create': True}"
+                                               placeholder="Select scrap location..."/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div invisible="action_type != 'deliver'" class="card bg-light border-0 p-3 mb-3">
+                                <h6 class="text-info mb-2">
+                                    <i class="fa fa-truck me-1"/>
+                                    Direct Delivery
+                                </h6>
+                                <p class="text-muted small mb-0">Proceeding will initialize a pre-filled delivery order
+                                    picking. You will be redirected to complete the destination customer details.
+                                </p>
+                            </div>
+
+                            <div invisible="action_type != 'return'" class="card bg-light border-0 p-3 mb-3">
+                                <h6 class="text-warning mb-2">
+                                    <i class="fa fa-undo me-1"/>
+                                    Return to Vendor
+                                </h6>
+                                <p class="text-muted small mb-0">Proceeding will locate the original Purchase Order and
+                                    completed Receipt, create a return transaction, and validate it immediately.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
+                <footer>
+                    <div class="w-100 d-flex justify-content-end gap-2">
+                        <button name="action_proceed" string="Proceed" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </div>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

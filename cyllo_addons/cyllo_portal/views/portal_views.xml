@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="portal_layout" name="Portal layout: Your Addresses"
+              inherit_id="portal.portal_breadcrumbs" priority="35">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'addresses'"
+                t-attf-class="breadcrumb-item #{'active' if not addresses else ''}">
+                <t>Addresses</t>
+            </li>
+        </xpath>
+    </template>
+    <template id="login_and_security" name="Portal layout: login and security"
+              inherit_id="portal.portal_breadcrumbs" priority="36">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'login_and_security'"
+                t-attf-class="breadcrumb-item #{'active' if not login_and_security else ''}">
+                <t>Login and Security</t>
+            </li>
+        </xpath>
+    </template>
+    <template id="edit_name_details" name="Portal layout: edit name"
+              inherit_id="portal.portal_breadcrumbs" priority="36">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name in ('edit_name_details','edit_email_details','edit_phone_details')"
+                t-attf-class="breadcrumb-item #{'active' if not login_and_security else ''}">
+                <a href="/login/security">Login and Security</a>
+            </li>
+            <li t-if="page_name == 'edit_name_details'"
+                t-attf-class="breadcrumb-item #{'active' if not login_and_security else ''}">
+                <t>Edit Name</t>
+            </li>
+            <li t-if="page_name == 'edit_email_details'"
+                t-attf-class="breadcrumb-item #{'active' if not edit_email_details else ''}">
+                <t>Edit Mail</t>
+            </li>
+            <li t-if="page_name == 'edit_phone_details'"
+                t-attf-class="breadcrumb-item #{'active' if not edit_phone_details else ''}">
+                <t>Edit Phone Number</t>
+            </li>
+        </xpath>
+    </template>
+    <!-- Template to add new address-->
+    <template id="portal_your_address_template" name="Your Addresses">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="page_title">Address</t>
+            </t>
+            <div>
+                <section class="gradient-custom" data-vcss="001"
+                         data-snippet="s_website_form">
+                    <div class="container address_container w-100 py-5 d-flex">
+                        <div class="address_main_div">
+                            <a href="/add/address" class="a-box address-tile">
+                                <div class="a-box-inner a-padding-extra-large">
+                                    <div id="ya-myab-plus-address-icon"
+                                         class="a-section a-spacing-none address-plus-icon aok-inline-block"/>
+                                    <h3 class="a-color-tertiary"
+                                        style="color:#9d9999">Add address
+                                    </h3>
+                                </div>
+                            </a>
+                            <t t-foreach="shippings" t-as="ship">
+                                <t t-set="res_id" t-value="ship.id"/>
+                                <form t-attf-action="/address/edit?res_id={{ship.id}}"
+                                      method="post">
+                                    <input type="hidden" name="res_id"
+                                           t-att-value="ship.id"/>
+                                    <div id="ya-myab-display-address-block-0"
+                                         class="a-box a-spacing-none desktop-address-tile">
+                                        <div class="a-box-inner a-padding-none">
+                                            <div class="a-section address-section-no-default">
+                                                <div class="a-row a-spacing-small">
+                                                    <ul class="a-unordered-list a-nostyle a-vertical">
+                                                        <li t-if="ship.name">
+                                                            <span class="a-list-item">
+                                                                <span class="name_address">
+                                                                    <t t-esc="ship.name"/>
+                                                                </span>
+                                                            </span>
+                                                        </li>
+                                                        <li t-if="ship.email">
+                                                            <span class="a-list-item">
+                                                                <span>
+                                                                    <t t-esc="ship.email"/>
+                                                                </span>
+                                                            </span>
+                                                        </li>
+                                                        <li t-if="ship.street">
+                                                            <span class="a-list-item">
+                                                                <span>
+                                                                    <t t-esc="ship.street"/>
+                                                                </span>
+                                                            </span>
+                                                        </li>
+                                                        <li t-if="ship.street2">
+                                                            <span class="a-list-item">
+                                                                <span>
+                                                                    <t t-esc="ship.street2"/>
+                                                                </span>
+                                                            </span>
+                                                        </li>
+                                                        <li t-if="ship.city">
+                                                            <span class="a-list-item">
+                                                                <span>
+                                                                    <t t-esc="ship.city"/>
+                                                                </span>
+                                                                <t t-if="ship.state_id">
+                                                                    <span>,
+                                                                        <t t-esc="ship.state_id.name"/>
+                                                                    </span>
+                                                                </t>
+                                                            </span>
+                                                        </li>
+                                                        <li t-if="ship.country_id">
+                                                            <span class="a-list-item">
+                                                                <span>
+                                                                    <t t-esc="ship.country_id.name"/>
+                                                                </span>
+                                                            </span>
+                                                        </li>
+                                                        <li t-if="ship.zip">
+                                                            <span class="a-list-item">
+                                                                <span>Zipcode:
+                                                                    <t t-esc="ship.zip"/>
+                                                                </span>
+                                                            </span>
+                                                        </li>
+                                                        <li t-if="ship.phone">
+                                                            <span class="a-list-item">
+                                                                <span>Phone
+                                                                    number:
+                                                                    <t t-esc="ship.phone"/>
+                                                                </span>
+                                                            </span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="edit-remove-link">
+                                            <button class="edit-rmv-buttons"
+                                                    type="submit">
+                                                Edit
+                                            </button>
+                                            <t t-if="not ship.user_ids and ship.parent_id == request.env.user.partner_id">
+                                                <a t-attf-href="/address/remove/{{ ship.id }}"
+                                                   class="edit-rmv-buttons text-decoration-none"
+                                                   role="button">
+                                                    Remove
+                                                </a>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </form>
+                            </t>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

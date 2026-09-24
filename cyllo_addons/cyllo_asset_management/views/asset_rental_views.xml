@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Tree view of the asset rental model-->
+    <record id="view_asset_rental_tree" model="ir.ui.view">
+        <field name="name">view.asset.rental.tree</field>
+        <field name="model">asset.rental</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="asset_id"/>
+                <field name="customer_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Search view of the asset rental model-->
+    <record id="view_asset_rental_search" model="ir.ui.view">
+        <field name="name">view.asset.rental.search</field>
+        <field name="model">asset.rental</field>
+        <field name="arch" type="xml">
+            <search string="Rental Asset">
+                <field name="asset_id"/>
+                <field name="customer_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Asset" name="asset_item" domain="[]" context="{'group_by':'asset_id'}"/>
+                    <filter string="Customer" name="customer" domain="[]" context="{'group_by':'customer_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--    Wizard view of the asset rental model-->
+    <record id="view_asset_rental_form2" model="ir.ui.view">
+        <field name="name">view.asset.rental.form2</field>
+        <field name="model">asset.rental</field>
+        <field name="arch" type="xml">
+            <form string="Rental">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id" invisible="1"/>
+                            <field name="customer_id"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="payment_terms"/>
+                            <field name="payment_type" invisible="payment_terms == 'day'"/>
+                            <label for="rent_amount"/>
+                            <div class="o_row">
+                                <field name="rent_amount" widget="monetary"
+                                       options="{'currency_field': 'currency_id'}" class="o_hr_narrow_field"
+                                       nolabel="1"/>
+                                <span class="ms-3">/ day</span>
+                            </div>
+                            <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"/>
+                            <field name="end_date" invisible="1"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button type="object" name="action_create_rental" string="Create Rental" class="oe_highlight"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Form view of the asset rental model-->
+    <record id="view_asset_rental_form" model="ir.ui.view">
+        <field name="name">view.asset.rental.form</field>
+        <field name="model">asset.rental</field>
+        <field name="arch" type="xml">
+            <form string="Rental">
+                <header>
+                    <button type="object" name="action_create_rental" string="Create Rental" class="oe_highlight"
+                            invisible="status != 'draft'"/>
+                    <button type="object" name="action_return_asset" string="Return Asset" class="oe_highlight"
+                            invisible="status != 'rent'"/>
+                    <button type="object" name="action_cancel" string="Cancel" class="btn-secondary"
+                            invisible="status == 'cancel'"/>
+                    <button type="object" name="action_reset_to_draft" string="Reset to Draft" class="btn-secondary"
+                            invisible="status != 'cancel'"
+                            groups="cyllo_asset_management.group_cyllo_asset_admin"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,rent"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="action_view_invoice"
+                                invisible="invoice_count == 0 or is_invoice != True" type="object" icon="fa-pencil-square-o">
+                            <field name="invoice_count" string="Invoices" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="alert alert-warning py-2"
+                         invisible="not availability_warning">
+                        <field name="availability_warning"
+                               widget="html"
+                               readonly="1"
+                               nolabel="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="asset_ids" invisible="True"/>
+                            <field name="asset_id" domain="[('is_confirm', '=', True),('is_assign', '=', False),
+                              ('status','not in', ['sell', 'disposed', 'cancel']), ('is_rental_asset', '=', True)]"/>                            <field name="customer_id" readonly="status != 'draft'"/>
+                            <field name="email" readonly="status != 'draft'"/>
+                            <field name="company_id" readonly="status != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"
+                                   readonly="status != 'draft' or not asset_id"/>
+                            <field name="end_date" invisible="1"/>
+                            <field name="payment_terms" readonly="status != 'draft'"/>
+                            <field name="payment_type" invisible="payment_terms == 'day'" readonly="status != 'draft'"/>
+                            <label for="rent_amount"/>
+                            <div class="o_row">
+                                <field name="rent_amount" widget="monetary"
+                                       options="{'currency_field': 'currency_id'}" class="o_hr_narrow_field"
+                                       nolabel="1"/>
+                                <span class="ms-3">/ day</span>
+                            </div>
+                            <field name="is_invoice" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--   Action for the asset rental model-->
+    <record id="action_view_rental" model="ir.actions.act_window">
+        <field name="name">Rental</field>
+        <field name="res_model">asset.rental</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!--   Menuitem for the asset rental -->
+    <menuitem id="menu_rental" name="Rental"
+              parent="cyllo_asset_management.menu_operations"
+              action="action_view_rental"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,141 @@
+// Add Chatter placeholder — shown when form has no chatter widget
+.cy-add-chatter-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 300px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.cy-add-chatter-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  pointer-events: none;
+  width: 100%;
+  height: stretch;
+  background: #f3f3f3;
+  border: 2px dashed #b1b1b1;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.cy-add-chatter-placeholder:hover .cy-add-chatter-inner {
+  background: #f8f9ed;
+  border-color: #9EA700;
+
+  .cy-add-chatter-icon,
+  .cy-add-chatter-label {
+    color: #9EA700;
+  }
+}
+
+
+.cy-add-chatter-icon {
+  font-size: 32px;
+  color: rgba(0, 0, 0, 0.25);
+  transition: color 0.2s ease;
+}
+
+.cy-add-chatter-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+}
+
+// Chatter Overlay — border always visible; delete button fades in on hover
+.cy-studio-chatter-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+
+  .cy-tooltip-wrapper {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+}
+
+.o-mail-Chatter {
+  position: relative;
+}
+
+.o-mail-Chatter:hover .cy-studio-chatter-overlay {
+  pointer-events: auto;
+  border: 2px dashed #b1b1b1;
+  background-color: #f3f3f3a6;
+  opacity: 1;
+
+  .cy-tooltip-wrapper {
+    opacity: 1;
+  }
+}
+
+// Tooltip Wrapper & Icon
+.cy-tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+
+  .cy-trash-icon {
+    font-size: 26px;
+    color: #f87171; // soft red
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+      color: #dc2626; // brighter red
+      transform: scale(1.15);
+    }
+  }
+
+  .cy-tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    width: max-content;
+    background-color: rgba(17, 24, 39, 0.9); // tooltip background
+    color: #ffffff;
+    text-align: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    position: absolute;
+    bottom: 125%; // above the icon
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    z-index: 999;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+
+    // Tooltip Arrow
+    &::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      /* below tooltip box */
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: rgba(17, 24, 39, 0.9) transparent transparent transparent;
+    }
+  }
+
+  &:hover .cy-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px); // hover lift effect
+  }
+}

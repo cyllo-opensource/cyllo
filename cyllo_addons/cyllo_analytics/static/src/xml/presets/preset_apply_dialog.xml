@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="PresetApplyDialog" owl="1">
+        <Dialog size="'lg'" title="state.viewMode === 'apply' ? 'Apply Preset' : 'Create Preset'">
+            <t t-set-slot="header">
+                <div class="d-flex w-100 align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="modal-title text-break">
+                            <t t-if="state.viewMode === 'apply'">Apply Preset</t>
+                            <t t-else="">Create Preset</t>
+                        </h4>
+                    </div>
+                    <button class="btn-close" t-on-click="onCancel" aria-label="Close"/>
+                </div>
+            </t>
+
+            <div class="cy-preset-apply-body cy-analytics-preset-body" style="max-height: 70vh; overflow-y: auto;">
+
+                <!-- ╔══ VIEW MODE: APPLY ══╗ -->
+                <t t-if="state.viewMode === 'apply'">
+
+                    <!-- ── Preset Selector ── -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <label class="cy-modal-form_label" style="font-size: 14px;">Select Preset Template</label>
+                        </div>
+                        <div class="cy-preset-search-container" style="position: relative;">
+                            <AutoComplete value="state.selectedPresetLabel" sources="presetSources" onSelect.bind="onPresetSelect" placeholder="'Search or select a preset...'" autoSelect="true" />
+                            <i class="ri-arrow-down-s-line" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #9ea700; pointer-events: none;"/>
+                        </div>
+                    </div>
+
+                    <!-- ── Config panel (after selection) ── -->
+                    <t t-if="state.selectedPresetId">
+                        <div class="mb-3">
+                            <label class="cy-modal-form_label cy-analytics-preset-label">Calculation Method <span class="text-danger">*</span>
+                            </label>
+                            <div class="cy-analytics-preset-method-grid mt-2">
+                                <div t-attf-class="cy-analytics-preset-method-card {{state.calculationType === 'row' ? 'cy-analytics-preset-method-card--active' : ''}}" t-on-click="() => this.state.calculationType = 'row'">
+                                    <div class="cy-analytics-preset-method-icon">
+                                        <i class="ri-list-check"/>
+                                    </div>
+                                    <div class="cy-analytics-preset-method-body">
+                                        <div class="cy-analytics-preset-method-name">Row-level</div>
+                                        <div class="cy-analytics-preset-method-desc">Calculates per individual record.</div>
+                                    </div>
+                                    <i class="ri-checkbox-circle-fill cy-analytics-preset-method-check"/>
+                                </div>
+                                <div t-attf-class="cy-analytics-preset-method-card {{state.calculationType === 'aggregate' ? 'cy-analytics-preset-method-card--active' : ''}}" t-on-click="() => this.state.calculationType = 'aggregate'">
+                                    <div class="cy-analytics-preset-method-icon">
+                                        <i class="ri-functions"/>
+                                    </div>
+                                    <div class="cy-analytics-preset-method-body">
+                                        <div class="cy-analytics-preset-method-name">Aggregated</div>
+                                        <div class="cy-analytics-preset-method-desc">Uses aggregated values for a single summary result.</div>
+                                    </div>
+                                    <i class="ri-checkbox-circle-fill cy-analytics-preset-method-check"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Field Name -->
+                        <div class="mb-3">
+                            <label class="cy-modal-form_label" style="font-size: 14px;">Field Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="cy-sidebar-input mt-1" placeholder="e.g. Sales Margin %" t-model="state.fieldName" style="font-size: 13px;"/>
+                        </div>
+
+                        <!-- ╔══ Variable Configuration ══╗ -->
+                        <div t-if="state.variables.length" class="mb-3">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="cy-preset-apply-subtitle" style="font-size: 14px;">Configure Variables</span>
+                                <span class="cy-preset-func-badge">
+                                    (                                    <t t-esc="state.variables.length"/>
+)
+                                </span>
+                            </div>
+
+                            <t t-foreach="state.variables" t-as="variable" t-key="variable_index">
+                                <div class="mb-2" style="overflow: hidden;">
+                                    <!-- Variable config row: Field | Aggregate | Filter inline -->
+                                    <div class="d-flex align-items-center gap-3 p-3 p-2 flex-nowrap cy-dashboard-preset-var-conf">
+                                        <div class="d-flex align-items-center gap-2 px-3 py-2 cy-preset-var-type-badge">
+                                            <span>
+                                                <t t-esc="variable.name"/>
+                                            </span>
+                                        </div>
+
+                                        <!-- Field selector (Searchable) -->
+                                        <div class="flex-grow-1" style="min-width: 250px;">
+                                            <div class="cy-variable-autocomplete-container" style="position: relative;">
+                                                <AutoComplete value="getVarLabel(variable.name)" sources="variableSources(variable.name)" onSelect="(selected) => this.onVarSelect(variable.name, selected)" placeholder="'Search field...'" autoSelect="true" />
+                                                <i class="ri-arrow-down-s-line" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #9ea700; pointer-events: none;"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Aggregate selector (Aggregated mode only) -->
+                                        <t t-if="state.calculationType === 'aggregate'">
+                                            <div style="width: 130px; flex-shrink: 0;">
+                                                <select t-attf-class="form-select btn btn-secondary" t-on-change="(ev) => this.setVarAggregate(variable.name, ev.target.value)" t-att-style="'font-size: 13px; height: 38px;' + (state.missingAggs and state.missingAggs.includes(variable.name) ? ' border: 1px solid #dc3545 !important; outline: 1px solid #dc3545;' : '')">
+                                                    <t t-foreach="aggOptions" t-as="agg" t-key="agg_index">
+                                                        <option t-att-value="agg" t-att-selected="state.variableConfigs[variable.name]?.aggregate === agg">
+                                                            <t t-if="agg" t-esc="agg"/>
+                                                            <t t-else="">None</t>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </div>
+                                        </t>
+
+                                        <!-- Filter -->
+                                        <div style="flex-shrink: 0;">
+                                            <t t-if="state.variableConfigs[variable.name]?.filter_name">
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <span class="d-inline-flex align-items-center gap-1 px-3" style="font-size: 12px; height: 38px; border-radius:8px; background: #ebedb7; color: #505050; border: 1px solid #d4d600;">
+                                                        <i class="ri-filter-3-line" style="color: #9ea700; font-size: 14px;"/>
+                                                        <t t-esc="state.variableConfigs[variable.name].filter_name"/>
+                                                        <button class="btn btn-sm p-0 text-decoration-none ms-2" style="font-size: 14px;" title="Edit filter" t-on-click="() => this.openFilterDialog(variable.name)">
+                                                            <i class="ri-pencil-line"/>
+                                                        </button>
+                                                        <button class="btn-close ms-1" style="font-size: 8px;" t-on-click="() => this.clearFilter(variable.name)"/>
+                                                    </span>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <button class="btn btn-sm d-flex btn-secondary align-items-center justify-content-center gap-1" style="height: 38px; min-width: 110px; font-size: 12px; color: #505050; background: #f7f7f7; border: 1px dashed #DFDFDF; border-radius: 5px; padding: 4px 15px;" t-on-click="() => this.openFilterDialog(variable.name)">
+                                                    <i class="ri-filter-3-line" style="color: #9ea700; font-size: 14px;"/>
+                                                    Add Filter
+                                                </button>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                        <div t-elif="state.variables.length === 0" class="cy-preset-no-vars-msg mb-3 d-flex align-items-center gap-2 px-3 py-2 rounded-2" style="background: #f7f7f7; border: 1px solid #DFDFDF;">
+                            <i class="ri-information-line" style="color: #888;"/>
+                            <span style="color: #888; font-size: 13px;">No variables required for this preset.</span>
+                        </div>
+
+                        <!-- Formula Toggle -->
+                        <div class="mt-3">
+                            <button class="btn btn-link btn-sm ms-1 px-1 text-decoration-none d-flex align-items-center gap-1" style="color: #9ea700; font-size: 13px;" t-on-click="() => this.state.showFormula = !this.state.showFormula">
+                                <t t-if="!state.showFormula">
+                                    <i class="ri-eye-line"/>
+                                    Show Formula</t>
+                                <t t-else="">
+                                    <i class="ri-eye-off-line"/>
+                                    Hide Formula</t>
+                            </button>
+                            <div t-if="state.showFormula" class="mt-2">
+                                <textarea class="form-control cy-button-stroke font-monospace" style="height: 70px; font-size: 13px; background: #f3f3e0;" t-model="state.rawFormula" t-on-input="onFormulaChange"/>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+
+                <!-- ╔══ VIEW MODE: CREATE ══╗ -->
+                <t t-else="">
+                    <!-- Template Name -->
+                    <div class="mb-3">
+                        <label class="cy-modal-form_label cy-analytics-preset-label">Template Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="cy-sidebar-input mt-1" placeholder="eg. Sales Margin %" t-model="state.fieldName"/>
+                    </div>
+
+                    <!-- Formula -->
+                    <div class="mb-3">
+                        <label class="cy-modal-form_label mb-1 cy-analytics-preset-label">Formula <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control cy-sidebar-input font-monospace rounded-0" placeholder="eg. ({a} - {b}) / {b} * 100" t-model="state.rawFormula" t-on-input="onFormulaChange"/>
+                        <div class="alert cy-alert-primary mt-2">
+                            <div>
+                                <i class="ri-information-line me-1 cy-analytics-preset-hint-icon"/>
+                                <b>Syntax:</b> Use <code>{var_name}</code> for values.</div>
+                            <div class="mt-1">
+                                <b>Examples:</b>
+                            </div>
+                            <ul class="mb-0 ps-3">
+                                <li>
+                                    <code>{qty}*{price}</code> —                                    <small>Row-level</small>
+                                </li>
+                                <li>
+                                    <code>{current}/{previous} * 100</code> —                                    <small>Aggregated</small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Calculation Method -->
+                    <div class="mb-3">
+                        <label class="cy-modal-form_label cy-analytics-preset-label">Calculation Method <span class="text-danger">*</span>
+                        </label>
+                        <div class="cy-analytics-preset-method-grid mt-2">
+                            <div t-attf-class="cy-analytics-preset-method-card {{state.calculationType === 'row' ? 'cy-analytics-preset-method-card--active' : ''}}" t-on-click="() => this.state.calculationType = 'row'">
+                                <div class="cy-analytics-preset-method-icon">
+                                    <i class="ri-list-check"/>
+                                </div>
+                                <div class="cy-analytics-preset-method-body">
+                                    <div class="cy-analytics-preset-method-name">Row-level</div>
+                                    <div class="cy-analytics-preset-method-desc">Calculates per individual record.</div>
+                                </div>
+                                <i class="ri-checkbox-circle-fill cy-analytics-preset-method-check"/>
+                            </div>
+                            <div t-attf-class="cy-analytics-preset-method-card {{state.calculationType === 'aggregate' ? 'cy-analytics-preset-method-card--active' : ''}}" t-on-click="() => this.state.calculationType = 'aggregate'">
+                                <div class="cy-analytics-preset-method-icon">
+                                    <i class="ri-functions"/>
+                                </div>
+                                <div class="cy-analytics-preset-method-body">
+                                    <div class="cy-analytics-preset-method-name">Aggregated</div>
+                                    <div class="cy-analytics-preset-method-desc">Uses aggregated values for a single summary result.</div>
+                                </div>
+                                <i class="ri-checkbox-circle-fill cy-analytics-preset-method-check"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
+                <!-- Error (shared by both modes) -->
+                <div t-if="state.error" t-ref="errorRef" class="alert alert-danger py-2 mt-3 d-flex align-items-center gap-2 cy-analytics-preset-error">
+                    <i class="ri-error-warning-line"/>
+                    <t t-esc="state.error"/>
+                </div>
+            </div>
+
+            <t t-set-slot="footer">
+                <t t-if="state.viewMode === 'apply'">
+                    <button class="btn btn-primary" t-on-click="onApply" t-att-disabled="!state.selectedPresetId">
+                        <i class="ri-check-line me-1"/>
+Apply
+                    </button>
+                    <button class="btn btn-secondary" t-on-click="onCancel">
+                        Cancel
+                    </button>
+                </t>
+                <t t-else="">
+                    <button class="btn btn-primary" t-on-click="onSaveAsTemplate">
+                        <i class="ri-save-line me-1"/>
+Save Template
+                    </button>
+                    <button class="btn btn-secondary" t-on-click="onCancel">
+                        Cancel
+                    </button>
+                </t>
+            </t>
+        </Dialog>
+
+    </t>
+
+    <t t-name="PresetApplyDialog.AutoCompleteOption" owl="1">
+        <div class="d-flex align-items-center justify-content-between w-100">
+            <span t-esc="option.label"/>
+            <i t-if="option.isSelected" class="ri-check-line ms-2 cy-analytics-preset-check-icon"/>
+        </div>
+    </t>
+</templates>

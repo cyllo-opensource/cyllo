@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_document_inherit"
+              inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@id='right-elements']" position="after">
+            <div class="ms-auto">
+                <table class="table table-sm table-borderless avoid-page-break-inside"
+                       id="installments">
+                    <t t-if="o.installment_ids">
+                        <tr>
+                            <th class="text-start">Installment Date</th>
+                            <th class="text-start">Amount</th>
+                            <th class="text-start">Payment Status</th>
+                        </tr>
+                        <t t-set="installments" t-value="o.installment_ids"/>
+                        <t t-foreach="installments" t-as="installment">
+                            <tr>
+                                <td>
+                                    <t t-out="installment.payment_date"
+                                       t-options='{"widget": "date"}'/>
+                                </td>
+                                <td>
+                                    <t t-out="installment.pay_amount"
+                                       t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                                <td>
+                                    <t t-if="installment.state == 'paid'">Paid
+                                    </t>
+                                    <t t-else="">Not Paid</t>
+
+                                </td>
+                            </tr>
+                        </t>
+                    </t>
+                </table>
+                <br/>
+                <t t-if="o.installment_paid">
+                    <div class="border-black fw-bold">
+                        <div>Total Installment Paid:
+                            <span t-field="o.installment_paid"/>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="o.total_advance_paid_amount != 0">
+                    <div class="border-black fw-bold">
+                        <div>Total Advance Amount:
+                            <span t-field="o.total_advance_paid_amount"/>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </template>
+</odoo>

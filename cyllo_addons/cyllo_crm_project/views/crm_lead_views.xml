@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_crm_lead_form_inherit_cyllo_crm_project"
+            model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit.cyllo.crm.project</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_set_won_rainbowman']"
+                   position="after">
+                <button string="Create Task" class="btn btn-secondary"
+                        type="object" name="action_create_task"
+                        invisible="task_id or probability &lt; 100"
+                />
+            </xpath>
+            <xpath expr="//button[@name='action_schedule_meeting']"
+                   position="after">
+                <button name="action_open_task" type="object"
+                        class="oe_stat_button" icon="fa-check-circle" invisible="not task_id"
+                        string="Task"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="after">
+                <div style="
+                    display:inline-flex;
+                    align-items:baseline;
+                    gap:6px;
+                    white-space:nowrap;
+                    vertical-align:baseline;
+                ">
+                    <field name="task_id" invisible="1"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

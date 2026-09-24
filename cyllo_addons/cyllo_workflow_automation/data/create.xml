@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="work_function_create" model="work.function">
+        <field name="name">On Create</field>
+        <field name="func_name">create</field>
+        <field name="trigger_type">create</field>
+        <field name="make_function"><![CDATA[
+def make_create():
+    @api.model_create_multi
+    def create(self, vals_list, **kw):
+        guard_key = '_workflow_create_running_' + self._name
+        if self.env.context.get(guard_key):
+            return create.origin(self, vals_list, **kw)
+
+        automation_ids = self.env['work.auto']._get_actions(self, 'create')
+        if not automation_ids:
+            return create.origin(self, vals_list, **kw)
+
+        self_guarded = self.with_context(**{guard_key: True})
+
+        before_ids = automation_ids.filtered(lambda x: x.ttype == 'before')
+        for automation in before_ids.with_context(old_values=None):
+            automation._process({'vals_list': vals_list, 'trigger_type': 'create'})
+
+        records = create.origin(self_guarded.with_env(automation_ids.env), vals_list, **kw)
+
+        after_ids = automation_ids - before_ids
+        for automation in after_ids.with_context(old_values=None):
+            automation._process({'records': records.with_context(**{guard_key: True}), 'trigger_type': 'create'})
+
+        return records.with_env(self.env)
+    return create
+        ]]></field>
+        <field name="icon" type="base64" file="cyllo_workflow_automation/static/src/img/on-create.svg"/>
+    </record>
+</odoo>

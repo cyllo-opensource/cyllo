@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Tree view of the Sign Request-->
+    <record id="view_sign_request_tree" model="ir.ui.view">
+        <field name="name">view.sign.request.tree</field>
+        <field name="model">sign.request</field>
+        <field name="arch" type="xml">
+            <tree string="sign.request">
+                <field name="name"/>
+                <field name="template_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--Search view of the Sign Request-->
+    <record id="view_sign_request_search" model="ir.ui.view">
+        <field name="name">view.sign.request.search</field>
+        <field name="model">sign.request</field>
+        <field name="arch" type="xml">
+            <search string="Sign Requests">
+                <filter string="Draft" domain="[('state', '=', 'draft')]"
+                        name="filter_by_draft"/>
+                <filter string="Partially Signed"
+                        domain="[('state', '=', 'partial')]"
+                        name="filter_by_sent"/>
+                <filter string="Signed" domain="[('state', '=', 'signed')]"
+                        name="filter_by_signed"/>
+                <filter string="Cancelled" domain="[('state', '=', 'cancel')]"
+                        name="filter_by_cancel"/>
+                <field name="name"/>
+                <field name="template_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="State" name="state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+                <searchpanel>
+                    <field name="state" select="multi" expand="0"
+                           icon="fa-inbox" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <!--Kanban view of the Sign Request-->
+    <record id="view_sign_request_kanban" model="ir.ui.view">
+        <field name="name">view.sign.request.kanban</field>
+        <field name="model">sign.request</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" quick_create="false">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="create_date"/>
+                <field name="create_uid"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings mt4">
+                                    <strong class="o_kanban_record_title">
+                                        <span t-out="record.name.value"/>
+                                    </strong>
+                                </div>
+                                <div>
+                                    <field name="create_uid"
+                                           widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left text-muted">
+                                    <span>
+                                        <t t-out="record.create_date.value"/>
+                                    </span>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="state" widget="label_selection"
+                                           options="{'classes': {'draft': 'info', 'sent': 'default',
+                                           'signed': 'success', 'cancel':'danger'}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!--Form view of the Sign Request-->
+    <record id="view_sign_request_form" model="ir.ui.view">
+        <field name="name">view.sign.request.form</field>
+        <field name="model">sign.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <header>
+                        <button type="object" name="action_sign" string="Sign"
+                                class="btn-primary"
+                                invisible="state not in ('draft', 'partial')"/>
+                        <button type="object" name="action_cancel"
+                                string="Cancel"
+                                class="btn-primary"
+                                invisible="state not in ('draft', 'partial')"/>
+                        <button type="object"
+                                name="action_print_signed_document"
+                                string="Print Signed Document"
+                                class="btn-primary"
+                                invisible="state != 'signed'"/>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="draft,signed"/>
+                    </header>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="data" invisible="1"/>
+                            <field name="template_id"
+                                   invisible="not template_id"/>
+                        </group>
+                        <group>
+                            <field name="validity" invisible="not validity"/>
+                        </group>
+                        <notebook>
+                            <page name="items" string="Signers">
+                                <field name="requester_ids" no_label="1">
+                                    <tree editable="bottom">
+                                        <field name="partner_id" required="1"/>
+                                        <field name="role_id" required="1"/>
+                                        <field name="signed_on"/>
+                                        <field name="color"
+                                               widget="color_picker"
+                                               optional="hide"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--Action specified for the Sign Request-->
+    <record id="action_view_all_requests" model="ir.actions.act_window">
+        <field name="name">All Requests</field>
+        <field name="res_model">sign.request</field>
+        <field name="context">{'create': False}</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                All Sign Requests
+            </p>
+            <p>
+                View all sign requests here.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_view_my_requests" model="ir.actions.act_window">
+        <field name="name">My Requests</field>
+        <field name="res_model">sign.request</field>
+        <field name="context">{'create': False}</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('allowed_user_ids', '=', uid)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                My Sign Requests
+            </p>
+            <p>
+                View your sign requests here.
+            </p>
+        </field>
+
+    </record>
+    <menuitem id="menu_requests" name="Requests"
+              parent="cyllo_sign.menu_cyllo_sign_root" sequence="1"/>
+    <menuitem id="menu_my_requests" name="My Requests"
+              action="action_view_my_requests"
+              parent="cyllo_sign.menu_requests"/>
+    <menuitem id="menu_all_requests" name="All Requests"
+              groups="group_cyllo_sign_manager"
+              action="action_view_all_requests"
+              parent="cyllo_sign.menu_requests"/>
+</odoo>

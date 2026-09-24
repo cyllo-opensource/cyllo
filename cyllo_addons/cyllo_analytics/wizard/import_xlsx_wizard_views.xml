@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_import_xlsx_wizard_form" model="ir.ui.view">
+        <field name="name">import.xlsx.wizard.form</field>
+        <field name="model">import.xlsx.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Table from XLSX">
+                <field name="state" invisible="1"/>
+                <group invisible="state in ('columns', 'confirm')">
+                    <field name="file" filename="file_name" accept=".xlsx,.xls,.csv,.json"/>
+                    <field name="file_name" invisible="1"/>
+                </group>
+                <group invisible="state != 'sheet'">
+                    <field name="sheet_id" options="{'no_create': True, 'no_open': True}" domain="[('wizard_id', '=', id)]"/>
+                </group>
+                <group invisible="state != 'sheet'" string="Table Boundaries">
+                    <group>
+                        <field name="start_row"/>
+                        <field name="start_col"/>
+                    </group>
+                    <group>
+                        <field name="end_row"/>
+                        <field name="end_col"/>
+                    </group>
+                </group>
+                <group invisible="state != 'confirm'">
+                    <div class="alert alert-warning" role="alert" style="margin-bottom: 20px;">
+                        <h4>Warning: Table Already Exists</h4>
+                        <p>The table "<strong><field name="table_label" readonly="1" nolabel="1" class="oe_inline"/></strong>" (<field name="table_name" readonly="1" nolabel="1" class="oe_inline"/>) already exists.</p>
+                        <p>Do you want to append these new records to the existing database table?</p>
+                    </div>
+                </group>
+                <group invisible="state in ('init', 'sheet')">
+                    <group>
+                        <field name="table_label" placeholder="Imported Data"/>
+                        <field name="table_name" placeholder="x_imported_data"/>
+                        <field name="start_row" invisible="1"/>
+                        <field name="end_row" invisible="1"/>
+                        <field name="start_col" invisible="1"/>
+                        <field name="end_col" invisible="1"/>
+                    </group>
+                    <field name="column_lines" nolabel="1" colspan="2">
+                        <tree editable="bottom">
+                            <field name="column_name" readonly="1"/>
+                            <field name="field_name"/>
+                            <field name="field_type"/>
+                            <field name="relation_model_id" invisible="field_type != 'many2one'" required="field_type == 'many2one'"/>
+                            <field name="selection_options" invisible="field_type != 'selection'"/>
+                        </tree>
+                    </field>
+                </group>
+                <footer>
+                    <button name="action_analyze_file" string="Analyze File" type="object" class="btn-primary" invisible="state != 'init'"/>
+                    <button name="action_read_first_row" string="Read Columns" type="object" class="btn-primary" invisible="state != 'sheet'"/>
+                    <button name="action_import_data" string="Import Data" type="object" class="btn-primary" invisible="state != 'columns'"/>
+                    <button name="action_import_data_confirm" string="Yes, Append Records" type="object" class="btn-warning" invisible="state != 'confirm'"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_import_xlsx_wizard" model="ir.actions.act_window">
+        <field name="name">Import Table</field>
+        <field name="res_model">import.xlsx.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

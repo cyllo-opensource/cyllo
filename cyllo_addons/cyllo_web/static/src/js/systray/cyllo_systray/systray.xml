@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="Systray">
+        <div class="o_menu_systray d-flex flex-shrink-0 ms-0" role="menu">
+            <ul class="d-flex align-items-center cy-right-header-menugroup me-2">
+                <t t-foreach="state.pinnedItems" t-as="item" t-key="item.key">
+                    <ErrorHandler onError="error => this.handleItemError(error, item)">
+                        <li class="cy-right-header-menugroup-item">
+                            <t t-component="item.Component" t-props="item.props" />
+                        </li>
+                    </ErrorHandler>
+                </t>
+                <li class="cy-right-header-menugroup-item">
+                    <div class="cy-tray dropdown">
+                        <button class="cy-tray__btn dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                            aria-expanded="false">
+                            <i class="ri-more-2-fill cy-tray__btn-icon" />
+                        </button>
+                        <div class="cy-tray__menu dropdown-menu">
+                            <ul class="cy-tray__menu-items" t-foreach="allItems" t-as="item" t-key="item.key">
+                                <t t-if="item.key != 'AccountSystrayItem'">
+                                    <li class="cy-tray__menu-item">
+                                        <div class="cy-tray__menu-item-left">
+                                            <div class="cy-tray__menu-icon">
+                                                <ErrorHandler onError="error => this.handleItemError(error, item)">
+                                                    <t t-component="item.Component" t-props="item.props" nameShow="true" />
+                                                </ErrorHandler>
+                                            </div>
+                                        </div>
+                                        <i t-att-class="item.pinned ? 'ri-pushpin-2-fill ': 'ri-pushpin-2-line '"
+                                            class="cy-tray__menu-pin" t-on-click="() => this.onPin(item.key, !item.pinned)" />
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <t t-foreach="state.alwaysItems" t-as="item" t-key="item.key">
+                <div t-att-data-index="item.index" />
+                <ErrorHandler onError="error => this.handleItemError(error, item)">
+                    <t t-component="item.Component" t-props="item.props" />
+                </ErrorHandler>
+            </t>
+        </div>
+    </t>
+</templates>

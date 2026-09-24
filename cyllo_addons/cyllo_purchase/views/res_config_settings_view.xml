@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Adding the Purchase Digitization block in settings-->
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="91"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='matrix_setting_container']"
+                   position="after">
+                <block title="Digitization" name="cy_purchase_digitization">
+                    <setting
+                            help="This helps to retrieve data from pdf files and generate the field values of purchase rfq automatically or manually">
+                        <field name="module_cyllo_purchase_digitization"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_purchase_res_config_settings_form_product_warranty" model="ir.ui.view">
+        <field name="name">view.purchase.res.config.settings.form.product.warranty</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="purchase.res_config_settings_view_form_purchase"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='stock_packaging_purchase']" position="after">
+                <setting id="enable_product_warranty_purchase"
+                         help="Enable product warranty management in Purchase.">
+                    <field name="module_cyllo_warranty_purchase"/>
+                    <div class="content-group" invisible="not module_cyllo_warranty_purchase">
+                        <div class="mt8">
+                            <field name="is_extend_warranty_purchase"/>
+                            <label for="is_extend_warranty_purchase" string="Allow Warranty Extension"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+            <xpath expr="//setting[@id='three_way_matching']" position="replace">
+                <setting id="three_way_matching" title="If enabled, activates 3-way matching on vendor bills: the items must be received in order to pay the invoice." help="Make sure you only pay bills for which you received the goods you ordered">
+                    <field name="three_way_matching" string="3-way matching"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

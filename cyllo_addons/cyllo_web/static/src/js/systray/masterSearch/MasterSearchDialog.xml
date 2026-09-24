@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_master_search.MasterSearchDialog" owl="1">
+            <div class="cy-master-onboard_modal-container cy-master_modal-container">
+                <div class="modal-dialog  w-100 cy-dashboard_modal-box">
+                    <div class="modal-content cy-modal_content" t-on-click="(ev) => this.onCLickMasterModal(ev)">
+                        <div class="modal-body py-0">
+                            <div class="search_div">
+                                <input type="text"
+                                       class="cy-custom-search"
+                                       accesskey="Q"
+                                       placeholder="Search for record using name or sequence."
+                                       role="searchbox"
+                                       t-ref="autofocus"
+                                       t-model="items.query"
+                                />
+                            </div>
+                            <div class="rounded-0 dropdown-menu master_searchview_autocomplete dropdown-menu show search_bar_style"
+                                 t-att-style="items.length ? 'height:50vh;': ''">
+                                <t t-if="items.data.length">
+                                    <t t-foreach="items.data" t-as="content" t-key="content_index">
+                                        <div class="w-100">
+                                            <ul role="menu p-0" style="padding-left: 1rem;">
+                                                <t t-if="content.length!=0">
+                                                    <t t-foreach="content" t-as="item" t-key="item_index">
+                                                        <li class="o_menu_item dropdown-item px-0"
+                                                            t-att-class="{ o_indent: item.isChild, focus: item_index === state.focusedIndex}"
+                                                            t-att-id="item.id">
+                                                            <t t-if="item.isParent">
+                                                                <t t-esc="item.title"/>
+                                                                <div t-on-click="() => this.CreateRecord(item)"
+                                                                     class="create_icon on-hov-pointer">
+                                                                    <i class="fa fa-plus cy_master-create-icon"/>
+                                                                </div>
+                                                            </t>
+                                                            <div class="on-hov-pointer" t-if="item.isChild" t-on-click="() => this.selectItem(item)">
+                                                                <t t-if="item.isJson" t-esc="item.name['en_US']"/>
+                                                                <t t-else="" t-esc="item.name"/>
+                                                            </div>
+                                                        </li>
+                                                    </t>
+                                                    <button t-if="content.length > 10" type="button" class="btn btn-secondary"
+                                                            t-on-click="() => this.loadMore(content[0])" >Load more...</button>
+                                                </t>
+                                            </ul>
+                                        </div>
+                                    </t>
+                                        <button t-if="loadMoreState.value" type="button" class="btn btn-secondary"
+                                                t-on-click="loadMoreModels" style="writing-mode: vertical-lr;">Load more</button>
+                                    </t>
+                                <t t-elif="!items.data.length and items.query.length">
+                                    <div class="d-flex justify-content-center align-items-center h-100 flex-column w-100">
+                                        <h1>
+                                            No Result Found
+                                        </h1>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                        <div class="d-flex justify-content-center align-items-center h-100 flex-column w-100">
+                                            <h1>
+                                                Search for records
+                                            </h1>
+                                            <p>
+                                                Make sure to enable <span
+                                                    style="color:var(--primary);">Master search</span> in Settings ->
+                                                Technical ->
+                                                <span style="color:var(--primary); font-weight:600; cursor:pointer"
+                                                      t-on-click="onClickModel">Model</span>
+                                            </p>
+                                        </div>
+                                    </t>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </t>
+</templates>

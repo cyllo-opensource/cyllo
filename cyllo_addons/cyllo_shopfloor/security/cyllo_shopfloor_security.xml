@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Category for Shop Floor -->
+    <record id="module_category_cyllo_shopfloor" model="ir.module.category">
+        <field name="name">Shop Floor</field>
+        <field name="description">Access rights for Shop Floor</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <!-- Group for Shopfloor User -->
+    <record id="group_cyllo_shopfloor_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="cyllo_shopfloor.module_category_cyllo_shopfloor"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('mrp.group_mrp_user'))]"/>
+    </record>
+
+        <!-- Group for Shopfloor Manager -->
+    <record id="group_cyllo_shopfloor_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="cyllo_shopfloor.module_category_cyllo_shopfloor"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('cyllo_shopfloor.group_cyllo_shopfloor_user')),]"/>
+        <field name="users" eval="[Command.link(ref('base.user_admin'))]"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="mrp_production_form_view_inherit" model="ir.ui.view">
+        <field name="name">mrp.production.form.view.inherit</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="employee_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                <field name="is_automated"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mrp_production_form_view_inherit_cyllo_shopfloor" model="ir.ui.view">
+        <field name="name">mrp.production.form.inherit.cyllo.shopfloor</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_cyllo_shopfloor"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-industry"
+                        invisible="state == 'draft' or state == 'cancel' or not workorder_ids "
+                        groups="cyllo_shopfloor.group_cyllo_shopfloor_user">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Shopfloor</span>
+                    </div>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

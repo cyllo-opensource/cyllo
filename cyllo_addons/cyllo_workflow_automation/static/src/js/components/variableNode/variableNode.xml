@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="VariableNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="row py-2">
+                <div class="col-12  mb-3 px-2">
+                    <div class="variable-input-container">
+                        <label for="variableName" class="form-label  cy-modal-form_label">Variable Name</label>
+                        <div class="input-wrapper">
+                            <input
+                                    id="variableName"
+                                    class="variable-input o_input"
+                                    t-ref="variableName"
+                                    t-on-input="handleInput"
+                                    autocomplete="off"
+                                    t-model="fieldState.variable_name"
+                                    t-attf-class="{{ state.errorMessage ? 'is-invalid': ''}} {{state.successMessage ? 'is-valid': ''}}"
+                            />
+                            <span t-if="state.successMessage" class="valid-icon">
+                                <i class="ri-check-line"/>
+                            </span>
+                        </div>
+                        <p t-if="state.errorMessage"
+                           t-attf-class="error-message d-flex align-items-end message-animate">
+                            <span class="error-icon d-flex align-items-end">
+                                <i class="ri-error-warning-line"/>
+                            </span>
+                            <span class="text" t-esc="state.errorMessage"/>
+                        </p>
+                        <p t-if="state.successMessage" t-attf-class="success-message message-animate ">
+                            <span class="success-icon">
+                                <i class="ri-check-line"/>
+                            </span>
+                            <span t-esc="state.successMessage"/>
+                        </p>
+                    </div>
+
+                </div>
+                <div class="col-12  mb-3 px-2">
+                    <label for="Variable_type"
+                           class="form-label  cy-modal-form_label">
+                        Variable Type
+                    </label>
+
+                    <CustomDropdown
+                            options="optionsType"
+                            defaultValue="variableType"
+                            onChange="(value) => this.handleUpdateField('type', value)"
+                            placeholder="'Select a type...'"
+                            searchable="true"
+                            width="''"
+                            maxHeight="'70px'"
+                            disabled="props.mode === 'edit'"
+                    />
+                    <p t-if="props.mode === 'edit'" t-attf-class="error-message">
+                        <span class="error-icon d-flex align-items-end">
+                            <i class="ri-error-warning-line"/>
+                        </span>
+                        <span class="text">You can't change the variable type in edit mode.</span>
+                    </p>
+                </div>
+                <!-- Return Type for Python Expressions -->
+                <div t-if="fieldState.type === 'code'" class="col-12 mb-3 px-2">
+                    <label for="Variable_return_type"
+                           class="form-label cy-modal-form_label">
+                        Expression Return Type
+                    </label>
+                    <CustomDropdown
+                            options="returnTypeOptions"
+                            defaultValue="codeReturnType"
+                            onChange="(value) => this.handleUpdateField('code_return_type', value)"
+                            placeholder="'Select return type...'"
+                            searchable="true"
+                            width="''"
+                            maxHeight="'70px'"
+                            disabled="props.mode === 'edit'"
+                    />
+                    <p t-if="props.mode === 'edit'" t-attf-class="error-message mt-2 d-flex align-items-end">
+                        <span class="error-icon d-flex align-items-end">
+                            <i class="ri-error-warning-line"/>
+                        </span>
+                        <span class="text">You can't change the return type in edit mode.</span>
+                    </p>
+                    <p t-if="props.errors?.code_return_type || state.errors?.code_return_type" t-attf-class="error-message mt-2 d-flex align-items-end">
+                        <span class="error-icon d-flex align-items-end">
+                            <i class="ri-error-warning-line"/>
+                        </span>
+                        <span class="text" t-esc="props.errors?.code_return_type || state.errors?.code_return_type"/>
+                    </p>
+                </div>
+                <div t-if="fieldState.type" class="col-12  mb-3 px-2">
+                    <label for="Variable_value"
+                           class="form-label  cy-modal-form_label">
+                        Variable Value
+                    </label>
+                    <t t-set="info" t-value="this.getComponent(fieldState.type)"/>
+                    <t t-set="update" t-value="(value) => this.updateVariableValue(value)"/>
+                    <t t-component="info.component" t-props="info.extractProps(variableValue, update)"/>
+                    <p t-if="state.valueErrorMessage" class="error-message d-flex align-items-end mt-2">
+                        <span class="error-icon d-flex align-items-end">
+                            <i class="ri-error-warning-line"/>
+                        </span>
+                        <span class="text" t-esc="state.valueErrorMessage"/>
+                    </p>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>
+

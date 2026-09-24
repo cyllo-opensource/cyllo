@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_form2_inherit_product" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.product</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <!-- Header: New Quotation button -->
+            <xpath expr="//header" position="inside">
+                <field name="allow_extra_quotations" invisible="1"/>
+                <button name="action_task_new_quotation"
+                        string="New Quotation"
+                        type="object"
+                        invisible="not allow_extra_quotations"
+                        groups="sales_team.group_sale_salesman,sales_team.group_sale_manager"/>
+            </xpath>
+            <!-- Smart buttons -->
+            <div name="button_box" position="inside">
+                <field name="allow_task_products" invisible="1"/>
+                <field name="sale_line_id" invisible="1"/>
+
+                <!-- Extra Quotations smart button -->
+                <button name="action_view_extra_quotations"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-file-text-o"
+                        invisible="not allow_extra_quotations or extra_quotation_count == 0">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="extra_quotation_count"/>
+                        </span>
+                        <span class="o_stat_text">Quotations</span>
+                    </div>
+                </button>
+            </div>
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="extra_quotation_ids" invisible="1"/>
+                <label for="related_sale_order_id"/>
+                    <div class="o_row">
+                    <field name="related_sale_order_id"
+                       domain="[('id', 'in', [project_sale_order_id] + extra_quotation_ids),
+                       ('invoice_status', '!=', 'invoiced')]"/>
+                    <button name="action_view_task_products"
+                            type="object"
+                            icon="fa-shopping-cart"
+                            class="oe_highlight"
+                            invisible="not allow_task_products or not related_sale_order_id"
+                    />
+                    </div>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

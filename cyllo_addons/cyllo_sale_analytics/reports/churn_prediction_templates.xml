@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="report_churn_prediction_pdf"
+            model="ir.actions.report">
+        <field name="name">Churn Prediction</field>
+        <field name="model">res.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_sale_analytics.report_churn_prediction</field>
+        <field name="report_file">cyllo_sale_analytics.report_churn_prediction</field>
+    </record>
+    <template id="cyllo_sale_analytics.report_churn_prediction">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="w-100">
+                    <h3 style="text-align:center;font-family: sans-serif !important">
+                        Churn Prediction Report
+                    </h3>
+                    <t t-if="churnData['predict']">
+                        <div>
+                            <div>
+                                <div>
+                                    <center>
+                                        <h5>
+                                            Prediction Based on Last
+                                            <t t-esc="numberOfPeriods"/>
+                                            <t t-if="period == 'Quarter'">
+                                                <span>Quarters</span>
+                                            </t>
+                                            <t t-elif="period == 'Year'">
+                                                <span>Years</span>
+                                            </t>
+                                            <t t-elif="period == 'Month'">
+                                                <span>Months</span>
+                                            </t>
+                                            <t t-else="">
+                                                <span>Six Months</span>
+                                            </t>
+                                            (
+                                            <t t-esc="churnData['start_date']"/>
+                                            to
+                                            <t t-esc="churnData['end_date']"/>
+                                            )
+                                        </h5>
+                                    </center>
+                                </div>
+                                <br/>
+                                <br/>
+                                <div>
+                                    <center>
+                                        <div>
+                                            <div class="col"
+                                                 style="border-radius: 2px;
+                                                 border: 1px solid #dfdfdf;
+                                                 background: #dfdfdf;
+                                                 padding: 1rem;
+                                                 width: 20%;
+                                                 display: inline-block !important;
+                                                 height: 100px;">
+                                                <div>
+                                                    <h6 class="cy-dashboard_state">
+                                                        Total Customers
+                                                    </h6>
+                                                </div>
+                                                <div>
+                                                    <h4>
+                                                        <t t-esc="churnData['total_cust']"/>
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                            <div class="col" style="border-radius: 2px;border: 1px solid #dfdfdf;background: #dfdfdf;
+                                            padding: 1rem;display: inline-block !important; width: 20%;height: 100px;">
+                                                <div>
+                                                    <h6 class="cy-dashboard_state">
+                                                        Active Customers
+                                                    </h6>
+                                                </div>
+                                                <div>
+                                                    <h4>
+                                                        <t t-esc="churnData['active_cust']"/>
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                            <div class="col" style="border-radius: 2px;border: 1px solid #dfdfdf;background: #dfdfdf;
+                                            padding: 1rem;display: inline-block !important; width: 20%;height: 100px;">
+                                                <div>
+                                                    <h6 class="cy-dashboard_state">
+                                                        Churn
+                                                    </h6>
+                                                </div>
+                                                <div>
+                                                    <h4>
+                                                        <t t-esc="churnData['churn_perc']"/>
+                                                        %
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                            <div class="col" style="border-radius: 2px;border: 1px solid #dfdfdf;background: #dfdfdf;
+                                            padding: 1rem;display: inline-block !important;width: 20%;height: 100px;">
+                                                <div>
+                                                    <h6 class="cy-dashboard_state">
+                                                        Not Churn
+                                                    </h6>
+                                                </div>
+                                                <div>
+                                                    <h4>
+                                                        <t t-esc="churnData['not_churn_perc']"/>
+                                                        %
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </center>
+                                    <div class="col-lg-4 col-md-4"
+                                         style="display:flex;justify-content:center;">
+                                        <center>
+                                            <img t-att-src="head"/>
+                                        </center>
+                                    </div>
+                                </div>
+                                <div class="col py-3">
+                                    <table class="table table-bordered mt-3 p-10 customer-details-table"
+                                           style="border:1px solid;width:100%;border-collapse: collapse;">
+                                        <thead>
+                                            <tr class="p-10"
+                                                style="height: 50px;">
+                                                <th style="border: 1px solid black;border-collapse: collapse;">
+                                                    Customer
+                                                </th>
+                                                <th style="border: 1px solid black;border-collapse: collapse;">
+                                                    Last Purchase Date
+                                                </th>
+                                                <th style="border: 1px solid black;border-collapse: collapse;">
+                                                    Total Sale Orders
+                                                </th>
+                                                <th style="border: 1px solid black;border-collapse: collapse;">
+                                                    Total Amount
+                                                </th>
+                                                <th style="border: 1px solid black;border-collapse: collapse;">
+                                                    Probability of Churn
+                                                </th>
+                                                <th style="border: 1px solid black;border-collapse: collapse;">
+                                                    Churn %
+                                                </th>
+                                                <th style="border: 1px solid black;border-collapse: collapse;">
+                                                    Not Churn %
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="churnData['cust_wise_details']">
+                                                <t t-foreach="churnData['cust_wise_details']"
+                                                   t-as="cust">
+                                                    <tr style="height: 40px;text-align:center;">
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="cust['custName']"/>
+                                                        </td>
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="cust['last_purchase_date']"/>
+                                                        </td>
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="cust['total_sales']"/>
+                                                        </td>
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="cust['total_amount']"/>
+                                                        </td>
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="cust['Churn']"/>
+                                                        </td>
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="cust['prob_yes']"/>
+                                                            %
+                                                        </td>
+                                                        <td style="border: 1px solid black;border-collapse: collapse;">
+                                                            <t t-esc="cust['prob_no']"/>
+                                                            %
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="row cy-empty_data text-center align-items-center justify-content-center h-100">
+                            <div class="mt-5 d-flex align-items-center justify-content-center flex-column">
+                                <h5 class="cy-demand-predit_head">No Data for
+                                    Prediction.There should be enough
+                                    customers and sale orders for prediction.The
+                                    dataset is too small to perform a meaningful
+                                    prediction.
+                                    The model may have limited accuracy due to
+                                    the small dataset size.
+                                </h5>
+                                <br/>
+                                <br/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

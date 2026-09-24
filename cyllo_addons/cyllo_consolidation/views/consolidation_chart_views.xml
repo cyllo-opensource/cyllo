@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--Tree view of the Consolidation Chart-->
+    <record id="view_consolidation_chart_tree" model="ir.ui.view">
+        <field name="name">view.consolidation.chart.tree</field>
+        <field name="model">consolidation.chart</field>
+        <field name="arch" type="xml">
+            <tree string="consolidation.chart">
+                <field name="name"/>
+                <field name="currency_id"/>
+            </tree>
+        </field>
+    </record>
+    <!--Form view of the Consolidation Chart-->
+    <record id="view_consolidation_chart_form" model="ir.ui.view">
+        <field name="name">view.consolidation.chart.form</field>
+        <field name="model">consolidation.chart</field>
+        <field name="arch" type="xml">
+            <form string="consolidation_chart">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_groups" type="object" string="Group" icon="fa-sitemap" class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="group_ids_count" nolabel="1"/>
+                                </span>
+                                <span class="o_stat_text">Groups</span>
+                            </div>
+                        </button>
+                        <button name="action_open_accounts" type="object" string="Account" icon="fa-book" class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="account_ids_count" nolabel="1"/>
+                                </span>
+                                <span class="o_stat_text">Accounts</span>
+                            </div>
+                        </button>
+                        <button name="action_open_period" type="object" string="Periods" icon="fa-calendar-check-o" class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="period_ids_count" nolabel="1"/>
+                                </span>
+                                <span class="o_stat_text">Periods</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" class="oe_title"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="currency_id"/>
+                            <field name="is_currency_different" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="is_invert_sign"/>
+                        </group>
+                    </group>
+                    <group string="Consolidated Companies">
+                        <field name="company_ids" options="{'no_create':True}" nolabel="1" colspan="2">
+                            <tree>
+                                <field name="name"/>
+                                <field name="currency_id"/>
+                                <button name="action_open_mapped_accounts" string="Map Accounts" type="object" class="btn-primary"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                    <field name="activity_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--Search view of the Consolidation Chart-->
+    <record id="view_consolidation_chart_search" model="ir.ui.view">
+        <field name="name">view.consolidation.chart.search</field>
+        <field name="model">consolidation.chart</field>
+        <field name="priority">15</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field name="name" string="Name"/>
+                <field name="currency_id" string="Currency"/>
+                <separator/>
+                <filter string="Creation Date" name="creation_date" date="create_date"/>
+                <separator/>
+                <group expand="0" string="Group By" colspan="16">
+                    <filter string="Currency" name="currency_id" context="{'group_by':'currency_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--Action specified for the Consolidation Chart-->
+    <record id="action_view_consolidation" model="ir.actions.act_window">
+        <field name="name">Consolidation</field>
+        <field name="res_model">consolidation.chart</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Consolidation Record Found
+            </p>
+            <p>
+                Consolidation encompasses details regarding consolidated
+                accounts, groups, and reporting periods, all crucial for
+                financial reporting purposes.
+            </p>
+        </field>
+    </record>
+</odoo>

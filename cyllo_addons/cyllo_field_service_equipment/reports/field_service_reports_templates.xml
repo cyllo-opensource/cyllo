@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inherit Template for adding fleet in pdf print reports -->
+<odoo>
+    <template id="report_field_service_request_form"
+              inherit_id="cyllo_field_service.report_field_service_request_form">
+        <!-- Insert additional content after a specific element -->
+        <xpath expr="//table[@name='workers_info']" position="after">
+            <t t-if="fs_request.field_service_equipments_ids">
+                <div class="oe_structure"/>
+                <h3 class="mt-4">
+                    <span>Equipments</span>
+                </h3>
+                <!-- Table for displaying equipment information -->
+                <table class="table table-bordered"
+                       style="table-layout: fixed">
+                    <thead style="display: table-row-group">
+                        <tr>
+                            <th class="text-center"
+                                style="min-width: 100px;">Equipment
+                            </th>
+                            <th class="text-center"
+                                style="min-width: 100px;">Category
+                            </th>
+                        </tr>
+                    </thead>
+                    <!-- Table body -->
+                    <tbody class="sale_tbody">
+                        <!-- Loop through each equipment record -->
+                        <t t-foreach="fs_request.field_service_equipments_ids"
+                           t-as="equipment">
+                            <tr>
+                                <!-- Display equipment name -->
+                                <td class="text-center"
+                                    style="min-width: 100px;">
+                                    <span t-field="equipment.display_name"/>
+                                </td>
+                                <!-- Display equipment category -->
+                                <td class="text-center"
+                                    style="min-width: 100px;">
+                                    <span t-field="equipment.category_id.name"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+        </xpath>
+    </template>
+</odoo>

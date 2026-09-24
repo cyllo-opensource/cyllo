@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--  Whatsapp channel form view  -->
+    <record id="view_whatsapp_channel_form" model="ir.ui.view">
+        <field name="name">view.whatsapp.channel.form</field>
+        <field name="model">whatsapp.channel</field>
+        <field name="arch" type="xml">
+            <form string="Whatsapp Channel" create="0">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page id="message" name="Messages">
+                            <field name="wa_message_ids" readonly="1">
+                                <tree string="Message" editable="false" create="false">
+                                    <field name="id"/>
+                                    <field name="message"/>
+                                    <field name="message_type"/>
+                                    <field name="is_template" optional="hide"/>
+                                    <field name="channel_id" optional="hide"/>
+                                    <field name="is_read"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--  Whatsapp channel tree view  -->
+    <record id="view_whatsapp_channel_tree" model="ir.ui.view">
+        <field name="name">view.whatsapp.channel.tree</field>
+        <field name="model">whatsapp.channel</field>
+        <field name="arch" type="xml">
+            <tree string="Whatsapp Channel">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Action window for whatsapp channel -->
+    <record id="action_view_whatsapp_channel" model="ir.actions.act_window">
+        <field name="name">Channels</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">whatsapp.channel</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new whatsapp channel
+            </p>
+            <p>
+                You can link whatsapp account.
+            </p>
+        </field>
+    </record>
+</odoo>

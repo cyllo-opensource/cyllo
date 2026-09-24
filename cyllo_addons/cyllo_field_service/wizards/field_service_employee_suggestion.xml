@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_field_service_employee_suggestion_tree" model="ir.ui.view">
+        <field name="name">view.field.service.employee.suggestion.tree</field>
+        <field name="model">field.service.employee.suggestion</field>
+        <field name="arch" type="xml">
+            <tree default_order="sequence asc">
+                <header>
+                    <button name="action_add_workers_bulk" type="object"
+                            string="Add to Workers"/>
+                </header>
+                <field name="employee_id"/>
+                <field name="skill_ids"
+                       widget="many2many_tags"/>
+                <field name="availability_status"
+                       widget="availability_status_widget"/>
+                <field name="field_service_request_ids"
+                       widget="many2many_tags"/>
+                <field name="added_to_workers"
+                       string="Added to Workers"/>
+                <button name="action_add_workers"
+                        type="object"
+                        string="Add Employee"
+                        invisible="added_to_workers or availability_status == 'not_available'"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_search_field_service_employee_suggestion_search"
+            model="ir.ui.view">
+        <field name="name">search.field.service.employee.suggestion.search</field>
+        <field name="model">field.service.employee.suggestion</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="employee_id"/>
+                <filter string="Available" name="availability_status"
+                        domain="[('availability_status', '=', 'available')]"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

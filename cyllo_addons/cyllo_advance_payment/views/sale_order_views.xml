@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_form_inherit_advance" model="ir.ui.view">
+        <field name="name">view.sale.order.form.inherit.advance</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_quotation_send']" position="after">
+                <field name="total_advance_amount" invisible="1"/>
+                <field name="amount_total" invisible="1"/>
+                <button name="action_advance_payment" string="Advance Payment" type="object"
+                        invisible="state != 'sale' or total_advance_amount >= amount_total"
+                        class="btn-primary" groups="cyllo_advance_payment.group_cyllo_advance_payment_sale"/>
+            </xpath>
+            <xpath expr="//page[@name='customer_signature']" position="after">
+                <page string="Advance Payments" name="advance_payments" invisible="not advance_payment_ids">
+                    <field name="advance_payment_ids">
+                        <tree>
+                            <field name="date"/>
+                            <field name="name"/>
+                            <field name="journal_id"/>
+                            <field name="payment_method_line_id"/>
+                            <field name="partner_id"/>
+                            <field name="amount" />
+                            <field name="state"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

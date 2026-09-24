@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_calculation_preset_tree" model="ir.ui.view">
+        <field name="name">calculation.preset.tree</field>
+        <field name="model">calculation.preset</field>
+        <field name="arch" type="xml">
+            <tree string="Calculation Presets">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="formula"/>
+                <field name="calculation_type"/>
+                <field name="category"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_calculation_preset_form" model="ir.ui.view">
+        <field name="name">calculation.preset.form</field>
+        <field name="model">calculation.preset</field>
+        <field name="arch" type="xml">
+            <form string="Calculation Preset">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. ROI Calculation"/></h1>
+                    </div>
+                    <group>
+                        <group name="formula_group" string="Formula Configuration">
+                            <field name="formula" placeholder="({revenue} - {cost}) / {cost}"/>
+                            <field name="calculation_type"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group name="meta_group" string="Information">
+                            <field name="category"/>
+                            <field name="model_id"/>
+                            <field name="description"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Help" name="help">
+                            <div class="alert alert-info" role="alert">
+                                <p>Use <b>{variable_name}</b> syntax in the formula to define placeholders.</p>
+                                <p>Variables should be defined in JSON format: <code>[{"name": "var1"}]</code></p>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_calculation_preset_search" model="ir.ui.view">
+        <field name="name">calculation.preset.search</field>
+        <field name="model">calculation.preset</field>
+        <field name="arch" type="xml">
+            <search string="Search Calculation Presets">
+                <field name="name" string="Preset Name"
+                       filter_domain="['|', ('name', 'ilike', self), ('description', 'ilike', self)]"/>
+                <field name="category"/>
+                <field name="calculation_type"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category" name="group_by_category" context="{'group_by': 'category'}"/>
+                    <filter string="Calculation Type" name="group_by_type" context="{'group_by': 'calculation_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_calculation_preset" model="ir.actions.act_window">
+        <field name="name">Preset Management</field>
+        <field name="res_model">calculation.preset</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_calculation_preset_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first calculation preset!
+            </p>
+            <p>
+                Presets allow you to define reusable formulas that can be applied to any dashboard sheet.
+            </p>
+        </field>
+    </record>
+</odoo>

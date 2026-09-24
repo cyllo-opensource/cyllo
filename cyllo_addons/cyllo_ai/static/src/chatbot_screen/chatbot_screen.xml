@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ChatBotScreen" t-inherit="ChatBot" t-inherit-mode="primary" owl="1">
+
+        <!--
+            Patch 1 — Remove the chatOn guard.
+            The JS setup() forces state.chatOn = true, but we remove the
+            conditional entirely so the screen always renders regardless.
+        -->
+        <xpath expr="//t[@t-if='state.chatOn and !state.isStudio']" position="attributes">
+            <attribute name="t-if">true</attribute>
+        </xpath>
+
+        <!--
+            Patch 2 — Replace the floating modal container with a plain
+            full-screen div. Using position="attributes" keeps every child
+            node intact (messages, composer, etc.) — nothing is rewritten.
+        -->
+        <xpath expr="//div[hasclass('chatbot-modal')]" position="attributes">
+            <attribute name="class">cy-ai-screen</attribute>
+            <attribute name="t-att-style"></attribute>
+            <attribute name="t-att-class"></attribute>
+            <attribute name="t-ref"></attribute>
+        </xpath>
+
+        <!--
+            Patch 3 — Inject a permanent left sidebar before the expanded
+            chat content block.  Because <t t-if="!state.minimized"> is a
+            transparent tag, the sidebar and div.chatbot-box end up as
+            siblings inside div.cy-ai-screen — which is a flex row in CSS.
+        -->
+        <xpath expr="//t[@t-if='!state.minimized']" position="before">
+            <div class="cy-ai-screen-sidebar">
+                <button class="btn btn-primary" style="margin: 16px 12px;" t-on-click="resetChat">
+                    <i class="ri-add-line" />
+                    New Chat
+                </button>
+
+                <div class="cy-ai-screen-history-label" style="margin: 0 12px;">Recent Chats</div>
+                <div class="cy-ai-screen-history pb-3">
+                    <t t-foreach="state.sessions" t-as="session" t-key="session.session_id">
+                        <div t-att-class="'cy-ai-screen-history-item' + (state.session_id === session.session_id ? ' active' : '')"
+                            style="margin: 0 12px;" t-on-click="() => this.onSelectSession(session)">
+                            <t t-if="state.activeRenameTextbox === session.session_id">
+                                <div class="rename-box">
+                                    <div class="rename-textbox">
+                                        <input type="text"
+                                            t-att-id="'input-session-' + session.session_id"
+                                            class="form-control"
+                                            t-att-value="session.title" />
+                                    </div>
+                                    <div class="rename-textbox-buttons">
+                                        <button class="ri-check-line rename-session-button" t-on-click.stop="() => this.editSessionTitle(session)" />
+                                        <button class="ri-close-line cancel-rename-button" t-on-click.stop="() => this.toggleRenameTextbox(session)" />
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <t t-if="state.activeSubMenu === session.session_id">
+                                    <div class="submenu show">
+                                        <div class="submenu-item" t-on-click.stop="() => this.toggleRenameTextbox(session)">
+                                            <i class="ri-edit-line" />
+                                            Edit
+                                        </div>
+                                        <div class="submenu-item" t-on-click.stop="(ev) => this.deleteSession(ev, session)">
+                                            <i class="ri-delete-bin-line" />
+                                            Delete
+                                        </div>
+                                    </div>
+                                </t>
+                                <span class="cy-ai-screen-history-title"
+                                    t-esc="session.title or 'New conversation'" />
+                                <div class="session-menu-button" t-on-click.stop="(ev) => this.showSubMenu(ev, session)">
+                                    <i class="ri-more-2-line" />
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <div t-if="!state.sessions.length" class="cy-ai-screen-history-empty">
+                        No conversations yet
+                    </div>
+                </div>
+            </div>
+        </xpath>
+
+        <!--
+            Patch 4 — Remove the minimised launcher bubble entirely.
+            The screen is always expanded; this block would never render
+            anyway because setup() sets minimized = false, but it is
+            cleaner to drop dead markup.
+        -->
+        <xpath expr="//t[@t-if='state.minimized']" position="replace" />
+
+        <!--
+            Patch 5 — Remove the overlay ChatSidebar.
+            History is now always visible in the left sidebar column,
+            so the slide-over overlay is not needed.
+        -->
+        <xpath expr="//t[@t-if='state.historyOpen']" position="replace" />
+
+        <!--
+            Patch 6 — Remove the "Conversations" toggle button from the
+            header.  The sidebar is permanently visible; the button is
+            redundant and would open a now-removed overlay.
+        -->
+
+        <xpath expr="//button[@title='Conversations']" position="replace" />
+
+        <!--
+            Patch 7 — Remove the "Close" button from the header.
+            Minimising makes no sense in a full-page client action.
+            -->
+        <xpath expr="//button[@title='Close']" position="replace" />
+
+        <xpath expr="//div[@class='chatbot-header']" position="replace" />
+    </t>
+</templates>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Changing the logo and tittle at favicon when the time of reload -->
+    <template id="cyllo_web_layout" inherit_id="web.layout">
+        <xpath expr="//head/title" position="replace">
+            <title t-esc="title or 'Cyllo'"/>
+        </xpath>
+        <xpath expr="//head/link[@type='image/x-icon']" position="replace">
+            <link type="image/x-icon" rel="shortcut icon"
+                  t-att-href="x_icon or '/cyllo_base/static/src/img/cyllo-favicon.ico'"/>
+        </xpath>
+    </template>
+    <template id="cyllo_webclient_offline" inherit_id="web.webclient_offline">
+        <xpath expr="//div[hasclass('card')]" position="replace">
+            <div class="card">
+                <img t-attf-src="data:image/png;base64,{{cyllo_icon}}"
+                     alt="Cyllo logo" style="width:400px;"/>
+                <h1>You are offline</h1>
+                <p>Check your network connection and come back here. Cyllo will
+                    load as soon as you're back online.
+                </p>
+                <button onclick="location.reload()"
+                        style="background:#9EA700; color:#fff; border:none;">
+                    Check again
+                </button>
+            </div>
+        </xpath>
+    </template>
+    <template id="webclient_bootstrap" inherit_id="web.webclient_bootstrap">
+        <xpath expr="//meta[@name='theme-color']" position="replace">
+            <meta name="theme-color" content="#1D1D1D"/>
+        </xpath>
+    </template>
+</odoo>

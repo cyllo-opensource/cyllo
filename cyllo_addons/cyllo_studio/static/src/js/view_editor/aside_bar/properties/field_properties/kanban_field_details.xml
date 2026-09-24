@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.KanbanFieldProperties" owl="1">
+        <div class="overall_container_list cy-from-type-field"
+             style="height: 80px;" t-ref="cy-Properties">
+            <div class="accordion cy-form-overall-view-field-button"
+                 id="accordionExample">
+                <div class="overall_container_list cy-from-type-field">
+                    <div>
+                        <div class="mb-2">
+                            <label for="" class="cy-navbar_label">Field Name
+                            </label>
+                            <input class="cy-input cy-input-field-align cy-studio-input-placeholder"
+                                   t-att-value="props.allFields[props.name]?.string or ' '" readonly="true"
+                                   type="text" id="label" name="label"/>
+                        </div>
+                        <div class="mb-2">
+                            <label for="" class="cy-navbar_label">Technical
+                                Name
+                            </label>
+                            <input class="cy-input" readonly="true" type="text"
+                                   id="technical_name"
+                                   name="technical_name" t-model="props.name"/>
+                        </div>
+                    </div>
+                    <div t-if="props.isFieldTag or props.widget" class="mb-2">
+                        <label for="" class="cy-navbar_label">Widget</label>
+                        <div class="cy-studio-custom-dropdown">
+                              <CylloStudioDropdown
+                                      options="widgets"
+                                      defaultValue="defaultWidget"
+                                      onChange="(value)=>this.handleWidget(value)"
+                                      searchable="true"
+                              />
+                         </div>
+                    </div>
+                    <div class="cy-prop-toggle-row">
+                        <span class="cy-toggle-label">Invisible</span>
+                        <div class="cy-prop-toggle-right">
+                            <button class="cy-basedOn" data-attribute="invisible"
+                                    t-on-click="(ev) => this.attrDomain(ev)">
+                                <span>Based on</span>
+                                <i class="fa fa-cog cy-setting-icon"/>
+                            </button>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-on-click="handleInvisibleChange"
+                                    t-att-checked="!['0', false, 'false', 'False', null].includes(state.fieldInvisible)"/>
+                                <span class="cy-slider"/>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex btn_div w-100 my-3 gap-2">
+                <button class="btn btn-secondary w-100" t-on-click="(ev) => this.RemoveField()">
+                    Remove
+                </button>
+            </div>
+        </div>
+    </t>
+</templates>

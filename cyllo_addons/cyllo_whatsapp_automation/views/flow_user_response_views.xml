@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!--    search view of flow_user_response-->
+    <record id="flows_user_response_view_search" model="ir.ui.view">
+        <field name="name">flows.user.response.view.search</field>
+        <field name="model">flows.user.response</field>
+        <field name="arch" type="xml">
+            <search string="Templates">
+                <filter string="Archived" name="filter_archived"
+                        domain="[('active', '=', False)]"/>
+                <separator/>
+                <field name="flows_id"/>
+                <separator/>
+            </search>
+        </field>
+    </record>
+<!--    form view of flow user response-->
+    <record id="flows_user_response_view_form" model="ir.ui.view">
+        <field name="name">flows.user.response.view.form</field>
+        <field name="model">flows.user.response</field>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+            <form string="Whatsapp flow types">
+                <header>
+                    <button name="action_create_lead" string="Create Lead"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="flows_id"/>
+                            <field name="create_date"/>
+                        </group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="number"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Response">
+                            <field name="flows_user_response_line_ids">
+                                <tree editable="bottom">
+                                    <field name="screen_id"/>
+                                    <field name="field_label"/>
+                                    <field name="product_id"/>
+                                    <field name="user_input"/>
+                                    <field name="response_key" optional="hide"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="JSON Format" name="json_format">
+                            <field name="json_format"
+                                   placeholder="json data"
+                                   options="{'collaborative': true}"
+                                   readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+<!--    tree view of flow user response-->
+    <record id="flows_user_response_view_tree" model="ir.ui.view">
+        <field name="name">flows.user.response.view.tree</field>
+        <field name="model">flows.user.response</field>
+        <field name="arch" type="xml">
+            <tree string="Response">
+                <field name="create_date"/>
+                <field name="flows_id"/>
+                <field name="partner_id"/>
+                <field name="number"/>
+                <field name="state"/>
+                <button name="action_create_lead" string="Create Lead"
+                        type="object" invisible="state != 'draft'"/>
+            </tree>
+        </field>
+    </record>
+<!--    window action of flow user response-->
+    <record id="action_view_flows_user_response" model="ir.actions.act_window">
+        <field name="name">Flows Response</field>
+        <field name="res_model">flows.user.response</field>
+        <field name="context">{'create':False,'edit':False}</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

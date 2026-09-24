@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="help_desk_mail_template" model="mail.template">
+        <field name="name">Help Desk</field>
+        <field name="model_id"
+               ref="cyllo_helpdesk.model_helpdesk_ticket"/>
+        <field name="subject">[Ticket #{{ object.ticket }}] {{ object.name }}: We received your
+            ticket
+        </field>
+        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if
+            object.user_id else object.company_id.partner_id.email_formatted) }}
+        </field>
+        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and
+            object.team_id.alias_id else object.company_id.partner_id.email_formatted }}
+        </field>
+        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id
+            else '') }}
+        </field>
+        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email'))
+            }}
+        </field>
+        <field name="body_html" type="html">
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #333333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                <div style="background-color: #9EA700; padding: 15px 20px; border-radius: 6px 6px 0 0; text-align: center; color: #ffffff;">
+                    <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Helpdesk Support</h2>
+                </div>
+                <div style="padding: 20px;">
+                    <p style="font-size: 15px;">Dear<strong
+                            t-out="object.customer_id.name or 'Customer'"/>,
+                    </p>
+                    <p>We have successfully received your support request regarding your issue:</p>
+                    <div style="background-color: #f8f9fa; border-left: 4px solid #9EA700; padding: 12px 16px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+                        <p style="margin: 0; font-size: 15px; font-weight: bold; color: #212529;">
+                            <t t-out="object.name"/>
+                        </p>
+                        <t t-if="object.description">
+                            <div style="margin-top: 8px; font-size: 13px; color: #6c757d;">
+                                <t t-out="object.description"/>
+                            </div>
+                        </t>
+                    </div>
+                    <p>Our support team is actively reviewing your request and we will resolve your
+                        issue as soon as possible.
+                    </p>
+
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px;">
+                        <tr style="border-bottom: 1px solid #eeeeee;">
+                            <td style="padding: 8px 0; color: #6c757d; width: 40%;">
+                                <strong>Ticket ID:</strong>
+                            </td>
+                            <td style="padding: 8px 0; font-weight: bold; color: #9EA700;">
+                                <t t-out="object.ticket"/>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eeeeee;">
+                            <td style="padding: 8px 0; color: #6c757d;">
+                                <strong>Helpdesk Team:</strong>
+                            </td>
+                            <td style="padding: 8px 0;">
+                                <t t-out="object.team_id.name or 'Support'"/>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eeeeee;">
+                            <td style="padding: 8px 0; color: #6c757d;">
+                                <strong>Status:</strong>
+                            </td>
+                            <td style="padding: 8px 0;">
+                                <t t-out="object.stage_id.name or 'New'"/>
+                            </td>
+                        </tr>
+                        <t t-if="object.user_id">
+                            <tr style="border-bottom: 1px solid #eeeeee;">
+                                <td style="padding: 8px 0; color: #6c757d;">
+                                    <strong>Assigned To:</strong>
+                                </td>
+                                <td style="padding: 8px 0;">
+                                    <t t-out="object.user_id.name"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+
+                    <p style="font-size: 13px; color: #6c757d;">
+                        You can reply directly to this email if you have any additional details or
+                        updates regarding this issue.
+                    </p>
+                    <br/>
+                    <p style="margin-bottom: 0;">
+                        Best regards,
+                        <br/>
+                        <strong>
+                            <t t-out="user.name or object.team_id.name or 'Support Team'"/>
+                        </strong>
+                        <br/>
+                        <t t-out="object.company_id.name"/>
+                    </p>
+                </div>
+            </div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+    <record id="help_desk_in_progress_mail_template" model="mail.template">
+        <field name="name">Help Desk: Ticket In Progress</field>
+        <field name="model_id" ref="cyllo_helpdesk.model_helpdesk_ticket"/>
+        <field name="subject">[Ticket #{{ object.ticket }}] {{ object.name }}: We are working on
+            your ticket
+        </field>
+        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if
+            object.user_id else object.company_id.partner_id.email_formatted) }}
+        </field>
+        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and
+            object.team_id.alias_id else object.company_id.partner_id.email_formatted }}
+        </field>
+        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id
+            else '') }}
+        </field>
+        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email'))
+            }}
+        </field>
+        <field name="body_html" type="html">
+            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #333333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                <div style="background-color: #9EA700; padding: 15px 20px; border-radius: 6px 6px 0 0; text-align: center; color: #ffffff;">
+                    <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Helpdesk Support</h2>
+                </div>
+                <div style="padding: 20px;">
+                    <p>Dear<strong t-out="object.customer_id.name or 'Customer'"/>,
+                    </p>
+                    <p>Our support team has started working on your ticket.</p>
+                    <p style="font-size: 16px; font-weight: bold; color: #212529;">
+                        <t t-out="object.name"/>
+                    </p>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px;">
+                        <tr style="border-bottom: 1px solid #eeeeee;">
+                            <td style="padding: 8px 0; color: #6c757d; width: 40%;">
+                                <strong>Ticket ID:</strong>
+                            </td>
+                            <td style="padding: 8px 0; font-weight: bold; color: #9EA700;">
+                                <t t-out="object.ticket"/>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eeeeee;">
+                            <td style="padding: 8px 0; color: #6c757d;">
+                                <strong>Status:</strong>
+                            </td>
+                            <td style="padding: 8px 0;">
+                                <t t-out="object.stage_id.name or 'In Progress'"/>
+                            </td>
+                        </tr>
+                    </table>
+                    <p>We will update you when there is further progress. You can reply to this
+                        email if you have additional information.
+                    </p>
+                    <p style="margin-bottom: 0;">Best regards,
+                        <br/>
+                        <strong>
+                            <t t-out="user.name or object.team_id.name or 'Support Team'"/>
+                        </strong>
+                        <br/>
+                        <t t-out="object.company_id.name"/>
+                    </p>
+                </div>
+            </div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+    <record id="help_desk_mail_template_auto_close_reminder" model="mail.template">
+        <field name="name">Help Desk: Auto-close Reminder</field>
+        <field name="model_id" ref="cyllo_helpdesk.model_helpdesk_ticket"/>
+        <field name="subject">Reminder: Your ticket will be closed soon</field>
+        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if
+            object.user_id else object.company_id.partner_id.email_formatted) }}
+        </field>
+        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and
+            object.team_id.alias_id else object.company_id.partner_id.email_formatted }}
+        </field>
+        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id
+            else '') }}
+        </field>
+        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email'))
+            }}
+        </field>
+        <field name="body_html" type="html">
+            <div>
+                <br/>
+                <h4>Dear<t t-out="object.customer_id.name"/>,
+                </h4>
+                <p>We are following up on your ticket
+                    <strong>
+                        <t t-out="object.name"/>
+                    </strong>
+                    (No.<t t-out="object.ticket"/>).
+                </p>
+                <p>Since we haven't heard from you in a while, we wanted to let you know that this
+                    ticket will be automatically closed soon if there is no further activity.
+                </p>
+                <p>If the issue is still ongoing, please reply to this email or update the ticket on
+                    the portal.
+                </p>
+                <br/>
+                <p>Best regards,
+                    <br/>
+                    <t t-out="object.team_id.name"/>
+                    Support Team
+                </p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+</odoo>

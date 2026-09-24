@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_online_bank_provider_search" model="ir.ui.view">
+        <field name="name">view.online.bank.provider.search</field>
+        <field name="model">online.bank.provider</field>
+        <field name="arch" type="xml">
+            <search string="Online Bank Providers">
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+    <record id="view_online_bank_provider_tree" model="ir.ui.view">
+        <field name="name">view.online.bank.provider.tree</field>
+        <field name="model">online.bank.provider</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="company_id" groups="base.group_multi_company" />
+                <field name="name" />
+                <field name="saltedge_connection_id" />
+                <field name="state" widget="badge" decoration-danger="state == 'cancel'"
+                           decoration-muted="state == 'draft'" decoration-info="state == 'open'"
+                           decoration-success="state == 'connect'"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_online_bank_provider_form" model="ir.ui.view">
+        <field name="name">view.online.bank.provider.form</field>
+        <field name="model">online.bank.provider</field>
+        <field name="arch" type="xml">
+            <form string="Online Bank Provider">
+                <field name="active" invisible="1" />
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_connect_to_bank" type="object" string="Connect to Bank" invisible="state != 'open'" class="oe_highlight"/>
+                    <button name="action_reset_to_connect" type="object" string="Reset to connect" invisible="state != 'cancel'"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state in ('cancel', 'draft')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connect"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active == True"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="state != 'draft'"/></h1>
+                    </div>
+                    <group name="main" col="2">
+                        <group>
+                            <field name="saltedge_connection_id" invisible="saltedge_connection_id == False" readonly="1"/>
+                            <field name="saltedge_customer_id" readonly="1" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group/>
+                    </group>
+                    <notebook>
+                        <page string="Bank Accounts" name="saltedge_connections" >
+                            <field name="bank_journal_ids">
+                                <tree create="0" edit="0" delete="0">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="default_account_id"/>
+                                    <field name="saltedge_account_id" column_invisible="1"/>
+                                    <field name="online_bank_provider_id" column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_online_bank_provider" model="ir.actions.act_window">
+        <field name="name">Online Bank Providers</field>
+        <field name="res_model">online.bank.provider</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new online bank provider...
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<template>
+    <!--Template for Kitchen order stages  -->
+    <t t-name="KitchenCustomDashBoard">
+        <header>
+            <div id="kitchen_screen" class="kitchen">
+                <div class="body_wrapper">
+                    <div class="cy-ks-navbar">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-dark cy-navbar-app-name">
+                                Kitchen Screen
+                                </span>
+                            </div>
+                        <div class="cy-ks-navbar-actions">
+                            <div class="cy-ks-info-box d-flex align-items-center border">
+                                <t t-if="state.shop_name">
+                                    <div class="cy-ks-info-item">
+                                        <i class="fa fa-desktop text-muted me-1"/>
+                                        <span class="fw-bold text-dark"><t t-esc="state.shop_name"/></span>
+                        </div>
+                                    <div class="cy-ks-info-divider"/>
+                                </t>
+                                <div class="cy-ks-info-item">
+                                    <span class="fw-bold text-dark"><t t-esc="(state.order_details || []).length"/></span>
+                                    <span class="text-muted ms-1">orders</span>
+                                </div>
+                            </div>
+
+                            <t t-if="!state.is_kitchen_cook">
+                                <span class="cy-ks-navbar-badge cy-ks-navbar-badge-readonly">
+                                    Read Only
+                                </span>
+                            </t>
+                            <button class="btn btn-danger border shadow-sm fw-bold d-flex align-items-center cy-ks-exit-btn"
+                                    type="button"
+                                    t-on-click="close_kitchen_screen">
+                                <i class="fa fa-sign-out me-2"/>
+                                Exit
+                            </button>
+                        </div>
+                    </div>
+                    <div class="container cy-ks-stage">
+                        <t t-call="KitchenOrder"/>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </t>
+    <!--Template for Kitchen Orders in the kitchen screen -->
+    <t t-name="KitchenOrder">
+        <section class="screen_info custom_padding_top">
+            <div class="wrapper">
+                <div class="container-fluid">
+                    <div class="kitchen_board">
+                        <t t-set="columns" t-value="this.getStageColumns()"/>
+                        <t t-foreach="columns" t-as="col" t-key="col.stage.id">
+                            <div class="kitchen_column"
+                                 t-attf-data-stage-id="{{col.stage.id}}"
+                                 t-on-dragover="on_stage_drag_over"
+                                 t-on-dragleave="on_stage_drag_leave"
+                                 t-on-drop="on_stage_drop">
+                                <div class="kitchen_column_header">
+                                    <div class="kitchen_column_title">
+                                        <t t-if="col.stage.image and col.stage.image != 'false'">
+                                            <img class="kitchen_stage_icon"
+                                                 t-attf-src="data:image/png;base64,{{col.stage.image}}"
+                                                 alt=""
+                                                 loading="lazy"/>
+                                        </t>
+                                        <span class="kitchen_column_name">
+                                            <t t-esc="col.stage.name"/>
+                                        </span>
+                                    </div>
+                                    <span class="kitchen_column_badge">
+                                        <t t-esc="col.count"/>
+                                    </span>
+                                </div>
+
+                                <div class="kitchen_column_body">
+                                    <t t-if="col.orders.length == 0">
+                                        <div class="kitchen_column_empty">
+                                            <div class="empty-state-icon-wrapper">
+                                                <i class="fa fa-inbox"/>
+                                            </div>
+                                            <h4 class="empty-state-title">No orders</h4>
+                                            <p class="empty-state-subtitle"><span style="text-transform: capitalize;"><t t-esc="col.stage.name"/></span> orders will appear here</p>
+                                        </div>
+                                    </t>
+                                    <t t-foreach="col.orders" t-as="order" t-key="order.id">
+                                        <div class="card kitchen_card o_draggable"
+                                             t-attf-data-order-id="{{order.id}}"
+                                             t-att-draggable="state.is_kitchen_cook ? 'true' : 'false'"
+                                             t-on-dragstart="on_order_drag_start"
+                                             t-on-dragend="on_order_drag_end"
+                                             t-on-click="advance_order"
+                                             t-attf-style="{{state.is_kitchen_cook ? 'cursor: pointer;' : 'cursor: default;'}}">
+                                            <t t-if="state.is_kitchen_cook and ((col.isReadyStage and order.order_status == 'ready') or (col.isCancelStage and order.order_status == 'cancel'))">
+                                                <button class="kitchen_card_remove"
+                                                        type="button"
+                                                        title="Remove"
+                                                        aria-label="Remove"
+                                                        t-attf-data-order-id="{{order.id}}"
+                                                        draggable="false"
+                                                        t-on-click="remove_completed_order">
+                                                    ×
+                                                </button>
+                                            </t>
+                                            <div class="card-header cy-card-header">
+                                                <div class="d-flex w-100 align-items-start">
+
+                                                    <div class="cy-card-info flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <div class="fw-bold fs-5 text-dark"><t t-esc="order.name"/></div>
+                                                            <div class="fw-bold fs-6 text-dark"><t t-esc="order.user_id[1]"/></div>
+                                                        </div>
+
+                                                        <div class="d-flex justify-content-between align-items-start cy-card-meta text-muted" style="font-size: 13px;">
+                                                            <div class="d-flex flex-column gap-1">
+                                                                <span><i class="ri-time-line me-2"/>Time <span class="text-success ms-1"><t t-esc="order.hour || '-'"/>:<t t-esc="order.minutes || '-'"/></span></span>
+                                                                <span><i class="ri-archive-drawer-line me-2"/>Table <span class="text-success ms-1"><t t-esc="order.table_id and order.table_id[1] || '-'"/></span></span>
+                                                                <span>Floor: <span class="text-success ms-1"><t t-esc="order.floor || '-'"/></span></span>
+                                                        </div>
+                                                            <div class="cy-time-pill mt-1">
+                                                                <i class="ri-time-line me-1"/> <t t-esc="get_time_ago(order.date_order, state.timeTick)"/>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                                </div>
+                                            </div>
+
+                                            <ul class="list-group list-group-flush cy-order-lines">
+                                                <t t-foreach="order.lines" t-as="line_id" t-key="line_id">
+                                                    <t t-set="line" t-value="state.lines.find(l => l.id == line_id)"/>
+                                                    <t t-if="line">
+                                                        <button t-attf-class="list-group-item d-flex align-items-center py-3 {{state.is_kitchen_cook and order.order_status == 'waiting' ? 'accept_order_line' : ''}}"
+                                                                t-on-click="(e) => this.on_line_click(e, order.order_status)"
+                                                                t-attf-id="lines_id_{{line.id}}"
+                                                                t-att-value="line.id"
+                                                                t-att-disabled="!state.is_kitchen_cook"
+                                                                t-attf-style="{{order.order_status=='waiting' and line.order_status=='ready' ? 'text-decoration: line-through !important;color: #bfbfbf !important;' : ''}} {{!state.is_kitchen_cook ? 'cursor: default; pointer-events: none;' : ''}}">
+
+                                                            <img class="cy-product-img me-3" t-attf-src="/web/image?model=product.product&amp;id={{line.product_id[0]}}&amp;field=image_128" onerror="this.src='/web/static/img/placeholder.png';" alt="Product"/>
+                                                            <div class="fw-bold text-dark fs-6 text-start flex-grow-1"><t t-esc="line.full_product_name"/></div>
+                                                            <div class="cy-qty-badge ms-3">x <t t-esc="line.qty"/></div>
+
+                                                            <t t-if="line.note">
+                                                                <div class="w-100 mt-2 text-start">
+                                                                    <i class="ri-price-tag-3-line text-muted me-1"/>
+                                                                    <span style="font-size:14px" class="text-muted"><t t-esc="line.note"/></span>
+                                                                </div>
+                                                            </t>
+                                                        </button>
+                                                    </t>
+                                                </t>
+                                            </ul>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </t>
+</template>

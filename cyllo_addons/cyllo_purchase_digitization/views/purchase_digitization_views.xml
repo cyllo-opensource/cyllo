@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_purchase_digitization_tree" model="ir.ui.view">
+        <field name="name">view.purchase.digitization.tree</field>
+        <field name="model">purchase.digitization</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="automation_type"/>
+                <field name="automation_method"/>
+                <field name="active_configuration"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_purchase_digitization_form" model="ir.ui.view">
+        <field name="name">view.purchase.digitization.form</field>
+        <field name="model">purchase.digitization</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1 class="oe_title">
+                        <field name="name"
+                               placeholder="e.g. purchase digitization"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="automation_method" widget="radio"/>
+                            <field name="automation_type" widget="radio"/>
+                            <field name="active_configuration"
+                                   widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Purchase Details"
+                              name="purchase_details"
+                              invisible="automation_method != 'manual_digitization'">
+                            <field name="purchase_field_details_ids">
+                                <tree editable="bottom">
+                                    <field name="purchase_field_id"
+                                           string="Fields"/>
+                                    <field name="field_keyword_ids"
+                                           widget="many2many_tags"
+                                           string="Keyword"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Purchase Line Details"
+                              name="purchase_line_details"
+                              invisible="automation_method != 'manual_digitization'">
+                            <field name="purchase_line_field_details_ids">
+                                <tree editable="bottom">
+                                    <field name="purchase_line_field_id"
+                                           string="Fields"/>
+                                    <field name="line_field_keyword_ids"
+                                           widget="many2many_tags"
+                                           string="Keyword"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Tax Details"
+                              name="tax_details">
+                            <group>
+                                <group>
+                                    <field name="tax_type" widget="radio"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Product Creation"
+                              name="product_creation">
+                            <group>
+                                <group>
+                                    <field name="product_creation_type"
+                                           widget="radio"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- actions -->
+    <record id="action_view_purchase_digitization"
+            model="ir.actions.act_window">
+        <field name="name">Purchase Digitization</field>
+        <field name="res_model">purchase.digitization</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_view_purchase_orders" model="ir.actions.act_window">
+        <field name="name">Purchase Orders</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="purchase.purchase_order_kpis_tree"/>
+    </record>
+    <menuitem id="menu_purchase_digitization_categ"
+              name="Purchase Digitization"
+              parent="cyllo_ocr_digitization.menu_cyllo_ocr_digitization_root"
+              sequence="3"/>
+    <menuitem id="menu_purchase_digitization_config"
+              name="Purchase Digitization Config"
+              parent="cyllo_ocr_digitization.menu_configuration_categ"
+              action="action_view_purchase_digitization"/>
+    <menuitem id="menu_purchase_orders"
+              name="Purchase Orders"
+              parent="menu_purchase_digitization_categ"
+              action="action_view_purchase_orders"/>
+</odoo>

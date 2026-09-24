@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.GraphOverall">
+
+        <div class="cy-graph-panel">
+
+            <!-- Graph type icon selector -->
+            <div class="cy-graph-icons-section">
+                <span t-if="this.state.activeGraphs.length > 3"
+                      t-on-click="() => this.prevPage()"
+                      class="cy-graph-arrow">
+                    <i class="ri-arrow-left-s-line"/>
+                </span>
+                <t t-foreach="this.visibleGraphTypes" t-as="type" t-key="type">
+                    <span class="cy-studio-graph-icon cy-status_bar_hover"
+                          t-on-click="(event) => this.onClickGraphIcon(event, type)">
+                        <i t-att-class="graphIcons[type]"
+                           t-att-style="state.displayedGraphType == type ?
+                               'font-size:16px;color:#a4ad02;' :
+                               'font-size:16px;color:var(--custom-dropdown-color);'"/>
+                        <div class="default_type_icon"
+                             t-att-class="state.currentType == type ? 'fa fa-circle' : ''"/>
+                    </span>
+                </t>
+                <span t-if="this.state.activeGraphs.length > 3"
+                      t-on-click="() => this.nextPage()"
+                      class="cy-graph-arrow">
+                    <i class="ri-arrow-right-s-line"/>
+                </span>
+            </div>
+
+            <!-- Default Type -->
+            <div class="cy-graph-section" t-ref="graphTypeDropdown">
+                <label class="cy-navbar_label">Default Type</label>
+                <div class="cy-graph-type-trigger"
+                     t-on-click="() => { this.state.options = !this.state.options; this.toggleRotation(); }">
+                    <div class="cy-graph-type-value">
+                        <i t-att-class="graphIcons[state.currentType]" style="font-size:16px;"/>
+                        <span t-esc="capitalizeFirstLetter(state.currentType)"/>
+                    </div>
+                    <i t-attf-class="ri-arrow-down-s-line #{state.isRotated ? 'rotated' : ''}"
+                       style="font-size:18px; transition:transform 0.3s ease;"/>
+                </div>
+                <div t-if="state.options" class="cy-graph-type-menu">
+                    <ul>
+                        <t t-foreach="state.graphTypes" t-as="item" t-key="item">
+                            <li t-att-class="{'cy-dropdown-item': true, 'pinned': state.currentType === item}">
+                                <div class="cy-graph-type-row">
+                                    <input type="checkbox" class="custom-round-checkbox"
+                                           t-att-checked="this.state.activeGraphs.includes(item) ? 'checked' : ''"
+                                           t-on-click="() => this.updateGraphElement({ type: 'modes', position: 'attributes', name: 'modes', item_type: item })"
+                                           t-att-id="'GT-' + item"/>
+                                    <label t-att-for="'GT-' + item">
+                                        <i t-att-class="graphIcons[item]" style="font-size:16px;"/>
+                                        <span t-esc="capitalizeFirstLetter(item)"/>
+                                    </label>
+                                </div>
+                                <t t-if="state.activeGraphs.includes(item)">
+                                    <i t-attf-class="ri-pushpin-#{state.currentType === item ? 'fill' : 'line'} cy-pushpin-fill"
+                                       t-on-click="() => this.updateGraphElement({ type: 'default_type', position: 'attributes', name: 'type', item_type: item })"/>
+                                </t>
+                            </li>
+                        </t>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Sorting -->
+            <div class="cy-graph-section">
+                <label class="cy-navbar_label">Sorting</label>
+                <div class="cy-studio-custom-dropdown">
+                    <CylloStudioDropdown
+                        options="sortGraph"
+                        onChange="(value) => this.updateGraphElement({ type: 'order', position: 'attributes', name: 'order', item_type: value })"
+                        searchable="true"
+                        defaultValue="state.currentOrder"/>
+                </div>
+            </div>
+
+            <!-- Toggles -->
+            <div class="cy-graph-section">
+                <div class="cy-toggle-row">
+                    <span class="cy-toggle-label">Stacked Graph</span>
+                    <label class="cy-switch">
+                        <input type="checkbox" t-model="state.stacked"
+                               t-on-click="() => this.updateGraphElement({ type: 'stacked', position: 'attributes', name: 'stacked', item_type: !state.stacked })"/>
+                        <span class="cy-slider"/>
+                    </label>
+                </div>
+                <div class="cy-toggle-row">
+                    <span class="cy-toggle-label">Disable Link To Record</span>
+                    <label class="cy-switch">
+                        <input type="checkbox" t-model="state.link"
+                               t-on-click="({target}) => this.updateGraphElement({ type: 'general', position: 'attributes', name: 'disable_linking', item_type: target.checked })"/>
+                        <span class="cy-slider"/>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Group By -->
+            <div class="cy-graph-section">
+                <div class="cy-graph-section-header">
+                    <span class="cy-graph-section-title">Group By</span>
+                    <button t-if="state.New" class="cy-pivot-add-btn"
+                            t-on-click="handleGroupBy"
+                            title="Add Group By">
+                        <i class="fa fa-plus"/>
+                    </button>
+                </div>
+                <div class="cy-pivot-items">
+                    <t t-foreach="state.groupBy" t-as="field" t-key="field_index">
+                        <div class="cy-pivot-item">
+                            <span class="cy-pivot-item-label text-capitalize">
+                                <t t-esc="state.fields.find(f => f.name === state.groupBy[field_index].fieldName)?.string"/>
+                                <t t-if="field.interval"> · <t t-esc="field.interval"/></t>
+                            </span>
+                            <button class="cy-pivot-delete-btn"
+                                    t-on-click="() => this.removeGroupBy('measure', field)">
+                                <i class="ri-close-line"/>
+                            </button>
+                        </div>
+                    </t>
+                    <div t-if="!state.New" class="cy-pivot-item">
+                        <div class="cy-studio-custom-dropdown" style="flex:1;">
+                            <CylloStudioDropdown
+                                options="groupByFields"
+                                onChange="(value) => this.onGroupBySelect(value)"
+                                searchable="true"
+                                placeholder="'Select a field'"/>
+                        </div>
+                        <button class="cy-pivot-delete-btn"
+                                t-on-click="() => this.removeGroupBy('measure', field)">
+                            <i class="ri-close-line"/>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Measure -->
+            <div class="cy-graph-section">
+                <label class="cy-navbar_label">Measure</label>
+                <div class="cy-studio-custom-dropdown">
+                    <CylloStudioDropdown
+                        options="measureValue"
+                        onChange="(value) => this.updateGraphElement({ type: 'measure', position: 'inside', name: value, item_type: 'measure' })"
+                        searchable="true"
+                        defaultValue="state.measures[state.measure].string"/>
+                </div>
+            </div>
+
+        </div>
+    </t>
+</templates>

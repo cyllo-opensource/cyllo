@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_social_insta_account_form" model="ir.ui.view">
+        <field name="name">view.social.insta.account.form</field>
+        <field name="model">social.insta.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="is_default" invisible="True"/>
+                <header>
+                    <button name="action_connect_instagram" type="object"
+                            string="Connect Manually"
+                            invisible="state != 'not connected'"
+                            class="btn-primary"/>
+                    <button name="action_connect_instagram_oauth" type="object"
+                            string="Connect with Facebook"
+                            invisible="state != 'not connected'"
+                            class="btn-primary"/>
+                    <button name="action_disconnect" type="object"
+                            string="Disconnect" invisible="state != 'connected'"
+                            class="btn-primary"/>
+                    <button name="action_default_ig"
+                            string="Set as Default"
+                            type="object"
+                            class="btn-primary"
+                            invisible="is_default or state != 'connected'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="badge rounded-pill bg-primary text-white position-absolute end-0"
+                              invisible="not is_default">
+                            Default Account
+                        </span>
+                        <div>
+                            <label for="facebook_insta_page_name"/>
+                            <h1>
+                                <field name="facebook_insta_page_name"
+                                       readonly="state == 'connected'"
+                                       placeholder="E.g. my_instagram_page"/>
+                            </h1>
+                        </div>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="meta_app_number"
+                                   readonly="state == 'connected'"
+                                   placeholder="E.g. 123456789012345"/>
+                            <field name="meta_app_secret"
+                                   readonly="state == 'connected'"
+                                   placeholder="E.g. a1b2c3d4e5f6g7h8i9j0"/>
+                            <field name="instagram_access_token"
+                                   readonly="state == 'connected'"
+                                   placeholder="E.g. IGQVJ...long_token"/>
+                            <field name="instagram_page_access_token"
+                                   readonly="state == 'connected'"
+                                   placeholder="E.g. EAAGm0PX4ZCpsBA..."/>
+                        </group>
+                        <group>
+                            <field name="instagram_base_url"
+                                   readonly="state == 'connected'"
+                                   placeholder="Enter Instagram Base URL"/>
+                            <field name="facebook_insta_page_number"
+                                   readonly="1"
+                                   placeholder="Enter Facebook Instagram Page Number"/>
+                            <field name="instagram_connection_authenticated"
+                                   readonly="True"/>
+                            <field name="followers_count" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_social_insta_account_tree" model="ir.ui.view">
+        <field name="name">view.social.insta.account.tree</field>
+        <field name="model">social.insta.account</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="facebook_insta_page_name"/>
+                <field name="meta_app_number"/>
+                <field name="meta_app_secret"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'connected'"
+                    decoration-info="state == 'not connected'"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_view_instagram_accounts" model="ir.actions.act_window">
+        <field name="name">Instagram Accounts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">social.insta.account</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Instagram Account
+            </p>
+            <p>
+                You can link instagram account.
+            </p>
+        </field>
+    </record>
+</odoo>

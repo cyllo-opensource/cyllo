@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Visitor Tree View -->
+    <record id="frontdesk_visitor_view_tree" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.tree</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <tree string="Visitors" decoration-info="state == 'planned'"
+                  decoration-warning="state == 'draft'"
+                  decoration-success="state == 'checked_in'"
+                  decoration-muted="state in ('checked_out', 'cancelled')">
+                <field name="name"/>
+                <field name="visitor_name"/>
+                <field name="visitor_type"/>
+                <field name="company"/>
+                <field name="enquiry_id" optional="hide"/>
+                <field name="host_id" string="Host" invisible="visitor_type != 'meeting'"/>
+                <field name="host_id" string="Handled by" invisible="visitor_type == 'meeting'"/>
+                <field name="expected_arrival" optional="show"/>
+                <field name="purpose" optional="hide"/>
+                <field name="check_in"/>
+                <field name="duration" widget="float_time"/>
+                <field name="station_id"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'draft'"
+                       decoration-info="state == 'planned'"
+                       decoration-success="state == 'checked_in'"
+                       decoration-danger="state == 'cancelled'"
+                       decoration-muted="state == 'checked_out'"/>
+                <button name="action_check_out" string="Check out" type="object"
+                        class="btn-link" invisible="state != 'checked_in'"/>
+                <button name="action_drink_served" string="Drink Served"
+                        type="object" class="btn-link text-success"
+                        invisible="state != 'checked_in' or not drink_id or drink_served"/>
+                <field name="drink_id" column_invisible="1"/>
+                <field name="drink_served" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Visitor Form View -->
+    <record id="frontdesk_visitor_view_form" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.form</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <form string="Visitor">
+                <header>
+                    <button name="action_check_in" string="Check In"
+                            type="object" class="oe_highlight"
+                            invisible="state in ['checked_in','checked_out', 'cancelled']"/>
+                    <button name="action_check_out" string="Check Out"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'checked_in'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('checked_out', 'cancelled')"/>
+                    <button name="action_send_request" string="Send Request"
+                            type="object" class="oe_highlight"
+                            invisible="visitor_type != 'meeting' or state != 'draft' or is_approval_email_sent"/>
+                    <button name="action_create_enquiry" string="Create Enquiry"
+                            type="object" class="btn-primary"
+                            invisible="visitor_type != 'enquiry' or enquiry_id"/>
+                    <field name="is_approval_email_sent" invisible="1"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,planned,checked_in,checked_out,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Visitor Details">
+                            <field name="is_drink" invisible="1"/>
+                            <field name="drink_selection_ids"
+                                   widget="many2many_tags" invisible="1"/>
+                            <field name="host_domain_ids" invisible="1"/>
+
+                            <field name="partner_id" options="{'no_create': False}"/>
+                            <field name="visitor_name"/>
+                            <field name="visitor_type"/>
+                            <field name="enquiry_id" readonly="1" invisible="not enquiry_id"/>
+                            <field name="company" placeholder="e.g. Acme Corp"/>
+                            <field name="phone" placeholder="e.g. +1 555-0199"/>
+                            <field name="email"
+                                   placeholder="e.g. visitor@example.com"/>
+                            <field name="drink_id" options="{'no_create': True}"
+                                   invisible="not is_drink"
+                                   domain="[('id', 'in', drink_selection_ids)]"/>
+                            <field name="drink_served"
+                                   invisible="not drink_id"/>
+                        </group>
+                        <group string="Visit Details">
+                            <field name="is_host" invisible="1"/>
+                            <field name="station_id"
+                                   options="{'no_create': True}"/>
+                            <field name="host_id" string="Host" invisible="visitor_type != 'meeting'"/>
+                            <field name="host_id" string="Handled by" invisible="visitor_type == 'meeting'"/>
+                            <field name="is_frontdesk_manager" invisible="1"/>
+                            <field name="user_id" readonly="not is_frontdesk_manager"/>
+                            <field name="expected_arrival" invisible="visitor_type != 'meeting'" required="visitor_type == 'meeting'"/>
+                            <field name="purpose" invisible="visitor_type != 'meeting'" required="visitor_type == 'meeting'"/>
+                            <field name="check_in"/>
+                            <field name="check_out"/>
+                            <field name="duration" widget="float_time"
+                                   readonly="1" invisible="check_in == False"/>
+                        </group>
+                    </group>
+                    <group string="Approval Information" invisible="not approved_by_id">
+                        <group>
+                            <field name="approved_by_id" invisible="not approved_by_id"/>
+                            <field name="approved_datetime" invisible="not approved_datetime"/>
+                        </group>
+                        <group>
+                            <field name="rejected_by_id" invisible="not rejected_by_id"/>
+                            <field name="rejected_datetime" invisible="not rejected_datetime"/>
+                        </group>
+                    </group>
+                </sheet>
+                <!-- Chatter for Visitor Log -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Visitor Search View -->
+    <record id="frontdesk_visitor_view_search" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.search</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <search string="Search Visitors">
+                <field name="name"/>
+                <field name="visitor_name"/>
+                <field name="partner_id"/>
+                <field name="company"/>
+                <field name="visitor_type"/>
+                <field name="enquiry_id"/>
+                <field name="host_id"/>
+                <field name="station_id"/>
+                <separator/>
+                <filter string="Planned" name="planned"
+                        domain="[('state', '=', 'planned')]"/>
+                <filter string="Checked In" name="checked_in"
+                        domain="[('state', '=', 'checked_in')]"/>
+                <filter string="Checked Out" name="checked_out"
+                        domain="[('state', '=', 'checked_out')]"/>
+                    <filter string="Cancelled" name="cancelled"
+                            domain="[('state', '=', 'cancelled')]"/>
+                <filter string="Meeting" name="meeting"
+                        domain="[('visitor_type', '=', 'meeting')]"/>
+                <filter string="Enquiry" name="enquiry"
+                        domain="[('visitor_type', '=', 'enquiry')]"/>
+                <separator/>
+                <filter string="Today's Visits" name="today"
+                        domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')), ('check_in', '&lt;=', context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Station" name="group_by_station"
+                            context="{'group_by': 'station_id'}"/>
+                    <filter string="Host" name="group_by_host"
+                            context="{'group_by': 'host_id'}"/>
+                    <filter string="Company" name="group_by_company"
+                            context="{'group_by': 'company'}"/>
+                    <filter string="Visitor Type" name="group_by_visitor_type"
+                            context="{'group_by': 'visitor_type'}"/>
+                    <filter string="Status" name="group_by_state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Visitor Calendar View -->
+    <record id="frontdesk_visitor_view_calendar" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.calendar</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <calendar string="Visitors" date_start="check_in"
+                      date_stop="check_out" color="state" quick_create="false">
+                <field name="name"/>
+                <field name="company"/>
+                <field name="host_id"/>
+                <field name="station_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Visitor Graph View -->
+    <record id="frontdesk_visitor_view_graph" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.graph</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <graph string="Visitors Analysis" type="bar">
+                <field name="station_id"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Visitor Pivot View -->
+    <record id="frontdesk_visitor_view_pivot" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.pivot</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <pivot string="Visitors Analysis" display_quantity="true">
+                <field name="station_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Act Window -->
+    <record id="action_frontdesk_visitor" model="ir.actions.act_window">
+        <field name="name">Visitors</field>
+        <field name="res_model">frontdesk.visitor</field>
+        <field name="view_mode">tree,form,calendar,graph,pivot</field>
+        <field name="search_view_id" ref="frontdesk_visitor_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register a new visitor!
+            </p>
+            <p>
+                Keep track of guest registrations, hosts, arrival and departure
+                times, and drink requests.
+            </p>
+        </field>
+    </record>
+
+    <!-- Reporting Act Window -->
+    <record id="action_frontdesk_visitor_reporting"
+            model="ir.actions.act_window">
+        <field name="name">Visitors Analysis</field>
+        <field name="res_model">frontdesk.visitor</field>
+        <field name="view_mode">graph,pivot,tree</field>
+        <field name="search_view_id" ref="frontdesk_visitor_view_search"/>
+        <field name="help" type="html">
+            <p>
+                Analyze visitor traffic, busiest reception desks, and check-in
+                history.
+            </p>
+        </field>
+    </record>
+</odoo>

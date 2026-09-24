@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Tree view of the Quality Check-->
+    <record id="view_quality_check_tree" model="ir.ui.view">
+        <field name="name">view.quality.check.tree</field>
+        <field name="model">quality.check</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="quality_control_id"/>
+                <field name="product_id"/>
+                <field name="user_id"/>
+                <field name="quality_team_id"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-success="state == 'pass'"
+                       decoration-danger="state == 'fail'"
+                       decoration-warning="state == 'ongoing'"
+                       decoration-muted="state == 'todo'"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Form view of the quality check model-->
+    <record id="view_quality_check_form" model="ir.ui.view">
+        <field name="name">view.quality.check.form</field>
+        <field name="model">quality.check</field>
+        <field name="arch" type="xml">
+            <form js_class="quality_check_view">
+                 <header>
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="todo,ongoing,pass,fail"/>
+                </header>
+                <sheet>
+                    <field name="qc_alert_count" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button"
+                                name="action_view_quality_alert"
+                                type="object"
+                                invisible="not qc_alert_count">
+                            <i class="o_button_icon ri-check-line"/>
+                            <field name="qc_alert_count" string="Quality Alerts"
+                                   widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="reference"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="quality_control_id"/>
+                            <field name="control_type"/>
+                            <field name="product_id"
+                                   invisible="control_type != 'product'"/>
+                            <label for="quantity"
+                                   invisible="control_type != 'quantity'"/>
+                            <div class="o_row"
+                                 invisible="control_type != 'quantity'">
+                                <field name="quantity"/>
+                                <field name="uom_id" readonly="1" nolabel="1"/>
+                            </div>
+                            <field name="product_ids" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="picking_id"/>
+                            <field name="quality_team_id"/>
+                            <field name="user_id"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="inspection_actions"
+                              string="Inspection Actions">
+                            <field name="quality_check_line_ids">
+                                <tree>
+                                    <field name="inspection_action_id"/>
+                                    <field name="inspection_type_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                                    <field name="measure_start" invisible="measure_start == 0 and measure_end == 0"/>
+                                    <field name="measure_end" invisible="measure_start == 0 and measure_end == 0"/>
+                                    <field name="unit_id" invisible="measure_start == 0 and measure_end == 0"/>
+                                    <field name="blocked_by_id"/>
+                                    <field name="unit_value"
+                                           widget="MeasureUOM"/>
+                                    <field name="note" widget="view_qc_note"/>
+                                    <field name="is_checked"
+                                           column_invisible="1"/>
+                                    <field name="id" column_invisible="1"/>
+                                    <field name="quality_check_id"
+                                           column_invisible="1"/>
+                                    <field name="quality_control_id"
+                                           column_invisible="1"/>
+                                    <field name="is_pass" column_invisible="1"/>
+                                    <field name="is_alert"
+                                           column_invisible="1"/>
+                                    <field name="instruction"
+                                           column_invisible="1"/>
+                                    <field name="value" column_invisible="1"/>
+                                    <field name="status" widget="qc_badge"
+                                           decoration-success="status == 'pass'"
+                                           decoration-danger="status == 'fail'"/>
+                                    <widget name="check_quality_action"/>
+                                    <button name="action_create_alert"
+                                            class="btn btn-primary"
+                                            string="Create Alert"
+                                            type="object"
+                                            invisible="status != 'fail' or is_alert"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+     <record id="view_quality_check_line_form" model="ir.ui.view">
+        <field name="name">view.quality.check.line.form</field>
+        <field name="model">quality.check.line</field>
+        <field name="arch" type="xml">
+            <form string="Quality Check Line">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="quality_check_id"/>
+                            <field name="quality_control_id"/>
+                            <field name="inspection_action_id"/>
+                            <field name="inspection_type_id"/>
+                            <field name="blocked_by_id"/>
+                        </group>
+                        <group>
+                            <field name="is_picture_type" invisible="1"/>
+                            <field name="value"
+                                   invisible="is_picture_type"/>
+                            <field name="value_image" widget="image"
+                                   invisible="not is_picture_type"/>
+                            <field name="unit_value" widget="MeasureUOM"
+                                   invisible="not inspection_type_id or inspection_type_id.name != 'Measure'"/>
+                            <field name="status"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+
+    <!--    Search view of the Quality Check-->
+    <record id="view_quality_check_search" model="ir.ui.view">
+        <field name="name">view.quality.check.search</field>
+        <field name="model">quality.check</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="quality_control_id"/>
+                <field name="user_id"/>
+                <field name="quality_team_id"/>
+                <filter string="My Quality Checks" name="my_quality_checks"
+                        domain="[('user_id', '=', uid)]"/>
+                <filter string="Active" name="active"
+                        domain="[('active', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Quality Control Point"
+                            name="group_by_quality_control"
+                            context="{'group_by': 'quality_control_id'}"/>
+                    <filter string="Responsible" name="group_by_user"
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Team" name="group_by_team"
+                            context="{'group_by': 'quality_team_id'}"/>
+                    <filter string="Company" name="group_by_company"
+                            context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!--   Action for the Quality Check-->
+    <record id="action_view_quality_checks" model="ir.actions.act_window">
+        <field name="name">Quality Checks</field>
+        <field name="res_model">quality.check</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_quality_check_search"/>
+    </record>
+
+</odoo>

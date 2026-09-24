@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_repair_time_allocation_policy_tree" model="ir.ui.view">
+        <field name="name">repair.time.allocation.policy.tree</field>
+        <field name="model">repair.time.allocation.policy</field>
+        <field name="arch" type="xml">
+            <tree string="Time Allocation Policies" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="target_type"/>
+                <field name="product_category_id" invisible="target_type != 'category'"/>
+                <field name="product_id" invisible="target_type != 'product'"/>
+                <field name="allocated_duration" widget="float_time"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_repair_time_allocation_policy_form" model="ir.ui.view">
+        <field name="name">repair.time.allocation.policy.form</field>
+        <field name="model">repair.time.allocation.policy</field>
+        <field name="arch" type="xml">
+            <form string="Time Allocation Policy">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="target_type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="product_id" options="{'no_create': True, 'no_open': True}"
+                                   invisible="target_type != 'product'"/>
+                            <field name="product_category_id" options="{'no_create': True, 'no_open': True}"
+                                   invisible="target_type != 'category'"/>
+                        </group>
+                        <group>
+                            <field name="allocated_duration" widget="float_time"/>
+                            <field name="sequence"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_repair_time_allocation_policy_search" model="ir.ui.view">
+        <field name="name">repair.time.allocation.policy.search</field>
+        <field name="model">repair.time.allocation.policy</field>
+        <field name="arch" type="xml">
+            <search string="Search Time Allocation Policy">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="product_category_id"/>
+                <field name="target_type"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Target Type" name="groupby_target_type" context="{'group_by':'target_type'}"/>
+                    <filter string="Product" name="product" context="{'group_by':'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_repair_time_allocation_policy" model="ir.actions.act_window">
+        <field name="name">Time Allocation Policies</field>
+        <field name="res_model">repair.time.allocation.policy</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_repair_time_allocation_policy_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Time Allocation Policy
+            </p>
+            <p>
+                Define rules to automatically assign an allocated expected duration to repair orders based on conditions.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_repair_time_allocation_policy"
+              name="Time Allocation Policies"
+              parent="repair.repair_menu_config"
+              action="action_repair_time_allocation_policy"
+              sequence="50"/>
+</odoo>

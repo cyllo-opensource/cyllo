@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.CommandPalette" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_command_category')]" position="attributes">
+            <attribute name="t-attf-class">{{ category.keyId === 'apps' and state.appsLayout === 'grid' ? 'o_command_category_grid' : '' }}</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('o_command_palette_search')]/div[hasclass('input-group-text')]" position="replace">
+            <div t-if="commandsByCategory.some((c) => c.keyId === 'apps')" class="border-0 bg-transparent o_command_apps_layout_switch gap-1">
+                <i class="ri-apps-2-line cursor-pointer p-1"
+                   t-att-class="{ active: state.appsLayout === 'grid' }"
+                   title="Grid view"
+                   t-on-click="() => this.setAppsLayout('grid')"/>
+                <i class="ri-list-indefinite cursor-pointer p-1"
+                   t-att-class="{ active: state.appsLayout === 'list' }"
+                   title="List view"
+                   t-on-click="() => this.setAppsLayout('list')"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o_command_palette_search')]/span[hasclass('o_namespace')]" position="before">
+            <div class="input-group-text border-0 bg-transparent">
+                <i t-att-title="state.placeholder" role="img" t-att-aria-label="state.placeholder" class="oi oi-search search-icon"/>
+            </div>
+        </xpath>
+        <!-- Master search's "browse" list (see command_palette.js) groups
+             records under a model-name title row instead of prefixing every
+             record's name — mark it so CSS can render it as a grey label
+             instead of a normal selectable row. -->
+        <xpath expr="//div[hasclass('o_command')]" position="attributes">
+            <attribute name="t-attf-class">{{ command.isModelHeader ? 'o_command_model_header' : '' }}</attribute>
+        </xpath>
+    </t>
+</templates>

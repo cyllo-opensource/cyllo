@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Data for employee salary rules-->
+    <record id="employee_salary_rule_basic_salary" model="employee.salary.rule">
+        <field name="name">Basic Salary</field>
+        <field name="code">BASIC</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_basic"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+total_amount = payslip.total_amount
+wage = contract.wage
+if total_amount:
+    result = total_amount
+else:
+    result = wage
+        </field>
+    </record>
+    <!-- Gross salary rule -->
+    <record id="employee_salary_rule_gross" model="employee.salary.rule">
+        <field name="name">Gross</field>
+        <field name="code">GROSS</field>
+        <field name="sequence">100</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_gross"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories.BASIC + categories.ALW</field>
+    </record>
+    <!-- Net salary rule -->
+    <record id="employee_salary_rule_net_salary" model="employee.salary.rule">
+        <field name="name">Net Salary</field>
+        <field name="code">NET</field>
+        <field name="sequence">500</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_net"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = categories.BASIC + categories.ALW - categories.DED + categories.GRA + categories.REIMB</field>
+    </record>
+    <!-- House Rent Allowance salary rule -->
+    <record id="employee_salary_rule_house_rent_allowance" model="employee.salary.rule">
+        <field name="name">House Rent Allowance</field>
+        <field name="code">HRA</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_allowance"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract.house_rent</field>
+    </record>
+    <!-- Dearness Allowance salary rule -->
+    <record id="employee_salary_rule_dearness_allowance" model="employee.salary.rule">
+        <field name="name">Dearness Allowance</field>
+        <field name="code">DA</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_allowance"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract.dearness_allowance</field>
+    </record>
+    <!-- Travel Allowance salary rule -->
+    <record id="employee_salary_rule_travel_allowance" model="employee.salary.rule">
+        <field name="name">Travel Allowance</field>
+        <field name="code">TRAVEL</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_allowance"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract.travel_allowance</field>
+    </record>
+    <!-- Meal Allowance salary rule -->
+    <record id="employee_salary_rule_meal_allowance" model="employee.salary.rule">
+        <field name="name">Meal Allowance</field>
+        <field name="code">MEAL</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_allowance"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract.meal_allowance</field>
+    </record>
+    <!-- Medical Allowance salary rule -->
+    <record id="employee_salary_rule_medical_allowance" model="employee.salary.rule">
+        <field name="name">Medical Allowance</field>
+        <field name="code">MEDICAL</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_allowance"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract.medical_allowance</field>
+    </record>
+    <!-- Other Allowance salary rule -->
+    <record id="employee_salary_rule_other_allowance" model="employee.salary.rule">
+        <field name="name">Other Allowance</field>
+        <field name="code">OTHER</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_allowance"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract.other_allowance</field>
+    </record>
+    <record id="employee_salary_rule_commission" model="employee.salary.rule">
+        <field name="name">Commission</field>
+        <field name="code">COMMISSION</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_allowance"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.COMMISSION</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.COMMISSION</field>
+    </record>
+    <record id="employee_salary_rule_attachment_of_salary" model="employee.salary.rule">
+        <field name="name">Attachment of Salary</field>
+        <field name="sequence" eval="1"/>
+        <field name="code">ATTACH_SALARY</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_deduction"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.ATTACH_SALARY</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -inputs.ATTACH_SALARY</field>
+    </record>
+    <record id="employee_salary_rule_child_support" model="employee.salary.rule">
+        <field name="name">Child Support</field>
+        <field name="sequence" eval="1"/>
+        <field name="code">CHILD_SUPPORT</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_deduction"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.CHILD_SUPPORT</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -inputs.CHILD_SUPPORT</field>
+    </record>
+    <record id="employee_salary_rule_assignment_of_salary" model="employee.salary.rule">
+        <field name="name">Assignment of Salary</field>
+        <field name="sequence" eval="1"/>
+        <field name="code">ASSIG_SALARY</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_deduction"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.ASSIG_SALARY</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -inputs.ASSIG_SALARY</field>
+    </record>
+    <record id="employee_salary_rule_gratuity_settlement" model="employee.salary.rule">
+        <field name="name">Gratuity Settlement</field>
+        <field name="sequence" eval="1"/>
+        <field name="code">GRATUITY</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_gratuity_config"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.gratuity_settlement_id</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip.gratuity_settlement_id.gratuity_amount</field>
+    </record>
+    <record id="employee_salary_rule_expense_reimbursement" model="employee.salary.rule">
+        <field name="name">Expense Reimbursement</field>
+        <field name="sequence" eval="1"/>
+        <field name="code">EXPENSE</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_reimbursement"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.EXPENSE</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.EXPENSE</field>
+    </record>
+
+    <!-- Advance Salary rules -->
+
+    <record id="employee_salary_rule_advance_salary_deduction" model="employee.salary.rule">
+        <field name="name">Advance Salary Deduction</field>
+        <field name="sequence" eval="300"/>
+        <field name="code">ADVSAL_DED</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_deduction"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.DED and inputs.DED &lt; 0</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.DED</field>
+    </record>
+</odoo>

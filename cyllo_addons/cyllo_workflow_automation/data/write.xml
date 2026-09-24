@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="work_function_write" model="work.function">
+        <field name="name">On Write</field>
+        <field name="func_name">write</field>
+        <field name="trigger_type">write</field>
+        <field name="make_function"><![CDATA[
+def make_write():
+    def write(self, vals):
+        guard_key = '_workflow_write_running_' + self._name
+        if self.env.context.get(guard_key):
+            return write.origin(self, vals)
+
+        automation_ids = self.env['work.auto']._get_actions(self, 'write')
+        if not automation_ids:
+            return write.origin(self, vals)
+
+        self_guarded = self.with_context(**{guard_key: True})
+
+        before_ids = automation_ids.filtered(lambda x: x.ttype == 'before')
+        for automation in before_ids.with_context(old_values=None):
+            automation._process({'records': self_guarded, 'vals': vals, 'trigger_type': 'write'})
+
+        result = write.origin(self_guarded.with_env(automation_ids.env), vals)
+
+        after_ids = automation_ids - before_ids
+        for automation in after_ids.with_context(old_values=None):
+            automation._process({'records': self_guarded, 'trigger_type': 'write'})
+
+        return result
+
+    return write
+        ]]></field>
+        <field name="icon"
+               type="base64"
+               file="cyllo_workflow_automation/static/src/img/on-write.svg"/>
+    </record>
+</odoo>

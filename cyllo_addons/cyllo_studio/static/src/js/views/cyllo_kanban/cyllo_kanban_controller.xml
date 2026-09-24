@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="studio.CylloKanbanController">
+        <div t-att-class="className" t-ref="root">
+            <Layout model="props.resModel" className="model.useSampleModel ? 'o_view_sample_data' : ''"
+                    display="props.display" type="'Kanban'">
+                <t t-set-slot="control-panel-create-button">
+                    <t t-if="canCreate and props.showButtons">
+                        <button type="button" class="btn btn-primary o-kanban-button-new" accesskey="c"
+                                t-on-click="() => this.createRecord()" data-bounce-button="">
+                            New
+                        </button>
+                    </t>
+                </t>
+                <t t-set-slot="layout-buttons">
+                    <t t-call="{{ props.buttonTemplate }}"/>
+                </t>
+                <t t-set-slot="control-panel-navigation-additional">
+                    <t t-component="searchBarToggler.component" t-props="searchBarToggler.props"/>
+                </t>
+                <t t-component="props.Renderer"
+                   list="model.root"
+                   archInfo="props.archInfo"
+                   Compiler="props.Compiler"
+                   readonly="true"
+                   forceGlobalClick="props.forceGlobalClick"
+                   deleteRecord.bind="deleteRecord"
+                   openRecord.bind="openRecord"
+                   noContentHelp="props.info.noContentHelp"
+                   scrollTop.bind="scrollTop"
+                   canQuickCreate="canQuickCreate"
+                   quickCreateState="quickCreateState"
+                   progressBarState="progressBarState"
+                   evalViewModifier.bind="evalViewModifier"
+                />
+            </Layout>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_carbon_calc_document_green">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <div class="text-center mb32" style="margin-bottom: 30px;">
+                    <h2 style="font-weight: bold; color: #1b5e20;">Environmental Impact Report</h2>
+                    <h4 class="text-muted" t-esc="doc.name"/>
+                </div>
+
+                <div class="row mb32" style="margin-bottom: 30px;">
+                    <div class="col-6">
+                        <strong>Company:</strong> <span t-esc="doc.company_id.name"/><br/>
+                        <strong>Date:</strong> <span t-field="doc.date" t-options='{"widget": "date"}'/><br/>
+                        <strong>Status:</strong> <span t-field="doc.state"/>
+                    </div>
+                    <div class="col-6 text-end text-right" style="text-align: right;">
+                        <strong>Filter Type:</strong> <span t-field="doc.emission_type_filter"/><br/>
+                        <strong>Selected Companies:</strong> <span t-esc="doc.get_selected_companies_names()"/>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="row mb32 text-center" style="margin-bottom: 30px; display: flex; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 150px; padding: 10px;">
+                        <div class="card bg-light border-success p-3" style="border: 1px solid #2e7d32; border-radius: 5px; padding: 15px; background-color: #f8f9fa;">
+                            <h3 style="color: #2e7d32; font-weight: bold; margin-top: 0;" t-esc="'%.2f' % doc.get_total_air_pollution_to_print()"/>
+                            <small class="text-muted">Air Pollution (kg CO2e)</small>
+                        </div>
+                    </div>
+                    <div style="flex: 1; min-width: 150px; padding: 10px;">
+                        <div class="card bg-light border-warning p-3" style="border: 1px solid #f57c00; border-radius: 5px; padding: 15px; background-color: #f8f9fa;">
+                            <h3 style="color: #f57c00; font-weight: bold; margin-top: 0;" t-esc="'%.2f' % doc.get_total_water_pollution_to_print()"/>
+                            <small class="text-muted">Water Pollution (kg CO2e)</small>
+                        </div>
+                    </div>
+                    <div style="flex: 1; min-width: 150px; padding: 10px;">
+                        <div class="card bg-light border-info p-3" style="border: 1px solid #0288d1; border-radius: 5px; padding: 15px; background-color: #f8f9fa;">
+                            <h3 style="color: #0288d1; font-weight: bold; margin-top: 0;" t-esc="'%.2f' % doc.get_total_sound_pollution_to_print()"/>
+                            <small class="text-muted">Sound Pollution (kg CO2e)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pollution by Emission Source Table -->
+                <h4 class="mb16" style="border-bottom: 2px solid #1b5e20; padding-bottom: 5px; margin-top: 30px;">Pollution by Emission Source</h4>
+                <table class="table table-sm table-striped mt16" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: #e8f5e9;">
+                            <th style="padding: 8px; text-align: left;">Emission Source</th>
+                            <th style="padding: 8px; text-align: right;">Air Pollution (kg CO2e)</th>
+                            <th style="padding: 8px; text-align: right;">Water Pollution (kg CO2e)</th>
+                            <th style="padding: 8px; text-align: right;">Sound Pollution (kg CO2e)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="doc.get_source_summary()" t-as="row">
+                            <tr style="border-bottom: 1px solid #dee2e6;">
+                                <td style="padding: 8px; text-align: left; font-weight: bold;"><span t-esc="row['source']"/></td>
+                                <td style="padding: 8px; text-align: right;"><span t-esc="'%.2f' % row['air']"/></td>
+                                <td style="padding: 8px; text-align: right;"><span t-esc="'%.2f' % row['water']"/></td>
+                                <td style="padding: 8px; text-align: right;"><span t-esc="'%.2f' % row['sound']"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- Company-Wise Pollution & YTD Cap Breakdown -->
+                <h4 class="mb16" style="border-bottom: 2px solid #1b5e20; padding-bottom: 5px; margin-top: 30px;">Active Company-Wise Pollution &amp; YTD Cap</h4>
+                <table class="table table-sm table-striped mt16" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: #e8f5e9;">
+                            <th style="padding: 8px; text-align: left;">Company</th>
+                            <th style="padding: 8px; text-align: right;">Air Pollution</th>
+                            <th style="padding: 8px; text-align: right;">Water Pollution</th>
+                            <th style="padding: 8px; text-align: right;">Sound Pollution</th>
+                            <th style="padding: 8px; text-align: right;">Carbon Cap (t CO2e)</th>
+                            <th style="padding: 8px; text-align: right;">YTD Used (t CO2e)</th>
+                            <th style="padding: 8px; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="doc.get_company_wise_pollution()" t-as="row">
+                            <tr style="border-bottom: 1px solid #dee2e6;">
+                                <td style="padding: 8px; text-align: left; font-weight: bold;"><span t-esc="row['company_name']"/></td>
+                                <td style="padding: 8px; text-align: right;"><span t-esc="'%.2f' % row['air']"/></td>
+                                <td style="padding: 8px; text-align: right;"><span t-esc="'%.2f' % row['water']"/></td>
+                                <td style="padding: 8px; text-align: right;"><span t-esc="'%.2f' % row['sound']"/></td>
+                                <td style="padding: 8px; text-align: right;"><span t-esc="'%.3f' % row['cap']"/></td>
+                                <td style="padding: 8px; text-align: right;"><span t-esc="'%.3f' % row['used']"/></td>
+                                <td style="padding: 8px; text-align: center;">
+                                    <span t-if="row['status'] == 'Exceeded'" class="badge bg-danger text-white px-2 py-1" style="border-radius: 4px; font-size: 0.8rem; background-color: #dc3545 !important;">Exceeded</span>
+                                    <span t-if="row['status'] == 'Under Cap'" class="badge bg-success text-white px-2 py-1" style="border-radius: 4px; font-size: 0.8rem; background-color: #198754 !important;">Under Cap</span>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- Detailed Table -->
+                <t t-if="doc.print_activities">
+                    <h4 class="mb16" style="border-bottom: 2px solid #2e7d32; padding-bottom: 5px; margin-top: 20px;">Activity Details</h4>
+                    <table class="table table-sm table-striped mt16" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <thead>
+                            <tr style="background-color: #e8f5e9;">
+                                <th style="padding: 5px; text-align: left;">Activity</th>
+                                <th style="padding: 5px; text-align: left;">Date</th>
+                                <th style="padding: 5px; text-align: left;">Source</th>
+                                <th style="padding: 5px; text-align: left;">Scope</th>
+                                <th style="padding: 5px; text-align: left;">Type</th>
+                                <th style="padding: 5px; text-align: right;">Qty</th>
+                                <th style="padding: 5px; text-align: left;">Unit</th>
+                                <th style="padding: 5px; text-align: right;">Factor</th>
+                                <th style="padding: 5px; text-align: right;">Emissions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.get_activities_to_print()" t-as="line">
+                                <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td style="padding: 5px; text-align: left;"><span t-field="line.name"/></td>
+                                    <td style="padding: 5px; text-align: left;"><span t-field="line.date" t-options='{"widget": "date"}'/></td>
+                                    <td style="padding: 5px; text-align: left;"><span t-field="line.source_id.name"/></td>
+                                    <td style="padding: 5px; text-align: left;"><span t-field="line.scope_id.name"/></td>
+                                    <td style="padding: 5px; text-align: left;"><span t-field="line.factor_id.type"/></td>
+                                    <td style="padding: 5px; text-align: right;"><span t-esc="'%.2f' % line.quantity"/></td>
+                                    <td style="padding: 5px; text-align: left;"><span t-field="line.uom_id.name"/></td>
+                                    <td style="padding: 5px; text-align: right;"><span t-esc="'%.4f' % line.factor_value"/></td>
+                                    <td style="padding: 5px; text-align: right;"><span t-esc="'%.2f' % line.emission_total"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+
+                <!-- Notes Section -->
+                <t t-if="doc.print_note and doc.note">
+                    <div class="mt32 p-3 bg-light border rounded" style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+                        <strong>Notes:</strong>
+                        <p class="text-muted mt8" style="margin-top: 8px; color: #6c757d;" t-field="doc.note"/>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_carbon_calc_green">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="cyllo_green_metrics.report_carbon_calc_document_green"/>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_carbon_calc_report" model="ir.actions.report">
+        <field name="name">Carbon Calculation</field>
+        <field name="model">carbon.calc</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_green_metrics.report_carbon_calc_green</field>
+        <field name="report_file">cyllo_green_metrics.report_carbon_calc_green</field>
+        <field name="print_report_name">'Carbon - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_carbon_calc"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

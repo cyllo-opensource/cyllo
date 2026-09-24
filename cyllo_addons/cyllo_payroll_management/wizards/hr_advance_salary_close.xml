@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Close Advance Salary Wizard View -->
+    <record id="view_hr_advance_salary_close_wizard_form" model="ir.ui.view">
+        <field name="name">hr.advance.salary.close.wizard.form</field>
+        <field name="model">hr.advance.salary.close.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirm Close">
+                <group>
+
+                    <!-- Hidden reference -->
+                    <field name="advance_id" invisible="1"/>
+
+                    <!-- Remaining amount -->
+                    <field name="advance_remaining_amount" readonly="1"/>
+
+                    <!-- Close type -->
+                    <field name="close_type" widget="radio"/>
+
+                    <!-- Partial close fields -->
+                    <field name="closing_amount"
+                           invisible="close_type != 'partial'"
+                           required="close_type == 'partial'"/>
+
+                    <field name="remaining_after_closing"
+                           invisible="close_type != 'partial'"
+                           readonly="1"/>
+
+                    <field name="balance_action"
+                           invisible="remaining_after_closing == 0 or close_type != 'partial'"
+                           required="remaining_after_closing > 0"/>
+                    <field name="deduction_amount"
+                           invisible="balance_action != 'schedule' or is_percentage"/>
+                    <field name="is_percentage" invisible="1"/>
+                    <field name="deduction_percentage"
+                           invisible="balance_action != 'schedule' or not is_percentage"/>
+
+                    <!-- Payment account -->
+                    <field name="account_id"
+                           string="Payment Account"
+                           required="closing_amount > 0 or close_type == 'full'"
+                           invisible="closing_amount == 0 and close_type == 'partial'"/>
+
+                    <!-- Loss account (write-off) -->
+                    <field name="loss_account_id"
+                           invisible="balance_action != 'write_off'"
+                           required="balance_action == 'write_off'"/>
+
+                </group>
+                <notebook>
+                    <page string="Reason">
+                        <field name="reason"/>
+                    </page>
+                </notebook>
+
+                <footer>
+                    <button name="action_close"
+                            string="Confirm"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_hr_advance_salary_close_wizard"
+            model="ir.actions.act_window">
+        <field name="name">Confirm Close</field>
+        <field name="res_model">hr.advance.salary.close.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="SheetFilterDomain">
+        <Dialog size="'md'" title="'Sheet Filters'">
+            <div t-ref="root" class="condition-container-dialog">
+                <div>
+                    <input type="text"
+                           t-att-class="warnClass"
+                           class="o-autocomplete--input o_input filter_name_input"
+                           autocomplete="off"
+                           t-model="state.name"
+                           placeholder="Filter Name"/>
+                </div>
+                <t t-if="!state.domainNoEdit">
+                    <div>
+                        <select t-if="resModels.length"
+                                class="form-select w-auto"
+                                t-on-change="onModelSelect">
+                            <option value="" disabled="1" selected="1">+ Choose Model</option>
+                            <option t-foreach="resModels"
+                                    t-as="model"
+                                    t-key="model.model"
+                                    t-att-value="model_index">
+                                <t t-out="model.name"/>
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="domain-warning-message"
+                             t-if="state.domainWarn"><i
+                                class="ri-error-warning-line me-1"/>Please
+                            Provide a valid domain or remove the empty domain
+                        </div>
+                    </div>
+                    <div class="cy-condition-container domains-selected-filter">
+                        <t t-foreach="state.domains" t-as="resModel"
+                           t-key="resModel_index">
+                            <div class="cy-sheet-domain-row">
+                                <div class="w-100">
+                                    <SheetDomainSelector
+                                            t-props="getDomainSelectorProps(resModel)"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div>
+                        <div class="domain-warning-message"><i
+                                class="ri-error-warning-line me-1"/>This Filter
+                            is not editable at the moment, but it supports
+                            toggling on and off.
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <t t-set-slot="footer">
+                <div>
+                    <button t-if="!state.domainNoEdit" class="btn btn-primary"
+                            type="button" t-on-click="handleSaveFilter">
+                        Save
+                    </button>
+                    <button class="ms-2 btn btn-secondary" type="button"
+                            t-on-click="() => this.props.close()">
+                        Close
+                    </button>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+</templates>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Buy Credit Action -->
+    <record id="action_buy_credit" model="ir.actions.act_window">
+        <field name="name">Buy Credit</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('move_type', '=', 'in_invoice'), ('is_credit_transfer', '=', True)]</field>
+        <field name="context">{'default_move_type': 'in_invoice', 'default_is_credit_transfer': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Buy environmental credits.
+            </p>
+        </field>
+    </record>
+
+    <!-- Sell Credit Action -->
+    <record id="action_sell_credit" model="ir.actions.act_window">
+        <field name="name">Sell Credit</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('move_type', '=', 'out_invoice'), ('is_credit_transfer', '=', True)]</field>
+        <field name="context">{'default_move_type': 'out_invoice', 'default_is_credit_transfer': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Sell environmental credits.
+            </p>
+        </field>
+    </record>
+
+    <!-- Inherit Account Move Form -->
+    <record id="view_move_form_credit_inherit" model="ir.ui.view">
+        <field name="name">account.move.form.credit.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_reference']" position="after">
+                <field name="is_credit_transfer" invisible="1"/>
+                <field name="credit_product_id" invisible="1"/>
+            </xpath>
+            <!-- Restrict to products with is_credit_product enabled -->
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='product_id']" position="attributes">
+                <attribute name="domain">parent.is_credit_transfer and [('is_credit_product', '=', True)] or []</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

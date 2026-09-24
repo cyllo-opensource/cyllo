@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="product_template_smart_desk" model="product.template">
+            <field name="name">Smart Desk v1</field>
+            <field name="type">product</field>
+        </record>
+
+        <record id="product_template_desk_leg" model="product.template">
+            <field name="name">Smart Desk Leg</field>
+            <field name="type">product</field>
+        </record>
+
+
+        <record id="mrp_bom_smart_desk" model="mrp.bom">
+            <field name="product_tmpl_id" ref="product_template_desk_leg"/>
+            <field name="product_qty">1.0</field>
+            <field name="type">normal</field>
+            <field name="bom_line_ids" eval="[(0, 0, {
+                'product_id': ref('product.product_product_2'),
+                'product_qty': 4.0
+            })]"/>
+        </record>
+
+
+        <record id="plm_eco_product_demo" model="plm.eco">
+            <field name="type_id" ref="cyllo_plm.eco_type_product"/>
+            <field name="stage_id" ref="cyllo_plm.eco_stage_new"/>
+            <field name="product_id" ref="product_template_smart_desk"/>
+            <field name="description">
+                Upgrading the desk surface material for better durability.
+            </field>
+            <field name="user_id" ref="base.user_admin"/>
+        </record>
+
+
+        <record id="plm_eco_bom_demo" model="plm.eco">
+            <field name="type_id" ref="cyllo_plm.eco_type_bom"/>
+            <field name="stage_id" ref="cyllo_plm.eco_stage_new"/>
+            <field name="bom_id" ref="mrp_bom_smart_desk"/>
+            <field name="description">
+                Replace standard legs with adjustable height mechanism.
+            </field>
+            <field name="user_id" ref="base.user_admin"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="WorkflowCard" owl="1">
+        <div t-on-click="openView"
+             t-att-class="'auto-card' + (!isActive ? ' auto-card-inactive' : '')"
+             style="cursor: pointer; position: relative;">
+            <div class="auto-card-inner">
+                <div class="auto-card-more" t-on-click.stop="">
+                    <button class="auto-card-more-button"
+                            t-att-class="state.menuOpen ? 'auto-card-more-button auto-card-more-button-hidden' : 'auto-card-more-button'"
+                            t-on-click.prevent.stop="toggleMenu"
+                            title="More actions"
+                            aria-label="More actions">
+                        <i class="ri-more-2-fill"/>
+                    </button>
+                    <t t-if="state.menuOpen">
+                        <div class="auto-card-more-menu">
+                            <button class="auto-card-more-item"
+                                    t-on-click.prevent.stop="onClickRename">
+                                <i class="ri-edit-line"/>
+                                <span>Rename</span>
+                            </button>
+                            <button class="auto-card-more-item auto-card-more-item-danger"
+                                    t-on-click.prevent.stop="onClickDelete">
+                                <i class="ri-delete-bin-line"/>
+                                <span>Delete</span>
+                            </button>
+                            <button class="auto-card-more-item"
+                                    t-on-click.prevent.stop="toggleActive">
+                                <i t-att-class="isActive ? 'ri-pause-circle-line' : 'ri-play-circle-line'"/>
+                                <span>
+                                    <t t-if="isActive">Deactivate</t>
+                                    <t t-else="">Activate</t>
+                                </span>
+                            </button>
+                        </div>
+                    </t>
+                </div>
+               <t t-if="WorkflowCard.is_record_saved">
+                    <div class="auto-card-contents">
+                        <div class="kanban-flow-container-vertical">
+                            <div style="position: relative;">
+                                <!-- Box 1 -->
+                                <div class="d-flex" style="">
+                                    <div class="kanban-flow-box0">
+                                        <t t-esc="WorkflowCard.model_id[1]"/> <!-- Dynamic text for Box 2 -->
+                                    </div>
+
+                                </div>
+
+                                <!-- Box 2 -->
+                                <div class="d-flex" style="">
+                                    <div class="kanban-flow-box1">
+                                        <t t-if="WorkflowCard &amp;&amp; WorkflowCard.triggerNames &amp;&amp; WorkflowCard.triggerNames.length">
+                                            <t t-esc="WorkflowCard.triggerNames.join(', ')"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="'Trigger Block'"/>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <!-- Box 3 -->
+                                <div class="kanban-flow-box2" style="">
+                                    <t t-esc="'Builtin Blocks'"/> <!-- Dynamic text for Box 3 -->
+                                </div>
+                                <div class="work-auto-left-card"> <!-- Line connecting Box 1 and Box 2 -->
+                                    <img src="cyllo_workflow_automation/static/src/img/cardArrow/Arrow 10-10 sahid3.svg"
+                                         style="height: 63px;width:70px"/>
+                                </div>
+                                <div class="work-auto-right-card"> <!-- Line connecting Box 2 and Box 3 -->
+
+                                    <img src="cyllo_workflow_automation/static/src/img/cardArrow/Arrow 10-10 sahid3.svg"
+                                         style="height: 63px;width:70px"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+               </t>
+                <t t-else="">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <div class="auto-card-image">
+                            <img t-att-src="Image" alt="Card image"/>
+                        </div>
+                    </div>
+                </t>
+                <div class="auto-card-content">
+                    <t t-if="isReusable">
+                        <div class="auto-card-reusable-badge"
+                             t-att-title="'Generic Reusable: works with any model'">
+                            <span class="reusable-pill reusable-pill-generic">
+                                <i class="ri-global-line"/>
+                                Generic
+                            </span>
+                        </div>
+                    </t>
+                    <h3 class="auto-card-title" t-out="WorkflowCard.name"/>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="cy_portal_record_sidebar" inherit_id="portal.portal_record_sidebar" name="My Portal Record Sidebar">
+        <xpath expr="//div[hasclass('o_portal_sidebar_content')]" position="replace">
+            <div class="o_portal_sidebar_content d-lg-inline-block mb-4 mb-lg-0 p-3 p-lg-0" id="sidebar_content">
+                <div t-if="title" class="position-relative d-flex align-items-center justify-content-md-center justify-content-lg-between flex-wrap gap-2">
+                    <t t-out="title"/>
+                </div>
+                <t t-if="entries" t-out="entries"/>
+                <div class="d-none d-lg-block mt-5 small text-center text-muted">
+                    Powered by
+                    <a target="_blank" href="https://www.cyllo.com/" title="cyllo">
+                        <img src="/cyllo_base/static/src/img/cyllo-logo.svg" alt="Cyllo Logo" height="15"/>
+                    </a>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <!-- Replace the existing portal wrapper -->
+    <template id="custom_portal_layout" inherit_id="portal.portal_layout">
+        <xpath expr="//div[hasclass('o_portal_wrap')]" position="replace">
+            <div class="container mb64">
+                <t t-if="my_details">
+                    <div class="row justify-content-between mt-4">
+                        <div t-attf-class="col-12 col-md">
+                            <t t-out="0"/>
+                        </div>
+                        <div id="o_my_sidebar"
+                             class="pt-3 pt-lg-0 col-12 col-md col-lg-4 col-xl-3 d-none o_my_sidebar">
+                            <div class="o_my_contact" t-if="sales_user">
+                                <t t-call="portal.portal_contact"/>
+                            </div>
+                            <div class="o_portal_my_details">
+                                <h4>Details
+                                    <a role="button" href="/my/account"
+                                       class="btn btn-sm btn-link"><i
+                                            class="fa fa-pencil"/>Edit
+                                    </a>
+                                </h4>
+                                <hr class="mt-1 mb-0"/>
+                                <div t-field="user_id.partner_id"
+                                     t-options='{"widget": "contact", "fields": ["email", "phone", "address", "name"]}'/>
+                            </div>
+                            <div class="o_portal_my_security mt-3">
+                                <h4>Account Security</h4>
+                                <hr class="mt-1 mb-1"/>
+                                <a href="/my/security"><i
+                                        class="fa fa-pencil mx-1"/>Edit Security
+                                    Settings
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <t t-out="0"/>
+                </t>
+            </div>
+        </xpath>
+    </template>
+    <!-- Template for login and security section -->
+    <template id="portal_details_template">
+        <t t-call="portal.frontend_layout">
+            <div id="wrap">
+                <div class="container">
+                    <div class="content">
+                        <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                        <t t-call="portal.portal_searchbar"/>
+                        <div class="card-div">
+                            <h3>Login and Security</h3>
+                        </div>
+                        <div t-if="change"
+                             class="alert alert-success text-center o_form_header alert-dismissible">
+                            <span>You successfully updated your account
+                                details!
+                            </span>
+                        </div>
+                        <div class="card card-div">
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">Name:</span>
+                                        <span t-esc="user.name"/>
+                                    </div>
+                                    <a href="/login/security/edit/name"
+                                       class="btn button-edit">Edit
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">Email:</span>
+                                        <span t-esc="user.email"/>
+                                    </div>
+                                    <a href="/login/security/edit/email"
+                                       class="btn button-edit">Edit
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">Mobile
+                                            Number:
+                                        </span>
+                                        <span t-esc="user.phone"/>
+                                    </div>
+                                    <a href="/login/security/edit/phone"
+                                       class="btn button-edit">Edit
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">Change
+                                            Password:
+                                        </span>
+                                        <span>xxxxxxxxxx</span>
+                                    </div>
+                                    <a href="/my/security?show_section=password"
+                                       class="btn button-edit">Edit
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">2-step
+                                            verification:
+                                        </span>
+                                        <span>Add a layer of security. Require a
+                                            verification code in addition to
+                                            your password.
+                                        </span>
+                                    </div>
+                                    <a href="/my/security?show_section=totp"
+                                       class="btn button-edit">Turn On
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">Revoke all
+                                            Sessions:
+                                        </span>
+                                        <span>Log out of all sessions</span>
+                                    </div>
+                                    <a href="/my/security?show_section=revoke"
+                                       class="btn button-edit">Turn On
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="/my/home" class="btn button-done">Done</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="custom_portal_my_security_condition"
+              inherit_id="portal.portal_my_security">
+        <!-- Only show "Change Password" section if flag is set -->
+        <xpath expr="//section[@name='portal_change_password']"
+               position="attributes">
+            <attribute name="t-if">show_section == 'password'</attribute>
+        </xpath>
+        <!-- Only show "Revoke Sessions" section if flag is set -->
+        <xpath expr="//section[@name='portal_revoke_all_devices_popup']"
+               position="attributes">
+            <attribute name="t-if">show_section == 'revoke'</attribute>
+        </xpath>
+        <xpath expr="//section[h4[contains(., 'Two-factor authentication')]]"
+               position="attributes">
+            <attribute name="t-if">show_section == 'totp'</attribute>
+        </xpath>
+        <xpath expr="//button[@id='auth_totp_portal_disable']"
+               position="attributes">
+            <attribute name="class">btn button-edit</attribute>
+        </xpath>
+    </template>
+
+    <!-- Template for user details editing section -->
+    <template id="portal_details_edit_template">
+        <t t-call="portal.frontend_layout">
+            <div>
+                <form action="/login/security/save">
+                    <t t-if="user_name">
+                        <div>
+                            <div class="card-div">
+                                <t t-set="breadcrumbs_searchbar"
+                                   t-value="True"/>
+                                <t t-call="portal.portal_searchbar"/>
+                            </div>
+                            <div class="card-div">
+                                <h3>Change User Name</h3>
+                            </div>
+                            <div class="card-div">
+                                <div class="card content">
+                                    <div class="content-div">
+                                        <div>
+                                            <span>
+                                                If you want to change the name
+                                                associated with your account,
+                                                you may do so
+                                                below. Be sure to click the Done
+                                                button when you are done.
+                                            </span>
+                                        </div>
+                                        <label class="col-form-label label-optional span-style"
+                                               for="name">New Name
+                                        </label>
+                                        <input type="text" name="name"
+                                               t-attf-class="form-control s_website_form_input"
+                                               required="True"/>
+                                        <div>
+                                            <button type="submit"
+                                                    class="button-done">Done
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="user_mail">
+                        <div>
+                            <div class="card-div">
+                                <t t-set="breadcrumbs_searchbar"
+                                   t-value="True"/>
+                                <t t-call="portal.portal_searchbar"/>
+                            </div>
+                            <div class="card-div">
+                                <h3>Change User Email</h3>
+                            </div>
+                            <div class="card-div">
+                                <div class="card content">
+                                    <div class="content-div">
+                                        <div>
+                                            <span>
+                                                If you want to change the email
+                                                associated with your account,
+                                                you may do so below. Be sure to
+                                                click the Done button when you
+                                                are done.
+                                            </span>
+                                        </div>
+                                        <label class="col-form-label label-optional span-style"
+                                               for="name">New Email
+                                        </label>
+                                        <input type="email" name="email"
+                                               t-attf-class="form-control s_website_form_input"
+                                               required="True"/>
+                                        <div>
+                                            <button type="submit"
+                                                    class="button-done">Done
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t>
+                        <div>
+                            <div class="card-div">
+                                <t t-set="breadcrumbs_searchbar"
+                                   t-value="True"/>
+                                <t t-call="portal.portal_searchbar"/>
+                            </div>
+                            <div class="card-div">
+                                <h3>Change User Phone Number</h3>
+                            </div>
+                            <div class="card-div">
+                                <div class="card content">
+                                    <div class="content-div">
+                                        <div>
+                                            <span>
+                                                If you want to change the phone
+                                                number associated with your
+                                                account,
+                                                you may do so below. Be sure to
+                                                click the Done button when you
+                                                are done.
+                                            </span>
+                                        </div>
+                                        <label class="col-form-label label-optional span-style"
+                                               for="name">New Phone Number
+                                        </label>
+                                        <input type="phone" name="phone"
+                                               t-attf-class="form-control s_website_form_input"
+                                               required="True"/>
+                                        <div>
+                                            <button type="submit"
+                                                    class="button-done">Done
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </form>
+            </div>
+        </t>
+    </template>
+    <!-- no record template-->
+    <template id="no_record_portal">
+        <div class="empty_record">
+            <center>
+                <img src="/cyllo_portal/static/src/img/no_data_image.png"
+                     class="img-fluid null_rec_img2"/>
+                <h3>
+                    <strong>Currently No Records!</strong>
+                </h3>
+                <span class="all_msg" t-if="description" t-esc="description"/>
+                <br/>
+                <a t-att-href="url" t-if="url">Create New</a>
+            </center>
+        </div>
+    </template>
+    <!-- changing the controllers for the address and security menus-->
+    <template id="my_portal_security" name="Security"
+              inherit_id="portal.portal_my_home" priority="100">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon"
+                   t-value="'/cyllo_portal/static/src/img/portal-addresses.svg'"/>
+                <t t-set="title">Addresses</t>
+                <t t-set="text">Add, remove or modify your addresses</t>
+                <t t-set="url" t-value="'/your_address'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </xpath>
+        <xpath expr="//div[@id='portal_common_category']/t[2]/t[4]"
+               position="replace">
+            <t t-set="url" t-value="'/login/security'"/>
+        </xpath>
+    </template>
+
+    <!--    Inheriting portal_searchbar for changing the default breadcrumb-->
+    <template id="cyllo_portal_searchbar" name="Portal Search Bar"
+              inherit_id="portal.portal_searchbar" primary="True">
+        <form t-if="searchbar_inputs" position="after">
+            <a t-att-href="create_url" class="btn btn-primary"
+               t-if="create_record">
+                <t t-esc="create_title">Create</t>
+            </a>
+            <t t-set="_activeClasses" t-translation="off">active</t>
+            <div t-attf-class="oe_apply_layout btn-group d-none d-lg-flex p-0 small"
+                 t-att-data-active-classes="_activeClasses" t-if="switchView">
+                <input type="radio" class="btn-check"
+                       name="support_ticket_layout"
+                       id="support_ticket_apply_grid"
+                       t-att-checked="'checked' if layout_mode != 'list' else None"
+                       value="grid"/>
+                <label t-attf-class="btn btn-light #{_activeClasses if layout_mode != 'list' else None} support_ticket_apply_grid"
+                       title="Grid" for="support_ticket_apply_grid">
+                    <i class="fa fa-th-large"/>
+                </label>
+                <input type="radio" class="btn-check"
+                       name="support_ticket_layout"
+                       id="support_ticket_apply_list"
+                       t-att-checked="'checked' if layout_mode == 'list' else None"
+                       value="list"/>
+                <label t-attf-class="btn btn-light #{_activeClasses if layout_mode == 'list' else None} support_ticket_apply_list"
+                       title="List" for="support_ticket_apply_list">
+                    <i class="oi oi-view-list"/>
+                </label>
+            </div>
+        </form>
+    </template>
+
+    <template id="cyllo_pager" name="Pager"
+              inherit_id="portal.pager" primary="True">
+        <a t-att-href="page['url']" position="attributes">
+            <attribute name="t-attf-class">
+                page-link #{extraLinkClass}
+                #{'btn-primary' if page['num'] == pager['page']['num'] else ''}
+            </attribute>
+        </a>
+    </template>
+</odoo>

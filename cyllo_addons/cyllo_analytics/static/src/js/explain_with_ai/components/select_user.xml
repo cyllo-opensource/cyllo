@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="SelectUser" owl="1">
+        <div class="cy-onboard_modal-container cy-kpi_modal-container"
+             style="z-index:1055;">
+                <div class="modal-dialog  cy-dashboard_modal-box w-25">
+                    <div class="modal-content cy-modal_content">
+                        <div class="modal-header  cy-social_commentHead d-flex  pt-4">
+                            <h5 class="cy-dashboard_modal-heading">Select User</h5>
+                            <span id="sheet_filter_close"
+                                  class="cy-icons cy-social_cmnt-closebtn"
+                                  t-on-click="props.close">
+                                <i class="ri-close-line"/>
+                            </span>
+                        </div>
+                        <div class="modal-body p-0 cy-ai-select-user">
+                            <form class="d-flex"
+                                  style="justify-content: space-between;
+                                  align-items: center;
+                                  margin: 16px 10px;">
+                                <div class="cy_analytic_d input_tags cy_filter_input_tags input_tags_row w-100 cy-sheet_preview-input"
+                                     style="margin: 5px">
+                                    <div class="d-flex tags">
+                                        <div class="d-flex"
+                                             t-foreach="state.currentValue"
+                                             t-as="value"
+                                             t-key="value_index">
+                                        <div class="badge rounded-pill o_tag d-flex">
+                                            <t t-out="value[1]"/>
+                                            <span style="cursor: pointer; margin-left:5px;"
+                                                  t-on-click="() => this.deleteRecord(value)">x</span>
+                                        </div>
+                                    </div>
+                                    </div>
+                                    <Many2XAutocomplete
+                                            resModel="'res.users'"
+                                            getDomain.bind="getDomain"
+                                            fieldString="'User'"
+                                            activeActions="{}"
+                                            update.bind="onSelect"
+                                            placeholder="'Users'"
+                                            isToMany="true"
+                                            autoSelect="true"
+                                    />
+                                </div>
+                                <button class="btn btn-secondary ri-share-box-line px-2"
+                                        t-on-click.prevent="sendChart"
+                                        style="width: 35px;background-color: #D9D9D9 !important; border-radius: 2px !important;"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </t>
+</templates>

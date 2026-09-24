@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Define a view to add twilio credential's in the settings form -->
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="70"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Insert a new section for twilio -->
+            <xpath expr="//form" position="inside">
+                <app data-string="Twilio Voice Call" string="Twilio Voice Call"
+                     name="cyllo_twilio_voice_call"
+                     logo="/cyllo_twilio_voice_call/static/description/twillio.png"
+                     groups="cyllo_twilio_voice_call.group_cyllo_twilio_voice_call_admin">
+                    <div id="twilio_credentials">
+                        <block title="Twilio Credential's"
+                               name="twilio_setting_credentials">
+                            <setting id="twilio_setting_account_sid"
+                                     title="Account SID"
+                                     help="Enter your Twilio Account SID here. You can find this in your Twilio Console under 'Account Info.'">
+                                <field name="account_sid" password="True"/>
+                            </setting>
+                            <setting id="twilio_setting_api_key"
+                                     title="API Key"
+                                     help="Enter your Twilio API Key here. You can find this key in your Twilio account under 'API Keys and Tokens.'">
+                                <field name="api_key" password="True"/>
+                            </setting>
+                            <setting id="twilio_setting_api_secret"
+                                     title="API Secret"
+                                     help="Enter your Twilio API Secret here. You can find or create this secret in your Twilio account under 'API Keys and Tokens.'">
+                                <field name="api_secret" password="True"/>
+                            </setting>
+                            <setting
+                                    id="twilio_setting_outgoing_application_id"
+                                    title="Outgoing Application SID"
+                                    help="Enter the SID for your Twilio Outgoing Application. This can be found or created in your Twilio Console under 'Voice > TwiML Apps.'">
+                                <field name="outgoing_application_sid"
+                                       password="True"/>
+                            </setting>
+                            <setting id="twilio_setting_auth_token"
+                                     title="Auth Token"
+                                     help="Enter your Twilio Auth Token here. You can find this token in your Twilio Console under 'Account Info.'">
+                                <field name="auth_token" password="True"/>
+                            </setting>
+                            <setting id="twilio_setting_phone_number"
+                                     title="Twilio Phone Number"
+                                     help="Enter your Twilio phone number here,You can find it in your Twilio Console under 'Phone Numbers.'">
+                                <field name="from_number"/>
+                            </setting>
+                            <div class="mt8">
+                                <button name="test_twilio_connection"
+                                        icon="oi-arrow-right" type="object"
+                                        string="Test Connection"
+                                        class="btn-link"/>
+                            </div>
+                        </block>
+                    </div>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_view_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'cyllo_twilio_voice_call', 'bin_size':
+            False}
+        </field>
+    </record>
+    <menuitem id="menu_settings"
+              name="Settings"
+              parent="cyllo_twilio_voice_call.menu_configuration_categ"
+              sequence="0"
+              action="action_view_settings"
+              groups="cyllo_twilio_voice_call.group_cyllo_twilio_voice_call_admin"/>
+</odoo>

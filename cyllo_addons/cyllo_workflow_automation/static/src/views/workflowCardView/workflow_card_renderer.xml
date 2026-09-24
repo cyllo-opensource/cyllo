@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_workflow_automation.WorkflowCardRenderer">
+        <div tabindex="-1"
+             t-attf-class="{{ props.list.isGrouped ? 'o_kanban_grouped align-content-stretch' : 'o_autocard_renderer o_renderer row px-3 cy-template_container' }}"
+             t-ref="root">
+            <div class="d-flex">
+                <t t-foreach="getWorkRecords()" t-as="record" t-key="record_index">
+                    <t t-if="record.group">
+                        <t t-set="group" t-value="record.group"/>
+                        <t t-set="isGroupProcessing" t-value="'false'"/>
+                        <div class="o_kanban_group"
+                             t-attf-class="{{ '' }}"
+                             t-att-data-id="group.id"
+                             style="width: min-content;">
+                            <div class="d-flex align-items-center justify-content-center pt-1 fs-4 lh-1 text-nowrap opacity-50 opacity-100-hover flex-grow-1"
+                                 t-attf-class="{{!groupRecords(record.group).length?'auto-card-column-title':''}}">
+                                <t t-esc="groupName"/>
+                                <span class="badge text-bg-500 rounded-pill lh-1 ms-2" t-esc="group.count"/>
+                            </div>
+                            <t t-set="records" t-value="groupRecords(record.group)"/>
+                            <t t-foreach="groupRecords(record.group)" t-as="groupRecord" t-key="groupRecord.id">
+                                <div class="cy-auto-group-card mt-3"><WorkflowCard value="groupRecord" model="props.resModel" onDelete.bind="onDelete"/></div>
+                            </t>
+                        </div>
+                    </t>
+                </t>
+            </div>
+            <div class="auto_card_container flex-wrap gap-3">
+                <t t-foreach="getWorkRecords()" t-as="record" t-key="record_index">
+                    <t t-if="!record.group">
+                        <WorkflowCard value="record" model="props.resModel" onDelete.bind="onDelete"/>
+                    </t>
+                </t>
+            </div>
+            <div class="cy-w-empty-record o_view_nocontent" t-if="!getWorkRecords().length">
+                <div class="o_nocontent_help">
+                    <p class="o_view_nocontent_smiling_face">
+                        Record is empty
+                    </p>
+                    <p>
+                        Click on <a data-hotkey="c" t-on-click="e => this.onClickCreate(e)" data-bounce-button=""
+                       class="cy-w-create-record">Create New Rule</a> To create Record ...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

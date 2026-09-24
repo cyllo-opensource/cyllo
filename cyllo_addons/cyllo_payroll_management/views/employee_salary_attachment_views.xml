@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--  Employee Salary Attachment form view  -->
+    <record id="view_employee_salary_attachment_form" model="ir.ui.view">
+        <field name="name">view.employee.salary.attachment.form</field>
+        <field name="model">employee.salary.attachment</field>
+        <field name="arch" type="xml">
+            <form string="Salary Attachment">
+                <header>
+                    <button name="action_done" type="object" string="MARK AS COMPLETED"
+                            invisible="state not in ('running', 'cancelled')"/>
+                    <button name="action_open" type="object" string="RUNNING"
+                            invisible="state not in ('completed', 'cancelled')"/>
+                    <button name="action_cancel" type="object" string="CANCEL"
+                            invisible="state != 'running'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="running,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="employee_id"/>
+                        <h1>
+                            <field name="employee_id" readonly="state != 'running'"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="employee_id" readonly="state != 'running'" />
+                            <field name='description' readonly="state != 'running'"/>
+                            <field name='employee_payslip_other_input_id' readonly="state != 'running'" widget="selection"/>
+                            <field name='start_date' readonly="state != 'running'"/>
+                            <field name="attachment_name" invisible="1"/>
+                            <field name='end_date' invisible="not end_date"/>
+                            <field name='attachment' filename="attachment_name" readonly="state != 'running'"/>
+                        </group>
+                        <group>
+                            <field name='month_amount' readonly="state != 'running'"/>
+                            <field name="is_total_amount" invisible="1"/>
+                            <field name='total_amount' readonly="state != 'running'" invisible="is_total_amount == False"/>
+                            <field name='company_id' invisible="1"/>
+                            <field name="paid_amount" invisible="paid_amount == 0"/>
+                            <field name="active_amount" invisible="1"/>
+                            <field name="balance" invisible="1"/>
+                            <field name='currency_id' invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--  Employee Salary Attachment tree view  -->
+    <record id="view_employee_salary_attachment_tree" model="ir.ui.view">
+        <field name="name">view.employee.salary.attachment.tree</field>
+        <field name="model">employee.salary.attachment</field>
+        <field name="arch" type="xml">
+            <tree string="Salary Attachment">
+                <field name="employee_id"/>
+                <field name="description" optional="True"/>
+                <field name="employee_payslip_other_input_id"/>
+                <field name="month_amount"/>
+                <field name='start_date' optional="True"/>
+                <field name='total_amount' optional="True"/>
+                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                <field name="state"
+                       decoration-success="state == 'completed'"
+                       decoration-info="state == 'running'"
+                       decoration-danger="state == 'cancelled'"
+                       widget="badge"/>
+            </tree>
+        </field>
+    </record>
+    <!--  Salary Attachment search view  -->
+    <record id="view_employee_salary_attachment_search" model="ir.ui.view">
+        <field name="name">view.employee.salary.attachment.search</field>
+        <field name="model">employee.salary.attachment</field>
+        <field name="arch" type="xml">
+            <search string="Search Salary Attachment">
+                <field name="employee_id"/>
+                <field name="employee_payslip_other_input_id"/>
+                <filter string="Running" name="running" domain="[('state','=','running')]" help="Running Attachment"/>
+                <filter string="Completed" name="completed" domain="[('state','=','completed')]" help="Completed Attachment"/>
+                <group expand="0" string="Group By">
+                    <filter string="Employees" name="employee_id" context="{'group_by':'employee_id'}"/>
+                    <filter string="Attachment Type" name="employee_payslip_other_input_id"
+                            context="{'group_by':'employee_payslip_other_input_id'}"/>
+                    <filter string="Companies" name="company_id" groups="base.group_multi_company" context="{'group_by':'company_id'}"/>
+                    <filter string="States" name="state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Action window for Salary Attachment -->
+    <record id="action_view_salary_attachment" model="ir.actions.act_window">
+        <field name="name">Salary Attachment</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">employee.salary.attachment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Employees salary attachment</p>
+        </field>
+    </record>
+</odoo>

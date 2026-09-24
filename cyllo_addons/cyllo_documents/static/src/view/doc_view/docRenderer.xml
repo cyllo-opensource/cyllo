@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="docRenderer" t-inherit="web.KanbanRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_kanban_renderer')]" position="attributes">
+            <attribute name="class" add="cy_doc_viewer_renderer" separator=" "/>
+        </xpath>
+        <xpath expr="//t[@t-foreach='group.list.records']/KanbanRecord" position="replace">
+            <DocRecord
+                    archInfo="props.archInfo"
+                    Compiler="props.Compiler"
+                    canResequence="!isGroupProcessing and !isProcessing(record.id) and canResequenceRecords"
+                    forceGlobalClick="props.forceGlobalClick"
+                    group="group"
+                    list="props.list"
+                    deleteRecord="props.deleteRecord"
+                    openRecord="props.openRecord"
+                    readonly="props.readonly"
+                    record="record"
+                    templates="props.archInfo.templateDocs"
+                    progressBarState="props.progressBarState"
+                    selection="props.selection"
+            />
+        </xpath>
+        <xpath expr="//t[@t-else='']/KanbanRecord" position="replace">
+            <DocRecord
+                    archInfo="props.archInfo"
+                    Compiler="props.Compiler"
+                    canResequence="!isProcessing(groupOrRecord.record.id) and canResequenceRecords"
+                    forceGlobalClick="props.forceGlobalClick"
+                    list="props.list"
+                    deleteRecord="props.deleteRecord"
+                    openRecord="props.openRecord"
+                    readonly="props.readonly"
+                    record="groupOrRecord.record"
+                    templates="props.archInfo.templateDocs"
+                    selection="props.selection"
+            />
+        </xpath>
+    </t>
+</templates>

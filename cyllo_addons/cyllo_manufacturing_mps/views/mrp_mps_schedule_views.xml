@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_mps_add_product_form" model="ir.ui.view">
+        <field name="name">mps.add.product.form</field>
+        <field name="model">mrp.mps.schedule</field>
+        <field name="arch" type="xml">
+            <form string="Add Product">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="id" invisible="1"/>
+                            <field name="product_id" readonly="id"/>
+                            <field name="available_route_ids" invisible="1"/>
+                            <field name="route_id" domain="[('id', 'in', available_route_ids)]"/>
+                        </group>
+                        <group>
+                            <field name="is_manufacture_route" invisible="1"/>
+                            <field name="available_bom_ids" invisible="1"/>
+                            <field name="bom_id"
+                                   domain="[('id', 'in', available_bom_ids)]"
+                                   invisible="not is_manufacture_route"
+                                   required="is_manufacture_route"/>
+
+                            <field name="forcast_target_quantity"/>
+                            <field name="min_to_replenish_qty"/>
+                            <field name="replenishment_mode"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_hr.HrDashboard">
+        <div class="hr-dashboard-navbar hr-pj-dashboard hr-control-panel">
+            <div class="hr-dashbd-info">
+                <div class="hr-heading">
+                    <span class="hr-dashboard-header-title">HR Dashboard Overview</span>
+                </div>
+            </div>
+            <div class="hr-date-records">
+                <div class="hr-filter-btn-group">
+                    <button class="hr-filter-btn"
+                            t-att-class="state.date_filter === 'today' ? 'hr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('today')">Today</button>
+                    <button class="hr-filter-btn"
+                            t-att-class="state.date_filter === 'month' ? 'hr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('month')">Month</button>
+                    <button class="hr-filter-btn"
+                            t-att-class="state.date_filter === 'year' ? 'hr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('year')">Year</button>
+                </div>
+            </div>
+        </div>
+        <div class="hr-dashboard-graph">
+            <div class="hr-dashboard-container">
+
+                <!-- KPI Cards Section -->
+                <div class="hr-section-row hr-kpi-row">
+                    <!-- Total Employees -->
+                    <div class="hr-kpi-card" t-on-click="openEmployees">
+                        <div class="hr-kpi-v4">
+                            <div class="hr-kpi-v4-icon-wrap hr-kpi-icon-green">
+                                <i class="fa fa-users"/>
+                            </div>
+                            <div class="hr-kpi-v4-content">
+                                <div class="hr-kpi-v4-title">Total Employees</div>
+                                <div class="hr-kpi-v4-value"><t t-esc="state.total_employees.toLocaleString()"/></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Total Job Applied -->
+                    <t t-if="state.is_recruitment_installed">
+                    <div class="hr-kpi-card" t-on-click="openRecruitment">
+                        <div class="hr-kpi-v4">
+                            <div class="hr-kpi-v4-icon-wrap hr-kpi-icon-green">
+                                <i class="fa fa-check-circle-o"/>
+                            </div>
+                            <div class="hr-kpi-v4-content">
+                                <div class="hr-kpi-v4-title">Total Job Applied</div>
+                                <div class="hr-kpi-v4-value"><t t-esc="state.job_applied_count.toLocaleString()"/></div>
+                            </div>
+                        </div>
+                    </div>
+                    </t>
+                    <!-- Attendance Rate -->
+                    <div class="hr-kpi-card" t-on-click="openAttendance">
+                        <div class="hr-kpi-v4">
+                            <div class="hr-kpi-v4-icon-wrap hr-kpi-icon-red">
+                                <i class="ri-user-follow-line"/>
+                            </div>
+                            <div class="hr-kpi-v4-content">
+                                <div class="hr-kpi-v4-title">Attendance Rate</div>
+                                <div class="hr-kpi-v4-value"><t t-esc="state.attendance_rate"/>%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Upcoming Time Off -->
+                    <div class="hr-kpi-card">
+                        <div class="hr-kpi-v4">
+                            <div class="hr-kpi-v4-icon-wrap hr-kpi-icon-yellow">
+                                <i class="fa fa-calendar"/>
+                            </div>
+                            <div class="hr-kpi-v4-content">
+                                <div class="hr-kpi-v4-title">Upcoming Time Off</div>
+                                <div class="hr-kpi-v4-value"><t t-esc="state.upcoming_leaves.length"/></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="hr-section-row hr-charts-row">
+                    <!-- Employee Status Chart -->
+                    <div class="hr-chart-item hr-chart-item--lg">
+                        <div class="hr-card hr-chart-card">
+                            <div class="hr-card-header">
+                                <h5 class="hr-card-title">Employee Status</h5>
+                                <div class="hr-chart-type-group">
+                                    <button t-attf-class="hr-chart-type-btn #{state.employeeStatusChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeEmployeeStatusChartType('bar')"
+                                            title="Bar Chart">
+                                        <i class="fa fa-bar-chart"/>
+                                    </button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.employeeStatusChartType == 'pie' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeEmployeeStatusChartType('pie')"
+                                            title="Pie Chart">
+                                        <i class="fa fa-pie-chart"/>
+                                    </button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.employeeStatusChartType == 'doughnut' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeEmployeeStatusChartType('doughnut')"
+                                            title="Doughnut Chart">
+                                        <i class="fa fa-circle-o-notch"/>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="hr-card-body hr-card-body--chart">
+                                <div class="hr-chart-canvas-wrap">
+                                    <canvas id="employeeStatusChart"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Monthly Attendance Trend -->
+                    <div class="hr-chart-item hr-chart-item--xl">
+                        <div class="hr-card hr-chart-card">
+                            <div class="hr-card-header">
+                                <h5 class="hr-card-title">Monthly Attendance Trend</h5>
+                                <div class="hr-chart-type-group">
+                                    <button t-attf-class="hr-chart-type-btn #{state.attendanceTrendChartType == 'line' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeAttendanceTrendChartType('line')"
+                                            title="Line Chart">
+                                        <i class="fa fa-line-chart"/>
+                                    </button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.attendanceTrendChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeAttendanceTrendChartType('bar')"
+                                            title="Bar Chart">
+                                        <i class="fa fa-bar-chart"/>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="hr-card-body hr-card-body--chart">
+                                <div class="hr-chart-canvas-wrap hr-chart-canvas-wrap--md">
+                                    <canvas id="attendanceTrendChart"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Commission Leaderboard -->
+                    <div class="hr-chart-item hr-chart-item--sm">
+                        <div class="hr-card hr-chart-card">
+                            <div class="hr-card-header">
+                                <div class="hr-card-header-left">
+                                    <i class="fa fa-line-chart hr-card-header-icon"/>
+                                    <h5 class="hr-card-title">Commission Earned</h5>
+                                </div>
+                            </div>
+                            <div class="hr-card-body hr-card-body--table">
+                                <div class="hr-table-scroll">
+                                    <table class="hr-table">
+                                        <thead class="hr-table-head">
+                                            <tr>
+                                                <th class="hr-th" style="width:80px;">Rank</th>
+                                                <th class="hr-th">Sales Rep</th>
+                                                <th class="hr-th">Commission</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="state.leaderboard_data.length == 0">
+                                                <tr>
+                                                    <td colspan="3" class="hr-td hr-td--empty">No commission data found</td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="state.leaderboard_data" t-as="entry" t-key="entry.rank">
+                                                <tr class="hr-tr" style="cursor:pointer;" t-on-click="() => this.openCommission(entry)">
+                                                    <td class="hr-td">
+                                                        <div t-attf-class="rank-badge rank-#{entry.rank}">
+                                                            <t t-esc="entry.rank"/>
+                                                        </div>
+                                                    </td>
+                                                    <td class="hr-td hr-td--bold"><t t-esc="entry.name"/></td>
+                                                    <td class="hr-td hr-td--bold hr-td--emerald">$<t t-esc="entry.commission.toLocaleString()"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payslips + Contracts Row -->
+                <div class="hr-section-row hr-tables-row">
+                    <!-- Pending Payslips -->
+                    <div class="hr-table-item">
+                        <div class="hr-card hr-table-card">
+                            <div class="hr-card-header">
+                                <h5 class="hr-card-title">Pending Payslips</h5>
+                                <button class="hr-view-all-btn">View All</button>
+                            </div>
+                            <div class="hr-card-body hr-card-body--table">
+                                <div class="hr-table-scroll hr-table-scroll--sm">
+                                    <table class="hr-table">
+                                        <thead class="hr-table-head">
+                                            <tr>
+                                                <th class="hr-th">Employee</th>
+                                                <th class="hr-th">Department</th>
+                                                <th class="hr-th">Period</th>
+                                                <th class="hr-th hr-th--end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="state.pending_payslips.length == 0">
+                                                <tr>
+                                                    <td colspan="4" class="hr-td hr-td--empty">No pending payslips found</td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="state.pending_payslips" t-as="payslip" t-key="payslip.id">
+                                                <tr class="hr-tr">
+                                                    <td class="hr-td hr-td--bold"><t t-esc="payslip.employee_name"/></td>
+                                                    <td class="hr-td hr-td--muted"><t t-esc="payslip.department"/></td>
+                                                    <td class="hr-td hr-td--muted"><t t-esc="payslip.date_start"/> to <t t-esc="payslip.date_end"/></td>
+                                                    <td class="hr-td hr-td--end">
+                                                        <button class="hr-action-btn hr-action-btn--primary"
+                                                                t-on-click="() => this.openPayslip(payslip.id)">Review</button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Contract Endings -->
+                    <div class="hr-table-item">
+                        <div class="hr-card hr-table-card">
+                            <div class="hr-card-header">
+                                <h5 class="hr-card-title">Contract Endings Detail</h5>
+                                <button class="hr-view-all-btn">View All</button>
+                            </div>
+                            <div class="hr-card-body hr-card-body--table">
+                                <div class="hr-table-scroll hr-table-scroll--sm">
+                                    <table class="hr-table">
+                                        <thead class="hr-table-head">
+                                            <tr>
+                                                <th class="hr-th">Employee</th>
+                                                <th class="hr-th">Role</th>
+                                                <th class="hr-th">Expires</th>
+                                                <th class="hr-th hr-th--end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="state.ending_contracts.length == 0">
+                                                <tr>
+                                                    <td colspan="4" class="hr-td hr-td--empty">No contracts ending soon</td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="state.ending_contracts" t-as="contract" t-key="contract.id">
+                                                <tr class="hr-tr">
+                                                    <td class="hr-td hr-td--bold"><t t-esc="contract.employee_name"/></td>
+                                                    <td class="hr-td hr-td--muted"><t t-esc="contract.job_title"/></td>
+                                                    <td class="hr-td">
+                                                        <span class="hr-badge hr-badge--danger"><t t-esc="contract.date_end"/></span>
+                                                    </td>
+                                                    <td class="hr-td hr-td--end">
+                                                        <button class="hr-action-btn hr-action-btn--success"
+                                                                t-on-click="() => this.openContract(contract.id)">Open</button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expanded Analytics: Contract Types / Status / Recruitment -->
+                <div class="hr-section-row hr-analytics-row">
+                    <!-- Contract Types -->
+                    <div class="hr-analytics-item">
+                        <div class="hr-card hr-chart-card">
+                            <div class="hr-card-header">
+                                <div class="hr-card-header-left">
+                                    <i class="fa fa-briefcase hr-card-header-icon"/>
+                                    <h5 class="hr-card-title">Contract Types</h5>
+                                </div>
+                                <div class="hr-chart-type-group">
+                                    <button t-attf-class="hr-chart-type-btn #{state.contractTypeChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeContractTypeChartType('bar')"
+                                            t-att-style="state.contractTypeChartType === 'bar' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Bar Chart"><i class="fa fa-bar-chart"/></button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.contractTypeChartType == 'pie' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeContractTypeChartType('pie')"
+                                            t-att-style="state.contractTypeChartType === 'pie' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Pie Chart"><i class="fa fa-pie-chart"/></button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.contractTypeChartType == 'doughnut' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeContractTypeChartType('doughnut')"
+                                            t-att-style="state.contractTypeChartType === 'doughnut' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Doughnut Chart"><i class="fa fa-circle-o-notch"/></button>
+                                </div>
+                            </div>
+                            <div class="hr-card-body hr-card-body--chart">
+                                <div class="hr-chart-canvas-wrap hr-chart-canvas-wrap--analytics">
+                                    <canvas id="contractTypeChart"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Contract Status -->
+                    <div class="hr-analytics-item">
+                        <div class="hr-card hr-chart-card">
+                            <div class="hr-card-header">
+                                <div class="hr-card-header-left">
+                                    <i class="fa fa-check-circle hr-card-header-icon"/>
+                                    <h5 class="hr-card-title">Contract Status</h5>
+                                </div>
+                                <div class="hr-chart-type-group">
+                                    <button t-attf-class="hr-chart-type-btn #{state.contractStatusChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeContractStatusChartType('bar')"
+                                            t-att-style="state.contractStatusChartType === 'bar' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Bar Chart"><i class="fa fa-bar-chart"/></button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.contractStatusChartType == 'pie' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeContractStatusChartType('pie')"
+                                            t-att-style="state.contractStatusChartType === 'pie' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Pie Chart"><i class="fa fa-pie-chart"/></button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.contractStatusChartType == 'doughnut' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeContractStatusChartType('doughnut')"
+                                            t-att-style="state.contractStatusChartType === 'doughnut' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Doughnut Chart"><i class="fa fa-circle-o-notch"/></button>
+                                </div>
+                            </div>
+                            <div class="hr-card-body hr-card-body--chart">
+                                <div class="hr-chart-canvas-wrap hr-chart-canvas-wrap--analytics">
+                                    <canvas id="contractStatusChart"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Recruitment Pipeline -->
+                    <div class="hr-analytics-item">
+                        <div class="hr-card hr-chart-card">
+                            <div class="hr-card-header">
+                                <div class="hr-card-header-left">
+                                    <i class="fa fa-users hr-card-header-icon"/>
+                                    <h5 class="hr-card-title">Recruitment Pipeline</h5>
+                                </div>
+                                <div class="hr-chart-type-group">
+                                    <button t-attf-class="hr-chart-type-btn #{state.recruitmentChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeRecruitmentChartType('bar')"
+                                            t-att-style="state.recruitmentChartType === 'bar' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Bar Chart"><i class="fa fa-bar-chart"/></button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.recruitmentChartType == 'pie' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeRecruitmentChartType('pie')"
+                                            t-att-style="state.recruitmentChartType === 'pie' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Pie Chart"><i class="fa fa-pie-chart"/></button>
+                                    <button t-attf-class="hr-chart-type-btn #{state.recruitmentChartType == 'doughnut' ? 'hr-chart-type-btn--active' : ''}"
+                                            t-on-click="() => this.changeRecruitmentChartType('doughnut')"
+                                            t-att-style="state.recruitmentChartType === 'doughnut' ? 'background-color:#71717a;color:white;' : ''"
+                                            title="Doughnut Chart"><i class="fa fa-circle-o-notch"/></button>
+                                </div>
+                            </div>
+                            <div class="hr-card-body hr-card-body--chart">
+                                <div class="hr-chart-canvas-wrap hr-chart-canvas-wrap--analytics">
+                                    <canvas id="recruitmentChart"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Off &amp; Allocations (full width) -->
+                <div class="hr-section-row hr-full-row">
+                    <div class="hr-full-item">
+                        <div class="hr-card hr-table-card">
+                            <div class="hr-card-header">
+                                <div class="hr-card-header-left">
+                                    <i class="fa fa-calendar hr-card-header-icon"/>
+                                    <h5 class="hr-card-title">Time Off &amp; Allocations</h5>
+                                </div>
+                            </div>
+                            <div class="hr-card-body hr-card-body--table">
+                                <div class="hr-table-scroll hr-table-scroll--lg">
+                                    <table class="hr-table">
+                                        <thead class="hr-table-head">
+                                            <tr>
+                                                <th class="hr-th">Employee</th>
+                                                <th class="hr-th">Leave Type</th>
+                                                <th class="hr-th">Request Type</th>
+                                                <th class="hr-th">From</th>
+                                                <th class="hr-th">To</th>
+                                                <th class="hr-th hr-th--center">Days</th>
+                                                <th class="hr-th hr-th--center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="state.timeoff_records.length == 0">
+                                                <tr>
+                                                    <td colspan="7" class="hr-td hr-td--empty">No time off or allocation requests found</td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="state.timeoff_records" t-as="record" t-key="record.id + record.request_type">
+                                                <tr class="hr-tr" style="cursor:pointer;" t-on-click="() => this.openTimeOff(record)">
+                                                    <td class="hr-td hr-td--bold"><t t-esc="record.employee_name"/></td>
+                                                    <td class="hr-td hr-td--muted"><t t-esc="record.leave_type"/></td>
+                                                    <td class="hr-td">
+                                                        <span t-attf-class="hr-badge premium-badge rounded-pill #{record.request_type == 'leave' ? 'indigo' : 'emerald'}">
+                                                            <t t-esc="record.request_type"/>
+                                                        </span>
+                                                    </td>
+                                                    <td class="hr-td hr-td--muted"><t t-esc="record.date_from"/></td>
+                                                    <td class="hr-td hr-td--muted"><t t-esc="record.date_to"/></td>
+                                                    <td class="hr-td hr-td--center hr-td--bold"><t t-esc="record.days"/></td>
+                                                    <td class="hr-td hr-td--center">
+                                                        <span t-attf-class="hr-badge premium-badge rounded-pill #{record.state == 'validate' ? 'emerald' : record.state == 'refuse' ? 'rose' : 'amber'}">
+                                                            <t t-esc="record.state"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </t>
+</templates>

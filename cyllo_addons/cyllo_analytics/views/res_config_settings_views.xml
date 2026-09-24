@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="15"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Cyllo Analytics"
+                     data-string="Cyllo Analytics"
+                     id="cyllo_analytics_settings"
+                     name="cyllo_analytics_settings"
+                     data-key="SD">
+                    <block title="AI Assistant">
+                        <setting id="ai_analytics_assistant"
+                                 string="AI Analytics Assistant"
+                                 help="Enable AI-powered analytics (chart recommendation and more) via the Cyllo AI assistant. Requires an LLM configured under Cyllo AI settings.">
+                            <field name="module_cyllo_ai_analytics"/>
+                        </setting>
+                    </block>
+                    <block title="AI Credentials">
+                        <setting id="openai_api_credentials"
+                                 help="Enter your OpenAI API key here. This key is required for accessing OpenAI services"
+                                 documentation="https://openai.com/blog/openai-api">
+                            <field name="openai_api_key" password="True"/>
+                        </setting>
+                    </block>
+                    <block title="Financial Year Last Day">
+                        <setting id="fiscal_month">
+                            <field name="is_financial_year"/>
+                        </setting>
+                        <setting id="fiscal_month"
+                                 invisible="is_financial_year != True">
+                            <field name="fiscal_year_last_month"
+                                   required="is_financial_year == True"/>
+                        </setting>
+                        <setting id="fiscal_day"
+                                 invisible="is_financial_year != True">
+                            <field name="fiscal_year_last_day"
+                                   required="is_financial_year == True"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_view_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="view_res_config_settings_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'cyllo_analytics_settings',
+            'bin_size': False}
+        </field>
+    </record>
+
+    <menuitem id="menu_settings"
+              name="Settings"
+              sequence="1"
+              action="action_view_settings"
+              parent="cyllo_analytics.menu_configuration"/>
+</odoo>

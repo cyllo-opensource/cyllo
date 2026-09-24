@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+        <t t-name="cyllo_studio.RibbonProperties" owl="1">
+        <div class="ribbon_properties overall_container">
+            <div class="mb-2">
+                <label for="" class="cy-navbar_label">Label</label>
+                <input type="text" class="cy-input form-control"
+                       t-att-value="properties.string"
+                       t-on-input="handleLabelChange"
+                       t-on-change="() => this.autoSave()"/>
+            </div>
+            <div class="mb-2 position-relative">
+                <label for="" class="cy-navbar_label">Color</label>
+                <div class="cy-input cursor-pointer"
+                     t-on-click="()=> state.showDropdown = !state.showDropdown">
+                    <div class="d-flex justify-content-between align-items-center p-1">
+                        <div style="color: #BCBBA7;">
+                            <span t-esc="colors[properties.color]"/>
+                        </div>
+                        <div>
+                            <div class="cy-ribbon-swatch"
+                                 t-att-class="properties.color"/>
+                        </div>
+                    </div>
+                </div>
+                <div t-if="state.showDropdown" class="cy-ribbon-color-menu">
+                    <t t-foreach="Object.keys(colors)" t-as="color"
+                       t-key="color">
+                        <div class="p-1 cursor-pointer opacity-75-hover"
+                             t-on-click="()=> this.handleSelectColor(color)">
+                            <div class="d-flex justify-content-between align-items-center p-2">
+                                <div>
+                                    <span t-esc="colors[color]"/>
+                                </div>
+                                <div>
+                                    <div class="cy-ribbon-swatch"
+                                         t-att-class="color"/>
+                                </div>
+                            </div>
+
+                        </div>
+                    </t>
+                </div>
+            </div>
+            <div class="cy-prop-toggle-row">
+                <span class="cy-toggle-label">Invisible</span>
+                <div class="cy-prop-toggle-right">
+                    <button class="cy-basedOn" data-attribute="invisible"
+                            t-on-click="onDomainClick">
+                        <span>Based on</span>
+                        <i class="fa fa-cog cy-setting-icon"/>
+                    </button>
+                    <label class="cy-switch">
+                        <input type="checkbox" t-on-click="onDomainRadioClick"
+                            t-att-checked="!['0', 'false', 'False', null].includes(properties.invisible)"/>
+                        <span class="cy-slider"/>
+                    </label>
+                </div>
+            </div>
+            <div class="d-flex btn_div w-100 my-3 gap-2">
+                <button class="btn btn-secondary w-100" t-on-click="cancelribbon">Cancel</button>
+            </div>
+        </div>
+    </t>
+</templates>

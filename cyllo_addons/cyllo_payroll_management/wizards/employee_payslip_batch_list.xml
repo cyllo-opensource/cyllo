@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form view of Wizard used to select employees for generate payslip batches-->
+    <record id="view_employee_payslip_batch_list_form" model="ir.ui.view">
+        <field name="name">view.employee.payslip.batch.list.form</field>
+        <field name="model">employee.payslip.batch.list</field>
+        <field name="arch" type="xml">
+            <form string="Payslips by Employees">
+                <sheet>
+                    <span nolabel="1">
+                        The dates and credit note listed on Payslips Batch will be used by this wizard to create
+                        payslips for the selected employee or employees.
+                    </span>
+                    <separator string="Salary Structure" colspan="2"/>
+                    <div class="o_row">
+                        <p class="text-muted w-50">
+                            If you want to choose every employee from this structure, then set a customised compensation structure.
+                        </p>
+                        <field name="structure_id" nolabel="1" required="1"/>
+                    </div>
+                    <separator string="Department" colspan="2"/>
+                    <div class="o_row">
+                        <p class="text-muted w-50">
+                            If you want to choose every employee in this department (as well as any subdepartments) at once, set a specific department.
+                        </p>
+                        <field name="department_id" nolabel="1"/>
+                    </div>
+                    <separator string="Employees"/>
+                    <field name="employee_ids" nolabel="1">
+                        <tree>
+                            <field name="name"/>
+                            <field name="work_email"/>
+                            <field name="department_id"/>
+                            <field name="job_id"/>
+                        </tree>
+                    </field>
+                </sheet>
+                <footer>
+                    <button icon="fa-cogs" string="Generate" name="action_compute_sheet" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_view_employee_payslip_batch_list" model="ir.actions.act_window">
+        <field name="name">Generate Payslips</field>
+        <field name="res_model">employee.payslip.batch.list</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_employee_payslip_batch_list_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

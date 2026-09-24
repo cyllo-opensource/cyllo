@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Tree views-->
+    <record id="view_target_commission_report_plan_tree" model="ir.ui.view">
+        <field name="name">view.commission.report.tree</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <tree create="0" delete="0">
+                <field name="user_id"/>
+                <field name="period_name" optional="hide"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="target_amount" sum="Total Target"/>
+                <field name="achieve_rate" invisible="target_amount == 0"
+                       widget="percentage" optional="hide"/>
+                <field name="achieve_amount" sum="Total achieved"/>
+                <field name="commission_amount" sum="Total commission"/>
+                <field name="currency_id" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_contribution_commission_report_plan_tree"
+            model="ir.ui.view">
+        <field name="name">view.commission.report.tree</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <tree create="0" delete="0">
+                <field name="user_id"/>
+                <field name="period_name"/>
+                <field name="order_id"/>
+                <field name="date" optional="hide"/>
+                <field name="achieve_amount" sum="Total achieved"/>
+                <field name="commission_amount" sum="Total commission"/>
+                <field name="currency_id" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_target_commission_report_tree" model="ir.ui.view">
+        <field name="name">view.commission.report.tree</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <tree create="0" delete="0">
+                <field name="user_id"/>
+                <field name="plan_id"/>
+                <field name="period_name" optional="hide"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="target_amount" sum="Total Target"/>
+                <field name="achieve_amount" sum="Total achieved"/>
+                <field name="achieve_rate" invisible="target_amount == 0"
+                       widget="percentage" optional="hide"/>
+                <field name="commission_amount" sum="Total commission"/>
+                <field name="currency_id" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_contribution_commission_report_tree" model="ir.ui.view">
+        <field name="name">view.commission.report.tree</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <tree create="0" delete="0">
+                <field name="user_id"/>
+                <field name="plan_id"/>
+                <field name="period_name"/>
+                <field name="order_id"/>
+                <field name="date" optional="hide"/>
+                <field name="achieve_amount" sum="Total achieved"/>
+                <field name="commission_amount" sum="Total commission"/>
+                <field name="currency_id" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--Search View-->
+    <record id="view_commission_report_search" model="ir.ui.view">
+        <field name="name">view.commission.report.search</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <field name="plan_id"/>
+                <field name="period_name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="target_amount"/>
+                <field name="achieve_amount"/>
+                <field name="commission_amount"/>
+                <filter string="My contributions" name="my_contributions"
+                        domain="[('user_id', '=', uid),('type', '=', 'contribution')]"/>
+                <filter string="Monthly" name="monthly_filter"
+                        domain="[('frequency', '=','monthly')]"/>
+                <filter string="Quarterly" name="quarterly_filter"
+                        domain="[('frequency', '=','quarterly')]"/>
+                <filter string="Yearly" name="yearly_filter"
+                        domain="[('frequency', '=','yearly')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Period" name="frequency"
+                            context="{'group_by': 'frequency'}"/>
+                    <filter string="Sales person" name="user_id"
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Sales Team" name="team_id"
+                            context="{'group_by': 'team_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--Form views-->
+    <record id="view_target_commission_report_form" model="ir.ui.view">
+        <field name="name">view.commission.report.form</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <form create="0" delete="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="period_name"/>
+                            <field name="plan_id"/>
+                            <field name="target_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                        <group>
+                            <label for="date_from" string="Commission Period"/>
+                            <div class="d-inline-flex">
+                                <field name="date_from" string="Date"
+                                       widget="daterange"
+                                       options="{'end_date_field': 'date_to'}"
+                                       readonly="1"/>
+                                <field name="date_to" invisible="1"/>
+                            </div>
+                            <field name="achieve_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="achieve_rate" widget="percentage"
+                                   help="Achieved Rate as per the Commission Target"/>
+                            <field name="commission_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="currency_id" invisible="True"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_contribution_commission_report_form" model="ir.ui.view">
+        <field name="name">view.commission.report.form</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <form create="0" delete="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="period_name"/>
+                            <field name="plan_id"/>
+                            <field name="order_id"/>
+                            <field name="date" optional="hide"/>
+                        </group>
+                        <group>
+                            <label for="date_from" string="Commission Period"/>
+                            <div class="d-inline-flex">
+                                <field name="date_from" string="Date"
+                                       widget="daterange"
+                                       options="{'end_date_field': 'date_to'}"
+                                       readonly="1"/>
+                                <field name="date_to" invisible="1"/>
+                            </div>
+                            <field name="achieve_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="commission_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="currency_id" invisible="True"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--Graph-->
+    <record id="view_commission_report_graph" model="ir.ui.view">
+        <field name="name">view.commission.report.graph</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <graph string="Commissions" sample="1">
+                <field name="user_id"/>
+                <field name="commission_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <!--Pivot-->
+    <record id="view_commission_report_pivot" model="ir.ui.view">
+        <field name="name">view.commission.report.pivot</field>
+        <field name="model">commission.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Commissions" sample="1">
+                <field name="user_id" type="row"/>
+                <field name="period_id" type="col"/>
+                <field name="commission_amount" type="measure"/>
+                <field name="achieve_rate" invisible="1" widget="percentage"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!--Actions-->
+    <record id="action_target_commission_report" model="ir.actions.act_window">
+        <field name="name">Target Commissions</field>
+        <field name="res_model">commission.report</field>
+        <field name="view_mode">tree,graph,pivot</field>
+        <field name="domain">[('type', '=', 'target')]</field>
+        <field name="views"
+               eval="[(ref('view_target_commission_report_tree'), 'tree')]"/>
+    </record>
+
+    <record id="action_my_target_commission_report"
+            model="ir.actions.act_window">
+        <field name="name">My Commissions</field>
+        <field name="res_model">commission.report</field>
+        <field name="view_mode">tree,graph,pivot</field>
+        <field name="domain">[('user_id', '=', uid),('type', '=', 'target')]</field>
+        <field name="view_ids" eval="[(5,0,0),
+        (0,0,{'view_mode': 'tree', 'view_id': ref('view_target_commission_report_tree')})]"/>
+    </record>
+
+    <record id="action_contribution_commission_report"
+            model="ir.actions.act_window">
+        <field name="name">Contribution Commissions</field>
+        <field name="res_model">commission.report</field>
+        <field name="view_mode">tree,graph,pivot</field>
+        <field name="domain">[('type', '=', 'contribution')]</field>
+        <field name="context">{'search_default_my_contributions': 1}</field>
+        <field name="view_ids" eval="[(5,0,0),
+        (0,0,{'view_mode': 'tree', 'view_id': ref('view_contribution_commission_report_tree')})]"/>
+    </record>
+
+    <record id="action_commission_dashboard" model="ir.actions.client">
+        <field name="name">Commission Dashboard</field>
+        <field name="tag">commission_dashboard_tag</field>
+    </record>
+</odoo>

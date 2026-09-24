@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- view of payslip batch -->
+    <record id="view_employee_payslip_batch_search" model="ir.ui.view">
+        <field name="name">view.employee.payslip.batch.search</field>
+        <field name="model">employee.payslip.batch</field>
+        <field name="arch" type="xml">
+            <search string="Search Payslip Batches">
+                <field name="name" string="Payslip Batches"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]" help="Payslip Batches on Draft"/>
+                <filter name="paid" string="Paid" domain="[('state','=','paid')]" help="Paid Payslip Batches"/>
+                <group expand="0" string="Group By">
+                    <filter string="States" name="state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_employee_payslip_batch_tree" model="ir.ui.view">
+        <field name="name">view.employee.payslip.batch.tree</field>
+        <field name="model">employee.payslip.batch</field>
+        <field name="arch" type="xml">
+            <tree string="Payslips Batches" sample="1">
+                <field name="name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_employee_payslip_batch_kanban" model="ir.ui.view">
+        <field name="name">view.employee.payslip.batch.kanban</field>
+        <field name="model">employee.payslip.batch</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_content oe_kanban_global_click">
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="float-right badge badge-secondary">
+                                        <field name="state"/>
+                                    </span>
+                                </div>
+                                <div class="col-12">
+                                    <span>
+                                        <field name="start_date"/>
+                                        -
+                                        <field name="end_date"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="view_employee_payslip_batch_form" model="ir.ui.view">
+        <field name="name">view.employee.payslip.batch.form</field>
+        <field name="model">employee.payslip.batch</field>
+        <field name="arch" type="xml">
+            <form string="Payslips Batches">
+                <header>
+                    <button name="action_generate_batch" type="object" invisible="state != 'draft'"
+                            string="Generate Payslips" class="oe_highlight"/>
+                    <button string="Create Draft Entry" name="action_create_entry" type="object"
+                            invisible="state != 'confirm' or batch_move_line == True" class="oe_highlight"/>
+                    <button string="Create Batch Entry" name="action_validate" type="object"
+                            invisible="not batch_move_line or state != 'confirm'" class="oe_highlight"/>
+                    <button string="Register Payment" name="action_register_payment"
+                            context="{'payroll_register_payment': id}"
+                            invisible="state != 'done' or not batch_move_line"
+                            type="object" class="oe_highlight"/>
+                    <button string="Register Payment" name="action_create_payment"
+                            invisible="state != 'done' or batch_move_line"
+                            context="{'show_register_payment': True}"
+                            type="object" class="oe_highlight"/>
+                    <button string="Mark as paid" name="action_create_payment"
+                            invisible="state != 'done' or batch_move_line"
+                            context="{'show_action_paid': True}"
+                            type="object" class="oe_highlight"/>
+                    <button string="Mark as fully paid" name="mark_fully_paid" invisible="state != 'done'"
+                            type="object" class="oe_highlight"/>
+                    <button string="Set to Draft" name="action_draft" invisible="state != 'close'" type="object"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_journal_entry" type="object"
+                                class="oe_stat_button" invisible="journal_entry_count == 0"
+                                string="Journal Entry" groups="cyllo_payroll_management.group_cyllo_payroll_management_manager">
+                            <i class="fa fa-book" title="Journal Entry"/>
+                            <div class="o_stat_info" style="margin-left:2px;">
+                                <span class="o_stat_text">
+                                    Journal Entry
+                                    <field name="journal_entry_count" invisible="1"/>
+                                </span>
+                            </div>
+                        </button>
+                    </div>
+                    <div>
+                        <h1>
+                            <div class="oe_title">
+                                <field name="name" class="text-break" placeholder="Eg:March-2024" readonly="state != 'draft'"/>
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="start_date" readonly="state != 'draft'"/>
+                            <field name="end_date" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="is_batch_payslip" invisible="1"/>
+                            <field name="batch_move_line" invisible="1"/>
+                        </group>
+                    </group>
+                    <div invisible="not is_batch_payslip">
+                        <separator string="Payslips"/>
+                        <field name="employee_payslip_ids" readonly="state != 'draft'">
+                            <tree create="false" delete="false" edit="false">
+                                <field name="reference"/>
+                                <field name="employee_id"/>
+                                <field name="payslip_name"/>
+                                <field name="start_date"/>
+                                <field name="to_date"/>
+                                <field name="state" widget="badge"
+                                       decoration-success="state == 'paid'"
+                                       decoration-info="state == 'done'"
+                                       decoration-muted="state == 'draft'"
+                                       decoration-warning="state == 'confirm'"
+                                       decoration-danger="state == 'close'"/>
+                            </tree>
+                        </field>
+                    </div>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="action_view_payslip_batches" model="ir.actions.act_window">
+        <field name="name">Payslips Batches</field>
+        <field name="res_model">employee.payslip.batch</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_employee_payslip_batch_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Payslip Batches</p>
+        </field>
+    </record>
+</odoo>

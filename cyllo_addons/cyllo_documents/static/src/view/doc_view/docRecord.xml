@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="DocRecord">
+        <div
+                role="article"
+                t-att-class="getRecordClasses()"
+                t-att-data-id="props.record.id"
+                t-att-tabindex="props.record.model.useSampleModel ? -1 : 0"
+                t-on-click="onGlobalClick"
+                class="cy_kanban_document_record"
+                t-attf-class="{{ state.selected ? 'selected': ''}} {{ props.selection ? isLocked ? 'doc_locked' : '' : ''}}"
+                t-ref="root">
+            <div t-if="isLocked" class="doc_is_locked_container">
+                <div class="ri-lock-line"/>
+            </div>
+            <t t-call="{{ templates[this.constructor.KANBAN_BOX_ATTRIBUTE] }}" t-call-context="this.renderingContext"/>
+            <t t-if="!props.selection" t-call="{{ this.constructor.menuTemplate }}"/>
+        </div>
+    </t>
+</templates>

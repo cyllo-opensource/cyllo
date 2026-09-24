@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Template for pdf print of all reports -->
+<odoo>
+    <template id="report_field_service_request_form">
+        <t t-call="web.html_container">
+            <t t-foreach="fs_request" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        <h2 class="mt-4">
+                            <span t-field="o.name"/>
+                        </h2>
+                        <div class="row mt-4 mb-2" id="informations">
+                            <div class="col-auto col-3 mw-100 mb-2"
+                                 name="informations_employee">
+                                <strong>Customer:</strong>
+                                <br/>
+                                <t t-if="o.partner_id">
+                                    <span t-esc="o.partner_id.name"/>
+                                </t>
+                            </div>
+                            <div class="col-auto col-3 mw-100 mb-2"
+                                 name="submit_date">
+                                <strong>Request Submit Date:</strong>
+                                <br/>
+                                <span class="m-0"
+                                      t-field="o.submit_date"
+                                      t-options='{"widget": "date"}'/>
+                            </div>
+                            <div class="col-auto col-3 mw-100 mb-2"
+                                 name="deadline_date">
+                                <strong>Request Deadline Date:</strong>
+                                <br/>
+                                <span class="m-0"
+                                      t-field="o.date_deadline"
+                                      t-options='{"widget": "date"}'/>
+                            </div>
+                            <div class="col-auto col-3 mw-100 mb-2"
+                                 name="expiration_date">
+                                <strong>Skill Category:</strong>
+                                <br/>
+                                <span class="m-0"
+                                      t-field="o.skill_category_id"/>
+                            </div>
+                            <div class="col-auto col-3 mw-100 mb-2 oe_inline">
+                                <strong>State:</strong>
+                                <br/>
+                                <span class="m-0" t-field="o.state"/>
+                            </div>
+                            <div class="col-auto col-3 mw-100 mb-2 oe_inline">
+                                <strong>Skill Required:</strong>
+                                <br/>
+                                <t t-foreach="o.hr_skill_ids"
+                                   t-as="skill">
+                                    <span t-esc="skill.name"/>
+                                    <span>
+                                        ,
+                                    </span>
+                                </t>
+                            </div>
+
+                            <br/>
+                        </div>
+                        <div class="row mt-4 mb-2" id="other_informations">
+                            <div class="col-auto col-3 mw-100 mb-2">
+                                <strong>Description:</strong>
+                                <br/>
+                                <span class="m-0"
+                                      t-field="o.description"/>
+                            </div>
+                            <t t-if="o.sale_order_id">
+                                <div class="col-auto col-3 mw-100 mb-2 oe_inline">
+                                    <strong>Sale Order:</strong>
+                                    <br/>
+                                    <span class="m-0"
+                                          t-field="o.sale_order_id.name"/>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="oe_structure"/>
+                        <h3 class="mt-4">
+                            <span>Workers</span>
+                        </h3>
+                        <table class="table table-bordered"
+                               style="table-layout: fixed" name="workers_info">
+                            <thead style="display: table-row-group">
+                                <tr>
+                                    <th class="text-center"
+                                        style="min-width: 100px;">Name of Worker
+                                    </th>
+                                    <th class="text-center"
+                                        style="min-width: 100px;">Department
+                                    </th>
+                                    <th class="text-center"
+                                        style="min-width: 100px;">Phone Number
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="sale_tbody">
+                                <t t-foreach="o.field_service_worker_ids"
+                                   t-as="worker">
+                                    <tr>
+                                        <td class="text-center"
+                                            style="min-width: 100px;">
+                                            <span t-field="worker.employee_id.name"/>
+                                        </td>
+                                        <td class="text-center"
+                                            style="min-width: 100px;">
+                                            <span t-field="worker.employee_id.department_id.name"/>
+                                        </td>
+                                        <td class="text-center"
+                                            style="min-width: 100px;">
+                                            <span t-field="worker.mobile_number"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <div class="oe_structure"/>
+                        <h3 class="mt-4">
+                            <span>Checklist</span>
+                        </h3>
+                        <table class="table table-bordered"
+                               style="table-layout: fixed">
+                            <thead style="display: table-row-group">
+                                <tr>
+                                    <th class="text-center"
+                                        style="min-width: 100px;">Checklist
+                                    </th>
+                                    <th class="text-center"
+                                        style="min-width: 100px;">
+                                        Service Cost
+                                    </th>
+                                    <th class="text-center"
+                                        style="min-width: 100px;">Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="sale_tbody">
+                                <t t-foreach="o.service_checklist_ids"
+                                   t-as="checklist">
+                                    <tr>
+                                        <td class="text-center"
+                                            style="min-width: 100px;">
+                                            <span t-field="checklist.product_id.name"/>
+                                        </td>
+                                        <td class="text-center"
+                                            style="min-width: 100px;">
+                                            <span t-field="checklist.service_cost"/>
+                                        </td>
+                                        <td class="text-center"
+                                            style="min-width: 100px;">
+                                            <span t-field="checklist.status"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <div class="clearfix">
+                            <div class="row">
+                                <div class="col-6 ms-auto">
+                                    <table class="table table-sm table-borderless">
+                                        <tbody>
+                                            <tr class="border-black o_subtotal">
+                                                <td>
+                                                    <strong>Amount for Completed
+                                                        Service
+                                                    </strong>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span>
+                                                        <span t-esc="o.company_id.currency_id.symbol"/>
+                                                        <span class="oe_currency_value"
+                                                              t-esc="amount"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr style="">
+                                                <td>
+                                                    <span class="text-nowrap">
+                                                        Total Paid Amount
+                                                    </span>
+                                                </td>
+                                                <td class="text-end o_price_total">
+                                                    <span class="text-nowrap">
+                                                        <span t-esc="o.company_id.currency_id.symbol"/>
+                                                        <span t-esc="paid_amount"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr class="border-black o_total">
+                                                <td>
+                                                    <strong>Balance Amount
+                                                    </strong>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span class="text-nowrap">
+                                                        <span t-esc="o.company_id.currency_id.symbol"/>
+                                                        <span class="oe_currency_value"
+                                                              t-esc="balance_amount"/>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    <template id="report_field_service_request">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <center>
+                        <h1>Field Service Request Report</h1>
+                    </center>
+                    <t t-if="form['filter']=='customer_wise'">
+                        <div class="row ml32 mt32 mb32">
+                            <div class="col-4">
+                                <strong>Partner:</strong>
+                                <h4>
+                                    <t t-if="form['partner_ids']">
+                                        <t t-foreach="form['partner_ids']"
+                                           t-as="partner">
+                                            <t t-set="partner_name"
+                                               t-value="request.env['res.partner'].sudo().browse(partner).name"/>
+                                            <span t-esc="partner_name"/>
+                                            <br/>
+                                        </t>
+                                    </t>
+                                </h4>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="form['filter']=='state_wise'">
+                        <div class="row mt32 mb32">
+                            <div class="col-3">
+                                <strong>State:</strong>
+                                <h4>
+                                    <t t-if="form['state']">
+                                        <t t-esc="form['state'].capitalize()"/>
+                                    </t>
+                                </h4>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="form.get('from_date')">
+                        <div class="row mt32 mb32">
+                            <div class="col-3">
+                                <strong>Start Date:</strong>
+                                <h4>
+                                    <t t-esc="form['from_date']"/>
+                                </h4>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="form.get('to_date')">
+                        <div class="row mt32 mb32">
+                            <div class="col-3">
+                                <strong>End Date:</strong>
+                                <h4>
+                                    <t t-esc="form['to_date']"/>
+                                </h4>
+                            </div>
+                        </div>
+                    </t>
+                    <br/>
+                    <t t-if="form['group_by']=='priority'">
+                        <t t-foreach="group_option" t-as="group">
+                            <t t-set="flag" t-value="false"/>
+                            <t t-foreach="fs_requests"
+                               t-as="fs_request">
+                                <t t-if="fs_request['priority']==group[0]">
+                                    <t t-set="flag" t-value="true"/>
+                                </t>
+                            </t>
+                            <t t-if="flag">
+                                <span t-esc="group[1]"/>
+                                <br/>
+                                <table class="table table-sm">
+                                    <t t-if="fs_requests">
+                                        <thead>
+                                            <tr>
+                                                <th>Sl.no</th>
+                                                <th>Name</th>
+                                                <th>Partner</th>
+                                                <th>Skill Category</th>
+                                                <th>Deadline Date</th>
+                                                <th>Sale Order</th>
+                                                <th>State</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="fs_requests"
+                                               t-as="fs_request">
+                                                <t t-if="fs_request['priority']==group[0]">
+                                                    <tr>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request_index+1"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['partner_name']">
+                                                                <span t-esc="fs_request['partner_name']"/>
+                                                            </t>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['category_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['date_deadline']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['sale_order_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['state']">
+                                                                <span t-esc="fs_request['state'].capitalize()"/>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </tbody>
+                                    </t>
+                                </table>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-if="form['group_by']=='state'">
+                        <t t-foreach="group_option" t-as="group">
+                            <t t-set="flag" t-value="false"/>
+                            <t t-foreach="fs_requests"
+                               t-as="fs_request">
+                                <t t-if="fs_request['state']==group[0]">
+                                    <t t-set="flag" t-value="true"/>
+                                </t>
+                            </t>
+                            <t t-if="flag">
+                                <span t-esc="group[1]"/>
+                                <br/>
+                                <table class="table table-sm">
+                                    <t t-if="fs_requests">
+                                        <thead>
+                                            <tr>
+                                                <th>Sl.no</th>
+                                                <th>Name</th>
+                                                <th>Partner</th>
+                                                <th>Skill Category</th>
+                                                <th>Deadline Date</th>
+                                                <th>Sale Order</th>
+                                                <th>State</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="fs_requests"
+                                               t-as="fs_request">
+                                                <t t-if="fs_request['state']==group[0]">
+                                                    <tr>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request_index+1"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['partner_name']">
+                                                                <span t-esc="fs_request['partner_name']"/>
+                                                            </t>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['category_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['date_deadline']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['sale_order_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['state']">
+                                                                <span t-esc="fs_request['state'].capitalize()"/>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </tbody>
+                                    </t>
+                                </table>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-if="form['group_by']=='skill_category_id'">
+                        <t t-foreach="group_option" t-as="group">
+                            <t t-set="flag" t-value="false"/>
+                            <t t-foreach="fs_requests"
+                               t-as="fs_request">
+                                <t t-if="fs_request['skill_category_id']==group[0]">
+                                    <t t-set="flag" t-value="true"/>
+                                </t>
+                            </t>
+                            <t t-if="flag">
+                                <span t-esc="group[1]"/>
+                                <br/>
+                                <table class="table table-sm">
+                                    <t t-if="fs_requests">
+                                        <thead>
+                                            <tr>
+                                                <th>Sl.no</th>
+                                                <th>Name</th>
+                                                <th>Partner</th>
+                                                <th>Skill Category</th>
+                                                <th>Deadline Date</th>
+                                                <th>Sale Order</th>
+                                                <th>State</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="fs_requests"
+                                               t-as="fs_request">
+                                                <t t-if="fs_request['skill_category_id']==group[0]">
+                                                    <tr>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request_index+1"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['partner_name']">
+                                                                <span t-esc="fs_request['partner_name']"/>
+                                                            </t>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['category_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['date_deadline']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['sale_order_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['state']">
+                                                                <span t-esc="fs_request['state'].capitalize()"/>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </tbody>
+                                    </t>
+                                </table>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-if="form['group_by']=='company_id'">
+                        <t t-foreach="group_option" t-as="group">
+                            <t t-set="flag" t-value="false"/>
+                            <t t-foreach="fs_requests"
+                               t-as="fs_request">
+                                <t t-if="fs_request['company_id']==group[0]">
+                                    <t t-set="flag" t-value="true"/>
+                                </t>
+                            </t>
+                            <t t-if="flag">
+                                <span t-esc="group[1]"/>
+                                <br/>
+                                <table class="table table-sm">
+                                    <t t-if="fs_requests">
+                                        <thead>
+                                            <tr>
+                                                <th>Sl.no</th>
+                                                <th>Name</th>
+                                                <th>Partner</th>
+                                                <th>Skill Category</th>
+                                                <th>Deadline Date</th>
+                                                <th>Sale Order</th>
+                                                <th>State</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="fs_requests"
+                                               t-as="fs_request">
+                                                <t t-if="fs_request['company_id']==group[0]">
+                                                    <tr>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request_index+1"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['partner_name']">
+                                                                <span t-esc="fs_request['partner_name']"/>
+                                                            </t>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['category_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['date_deadline']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['sale_order_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['state']">
+                                                                <span t-esc="fs_request['state'].capitalize()"/>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </tbody>
+                                    </t>
+                                </table>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-if="form['group_by']=='sale_order_id'">
+                        <t t-foreach="group_option" t-as="group">
+                            <t t-set="flag" t-value="false"/>
+                            <t t-foreach="fs_requests"
+                               t-as="fs_request">
+                                <t t-if="fs_request['sale_order_name']==group[1]">
+                                    <t t-set="flag" t-value="true"/>
+                                </t>
+                            </t>
+                            <t t-if="flag">
+                                <span t-esc="group[1]"/>
+                                <br/>
+                                <table class="table table-sm">
+                                    <t t-if="fs_requests">
+                                        <thead>
+                                            <tr>
+                                                <th>Sl.no</th>
+                                                <th>Name</th>
+                                                <th>Partner</th>
+                                                <th>Skill Category</th>
+                                                <th>Deadline Date</th>
+                                                <th>Sale Order</th>
+                                                <th>State</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="fs_requests"
+                                               t-as="fs_request">
+                                                <t t-if="fs_request['sale_order_name']==group[1]">
+                                                    <tr>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request_index+1"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['partner_name']">
+                                                                <span t-esc="fs_request['partner_name']"/>
+                                                            </t>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['category_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['date_deadline']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <span t-esc="fs_request['sale_order_name']"/>
+                                                        </td>
+                                                        <td class="text-left">
+                                                            <t t-if="fs_request['state']">
+                                                                <span t-esc="fs_request['state'].capitalize()"/>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </tbody>
+                                    </t>
+                                </table>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-if="form['group_by']=='none'">
+                        <br/>
+                        <table class="table table-sm">
+                            <t t-if="fs_requests">
+                                <thead>
+                                    <tr>
+                                        <th>Sl.no</th>
+                                        <th>Name</th>
+                                        <th>Partner</th>
+                                        <th>Skill Category</th>
+                                        <th>Deadline Date</th>
+                                        <th>Sale Order</th>
+                                        <th>State</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="fs_requests"
+                                       t-as="fs_request">
+                                        <tr>
+                                            <td class="text-left">
+                                                <span t-esc="fs_request_index+1"/>
+                                            </td>
+                                            <td class="text-left">
+                                                <span t-esc="fs_request['name']"/>
+                                            </td>
+                                            <td class="text-left">
+                                                <t t-if="fs_request['partner_name']">
+                                                    <span t-esc="fs_request['partner_name']"/>
+                                                </t>
+                                            </td>
+                                            <td class="text-left">
+                                                <span t-esc="fs_request['category_name']"/>
+                                            </td>
+                                            <td class="text-left">
+                                                <span t-esc="fs_request['date_deadline']"/>
+                                            </td>
+                                            <td class="text-left">
+                                                <span t-esc="fs_request['sale_order_name']"/>
+                                            </td>
+                                            <td class="text-left">
+                                                <t t-if="fs_request['state']">
+                                                    <span t-esc="fs_request['state'].capitalize()"/>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </t>
+                        </table>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

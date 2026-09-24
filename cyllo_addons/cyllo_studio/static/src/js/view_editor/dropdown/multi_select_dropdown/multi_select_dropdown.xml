@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.MultiSelectDropDown">
+        <div class="custom-dropdown o-autocomplete" t-ref="dropdown">
+            <div class="d-flex align-items-center o-autocomplete--input o_input input_drop cy-multiselect-trigger"
+                 style="cursor:text; flex-wrap:wrap; gap:4px; min-height:23.5px; padding: 2px 0px;">
+                <TagsList tags="tags"/>
+                <input
+                    type="text"
+                    class="cy-multiselect-search"
+                    t-ref="searchInput"
+                    t-model="state.searchTerm"
+                    t-on-input="onInput"
+                    t-on-click.stop="openDropdown"
+                    placeholder="Search..."
+                    autocomplete="off"
+                    style="flex:1; min-width:60px; border:none; outline:none; background:transparent; color:inherit; font-size:13px;"
+                />
+                <i t-on-click.stop="toggleDropdown"
+                   t-att-class="state.isOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down'"
+                   class="cy-dropdown-icon ms-auto" style="align-self:center; cursor:pointer;"/>
+            </div>
+            <t t-if="state.isOpen">
+                <ul class="o-autocomplete--dropdown-menu ui-widget show" t-ref="recordList">
+                    <t t-foreach="filteredKeys" t-as="key" t-key="key">
+                        <li class="o-autocomplete--dropdown-item ui-menu-item d-block"
+                            t-on-click.stop="() => this.onSelected(key)">
+                            <a class="dropdown-item ui-menu-item-wrapper text-truncate">
+                                <span t-esc="state.allValues[key]"/>
+                            </a>
+                        </li>
+                    </t>
+                    <li t-if="filteredKeys.length === 0" class="no-results">No results found</li>
+                </ul>
+            </t>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="report_demand_prediction_pdf"
+            model="ir.actions.report">
+        <field name="name">Demand Prediction</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_sale_analytics.report_demand_prediction</field>
+        <field name="report_file">cyllo_sale_analytics.report_demand_prediction</field>
+    </record>
+    <template id="cyllo_sale_analytics.report_demand_prediction">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div t-ref="root" class="w-100">
+                    <t t-if="forecast_data">
+                        <h1 style="text-align:center; font-size: 50px; font-family: sans-serif !important">
+                            Demand Prediction Report
+                        </h1>
+                        <center>
+                            <h1 style="margin-bottom: 2rem; margin-top: 5rem;">
+                                Actual Sales from
+                                <t t-esc="start_date"/>
+                                to
+                                <t t-esc="end_date"/>
+                            </h1>
+                            <h1 style="margin-top: 0.5rem;">Predicted Demand For
+                                <t t-esc="period"/>
+                                <t t-if="frequency == 'D'">
+                                    <span>Days</span>
+                                </t>
+                                <t t-elif="frequency == 'M'">
+                                    <span>Months</span>
+                                </t>
+                                <t t-elif="frequency == 'Y'">
+                                    <span>Years</span>
+                                </t>
+                            </h1>
+
+                            <div class="col" style="margin-left: -100px;">
+                                <img t-att-src="chartImg"/>
+                            </div>
+                        </center>
+                        <div class="d-flex justify-content-between p-3"
+                             style="display:flex !important;justify-content:space-between !important;gap:50px;">
+                            <div>
+                                <h2>
+                                    Product :
+                                    <t t-esc="current_prod"/>
+                                </h2>
+                            </div>
+                        </div>
+                        <div class="px-3">
+                            <table class="table">
+                                <thead>
+                                    <tr style="height: 50px;">
+                                        <th colspan="4"
+                                            style="font-size:24px; padding-top:15px;">
+                                            ACTUAL
+                                            SALES
+                                        </th>
+                                    </tr>
+                                    <tr style="height: 50px;">
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Periods
+                                        </th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Quantity
+                                            Sold
+                                        </th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Average
+                                            Sales
+                                            Price
+                                        </th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Revenue
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-if="actual_data">
+                                        <t t-foreach="actual_data" t-as="act"
+                                           t-key="act_index">
+                                            <tr style="height: 50px; text-align: center;">
+                                                <td style="font-size:20px; padding-top:15px;">
+                                                    <t t-esc="act['date']"/>
+                                                </td>
+                                                <td style="font-size:20px; padding-top:15px;">
+                                                    <t t-esc="act['qty']"/>
+                                                </td>
+                                                <td style="font-size:20px; padding-top:15px;">
+                                                    <t t-esc="act['sub_total']"/>
+                                                </td>
+                                                <td style="font-size:20px; padding-top:15px;">
+                                                    <t t-esc="act['avg_price']"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+                            <table class="table"
+                                   style="margin-top:10px;"
+                                   border="1">
+                                <thead>
+                                    <tr style="height: 50px;">
+                                        <th colspan="4"
+                                            style="font-size:24px; padding-top:15px;">
+                                            PREDICTED SALES
+                                        </th>
+                                    </tr>
+                                    <tr style="height: 50px;">
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Periods
+                                        </th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Quantity
+                                            Sold
+                                        </th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Average
+                                            Sales
+                                            Price
+                                        </th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Revenue
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-if="forecast_data">
+                                        <t t-foreach="forecast_data" t-as="fore"
+                                           t-key="fore_index">
+                                            <tr style="height: 50px; text-align: center;">
+                                                <td style="font-size:20px; padding-top:15px;">
+                                                    <t t-esc="fore['date']"/>
+                                                </td>
+                                                <td style="font-size:20px; padding-top:15px;">
+                                                    <t t-esc="fore['qty']"/>
+                                                </td>
+                                                <td style="font-size:20px; padding-top:15px;">
+                                                    <t t-esc="fore['subtotal']"/>
+                                                </td>
+                                                <td style="font-size:20px; padding-top:15px;">
+                                                    <t t-esc="fore['avg_price']"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <h1 style="text-align:center; font-family: sans-serif !important;">
+                            Demand Prediction Report
+                        </h1>
+                        <center>
+                            <h3 style="margin-bottom: 2rem; margin-top: 3rem;">
+                                Actual Sales from
+                                <t t-esc="start_date"/>
+                                to
+                                <t t-esc="end_date"/>
+                            </h3>
+                            <h3 style="margin-top: 0.5rem;">Predicted Demand For
+                                <t t-esc="period"/>
+                                <t t-if="frequency == 'D'">
+                                    <span>Days</span>
+                                </t>
+                                <t t-elif="frequency == 'M'">
+                                    <span>Months</span>
+                                </t>
+                                <t t-elif="frequency == 'Y'">
+                                    <span>Years</span>
+                                </t>
+                            </h3>
+                            <div class="col" style="margin-left: -100px;">
+                                <img t-att-src="chartImg"/>
+                            </div>
+                        </center>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

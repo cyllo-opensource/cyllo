@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="ReusableAutomationNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="p-2">
+                <div class="mb-3">
+                    <label class="form-label">Label</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Label"
+                        t-on-change="(ev) => this.setLabel(ev.target.value)"
+                        t-att-value="fieldState.label"
+                    />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Reuse Automation Rule</label>
+                    <CustomDropdown
+                        options="automationDropdownOptions"
+                        defaultValue="fieldState.reused_work_auto_id || ''"
+                        onChange="(value) => this.onSelectAutomation(value)"
+                        placeholder="'Select automations...'"
+                        searchable="true"
+                        width="''"
+                        maxHeight="'150px'"
+                    />
+                    <div t-if="selectedAutomationModel" class="small mt-1"
+                         t-att-class="selectedAutomationModel === 'Generic (any model)' ? 'text-warning' : 'text-muted'">
+                        <i t-att-class="selectedAutomationModel === 'Generic (any model)' ? 'ri-global-line' : 'ri-database-2-line'"/>
+                        <t t-esc="selectedAutomationModel"/>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Record Source <span class="text-muted small">(optional — defaults to current record)</span></label>
+                    <CustomDropdown
+                        options="recordVariableOptions"
+                        defaultValue="fieldState.reused_variable?.id || ''"
+                        onChange="(value) => this.onSelectVariable(value)"
+                        placeholder="'Use current_record (default)'"
+                        searchable="true"
+                        width="''"
+                        maxHeight="'150px'"
+                    />
+                    <div t-if="!recordVariableOptions.length" class="text-muted small mt-1">
+                        No record variables defined. The current record will be passed automatically.
+                    </div>
+                </div>
+                <div class="alert alert-info" role="status">
+                    The node will call the selected automation using the record you picked and continue once it finishes.
+                    <br/>
+                    <strong>Generic automations</strong> work with any model and receive the record you pass as their active record.
+                </div>
+                <div class="mt-3 d-flex justify-content-end">
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        t-att-disabled="!fieldState.reused_work_auto_id"
+                        t-on-click="rewriteAutomationFlow"
+                    >
+                        Rewrite Flow
+                    </button>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

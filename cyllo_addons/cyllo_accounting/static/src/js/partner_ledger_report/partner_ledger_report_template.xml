@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <!--
+    The PartnerLedger template for the PartnerLedger component.
+
+    @param {Object} state - The state object containing the component's state data.
+    -->
+    <t t-name="PartnerLedger" t-inherit="cyllo_accounting.AccountingReportBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('cy_accounting_filters_sub')]" position="inside">
+            <t t-call="PartnerLedgerFilters"/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_table_main-view')]" position="inside">
+            <t t-call="PartnerLedgerBody"/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_filtered_data-body')]" position="before">
+            <div t-if="pager.total > 50" class="d-flex justify-content-end me-3 p-0">
+                <Pager total="pager.total"
+                       offset="pager.offset"
+                       limit="pager.limit"
+                       isEditable="false"
+                       onUpdate.bind="onPagerChanged"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_table_main-view')]" position="attributes">
+            <attribute name="class" remove="cy_table_main-view" add="cy_aged-pr-view" separator=" " />
+        </xpath>
+
+
+    </t>
+    <t t-name="PartnerLedgerFilters">
+        <button class="btn dropdown-toggle dropdown-toggle-none" type="button"  t-on-click="onClickPartners">
+            <span class="ri-user-line me-1"/>
+                        Partners
+        </button>
+        <!-- Time Range -->
+        <t t-call="dateRange">
+            <t t-set="dateFilterTemplate" t-value="'toAndFromDateFilter'"/>
+            <t t-set="separateAt" t-value="3"/>
+        </t>
+
+        <!--  Account Dropdown-->
+        <div class="drop dropdown">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-book" role="img"/>
+                    Account
+                    <t t-if="state.account_type.length"> : </t>
+                    <t t-foreach="state.account_type"
+                       t-as="account_key"
+                       t-key="account_key_index">
+                        <t t-esc="account_key"/>
+                        <t t-if="account_key_index != Object.keys(state.account_type).length - 1">
+                            ,
+                        </t>
+                    </t>
+                </t>
+                <DropdownItem class="{selected : state.account_type.includes('Receivable') }" onSelected.bind="() => this.AccountType('Receivable')">
+                    <span class="mx-2">Receivable</span>
+                </DropdownItem>
+                <DropdownItem class="{selected : state.account_type.includes('Payable') }" onSelected.bind="() => this.AccountType('Payable')">
+                    <span class="mx-2">Payable</span>
+                </DropdownItem>
+
+            </Dropdown>
+        </div>
+
+        <!-- Options Dropdown -->
+        <div class="drop dropdown">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-filter"/>
+                    <t t-if="!state.parent_state">
+                        Options: Posted Entries
+                    </t>
+                    <t t-else="">
+                        Options: Posted Entries, Draft Entries
+                    </t>
+                    <span class="code"/>
+                </t>
+                <DropdownItem onSelected.bind="toggleDraft">
+                    <i t-if="state.parent_state" class="ri-check-line"/>
+                    <span class="mx-2">Include Draft Entries</span>
+                </DropdownItem>
+                <DropdownItem onSelected.bind="toggleUnfold">
+                    <span t-if="state.isFolded" class="mx-2">UnFold All</span>
+                    <span t-else="" class="mx-2">Fold All</span>
+                </DropdownItem>
+
+            </Dropdown>
+        </div>
+    </t>
+    <t t-name="PartnerLedgerBody">
+        <div class="cy_table_age_pr">
+        <table class="cy_accounting_report_table" cellspacing="0" width="100%">
+            <thead>
+                <tr class="o_heading h-2-rem">
+                    <th colspan="6"/>
+                    <th>JRNL</th>
+                    <th>Account</th>
+                    <th>Accounting Date</th>
+                    <th>Due Date</th>
+                    <th>Matching Number</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                    <th>Amount Currency</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <t t-if="state.data?.partner_totals">
+                <LinesHeaderPartnerLedger t-foreach="Object.values(state.data.partner_totals)"
+                                          t-as="partner_ledger_total"
+                                          model="this.model"
+                                          filters="this.filters"
+                                          parentState="state.parent_state"
+                                          account_type="this.state.account_type"
+                                          t-key="partner_ledger_total_index"
+                                          partner_ledger_total="partner_ledger_total"
+                                          ledgerId="ledgerId" openAnnotation.bind="openAnnotation"
+                                          removeAnnotation.bind="removeAnnotation"
+                                          openAccounts="state.openAccounts"
+                                          callBackFn.bind="addPartnerToAccounts"
+                                          saveSession.bind="saveSession"
+                                          searchViewId="searchViewId"/>
+            </t>
+            <tr class="h-2-rem cy-report-line">
+                <th/>
+                <th colspan="10" class="o_heading">
+                    Total
+                </th>
+                <th class="o_heading">
+                    <t t-esc="state.data?.currency_id"/>
+                    <t t-out="state.data?.totalDebitSum"/>
+                </th>
+                <th class="o_heading">
+                    <t t-esc="state.data?.currency_id"/>
+                    <t t-out="state.data?.totalCreditSum"/>
+                </th>
+                <th/>
+                <th class="o_heading">
+                    <t t-esc="state.data?.currency_id"/>
+                    <t t-out="(state.data?.totalDebitSum - state.data?.totalCreditSum).toFixed(2)"/>
+                </th>
+            </tr>
+        </table>
+        </div>
+    </t>
+</templates>

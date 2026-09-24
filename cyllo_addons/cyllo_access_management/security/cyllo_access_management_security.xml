@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="module_category_cyllo_access_management" model="ir.module.category">
+        <field name="name">Access Management</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="group_access_management_admin" model="res.groups">
+        <field name="name">Access Management Admin</field>
+        <field name="category_id" ref="module_category_cyllo_access_management"/>
+        <field name="users"
+               eval="[
+               Command.link(ref('base.user_root')),
+               Command.link(ref('base.user_admin'))
+               ]"
+        />
+    </record>
+
+    <record id="rule_user_profile_company" model="ir.rule">
+        <field name="name">User Profile: Multi-Company</field>
+        <field name="model_id" ref="model_user_profile"/>
+        <field name="domain_force">['|', ('company_ids', '=', False), ('company_ids', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_profile_management_company" model="ir.rule">
+        <field name="name">Profile Management: Multi-Company</field>
+        <field name="model_id" ref="model_profile_management"/>
+        <field name="domain_force">['|', ('company_ids', '=', False), ('company_ids', 'in', company_ids)]</field>
+    </record>
+</odoo>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="web.NavBar" t-inherit-mode="extension" owl="1">
+        <xpath expr="//header[hasclass('o_navbar')]" position="inside">
+            <nav t-if="!isWebsiteEditing" t-ref="cyMenuSidebar" t-attf-class="cy-menu-sidebar">
+                <div class="cy-menu-sidebar-header">
+                    <div class="cy-menu-sidebar-current-app" t-if="menuSidebarState.isSidebarOpen">
+                        <img src="/cyllo_base/static/src/img/cyllo-logo.svg" class="cy-navbar-brand-icon" alt="Cyllo"/>
+                    </div>
+                    <div class="cy-menu-sidebar-home" t-attf-data-tooltip="{{menuSidebarState.isSidebarOpen? 'Collapse' : 'Expand'}}" data-tooltip-position="right" t-on-click="toggleMenuSidebar">
+                        <i t-if="!menuSidebarState.isSidebarOpen" class="ri-menu-line"/>
+                        <i t-if="menuSidebarState.isSidebarOpen" class="ri-arrow-left-s-line"/>
+                        <span class="cy-menu-sidebar-home-arrow">
+                            <i t-attf-class="{{menuSidebarState.isSidebarOpen ? 'ri-arrow-left-s-line' : 'ri-arrow-right-s-line'}}"/>
+                        </span>
+                    </div>
+                </div>
+
+                <ul class="cy-menu-sidebar-apps">
+                    <t t-foreach="menuService.getApps()" t-as="app" t-key="app.id">
+                        <li t-att-class="menuService.getCurrentApp() === app ? 'active' : ''" t-att-data-tooltip="!menuSidebarState.isSidebarOpen and app.name" data-tooltip-position="right" t-on-click="() => this.menuService.selectMenu(app)">
+                            <t t-call="cyllo_base.AppIcon"/>
+                            <span class="cy-menu-sidebar-app-name" t-esc="app.name"/>
+                        </li>
+                    </t>
+                </ul>
+
+                <div class="cy-menu-sidebar-search">
+                    <div class="cy-menu-sidebar-search-container" t-att-data-tooltip="!menuSidebarState.isSidebarOpen and ('Search apps and menus... (' + searchShortcutKey + ' + F)')" data-tooltip-position="right" t-on-click="handleSearchClick" data-hotkey="f">
+                        <i class="ri-search-line"/>
+                        <div class="cy-menu-sidebar-search-text-col">
+                            <span class="cy-menu-sidebar-search-text text-truncate">Search...</span>
+                            <span class="cy-menu-sidebar-search-text-hotkey text-truncate"><t t-esc="searchShortcutKey"/> + F</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </xpath>
+    </t>
+</templates>

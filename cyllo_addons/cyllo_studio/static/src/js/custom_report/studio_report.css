@@ -1,0 +1,3298 @@
+/* ===================================================
+   Cyllo Studio – Report Editor Styles
+   =================================================== */
+
+/* ── Report Frame / Editable Area ─────────────────── */
+.editable-area {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #1f2937;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+/* Ensure fixed page height */
+.editable-area .page {
+    box-sizing: border-box;
+    min-height: 297mm;
+    height: 297mm;
+    /*width: 210mm;*/
+    overflow: hidden;
+}
+
+/* ── Footer Preview Strip ──────────────────────────── */
+.cy-footer-preview-wrapper {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0 10mm 8mm 10mm;
+}
+
+.editable-area .cy-studio-page-host {
+    position: relative;
+    padding-bottom: 22mm;
+}
+
+.editable-area .cy-studio-page-host>.cy-footer-preview-wrapper {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8mm;
+    margin: 0;
+    padding: 0 10mm;
+    z-index: 2;
+}
+
+/* Controls bar above the preview area */
+.cy-footer-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f0f2f5;
+    border: 1px solid #dde0e6;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    padding: 5px 10px;
+    gap: 8px;
+}
+
+.cy-footer-ctrl-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6c757d;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.cy-footer-ctrl-items {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cy-footer-ctrl-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #444;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.cy-footer-ctrl-item input[type="checkbox"] {
+    width: 13px;
+    height: 13px;
+    accent-color: #9ea700;
+    cursor: pointer;
+    margin: 0;
+}
+
+.cy-footer-edit-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    color: #1a56db;
+    text-decoration: none;
+    border: 1px solid #b8d0f7;
+    border-radius: 3px;
+    padding: 1px 7px;
+    background: #dce8fb;
+    white-space: nowrap;
+    pointer-events: all !important;
+}
+
+.cy-footer-edit-link:hover {
+    background: #c3d9f8;
+    color: #1340a8;
+}
+
+/* Preview content area */
+.cy-footer-preview-area {
+    pointer-events: none;
+    user-select: none;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #555;
+    background: #f8f9fa;
+    border: 1px solid #dde0e6;
+    border-radius: 0 0 4px 4px;
+    padding: 7px 10px;
+    min-height: 32px;
+}
+
+/* Left / right row layout for the preview content */
+.cy-footer-preview-area .cy-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-top: 1px solid #ddd;
+    padding-top: 5px;
+}
+
+.cy-footer-preview-area .cy-footer-cell-left {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.cy-footer-preview-area .cy-footer-cell-right {
+    flex: 0 0 auto;
+    text-align: right;
+    white-space: nowrap;
+    color: #888;
+    margin-left: auto;
+}
+
+.cy-footer-empty-msg {
+    color: #aaa;
+    font-size: 11px;
+    font-style: italic;
+    text-align: center;
+    padding: 4px 0;
+}
+
+/* Odoo-style placeholder chip */
+.cy-footer-preview-area .cy-footer-placeholder {
+    display: inline-block;
+    background: #dce8fb;
+    color: #1a56db;
+    border: 1px solid #b8d0f7;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Expression chip – Page 1 / N */
+.cy-footer-preview-area .cy-footer-expr {
+    display: inline-block;
+    background: #fef3cd;
+    color: #7a5c00;
+    border: 1px dashed #f0c040;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 10px;
+    font-family: monospace;
+}
+
+.cy-footer-separator {
+    color: #bbb;
+    font-size: 11px;
+}
+
+
+/* ── Tables – use auto layout so column widths adapt to content ── */
+.editable-area table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+    margin-bottom: 8px;
+    page-break-inside: auto;
+}
+
+
+/* Header cells: never split mid-word */
+.editable-area table th {
+    padding: 4px 8px;
+    vertical-align: top;
+    border: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Data cells: wrap only at word boundaries, never mid-word */
+.editable-area table td {
+    padding: 4px 8px;
+    vertical-align: top;
+    border: none;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.editable-area table thead th {
+    border-bottom: 2px solid #111827;
+    font-weight: 700;
+    text-align: left;
+    background: transparent;
+    font-size: 12px;
+    color: #111827;
+    padding: 6px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.editable-area table tfoot td,
+.editable-area table tfoot th {
+    border-top: 2px solid #111827;
+    font-weight: 700;
+    text-align: right;
+    color: #111827;
+    padding-top: 6px;
+}
+
+.editable-area table tbody tr:last-child td {
+    border-bottom: 1px solid #ddd;
+}
+
+/* ── Images ──────────────────────────────────────── */
+.editable-area img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ── Bootstrap-like grid inside the editable area ── */
+.editable-area .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -10px;
+    margin-left: -10px;
+    box-sizing: border-box;
+}
+
+.editable-area [class*="col-"] {
+    padding-right: 10px;
+    padding-left: 10px;
+    box-sizing: border-box;
+}
+
+.editable-area .col-1 {
+    width: 8.333333%;
+}
+
+.editable-area .col-2 {
+    width: 16.666667%;
+}
+
+.editable-area .col-3 {
+    width: 25%;
+}
+
+.editable-area .col-4 {
+    width: 33.333333%;
+}
+
+.editable-area .col-5 {
+    width: 41.666667%;
+}
+
+.editable-area .col-6 {
+    width: 50%;
+}
+
+.editable-area .col-7 {
+    width: 58.333333%;
+}
+
+.editable-area .col-8 {
+    width: 66.666667%;
+}
+
+.editable-area .col-9 {
+    width: 75%;
+}
+
+.editable-area .col-10 {
+    width: 83.333333%;
+}
+
+.editable-area .col-11 {
+    width: 91.666667%;
+}
+
+.editable-area .col-12 {
+    width: 100%;
+}
+
+.editable-area .col-auto {
+    width: auto;
+}
+
+/* Offsets */
+.editable-area .offset-1 {
+    margin-left: 8.333333%;
+}
+
+.editable-area .offset-2 {
+    margin-left: 16.666667%;
+}
+
+.editable-area .offset-3 {
+    margin-left: 25%;
+}
+
+.editable-area .offset-4 {
+    margin-left: 33.333333%;
+}
+
+.editable-area .offset-5 {
+    margin-left: 41.666667%;
+}
+
+.editable-area .offset-6 {
+    margin-left: 50%;
+}
+
+/* Margin/Padding Utility compatibility */
+.editable-area .ms-auto {
+    margin-left: auto !important;
+}
+
+.editable-area .me-auto {
+    margin-right: auto !important;
+}
+
+.editable-area .mt-0 {
+    margin-top: 0 !important;
+}
+
+.editable-area .mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.editable-area .p-0 {
+    padding: 0 !important;
+}
+
+.editable-area .pt-0 {
+    padding-top: 0 !important;
+}
+
+/* ── Text utilities used by Odoo report templates ── */
+.editable-area .text-right {
+    text-align: right;
+}
+
+.editable-area .text-center {
+    text-align: center;
+}
+
+.editable-area .text-left {
+    text-align: left;
+}
+
+.editable-area .font-weight-bold,
+.editable-area strong {
+    font-weight: bold;
+}
+
+/* ── Odoo report helper classes ─────────────────── */
+.editable-area .o_report_page {
+    padding: 0;
+}
+
+.editable-area .address {
+    margin-bottom: 8px;
+}
+
+.editable-area .page-break {
+    page-break-before: always;
+}
+
+/* ── Selected element highlight ─────────────────── */
+.editable-area .selected {
+    outline: 2px dashed #5b8dee;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ── Drag-over highlight ─────────────────────────── */
+.gu-over {
+    outline: 2px dashed #43a047;
+    background-color: rgba(67, 160, 71, 0.05);
+}
+
+/* ── New dropped elements ────────────────────────── */
+.editable-area .c_new {
+    animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Dynamic Fields Luxury Styling ────────────────── */
+[cy-type='dynamic'] {
+    background-color: transparent !important;
+    color: inherit !important;
+    border: 1px dashed transparent !important;
+    border-radius: 2px !important;
+    padding: 0px 2px !important;
+    font-weight: inherit !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+    vertical-align: baseline;
+}
+
+[cy-type='dynamic']:hover,
+[cy-type='dynamic'].selected {
+    background-color: rgba(91, 141, 238, 0.08) !important;
+    border: 1px dashed rgba(91, 141, 238, 0.4) !important;
+}
+
+/* ── Table Node Styling ───────────────────────────── */
+[cy-type='table'] {
+    width: 100%;
+    margin: 15px 0;
+    transition: all 0.2s ease;
+}
+
+[cy-type='table']:hover,
+[cy-type='table'].selected {
+    outline: 2px dashed rgba(91, 141, 238, 0.4) !important;
+    outline-offset: -2px;
+}
+
+/* ── Unified Popup Handles ───────────────────────── */
+.table-handle-container,
+.field-handle-container {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    height: 20px;
+    background: #5b8dee;
+    border-radius: 4px;
+    display: none;
+    align-items: center;
+    padding: 0 4px;
+    gap: 6px;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.table-wrapper:hover>.table-handle-container,
+.table-wrapper.selected>.table-handle-container,
+.dynamic-field-wrapper:hover>.field-handle-container,
+.dynamic-field-wrapper.selected>.field-handle-container {
+    display: flex;
+}
+
+.table-handle,
+.field-handle {
+    color: white;
+    font-size: 14px;
+    font-family: 'remixicon' !important;
+    cursor: grab;
+    padding: 2px;
+    line-height: 1;
+}
+
+.table-delete,
+.field-delete {
+    color: #faf9f9;
+    font-size: 14px;
+    font-family: 'remixicon' !important;
+    cursor: pointer;
+    padding: 2px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.table-settings,
+.field-settings {
+    color: #faf9f9;
+    font-size: 14px;
+    font-family: 'remixicon' !important;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px;
+    transition: color 0.15s;
+}
+
+.table-delete:hover,
+.field-delete:hover {
+    color: white;
+}
+
+.table-settings:hover,
+.field-settings:hover {
+    color: white;
+}
+
+.table-wrapper {
+    position: relative;
+    margin: 0 !important;
+    padding: 0;
+    /* Buffer for selection click */
+    border: 1px transparent solid;
+    transition: border-color 0.2s;
+}
+
+/* Hit zone for selecting the table via border */
+.table-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 10px solid transparent;
+    /* Invisible hit zone */
+    pointer-events: none;
+    /* Let clicks pass through to wrapper */
+    z-index: 1;
+}
+
+.table-wrapper:hover {
+    border-color: rgba(91, 141, 238, 0.2);
+}
+
+.table-wrapper.selected table {
+    outline: 2px solid #5b8dee !important;
+    outline-offset: 4px;
+}
+
+[cy-type='table'] table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.text-danger {
+    color: #e35d6a !important;
+}
+
+.table-active {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ── Page Breaks for PDF Export ───────────────────── */
+
+.editable-area tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+}
+
+.editable-area thead {
+    display: table-header-group;
+}
+
+.editable-area tfoot {
+    display: table-footer-group;
+}
+
+
+/* ── Preview Mode Styling overrides ───────────────────────────────────── */
+.previewing [cy-type='dynamic'] {
+    background-color: transparent;
+    color: inherit;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    pointer-events: none;
+}
+
+.previewing [cy-type='box'] {
+    border: 1px dotted transparent !important;
+    pointer-events: none;
+}
+
+.previewing [cy-template] {
+    outline: none !important;
+    background: transparent !important;
+    pointer-events: none;
+}
+
+.previewing .table-handle,
+.previewing .box-handle,
+.previewing .field-handle {
+    display: none !important;
+}
+
+.previewing .selected {
+    outline: none !important;
+}
+
+/* ── Element Handles ────────────────────────────────── */
+.box-handle {
+    background: #5b8dee;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: none;
+    margin-right: 5px;
+    cursor: grab;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.box-wrapper:hover .box-handle,
+.box-wrapper.selected .box-handle,
+.dynamic-field-wrapper:hover .field-handle,
+.dynamic-field-wrapper.selected .field-handle {
+    display: inline-block;
+}
+
+.dynamic-field-wrapper {
+    position: relative;
+    padding: 2px 6px;
+    border: 1px dashed rgba(91, 141, 238, 0.4);
+    border-radius: 4px;
+    background: rgba(91, 141, 238, 0.05);
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    gap: 4px;
+}
+
+.field-container {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.field-label {
+    color: #444;
+    font-size: 0.95em;
+    font-weight: 700;
+}
+
+/* ════════════════════════════════════════════════════════════
+   BOX SECTION CONTAINER – full redesign
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Outer wrapper ──────────────────────────────────────── */
+.box-section-wrapper {
+    position: relative;
+    display: inline-block;
+    min-width: 80px;
+    min-height: 80px;
+    box-sizing: border-box;
+    margin-top: 28px;
+    vertical-align: top;
+}
+
+.box-section-wrapper.selected>.box-dropzone {
+    outline: 2px solid #5b8dee !important;
+    outline-offset: 2px;
+}
+
+/* ── Box Toolbar (drag, label, delete) ──────────────────── */
+.box-toolbar {
+    position: absolute;
+    top: -24px;
+    left: 0;
+    height: 22px;
+    background: #9ea700;
+    border-radius: 4px 4px 0 0;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    z-index: 200;
+    white-space: nowrap;
+    font-size: 10px;
+    color: white;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.box-section-wrapper:hover>.box-toolbar,
+.box-section-wrapper.selected>.box-toolbar {
+    display: flex;
+}
+
+.box-toolbar .box-drag-handle {
+    cursor: grab;
+    padding: 2px;
+    opacity: 0.9;
+}
+
+.box-toolbar .box-drag-handle:active {
+    cursor: grabbing;
+}
+
+.box-toolbar .box-label-text {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.box-toolbar .box-layout-badge {
+    font-size: 9px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    padding: 0 4px;
+    line-height: 16px;
+}
+
+.box-toolbar .box-delete-btn {
+    color: #ffdce0;
+    cursor: pointer;
+    padding: 2px;
+    margin-left: 4px;
+    transition: color 0.15s;
+}
+
+.box-toolbar .box-delete-btn:hover {
+    color: #fff;
+}
+
+/* ── 8-Point Resize Handles ─────────────────────────────── */
+.box-resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #5b8dee;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    z-index: 200;
+    display: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.box-section-wrapper:hover .box-resize-handle,
+.box-section-wrapper.selected .box-resize-handle {
+    display: block;
+}
+
+/* Corners */
+.box-resize-handle.nw {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.box-resize-handle.ne {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.box-resize-handle.sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+.box-resize-handle.se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+/* Edges */
+.box-resize-handle.n {
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: n-resize;
+}
+
+.box-resize-handle.s {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: s-resize;
+}
+
+.box-resize-handle.w {
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: w-resize;
+}
+
+.box-resize-handle.e {
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: e-resize;
+}
+
+/* ── Drop Zone ──────────────────────────────────────────── */
+.box-dropzone {
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.box-dropzone.layout-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.box-dropzone.layout-free {
+    position: relative;
+}
+
+/* Drag-over highlight */
+.box-dropzone.drag-over {
+    outline: 2px dashed #43a047 !important;
+    outline-offset: 3px;
+    background: rgba(67, 160, 71, 0.04) !important;
+}
+
+/* ── Empty box placeholder ──────────────────────────────── */
+.box-dropzone:empty::after {
+    content: 'Drop elements here';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 60px;
+    color: #aaa;
+    font-size: 11px;
+    font-style: italic;
+    pointer-events: none;
+    border: 1.5px dashed #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* ── Preview mode – hide resize/toolbar ── */
+.previewing .box-toolbar,
+.previewing .box-resize-handle {
+    display: none !important;
+}
+
+.previewing .box-section-wrapper.selected>.box-dropzone {
+    outline: none !important;
+}
+
+/* ── Box Properties Panel Sidebar ───────────────────────── */
+.box-props-panel {
+    width: 260px;
+    background: #ffffff;
+    border-left: 1px solid #e5e7eb;
+    overflow-y: auto;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.06);
+}
+
+.box-props-header {
+    padding: 12px 16px;
+    background: #9ea700;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.box-props-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+}
+
+.box-props-close:hover {
+    color: white;
+}
+
+.box-props-body {
+    padding: 16px;
+    flex: 1;
+}
+
+.box-props-section {
+    margin-bottom: 16px;
+}
+
+.box-props-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.box-props-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.box-props-row label {
+    font-size: 11px;
+    color: #374151;
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.box-props-row input,
+.box-props-row select {
+    flex: 1;
+    font-size: 12px;
+    padding: 3px 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    color: #111;
+    background: #fff;
+}
+
+.box-props-row input:focus,
+.box-props-row select:focus {
+    outline: none;
+    border-color: #9ea700;
+    box-shadow: 0 0 0 2px rgba(158, 167, 0, 0.15);
+}
+
+.box-layout-toggle {
+    display: flex;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.box-layout-toggle button {
+    flex: 1;
+    border: none;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 0;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.box-layout-toggle button.active {
+    background: #9ea700;
+    color: white;
+}
+
+.box-props-delete-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 7px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.box-props-delete-btn:hover {
+    background: #fca5a5;
+    color: #7f1d1d;
+}
+
+/* ── Legacy box-wrapper compat ──────────────────────────── */
+.box-wrapper {
+    position: relative;
+}
+
+/* ── Enhanced Preview Styling ────────────────────────────────────────── */
+.bg-dark-main {
+    background-color: #1a1b1e !important;
+}
+
+.bg-black {
+    background-color: #000000 !important;
+}
+
+.preview-top-toolbar {
+    transition: all 0.3s ease;
+    background: rgba(33, 37, 41, 0.9) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination-controls .btn-dark {
+    background: #2b2d31;
+    border: none;
+}
+
+.pagination-controls .btn-dark:hover {
+    background: #3b3e44;
+}
+
+.snippet-panel.bg-dark {
+    background-color: #212529 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.snippet-panel.bg-dark .form-control,
+.snippet-panel.bg-dark .form-select {
+    font-size: 13px;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.snippet-panel.bg-dark .form-control:focus,
+.snippet-panel.bg-dark .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* ── Modern Preview Sidebar Styling (Light Theme) ──────────────────────── */
+.modern-preview-sidebar {
+    padding: 0 16px;
+}
+
+.modern-preview-sidebar .tracking-wider {
+    letter-spacing: 1px;
+}
+
+.modern-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #bcbba7;
+    margin-bottom: 6px;
+}
+
+.modern-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.modern-input-wrapper .input-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-color) !important;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.modern-preview-sidebar .modern-input,
+.modern-preview-sidebar .modern-select {
+    background: var(--input-background-color) !important;
+    border: 1px solid var(--input-border-color) !important;
+    color: var(--text-color) !important;
+    font-size: 13px;
+    font-family: inter, system-ui, sans-serif;
+    padding: 0.44rem 12px 0.44rem 36px;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: none;
+}
+
+.modern-preview-sidebar .modern-input::placeholder {
+    color: #85857d;
+}
+
+.modern-preview-sidebar .modern-input:focus,
+.modern-preview-sidebar .modern-select:focus {
+    background: var(--input-background-color) !important;
+    border-color: #9ea700 !important;
+    box-shadow: 0 0 0 2px rgba(158, 167, 0, 0.15);
+    outline: none;
+}
+
+/* Fix CylloStudioDropdown inside modern sidebar */
+.modern-input-wrapper.cy-studio-custom-dropdown .custom-dropdown .o-autocomplete--input,
+.modern-input-wrapper.cy-studio-custom-dropdown .custom-dropdown .selected-text {
+    background: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.modern-preview-sidebar .modern-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23bcbba7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+}
+
+.modern-toggle-card {
+    background: var(--input-background-color) !important;
+    border: 1px solid var(--input-border-color) !important;
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.modern-toggle-card:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.modern-toggle-card-heading {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e2e2;
+    line-height: 1.2;
+}
+
+.modern-toggle-card-subtitle {
+    font-size: 12px;
+    color: #b9b9b9;
+    line-height: 1.2;
+}
+
+.custom-switch {
+    width: 36px !important;
+    height: 20px !important;
+    cursor: pointer;
+    background-color: #cbd5e1;
+    border: none;
+}
+
+.custom-switch:checked {
+    background-color: #3b82f6;
+}
+
+.modern-action-btn {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.modern-action-btn.primary-action {
+    background: #9ea700;
+    border: none;
+    color: #ffffff;
+}
+
+.modern-action-btn.primary-action:hover {
+    background: #8b9300;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(158, 167, 0, 0.25);
+}
+
+.modern-action-btn.danger-action {
+    background: #e85e6a;
+    border: none;
+    color: #ffffff;
+}
+
+.modern-action-btn.danger-action:hover {
+    background: #d45561;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(232, 94, 106, 0.25);
+}
+
+.cyllo-studio-report-container.shadow-lg {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.live-report-content {
+    background: white;
+    min-height: 100%;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Snippet panel ───────────────────────────────── */
+.snippet-panel .snippet {
+    user-select: none;
+    cursor: grab;
+}
+
+.snippet-panel .snippet:active {
+    cursor: grabbing;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ── Native DnD transit / dragging states ──────────── */
+.gu-transit {
+    opacity: 0.35;
+    border: 2px dashed #5b8dee;
+    outline: 2px dashed #9ab83a;
+    outline-offset: 2px;
+}
+
+.snippet-panel .snippet.dragging {
+    opacity: 0.5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* =============================================================================
+   Cyllo Studio – MediumEditor Toolbar Theme
+   ============================================================================= */
+
+/* ── Toolbar container ──────────────────────────────────────────────────────── */
+.medium-editor-toolbar {
+    background: #2b2f2c !important;
+    border: 1px solid #3e4440 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5) !important;
+    padding: 3px 5px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 1px !important;
+    overflow: visible !important;
+}
+
+.medium-editor-toolbar-arrow {
+    display: none !important;
+}
+
+/* ── Button list ────────────────────────────────────────────────────────────── */
+.medium-editor-toolbar ul {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 1px !important;
+}
+
+.medium-editor-toolbar li {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.medium-editor-toolbar li button {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: #b8bfba !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    font-family: 'Georgia', 'Times New Roman', serif !important;
+    cursor: pointer !important;
+    transition: background 0.12s ease, color 0.12s ease !important;
+    line-height: 1 !important;
+    outline: none !important;
+}
+
+.medium-editor-toolbar li button:hover {
+    background: #353b37 !important;
+    color: #9ab83a !important;
+}
+
+.medium-editor-toolbar li button.medium-editor-button-active {
+    background: #2d3d1c !important;
+    color: #9ab83a !important;
+    box-shadow: inset 0 0 0 1px #556b22 !important;
+}
+
+/* ── Anchor / link form — COMPACT ───────────────────────────────────────────── */
+.medium-editor-toolbar-form {
+    background: #2b2f2c !important;
+    border: 1px solid #3e4440 !important;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: auto !important;
+    max-width: 280px !important;
+    min-width: 0 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.medium-editor-toolbar-input {
+    background: #222622 !important;
+    border: 1px solid #3e4440 !important;
+    border-radius: 5px !important;
+    color: #c8cec9 !important;
+    font-size: 11px !important;
+    padding: 3px 7px !important;
+    outline: none !important;
+    width: 160px !important;
+    min-width: 0 !important;
+    max-width: 160px !important;
+    transition: border-color 0.12s !important;
+}
+
+.medium-editor-toolbar-input:focus {
+    border-color: #9ab83a !important;
+    box-shadow: 0 0 0 2px rgba(154, 184, 58, 0.15) !important;
+}
+
+.medium-editor-toolbar-input::placeholder {
+    color: #606860 !important;
+    font-size: 11px !important;
+}
+
+/* ✓ save and ✗ cancel link buttons */
+.medium-editor-toolbar-form a {
+    color: #7a8c7c !important;
+    font-size: 14px !important;
+    text-decoration: none !important;
+    line-height: 1 !important;
+    width: 22px !important;
+    height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    transition: background 0.12s, color 0.12s !important;
+    flex-shrink: 0 !important;
+}
+
+.medium-editor-toolbar-form a:hover {
+    color: #9ab83a !important;
+    background: #353b37 !important;
+}
+
+.medium-editor-toolbar-form a.medium-editor-toolbar-close {
+    color: #7a4040 !important;
+}
+
+.medium-editor-toolbar-form a.medium-editor-toolbar-close:hover {
+    color: #e05a5a !important;
+    background: #3d1e1e !important;
+}
+
+/* ── Selected element highlight ─────────────────────────────────────────────── */
+.selected {
+    outline: 2px solid #9ab83a !important;
+    outline-offset: 2px !important;
+    border-radius: 3px !important;
+}
+
+/* ── Drag states ────────────────────────────────────────────────────────────── */
+
+.gu-mirror {
+    opacity: 0.9 !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45) !important;
+    border-radius: 4px !important;
+    cursor: grabbing !important;
+}
+
+[cy-template].gu-over {
+    outline: 2px dashed #9ab83a !important;
+    outline-offset: 3px !important;
+    background: rgba(154, 184, 58, 0.04) !important;
+    border-radius: 4px !important;
+}
+
+[cy-template] {
+    min-height: 20px;
+    position: relative;
+}
+
+
+.cyllo-studio-report-container,
+.d-flex.flex-column {
+    min-height: 0;
+}
+
+/* ── Sidebar Action Buttons ───────────────────────── */
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+
+
+/* ── Source Editor Refinement ─────────────────────────── */
+.source-editor-container {
+    height: 100%;
+    position: relative;
+    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+#ace-editor {
+    border: none !important;
+    line-height: 1.6;
+    background: #1a1b1e !important;
+    min-height: 500px;
+}
+
+.source-editor-header {
+    background: #2b2d31 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff !important;
+}
+
+/* ===================================================================
+   Table Config Modal — Light theme with Cyllo green accents
+   =================================================================== */
+
+.tcm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 10500 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: tcm-fadeIn 0.2s ease;
+}
+
+@keyframes tcm-fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.tcm-modal {
+    background: #ffffff;
+    width: 560px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    animation: tcm-slideUp 0.25s ease;
+}
+
+@keyframes tcm-slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Modal header ──────────────────────────────────── */
+.tcm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tcm-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tcm-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.tcm-close:hover {
+    color: #374151;
+}
+
+/* ── Section layout ────────────────────────────────── */
+.tcm-section {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tcm-section:last-of-type {
+    border-bottom: none;
+}
+
+.tcm-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+/* ── Preset cards — 2×2 grid ──────────────────────── */
+.tcm-preset-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.tcm-preset-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 72px;
+}
+
+.tcm-preset-card:hover {
+    border-color: #d1d5db;
+    background: #f3f4f6;
+}
+
+.tcm-preset-card.active {
+    background: #f0faf3;
+    border: 2px solid #2d9c4a;
+}
+
+.tcm-preset-card.active .tcm-preset-title {
+    color: #2d9c4a;
+}
+
+.tcm-preset-icon {
+    font-size: 18px;
+    color: #9ca3af;
+    margin-top: 2px;
+    flex-shrink: 0;
+    width: 22px;
+    text-align: center;
+}
+
+.tcm-preset-card.active .tcm-preset-icon {
+    color: #2d9c4a;
+}
+
+.tcm-preset-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.tcm-preset-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 2px;
+}
+
+.tcm-preset-desc {
+    font-size: 11px;
+    color: #9ca3af;
+    line-height: 1.3;
+}
+
+/* ── Inputs & dropdowns ───────────────────────────── */
+.tcm-input,
+.tcm-select {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 13px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #374151;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.tcm-input:focus,
+.tcm-select:focus {
+    border-color: #2d9c4a;
+    box-shadow: 0 0 0 3px rgba(45, 156, 74, 0.10);
+}
+
+.tcm-input::placeholder {
+    color: #9ca3af;
+}
+
+.tcm-input-sm {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* ── Column rows ──────────────────────────────────── */
+.tcm-col-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.tcm-add-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2d9c4a;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.tcm-add-btn:hover {
+    background: #f0faf3;
+}
+
+.tcm-col-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.tcm-col-row:hover {
+    background: #f3f4f6;
+}
+
+.tcm-col-drag {
+    cursor: grab;
+    color: #d1d5db;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.tcm-col-drag:active {
+    cursor: grabbing;
+}
+
+.tcm-col-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.tcm-col-remove {
+    background: none;
+    border: none;
+    color: #d1d5db;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.tcm-col-remove:hover {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+.tcm-col-agg {
+    width: 90px;
+    flex-shrink: 0;
+}
+
+.tcm-col-width {
+    width: 70px;
+    flex-shrink: 0;
+}
+
+/* ── Radio buttons ────────────────────────────────── */
+.tcm-radio-group {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.tcm-radio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+}
+
+.tcm-radio input[type="radio"] {
+    accent-color: #2d9c4a;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.tcm-manual-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+.tcm-manual-count label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.tcm-manual-count input {
+    width: 60px;
+}
+
+/* ── Checkboxes (Options) ─────────────────────────── */
+.tcm-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.tcm-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+}
+
+.tcm-checkbox input[type="checkbox"] {
+    accent-color: #2d9c4a;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* ── Domain editor ────────────────────────────────── */
+.tcm-domain-editor {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.tcm-domain-editor label {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* ── Warning / info text ──────────────────────────── */
+.tcm-warning {
+    color: #b45309;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.tcm-info {
+    color: #6b7280;
+    font-size: 11px;
+}
+
+.tcm-field-meta {
+    font-size: 10px;
+    color: #9ca3af;
+    margin-left: 4px;
+}
+
+/* ── Footer ───────────────────────────────────────── */
+.tcm-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.tcm-btn-cancel {
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.tcm-btn-cancel:hover {
+    background: #f3f4f6;
+}
+
+.tcm-btn-insert {
+    padding: 8px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    background: #2d9c4a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.tcm-btn-insert:hover {
+    background: #247a3b;
+}
+
+.tcm-btn-insert:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* ── Empty state ──────────────────────────────────── */
+.tcm-empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #9ca3af;
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* ── Table Toolbar ─────────────────────────────────── */
+.table-toolbar {
+    position: absolute;
+    background: #2b2f2c !important;
+    border: 1px solid #3e4440 !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+    display: flex !important;
+    gap: 4px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+    /* ── Table Wrapper & Handle ───────────────────────── */
+    .table-wrapper {
+        position: relative !important;
+        padding-top: 15px !important;
+        margin-bottom: 20px !important;
+        border: 1px dashed transparent !important;
+        transition: all 0.2s !important;
+    }
+
+    .table-wrapper:hover {
+        border-color: #9ab83a !important;
+    }
+
+    .table-wrapper.selected {
+        border: 1px solid #9ab83a !important;
+        background: rgba(154, 184, 58, 0.02) !important;
+    }
+
+    .table-handle-container {
+        position: absolute !important;
+        top: -10px;
+        left: -10px;
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        background: #9ab83a;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 1px solid white;
+    }
+
+    .table-handle {
+        width: 22px;
+        height: 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        font-size: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .table-delete {
+        width: 22px;
+        height: 22px;
+        background: #e35d6a;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 10px;
+        transition: background 0.2s;
+    }
+
+    .table-delete:hover {
+        background: #c62828 !important;
+    }
+
+    .table-settings {
+        width: 22px;
+        height: 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .table-settings:hover {
+        background: #8aa334;
+    }
+
+    .table-handle:hover {
+        background: #8aa334;
+    }
+
+    /* ── Field Block (Atomic Unit) ─────────────────────── */
+    .field-block {
+        position: relative !important;
+        display: inline-flex !important;
+        max-width: 100%;
+        padding: 0 !important;
+        outline: 1px dashed rgba(91, 141, 238, 0.15) !important;
+        outline-offset: -1px;
+        background: transparent !important;
+        transition: all 0.2s !important;
+        cursor: grab !important;
+        vertical-align: baseline;
+    }
+
+    .field-block:hover {
+        outline-color: rgba(91, 141, 238, 0.5) !important;
+    }
+
+    .field-block.selected {
+        border: 1px solid #9ab83a !important;
+        background: #f0f4e4 !important;
+        box-shadow: 0 0 5px rgba(154, 184, 58, 0.2) !important;
+    }
+
+
+
+
+
+    .field-delete:hover {
+        color: #e35d6a;
+    }
+}
+
+/* ── Text Nodes ────────────────────────────────────── */
+.text-node {
+    position: relative;
+    display: inline-block;
+    min-width: 10px;
+    min-height: 1em;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    cursor: grab;
+    vertical-align: middle;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.text-node:active {
+    cursor: grabbing;
+}
+
+.text-node.selected {
+    outline: 1px dashed rgba(154, 184, 58, 0.6);
+    outline-offset: 2px;
+}
+
+.text-node[contenteditable="true"] {
+    cursor: text;
+    outline: 1px solid #9ab83a;
+    outline-offset: 2px;
+}
+
+/* ===================================================================
+   QR Code Wizard Styles
+   =================================================================== */
+
+.qr-wizard-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 10500 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-wizard-modal {
+    background: #ffffff;
+    width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.qr-wizard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.qr-wizard-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.qr-wizard-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #9ca3af;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.qr-type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 24px;
+}
+
+.qr-type-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.qr-type-card:hover {
+    border-color: #d1d5db;
+    background: #f3f4f6;
+    transform: translateY(-2px);
+}
+
+.qr-type-card.active {
+    border-color: #9ea700;
+    background: #fdfdf2;
+    box-shadow: 0 0 0 1px #9ea700;
+}
+
+.qr-card-icon {
+    font-size: 24px;
+    color: #9ea700;
+    margin-bottom: 4px;
+}
+
+.qr-card-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #111827;
+}
+
+.qr-card-desc {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.qr-card-preview {
+    font-size: 10px;
+    font-family: monospace;
+    color: #9ca3af;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+.qr-config-panel {
+    padding: 24px;
+    min-height: 300px;
+}
+
+.qr-detected-info {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.qr-preview-container {
+    display: flex;
+    gap: 24px;
+    padding: 0 24px 24px;
+}
+
+.qr-preview-left {
+    flex: 0 0 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.qr-image-box {
+    width: 110px;
+    height: 110px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    padding: 10px;
+}
+
+.qr-image-box img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.qr-preview-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.qr-style-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.qr-label-sm {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+}
+
+.qr-align-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.qr-align-btn {
+    flex: 1;
+    height: 32px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.qr-align-btn i {
+    font-size: 14px;
+}
+
+.qr-align-btn.active {
+    background: #9ea700;
+    border-color: #9ea700;
+    color: white;
+}
+
+.qr-field-inline {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.qr-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.qr-step-indicator {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.qr-nav-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.qr-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d5db;
+}
+
+.qr-dot.active {
+    background: #9ea700;
+}
+
+.qr-dot.completed {
+    background: #9ea700;
+    opacity: 0.5;
+}
+
+.qr-preview-str {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 11px;
+    word-break: break-all;
+    margin-top: 12px;
+}
+
+.qr-qweb-code {
+    background: #1e293b;
+    color: #cbd5e1;
+    font-family: monospace;
+    font-size: 10px;
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    line-height: 1.4;
+}
+
+.qr-btn-primary {
+    background: #9ea700;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.qr-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.qr-btn-secondary {
+    background: #e5e7eb;
+    color: #374151;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.bg-light {
+    background: #ffffff !important;
+}
+
+/* ── Issue 4B: QR Block – visible in edit mode ───────────────────────────── */
+.s_qr_block {
+    position: relative;
+    display: inline-block;
+    margin-top: 18px;
+    /* room for the handle above */
+    vertical-align: top;
+}
+
+/* The dashed placeholder is purely for edit-mode visibility */
+.s_qr_block .qr-edit-placeholder {
+    cursor: default;
+    transition: box-shadow 0.2s ease;
+}
+
+.s_qr_block:hover .qr-edit-placeholder,
+.s_qr_block.selected .qr-edit-placeholder {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.s_qr_block:hover .qr-handle-container,
+.s_qr_block.selected .qr-handle-container {
+    display: flex !important;
+}
+
+/* Hide the edit placeholder in preview mode */
+.previewing .s_qr_block .qr-edit-placeholder {
+    display: none !important;
+}
+
+.previewing .s_qr_block .qr-handle-container {
+    display: none !important;
+}
+
+/* ── A4 page bottom boundary ───────────────────────────────────────────────── */
+/* .cy-studio.rounded.m-2.overflow-hidden.border-view.shadow {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+} */
+
+/* .border-view {
+    height: auto !important;
+    min-height: 0 !important;
+} */
+
+/* Strong downward shadow on the paper container to visually "ground" the page */
+.cyllo-studio-report-container {
+    overflow: visible;
+    background: #ffffff;
+    border-radius: 4px;
+    max-width: none;
+    margin: 24px auto;
+    padding: 40px 48px;
+    border-top: 3px solid #9ea700;
+    box-sizing: border-box;
+    position: relative;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+    background-image: repeating-linear-gradient(to bottom,
+            transparent 0,
+            transparent calc(var(--cy-page-height, 297mm) - 1px));
+    /*background-image: repeating-linear-gradient(to bottom,*/
+    /*        transparent 0,*/
+    /*        transparent calc(var(--cy-page-height, 297mm) - 1px),*/
+    /*        rgba(229, 57, 53, 0.45) calc(var(--cy-page-height, 297mm) - 1px),*/
+    /*        rgba(229, 57, 53, 0.45) var(--cy-page-height, 297mm));*/
+    background-size: 100% var(--cy-page-height, 297mm);
+    background-repeat: repeat-y;
+}
+
+/* "End of Page" label below the A4 sheet */
+.cyllo-end-of-page-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    gap: 10px;
+}
+
+.cyllo-end-of-page-marker::before,
+.cyllo-end-of-page-marker::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: #b0b8c6;
+}
+
+.cyllo-end-of-page-marker span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9aa3b0;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    user-select: none;
+}
+
+/* ── Report Editor Header Buttons ─────────────────────────────────────────── */
+
+/* Back icon button */
+.cy-back-icon-btn {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #e2e2e2;
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: none;
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cy-back-icon-btn:hover,
+.cy-back-icon-btn:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #9ea700 !important;
+    box-shadow: none !important;
+}
+
+/* Save button - Cyllo Green */
+/* .cy-hdr-save {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 6px 20px;
+    background: #9ea700;
+    border: 1px solid #9ea700;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(158, 167, 0, 0.25);
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.cy-hdr-save:hover {
+    background: #8b9200;
+    border-color: #8b9200;
+    box-shadow: 0 4px 8px rgba(158, 167, 0, 0.35);
+}
+
+.cy-hdr-save:disabled {
+    background: #c8ccc0 !important;
+    border-color: #c8ccc0 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+} */
+
+/* Discard button - neutral */
+/* .cy-hdr-discard {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 6px 20px;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    color: #bcbba7;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-width: 0;
+    white-space: nowrap;
+    box-shadow: none;
+    border-color: #4b4934;
+}
+
+.cy-hdr-discard:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #4b4934;
+    color: #e2e2e2;
+} */
+
+span.badge.rounded-pill.bg-primary {
+    color: #ffffff;
+}
+
+/*justify-content: center !important;*/
+/*transition: all 0.2s ease !important;*/
+/*cursor: pointer !important;*/
+/*min-width: 0 !important;*/
+/*white-space: nowrap !important;*/
+/*box-shadow: none !important;*/
+/*}*/
+
+
+
+/* ── Signature Node Styling ────────────────────────────────────────────── */
+.sign-wrapper {
+    position: relative;
+    box-sizing: border-box;
+    margin: 5px;
+    display: inline-block;
+    transition: outline 0.2s, box-shadow 0.2s;
+}
+
+.sign-wrapper:hover {
+    outline: 2px dashed #ccc;
+}
+
+.sign-wrapper.selected {
+    outline: 2px solid #5b8dee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sign-toolbar {
+    position: absolute;
+    top: -24px;
+    left: 0;
+    background: #5b8dee;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    gap: 2px;
+    padding: 2px 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.sign-wrapper:hover>.sign-toolbar,
+.sign-wrapper.selected>.sign-toolbar {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.sign-toolbar span {
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+.sign-toolbar span:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.sign-drag-handle {
+    cursor: grab !important;
+}
+
+.sign-drag-handle:active {
+    cursor: grabbing !important;
+}
+
+.sign-delete-btn:hover {
+    background: #e85e6a !important;
+}
+
+.sign-resize-handles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.sign-resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border: 2px solid #5b8dee;
+    border-radius: 50%;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.sign-wrapper:hover .sign-resize-handle,
+.sign-wrapper.selected .sign-resize-handle {
+    opacity: 1;
+}
+
+.sign-resize-handle[data-dir="se"] {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+.o_sign_placeholder {
+    display: inline-block;
+    vertical-align: top;
+    margin: 5px;
+}
+
+.previewing .sign-wrapper.selected {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.previewing .sign-toolbar,
+.previewing .sign-resize-handle {
+    display: none !important;
+}
+
+/* ===================================================
+   Overflow Guard – Page Boundary Indicator
+   =================================================== */
+
+/* ── Red dashed line at the page boundary ─────────── */
+.cy-page-overflow-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0;
+    border-top: 1px dashed #e53935;
+    pointer-events: none;
+    z-index: 50;
+    transition: top 0.2s ease;
+}
+
+/* Label badge sitting on the red line */
+.cy-page-overflow-line::after {
+    content: 'Page boundary';
+    position: absolute;
+    right: 12px;
+    top: -11px;
+    background: #e53935;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* ── Sticky overflow warning banner ───────────────── */
+.cy-overflow-warning {
+    position: sticky;
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff3f3;
+    border: 1.5px solid #e53935;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 0 24px 0 24px;
+    box-shadow: 0 4px 16px rgba(229, 57, 53, 0.18);
+    animation: cy-overflow-fadein 0.25s ease;
+    pointer-events: none;
+}
+
+.cy-overflow-warning.hidden {
+    display: none;
+}
+
+@keyframes cy-overflow-fadein {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cy-overflow-warning-icon {
+    color: #e53935;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.cy-overflow-warning-text {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b71c1c;
+    line-height: 1.4;
+}
+
+.cy-overflow-warning-sub {
+    font-weight: 400;
+    color: #c62828;
+    font-size: 11px;
+}
+
+/* ── Highlight elements that cross the boundary ───── */
+.cy-overflowing {
+    outline: 2px solid #e53935 !important;
+    outline-offset: 2px !important;
+    background-color: rgba(229, 57, 53, 0.05) !important;
+}
+
+/* ===================================================
+   Block Settings Popup & Visibility 
+   =================================================== */
+
+.cy-medium-settings-popup {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    width: 340px;
+    height: auto !important;
+    z-index: 10500 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #334155;
+    font-size: 13px;
+    overflow: hidden;
+}
+
+.cy-medium-settings-popup .settings-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cy-medium-settings-popup .settings-header h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.cy-medium-settings-popup .settings-header .close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #64748b;
+    line-height: 1;
+}
+
+.cy-medium-settings-popup .settings-body {
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.cy-medium-settings-popup .settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cy-medium-settings-popup .settings-section h5 {
+    margin: 0;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+}
+
+.cy-medium-settings-popup .settings-section div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.cy-medium-settings-popup .settings-section div label {
+    flex: 0 0 70px;
+    margin: 0;
+    font-size: 12px;
+    color: #475569;
+}
+
+.cy-medium-settings-popup .settings-section div input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    background: #fff;
+}
+
+.cy-medium-settings-popup .settings-section label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    margin: 0;
+    font-size: 13px;
+}
+
+/* cy-block-hidden styles moved to bottom of file (enhanced version) */
+/* .cy-block-hidden and ::before are now defined with !important overrides below */
+
+/* ── Enhanced cy-block-hidden for all block types ─── */
+.cy-block-hidden {
+    opacity: 0.5 !important;
+    position: relative !important;
+    border: 2px dashed #d8d7d7 !important;
+    overflow: visible !important;
+}
+
+.cy-block-hidden::after {
+    content: 'Hidden';
+    position: absolute;
+    top: -13px;
+    left: 0;
+    background: #8a8888;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px 4px 0 0;
+    z-index: 1000;
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1.6;
+    box-shadow: 0 -2px 4px rgba(239, 68, 68, 0.25);
+}
+
+.table-wrapper.cy-block-hidden,
+.field-block.cy-block-hidden,
+.box-section-wrapper.cy-block-hidden,
+.sign-wrapper.cy-block-hidden,
+.text-node.cy-block-hidden {
+    position: relative !important;
+    overflow: visible !important;
+    margin-top: 14px !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   CYLLO STUDIO - SIDEBAR REDESIGN
+   ════════════════════════════════════════════════════════════ */
+
+.cy-snippet-panel {
+    background: var(--background-color-bg);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif !important;
+}
+
+.cy-report-section {
+    padding: 0 16px;
+}
+
+.cy-snippet-panel .cy-section-label {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
+.cy-snippet-panel .cy-section-label:first-child {
+    margin-top: 8px;
+}
+
+.cy-snippet-panel .cy-section-label span {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-color, #e2e2e2);
+}
+
+.cy-footer-textarea {
+    width: 100%;
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-background-color);
+    border-radius: 8px;
+    padding: 0.44rem 10px;
+    color: var(--text-color) !important;
+    font-size: 12px;
+    font-weight: normal;
+    resize: none;
+}
+
+.cy-footer-textarea:focus {
+    outline: none;
+    border-color: #9ea700;
+    box-shadow: none;
+}
+
+.cy-footer-textarea::placeholder {
+    color: #85857d;
+}
+
+.cy-snippet-panel .cy-node-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--input-border-color) !important;
+    background-color: var(--input-background-color) !important;
+    border-radius: 10px;
+    padding: 9px 10px;
+    gap: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    margin-bottom: 5px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.cy-snippet-panel .cy-node-card:active {
+    cursor: grabbing;
+}
+
+.cy-snippet-panel .cy-node-card:hover {
+    border-color: #c8ca80 !important;
+}
+
+.cy-snippet-panel .cy-node-card:hover .cy-node-accent {
+    opacity: 1;
+}
+
+.cy-snippet-panel .cy-node-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    color: #9ea700;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.cy-snippet-panel .cy-node-icon-wrap i {
+    font-size: 28px !important;
+    color: #9ea700 !important;
+    line-height: 1 !important;
+}
+
+
+.cy-snippet-panel .cy-node-text {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.cy-snippet-panel .cy-node-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #e2e2e2;
+    line-height: 1.2;
+}
+
+.cy-snippet-panel .cy-node-desc {
+    font-size: 12px;
+    color: #b9b9b9;
+    margin-top: 1px;
+    line-height: 1.2;
+}
+
+.cy-snippet-panel .cy-node-card .ri-draggable {
+    font-size: 20px;
+    color: #c8ca80;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.cy-snippet-panel .cy-node-card:hover .ri-draggable {
+    opacity: 1;
+}
+
+.cy-snippet-report-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #bcbba7;
+    margin-bottom: 6px;
+}
+
+.cy-snippet-panel .cy-tech-tools {
+    display: flex;
+    flex-direction: row;
+    gap: 7px;
+    margin-top: 8px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   CYLLO STUDIO - REPORT EDITOR REFINEMENTS (ICONS, HEADER, SHEET)
+   ════════════════════════════════════════════════════════════ */
+
+/* 1. Sidebar Icons Override */
+.cy-report {
+    background: var(--body-bg);
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+}
+
+/* 2. Top Header Bar */
+.cy-report-hdr {
+    background-color: var(--navbar-bg);
+    padding: var(--navbar-padding);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    margin-bottom: 8px;
+    border-radius: 8px;
+}
+
+.cy-report-hdr .cy-bc-trail {
+    max-width: 500px;
+}
+
+.cy-report-body {
+    border-radius: 8px;
+}
+
+.cy-back-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #9ea700 !important;
+    box-shadow: none !important;
+}
+
+.cy-report-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e2e2;
+    margin-right: auto;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Section 4: Breadcrumb in header bar ── */
+.cy-report-breadcrumb {
+    font-size: 13px;
+    color: #6b7280;
+    margin-right: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 340px;
+}
+
+.cy-report-breadcrumb strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+/* Preview Toggle */
+.cy-preview-toggle span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #bcbba7;
+}
+
+.cy-switch-wrap {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+
+.cy-switch-wrap input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.cy-switch-wrap .cy-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    transition: .4s;
+    height: 20px;
+}
+
+.cy-switch-wrap .cy-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    top: 2px;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked+.cy-slider {
+    background-color: #9ea700;
+}
+
+input:checked+.cy-slider:before {
+    transform: translateX(16px);
+    background-color: #ffffff;
+}
+
+.cy-report-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    background: #EEEEEE;
+    border-radius: 6px;
+
+    button.prev {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    button.next {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+    }
+}
+
+/* 3. Report Sheet Style */
+.cy-canvas-area {
+    background: #e9ecef;
+    padding: 32px 24px;
+    max-height: none;
+    overflow: auto;
+}
+
+.editable-area .selected,
+.box-section-wrapper.selected>.box-dropzone,
+.table-wrapper.selected table {
+    outline: 2px solid #9ea700 !important;
+    outline-offset: 2px !important;
+    border-radius: 3px !important;
+}
+
+.gu-over,
+.box-dropzone.drag-over {
+    outline: 2px dashed #9ea700 !important;
+    background: rgba(158, 167, 0, 0.04) !important;
+}
+
+
+
+/* 4. Hide specific Studio & UI elements strictly on Report Kanban View */
+/* .o_n_kanban_view .o_control_panel,
+.o_n_kanban_view .o_search_panel, */
+.o_n_kanban_view>.p-3.d-flex>.o-dropdown {
+    display: none !important;
+}
+
+body:has(.o_n_kanban_view) .o_web_studio_edit,
+body:has(.o_n_kanban_view) .o_web_studio_navbar,
+body:has(.o_n_kanban_view) .hnk-dropdown,
+body:has(.o_n_kanban_view) .view-icons.ri-search-eye-line {
+    display: none !important;
+}
+
+body:has(.o_n_kanban_view) .cy-nav-menu>button.cy-viewEdits {
+    display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Sections 1-5: New UI Features
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Section 5: Table Body ── */
+.editable-area table tbody td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 12px;
+}
+
+/* ── Section 1: Report Header Layout (Company + Partner) ── */
+.cy-report-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cy-company-block {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cy-company-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+    color: #374151;
+    line-height: 1.5;
+}
+
+.cy-company-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    display: block;
+    margin-bottom: 2px;
+}
+
+
+/* ── Section 2: Company Logo Block ── */
+.cy-logo-block {
+    cursor: pointer;
+    margin-bottom: 8px;
+    display: inline-block;
+    position: relative;
+}
+
+.cy-company-logo {
+    max-width: 160px;
+    max-height: 80px;
+    object-fit: contain;
+    display: block;
+    border-radius: 4px;
+}
+
+.cy-logo-placeholder {
+    width: 140px;
+    height: 70px;
+    border: 2px dashed #d1d5db;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #9ca3af;
+    font-size: 11px;
+    background: #f9fafb;
+    transition: all 0.2s;
+}
+
+.cy-logo-placeholder:hover {
+    border-color: #9ea700;
+    color: #9ea700;
+    background: #f7f8e8;
+}
+
+.cy-logo-placeholder i {
+    font-size: 22px;
+}

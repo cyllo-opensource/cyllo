@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.CalendarDialog">
+        <t t-if="getOptions.length > 0">
+            <Dialog title="'Add Calendar'" size="'md'">
+                    <div class="cyllo-calendar-form">
+                        <div class="cyllo-form-row">
+                            <label class="cyllo-form-label">Start Date Field:</label>
+                            <Dropdown showCaret="true">
+                                <t t-set-slot="toggler"><t t-esc="state.startDateField.value"/></t>
+                                <t t-foreach="getOptions" t-as="key" t-key="key">
+                                        <DropdownItem onSelected="(value) => this.updateDateField('start', key)">
+                                            <span t-att-value="key[0]"><t t-esc="key[1]"/></span>
+                                            <br/>
+                                        </DropdownItem>
+                                    </t>
+                            </Dropdown>
+                        </div>
+                        <div class="cyllo-form-row cyllo-no-margin">
+                            <label class="cyllo-form-label">Stop Date Field:</label>
+                            <Dropdown showCaret="true">
+                                <t t-set-slot="toggler"><t t-esc="state.stopDateField.value"/></t>
+                                <t t-foreach="getOptions" t-as="key" t-key="key">
+                                        <DropdownItem onSelected="(value) => this.updateDateField('stop', key)">
+                                            <span t-att-value="key[0]"><t t-esc="key[1]"/></span>
+                                            <br/>
+                                        </DropdownItem>
+                                    </t>
+                            </Dropdown>
+                        </div>
+                    </div>
+                <t t-set-slot="footer">
+                    <button class="btn btn-primary"
+                            t-on-click="onConfirm">Confirm</button>
+                    <button class="btn btn-secondary"
+                            t-on-click="onDiscard">Discard</button>
+                </t>
+            </Dialog>
+        </t>
+    </t>
+</templates>

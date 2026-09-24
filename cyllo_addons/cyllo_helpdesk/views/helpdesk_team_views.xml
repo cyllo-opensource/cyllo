@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Action for helpdesk team -->
+    <record id="helpdesk_team_action" model="ir.actions.act_window">
+        <field name="name">Team</field>
+        <field name="res_model">helpdesk.team</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="context">{'overview':false}</field>
+    </record>
+    <!-- Tree view for helpdesk team -->
+    <record id="helpdesk_team_view_tree" model="ir.ui.view">
+        <field name="name">helpdesk.team.view.tree</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="member_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Form view for helpdesk team -->
+    <record id="helpdesk_team_view_form" model="ir.ui.view">
+        <field name="name">helpdesk.team.view.form</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_get_team_tickets" type="object"
+                                class="oe_stat_button" icon="fa-life-ring">
+                            <field name="all_ticket_count" widget="statinfo"
+                                   string="Tickets"/>
+                        </button>
+                        <button name="action_view_team_rating" type="object"
+                                class="oe_stat_button" icon="fa-smile-o"
+                                invisible="not customer_rating">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Avg. Rating</span>
+                                <span class="o_stat_value">
+                                    <field name="rating_avg"/>
+                                    / 5
+                                </span>
+                            </div>
+                        </button>
+                        <button name="action_view_team_sla_policies"
+                                type="object" class="oe_stat_button"
+                                icon="fa-clock-o" invisible="not use_sla">
+                            <field name="sla_policy_count" widget="statinfo"
+                                   string="SLA Policies"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Support Team"/>
+                        </h1>
+                    </div>
+                    <group col="2">
+                        <group>
+                            <separator string="General"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="color" widget="color_picker"/>
+                            <field name="working_hour_id"/>
+                            <field name="manager_id" widget="many2one_avatar_user"/>
+                            <field name="description"
+                                   placeholder="Short description..."/>
+                            <field name="use_timesheet"/>
+                        </group>
+                        <group>
+                            <separator string="Performance"/>
+                            <setting help="Track customer satisfaction on tickets" colspan="2">
+                                <field name="customer_rating"/>
+                                <div invisible="not customer_rating" class="mt-3">
+                                    <div class="text-muted">
+                                        A rating request will automatically be sent by email to the customer when their ticket reaches the corresponding stage with the email template set.
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="action" name="%(cyllo_helpdesk.helpdesk_stage_action)d" string="Set an Email Template on Stages" class="btn-link" icon="fa-arrow-right"/>
+                                    </div>
+                                </div>
+                            </setting>
+                            <setting help="Set up SLA policies to track deadlines" colspan="2">
+                                <field name="use_sla" string="SLA Policies"/>
+                            </setting>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Members">
+                            <field name="member_ids" mode="kanban">
+                                <kanban class="o_helpdesk_members">
+                                    <field name="name"/>
+                                    <field name="avatar_128"/>
+                                    <templates>
+                                        <t t-name="kanban-box">
+                                            <div class="oe_kanban_global_click d-inline-block">
+                                                <div class="card shadow-sm text-center p-2" style="width: 110px;">
+                                                    <field name="avatar_128"
+                                                           widget="image"
+                                                           class="rounded-circle mx-auto d-block"
+                                                           options="{'zoom': true, 'background': true}"/>
+
+                                                    <div class="mt-2 fw-semibold small text-truncate">
+                                                        <field name="name"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                            </field>
+                        </page>
+                        <page string="Integrations">
+                            <group col="2">
+                                <group>
+                                    <separator string="Commerce"/>
+                                    <field name="use_credit_notes"/>
+                                    <field name="use_coupons"/>
+                                    <field name="use_gift_cards"/>
+                                    <field name="use_crm"/>
+                                    <field name="use_sale_order"/>
+                                    <field name="use_product_warranty"/>
+                                </group>
+                                <group>
+                                    <separator string="Operations"/>
+                                    <field name="use_returns"/>
+                                    <field name="use_repairs"/>
+                                    <field name="use_field_service"/>
+                                    <field name="use_project"/>
+                                </group>
+                            </group>
+                            <group col="2">
+                                <group>
+                                    <separator string="Channels"/>
+                                    <field name="use_website_ticket_creation"/>
+                                    <field name="use_livechat_ticket_creation"/>
+                                    <field name="use_email_alias"/>
+                                    <field name="use_confirmation_email"
+                                           invisible="not use_email_alias"/>
+                                    <label for="alias_id" string="Email Alias"
+                                           invisible="not use_email_alias"/>
+
+                                    <div name="alias_def"
+                                         invisible="not use_email_alias">
+                                        <field name="alias_id"
+                                               class="oe_read_only"
+                                               string="Email Alias"
+                                               required="0"/>
+                                        <div class="oe_edit_only"
+                                             name="edit_alias">
+                                            <field name="alias_name"
+                                                   class="oe_inline"/>@
+                                            <field name="alias_domain_id"
+                                                   class="oe_inline"
+                                                   placeholder="e.g. domain.com"
+                                                   options="{'no_create': True, 'no_open': True}"/>
+                                        </div>
+                                    </div>
+                                    <field name="alias_contact"
+                                           invisible="not use_email_alias"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Automation">
+                            <group col="2">
+                                <group>
+                                    <separator string="Assignment"/>
+                                    <field name="assignment_method"
+                                           widget="radio"
+                                           options="{'horizontal': true}"/>
+                                </group>
+                                <group>
+                                    <separator string="Auto-close"/>
+                                    <field name="auto_close_days"/>
+                                    <field name="auto_close_stage_id"
+                                           invisible="auto_close_days == 0"
+                                           required="auto_close_days &gt; 0"/>
+                                    <field name="auto_close_reminder_days"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Kanban view for helpdesk team -->
+
+    <record id="helpdesk_team_view_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.team.view.kanban</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <kanban class="o_slide_kanban o_kanban_dashboard"
+                    js_class="helpdesk_dashboard_kanban" sample="1">
+                <field name="name"/>
+                <field name="color"/>
+                <field name="sla_failed" invisible="1"/>
+                <field name="success_rate" invisible="1"/>
+                <field name="use_sla" invisible="1"/>
+                <field name="rating_avg" invisible="1"/>
+                <field name="rating_count" invisible="1"/>
+                <templates>
+                    <t t-name="kanban-menu">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-12 o_kanban_card_manage_section o_kanban_manage_view">
+                                    <h5 role="menuitem" class="o_kanban_card_manage_title">
+                                        <span>View</span>
+                                    </h5>
+                                    <div role="menuitem">
+                                        <a name="action_get_team_tickets" type="object">Tickets</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_card_manage_settings row">
+                                <div role="menuitem" aria-haspopup="true" class="col-8">
+                                    <ul class="oe_kanban_colorpicker" data-field="color" role="popup"/>
+                                </div>
+                                <div role="menuitem" class="col-4">
+                                    <a class="dropdown-item" role="menuitem" name="action_team_settings" type="object">Settings</a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) }} container o_kanban_card_content">
+                            <field name="display_name"/>
+                            <div class="row">
+                                <div class="col o_kanban_primary_left">
+                                    <button class="btn btn-primary"
+                                            name="action_get_team_tickets"
+                                            type="object">Tickets
+                                    </button>
+                                </div>
+                                <div class="col o_kanban_primary_right">
+                                    <div>
+                                        <a class="justify-content-between flex-nowrap"
+                                           name="get_team_closed_tickets"
+                                           type="object"
+                                           invisible="closed_ticket_count == 0">
+                                            <span>Ticket Closed</span>
+                                            <span class="ms-3">
+                                                <field name="closed_ticket_count"/>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div invisible="not use_sla">
+                                        <a class="justify-content-between flex-nowrap"
+                                           name="get_team_solved_tickets"
+                                           type="object"
+                                           invisible="success_rate == 0">
+                                            <span>Success Rate</span>
+                                            <span class="ms-3">
+                                                <field name="success_rate"/>
+                                                <span>%</span>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div invisible="rating_count == 0">
+                                        <a class="justify-content-between flex-nowrap">
+                                            <span>Average Rating</span>
+                                            <span class="ms-3">
+                                                <i t-if="record.rating_avg.raw_value &gt;= 4"
+                                                   class="fa fa-smile-o"
+                                                   style="color: #5cb85c;"
+                                                   title="Satisfied"/>
+                                                <i t-if="record.rating_avg.raw_value &gt; 2 and record.rating_avg.raw_value &lt; 4"
+                                                   class="fa fa-meh-o"
+                                                   style="color: #f0ad4e;"
+                                                   title="Okay"/>
+                                                <i t-if="record.rating_avg.raw_value &lt;= 2"
+                                                   class="fa fa-frown-o"
+                                                   style="color: #d9534f;"
+                                                   title="Dissatisfied"/>
+                                                <field name="rating_avg"/>
+                                                <span>/ 5</span>
+                                            </span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row pt-5">
+                                <div class="col">
+                                    <a class="d-flex flex-column align-item-center"
+                                       name="get_team_open_tickets"
+                                       type="object">
+                                        <span class="fw-bold">
+                                            <field name="open_count"/>
+                                        </span>
+                                        <span class="text-muted">Open</span>
+                                    </a>
+                                </div>
+                                <div class="col border-start">
+                                    <a class="d-flex flex-column align-item-center"
+                                       name="get_team_unassigned_tickets"
+                                       type="object">
+                                        <span class="fw-bold">
+                                            <field name="unassigned_count"/>
+                                        </span>
+                                        <span class="text-muted">Unassigned
+                                        </span>
+                                    </a>
+                                </div>
+                                <div class="col border-start">
+                                    <a class="d-flex flex-column align-item-center"
+                                       name="get_team_urgent_tickets"
+                                       type="object">
+                                        <span class="fw-bold">
+                                            <field name="urgent_count"/>
+                                        </span>
+                                        <span class="text-muted">Urgent</span>
+                                    </a>
+                                </div>
+                                <div class="col border-start"
+                                     invisible="not use_sla">
+                                    <a class="d-flex flex-column align-item-center"
+                                       name="get_team_failed_tickets"
+                                       type="object">
+                                        <span class="fw-bold">
+                                            <field name="failed_sla_count"/>
+                                        </span>
+                                        <span class="text-muted">Failed</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+</odoo>

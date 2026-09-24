@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.StreamColumn">
+        <div class="o_stream_column" t-att-data-id="props.column.id">
+            <div class="o_stream_column_header">
+                <img t-if="props.column.account_avatar_url" t-att-src="props.column.account_avatar_url"
+                    class="o_stream_column_avatar"/>
+                <i t-else="" t-attf-class="o_stream_column_avatar_icon {{ platformIcon }}"/>
+                <div class="o_stream_column_titles">
+                    <div class="o_stream_column_type" t-esc="typeLabel"/>
+                    <div class="o_stream_column_name" t-esc="props.column.account_display_name"/>
+                </div>
+                <button class="o_stream_column_create btn btn-sm" title="New post" t-if="canCreatePost"
+                    t-on-click="createPost">
+                    <i class="ri-add-large-line"/>
+                </button>
+                <button class="o_stream_column_refresh btn btn-sm" title="Refresh" t-on-click="refresh"
+                    t-att-disabled="state.loading">
+                    <i t-attf-class="ri-refresh-line{{ state.loading ? ' o_stream_column_refresh_spinning' : '' }}"/>
+                </button>
+                <Dropdown togglerClass="'o_stream_column_more btn btn-sm p-0'">
+                    <t t-set-slot="toggler">
+                        <i class="ri-more-2-fill"/>
+                    </t>
+                    <DropdownItem onSelected="() => this.viewAccount()">View account</DropdownItem>
+                    <DropdownItem t-if="canEditConfig" onSelected="() => this.editStream()">Edit stream</DropdownItem>
+                    <DropdownItem onSelected="() => this.deleteColumn()">Delete stream</DropdownItem>
+                </Dropdown>
+            </div>
+            <div class="o_stream_column_body">
+                <t t-if="state.loading and !state.items.length">
+                    <t t-foreach="[0, 1, 2]" t-as="skeleton_index" t-key="skeleton_index">
+                        <div class="o_stream_item_skeleton">
+                            <div class="o_stream_item_skeleton_head">
+                                <div class="o_skeleton_circle"/>
+                                <div class="o_stream_item_skeleton_lines">
+                                    <div class="o_skeleton_bar" style="width: 60%"/>
+                                    <div class="o_skeleton_bar o_skeleton_bar_sm" style="width: 40%"/>
+                                </div>
+                            </div>
+                            <div class="o_skeleton_bar" style="width: 95%"/>
+                            <div class="o_skeleton_bar" style="width: 88%"/>
+                            <div class="o_skeleton_bar" style="width: 70%"/>
+                            <div class="o_stream_item_skeleton_icons">
+                                <div class="o_skeleton_square"/>
+                                <div class="o_skeleton_square"/>
+                                <div class="o_skeleton_square"/>
+                                <div class="o_skeleton_square"/>
+                                <div class="o_skeleton_square"/>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <div class="o_stream_column_error" t-if="state.error and !state.items.length" t-esc="state.error"/>
+                <t t-foreach="state.items" t-as="item" t-key="item.id">
+                    <t t-if="item.item_kind === 'comment_thread'">
+                        <t t-call="cyllo_social_media_marketing.StreamCommentItem"/>
+                    </t>
+                    <t t-else="">
+                        <t t-call="cyllo_social_media_marketing.StreamPostItem"/>
+                    </t>
+                </t>
+                <div class="o_stream_column_empty" t-if="!state.loading and !state.items.length and !state.error">
+                    Nothing here yet.
+                </div>
+                <button class="btn btn-link o_stream_column_load_more" t-if="state.cursor"
+                    t-on-click="loadMore" t-att-disabled="state.loading">
+                    Load more
+                </button>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="cyllo_social_media_marketing.StreamItemCarousel">
+        <div class="o_stream_item_carousel">
+            <div class="o_stream_item_carousel_track" t-on-scroll="(ev) => this.onCarouselScroll(ev, item)">
+                <img t-foreach="item.image_urls" t-as="carouselImg" t-key="carouselImg_index" t-att-src="carouselImg"/>
+            </div>
+            <span class="o_stream_item_carousel_count" t-esc="item.image_urls.length + ' photos'"/>
+            <button class="o_stream_item_carousel_arrow o_stream_item_carousel_arrow_prev"
+                t-if="(state.carouselIndex[item.id] || 0) > 0"
+                t-on-click="(ev) => this.scrollCarousel(ev, -1)">
+                <i class="ri-arrow-left-s-line"/>
+            </button>
+            <button class="o_stream_item_carousel_arrow o_stream_item_carousel_arrow_next"
+                t-if="(state.carouselIndex[item.id] || 0) &lt; item.image_urls.length - 1"
+                t-on-click="(ev) => this.scrollCarousel(ev, 1)">
+                <i class="ri-arrow-right-s-line"/>
+            </button>
+            <div class="o_stream_item_carousel_dots">
+                <span t-foreach="item.image_urls" t-as="carouselImg" t-key="carouselImg_index"
+                    t-attf-class="o_stream_item_carousel_dot{{ (state.carouselIndex[item.id] || 0) === carouselImg_index ? ' active' : '' }}"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="cyllo_social_media_marketing.StreamPostItem">
+        <div class="o_stream_item o_stream_item_ig" t-if="props.column.platform === 'social.insta.account'">
+            <div class="o_stream_item_ig_head">
+                <img t-if="item.author_avatar_url" t-att-src="item.author_avatar_url" class="o_stream_item_avatar"/>
+                <div class="o_stream_item_avatar_placeholder" t-else="">
+                    <i t-att-class="platformIcon"/>
+                </div>
+                <span class="o_stream_item_ig_username" t-esc="item.author_name"/>
+                <div class="o_stream_item_menu">
+                    <Dropdown t-if="getActionsFor('post').length" togglerClass="'o_stream_item_more btn btn-sm btn-link p-0'">
+                        <t t-set-slot="toggler">
+                            <i class="ri-more-2-fill"/>
+                        </t>
+                        <t t-foreach="getActionsFor('post')" t-as="action" t-key="action_index">
+                            <DropdownItem onSelected="() => action.handler(item, props.column, this)">
+                                <t t-esc="this.resolveActionLabel(action, item)"/>
+                            </DropdownItem>
+                        </t>
+                    </Dropdown>
+                </div>
+            </div>
+            <div class="o_stream_item_ig_media" t-if="item.image_urls" t-on-click="() => this.openInstagramEmbed(item)">
+                <t t-call="cyllo_social_media_marketing.StreamItemCarousel"/>
+            </div>
+            <div class="o_stream_item_ig_media" t-elif="item.thumbnail_url or item.image_url"
+                t-on-click="() => this.openInstagramEmbed(item)">
+                <img t-att-src="item.thumbnail_url or item.image_url"/>
+            </div>
+            <div class="o_stream_item_ig_media" t-if="item.video_url and !item.thumbnail_url and !item.image_url and !item.image_urls"
+                t-on-click="() => this.openInstagramEmbed(item)">
+                <video class="o_stream_item_video" t-att-src="item.video_url" controls="true" muted="muted"/>
+            </div>
+            <div class="o_stream_item_ig_icons">
+                <span class="o_stream_item_ig_icon_btn">
+                    <i t-attf-class="{{ likeIcon }}"/>
+                    <t t-if="item.like_count" t-esc="item.like_count"/>
+                </span>
+                <span class="o_stream_item_ig_icon_btn o_stream_item_comment_toggle" t-on-click="() => this.toggleComments(item)">
+                    <i class="ri-chat-3-line"/>
+                    <t t-if="item.comment_count" t-esc="item.comment_count"/>
+                </span>
+                <span class="o_stream_item_ig_icon_btn" t-on-click="() => this.openShareDialog(item)">
+                    <i class="ri-send-plane-line"/>
+                </span>
+            </div>
+            <div class="o_stream_item_ig_caption" t-if="item.text">
+                <span class="o_stream_item_ig_username" t-esc="item.author_name"/>
+                <t t-if="!captionTruncated(item.text) or state.openCaptions[item.id]">
+                    <t t-esc="item.text"/>
+                    <span t-if="captionTruncated(item.text)" class="o_stream_item_ig_more"
+                        t-on-click="() => this.toggleCaption(item)"> less</span>
+                </t>
+                <t t-else="">
+                    <t t-esc="captionPreview(item.text)"/>
+                    ...
+                    <span class="o_stream_item_ig_more" t-on-click="() => this.toggleCaption(item)"> more</span>
+                </t>
+            </div>
+            <div class="o_stream_item_ig_view_comments" t-if="item.comment_count"
+                t-on-click="() => this.toggleComments(item)">
+                View all
+                <t t-esc="item.comment_count"/>
+                comments
+            </div>
+            <div class="o_stream_item_ig_time" t-esc="this.formatRelativeDate(item.posted_date)"/>
+            <t t-if="state.openComments[item.id]">
+                <t t-call="cyllo_social_media_marketing.StreamItemComments"/>
+            </t>
+        </div>
+        <div class="o_stream_item" t-else="">
+            <div class="o_stream_item_head">
+                <img t-if="item.author_avatar_url" t-att-src="item.author_avatar_url" class="o_stream_item_avatar"/>
+                <div class="o_stream_item_avatar_placeholder" t-else="">
+                    <i t-att-class="platformIcon"/>
+                </div>
+                <div class="o_stream_item_meta">
+                    <span class="o_stream_item_author" t-esc="item.author_name"/>
+                    <span class="o_stream_item_date" t-esc="this.formatDate(item.posted_date)"/>
+                </div>
+                <div class="o_stream_item_menu">
+                    <a class="o_stream_item_permalink" t-if="item.permalink" t-att-href="item.permalink" target="_blank">
+                        <i class="ri-external-link-line"/>
+                        View
+                    </a>
+
+                    <Dropdown t-if="getActionsFor('post').length" togglerClass="'o_stream_item_more btn btn-sm btn-link p-0'">
+                        <t t-set-slot="toggler">
+                            <i class="ri-more-2-fill"/>
+                        </t>
+                        <t t-foreach="getActionsFor('post')" t-as="action" t-key="action_index">
+                            <DropdownItem onSelected="() => action.handler(item, props.column, this)">
+                                <t t-esc="this.resolveActionLabel(action, item)"/>
+                            </DropdownItem>
+                        </t>
+                    </Dropdown>
+                </div>
+            </div>
+            <t t-if="props.column.platform === 'social.fb.account'">
+                <div class="o_stream_item_text" t-if="item.text" t-esc="item.text"/>
+                <t t-if="item.image_urls" t-call="cyllo_social_media_marketing.StreamItemCarousel"/>
+                <div class="o_stream_item_media" t-elif="item.thumbnail_url or item.image_url">
+                    <img t-att-src="item.thumbnail_url or item.image_url"/>
+                    <span class="o_stream_item_duration" t-if="item.duration" t-esc="formatDuration(item.duration)"/>
+                </div>
+                <video class="o_stream_item_video" t-if="item.video_url and !item.thumbnail_url and !item.image_url and !item.image_urls"
+                    t-att-src="item.video_url" controls="controls"/>
+                <div class="o_stream_item_stats">
+                    <span t-if="item.view_count">
+                        <i class="ri-eye-line"/>
+                        <t t-esc="item.view_count"/>
+                    </span>
+                    <span t-attf-class="o_stream_item_like_btn{{ item.liked ? ' o_stream_item_liked' : '' }}"
+                        t-on-click="() => this.likeItem(item)">
+                        <i t-attf-class="{{ likeIcon }}"/>
+                        <t t-esc="item.like_count or 0"/>
+                    </span>
+                    <span class="o_stream_item_comment_toggle" t-on-click="() => this.toggleComments(item)">
+                        <i class="ri-chat-3-line"/>
+                        <t t-esc="item.comment_count or 0"/>
+                    </span>
+                    <span class="o_stream_item_comment_toggle" t-on-click="() => this.openShareDialog(item)">
+                        <i class="ri-share-forward-line"/>
+                    </span>
+                </div>
+            </t>
+            <t t-elif="props.column.platform === 'youtube.channel'">
+                <a class="o_stream_item_media o_stream_item_yt_thumb" t-if="item.thumbnail_url or item.image_url"
+                    t-att-href="item.permalink" target="_blank">
+                    <img t-att-src="item.thumbnail_url or item.image_url"/>
+                    <span class="o_stream_item_play_overlay">
+                        <i class="ri-play-fill"/>
+                    </span>
+                    <span class="o_stream_item_duration" t-if="item.duration" t-esc="formatDuration(item.duration)"/>
+                </a>
+                <a class="o_stream_item_yt_title" t-if="item.text" t-att-href="item.permalink" target="_blank"
+                    t-esc="item.text"/>
+                <div class="o_stream_item_yt_meta">
+                    <span t-if="item.view_count">
+                        <t t-esc="item.view_count"/>
+                        views
+                    </span>
+                    <span>
+                        <t t-esc="item.like_count or 0"/>
+                        likes
+                    </span>
+                    <span class="o_stream_item_comment_toggle" t-on-click="() => this.toggleComments(item)">
+                        <t t-esc="item.comment_count or 0"/>
+                        comments
+                    </span>
+                    <span class="o_stream_item_comment_toggle" t-on-click="() => this.openShareDialog(item)">
+                        <i class="ri-share-forward-line"/>
+                        Share
+                    </span>
+                </div>
+            </t>
+            <t t-else="">
+                <t t-if="item.image_urls" t-call="cyllo_social_media_marketing.StreamItemCarousel"/>
+                <div class="o_stream_item_media" t-elif="item.thumbnail_url or item.image_url">
+                    <img t-att-src="item.thumbnail_url or item.image_url"/>
+                    <span class="o_stream_item_duration" t-if="item.duration" t-esc="formatDuration(item.duration)"/>
+                </div>
+                <video class="o_stream_item_video" t-if="item.video_url and !item.thumbnail_url and !item.image_url and !item.image_urls"
+                    t-att-src="item.video_url" controls="controls"/>
+                <div class="o_stream_item_text" t-if="item.text" t-esc="item.text"/>
+                <div class="o_stream_item_poll" t-if="item.poll">
+                    <div class="o_stream_item_poll_question" t-esc="item.poll.question"/>
+                    <t t-set="topPct" t-value="Math.max(...item.poll.options.map((o) => o.pct), 0)"/>
+                    <div class="o_stream_item_poll_option" t-foreach="item.poll.options" t-as="option"
+                        t-key="option_index"
+                        t-attf-class="o_stream_item_poll_option{{ option.pct === topPct and topPct &gt; 0 ? ' o_stream_item_poll_option_leading' : '' }}">
+                        <div class="o_stream_item_poll_bar" t-attf-style="width: {{ option.pct }}%;"/>
+                        <div class="o_stream_item_poll_option_label">
+                            <span t-esc="option.text"/>
+                            <span class="o_stream_item_poll_option_pct" t-esc="option.pct + '%'"/>
+                        </div>
+                    </div>
+                    <div class="o_stream_item_poll_footer">
+                        <span t-esc="item.poll.total_votes + (item.poll.total_votes === 1 ? ' vote' : ' votes')"/>
+                        <span t-if="item.poll.duration">
+                            ·
+                            <t t-esc="item.poll.duration"/>
+                        </span>
+                    </div>
+                </div>
+                <div class="o_stream_item_stats">
+                    <span t-if="item.view_count">
+                        <i class="ri-eye-line"/>
+                        <t t-esc="item.view_count"/>
+                    </span>
+                    <span>
+                        <i t-attf-class="{{ likeIcon }}"/>
+                        <t t-esc="item.like_count or 0"/>
+                    </span>
+                    <span class="o_stream_item_comment_toggle" t-on-click="() => this.toggleComments(item)">
+                        <i class="ri-chat-3-line"/>
+                        <t t-esc="item.comment_count or 0"/>
+                    </span>
+                    <span class="o_stream_item_comment_toggle" t-on-click="() => this.openShareDialog(item)">
+                        <i class="ri-share-forward-line"/>
+                    </span>
+                </div>
+            </t>
+            <t t-if="state.openComments[item.id]">
+                <t t-call="cyllo_social_media_marketing.StreamItemComments"/>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="cyllo_social_media_marketing.StreamCommentItem">
+        <div class="o_stream_item o_stream_item_comment">
+            <div class="o_stream_item_parent" t-if="!hideParent and item.extra and item.extra.parent_title">
+                <i class="ri-chat-3-line"/>
+                Comment on
+                <a t-if="item.extra.parent_permalink" t-att-href="item.extra.parent_permalink" target="_blank"
+                    t-esc="item.extra.parent_title"/>
+                <span t-else="" t-esc="item.extra.parent_title"/>
+            </div>
+            <div class="o_stream_item_head align-items-start mb-0">
+                <img t-if="item.author_avatar_url" t-att-src="item.author_avatar_url" class="o_stream_item_avatar"/>
+                <img t-elif="props.column.account_avatar_url" t-att-src="props.column.account_avatar_url" class="o_stream_item_avatar"/>
+                <div class="o_stream_item_avatar_placeholder" t-else="">
+                    <i t-att-class="platformIcon"/>
+                </div>
+                <div class="o_stream_item_meta">
+                    <div class="d-flex align-items-center">
+                        <span class="o_stream_item_author" t-esc="item.author_name"/>
+                    </div>
+                    <div class="o_stream_item_text" t-esc="item.text"/>
+                </div>
+                <div class="o_stream_item_menu">
+                    <Dropdown t-if="getActionsFor('comment_thread').length" togglerClass="'o_stream_item_more btn btn-sm btn-link p-0'">
+                        <t t-set-slot="toggler">
+                            <i class="ri-more-2-fill"/>
+                        </t>
+                        <t t-foreach="getActionsFor('comment_thread')" t-as="action" t-key="action_index">
+                            <DropdownItem onSelected="() => action.handler(item, props.column, this)">
+                                <t t-esc="this.resolveActionLabel(action, item)"/>
+                            </DropdownItem>
+                        </t>
+                    </Dropdown>
+                </div>
+            </div>
+            <div class="o_stream_item_stats">
+                <span data-tooltip="Like">
+                    <i t-attf-class="{{ likeIcon }}"/>
+                    <t t-esc="item.like_count or 0"/>
+                </span>
+                <t t-if="props.column.platform === 'youtube.channel'">
+                    <span class="o_stream_item_stat_icon" data-tooltip="Dislike">
+                        <i class="ri-thumb-down-line"/>
+                    </span>
+                </t>
+                <span t-if="canReply" class="o_stream_item_comment_toggle" t-on-click="() => this.toggleReply(item)">
+                    <i class="ri-reply-line"/>
+                    Reply
+                </span>
+                <a class="o_stream_item_comment_toggle" t-if="item.reply_count" t-on-click="() => this.toggleReplies(item)">
+                    <t t-esc="item.reply_count"/>
+                    replies
+                </a>
+                <span class="o_stream_item_date" t-esc="this.formatDate(item.created_at)"/>
+            </div>
+            <div class="o_stream_item_comment_form" t-if="state.openReply[item.id]">
+                <img t-att-src="props.column.account_avatar_url or currentUserAvatarUrl" class="o_stream_item_avatar"/>
+                <input type="text" placeholder="Write a reply..."
+                    t-att-value="state.replyDraft[item.id] or ''"
+                    t-on-input="(ev) => state.replyDraft[item.id] = ev.target.value"
+                    t-on-keydown="(ev) => ev.key === 'Enter' and this.submitReply(item)"/>
+                <button class="o_stream_item_comment_emoji"
+                    t-on-click="(ev) => this.openEmojiPicker(ev, state.replyDraft, item.id)">
+                    <i class="ri-emotion-line"/>
+                </button>
+                <button class="o_stream_item_comment_send" t-on-click="() => this.submitReply(item)"
+                    t-att-disabled="!(state.replyDraft[item.id] or '').trim()">
+                    <i class="ri-send-plane-2-line"/>
+                </button>
+            </div>
+            <div class="o_stream_item_replies" t-if="state.openReplies[item.id]">
+                <div class="o_stream_column_loading"
+                    t-if="state.openReplies[item.id].loading and !state.openReplies[item.id].replies.length">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"/>
+                    Loading replies...
+                </div>
+                <div class="o_stream_column_error"
+                    t-elif="state.openReplies[item.id].error and !state.openReplies[item.id].replies.length"
+                    t-esc="state.openReplies[item.id].error"/>
+                <t t-else="">
+                    <t t-call="cyllo_social_media_marketing.StreamItemReplyList">
+                        <t t-set="replies" t-value="state.openReplies[item.id].replies"/>
+                        <t t-set="rootId" t-value="item.id"/>
+                        <t t-set="rootComment" t-value="item"/>
+                    </t>
+                    <div class="o_stream_column_error"
+                        t-if="state.openReplies[item.id].error and state.openReplies[item.id].replies.length"
+                        t-esc="state.openReplies[item.id].error"/>
+                    <button class="btn btn-link o_stream_column_load_more" t-if="state.openReplies[item.id].cursor"
+                        t-on-click="() => this.loadMoreReplies(item)" t-att-disabled="state.openReplies[item.id].loading">
+                        <t t-if="state.openReplies[item.id].loading">Loading...</t>
+                        <t t-else="">Load more replies</t>
+                    </button>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="cyllo_social_media_marketing.StreamItemReplyList">
+        <t t-foreach="replies" t-as="reply" t-key="reply.id or reply_index">
+            <div class="o_stream_item_reply">
+                <div class="o_stream_item_head align-items-start mb-1">
+                    <img t-if="reply.author_avatar_url" t-att-src="reply.author_avatar_url" class="o_stream_item_avatar"/>
+                    <img t-elif="props.column.account_avatar_url" t-att-src="props.column.account_avatar_url" class="o_stream_item_avatar"/>
+                    <div class="o_stream_item_avatar_placeholder" t-else="">
+                        <i t-att-class="platformIcon"/>
+                    </div>
+                    <div class="o_stream_item_meta">
+                        <span class="o_stream_item_author" t-esc="reply.author_name"/>
+                        <div class="o_stream_item_text" t-esc="reply.text"/>
+                    </div>
+                    <div class="o_stream_item_menu">
+                        <Dropdown t-if="getActionsFor('comment_thread').length" togglerClass="'o_stream_item_more btn btn-sm btn-link p-0'">
+                            <t t-set-slot="toggler">
+                                <i class="ri-more-2-fill"/>
+                            </t>
+                            <t t-foreach="getActionsFor('comment_thread')" t-as="action" t-key="action_index">
+                                <DropdownItem onSelected="() => action.handler(reply, props.column, this)">
+                                    <t t-esc="this.resolveActionLabel(action, reply)"/>
+                                </DropdownItem>
+                            </t>
+                        </Dropdown>
+                    </div>
+                </div>
+                <div class="o_stream_item_stats">
+                    <span>
+                        <i t-attf-class="{{ likeIcon }}"/>
+                        <t t-esc="reply.like_count or 0"/>
+                    </span>
+                    <span t-if="canReply" class="o_stream_item_comment_toggle"
+                        t-on-click="() => this.toggleReply(reply)">
+                        <i class="ri-reply-line"/>
+                        Reply
+                    </span>
+                    <span class="o_stream_item_date" t-esc="this.formatDate(reply.created_at)"/>
+                </div>
+                <div class="o_stream_item_comment_form" t-if="state.openReply[reply.id]">
+                    <img t-att-src="props.column.account_avatar_url or currentUserAvatarUrl" class="o_stream_item_avatar"/>
+                    <input type="text" placeholder="Write a reply..."
+                        t-att-value="state.replyDraft[reply.id] or ''"
+                        t-on-input="(ev) => state.replyDraft[reply.id] = ev.target.value"
+                        t-on-keydown="(ev) => ev.key === 'Enter' and this.submitReply(reply, this.getReplyTargetId(reply, rootId), rootComment)"/>
+                    <button class="o_stream_item_comment_emoji"
+                        t-on-click="(ev) => this.openEmojiPicker(ev, state.replyDraft, reply.id)">
+                        <i class="ri-emotion-line"/>
+                    </button>
+                    <button class="o_stream_item_comment_send"
+                        t-on-click="() => this.submitReply(reply, this.getReplyTargetId(reply, rootId), rootComment)"
+                        t-att-disabled="!(state.replyDraft[reply.id] or '').trim()">
+                        <i class="ri-send-plane-2-line"/>
+                    </button>
+                </div>
+                <div class="o_stream_item_nested_replies" t-if="reply.replies and reply.replies.length">
+                    <t t-call="cyllo_social_media_marketing.StreamItemReplyList">
+                        <t t-set="replies" t-value="reply.replies"/>
+                        <t t-set="rootId" t-value="rootId"/>
+                        <t t-set="rootComment" t-value="rootComment"/>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </t>
+
+    <t t-name="cyllo_social_media_marketing.StreamItemComments">
+        <div class="o_stream_item_comments">
+            <div class="o_stream_item_comment_form">
+                <img t-att-src="props.column.account_avatar_url or currentUserAvatarUrl" class="o_stream_item_avatar"/>
+                <input type="text" placeholder="Add a comment..."
+                    t-att-value="state.commentDraft[item.id] or ''"
+                    t-on-input="(ev) => state.commentDraft[item.id] = ev.target.value"
+                    t-on-keydown="(ev) => ev.key === 'Enter' and this.submitComment(item)"/>
+                <button class="o_stream_item_comment_emoji"
+                    t-on-click="(ev) => this.openEmojiPicker(ev, state.commentDraft, item.id)">
+                    <i class="ri-emotion-line"/>
+                </button>
+                <button class="o_stream_item_comment_send" t-on-click="() => this.submitComment(item)"
+                    t-att-disabled="!(state.commentDraft[item.id] or '').trim()">
+                    <i class="ri-send-plane-2-line"/>
+                </button>
+            </div>
+            <div class="o_stream_column_loading"
+                t-if="state.openComments[item.id].loading and !state.openComments[item.id].comments.length">
+                <span class="spinner-border spinner-border-sm text-primary me-2" role="status"/>
+                Loading comments...
+            </div>
+            <div class="o_stream_column_error" t-elif="state.openComments[item.id].error and !state.openComments[item.id].comments.length"
+                t-esc="state.openComments[item.id].error"/>
+            <t t-else="">
+                <t t-foreach="state.openComments[item.id].comments" t-as="comment" t-key="comment.id or comment_index">
+                    <t t-call="cyllo_social_media_marketing.StreamCommentItem">
+                        <t t-set="item" t-value="comment"/>
+                        <t t-set="hideParent" t-value="true"/>
+                    </t>
+                </t>
+                <div class="o_stream_item_no_comments"
+                    t-if="!state.openComments[item.id].comments.length">No comments yet.</div>
+                <div class="o_stream_column_error" t-if="state.openComments[item.id].error and state.openComments[item.id].comments.length"
+                    t-esc="state.openComments[item.id].error"/>
+                <button class="btn btn-link o_stream_column_load_more" t-if="state.openComments[item.id].cursor"
+                    t-on-click="() => this.loadMoreComments(item)" t-att-disabled="state.openComments[item.id].loading">
+                    <t t-if="state.openComments[item.id].loading">Loading...</t>
+                    <t t-else="">Load more comments</t>
+                </button>
+            </t>
+            <div class="o_stream_item_comment_hide">
+                <a t-on-click="() => this.toggleComments(item)">Hide comments</a>
+            </div>
+        </div>
+    </t>
+</templates>

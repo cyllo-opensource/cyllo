@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+     <t t-name="Lines">
+         <t t-foreach="props.moveLines" t-as="move_line" t-key="move_line_index">
+                <tr class="cy-report-line-acc">
+                    <th colspan="6">
+                        <div class="d-flex gap-2">
+                            <span t-esc="move_line.move_name"/>
+                            <sapn t-if="move_line.name" t-esc="move_line.name"/>
+                            <t t-set="annotation"
+                               t-value="move_line.annotations and move_line.annotations.hasOwnProperty(this.props.ledgerId) ? move_line.annotations[this.props.ledgerId] : ''"/>
+                            <Dropdown class="'border_unset_button'">
+                        <t t-set-slot="toggler">
+                            <span class="mx-2 fa fa-caret-down"/>
+                        </t>
+                                <DropdownItem
+                                        onSelected="() => this.goToJournalEntry(move_line.move_id)">
+                            View Entry
+                        </DropdownItem>
+                                <DropdownItem
+                                        onSelected="() => props.openAnnotation(move_line.id, annotation, move_line.partner_id)">
+                            Annotation
+                        </DropdownItem>
+                    </Dropdown>
+                    <div t-on-click="() => props.openAnnotation(move_line.id, annotation, move_line.partner_id)"
+                                 t-if="annotation" class="mx-2 cursor-pointer position-relative">
+                    <div class="cy-annotation-tooltip">
+                        <span class="ri-ball-pen-line"/>
+                    </div>
+                                <div class="cy-annotation-tooltip-content justify-content-around modal_background position-absolute"
+                                     t-out="annotation"/>
+                    </div>
+                    <div class="mx-1 delete-on-h-show ri-delete-bin-6-line on-h-red cursor-pointer"
+                         t-if="annotation"
+                         t-on-click="() => props.removeAnnotation(move_line.id, move_line.partner_id)"/>
+                    </div>
+                    </th>
+                    <th>
+                        <span class="text-nowrap">
+                            <t t-esc="move_line.date"/>
+                        </span>
+                    </th>
+                    <th class="text-end">
+                        <span>
+                            <t t-esc="move_line.amount_currency_symbol"/>
+                            <span class="mx-1" t-esc="(move_line.amount_currency || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                        </span>
+                    </th>
+                    <th>
+                        <span>
+                            <t t-esc="move_line.amount_currency_name"/>
+                        </span>
+                    </th>
+                    <th>
+                        <span>
+                            <span class="mx-1" t-esc="move_line.account_code"/>
+                            <t t-esc="move_line.account_name['en_US']"/>
+                        </span>
+                    </th>
+                    <th>
+                        <span>
+                            <t t-if="move_line.date_maturity" t-esc="move_line.date_maturity"/>
+                        </span>
+                    </th>
+                    <th class="text-end">
+                        <span t-if="move_line.diff0">
+                            <t t-esc="props.currencyId"/>
+                            <span class="ms-1" t-esc="(move_line.diff0 || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                        </span>
+                    </th>
+                    <th class="text-end">
+                        <span t-if="move_line.diff1">
+                             <t t-esc="props.currencyId"/>
+                            <span class="ms-1" t-esc="(move_line.diff1 || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                        </span>
+                    </th>
+                    <th class="text-end">
+                        <span t-if="move_line.diff2">
+                             <t t-esc="props.currencyId"/>
+                            <span class="ms-1" t-esc="(move_line.diff2 || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                        </span>
+                    </th>
+                    <th class="text-end">
+                        <span t-if="move_line.diff3">
+                             <t t-esc="props.currencyId"/>
+                            <span class="ms-1" t-esc="(move_line.diff3 || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                        </span>
+                    </th>
+                    <th class="text-end">
+                        <span t-if="move_line.diff4">
+                             <t t-esc="props.currencyId"/>
+                            <span class="ms-1" t-esc="(move_line.diff4 || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                        </span>
+                    </th>
+                    <th class="text-end">
+                        <span t-if="move_line.diff5">
+                            <t t-esc="props.currencyId"/>
+                            <span class="ms-1" t-esc="move_line.diff5"/>
+                        </span>
+                    </th>
+                    <th/>
+                </tr>
+        </t>
+     </t>
+</templates>

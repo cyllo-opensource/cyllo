@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Asset Brands -->
+        <record id="brand_dell" model="asset.brand">
+            <field name="name">Dell</field>
+        </record>
+        <record id="brand_toyota" model="asset.brand">
+            <field name="name">Toyota</field>
+        </record>
+        <record id="brand_cisco" model="asset.brand">
+            <field name="name">Cisco</field>
+        </record>
+
+        <!-- Partners -->
+        <record id="partner_demo_vendor" model="res.partner">
+            <field name="name">Demo Vendor Ltd</field>
+            <field name="email">vendor@demo.example.com</field>
+        </record>
+        <record id="partner_demo_customer" model="res.partner">
+            <field name="name">Demo Customer Ltd</field>
+            <field name="email">customer@demo.example.com</field>
+        </record>
+        <record id="partner_demo_insurance" model="res.partner">
+            <field name="name">Demo Insurance Corp</field>
+            <field name="email">insurance@demo.example.com</field>
+        </record>
+
+        <!-- Insurance Type -->
+        <record id="insurance_type_full" model="asset.insurance.type">
+            <field name="type">Full Coverage</field>
+        </record>
+
+        <!-- Insurance Provider -->
+        <record id="insurance_demo" model="asset.asset.insurance">
+            <field name="partner_id" ref="partner_demo_insurance"/>
+            <field name="type_id" ref="insurance_type_full"/>
+        </record>
+
+        <!-- Employee -->
+        <record id="employee_demo" model="hr.employee">
+            <field name="name">Demo Employee</field>
+            <field name="work_email">employee@demo.example.com</field>
+        </record>
+
+        <!-- Accounts -->
+        <record id="account_demo_fixed_asset" model="account.account">
+            <field name="name">Demo Fixed Assets Account</field>
+            <field name="code">912562</field>
+            <field name="account_type">asset_fixed</field>
+        </record>
+        <record id="account_demo_depreciation" model="account.account">
+            <field name="name">Demo Accumulated Depreciation Account</field>
+            <field name="code">932516</field>
+            <field name="account_type">asset_fixed</field>
+        </record>
+        <record id="account_demo_expense" model="account.account">
+            <field name="name">Demo Depreciation Expense Account</field>
+            <field name="code">620135</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="account_demo_loss" model="account.account">
+            <field name="name">Demo Asset Loss Account</field>
+            <field name="code">623014</field>
+            <field name="account_type">expense</field>
+        </record>
+
+        <!-- Journal -->
+        <record id="journal_demo_asset" model="account.journal">
+            <field name="name">Demo Asset Journal</field>
+            <field name="type">general</field>
+            <field name="code">DAJ</field>
+        </record>
+
+        <!-- Asset Item (Model Template) -->
+        <record id="asset_item_laptop" model="asset.item">
+            <field name="name">Laptop Dell Latitude</field>
+            <field name="brand_id" ref="brand_dell"/>
+            <field name="vendor_id" ref="partner_demo_vendor"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="is_auto_calculate" eval="True"/>
+            <field name="method_duration" eval="5"/>
+            <field name="duration_period">year</field>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- Assets -->
+        <!-- 1. Running Asset -->
+        <record id="asset_dell_laptop_01" model="asset.asset">
+            <field name="name">Dell Latitude 5420 - Laptop 01</field>
+            <field name="asset_item_id" ref="asset_item_laptop"/>
+            <field name="brand_id" ref="brand_dell"/>
+            <field name="serial_no">DELL-123456</field>
+            <field name="date">2026-06-10</field>
+            <field name="vendor_id" ref="partner_demo_vendor"/>
+            <field name="original_value" eval="1500.0"/>
+            <field name="salvage_value" eval="1200.0"/>
+            <field name="status">running</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- 2. Leased Asset -->
+        <record id="asset_car_lease" model="asset.asset">
+            <field name="name">Toyota Camry 2023 (Lease)</field>
+            <field name="brand_id" ref="brand_toyota"/>
+            <field name="original_value" eval="25000.0"/>
+            <field name="salvage_value" eval="20000.0"/>
+            <field name="date">2026-06-10</field>
+            <field name="status">leased</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="is_lease_asset" eval="True"/>
+            <field name="is_lease" eval="True"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- 3. Rented Asset -->
+        <record id="asset_switch_rental" model="asset.asset">
+            <field name="name">Cisco Switch Catalyst (Rental)</field>
+            <field name="brand_id" ref="brand_cisco"/>
+            <field name="original_value" eval="3000.0"/>
+            <field name="salvage_value" eval="2500.0"/>
+            <field name="status">rented</field>
+            <field name="date">2026-06-10</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="is_rental_asset" eval="True"/>
+            <field name="is_rental" eval="True"/>
+            <field name="day_amount" eval="10.0"/>
+            <field name="week_amount" eval="60.0"/>
+            <field name="month_amount" eval="200.0"/>
+            <field name="year_amount" eval="2000.0"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- 4. Reserved Asset -->
+        <record id="asset_projector_reserve" model="asset.asset">
+            <field name="name">Projector Epson - Conference Room</field>
+            <field name="original_value" eval="800.0"/>
+            <field name="salvage_value" eval="600.0"/>
+            <field name="status">reserved</field>
+            <field name="date">2026-06-10</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="is_reserve" eval="True"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- 5. Assigned Asset -->
+        <record id="asset_macbook_assign" model="asset.asset">
+            <field name="name">MacBook Pro 16 - Assigned</field>
+            <field name="original_value" eval="2000.0"/>
+            <field name="salvage_value" eval="1600.0"/>
+            <field name="status">assigned</field>
+            <field name="date">2026-06-10</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="is_assign" eval="True"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- 6. Asset Under Maintenance -->
+        <record id="asset_server_maintenance" model="asset.asset">
+            <field name="name">Server Rack 42U - Maintenance</field>
+            <field name="original_value" eval="5000.0"/>
+            <field name="salvage_value" eval="4000.0"/>
+            <field name="status">running</field>
+            <field name="date">2026-06-10</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="is_maintenance" eval="True"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- 7. Asset Under Repair -->
+        <record id="asset_forklift_repair" model="asset.asset">
+            <field name="name">Forklift Hyster - Repair</field>
+            <field name="original_value" eval="15000.0"/>
+            <field name="salvage_value" eval="12000.0"/>
+            <field name="status">running</field>
+            <field name="date">2026-06-10</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="is_repair" eval="True"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- 8. Asset to Sell -->
+        <record id="asset_chair_sell" model="asset.asset">
+            <field name="name">Old Office Chair - Sold</field>
+            <field name="original_value" eval="100.0"/>
+            <field name="salvage_value" eval="80.0"/>
+            <field name="status">sell</field>
+            <field name="date">2026-06-10</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="is_sell" eval="True"/>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- 9. Asset to Dispose -->
+        <record id="asset_monitor_dispose" model="asset.asset">
+            <field name="name">Broken Monitor - Disposed</field>
+            <field name="original_value" eval="200.0"/>
+            <field name="salvage_value" eval="150.0"/>
+            <field name="status">disposed</field>
+            <field name="is_confirm" eval="True"/>
+            <field name="is_dispose" eval="True"/>
+            <field name="date">2026-06-10</field>
+            <field name="depreciation_method">straight_line</field>
+            <field name="duration_period">year</field>
+            <field name="method_duration" eval="5"/>
+            <field name="computation_method">no_prorata</field>
+            <field name="fixed_asset_account_id" ref="account_demo_fixed_asset"/>
+            <field name="asset_depreciation_account_id" ref="account_demo_depreciation"/>
+            <field name="asset_expense_account_id" ref="account_demo_expense"/>
+            <field name="asset_loss_account_id" ref="account_demo_loss"/>
+            <field name="asset_journal_id" ref="journal_demo_asset"/>
+        </record>
+
+        <!-- Lease Record -->
+        <record id="lease_demo_car" model="asset.lease">
+            <field name="asset_id" ref="asset_car_lease"/>
+            <field name="start_date">2026-07-01 08:00:00</field>
+            <field name="end_date">2026-07-31 18:00:00</field>
+            <field name="customer_id" ref="partner_demo_customer"/>
+            <field name="lease_amount" eval="500.0"/>
+            <field name="status">lease</field>
+            <field name="is_invoice" eval="True"/>
+        </record>
+
+        <!-- Customer Invoice for Lease -->
+        <record id="invoice_demo_lease" model="account.move">
+            <field name="ref">Toyota Camry 2023 (Lease)</field>
+            <field name="partner_id" ref="partner_demo_customer"/>
+            <field name="move_type">out_invoice</field>
+            <field name="state">draft</field>
+            <field name="lease_id" ref="lease_demo_car"/>
+            <field name="invoice_line_ids" eval="[(0, 0, {
+                'name': 'Toyota Camry 2023 (Lease)-Lease',
+                'price_unit': 500.0,
+            })]"/>
+        </record>
+
+        <!-- Rental Record -->
+        <record id="rental_demo_switch" model="asset.rental">
+            <field name="asset_id" ref="asset_switch_rental"/>
+            <field name="start_date">2026-07-01 08:00:00</field>
+            <field name="end_date">2026-07-10 18:00:00</field>
+            <field name="customer_id" ref="partner_demo_customer"/>
+            <field name="payment_terms">day</field>
+            <field name="payment_type">complete</field>
+            <field name="status">rent</field>
+            <field name="is_invoice" eval="True"/>
+        </record>
+
+        <!-- Customer Invoice for Rental -->
+        <record id="invoice_demo_rental" model="account.move">
+            <field name="ref">Cisco Switch Catalyst (Rental)</field>
+            <field name="partner_id" ref="partner_demo_customer"/>
+            <field name="move_type">out_invoice</field>
+            <field name="state">draft</field>
+            <field name="rent_id" ref="rental_demo_switch"/>
+            <field name="invoice_line_ids" eval="[(0, 0, {
+                'name': 'Cisco Switch Catalyst (Rental)-Rental',
+                'price_unit': 100.0,
+            })]"/>
+        </record>
+
+        <!-- Reservation Record -->
+        <record id="reservation_demo_projector" model="asset.reservation">
+            <field name="asset_id" ref="asset_projector_reserve"/>
+            <field name="start_date">2026-07-01</field>
+            <field name="end_date">2026-07-05</field>
+            <field name="employee_id" ref="employee_demo"/>
+            <field name="status">reserve</field>
+        </record>
+
+        <!-- Asset Assign Record -->
+        <record id="assign_demo_macbook" model="asset.assign">
+            <field name="asset_id" ref="asset_macbook_assign"/>
+            <field name="employee_id" ref="employee_demo"/>
+            <field name="assign_date">2026-06-13    </field>
+            <field name="status">assign</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <!-- Maintenance Request (Preventive Maintenance) -->
+        <record id="maintenance_demo_server" model="maintenance.request">
+            <field name="name">Annual Server Rack Checkup</field>
+            <field name="asset_id" ref="asset_server_maintenance"/>
+            <field name="maintenance_type">preventive</field>
+            <field name="partner_id" ref="partner_demo_vendor"/>
+            <field name="expense" eval="150.0"/>
+            <field name="stage_id" ref="maintenance.stage_1"/>
+        </record>
+
+        <!-- Repair Request (Corrective Repair) -->
+        <record id="repair_demo_forklift" model="maintenance.request">
+            <field name="name">Engine Belt Replacement</field>
+            <field name="asset_id" ref="asset_forklift_repair"/>
+            <field name="maintenance_type">corrective</field>
+            <field name="partner_id" ref="partner_demo_vendor"/>
+            <field name="expense" eval="350.0"/>
+            <field name="stage_id" ref="maintenance.stage_3"/>
+            <field name="has_billed" eval="True"/>
+        </record>
+
+        <!-- Vendor Bill for Repair Request -->
+        <record id="bill_demo_repair" model="account.move">
+            <field name="ref">Forklift Hyster - Repair</field>
+            <field name="partner_id" ref="partner_demo_vendor"/>
+            <field name="move_type">in_invoice</field>
+            <field name="state">draft</field>
+            <field name="repair_id" ref="repair_demo_forklift"/>
+            <field name="invoice_line_ids" eval="[(0, 0, {
+                'name': 'Forklift Hyster - Repair-Repair Bill',
+                'quantity': 1,
+                'price_unit': 350.0,
+            })]"/>
+        </record>
+
+        <!-- Sell Record -->
+        <record id="sell_demo_chair" model="asset.sell.dispose">
+            <field name="asset_asset_id" ref="asset_chair_sell"/>
+            <field name="asset_action">sell</field>
+            <field name="date">2026-06-12</field>
+            <field name="is_done" eval="True"/>
+            <field name="loss_account_id" ref="account_demo_loss"/>
+        </record>
+
+        <!-- Dispose Record -->
+        <record id="dispose_demo_monitor" model="asset.sell.dispose">
+            <field name="asset_asset_id" ref="asset_monitor_dispose"/>
+            <field name="asset_action">dispose</field>
+            <field name="date">2026-06-11</field>
+            <field name="is_done" eval="True"/>
+            <field name="loss_account_id" ref="account_demo_loss"/>
+            <field name="disposal_type">dispose</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Record for defining a kanban view named 'marketing.campaign.kanban' for the model 'marketing.campaign' -->
+    <record id="view_stock_picking_kanban" model="ir.ui.view">
+        <field name="name">view.stock.picking.kanban</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <kanban js_class="barcode_kanban" class="cyllo_barcode_kanban"
+                    quick_create="false" records_draggable="false"
+                    action="open_record" type="object"
+                    create="0">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="partner_id"/>
+                <field name="scheduled_date"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="card">
+                            <div class="card-body p-1">
+                                <div class="row d-flex justify-content-between">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <h4 class="card-title mb-0 flex-grow-1"
+                                        t-esc="record.name.value"/>
+                                        <div class="badge-stock-picking">Ready</div>
+                                        <button class="btn btn-secondary btn-sm w-auto ms-3"
+                                                name="open_picking" type="object">
+                                            <i class="ri-arrow-right-s-line"/>
+                                        </button>
+                                    </div>
+
+                                    <p class="text-muted col-sm-6 text-truncate"
+                                       t-esc="record.partner_id.value"/>
+                                    <p class="text-muted col-sm-6 d-flex justify-content-end"
+                                       t-esc="record.scheduled_date.value"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

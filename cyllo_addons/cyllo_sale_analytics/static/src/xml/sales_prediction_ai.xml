@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="SalesPredictionAiDashboard" owl="1">
+        <div class="cy-main cyllo-background">
+            <div class="cy_prediction_container" t-ref="root">
+                <div class="cy_prediction-child">
+                    <div class="d-flex justify-content-between align-items-center cy-sale-analysis_nav ms-2">
+                        <div class="d-flex">
+                            <span class="nav-link prediction-heading">Sales Analytics with AI</span>
+                            <br/>
+                        </div>
+                        <div class="col d-flex align-items-center justify-content-end gap-2 px-2 pt-3">
+                            <button t-if="stateChart.typeChart == 'line'"
+                                    class="btn cy-btn-green toggle-chart-button"
+                                    t-on-click="() => this.onClickTypeChart('bar')">
+                                <i class="ri-bar-chart-fill sf-chart-image"/>
+                            </button>
+                            <button t-if="stateChart.typeChart == 'bar'"
+                                    class="btn cy-btn-green toggle-chart-button"
+                                    t-on-click="() => this.onClickTypeChart('line')">
+                                <i class="ri-line-chart-line sf-chart-image"/>
+                            </button>
+                            <FilterDropdown mainClass="'dropdown-filters-sale'"
+                                            class="'cy-btn-green'"
+                                            onClick.bind="filter_date"
+                                            name="'Filters'">
+                                <t t-set-slot="contents">
+                                    <div class="col-12">
+                                        <label for="start-date"
+                                               class="cy-marketing-auto-dialog-txt">Start Date:</label>
+                                        <div>
+                                            <input type="date"
+                                                   id="start-date"
+                                                   t-att-max="dateToday"
+                                                   class="start_date w-100 form-control"
+                                                   name="start-date"
+                                                   t-model="graphState.start_date"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-12  my-3">
+                                        <label for="end-date"
+                                               class="cy-marketing-auto-dialog-txt">End Date:</label>
+                                        <div>
+                                            <input type="date"
+                                                   id="end-date"
+                                                   t-att-max="dateToday"
+                                                   class="end_date w-100 form-control"
+                                                   name="end-date"
+                                                   t-model="graphState.end_date"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-12  my-3">
+                                        <label for="periods" class="h4">Future Periods:</label>
+                                        <input class="form-control cy-button-stroke"
+                                               type="number"
+                                               min="0"
+                                               max="500"
+                                               id="periods"
+                                               value="30"
+                                               placeholder="Future Period"
+                                               t-model="graphState.period"
+                                               title="Period for Forcasting"/>
+                                    </div>
+                                    <div class="col-12  my-3">
+                                        <label for="frequency" class="h4">Frequency:</label>
+                                        <select id="frequency"
+                                                class="form-select cy-button-stroke"
+                                                t-model="graphState.frequency"
+                                                title="Frequency for Forcasting">
+                                            <option value="D">Day</option>
+                                            <option value="M">Month</option>
+                                            <option value="Y">Year</option>
+                                        </select>
+                                    </div>
+                                </t>
+                            </FilterDropdown>
+                            <div class="position-relative">
+                                <Dropdown
+                                        class="'btn-group flex-grow-1 flex-md-grow-0 dropdown-fit-content'"
+                                        togglerClass="'btn cy-btn-green cy-export-dropdown'"
+                                        showCaret="true">
+                                    <t t-set-slot="toggler">
+                                        <span class="ri-upload-line"/>
+                                        Export
+                                    </t>
+                                    <DropdownItem
+                                            onSelected.bind="exportSalePDF">
+                                        <span class="ri-file-pdf-line"/>
+                                        <span class="ms-2">PDF</span>
+                                    </DropdownItem>
+                                    <DropdownItem
+                                            onSelected.bind="exportSalePNG">
+                                        <span class="ri-file-image-line"/>
+                                        <span class="ms-2">PNG</span>
+                                    </DropdownItem>
+                                </Dropdown>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="col">
+                            <div class="churn_prediction_selected_filter">
+                                <div class="d-flex justify-content-between align-items-center cy-sale-analysis_nav ms-2">
+                                    <div class="cy-sales-main-head-container">
+                                        <div t-if="stateChart.chartDataSales"
+                                             class="cy-churn-main_head">
+                                            Predicted Sales For
+                                            <t t-esc="graphState.formattedDate.period"/>
+                                            <t t-if="graphState.formattedDate.frequency == 'D'"><span> Days</span></t>
+                                            <t t-elif="graphState.formattedDate.frequency == 'M'"><span> Months</span></t>
+                                            <t t-elif="graphState.formattedDate.frequency == 'Y'"><span> Years</span></t>
+                                        </div>
+                                        <t t-if="stateChart.chartDataSales">
+                                            <t t-if="this.graphState.formattedDate.startDate and this.graphState.formattedDate.endDate">
+                                                <div class="info-content gap-1">
+                                                    <i class="ri-information-line cy-icons"/>
+                                                    <span class="d-flex gap-1 px-1 "><span class="info-hover-msg">Actual Sales from </span>
+                                                        <t t-esc="graphState.formattedDate.startDate"/>
+                                                        to
+                                                        <t t-esc="graphState.formattedDate.endDate"/>
+                                                    </span>
+                                                </div>
+                                            </t>
+                                            <t t-if="stateChart.metrics and stateChart.metrics.mape">
+                                                <div class="info-content gap-1">
+                                                    <i class="ri-focus-3-line cy-icons"/>
+                                                    <span class="d-flex gap-1 px-1"><span class="info-hover-msg">Walk-forward error:
+                                                        ±<t t-esc="stateChart.metrics.mape"/>% MAPE over
+                                                        <t t-esc="stateChart.metrics.n_folds"/> segments
+                                                    </span></span>
+                                                </div>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-100 sale_pred">
+                        <div class="col-md-12 col-lg-12 p-0 cy-sales-forcaste_graph-area">
+                            <div t-attf-class="cy-sale-forecast_graph-container pt-3 sale-chart d-flex justify-content-center {{ stateChart.isChartVisible ? '' : 'd-none' }}">
+                                <div id="sale_forecast_chart" t-ref="canvas"/>
+                            </div>
+                            <button t-if="stateChart.chartDataSales and stateChart.summary"
+                                    class="cy-ai-summary-fab"
+                                    t-on-click="toggleSummary"
+                                    aria-label="AI summary">
+                                <i class="ri-robot-2-line"/>
+                            </button>
+                            <div t-if="stateChart.showSummary"
+                                 class="cy-ai-summary-panel">
+                                <div class="cy-ai-summary-panel_head">
+                                    <span class="cy-ai-summary-title">
+                                        <i class="ri-robot-2-line"/>
+                                        <span>AI Summary</span>
+                                    </span>
+                                    <button class="cy-ai-summary-close"
+                                            t-on-click="closeSummary"
+                                            aria-label="Close">
+                                        <i class="ri-close-line"/>
+                                    </button>
+                                </div>
+                                <div class="cy-ai-summary-panel_body">
+                                    <p class="cy-ai-summary-text"
+                                       t-esc="stateChart.summary"/>
+                                </div>
+                            </div>
+                            <div t-if="!stateChart.chartDataSales"
+                                 class="col h-100">
+                                <div class="cy_sale-empty_data text-center align-items-center justify-content-center d-flex">
+                                    <div class="d-flex align-items-center justify-content-center flex-column w-100">
+                                        <div>
+                                            <i class="ri-close-circle-fill no-data-forbid"/>
+                                        </div>
+                                        <h3 class="cy-demand-predit_head">Sales Data for this Frequency is Insufficient.
+                                        </h3>
+                                        <p class="cy-empty_text">The dataset is too small to perform a meaningful prediction.
+                                            Increase the Sales Data by adjusting the Start Date and End Date.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

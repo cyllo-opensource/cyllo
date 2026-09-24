@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+     <t t-name="LinesPartnerLedger">
+         <t t-foreach="props.move_lines" t-as="move_line" t-key="move_line_index">
+             <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="d-flex gap-2">
+                            <th>
+                        <span class="mx-3">
+                            <t t-esc="move_line.move_name"/>
+                        </span>
+                    </th>
+                            <t t-set="annotation"
+                               t-value="move_line.annotations and move_line.annotations.hasOwnProperty(this.props.ledgerId) ? move_line.annotations[this.props.ledgerId] : ''"/>
+                            <Dropdown class="'border_unset_button'">
+                        <t t-set-slot="toggler">
+                            <span class="mx-2 fa fa-caret-down"/>
+                        </t>
+                                <DropdownItem onSelected="() => this.goToJournalEntry(move_line.move_id)">
+                            View Entry
+                        </DropdownItem>
+                                <DropdownItem
+                                        onSelected="() => props.openAnnotation(move_line.id,annotation, move_line.partner_id)">
+                            Annotation
+                        </DropdownItem>
+                    </Dropdown>
+                            <div t-on-click="() => props.openAnnotation(move_line.id,annotation, move_line.partner_id)"
+                                 t-if="annotation" class="mx-2 cursor-pointer">
+                        <div class="cy-annotation-tooltip">
+                            <span class="ri-ball-pen-line"/>
+                        </div>
+                                <div class="cy-annotation-tooltip-content justify-content-around modal_background"
+                                     t-out="annotation"/>
+                    </div>
+                            <div class="mx-1 delete-on-h-show ri-delete-bin-6-line on-h-red cursor-pointer"
+                                 t-if="annotation"
+                                 t-on-click="() => props.removeAnnotation(move_line.id, move_line.partner_id)"/>
+                        </span>
+                    </th>
+                 <th>
+                        <span>
+                            <t t-esc="move_line.jrnl"/>
+                        </span>
+                    </th>
+                 <th>
+                        <span>
+                            <t t-esc="move_line.code"/>
+                        </span>
+                    </th>
+                 <th>
+                        <span>
+                            <t t-if="move_line.date" t-esc="move_line.date"/>
+                        </span>
+                    </th>
+                 <th>
+                        <span t-if="move_line.date_maturity">
+                            <t t-esc="move_line.date_maturity"/>
+                        </span>
+                    </th>
+                 <th>
+                     <span>
+                            <t t-if="move_line.matching_number" t-esc="move_line.matching_number"/>
+                     </span>
+                 </th>
+                 <th>
+                        <span>
+                            <t t-if="move_line.debit" t-esc="move_line.format_debit"/>
+                        </span>
+                    </th>
+                 <th>
+                        <span>
+                            <t t-if="move_line.credit" t-esc="move_line.format_credit"/>
+                        </span>
+                    </th>
+                 <th>
+                        <span>
+                            <t t-if="move_line.amount_currency" t-esc="move_line.currency_symbol"/>
+                            <t t-if="move_line.amount_currency" t-esc="move_line.amount_currency"/>
+                        </span>
+                    </th>
+                 <th>
+                        <span t-if="move_line.balance != null">
+                            <t t-esc="move_line.format_balance"/>
+                        </span>
+                    </th>
+                </tr>
+        </t>
+     </t>
+</templates>

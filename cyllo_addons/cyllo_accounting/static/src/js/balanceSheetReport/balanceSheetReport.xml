@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="BalanceSheetReport" t-inherit="cyllo_accounting.PnlReport" t-inherit-mode="primary">
+        <xpath expr="//tbody[hasclass('pnl_report_body')]" position="replace">
+            <tbody class="balance_sheet_report">
+                <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                    <th colspan="8">
+                        <span class="cy-balance-sheet-heading">
+                            Assets
+                        </span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="fw-bold ms-2 cy-balance-sheet-heading">
+                            Current Assets
+                        </span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('asset_cash')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'asset_cash'"
+                                title="'Bank and Cash Accounts'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Bank and Cash Accounts</span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('asset_receivable')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'asset_receivable'"
+                                title="'Receivables'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Receivables</span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('asset_current')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'asset_current'"
+                                title="'Current Assets'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Current Assets</span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('asset_prepayments')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'asset_prepayments'"
+                                title="'Prepayments'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4 cy-accounting-sub-heading">Prepayments</span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="fw-bolder cy-balance-sheet-heading ms-3">
+                            Total Current Assets
+                        </span>
+                    </th>
+                    <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                        <span class="fw-bolder cy-balance-sheet-heading">
+                            <t t-out="currencySymbol"/>
+                            <span class="mx-1" t-out="record.total_current_asset"/>
+                        </span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('asset_fixed')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'asset_fixed'"
+                                title="'Plus Fixed Assets'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Plus Fixed Assets</span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('asset_non_current')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'asset_non_current'"
+                                title="'Plus Non-current Assets'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Plus Non-current Assets</span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="fw-bolder ms-3 cy-balance-sheet-heading">
+                            Total Assets
+                        </span>
+                    </th>
+                    <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                        <span class="fw-bolder cy-balance-sheet-heading">
+                            <t t-out="currencySymbol"/>
+                            <span class="mx-1" t-out="record.total_assets"/>
+                        </span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                    <th colspan="8">
+                        <span class="fw-bolder cy-balance-sheet-heading">
+                           Liabilities
+                        </span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="fw-bolder cy-balance-sheet-heading ms-2">
+                            Current Liabilities
+                        </span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('liability_current')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'liability_current'"
+                                title="'Current Liabilities'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <!--                        Todo: Plus Non-current Assets ??-->
+                        <span class="ms-4">Current Liabilities</span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('liability_payable')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'liability_payable'"
+                                title="'Payable'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Payable</span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('liability_credit_card')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'liability_credit_card'"
+                                title="'Credit Card'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Credit Card</span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="fw-bolder cy-balance-sheet-heading ms-3">
+                            Total Current Liabilities
+                        </span>
+                    </th>
+                    <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                        <span class="fw-bolder cy-balance-sheet-heading">
+                            <t t-out="currencySymbol"/>
+                            <span class="mx-1" t-out="record.total_current_liability"/>
+                        </span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('liability_non_current')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'liability_non_current'"
+                                title="'Plus Non-current Liabilities'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Plus Non-Current Liabilities</span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="fw-bolder cy-balance-sheet-heading ms-3">
+                            Total Liabilities
+                        </span>
+                    </th>
+                    <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                        <span class="fw-bolder cy-balance-sheet-heading">
+                            <t t-out="currencySymbol"/>
+                            <span class="mx-1" t-out="record.total_liability"/>
+                        </span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                    <th colspan="8">
+                        <span class="fw-bolder cy-balance-sheet-heading">
+                            Equity
+                        </span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="fw-bolder cy-balance-sheet-heading ms-2">
+                            Unallocated Earnings
+                        </span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="ms-4">Current Earnings</span>
+                    </th>
+                    <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                        <span class="fw-bold">
+                            <t t-out="currencySymbol"/>
+                            <span class="mx-1" t-out="record.total_earnings"/>
+                        </span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('equity_unaffected')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'equity_unaffected'"
+                                title="'Current Allocated Earnings'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Current Allocated Earnings</span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="ms-4">Total Unallocated Earnings</span>
+                    </th>
+                    <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                        <span class="fw-bold">
+                            <t t-out="currencySymbol"/>
+                            <span class="mx-1" t-out="record.total_unallocated_earning"/>
+                        </span>
+                    </th>
+                </tr>
+                <t t-set="accountLines" t-value="getAccountLines('equity')"/>
+                <ReportDropdown t-if="accountLines.length"
+                                t-props="commonReportDropdownProps"
+                                accountLines="accountLines"
+                                displayTemplate="'pnlGeneralValDT'"
+                                pnlKey="'equity'"
+                                title="'Retained Earnings'"
+                />
+                <tr t-else=""
+                    class="h-2-rem border-bottom border-gainsboro hide-at-zero cy-report-line-acc">
+                    <th colspan="9">
+                        <span class="ms-4">Retained Earnings</span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="fw-bolder cy-balance-sheet-heading ms-2">
+                            Total Equity
+                        </span>
+                    </th>
+                    <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                        <span class="fw-bolder cy-balance-sheet-heading">
+                            <t t-out="currencySymbol"/>
+                            <span class="mx-1" t-out="record.total_equity"/>
+                        </span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem border-bottom border-dark cy-report-line-acc">
+                    <th colspan="6">
+                        <span class="fw-bolder ms-2 cy-balance-sheet-heading">
+                             Liabilities + Equity
+                        </span>
+                    </th>
+                    <th t-foreach="records" t-as="record" t-key="record_index" class="text-end">
+                        <span class="fw-bolder cy-balance-sheet-heading">
+                            <t t-out="currencySymbol"/>
+                            <span class="mx-1" t-out="record.total_balance"/>
+                        </span>
+                    </th>
+                </tr>
+                <tr class="h-2-rem"/>
+            </tbody>
+        </xpath>
+    </t>
+</templates>

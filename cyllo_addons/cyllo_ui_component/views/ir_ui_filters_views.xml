@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="ir_ui_filters_view_tree" model="ir.ui.view">
+        <field name="name">ir.ui.filters.view.tree</field>
+        <field name="model">ir.ui.filters</field>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <header>
+                    <button name="load_filters_from_views" string="Load from Views"
+                            type="object" class="oe_highlight"/>
+                </header>
+                <field name="name"/>
+                <field name="string"/>
+                <field name="is_group_by"/>
+                <field name="model_id" context="{'model': True}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ir_ui_filters_view_form" model="ir.ui.view">
+        <field name="name">ir.ui.filters.view.form</field>
+        <field name="model">ir.ui.filters</field>
+        <field name="arch" type="xml">
+            <form string="Filter">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="string"/>
+                            <field name="is_group_by"/>
+                        </group>
+                        <group>
+                            <field name="model_id" context="{'model': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ir_ui_filters" model="ir.actions.act_window">
+        <field name="name">Filters</field>
+        <field name="res_model">ir.ui.filters</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="ir_ui_filters_view_tree"/>
+        <field name="views" eval="[(ref('ir_ui_filters_view_tree'), 'tree'), (ref('ir_ui_filters_view_form'), 'form')]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face"></p>
+        </field>
+    </record>
+
+    <menuitem id="menu_ir_ui_filters" name="Filters" parent="base.next_id_2"
+              action="action_ir_ui_filters" sequence="43"/>
+</odoo>

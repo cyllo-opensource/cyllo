@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Mail Template for the Debt Payback Schedules Action-->
+    <record id="mail_template_payback_alert" model="mail.template">
+        <field name="name">Payback Alert</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_debt_management"/>
+        <field name="email_to">{{object.person_id.email}}
+        </field>
+        <field name="subject">Payback Date of {{object.display_name}} is Tomorrow</field>
+        <field name="body_html" type="html">
+            <div style="background-color: #f9f9f9; padding: 20px;">
+                <p style="font-size: 16px; color: #333;">
+                    Hi There,
+                    <br/>
+                    Payback date of the debt
+                    <t t-out="object.display_name"/>
+                    is tomorrow.
+                    <table class="table" style=" border-collapse: collapse;width: 100%;">
+                        <thead class="table-light"
+                               style="background-color: #f2f2f2;  padding: 8px;text-align: left;border-bottom: 1px solid #ddd;">
+                            <th>
+                                Debt Type
+                            </th>
+                            <th>
+                                Partner
+                            </th>
+                            <th>
+                                Amount
+                            </th>
+                            <th>
+                                Payback Date
+                            </th>
+                            <th>
+                                State
+                            </th>
+                        </thead>
+                        <tr>
+                            <td style="text-align: center;padding: 8px;text-align: left;border-bottom: 1px solid #ddd;">
+                                <t t-esc="object.debt_type"/>
+                            </td>
+                            <td style="text-align: center;padding: 8px;text-align: left;border-bottom: 1px solid #ddd;">
+                                <t t-esc="object.person_id.name"/>
+                            </td>
+                            <td style="text-align: center;padding: 8px;text-align: left;border-bottom: 1px solid #ddd;">
+                                <t t-esc="object.amount"/>
+                                <t t-esc="object.currency_id.symbol"/>
+                            </td>
+                            <td style="text-align: center;padding: 8px;text-align: left;border-bottom: 1px solid #ddd;">
+                                <t t-esc="object.payback_date"/>
+                            </td>
+                            <td style="text-align: center;padding: 8px;text-align: left;border-bottom: 1px solid #ddd;">
+                                <t t-if="object.state == 'lend_borrow'">
+                                    Lend/Borrowed
+                                </t>
+                                <t t-if="object.state == 'partial_return'">
+                                    Partially Returned
+                                </t>
+                            </td>
+                        </tr>
+                    </table>
+                    <br/>
+                    <br/>
+                    Kind regards,
+                </p>
+            </div>
+        </field>
+    </record>
+
+    <!--    Mail Template for the Budget Delay mail Schedules Action-->
+    <record id="mail_template_budget_delay_mail"
+            model="mail.template">
+        <field name="name">Budget Delay Mail</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_budget_budget"/>
+        <field name="email_to">{{object.responsible_id.partner_id.email}}
+        </field>
+        <field name="subject">Budget {{object.name}} is Currently Low</field>
+        <field name="body_html" type="html">
+            <div style="background-color: #f9f9f9; padding: 20px;">
+                <p style="font-size: 16px; color: #333;">
+                    Hi  <t t-out="object.responsible_id.name"/>,
+                    <br/>
+                    Your budget
+                    <b>
+                        <t t-out="object.name"/>
+                    </b>
+                    achievement is currently low. Let's work on increasing it before the due date of
+                    <b>
+                        <t t-out="object.due_date"/>
+                    </b>
+                    .
+                    Attached the pdf report along with this mail.
+                </p>
+            </div>
+        </field>
+    </record>
+    <!--    Mail Template for the Budget, State changed to Approve -->
+    <record id="mail_template_budget_approve_mail"
+            model="mail.template">
+        <field name="name">Budget Approve Mail</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_budget_budget"/>
+        <field name="email_to">{{object.responsible_id.partner_id.email}}
+        </field>
+        <field name="subject">Budget {{object.name}} is Approved</field>
+        <field name="body_html" type="html">
+            <div style="background-color: #f9f9f9; padding: 20px;">
+                <p style="font-size: 16px; color: #333;">
+                    Hi  <t t-out="object.responsible_id.name"/>,
+                    <br/>
+                    Your budget
+                    <b>
+                        <t t-out="object.name"/>
+                    </b>
+                    is Approved by the Manager.
+                    Attached the pdf report along with this mail.
+                </p>
+            </div>
+        </field>
+    </record>
+    <!--    Mail Template for the Budget, State changed to Cancel -->
+    <record id="mail_template_budget_cancel_mail"
+            model="mail.template">
+        <field name="name">Budget Cancel Mail</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_budget_budget"/>
+        <field name="email_to">{{object.responsible_id.partner_id.email}}
+        </field>
+        <field name="subject">Budget {{object.name}} is Cancelled</field>
+        <field name="body_html" type="html">
+            <div style="background-color: #f9f9f9; padding: 20px;">
+                <p style="font-size: 16px; color: #333;">
+                    Hi <t t-out="object.responsible_id.name"/>,
+                    <br/>
+                    Your budget
+                    <b>
+                        <t t-out="object.name"/>
+                    </b>
+                    is Cancelled.
+                    Attached the pdf report along with this mail.
+                </p>
+            </div>
+        </field>
+    </record>
+    <!--    Mail Template for the Budget, State changed to Expired -->
+    <record id="mail_template_budget_expiry_mail"
+            model="mail.template">
+        <field name="name">Budget Expiry Mail</field>
+        <field name="model_id"
+               ref="cyllo_budget_management.model_budget_budget"/>
+        <field name="email_to">{{object.responsible_id.partner_id.email}}
+        </field>
+        <field name="subject">Budget {{object.name}} is Expired</field>
+        <field name="body_html" type="html">
+            <div style="background-color: #f9f9f9; padding: 20px;">
+                <p style="font-size: 16px; color: #333;">
+                    Hi  <t t-out="object.responsible_id.name"/>,
+                    <br/>
+                    Your budget
+                    <b>
+                        <t t-out="object.name"/>
+                    </b>
+                    is Expired.
+                    Attached the pdf report along with this mail.
+                </p>
+            </div>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--Form view of the Sign Template-->
+    <record id="view_sign_template_form" model="ir.ui.view">
+        <field name="name">view.sign.template.form</field>
+        <field name="model">sign.template</field>
+        <field name="arch" type="xml">
+            <form string="sign_template">
+                <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button name="action_configure" type="object"
+                                icon="fa-wrench" string="Configure"/>
+                    </div>
+                    <group>
+                        <field name="name"/>
+                        <field name="data" filename="filename"
+                               options="{'accepted_file_extensions': '.pdf'}"
+                               readonly="1"/>
+                        <field name="tags_ids" widget="many2many_tags"/>
+                    </group>
+                    <notebook>
+                        <page name="items" string="Fields">
+                            <field name="item_ids">
+                                <tree editable="bottom" create="false"
+                                      delete="false">
+                                    <field name="field_id"/>
+                                    <field name="role_id"/>
+                                    <field name="required"/>
+                                    <field name="page"/>
+                                    <field name="position_x"/>
+                                    <field name="position_y"/>
+                                    <field name="width"/>
+                                    <field name="height"/>
+                                    <field name="color" widget="color_picker"
+                                           optional="hide"/>
+                                    <field name="placeholder" optional="hide"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter"/>
+            </form>
+        </field>
+    </record>
+
+    <!--Kanban view of the Sign Template-->
+    <record id="view_sign_template_kanban" model="ir.ui.view">
+        <field name="name">view.sign.template.kanban</field>
+        <field name="model">sign.template</field>
+        <field name="arch" type="xml">
+            <kanban quick_create="false"
+                    default_order="priority desc, create_date desc" create="0"
+                    js_class="cyllo_sign_upload" class="cyllo_sign">
+                <field name="name"/>
+                <field name="data"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="cy-nw-kanban_card">
+                            <div class="cy-nw-kanban_card-img">
+                                <img t-if="record.data.raw_value"
+                                     t-attf-src="/web/image/sign.template/{{record.id.value}}/image_1920"
+                                     alt="pdf"/>
+                                <t t-else="">
+                                    <img src="/cyllo_sign/static/images/pdf.png"
+                                         t-att-data-id="record.id.value"
+                                         alt="pdf"/>
+                                </t>
+                                <div class="cy-nw-kanban_card-buttons">
+                                    <button class="btn" type="object"
+                                            name="delete_record">
+                                        <img src="/cyllo_sign/static/images/delete-bin.svg" alt="delete-bin"/>
+                                    </button>
+                                    <div class="btn btn-group"
+                                         t-att-style="record.priority.raw_value == 1 ? 'background-color: #9ea700;' : ''">
+                                        <field name="priority"
+                                               widget="priority"/>
+                                    </div>
+                                    <button class="btn" type="object"
+                                            name="view_record">
+                                        <img src="/cyllo_sign/static/images/eye.svg" alt="eye"/>
+                                    </button>
+                                </div>
+                                <div class="cy-nw-kanban-star favorite">
+                                    <img t-if="record.priority.raw_value == 1"
+                                         src="/cyllo_sign/static/images/star-fill.svg"
+                                         class="star-icon" alt="star-icon"/>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end mt-3">
+                                <div>
+                                    <h5 class="cy-nw-kanban_header-title">
+                                        <field name="name"/>
+                                    </h5>
+                                    <p class="cy-nw-kanban-date">
+                                        <field name="create_date"/>
+                                    </p>
+                                </div>
+                                <button class="cy-nw-send-btn mb-2"
+                                        type="object"
+                                        name="action_view_sign_generate">Send
+                                    <img src="/cyllo_sign/static/images/send-icon.svg" alt="send-icon"/>
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!--Tree view of the Sign Template-->
+    <record id="view_sign_template_tree" model="ir.ui.view">
+        <field name="name">view.sign.template.tree</field>
+        <field name="model">sign.template</field>
+        <field name="arch" type="xml">
+            <tree create="0">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_sign_template_search" model="ir.ui.view">
+        <field name="name">view.sign.template.search</field>
+        <field name="model">sign.template</field>
+        <field name="arch" type="xml">
+            <search string="Sign Templates">
+                 <field name="name"/>
+                <searchpanel>
+                    <field name="tags_ids" select="multi" icon="fa-tags"
+                           enable_counters="1"/>
+                </searchpanel>
+                <group>
+                    <filter string="Tags" name="tags_ids"
+                            context="{'group_by':'tags_ids'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--Action specified for the Sign Template-->
+    <record id="action_view_templates" model="ir.actions.act_window">
+        <field name="name">Templates</field>
+        <field name="res_model">sign.template</field>
+        <field name="context">{'create': False}</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Upload Your Templates
+            </p>
+            <p>
+                Upload PDF templates and sign.
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_cyllo_sign_root" name="Sign"
+              web_icon="cyllo_sign,static/description/cyllo_sign.svg"
+              groups="cyllo_sign.group_cyllo_sign_user,cyllo_sign.group_cyllo_sign_manager"/>
+    <menuitem id="menu_templates" name="Templates"
+              action="action_view_templates"
+              parent="cyllo_sign.menu_cyllo_sign_root"
+              sequence='0'/>
+</odoo>

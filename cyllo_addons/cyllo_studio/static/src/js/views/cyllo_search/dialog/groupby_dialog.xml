@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.GroupByDialog">
+        <div class="cy-search-modal-body">
+        <Dialog title="props.properties ? 'Update Group By': 'Add Group By'">
+            <div class="search_groupby_dialog">
+                <p class="cy-studio-modal_subtitle">
+                    <t t-if="props.properties">
+                        Update the Group By
+                    </t>
+                    <t t-else="">
+                        Fill the form to add the Group By
+                    </t>
+                </p>
+                <div class="row">
+                <div class="col">
+                    <div class="form-group mb-3 col-10">
+                        <label>Label</label>
+                        <input type="text" class="form-control" t-model="state.string"
+                               t-attf-placeholder="{{props.allFields[state.field]?.string || 'Enter a label'}}"/>
+                    </div>
+                    <div class="form-group mb-3 col-10 filter_domain">
+                        <label>Field</label>
+                        <div class="cy-studio-custom-dropdown-dialog-search-groupby-view">
+                            <CylloStudioDropdown
+                                    options="Fields"
+                                    onChange="(value) => this.handleFieldSelect(value)"
+                                    defaultValue="defaultFields"
+                                    searchable="true"
+                            />
+                        </div>
+
+                    </div>
+                </div>
+                    <div class="col">
+                    <div class="form-group mb-3 col-10">
+                        <label>Visible To</label>
+                        <div class="form-control" style="overflow:auto;">
+                            <MultiRecordSelector resIds="state.groupIds" resModel="'res.groups'"
+                                                 update="(groupIds)=> state.groupIds = groupIds"/>
+                        </div>
+                    </div>
+                        <div class="d-flex ms-2 col-10" style="margin-left: 0.5% !important;">
+                        <input class="customCheckbox d-none ViewCheck" type="checkbox" name="invisible" id="invisible"
+                               t-on-click="onDomainRadioClick"
+                               t-att-checked="state.invisible == 'false' ? null : 'checked'"/>
+                            <label class="cy-navbar_label customCheckbox-label" for="invisible">Invisible</label>
+                        </div>
+                </div>
+            </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onConfirm">Confirm</button>
+                <button class="btn btn-secondary" t-on-click="onDiscard">Discard</button>
+            </t>
+        </Dialog>
+        </div>
+    </t>
+</templates>

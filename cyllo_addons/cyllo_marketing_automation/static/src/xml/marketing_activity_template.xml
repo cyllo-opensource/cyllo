@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<template id="template" xml:space="preserve">
+    <!-- Marketing Activity Template -->
+    <t t-name="MarketingActivity" owl="1">
+       <!-- Main Container for Marketing Activity -->
+        <div class="o_action_manage">
+           <div class="col-12 cy-breadcrumbs-marketing-titlebar">
+               <div class="d-flex align-items-center py-2 cy-border-btm cy-breadcrumbs-bar">
+                   <div class="col d-flex align-items-center justify-content-between gap-2">
+                       <span class=" cy-marketing-auto-sm_head d-flex align-items-center"
+                             t-on-click="goToCampaign" t-att-title="state.recordName.name">
+                           <i class="ri-arrow-left-s-line cy-marketing-auto_back" aria-hidden="true"/>
+                           <span class=" cy-record-name" t-out="state.recordName.name"/>/
+                           <span class=" cy-marketing-auto-sm_head">Activities</span>
+                       </span>
+                       <div class="d-flex align-items-center gap-2">
+                           <div class="c-button-primary-stroke add_div-style" t-on-click="onclickParentActivity">
+                               <button class="btn btn-primary">
+                                   <i class="ri-add-line" aria-hidden="true"/>
+                                   Add Activity
+                               </button>
+                           </div>
+                           <div t-if="state.activities.length gt 0" class="position-relative">
+                                <button class="btn btn-secondary" t-on-click="onclickLaunchTest"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#recordContainer" aria-expanded="false"
+                                        aria-controls="recordContainer">
+                                    <i class="ri-play-line" aria-hidden="true"/>
+                                    Launch Test
+                                </button>
+                               <div class="cy-marketing-auto_add-parent-container collapse" id="recordContainer"
+                                    t-ref="testDiv">
+                                   <div class="cy-market-dialog-header p-3 cy-border-btm">
+                                       <h2 class="cy-marketing-auto-dialog-head">
+                                        Launch Test
+                                       </h2>
+                                   </div>
+                                   <div class="p-3">
+                                       <label class="cy-marketing-auto-dialog-txt">
+                                           Pick or create a/an <t t-out="state.recordName.model_id[1]"/>
+                                           to generate a Test Participant</label>
+                                       <div class="dropdown-input-div col-12 my-3" t-ref="testInput"
+                                            t-att-data-id="model.modelTarget.id || null"
+                                            t-att-data-model="state.recordName.model_name">
+                                                <Many2XAutocomplete placeholder="'Select'"
+                                                                    value="model.modelTarget.display_name"
+                                                                    fieldString="''" activeActions="{}"
+                                                                    resModel="state.recordName.model_name"
+                                                                    getDomain.bind="getDomainTarget"
+                                                                    update.bind="onUpdateTarget"/>
+                                       </div>
+                                       <div class="dropdown-footer d-flex gap-2 mt-3">
+                                           <button type="object"
+                                                   class="btn-launch c-button-primary-stroke py-2 px-4 cy-active-btn w-100 "
+                                                   t-on-click="onclickLaunchButton">Launch</button>
+                                           <button class="btn_test-activity cy-button-stroke py-2 px-4 w-100 "
+                                                   t-on-click="onclickCancelTest">Cancel</button>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+            <!-- Marketing Activity Main Page -->
+            <div class="activity-main_page col-lg-12 col-md-12 cy-main">
+               <!-- Marketing Status Cards -->
+                <div class=" row pt-5 mx-2 cy-marketing-tile_row cy-marketing_status">
+                   <MarketingCards type="'Total'" value="updateCountValue(state.total_count)"/>
+                    <MarketingCards type="'Running'" value="updateCountValue(state.running)"/>
+                    <MarketingCards type="'Completed'" value="updateCountValue(state.completed)"/>
+               </div>
+                <!-- Marketing Tabs Component -->
+                <MarketingTabs t-if="state.activities.length gt 0" t-props="activities" edit="state.edit"/>
+           </div>
+       </div>
+   </t>
+</template>

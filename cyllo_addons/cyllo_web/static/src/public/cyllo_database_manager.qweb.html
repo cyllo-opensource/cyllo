@@ -1,0 +1,457 @@
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Cyllo</title>
+    <link rel="shortcut icon" href="/cyllo_web/static/src/img/cyllo-favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="/web/static/lib/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="/cyllo_web/static/src/css/database_manager.css">
+    <link rel="stylesheet" href="/cyllo_web/static/src/css/remixicon.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+    <script src="/web/static/lib/bootstrap/js/dist/dom/data.js"></script>
+    <script src="/web/static/lib/bootstrap/js/dist/dom/event-handler.js"></script>
+    <script src="/web/static/lib/bootstrap/js/dist/dom/manipulator.js"></script>
+    <script src="/web/static/lib/bootstrap/js/dist/dom/selector-engine.js"></script>
+    <script src="/web/static/lib/bootstrap/js/dist/base-component.js"></script>
+    <script src="/web/static/lib/bootstrap/js/dist/modal.js"></script>
+    <script src="/web/static/lib/bootstrap/js/dist/collapse.js"></script>
+    <script src="/web/static/src/public/database_manager.js"></script>
+    <script>
+        // Core database_manager.js only toggles the input's type
+        // (text/password) on ".o_little_eye" mousedown — it doesn't touch
+        // the icon. Cyllo's markup swapped the old fa-eye icon for a
+        // remixicon one (.cy-eye), so it needs its own toggle to reflect
+        // "password visible" state on the icon.
+        document.addEventListener("DOMContentLoaded", function () {
+            document.body.addEventListener("mousedown", function (ev) {
+                if (ev.target.classList.contains("cy-eye")) {
+                    ev.target.classList.toggle("ri-eye-fill");
+                    ev.target.classList.toggle("ri-eye-off-fill");
+                }
+            });
+        });
+    </script>
+    <style>
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="cy-authentication body_bg">
+        <script>
+            localStorage.setItem('mainMenuVisibility', 'true');
+            localStorage.setItem("cy_selected_app", false);
+            localStorage.setItem("isSidebarOn", true);
+        </script>
+        <div class="d-flex justify-content-center">
+            <t t-if="insecure and databases">
+                <div class="alert alert-warning text-center cy-alert-box-60">
+                    Warning, your Cyllo database manager is not protected.<br />
+                    Please <a href="#" data-bs-toggle="modal" data-bs-target=".o_database_master">set a
+                        master
+                        password</a>
+                    to secure it.
+                </div>
+            </t>
+            <t t-if="error">
+                <div class="alert alert-danger text-center cy-alert-box-60" t-out="error"></div>
+            </t>
+        </div>
+        <div class="container">
+            <div class="wrapper">
+                <div class="login_form_left items">
+                    <div class="login_img_wrapper">
+                        <img src="/cyllo_web/static/src/img/cyllo-logo-png.png" width="70" alt="" />
+                    </div>
+                    <div class="form_heading">
+                        <h4 t-if="list_db and databases and not manage">Select a database</h4>
+                        <h4 t-elif="list_db and databases">Select a database</h4>
+                        <h4 t-elif="list_db">Create your database</h4>
+                    </div>
+                </div>
+                <div class="login_form_right items">
+                    <div class="login_form_right_form">
+                        <div class="d-flex flex-column">
+                            <t t-if="not list_db">
+                                <div class="alert alert-danger text-center m-5">The database manager has
+                                    been disabled by
+                                    the administrator
+                                </div>
+                                <div class="text-center p-4 border-top">
+                                    <a href="/web/login">Back to login</a>
+                                </div>
+                            </t>
+                            <t t-if="list_db and databases">
+                                <div class="cy-db-list">
+                                    <t t-foreach="databases" t-as="db">
+                                        <div class="w-100 cy-database-content">
+                                            <a t-attf-href="/web?db={{ db }}" class="flex-grow-1 pl-0">
+                                                <span class="cy-database-name">
+                                                    <t t-out="db" />
+                                                </span>
+                                            </a>
+                                            <div class="d-flex align-items-center">
+                                                <t t-if="db in incompatible_databases">
+                                                    <i class="icon ri-alert-fill float-end text-warning warning-icon me-4"
+                                                        title="This database may not be compatible"></i>
+                                                </t>
+                                                <t t-if="manage">
+                                                    <div
+                                                        class="cy-database-button-container d-flex align-items-center gap-3 w-100">
+                                                        <div class="cy-box-upload text-center">
+                                                            <a class="d-flex justify-content-center o_database_action align-items-center h-100"
+                                                                href="#" t-att-data-db="db"
+                                                                data-bs-target=".o_database_backup"
+                                                                title="Backup Database">
+                                                                <i class="ri-upload-cloud-2-line o_database_action text-dark"
+                                                                    t-att-data-db="db"
+                                                                    data-bs-target=".o_database_backup"></i>
+                                                            </a>
+                                                        </div>
+                                                        <div class="cy-box-copy text-center">
+                                                            <a class="d-flex justify-content-center o_database_action align-items-center h-100"
+                                                                href="#" t-att-data-db="db"
+                                                                data-bs-target=".o_database_duplicate"
+                                                                title="Duplicate Database">
+                                                                <i class="ri-file-copy-line o_database_action text-dark"
+                                                                    t-att-data-db="db"
+                                                                    data-bs-target=".o_database_duplicate"></i>
+                                                            </a>
+                                                        </div>
+                                                        <div class="cy-box-delete text-center">
+                                                            <a class="d-flex justify-content-center o_database_action align-items-center h-100"
+                                                                href="#" t-att-data-db="db"
+                                                                data-bs-target=".o_database_delete"
+                                                                title="Delete Database">
+                                                                <i class="ri-delete-bin-7-line o_database_action text-dark"
+                                                                    t-att-data-db="db"
+                                                                    data-bs-target=".o_database_delete"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                                <t t-if="manage">
+                                    <div class="d-flex m-4">
+                                        <button type="button" data-bs-toggle="modal" data-bs-target=".o_database_create"
+                                            class="btn btn-primary flex-grow-1">Create Database
+                                        </button>
+                                        <button type="button" data-bs-toggle="modal"
+                                            data-bs-target=".o_database_restore"
+                                            class="btn btn-secondary flex-grow-1 ms-2">Restore
+                                            Database
+                                        </button>
+                                        <button type="button" data-bs-toggle="modal" data-bs-target=".o_database_master"
+                                            class="btn btn-warning flex-grow-1 ms-2">Set Master
+                                            Password
+                                        </button>
+                                    </div>
+                                </t>
+                                <t t-if="not manage">
+                                    <div class="text-center m-4">
+                                        <a href="/web/database/manager">Manage databases</a>
+                                    </div>
+                                </t>
+                            </t>
+                            <t t-elif="list_db">
+                                <form class="position-relative mb-0" role="form"  style="max-height: 60vh;" action="/web/database/create" method="post">
+                                    <div class="cy_create_db_form" style="max-height: 50vh; overflow-y: auto;">
+                                        <t t-call="create_form" />
+                                    </div>
+                                    <div class="d-flex p-4 border-top">
+                                        <input type="submit" value="Create Database"
+                                            class="btn btn-primary flex-grow-1" />
+                                        <button type="button" data-bs-toggle="modal"
+                                            data-bs-target=".o_database_restore"
+                                            class="btn btn-secondary flex-grow-1 ms-2">Restore Database</button>
+                                    </div>
+                                </form>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Create -->
+    <div class="modal fade o_database_create" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content cyllo-modal_content">
+                <form class="mb-0" role="form" action="/web/database/create" method="post">
+                    <div class="modal-header cy-modal_header pt-0 pb-0">
+                        <div>
+                            <h5 class="modal-title cy-modal-title">Create Database</h5>
+                            <p class="cy-modal_sub-title">Fill in the details to create a database</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="cy_create_db_form p-0 pb-4">
+                            <t t-call="create_form" />
+                            <small class="text-muted mt-3">
+                                To enhance your experience, some data may be sent to Cyllo online services.
+                                See our <a href="https://www.cyllo.com/privacy" target="_blank">Privacy Policy</a>.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer cy-modal_footer">
+                        <button type="submit" class="btn btn-primary cy-primary_btn">Create Database
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restore -->
+    <div class="modal fade o_database_restore" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content cyllo-modal_content">
+                <div class="modal-header  cy-modal_header">
+                    <div>
+                        <h5 class="modal-title cy-modal-title">Restore Database</h5>
+                        <p class="cy-modal_sub-title">Fill the details to restore database</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form class="mb-0" id="form_restore_db" role="form" action="/web/database/restore" method="post"
+                    enctype="multipart/form-data">
+                    <div class="modal-body cy-modal_body">
+                        <div class="cy_create_db_form p-0 pb-4">
+                            <t t-call="master_input" />
+                            <div class="form-group cy-form_group">
+                                <label class="cy-modal__label" for="backup_file">File<span
+                                        class="cy-required">*</span></label>
+                                <input id="backup_file" type="file" name="backup_file" class="required cy-file_btn" />
+                            </div>
+                            <div class="form-group cy-form_group">
+                                <label class="cy-modal__label" for="dbname_restore">Database Name<span
+                                        class="cy-required">*</span></label>
+                                <input type="text" class="form-control cy-input-box" id="dbname_restore" name="name"
+                                    required="required" t-att-pattern="pattern" placeholder="Type your database name"
+                                    title="Only alphanumerical characters, underscore, hyphen and dot are allowed">
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="cy-modal__label mb-0" for="neutralize_database_restore">Neutralize</label>
+                                <label class="switch-auto-edit mb-0">
+                                    <input type="checkbox" id="neutralize_database_restore"
+                                        name="neutralize_database" />
+                                    <span class="slider-auto-edit round"></span>
+                                </label>
+                            </div>
+                            <div class="my-2">
+                                <span class="cy-modal__label">This database might have been moved or copied.</span>
+                                <p class="cy-modal_sub-text">In order to avoid conflicts between databases,
+                                    Cyllo needs
+                                    to know if this database was moved or copied.
+                                    If you don’t know, answer “This database is a copy”.</p>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-check ">
+                                    <input class="form-check-input cy-check_box" type="radio" name="copy"
+                                        id="radio_copy_true" value="true" checked="1">
+                                    <label class="form-check-label cy-radio_label" for="radio_copy_true"
+                                        style="margin-top: 0.3rem;">This database is a copy</label>
+                                </div>
+                                <div class="form-check ">
+                                    <input class="form-check-input cy-check_box" type="radio" name="copy"
+                                        id="radio_copy_false" value="false">
+                                    <label class="form-check-label cy-radio_label" for="radio_copy_false"
+                                        style="margin-top: 0.3rem;">This database was moved</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer pb-0 cy-modal_footer">
+                        <button type="submit" value="Continue" class="btn btn-primary cy-primary_btn">
+                            Continue
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Master password -->
+    <div class="modal fade o_database_master" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content cyllo-modal_content">
+                <div class="modal-header cy-modal_header">
+                    <div>
+                        <h5 class="modal-title cy-modal-title">Set Master Password</h5>
+                        <p class="cy-modal_sub-title">Set your new master password</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form class="mb-0" id="form_change_pwd" role="form" action="/web/database/change_password"
+                    method="post">
+                    <div class="modal-body p-0 pb-4">
+                        <p class="cy-modal_sub-title">The master password is required to create, delete,
+                            dump or
+                            restore
+                            databases.</p>
+                        <t t-set="set_master_pwd" t-value="True" />
+                        <t t-call="master_input" />
+                        <div class="form-group cy-form_group">
+                            <label class="cy-modal__label" for="master_pwd_new">New Master Password<span
+                                    class="cy-required">*</span></label>
+                            <div class="input-group">
+                                <input id="master_pwd_new" type="password" name="master_pwd_new"
+                                    class="form-control cy-input-box" required="required" autocomplete="new-password" />
+                                <span class="ri-eye-fill o_little_eye cy-eye " aria-hidden="true"
+                                    style="cursor: pointer;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer cy-modal_footer">
+                        <button type="submit" value="Continue" class="btn btn-primary cy-primary_btn">
+                            Continue
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Duplicate DB -->
+    <div class="modal fade o_database_duplicate" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content cyllo-modal_content">
+                <div class="modal-header cy-modal_header">
+                    <div>
+                        <h5 class="modal-title cy-modal-title">Duplicate Database</h5>
+                        <p class="cy-modal_sub-title">Make a duplicate of your database</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form class="mb-0" id="form-duplicate-db" role="form" action="/web/database/duplicate" method="post">
+                    <div class="modal-body cy-modal_body mb-4">
+                        <t t-set="set_master_pwd" t-value="False" />
+                        <t t-call="master_input" />
+                        <div class="form-group cy-form_group">
+                            <label class="cy-modal__label" for="dbname_duplicate">Database Name<span
+                                    class="cy-required">*</span></label>
+                            <input type="text" class="form-control cy-input-box" id="dbname_duplicate" name="name"
+                                required="required" readonly="readonly">
+                        </div>
+                        <div class="form-group cy-form_group">
+                            <label class="cy-modal__label" for="new_name">New Name<span
+                                    class="cy-required">*</span></label>
+                            <input type="text" class="form-control cy-input-box" id="new_name" name="new_name"
+                                required="required" t-att-pattern="pattern"
+                                title="Only alphanumerical characters, underscore, hyphen and dot are allowed">
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="cy-modal__label mb-0" for="neutralize_database">Neutralize</label>
+                            <label class="switch-auto-edit mb-0">
+                                <input type="checkbox" id="neutralize_database" name="neutralize_database" />
+                                <span class="slider-auto-edit round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer cy-modal_footer">
+                        <button type="submit" class="btn btn-primary cy-primary_btn">Continue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drop DB -->
+    <div class="modal fade o_database_delete" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content cyllo-modal_content">
+                <div class="modal-header cy-modal_header">
+                    <div>
+                        <h5 class="modal-title cy-modal-title">Delete Database</h5>
+                        <p class="cy-modal_sub-title">This action cannot be undone</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="form_drop_db mb-0" role="form" action="/web/database/drop" method="post">
+                    <div class="modal-body cy-modal_body mb-4">
+                        <t t-call="master_input" />
+                        <div class="form-group cy-form_group">
+                            <label class="cy-modal__label" for="dbname_delete">Database<span
+                                    class="cy-required">*</span></label>
+                            <input type="text" class="form-control cy-input-box" id="dbname_delete" name="name"
+                                required="required" readonly="readonly">
+                        </div>
+                    </div>
+                    <div class="modal-footer cy-modal_footer">
+                        <button type="submit" class="btn btn-danger cy-primary_btn">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup DB -->
+    <div class="modal fade o_database_backup" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content cyllo-modal_content">
+                <div class="modal-header cy-modal_header">
+                    <div>
+                        <h5 class="modal-title cy-modal-title">Backup Database</h5>
+                        <p class="cy-modal_sub-title">Backup your database</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="form_backup_db" class="mb-0" role="form" action="/web/database/backup" method="post">
+                    <div class="modal-body cy-modal_body mb-4">
+                        <t t-call="master_input" />
+                        <div class="form-group cy-form_group">
+                            <label class="cy-modal__label" for="dbname_backup">Database Name <span
+                                    class="cy-required">*</span></label>
+                            <input type="text" class="form-control cy-input-box" id="dbname_backup" name="name"
+                                required="required" readonly="readonly">
+                        </div>
+                        <div class="form-group cy-form_group">
+                            <label class="cy-modal__label" for="backup_format">Backup Format<span
+                                    class="cy-required">*</span></label>
+                            <select id="backup_format" name="backup_format" class="form-select cy-input-box"
+                                required="required">
+                                <option value="zip">zip (includes filestore)</option>
+                                <option value="dump">pg_dump custom format (without filestore)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer cy-modal_footer">
+                        <button type="submit" value="Continue" class="btn btn-primary cy-primary_btn">
+                            Backup
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".owl-carousel").owlCarousel({
+                loop: true,
+                margin: 10,
+                nav: false,
+                dots: true,
+                items: 1,
+            });
+        });
+    </script>
+</body>
+
+</html>

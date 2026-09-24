@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Action for support service team -->
+    <record id="action_view_team" model="ir.actions.act_window">
+        <field name="name">Team</field>
+        <field name="res_model">support.service.team</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="context">{'overview':false}</field>
+    </record>
+    <!-- Tree view for support service team -->
+    <record id="view_support_service_team_tree" model="ir.ui.view">
+        <field name="name">view.support.service.team.tree</field>
+        <field name="model">support.service.team</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Form view for support service team -->
+    <record id="view_support_service_team_form" model="ir.ui.view">
+        <field name="name">view.support.service.team.form</field>
+        <field name="model">support.service.team</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"
+                               string="Support Team"/>
+                        <h1>
+                            <field name="name"
+                                   placeholder="Support Team name..."/>
+                        </h1>
+                        <div name="options_active"/>
+                    </div>
+                    <group>
+                        <group name="left" string="Team Details">
+                            <field name="manager_id"
+                                   widget="many2one_avatar_user"/>
+                            <field name="company_id"/>
+                            <label for="alias_name" string="Email Alias"/>
+                            <div name="alias_def">
+                                <field name="alias_id" string="Email Alias"
+                                       class="oe_read_only" required="0"/>
+                                <div class="oe_edit_only" name="edit_alias">
+                                    <field name="alias_name" class="oe_inline"/>
+                                    @
+                                    <field name="alias_domain_id"
+                                           class="oe_inline"
+                                           placeholder="e.g. domain.com"
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                            <field name="alias_contact"
+                                   string="Accept Emails From"/>
+                        </group>
+                        <group name="right"/>
+                    </group>
+                    <notebook>
+                        <page string="Track and Bill Time" name="track_bill">
+                            <group>
+                                <field name="is_timesheet"/>
+                                <field name="is_paid"/>
+                                <field name="working_hour_id"/>
+                                <field name="project_id" invisible="1"/>
+                                <field name="description"
+                                       placeholder="Describe the team"/>
+                            </group>
+                        </page>
+                        <page string="Ticket Closing" name="ticket_closing">
+                            <group>
+                                <field name="closing_inactive_tickets"/>
+                            </group>
+                            <field name="inactivity_ids"
+                                   invisible="closing_inactive_tickets != True">
+                                <tree editable="bottom">
+                                    <field name="stage_id"/>
+                                    <field name="no_of_inactive_days"/>
+                                    <field name="state_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Kanban view for support_service team -->
+    <record id="view_support_service_team_kanban" model="ir.ui.view">
+        <field name="name">view.support.service.team.kanban</field>
+        <field name="model">support.service.team</field>
+        <field name="arch" type="xml">
+            <kanban class="o_slide_kanban o_kanban_dashboard"
+                    js_class="support_service_dashboard_kanban" sample="1">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class=" card  cy-support_service_card">
+                            <div class="card-body">
+                                <div
+                                        class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                                    <div class="cy-support_service_title cy-support_service-card">
+                                        <field name="display_name"/>
+                                        <br/>
+                                        <div style="font-size:small; font-weight: initial;">
+                                            <field name="company_id"/>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn cy-button-primary-stroke cy-support_service-btn"
+                                                name="action_get_team_tickets"
+                                                type="object">View Tickets
+                                        </button>
+                                    </div>
+                                </div>
+                                <a class="d-flex justify-content-between align-items-center mb-2"
+                                   type="object"
+                                   name="get_team_closed_tickets">
+                                    <span class="cy-support_service_subtitle">
+                                        Tickets Closed
+                                    </span>
+                                    <span class="ms-3">
+                                        <field name="closed_ticket_count"/>
+                                    </span>
+                                </a>
+                                <a class="d-flex justify-content-between align-items-center mb-2"
+                                   name="get_team_solved_tickets"
+                                   type="object">
+                                    <span class="cy-support_service_subtitle">
+                                        Success Rate
+                                    </span>
+                                    <span class="cy-support_service_card-count">
+                                        <field name="success_rate"/>
+                                        %
+                                    </span>
+                                </a>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="mt-3 text-center cy-support_service_card-state">
+                                        <a name="get_team_open_tickets"
+                                           type="object">
+                                            <span>
+                                                <field name="open_count"/>
+                                            </span>
+                                            <p class="m-0">Open</p>
+                                        </a>
+                                    </div>
+                                    <div class="mt-3 text-center cy-support_service_card-state">
+                                        <a name="get_team_unassigned_tickets"
+                                           type="object">
+                                            <span>
+                                                <field name="unassigned_count"/>
+                                            </span>
+                                            <p class="m-0">Unassigned
+                                            </p>
+                                        </a>
+                                    </div>
+                                    <div class="mt-3 text-center cy-support_service_card-state">
+                                        <a name="get_team_urgent_tickets"
+                                           type="object">
+                                            <span>
+                                                <field name="urgent_count"/>
+                                            </span>
+                                            <p class="m-0">Urgent</p>
+                                        </a>
+                                    </div>
+                                    <div class="mt-3 text-center cy-support_service_card-state">
+                                        <a name="get_team_failed_tickets"
+                                           type="object">
+                                            <span>
+                                                <field name="failed_ticket_count"/>
+                                            </span>
+                                            <p class="m-0">Failed</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

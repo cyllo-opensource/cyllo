@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.ExistingFieldDialog">
+        <div class="dialog-custom-popup">
+            <Dialog title="'Add Existing Field'">
+                <!-- Search and Controls Section -->
+                <div class="search-controls-section">
+                    <div class="d-flex gap-2 align-items-center">
+                        <!-- Search Input -->
+                        <div class="search-input-wrapper">
+                            <input
+                                    type="text"
+                                    placeholder="Search fields..."
+                                    t-model="state.searchQuery"
+                                    t-on-input="onSearchInput"/>
+                        </div>
+                        <!-- Select All Checkbox -->
+                        <div class="select-all-container" t-on-click="toggleSelectAll">
+                            <input
+                                    type="checkbox"
+                                    id="selectAll"
+                                    t-att-checked="state.selectAll"
+                                    t-on-click.stop="toggleSelectAll"/>
+                            <label for="selectAll">
+                                Select All
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Selected Count -->
+                    <div class="selected-count">
+                        <span t-esc="state.fields.length"/>
+                        field(s) selected
+                    </div>
+                </div>
+
+                <!-- Fields Grid -->
+                <div class="d-grid"
+                     style="grid-template-columns: repeat(3, 1fr); gap: 1rem; max-height: 400px; overflow-y: auto;">
+                    <t t-foreach="getFilteredFields()" t-as="item" t-key="item.name">
+                        <div class="card" style="padding: 5px; cursor: pointer;" t-on-click="(ev)=> this.toggleField(ev, item.name)">
+                            <div class="card-body d-flex align-items-center gap-2 p-2">
+                                <!-- Checkbox on the left -->
+                                <input
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        style="pointer-events: none;"
+                                        t-att-checked="isFieldSelected(item.name)"/>
+                                <div t-if="item.icon" class="d-flex align-items-center justify-content-center"
+                                     style="width: 33px;height: 35px;">
+                                    <i t-att-class="item.icon"/>
+                                </div>
+                                <div>
+                                    <label class="form-check-label mb-0" style="font-size: 0.85rem;">
+                                        <div class="d-flex flex-column">
+                                            <!-- Field name -->
+                                                        <span class="fw-semibold" style="font-size: 0.82rem; line-height: 1.2;">
+                <t t-esc="item.string"/>
+            </span>
+            <!-- Technical name -->
+            <span class="text-muted" style="font-size: 0.72rem; font-family: monospace;">
+                <t t-esc="item.name"/>
+            </span>
+            <!-- Field type -->
+            <span class="text-muted" style="font-size: 0.70rem;">
+                <t t-esc="item.type"/>
+            </span>
+<!--                                            <span>-->
+<!--                                                <t t-esc="item.string"/>-->
+<!--                                                <t t-esc="item.name"/>-->
+<!--                                            </span>-->
+<!--                                            &lt;!&ndash; Field type &ndash;&gt;-->
+<!--                                            <span class="text-muted">-->
+<!--                                                <t t-esc="item.type"/>-->
+<!--                                            </span>-->
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- No Results Message -->
+                <div t-if="getFilteredFields().length === 0" class="text-center text-muted py-4">
+                    No fields found matching "<t t-esc="state.searchQuery"/>"
+                </div>
+
+                <t t-set-slot="footer">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" t-on-click="(ev)=> this.onConfirm(ev)"
+                                t-att-disabled="state.fields.length === 0">
+                            OK (<t t-esc="state.fields.length"/>)
+                        </button>
+                        <button class="btn btn-secondary" t-on-click="onDialogClose">Discard</button>
+                    </div>
+                </t>
+            </Dialog>
+        </div>
+    </t>
+</templates>

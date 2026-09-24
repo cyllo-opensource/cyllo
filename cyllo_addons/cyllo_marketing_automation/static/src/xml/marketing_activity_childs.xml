@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="child_templates" xml:space="preserve">
+    <!-- Marketing Child Template -->
+    <t t-name="MarketingChild" owl="1">
+        <!-- Marketing Child Component -->
+        <div class="tab-pane active" t-att-style="props.activity.h_level_css"
+             t-attf-class="{{props.activity.h_level}} {{props.activity.p_level}}"
+             t-attf-id="tab-{{props.activity.id}}" role="tabpanel">
+            <div class="cy-sampleDiv d-flex">
+                <div class="child-activities cy-marketing-auto_list-box"
+                     t-att-data-id="props.activity.id"
+                     t-att-data-type="props.activity.type">
+                    <div class="child-activities-head-main d-flex align-items-center justify-content-between cy-border-btm p-2 gap-4">
+                        <div class="cy-child-activities-head d-flex align-items-center gap-2"
+                             t-att-data-id="props.activity.id">
+                            <button class="cy-marketing-auto_icon-btn cy-marketing-auto_mail-icon">
+                                <i t-if="props.activity.type == 'mail'"
+                                   class="ri-mail-open-line"/>
+                                <i t-if="props.activity.type == 'server'"
+                                   class="ri-git-merge-line"/>
+                            </button>
+                            <div>
+                                <p class="cy_name-adjust cy-marketing_auto-box_title mb-0"
+                                   t-att-data-id="props.activity.id"
+                                   t-att-title="props.activity.name">
+                                    <t t-out="props.activity.name"/>
+                                </p>
+                                <span class="child-activity-type cy-marketing_auto-box-subtitle"
+                                      t-out="props.activity.type"
+                                      t-att-data-id="props.activity.id"/>
+                            </div>
+                        </div>
+<!--                        <div class="edit-delete-buttons d-flex align-items-center gap-2">-->
+                        <div class="edit-delete-buttons d-flex align-items-center gap-2"
+                            t-att-class="!props.edit and 'cy-marketing-auto_actions-disabled'">
+                            <button class="btn-edit-activity cy-btn_marketing cy-marketing-auto_icon-btn cy-marketing-auto_edit-icon cy-active-btn"
+                                    t-on-click="onClickActivity"
+                                    t-att-disabled="!props.edit"
+                                    t-att-data-id="props.activity.id">
+                                <i class="ri-edit-box-line"
+                                   t-att-data-id="props.activity.id"/>
+                            </button>
+                            <button class="btn-delete-activity cy-btn_marketing cy-marketing-auto_icon-btn cy-marketing-auto_delete-icon"
+                                    t-on-click="onClickDeleteRecord"
+                                    t-att-disabled="!props.edit"
+                                    t-att-data-id="props.activity.id">
+                                <i class="ri-delete-bin-line"
+                                   t-att-data-id="props.activity.id"/>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="child-activities-content align-items-center justify-content-between p-2"
+                         t-if="props.activity.type == 'server'">
+                        <center>
+                            <button class="child-branch-add-child active-div cy-marketing-auto_icon-btn cy-marketing-auto_icon-active"
+                                    t-attf-data-trigger="activity_another"
+                                    t-on-click="onClickAddActivityDiv"
+                                    title="Another Activity">
+                                <i class="ri-git-merge-line"/>
+                            </button>
+                        </center>
+                    </div>
+                    <div class="child-activities-content d-flex align-items-center justify-content-between p-2"
+                         t-if="props.activity.type == 'mail'">
+                            <button class="child-branch-add-child active-div cy-marketing-auto_icon-btn cy-marketing-auto_icon-active"
+                                    t-attf-data-trigger="activity_another"
+                                    t-on-click="onClickAddActivityDiv"
+                                    title="Another Activity">
+                                <i class="ri-git-merge-line"/>
+                            </button>
+                        <button class="child-branch-open active-div cy-marketing-auto_icon-btn  cy-marketing-auto_icon-active"
+                                t-attf-data-trigger="mail_open" title="Open"
+                                t-on-click="onClickAddActivityDiv"
+                                t-if="props.activity.type == 'mail'">
+                                <i class="ri-mail-open-line"/>
+                            </button>
+                        <button class="child-branch-not-open active-div cy-marketing-auto_icon-btn  cy-marketing-auto_icon-inactive"
+                                t-attf-data-trigger="mail_not_open"
+                                t-on-click="onClickAddActivityDiv"
+                                title="Not Open"
+                                t-if="props.activity.type == 'mail'">
+                                <i class="ri-mail-open-line"/>
+                            </button>
+                        <button class="child-branch-reply active-div cy-marketing-auto_icon-btn  cy-marketing-auto_icon-active"
+                                t-attf-data-trigger="mail_reply"
+                                t-on-click="onClickAddActivityDiv"
+                                title="Replied"
+                                t-if="props.activity.type == 'mail'">
+                                <i class="ri-reply-line"/>
+                            </button>
+                        <button class="child-branch-not-reply active-div cy-marketing-auto_icon-btn  cy-marketing-auto_icon-inactive"
+                                t-attf-data-trigger="mail_not_reply"
+                                t-on-click="onClickAddActivityDiv"
+                                title="Not Replied"
+                                t-if="props.activity.type == 'mail'">
+                                <i class="ri-reply-line"/>
+                            </button>
+                        <button class="child-branch-click active-div cy-marketing-auto_icon-btn  cy-marketing-auto_icon-active"
+                                t-attf-data-trigger="mail_click"
+                                t-on-click="onClickAddActivityDiv"
+                                title="Click"
+                                t-if="props.activity.type == 'mail'">
+                            <img class="cy-click-icon" src="cyllo_marketing_automation/static/src/icons/click.svg" alt="img"/>
+                            </button>
+                        <button class="child-branch-not-click active-div cy-marketing-auto_icon-btn  cy-marketing-auto_icon-inactive"
+                                t-attf-data-trigger="mail_not_click"
+                                t-on-click="onClickAddActivityDiv"
+                                title="Not Clicked"
+                                t-if="props.activity.type == 'mail'">
+                            <img class="cy-click-icon" src="cyllo_marketing_automation/static/src/icons/not_click.svg" alt="img"/>
+                            </button>
+                        <button class="child-branch-mail-bounce active-div cy-marketing-auto_icon-btn  cy-marketing-auto_icon-inactive"
+                                t-attf-data-trigger="mail_bounce"
+                                t-on-click="onClickAddActivityDiv"
+                                title="Bounce"
+                                t-if="props.activity.type == 'mail'">
+                                <i class="ri-information-line"/>
+                            </button>
+                    </div>
+                    <div class="cy_trigger-details-div cy-marketing-auto_timing cy-test_participation-timing">
+                        <div>
+                        <span class="cy_icon-style-marketing"><i class="ri-time-line"/></span>
+                        <span>
+                            <span><t t-out="props.activity.activity_trigger"/></span>
+                            <span class="px-1"><t t-out="stateKey(props.activity.activity_trigger_type)"/></span>
+                        </span>
+                        </div>
+                    <span class="cy-schedule-type" t-out="stateKey(props.activity.trigger_schedule_type)"/>
+                 </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

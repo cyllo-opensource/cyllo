@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_calendar_event_form_google_meet" model="ir.ui.view">
+        <field name="name">
+            calendar.event.view.form.inherit.cyllo.google.meet.integration
+        </field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Hide original video call fields when google meet is ON -->
+            <xpath expr="//label[@for='videocall_location']" position="attributes">
+                <attribute name="invisible">is_google_meet</attribute>
+            </xpath>
+            <xpath expr="//label[@for='videocall_location']/following-sibling::div[1]" position="attributes">
+                <attribute name="invisible">is_google_meet</attribute>
+            </xpath>
+
+            <!-- Add Google Meet section after videocall_location -->
+            <xpath expr="//label[@for='videocall_location']/following-sibling::div[1]" position="after">
+
+                <label for="google_meet_url"
+                       string="Google Meet URL"
+                       class="opacity-100"
+                       invisible="not is_google_meet"/>
+
+                <div col="2" invisible="not is_google_meet">
+                    <field name="google_meet_url"
+                           widget="CopyClipboardChar"
+                           placeholder="https://meet.google.com/..."
+                           readonly="1"/>
+
+                    <button name="action_google_meet_url"
+                            type="object"
+                            class="btn btn-link ps-0"
+                            icon="fa-video-camera"
+                            string="Join Meeting"
+                            invisible="not google_meet_url"/>
+
+                    <field name="google_meet_event_id" invisible="1"/>
+                </div>
+
+            </xpath>
+
+            <xpath expr="//field[@name='start']" position="after">
+                <field name="is_google_meet" widget="boolean_toggle"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

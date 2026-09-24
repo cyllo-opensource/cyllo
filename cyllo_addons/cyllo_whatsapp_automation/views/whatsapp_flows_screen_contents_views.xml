@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!--    whatsapp_flows_screen_contents form view-->
+    <record id="whatsapp_flows_screen_contents_view_form" model="ir.ui.view">
+        <field name="name">whatsapp.flows.screen.contents.view.form</field>
+        <field name="model">whatsapp.flows.screen.contents</field>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+            <form string="Create Screen contents">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="content_type"/>
+                            <field name="content_text_type"
+                                   invisible="content_type != 'text'" required="content_type == 'text'"/>
+                            <field name="content_text_answer_type"
+                                   invisible="content_type != 'text_answer'" required="content_type == 'text_answer'"/>
+                            <field name="shot_answer_type" required="content_text_answer_type == 'short_answer'"
+                                   invisible="content_text_answer_type != 'short_answer' or content_type != 'text_answer'"/>
+                            <field name="content_selection_type" required="content_type == 'selection'"
+                                   invisible="content_type != 'selection'"/>
+                        </group>
+                        <group>
+                            <field name="text" placeholder="Add text here......"
+                                   invisible="content_type != 'text'" required="content_type == 'text'"/>
+                            <field name="image_1920"
+                                   invisible="content_type != 'media'" required="content_type == 'media'"/>
+                            <field name="label" required="content_type in ('text_answer', 'selection')"
+                                   invisible="content_type not in ('text_answer', 'selection')"/>
+                            <field name="instructions"
+                                   invisible="content_type != 'text_answer'"/>
+                            <field name="required"
+                                   invisible="content_type not in ('text_answer', 'selection')"
+                                   widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook invisible="content_type != 'selection'">
+                        <page string="Options">
+                            <group>
+                                <group>
+                                    <field name="option_ids">
+                                        <tree editable="bottom">
+                                            <field name="options"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="helpdesk_report_view_form" model="ir.ui.view">
+        <field name="name">HelpDesk Report</field>
+        <field name="model">helpdesk.report</field>
+        <field name="arch" type="xml">
+            <form string="Report Options">
+                <separator string="Excel Report"/>
+                <group col="4">
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="category_ids" widget="many2many_tags"/>
+                    <field name="customer_ids" widget="many2many_tags"/>
+                    <field name="team_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_generate_pdf" string="PDF REPORT"
+                            class="oe_highlight"
+                            type="object"/>
+                    <button name="action_generate_xlsx" string="XLSX REPORT"
+                            class="oe_highlight" default_focus="1"
+                            type="object"/>
+                    <button string="Cancel" class="btn btn-default"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="helpdesk_report_action" model="ir.actions.act_window">
+        <field name="name">HelpDesk Report</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.report</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="helpdesk_report_view_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

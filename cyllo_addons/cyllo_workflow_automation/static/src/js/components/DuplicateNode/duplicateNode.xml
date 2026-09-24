@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="DuplicateNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="py-2">
+
+                <!-- Label -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Label</label>
+                    <input type="text"
+                           class="o_input"
+                           autocomplete="off"
+                           placeholder="Label"
+                           t-on-focusout="(ev) => this.setLabel(ev.target.value)"
+                           t-att-value="getLabel"
+                    />
+                </div>
+
+                <!-- Record selector + model pill (same layout as WriteNode) -->
+                <div class="row align-items-end mb-3">
+                    <div t-attf-class="mb-3 {{ state.model ? 'col-md-6' : 'col-12' }}">
+                        <label class="form-label cy-modal-form_label">Record to Duplicate</label>
+                        <CustomDropdown
+                                options="getRecords"
+                                defaultValue="getSelectedRecordValue"
+                                onChange="(value) => this.updateObject(value)"
+                                placeholder="'Select a record...'"
+                                searchable="true"
+                                width="''"
+                                maxHeight="'70px'"
+                        />
+                    </div>
+                    <div t-if="state.model" class="col-md-6 mb-3">
+                        <label class="form-label">Model</label>
+                        <input type="text" class="form-control"
+                               t-att-value="state.model" disabled="disabled"/>
+                    </div>
+                </div>
+
+                <!-- Field overrides on the copy (optional) -->
+                <div t-if="state.model" class="mb-3">
+                    <label class="form-label cy-modal-form_label">
+                        Field Overrides on Copy
+                        <small class="text-muted ms-1 fw-normal">(optional)</small>
+                    </label>
+                    <CustomTreeEditor
+                            getPathEditorInfo.bind="getPathEditorInfo"
+                            resModel="state.model"
+                            tree="state.tree"
+                            createNewNode.bind="createNewNode"
+                            nodeUpdate.bind="nodeUpdate"
+                            nodeValueUpdate.bind="nodeValueUpdate"
+                            deleteNode.bind="deleteNode"
+                            variables="variables"
+                    >
+                        <t t-set-slot="newButton">
+                            <span><i class="ri-add-fill"/> Override Field</span>
+                        </t>
+                    </CustomTreeEditor>
+                </div>
+
+                <!-- Optional result variable name -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">
+                        Save Copy As Variable
+                        <small class="text-muted ms-1 fw-normal">(optional — usable in downstream nodes)</small>
+                    </label>
+                    <input type="text"
+                           class="o_input"
+                           autocomplete="off"
+                           placeholder="e.g. duplicated_order"
+                           t-att-value="fieldState.duplicate_result_variable || ''"
+                           t-on-input="(ev) => { fieldState.duplicate_result_variable = ev.target.value }"
+                    />
+                </div>
+
+            </div>
+        </xpath>
+    </t>
+</templates>

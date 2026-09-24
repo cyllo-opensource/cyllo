@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<t t-name="cyllo_studio.MenuCreationDialog" owl="1">
+		<Dialog size="'lg'" title="props.title">
+			<div class="cy-studio-new-menu">
+			<div class="container cy-childEle">
+                <div class="row">
+					<div class="col" style="border-right: 1px solid #0000001f;">
+						<div class="form-group">
+							<label for="name">Name</label>
+                            <input type="text" id="MenuName" class="o_input MenuName menu-name"
+                                   placeholder="Product..."
+                                   autocomplete="off"
+                                   required="required"/>
+					    </div>
+                        <div class="form-group">
+						  <label for="parent">Parent</label>
+                            <div class="MenuName down-arrow">
+							<RecordSelector resId="state.ParentMenu" resModel="'ir.ui.menu'"
+                                            update="(ParentMenu)=> state.ParentMenu = ParentMenu"/>
+							</div>
+						</div>
+                        <div class="form-group menu-group">
+							<label for="group">Group</label>
+                            <div class="MenuName down-arrow">
+								<MultiRecordSelector resIds="state.group_ids"
+                                                     resModel="'res.groups'"
+                                                     update="(group_ids)=> state.group_ids = group_ids"/>
+							</div>
+						</div>
+					</div>
+                        <!--					need to work in style class  -->
+                    <div class="col">
+						<div class="action-container">
+							<label for="Action">Action Type</label>
+                            <select id="label_type"
+                                    name="Label Type"
+                                    class="form-select label-type" t-model="state.types">
+                                <option value="new_model">New Model</option>
+                                <option value="existing_model">Existing Model</option>
+   				            </select>
+						</div>
+                        <div class="mb-3 row align-items-center">
+                            <label class="col-sm-3 col-form-label text-nowrap">Menu Status</label>
+                            <div class="col-sm-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input"
+                                           t-model="state.ActiveMenu"
+                                           type="checkbox"
+                                           role="switch"
+                                           id="flexSwitchCheckDefault"
+                                           t-att-disabled="props.ParentMenu.xmlid == 'cyllo_dashboard.menu_cyllo_dashboard_root'"
+                                           data-bs-toggle="tooltip"
+                                           t-att-data-bs-title="state.ActiveMenu ? 'Deactivate Menu' : 'Activate Menu'"/>
+                                    <label class="form-check-label" for="flexSwitchCheckDefault">
+                                        <t t-esc="state.ActiveMenu ? 'Active' : 'Deactive'"/>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div t-if="state.types == 'new_model'" class="mt-3">
+							<div>
+								<label>Model Name</label>
+                                <input type="text" class="o_input MenuName " id="model_name"
+                                       t-ref="model-name"
+                                       placeholder="eg. property.management"
+                                       t-model="state.model_name"
+                                       t-on-input="onInputModelName"
+                                       autocomplete="off"/>
+							</div>
+                            <div class="mt-3">
+								<label>Description</label>
+                                <input type="text" class="o_input MenuName "
+                                       t-model="state.description"
+                                       id="name_desc"
+                                       placeholder="eg. The module helps to manage property"
+
+                                       t-on-input="onInputDescription"/>
+							</div>
+						</div>
+                        <div t-if="state.types == 'existing_model'" class="menu-record-selector">
+							<label>Existing Model</label>
+                            <RecordSelector placeholder=" 'eg. Sale Order'"
+                                            resId="state.resId"
+                                            resModel="'ir.model'"
+                                            update="(resId)=> onUpdate(resId,this)"
+                                            domain="[['transient', '=', false]]"/>
+						</div>
+					</div>
+				</div>
+			</div>
+                <t t-set-slot="footer">
+				<button class="btn btn-primary"
+                        t-on-click="(ev) => this.OnclickConfirmDialogue(ev)">Confirm</button>
+			</t>
+			</div>
+		</Dialog>
+	</t>
+    <t t-name="cyllo_studio.MenuConfigurationDialog" owl="1">
+		<Dialog size="'lg'" title="props.title">
+			<div class="cy-studio-update-menu-dialog">
+				<t t-if="props.isParent == 'sibling'">
+					<div class="d-flex mx-3 justify-content-between">
+						<p class="cy-studio-modal_subtitle">
+							Update the Menu Details
+						</p>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input"
+                                   t-model="state.ActiveMenu"
+                                   type="checkbox"
+                                   role="switch"
+                                   id="flexSwitchCheckDefault"
+                                   t-att-disabled="props.ParentMenu.xmlid == 'cyllo_dashboard.menu_cyllo_dashboard_root'"
+                                   data-bs-toggle="tooltip"
+                                   t-att-data-bs-title="state.ActiveMenu ? 'Deactivate Menu' : 'Activate Menu'"/>
+                            <label class="form-check-label" for="flexSwitchCheckDefault">
+                                <t t-esc="state.ActiveMenu ? 'Active Submenu' : 'Deactive Submenu'"/>
+                            </label>
+						</div>
+					</div>
+                    <div class="d-flex cy-childEle">
+						<div class="cy-field__box">
+							<div class="d-flex align-items-center gap-2">
+								<i class="ri-code-box-fill cy-content-header-icon"/>
+                                <h3 class="cy-content_header">Menu</h3>
+							</div>
+
+                            <div class="form-group">
+								<label for="name">Name</label>
+                                <input type="text" id="MenuName" class="o_input MenuName"
+                                       t-att-value="props.menuName"/>
+							</div>
+                            <div class="form-group">
+								<label for="parent">Parent</label>
+                                <div class="MenuName down-arrow">
+									<RecordSelector resId="state.ParentMenu.id"
+                                                    resModel="'ir.ui.menu'"
+                                                    update="(ParentMenu)=> state.ParentMenu.id = ParentMenu"
+                                                    domain="[['parent_id', 'in', this.state.Parents], ['parent_id.child_id', '!=', false]]"
+                                    />
+								</div>
+							</div>
+                            <label>Action</label>
+                            <div class="form-group gap-2 d-flex">
+								<select id="action_type"
+                                        name="Action Type"
+                                        class="form-select action-type"
+                                        style="width: 50% !important; border: none !important; border-bottom: 1px solid #ced4da !important;"
+                                        t-on-change="(ev) => this._onActionTypeChange(ev)">
+									<option value=""/>
+                                    <option value="ir.actions.act_window"
+                                            t-att-selected="props.Menu.actionModel == 'ir.actions.act_window'">ir.actions.act_window</option>
+                                    <option value="ir.actions.client"
+                                            t-att-selected="props.Menu.actionModel == 'ir.actions.client'">ir.actions.client</option>
+                                    <option value="ir.actions.report"
+                                            t-att-selected="props.Menu.actionModel == 'ir.actions.report'">ir.actions.report</option>
+                                    <option value="ir.actions.act_url"
+                                            t-att-selected="props.Menu.actionModel == 'ir.actions.act_url'">ir.actions.act_url</option>
+                                    <option value="ir.actions.server"
+                                            t-att-selected="props.Menu.actionModel == 'ir.actions.server'">ir.actions.server</option>
+								</select>
+                                <div t-if="props.Menu.actionModel" class="MenuName down-arrow"
+                                     style="width: 50% !important;">
+									<RecordSelector resId="state.actionID"
+                                                    resModel="'ir.actions.actions'"
+                                                    update="(actionID)=> state.actionID = actionID"
+                                                    domain="[['type', '=', props.Menu.actionModel]]"/>
+								</div>
+							</div>
+                            <div class="form-group">
+								<label for="group">Group</label>
+                                <div class="MenuName down-arrow">
+									<MultiRecordSelector resIds="state.group_ids"
+                                                         resModel="'res.groups'"
+                                                         update="(group_ids)=> state.group_ids = group_ids"/>
+								</div>
+							</div>
+						</div>
+                        <div class="cy-field__box border-start border-end-0">
+							<div class="d-flex align-items-center gap-2">
+								<h3 class="cy-content_header">Siblings</h3>
+							</div>
+                            <div t-if="props.isParent == 'sibling'" class="form-group">
+								<div t-ref="cy-MenuSiblings">
+									<t t-foreach="state.ParentMenu?.childrenTree || []" t-as="c"
+                                       t-key="c.id">
+										<div class="cy-drag-input_container mb-2"
+                                             t-att-data-index="c_index">
+											<button class="btn btn-secondary handle-drag cy-drag_edit-btn"
+                                                    type="button">
+												<i class="ri-drag-move-line handle-drag"/>
+											</button>
+                                            <div class="w-100  cy-draginput--box p-1">
+												<span class="cy-content-text SiblingMenu"
+                                                      t-att-value="c.id"
+                                                      t-esc="c.name"/>
+											</div>
+										</div>
+									</t>
+                                    <t t-if="state.ParentChange">
+										<div class="input-group bg-secondary mb-2"
+                                             t-att-data-index="c_index">
+											<button class="btn btn-secondary handle-drag"
+                                                    type="button"
+                                                    style="border-radius:0 !important;">
+												<i class="ri-drag-move-line handle-drag"/>
+											</button>
+                                            <span class="form-control SiblingMenu"
+                                                  t-att-value="props.Menu.id"
+                                                  t-esc="props.Menu.name"/>
+										</div>
+									</t>
+								</div>
+							</div>
+						</div>
+					</div>
+				</t>
+                <t t-elif="props.isParent == 'children'">
+                    <div class="container cy-childEle">
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold">Update Menu Items</h5>
+                            <div class="form-group d-flex align-items-center gap-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input"
+                                           t-model="state.ActiveMenu"
+                                           type="checkbox"
+                                           role="switch"
+                                           id="flexSwitchCheckDefault"
+                                           t-att-disabled="props.ParentMenu.xmlid == 'cyllo_dashboard.menu_cyllo_dashboard_root'"
+                                           data-bs-toggle="tooltip"
+                                           t-att-data-bs-title="state.ActiveMenu ? 'Deactivate Menu' : 'Activate Menu'"/>
+                                    <label class="form-check-label" for="flexSwitchCheckDefault">
+                                        <t t-esc="state.ActiveMenu ? 'Active Menu' : 'Deactive Menu'"/>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Form Inputs -->
+                        <div class="row">
+                            <!-- Left side -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="name">Name</label>
+                                    <input type="text" id="MenuName" class="o_input MenuName"
+                                           t-model="state.menuName"/>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="group">Group</label>
+                                    <div class="MenuName down-arrow">
+                                        <MultiRecordSelector resIds="state.group_ids"
+                                                             resModel="'res.groups'"
+                                                             update="(group_ids)=> state.group_ids = group_ids"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Right side -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label>Action</label>
+                                    <select id="action_type"
+                                            name="Action Type"
+                                            class="form-select action-type"
+                                            t-on-change="(ev) => this._onActionTypeChange(ev)">
+                                        <option value="">Select an option</option>
+                                        <option value="ir.actions.act_window"
+                                                t-att-selected="props.Menu.actionModel == 'ir.actions.act_window'">ir.actions.act_window</option>
+                                        <option value="ir.actions.client"
+                                                t-att-selected="props.Menu.actionModel == 'ir.actions.client'">ir.actions.client</option>
+                                        <option value="ir.actions.report"
+                                                t-att-selected="props.Menu.actionModel == 'ir.actions.report'">ir.actions.report</option>
+                                        <option value="ir.actions.act_url"
+                                                t-att-selected="props.Menu.actionModel == 'ir.actions.act_url'">ir.actions.act_url</option>
+                                        <option value="ir.actions.server"
+                                                t-att-selected="props.Menu.actionModel == 'ir.actions.server'">ir.actions.server</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="action_name">Action Name</label>
+                                    <div class="MenuName down-arrow">
+                                    <RecordSelector resId="state.actionID"
+                                                    resModel="'ir.actions.actions'"
+                                                    update="(actionID)=> state.actionID = actionID"
+                                                    domain="[['type', '=', props.Menu.actionModel]]"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Children Section -->
+                        <div class="form-group mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label>Children</label>
+                                <button class="btn btn-primary" type="button"
+                                        t-on-click="(e) => this.addChild(e, props.Menu)">
+                                    <i class="ri-add-line"></i>
+                                    Add Child
+                                </button>
+                            </div>
+                            <div class="children-list childrenList" id="childrenList">
+                                <div t-ref="cy-MenuSiblings">
+                                    <t t-if="props.Menu.childrenTree"
+                                       t-foreach="props.Menu.childrenTree"
+                                       t-as="c"
+                                       t-key="c.id">
+                                        <div class="childMenus d-flex align-items-center justify-content-between border rounded">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="ri-drag-move-line handle-drag"/>
+                                                <span class="form-control-plaintext SiblingMenu fw-semibold"
+                                                      t-att-value="c.id"
+                                                      t-esc="c.name"/>
+                                            </div>
+                                            <button class="btn btn-link text-danger p-1"
+                                                    type="button"
+                                                    t-on-click="() => this.deleteMenu(c.id)"
+                                                    title="Delete">
+                                            <i class="ri-delete-bin-line"/>
+                                        </button>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-set-slot="footer">
+                        <div class="d-flex justify-content-end w-100">
+					<button class="btn btn-primary"
+                            t-on-click="(ev) => this.OnclickConfirmDialogue(ev)"
+                            style="">Confirm</button>
+                        </div>
+				</t>
+			</div>
+		</Dialog>
+	</t>
+
+    <t t-name="cyllo_studio.ParentMenuConfigurationDialog" owl="1">
+		<Dialog size="'md'" title="props.title" bodyClass="'position-static'">
+			<div class="container " style="position:static;">
+				<div class="row">
+					<div class="col-6">
+                        <div class="form-group">
+							<label for="name">Name</label>
+                            <input type="text" id="MenuName" class="o_input MenuName"
+                                   t-att-value="props.menuName"
+                                   style="width:300px;"/>
+						</div>
+				    </div>
+                    <div class="col-6">
+					   <div class="form-group" style="margin-left: 145px;">
+                           <form class="cyst1 modal_right_form">
+						       <div class="form-group">
+							       <img class="custom-file-upload btn"
+                                        style="width: 90px !important;border:none;margin-top:0%;height:57px"
+                                        t-if="props.ParentMenu.webIconDataMimetype and !state.imageUrl"
+                                        t-att-src="'data:' + props.ParentMenu.webIconDataMimetype + ';base64,' + props.ParentMenu.webIconData"
+                                        alt="Image"
+                                        id="icon-img"/>
+                                   <img class="custom-file-upload-parentmenu btn"
+                                        t-if="state.imageUrl"
+                                        t-att-src="state.imageUrl"
+                                        id="icon-img"
+                                        style="width: 90px !important;border:none;margin-top:0%;height:57px;">
+								   </img>
+                                   <div t-if="state.iconDefault and !props.ParentMenu.webIconDataMimetype"
+                                        class="custom-file-upload btn"
+                                        style="width: 90px !important;border:none;margin-top:0%;height:57px;">
+									   <i class="cy-view-icon" t-att-class="this.state.iconDefault"
+                                          style="font-size:25px;"/>
+								   </div>
+							   </div>
+                               <div class="cyst2 modal fade" id="exampleModalToggle"
+                                    aria-hidden="true"
+                                    aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+								   <div class="modal-dialog modal-dialog-centered">
+									   <div class="modal-content">
+									       <button type="button" class="close"
+                                                   data-bs-dismiss="modal"
+                                                   aria-label="Close">×</button>
+                                           <div class="modal-header">
+											  <h1 class="modal-title fs-5"
+                                                  id="exampleModalToggleLabel"/>
+                                               <ul class="d-flex align-items-start gap-3 flex-wrap cy-selection_icon-list py-2">
+												  <li t-foreach="IconClass" t-as="icons"
+                                                      t-key="icons_index">
+													  <div class="cy-icon_box-item"
+                                                           t-on-click="()=> this.selectIcon(icons)">
+														  <i class="cy-icons" t-att-class="icons"
+                                                             data-bs-dismiss="modal"/>
+													  </div>
+												  </li>
+											  </ul>
+										   </div>
+									   </div>
+							       </div>
+					           </div>
+                               <div class="btn_group_menu justify-content-center ms-0 gap-2"
+                                    id="edit-form-group">
+							      <label type="button"
+                                         id="iconButton"
+                                         class="icon-group btn btn-secondary"
+                                         aria-expanded="true"
+                                         aria-controls="collapseOne"
+                                         t-on-click="handleIconVisible"
+                                         role="button"
+                                         style="display: flex; align-items: center; justify-content: center;">
+										  <svg width="12" height="12" viewBox="0 0 12 12"
+                                               fill="none"
+                                               xmlns="http://www.w3.org/2000/svg"
+                                               style="margin-right: 0px !important;">
+											  <path d="M8.27616 0.630589L7.12269 1.78406H1.49527V9.85835H9.56954V4.23093L10.723 3.07746V10.4351C10.723 10.7536 10.4648 11.0118 10.1463 11.0118H0.918531C0.600012 11.0118 0.341797 10.7536 0.341797 10.4351V1.20732C0.341797 0.888798 0.600012 0.630589 0.918531 0.630589H8.27616ZM10.4262 0.111816L11.2418 0.927445L5.94021 6.22902L5.12604 6.2304L5.1246 5.4134L10.4262 0.111816Z"
+                                                    fill="#505050"/>
+										  </svg>
+                                        <!--         Select Icon-->
+						          </label>
+                                   <label for="file-input" class="icon-group btn btn-secondary"
+                                          style="display: flex;
+                                                    align-items: center; justify-content: center;">
+										<svg width="13"
+                                             height="11"
+                                             viewBox="0 0 13 11"
+                                             fill="none"
+                                             xmlns="http://www.w3.org/2000/svg"
+                                             style="margin-right: 0px !important;">
+											<path
+                                                    d="M2.04584 9.7041H11.6547V5.50022H12.8558V10.3047C12.8558 10.6363 12.587 10.9052 12.2553 10.9052H1.44528C1.11361 10.9052 0.844727 10.6363 0.844727 10.3047V5.50022H2.04584V9.7041ZM7.45084 3.69855V7.90244H6.24973V3.69855H3.24695L6.85028 0.0952148L10.4536 3.69855H7.45084Z"
+                                                    fill="#505050"/>
+										</svg>
+                                        <!--                    Upload Icon-->
+                                       <input type="file"
+                                              id="file-input"
+                                              accept="image/*"
+                                              style="display: none;"
+                                              t-on-change="AppIconUpload"
+                                              t-ref="file-input-button"/>
+							      </label>
+						       </div>
+                               <div t-ref="iconBox"
+                                    class="modal-content cy-sheet_icon-selectBox position-absolute overflow-auto z-index-1 menu-dialogue-icons"
+                                    style="min-height: 35vh;width: 280px;height:0%;box-shadow: 0px 0px 9px 8px rgba(0, 0, 0, 0.05); padding:0px;left:60%"
+                                    t-att-class="state.iconToggle ? '':'d-none'">
+                                    <div class="modal-body pt-0">
+										<ul class="d-flex align-items-start gap-3 flex-wrap cy-selection_icon-list py-2 list-unstyled">
+											<li t-foreach="IconClass" t-as="icon"
+                                                t-key="icon_index">
+												<div class="cy-icon_x`box-item cursor-pointer opacity-75-hover p-1"
+                                                     t-on-click="()=> this.selectIcon(icon)">
+													<i class="cy-icons fa fa-fw"
+                                                       t-att-class="icon"/>
+												</div>
+											</li>
+										</ul>
+									</div>
+								</div>
+						   </form>
+					   </div>
+				   </div>
+                    <div class="row">
+						<div class="form-group">
+							<label for="group">Group</label>
+                            <div class="cy-record-selector MenuName down-arrow">
+								<MultiRecordSelector resIds="state.group_ids"
+                                                     resModel="'res.groups'"
+                                                     update="(group_ids)=> state.group_ids = group_ids"/>
+							</div>
+				        </div>
+			        </div>
+                    <div class="mb-3 row align-items-center mt-2">
+                            <label class="col-sm-2 col-form-label text-nowrap">Menu Status</label>
+                        <div class="col">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                       t-model="state.ActiveMenu"
+                                       type="checkbox"
+                                       role="switch"
+                                       id="flexSwitchCheckDefault"
+                                       t-att-disabled="props.ParentMenu.xmlid == 'cyllo_dashboard.menu_cyllo_dashboard_root'"
+                                       data-bs-toggle="tooltip"
+                                       t-att-data-bs-title="state.ActiveMenu ? 'Deactivate Menu' : 'Activate Menu'"/>
+                                <label class="form-check-label" for="flexSwitchCheckDefault">
+                                    <t t-esc="state.ActiveMenu ? 'Active' : 'Deactive'"/>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <t t-set-slot="footer">
+					    <button class="btn btn-primary"
+                             t-on-click="(ev) => this.OnclickConfirmDialogueParentMenu(ev)">Confirm</button>
+				    </t>
+				</div>
+			</div>
+		</Dialog>
+	</t>
+</templates>

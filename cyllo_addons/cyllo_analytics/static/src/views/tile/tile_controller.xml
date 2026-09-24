@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_analytics.TileView">
+        <div t-att-class="className" t-ref="root">
+            <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''"
+                    display="display">
+                <t t-set-slot="layout-actions">
+                    <TileSearchBar t-if="searchBarToggler.state.showSearchBar"
+                                   autofocus="firstLoad"/>
+                </t>
+                <t t-set-slot="control-panel-additional-actions">
+                    <t t-if="isAdmin">
+                        <a data-hotkey="c"
+                           t-on-click="onClickCreate"
+                           data-bounce-button=""
+                           class="nav-link cy-navitem-list text-nowrap o_tile_button_add">
+                            <i class="ri-add-line"/>Add New
+                        </a>
+                        <a t-if="env.searchModel.resModel == 'dashboard.config'"
+                                class="nav-link cy-navitem-list text-nowrap o_tile_button_add cy-import-link"
+                                t-on-click="onClickImport"
+                                title="Import">
+                            <i class="ri-download-line me-1"/> Import
+                        </a>
+                    </t>
+                </t>
+                <t t-component="props.Renderer"
+                   list="model.root"
+                   resModel="props.resModel"
+                   activeActions="activeActions"
+                   archInfo="archInfo"
+                   allowSelectors="props.allowSelectors"
+                   editable="editable"
+                   openRecord.bind="openRecord"
+                   noContentHelp="props.info.noContentHelp"
+                   onAdd.bind="createRecord"/>
+            </Layout>
+        </div>
+    </t>
+</templates>

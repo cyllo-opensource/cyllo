@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+    <!-- WhatsappImagePreview Template -->
+    <t t-name="WhatsappImagePreview" owl="1">
+        <div class="whatsapp_image_preview_container">
+            <div class="d-flex justify-content-between align-items-center bg-white w-100 p-3">
+                <div t-if="props.inputFile" class="text-truncate text-start" style="width: 200px; direction: rtl;">
+                    <t t-out="props.inputFile.name"/>
+                </div>
+                <div t-if="props.image and !props.image.split(';')[0].includes('video')" class="justify-content-end align-items-center d-flex me-3 w-100">
+                    <i class="ri-clockwise-2-line btn fs-2" t-on-click="() => this.props.rotateImage('+',this.imagePreview)"/>
+                    <i class="ri-anticlockwise-2-line btn fs-2" t-on-click="() => this.props.rotateImage('-',this.imagePreview)"/>
+                    <i class="ri-zoom-in-line btn fs-2" t-on-click="zoomInImage"/>
+                    <i class="ri-zoom-out-line btn fs-2" t-on-click="zoomOutImage"/>
+                </div>
+                <button type="button" class="btn-close" t-on-click="props.closePreview" aria-label="Close" tabindex="-1"/>
+            </div>
+            <div class="w-100 d-flex justify-content-center position-relative mx-auto align-items-center h-100">
+                <video t-if="props.image and props.image.split(';')[0].includes('video')" t-att-src="props.image" class="whatsapp_image_preview"/>
+                <img t-if="props.image and !props.image.split(';')[0].includes('video')" t-ref="imagePreview" t-att-src="props.image" class="whatsapp_image_preview" style="transform: rotate(0deg);"/>
+                <img t-if="!props.image and props.inputFile" t-attf-src="/cyllo_whatsapp/static/images/{{fileType}}" class="whatsapp_image_preview" t-on-click="props.viewDocument"/>
+            </div>
+        </div>
+    </t>
+</templates>

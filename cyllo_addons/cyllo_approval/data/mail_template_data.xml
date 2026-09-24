@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data >
+        <!--    mail template for Approval request notification-->
+        <record id="mail_template_approval_request" model="mail.template">
+            <field name="name">Approval Request Notification</field>
+            <field name="model_id" ref="cyllo_approval.model_approval_request"/>
+            <field name="subject">Approval Request for {{ object.rule_id.name }}</field>
+            <field name="email_to">{{ object.approver_id.email }}</field>
+            <field name="body_html" type="html">
+                <p>Dear Sir
+                </p>
+                <p>An approval request has been assigned to you. Below are the
+                    details:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Request ID:</strong>
+                        <t t-out="object.rule_id.name"/>
+                    </li>
+                    <li>
+                        <strong>Approval Level:</strong>
+                        <t t-out="object.level_name"/>
+                    </li>
+                    <li>
+                        <strong>Requested By:</strong>
+                        <t t-out="object.requested_by.name"/>
+                    </li>
+                    <li>
+                        <strong>Date:</strong>
+                        <t t-out="object.write_date"/>
+                    </li>
+                </ul>
+                <p>
+                    <a t-att-href="'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.res_model)"
+                       class="btn btn-primary">
+                        View Record
+                    </a>
+                </p>
+                <p>Kindly review the request.</p>
+            </field>
+        </record>
+        <!--    mail template for Approved request notification-->
+        <record id="mail_template_request_approved" model="mail.template">
+            <field name="name">Approval Request Approved</field>
+            <field name="model_id" ref="cyllo_approval.model_approval_request"/>
+            <field name="subject">Your Approval Request {{ object.rule_id.name }} has been Approved</field>
+            <field name="email_to">{{ object.requested_by.email }}</field>
+            <field name="body_html" type="html">
+                <p>Dear<t t-out="object.requested_by.name"/>,
+                </p>
+                <p>Your approval request has been approved.</p>
+                <ul>
+                    <li>
+                        <strong>Request ID:</strong>
+                        <t t-out="object.rule_id.name"/>
+                    </li>
+                    <li>
+                        <strong>Approval Level:</strong>
+                        <t t-out="object.level_name"/>
+                    </li>
+                    <li>
+                        <strong>Approved By:</strong>
+                        <t t-out="object.approver_id.name"/>
+                    </li>
+                    <li>
+                        <strong>Approved Date:</strong>
+                        <t t-out="object.write_date"/>
+                    </li>
+                </ul>
+                <p>
+                    <a t-att-href="'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.res_model)"
+                       class="btn btn-primary">
+                        View Record
+                    </a>
+                </p>
+                <p>Thank you.</p>
+            </field>
+        </record>
+        <!--    mail template for Rejected request notification-->
+        <record id="mail_template_request_rejected" model="mail.template">
+            <field name="name">Approval Request Rejected</field>
+            <field name="model_id" ref="cyllo_approval.model_approval_request"/>
+            <field name="subject">Your Approval Request {{ object.rule_id.name }} has been Rejected</field>
+            <field name="email_to">{{ object.requested_by.email }}</field>
+            <field name="body_html" type="html">
+                <p>Dear<t t-out="object.requested_by.name"/>,
+                </p>
+                <p>Your approval request has been rejected.</p>
+                <ul>
+                    <li>
+                        <strong>Request ID:</strong>
+                        <t t-out="object.rule_id.name"/>
+                    </li>
+                    <li>
+                        <strong>Approval Level:</strong>
+                        <t t-out="object.level_name"/>
+                    </li>
+                    <li>
+                        <strong>Rejected By:</strong>
+                        <t t-out="object.approver_id.name"/>
+                    </li>
+                </ul>
+                <p>
+                    <a t-att-href="'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.res_model)"
+                       class="btn btn-primary">
+                        View Record
+                    </a>
+                </p>
+                <p>Thank you.</p>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Sale Order form view to add Appointments smart button -->
+    <record id="view_sale_order_form_inherit_appointment" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.appointment</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_appointments"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-calendar"
+                        groups="cyllo_appointment.group_appointment_user"
+                        invisible="appointment_count == 0">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="appointment_count"/>
+                        </span>
+                        <span class="o_stat_text">Appointments</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

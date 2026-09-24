@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_carbon_activity_tree" model="ir.ui.view">
+        <field name="name">carbon.activity.tree</field>
+        <field name="model">carbon.activity</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="source_id"/>
+                <field name="scope_id"/>
+                <field name="quantity"/>
+                <field name="uom_id" readonly="1" force_save="1"/>
+                <field name="factor_id"
+                       domain="[('source_id', '=', source_id),
+                                '|', ('valid_from', '=', False), ('valid_from', '&lt;=', date),
+                                '|', ('valid_to', '=', False), ('valid_to', '&gt;=', date)]"/>
+                <field name="gas_id"/>
+                <field name="emission_total"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_carbon_activity_form" model="ir.ui.view">
+        <field name="name">carbon.activity.form</field>
+        <field name="model">carbon.activity</field>
+        <field name="arch" type="xml">
+            <form string="Carbon Activity">
+
+                <header>
+                    <button name="action_apply_rules"
+                            type="object"
+                            string="Apply Rules"
+                            class="btn-secondary"
+                            invisible="state == 'done'"/>
+
+                    <button name="action_compute"
+                            type="object"
+                            string="Done"
+                            class="btn-primary" invisible="state == 'done' "/>
+
+                    <button name="action_set_draft"
+                            type="object"
+                            string="Reset to Draft"
+                            class="btn-secondary"
+                            groups="cyllo_green_metrics.group_carbon_manager"
+                            invisible="state != 'done'"/>
+
+                    <field name="state" widget="statusbar"/>
+                </header>
+
+                <sheet>
+
+                    <widget name="web_ribbon" title="Done" bg_color="text-bg-success"
+                            invisible="state != 'done'"/>
+
+                    <!-- Form Title -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Carbon Activity Name"
+                                   readonly="state == 'done'"/>
+                        </h1>
+                    </div>
+
+                    <notebook>
+
+                        <!-- General Information -->
+                        <page string="General Information">
+                            <group>
+                                <group string="Activity Details">
+                                    <field name="date" readonly="state == 'done'"/>
+                                    <field name="calculation_id" readonly="state == 'done'"/>
+                                    <field name="source_id" readonly="state == 'done'"/>
+                                    <field name="scope_id" readonly="state == 'done'"/>
+                                    <field name="company_id"
+                                           groups="base.group_multi_company"
+                                           readonly="state == 'done'"/>
+                                </group>
+
+                                <group string="Emission Data">
+                                    <field name="quantity" readonly="state == 'done'"/>
+                                    <field name="uom_id"
+                                           readonly="1"
+                                           force_save="1"/>
+
+                                    <field name="factor_id"
+                                           readonly="state == 'done'"
+                                           domain="[('source_id', '=', source_id),
+                                                    '|', ('valid_from', '=', False), ('valid_from', '&lt;=', date),
+                                                    '|', ('valid_to', '=', False), ('valid_to', '&gt;=', date)]"/>
+                                    <field name="emission_type" invisible="1"/>
+                                    <field name="gas_id" invisible="emission_type != 'air'"
+                                           readonly="state == 'done'"/>
+                                    <field name="factor_value"/>
+
+                                    <field name="emission_total"
+                                           readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Accounting Link">
+                            <group>
+                                <field name="account_move_id" readonly="state == 'done'"/>
+                                <field name="account_move_line_id" readonly="state == 'done'"/>
+                                <field name="partner_id"/>
+                            </group>
+                        </page>
+
+                        <!-- Notes -->
+                        <page string="Notes">
+                            <field name="note"
+                                   nolabel="1"
+                                   readonly="state == 'done'"
+                                   placeholder="Add notes, comments, assumptions, or references here..."/>
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_carbon_activity_search" model="ir.ui.view">
+        <field name="name">carbon.activity.search</field>
+        <field name="model">carbon.activity</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="source_id"/>
+                <field name="scope_id"/>
+                <field name="emission_type"/>
+                <filter string="Current Year" name="current_year"
+                        domain="[('date', '&gt;=', context_today().strftime('%Y-01-01')), ('date', '&lt;=', context_today().strftime('%Y-12-31'))]"/>
+                <filter string="Previous Year" name="previous_year"
+                        domain="[('date', '&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-01-01')), ('date', '&lt;=', (context_today() - relativedelta(years=1)).strftime('%Y-12-31'))]"/>
+                <separator/>
+                <filter string="Carbon Pollution" name="filter_carbon" domain="[('emission_type', '=', 'air')]"/>
+                <filter string="Water Pollution" name="filter_water" domain="[('emission_type', '=', 'water')]"/>
+                <filter string="Sound Pollution" name="filter_sound" domain="[('emission_type', '=', 'sound')]"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Emission Source" name="group_by_source" context="{'group_by': 'source_id'}"/>
+                    <filter string="Emission Type" name="group_by_type" context="{'group_by': 'emission_type'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="State" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Company" name="group_by_company" context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_carbon_activity_pivot" model="ir.ui.view">
+        <field name="name">carbon.activity.pivot</field>
+        <field name="model">carbon.activity</field>
+        <field name="arch" type="xml">
+            <pivot string="Emissions Analysis" sample="1">
+                <field name="source_id" type="row"/>
+                <field name="emission_type" type="col"/>
+                <field name="emission_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_carbon_activity_graph" model="ir.ui.view">
+        <field name="name">carbon.activity.graph</field>
+        <field name="model">carbon.activity</field>
+        <field name="arch" type="xml">
+            <graph string="Emissions Analysis" type="bar" sample="1">
+                <field name="source_id"/>
+                <field name="emission_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_carbon_activity" model="ir.actions.act_window">
+        <field name="name">Activities</field>
+        <field name="res_model">carbon.activity</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_carbon_activity_search"/>
+    </record>
+
+    <record id="action_carbon_activity_report" model="ir.actions.act_window">
+        <field name="name">Emissions Analysis</field>
+        <field name="res_model">carbon.activity</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="search_view_id" ref="view_carbon_activity_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No emission activity data available yet.
+            </p>
+            <p>
+                Track activities to analyze carbon, water, and sound pollution by emission source.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_open_carbon_activity_from_move" model="ir.actions.server">
+        <field name="name">Create Carbon Activity</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+    <field name="code"><![CDATA[
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Carbon Activity',
+    'res_model': 'carbon.activity',
+    'view_mode': 'form',
+    'target': 'current',
+    'context': {
+        'default_account_move_id': record.id,
+        'default_company_id': record.company_id.id,
+    }
+}
+    ]]></field>
+    </record>
+</odoo>

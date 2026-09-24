@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_web.GanttView" owl="1">
+        <div t-att-class="className" t-ref="root">
+            <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
+                <t t-set-slot="control-panel-create-button">
+                    <t t-if="!model.root.editedRecord and activeActions.create and (!model.root.isGrouped or !editable) and !env.inDialog">
+                        <button type="button" class="btn btn-primary o_list_button_add" data-hotkey="c" t-on-click="props.createRecord" data-bounce-button="">
+                            New
+                        </button>
+                    </t>
+                    <t t-if="state.isLayoutChanged">
+                        <button type="button" class="btn btn-primary o_list_button_add" data-hotkey="s" t-on-click="onClickSave" data-bounce-button="">
+                            Save
+                        </button>
+                    </t>
+                </t>
+                <t t-set-slot="layout-actions">
+                    <SearchBar autofocus="firstLoad"/>
+                </t>
+                <t t-set-slot="control-panel-navigation-additional">
+                    <t t-component="searchBarToggler.component" t-props="searchBarToggler.props"/>
+                </t>
+                <t t-set-slot="control-panel-additional-actions">
+                    <CogMenu/>
+                </t>
+                <t t-component="props.Renderer"
+                    list="model.root"
+                    archInfo="props.archInfo"
+                    Compiler="props.Compiler"
+                    readonly="true"
+                    layoutChanged.bind="layoutChanged"
+                    noContentHelp="props.info.noContentHelp"
+                />
+            </Layout>
+        </div>
+    </t>
+    <div t-name="cyllo_web.GanttRenderer" t-ref="root-renderer" owl="1">
+        <div class="d-flex gap-1 o_calendar_navigation_buttons px-3 py-2">
+            <button class="btn btn-secondary btn-sm d-none d-md-block o_calendar_button_prev"
+                    title="Previous"
+                    aria-label="Previous"
+                    value="Previous"
+                    t-on-click.stop="() => this.UpdateDateRange(false,this.ref.el.querySelector('#view-selector').value)">
+                <i class="oi oi-arrow-left"/>
+            </button>
+            <button class="btn btn-secondary btn-sm d-none d-md-block o_calendar_button_next"
+                    title="Next"
+                    aria-label="Next"
+                    value="Next"
+                    t-on-click.stop="() => this.UpdateDateRange(true,this.ref.el.querySelector('#view-selector').value)">
+                <i class="oi oi-arrow-right"/>
+            </button>
+            <select class="form-select" id="view-selector" t-on-change="(ev) => this.updateViewMode(ev.target.value)">
+                <option value="Day">Day</option>
+                <option value="Week" selected="true">Week</option>
+                <option value="Month">Month</option>
+                <option value="Year">Year</option>
+            </select>
+            <button class="btn btn-secondary mx-1 o_calendar_button_today"
+                    t-on-click="() => this.updateViewMode(this.ref.el.querySelector('#view-selector').value)">
+                Today
+            </button>
+            <div style="display: flex; align-items: center;">
+                <h5 class="my-0 currentDate" t-esc="this.displayDate"/>
+            </div>
+        </div>
+        <div id="cyllo_gantt_widget" style="height:82vh;overflow-y:auto;"/>
+    </div>
+</templates>

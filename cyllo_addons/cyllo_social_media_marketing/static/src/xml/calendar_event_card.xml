@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.CalendarEventCard">
+        <div class="fc-content o_smm_calendar_card">
+            <div class="o_smm_calendar_thumb_wrap" t-if="rawRecord.calendar_image_url">
+                <img t-att-src="rawRecord.calendar_image_url" class="o_smm_calendar_thumb" />
+                <span class="o_smm_calendar_platform_badge">
+                    <i t-att-class="rawRecord.calendar_platform_icon" />
+                </span>
+            </div>
+            <div class="o_smm_calendar_body">
+                <div class="o_smm_calendar_head">
+                    <img t-if="rawRecord.calendar_account_image" t-att-src="rawRecord.calendar_account_image"
+                        class="o_smm_calendar_avatar" />
+                    <div class="o_smm_calendar_avatar o_smm_calendar_avatar_placeholder" t-else="">
+                        <i t-att-class="rawRecord.calendar_platform_icon" />
+                    </div>
+                    <span class="o_smm_calendar_account text-truncate" t-esc="rawRecord.calendar_account_name" />
+                    <span class="o_smm_calendar_time" t-esc="startTime" />
+                </div>
+                <div class="o_smm_calendar_text text-truncate" t-esc="rawRecord.description" />
+                <div class="o_smm_calendar_footer">
+                    <span t-attf-class="o_smm_calendar_status o_smm_calendar_status_{{ rawRecord.state }}">
+                        <t t-if="rawRecord.state === 'post'">Published</t>
+                        <t t-elif="rawRecord.state === 'queue'">Scheduled</t>
+                        <t t-else="">Draft</t>
+                    </span>
+                    <i class="ri-chat-3-line o_smm_calendar_comment_icon" />
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="cyllo_social_media_marketing.CalendarEventCardCompact">
+        <div class="fc-content o_smm_calendar_chip">
+            <img t-if="rawRecord.calendar_account_image" t-att-src="rawRecord.calendar_account_image"
+                class="o_smm_calendar_chip_avatar" />
+            <i t-else="" t-att-class="rawRecord.calendar_platform_icon" class="o_smm_calendar_chip_icon" />
+            <span class="o_smm_calendar_chip_text text-truncate" t-esc="rawRecord.calendar_account_name or rawRecord.description" />
+            <span class="o_smm_calendar_chip_time" t-esc="startTime" />
+            <span t-attf-class="o_smm_calendar_chip_dot o_smm_calendar_status_{{ rawRecord.state }}" />
+        </div>
+    </t>
+</templates>

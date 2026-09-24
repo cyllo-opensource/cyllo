@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Appointments to Portal Home -->
+    <template id="portal_my_home_appointment" name="Appointments" inherit_id="portal.portal_my_home" customize_show="True" priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <style>
+                .o_portal_icon img[src*='calendar_icon'] {
+                    width: 64px;
+                    height: 64px;
+                    object-fit: contain;
+                }
+            </style>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/cyllo_appointment/static/img/calendar_icon.png?v=9'"/>
+                <t t-set="title">Appointments</t>
+                <t t-set="url" t-value="'/my/appointments'"/>
+                <t t-set="text">View and manage your scheduled appointments</t>
+                <t t-set="placeholder_count" t-value="'appointment_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_menu_appointment" name="Portal layout : appointment menu entries" inherit_id="portal.portal_breadcrumbs" priority="30">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'appointment' or appointment" t-attf-class="breadcrumb-item #{'active ' if not appointment else ''}">
+                <a t-if="appointment" t-attf-href="/my/appointments?{{ keep_query() }}">Appointments</a>
+                <t t-else="">Appointments</t>
+            </li>
+            <li t-if="appointment" class="breadcrumb-item active">
+                <t t-esc="appointment.name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <!-- List Appointments -->
+    <template id="portal_my_appointments" name="My Appointments">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Appointments</t>
+            </t>
+            <t t-if="not appointments">
+                <div class="alert alert-warning mt8" role="alert">
+                    There are no appointments.
+                </div>
+            </t>
+            <t t-if="appointments" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Reference</th>
+                        <th>Subject</th>
+                        <th>Type</th>
+                        <th class="text-right">Start Time</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="appointments" t-as="appointment">
+                        <tr>
+                            <td>
+                                <!-- Redirects to the secure manage page -->
+                                <a t-attf-href="/appointment/manage/#{appointment.access_token}">
+                                    <t t-esc="appointment.name"/>
+                                </a>
+                            </td>
+                            <td><span t-field="appointment.meeting_subject"/></td>
+                            <td><span t-field="appointment.appointment_type_id.name"/></td>
+                            <td class="text-right"><span t-field="appointment.start_datetime" t-options="{'widget': 'datetime'}"/></td>
+                            <td class="text-center">
+                                <span t-if="appointment.state == 'confirmed'" class="badge badge-success badge-pill">
+                                    <i class="fa fa-check"/> Confirmed
+                                </span>
+                                <span t-if="appointment.state == 'pending_payment'" class="badge badge-warning badge-pill">
+                                    <i class="fa fa-clock-o"/> Pending Payment
+                                </span>
+                                <span t-if="appointment.state == 'done'" class="badge badge-info badge-pill">
+                                    <i class="fa fa-check-circle"/> Done
+                                </span>
+                                <span t-if="appointment.state == 'in_progress'" class="badge badge-primary badge-pill">
+                                    <i class="fa fa-spinner"/> In Progress
+                                </span>
+                                <span t-if="appointment.state == 'no_show'" class="badge badge-secondary badge-pill">
+                                    <i class="fa fa-user-times"/> No Show
+                                </span>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+        </t>
+    </template>
+</odoo>

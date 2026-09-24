@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_youtube.YoutubeComment" owl="1">
+        <div>
+            <div>
+                <div style="width:800px; margin:0 auto;">
+                    <br/>
+                    <textarea rows="4" name="comment" class="form-control"
+                              id="yt_comment_area"
+                              placeholder="Write a comment..." width="50px"/>
+                    <br/>
+                    <button class="btn btn-primary" t-on-click="onClickPost"
+                            title="Click to post"
+                            width="10px">Post</button>
+                    <br/>
+                    <br/>
+                    <table width="100%" height="50%">
+                        <tbody bgcolor="#f6f7fa">
+                            <t t-if="YoutubeCommentDetails">
+                                <t t-foreach="YoutubeCommentDetails"
+                                   t-as="yt_comment" t-key="yt_comment['id']">
+                                    <tr>
+                                        <td style="padding: 20px;">
+                                            <span style="font-weight:bold; color:#3CB371">
+                                                <t t-esc="yt_comment['username']"/>
+                                            </span>
+                                            <span class="text-muted">
+                                                <span t-esc="yt_comment['timestamp']"
+                                                      style="margin-left: 10px;font-size:13px;"/>
+                                            </span>
+                                            <br/>
+                                            <span t-esc="yt_comment['text']"
+                                                  style="color:#000"/>
+                                            <span class="badge rounded-pill text-bg-secondary float-end me-4">
+                                                <i class="fa fa-heart"
+                                                   style="color:red; padding:3px;"/>
+                                                <span t-esc="yt_comment['like_count']"/>
+                                            </span>
+                                            <div class="badge rounded-pill text-bg-secondary float-end me-4"
+                                                 t-on-click="convertToLead"
+                                                 t-att-id="yt_comment['id']">
+                                                <i class="fa fa-user"
+                                                   style="color:blue; padding:3px;"/>
+                                            </div>
+                                            <br/>
+                                            <div t-att-id="yt_comment['id']">
+                                                <a class="o_yt_comment_reply btn btn-sm btn-link px-0"
+                                                   href="#"
+                                                   t-att-id="yt_comment['id']"
+                                                   t-on-click="onClickReply"><i class="fa fa-comments me-1"/>
+                                                    Reply
+                                                </a>
+                                                <div id="reply_to_comments"
+                                                     t-att-id="yt_comment['id']"
+                                                     style="display:none;">
+                                                    <textarea rows="4"
+                                                              name="comment_reply"
+                                                              class="form-control text_area"
+                                                              id="yt_comment_reply_area"
+                                                              t-ref="yt_comment_reply_area"
+                                                              placeholder="Write a reply..."
+                                                              width="30px"/>
+                                                    <button class="btn btn-primary"
+                                                            t-on-click="postReply"
+                                                            title="Click to Reply"
+                                                            width="3px">Reply</button>
+                                                </div>
+                                                <t t-if="yt_comment['replies']">
+                                                    <a class="o_yt_comment_replies btn btn-sm btn-link"
+                                                       href="#"
+                                                       t-att-id="yt_comment['id']"
+                                                       style="margin-left:10px;"
+                                                       t-on-click="onClickViewReplies">
+                                                        View
+                                                        Replies (
+                                                        <t t-esc="yt_comment['replies']['data']['length']"/>
+                                                        )
+                                                    </a>
+                                                    <div id="view_replies"
+                                                         t-att-id="yt_comment['id']"
+                                                         style="display:none;">
+                                                    <t t-if="yt_comment['replies']">
+                                                        <t t-foreach="yt_comment['replies']['data']"
+                                                           t-as="replies"
+                                                           t-key="replies['id']">
+                                                            <span t-esc="replies['text']"
+                                                                  style="margin-left: 35px;"/>
+                                                            <br/>
+                                                        </t>
+                                                    </t>
+                                                </div>
+                                                </t>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                        <br/>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

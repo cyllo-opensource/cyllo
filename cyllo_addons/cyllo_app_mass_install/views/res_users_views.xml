@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!--    Inherited view of res users-->
+    <record id="view_res_users_form" model="ir.ui.view">
+        <field name="name">view.res.users.form.cyllo.app.mass.install</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="first_time" invisible="1"/>
+                <div class="cy-app-install-guidance-message alert-success"
+                     role="status"
+                     invisible="first_time">
+                    You will be able to create and edit the user by navigating to
+                    Settings → Users &amp; Companies → Users
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='login']" position="attributes">
+                <attribute name="readonly">not first_time and id == context.get('uid')</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

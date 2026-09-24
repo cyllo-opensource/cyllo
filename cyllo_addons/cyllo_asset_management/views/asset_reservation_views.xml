@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Calendar view of the asset reservation model-->
+    <record id="view_asset_reservation_form1" model="ir.ui.view">
+        <field name="name">view.asset.reservation.form1</field>
+        <field name="model">asset.reservation</field>
+        <field name="arch" type="xml">
+            <form string="Reservation">
+                <sheet>
+                    <div class="alert alert-warning py-2"
+                         invisible="not availability_warning">
+                        <field name="availability_warning"
+                               widget="html"
+                               readonly="1"
+                               nolabel="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="asset_id" domain="[('is_confirm', '=', True), ('is_assign', '=', False),
+                            ('status', 'not in', ('sell', 'disposed', 'cancel'))]"/>
+                            <field name="employee_id"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"/>
+                            <field name="end_date" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="reservation_note"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Calendar view of the asset reservation model-->
+    <record id="view_asset_reservation_calendar" model="ir.ui.view">
+        <field name="name">view.asset.reservation.calendar</field>
+        <field name="model">asset.reservation</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <calendar date_start="start_date" date_stop="end_date"
+                      string="Reservation"
+                      mode="month" event_open_popup="true" quick_create="0"
+                      form_view_id="%(cyllo_asset_management.view_asset_reservation_form1)d">
+                <field name="start_date"/>
+                <field name="end_date"/>
+            </calendar>
+        </field>
+    </record>
+    <!--    Tree view of the asset reservation model-->
+    <record id="view_asset_reservation_tree" model="ir.ui.view">
+        <field name="name">view.asset.reservation.tree</field>
+        <field name="model">asset.reservation</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="asset_id"/>
+                <field name="employee_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Search view of the asset reservation model-->
+    <record id="view_asset_reservation_search" model="ir.ui.view">
+        <field name="name">view.asset.reservation.search</field>
+        <field name="model">asset.reservation</field>
+        <field name="arch" type="xml">
+            <search string="Reserved Asset">
+                <field name="asset_id"/>
+                <field name="employee_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By...">
+                    <filter string="Asset" name="asset_item" domain="[]" context="{'group_by':'asset_id'}"/>
+                    <filter string="Employee" name="employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--    Wizard view of the asset reservation model-->
+    <record id="view_asset_reservation_form2" model="ir.ui.view">
+        <field name="name">view.asset.reservation.form2</field>
+        <field name="model">asset.reservation</field>
+        <field name="arch" type="xml">
+            <form string="Reservation">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id" invisible="1"/>
+                            <field name="employee_id"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"/>
+                            <field name="end_date" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="reservation_note"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button type="object" name="action_reserve" string="Reserve" class="oe_highlight"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Form view of the asset reservation model-->
+    <record id="view_asset_reservation_form" model="ir.ui.view">
+        <field name="name">view.asset.reservation.form</field>
+        <field name="model">asset.reservation</field>
+        <field name="arch" type="xml">
+            <form string="Reservation">
+                <header>
+                    <button type="object" name="action_reserve" string="Reserve" class="oe_highlight"
+                            invisible="status != 'draft'"/>
+                    <button type="object" name="action_assign_asset" string="Assign" class="oe_highlight"
+                            invisible="status != 'reserve'"/>
+                    <button type="object" name="action_lease_asset" string="Create Lease" class="oe_highlight"
+                            invisible="status != 'reserve'"/>
+                    <button type="object" name="action_rental_asset" string="Create Rental" class="oe_highlight"
+                            invisible="status != 'reserve'"/>
+                    <button type="object" name="action_unreserve" string="Unreserve" class="oe_highlight"
+                            invisible="status != 'reserve'"/>
+                    <button type="object" name="action_reset_to_draft" string="Reset to Draft" class="btn-secondary"
+                            invisible="status != 'cancel'"
+                            groups="cyllo_asset_management.group_cyllo_asset_admin"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,reserve"/>
+                </header>
+
+                <sheet>
+                    <div class="alert alert-warning py-2"
+                         invisible="not availability_warning">
+                        <field name="availability_warning"
+                               widget="html"
+                               readonly="1"
+                               nolabel="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="asset_id" domain="[('is_confirm', '=', True), ('is_assign', '=', False),
+                                                            ('status', 'not in', ('sell', 'disposed', 'cancel'))]"/>
+                            <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"/>
+                            <field name="end_date" invisible="1"/>
+                            <field name="company_id" readonly="status != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="employee_id" readonly="status != 'draft'"/>
+                            <field name="email" readonly="status != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="reservation_note"/>
+                        </group>
+                    </group>
+                </sheet>
+                <!-- Chatter -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--    Action the asset reservation model-->
+    <record id="action_view_reservations" model="ir.actions.act_window">
+        <field name="name">Reservation</field>
+        <field name="res_model">asset.reservation</field>
+        <field name="view_mode">calendar,tree,form</field>
+    </record>
+    <!--    Menuitem the asset reservation-->
+    <menuitem id="menu_reservations" name="Reservations"
+              parent="cyllo_asset_management.menu_assets_categ"
+              action="action_view_reservations"
+              sequence="3"/>
+</odoo>

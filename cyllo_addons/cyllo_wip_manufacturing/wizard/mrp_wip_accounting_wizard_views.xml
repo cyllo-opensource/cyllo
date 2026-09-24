@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_wip_accounting_wizard_view_form" model="ir.ui.view">
+        <field name="name">mrp.wip.accounting.wizard.view.form</field>
+        <field name="model">mrp.wip.accounting.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Post WIP Accounting Entry">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="production_id" readonly="1" force_save="1"/>
+                            <field name="journal_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="reference"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="reversal_date"/>
+                            <field name="company_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Journal Items" name="journal_items">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="account_id" options="{'no_create': True}"/>
+                                    <field name="label"/>
+                                    <field name="debit" sum="Total Debit"/>
+                                    <field name="credit" sum="Total Credit"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button name="action_post_wip" string="Post WIP" type="object" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mrp_wip_accounting_wizard" model="ir.actions.act_window">
+        <field name="name">Post WIP Entries</field>
+        <field name="res_model">mrp.wip.accounting.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

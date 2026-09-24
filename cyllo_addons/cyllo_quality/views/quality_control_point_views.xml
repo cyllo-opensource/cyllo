@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Tree view of the Quality Control Points-->
+    <record id="view_quality_control_point_tree" model="ir.ui.view">
+        <field name="name">view.quality.control.point.tree</field>
+        <field name="model">quality.control.point</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="qc_check_for"/>
+                <field name="operation_type_ids" widget="many2many_tags"/>
+                <field name="product_category_ids" widget="many2many_tags" invisible="qc_check_for != 'category'"/>
+                <field name="product_ids" widget="many2many_tags" invisible="qc_check_for != 'product'"/>
+                <field name="quality_team_id"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Form view of the quality control point model-->
+    <record id="view_quality_control_point_form" model="ir.ui.view">
+        <field name="name">view.quality.control.point.form</field>
+        <field name="model">quality.control.point</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="action_view_quality_checks"
+                                type="object"  invisible="not qc_check_count">
+                            <i class="o_button_icon ri-check-line"/>
+                            <field name="qc_check_count" string="Quality Checks" widget="statinfo" force_save="1"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="qc_check_for" widget="radio" options="{'horizontal': true}" />
+                            <field name="quality_team_id"/>
+                            <field name="user_id"/>
+                            <field name="company_id"/>
+                            <field name="failure_location_id"/>
+                            <field name="is_measure" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="operation_type_ids" widget="many2many_tags"/>
+                            <field name="product_category_ids" widget="many2many_tags"
+                                   invisible="qc_check_for != 'category'" />
+                            <field name="product_ids" widget="many2many_tags" invisible="qc_check_for != 'product'"/>
+                            <field name="control_type"/>
+                            <label for="control_quantity" string="Partial Check"
+                                   invisible="control_type != 'quantity'"/>
+                            <div class="o_row" invisible="control_type != 'quantity'">
+                                <span>Check</span>
+                                <field name="control_quantity" nolabel="1"/>
+                                <span class="ms-3">% of products</span>
+                            </div>
+                            <field name="control_by"/>
+                            <label for="control_frequency" string="Frequency" invisible="control_by == 'all'"/>
+                            <div class="o_row" invisible="control_by == 'all'">
+                                <span>Check every</span>
+                                <field name="control_frequency" nolabel="1"/>
+                                <span class="ms-3" invisible="control_type != 'quantity' or control_by != 'randomly'">% of transfers</span>
+                                <span class="ms-3" invisible="control_type == 'quantity' or control_by != 'randomly'">% of operations</span>
+                                <field name="control_period" invisible="control_by != 'periodically'"/>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="quality_inspection" string="Quality Inspections">
+                            <field name="quality_inspection_ids">
+                                <tree editable="bottom">
+                                    <field name="priority" widget="handle"/>
+                                    <field name="quality_control_id" column_invisible="1"/>
+                                    <field name="inspection_action_id"/>
+                                    <field name="blocked_by_id"/>
+                                    <field name="inspection_type_id" options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                                    <field name="is_measure" column_invisible="1"/>
+                                    <field name="measure_start" column_invisible="not parent.is_measure" invisible="not is_measure" readonly="not is_measure"/>
+                                    <field name="measure_end" column_invisible="not parent.is_measure" invisible="not is_measure" readonly="not is_measure"/>
+                                    <field name="unit_id" column_invisible="not parent.is_measure" invisible="not is_measure" readonly="not is_measure"/>
+                                    <button name="action_add_instruction" type="object" class="cy-add-instruction" string="Instructions"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--    Search view of the Quality Control Points-->
+    <record id="view_quality_control_point_search" model="ir.ui.view">
+        <field name="name">view.quality.control.point.search</field>
+        <field name="model">quality.control.point</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="quality_team_id"/>
+                <field name="user_id"/>
+                <field name="company_id"/>
+                <filter string="My Quality Control Points" name="my_quality_control_points"
+                        domain="[('user_id', '=', uid)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Quality Team" name="group_by_quality_team"
+                            context="{'group_by': 'quality_team_id'}"/>
+                    <filter string="Responsible" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Company" name="group_by_company" context="{'group_by': 'company_id'}"/>
+                    <filter string="Archived" name="group_by_archived" domain="[('active', '=', False)]"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!--   Action for the Quality Control Points-->
+    <record id="action_view_quality_control_points" model="ir.actions.act_window">
+        <field name="name">Quality Control Points</field>
+        <field name="res_model">quality.control.point</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_quality_control_point_search"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="sale_order_form_view_warranty" model="ir.ui.view">
+        <field name="name">sale.order.form.warranty</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="display_extend_warranty" invisible="1"/>
+                <button name="action_extend_warranty"
+                        string="Extend Warranty"
+                        type="object"
+                        class="btn-primary"
+                        invisible="not display_extend_warranty or state not in ['sale', 'done']"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='qty_delivered']"
+                   position="after">
+                <field name="sale_warranty_expiration_date"
+                       optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//div[@name='delivered_qty']"
+                   position="after">
+                <label for="sale_warranty_expiration_date"
+                       string="Warranty Expiration"
+                       invisible="parent.state != 'sale'"/>
+                <div invisible="parent.state != 'sale'">
+                    <field name="sale_warranty_expiration_date"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="sale_order_line_tree_view_warranty" model="ir.ui.view">
+        <field name="name">sale.order.line.tree.warranty</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.view_order_line_tree"/>
+        <field name="arch" type="xml">
+            <field name="qty_delivered" position="after">
+                <field name="sale_warranty_expiration_date"
+                       optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="sale_order_line_form_view_warranty" model="ir.ui.view">
+        <field name="name">sale.order.line.form.warranty</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.sale_order_line_view_form_readonly"/>
+        <field name="arch" type="xml">
+            <field name="qty_delivered" position="after">
+                <field name="sale_warranty_expiration_date"/>
+            </field>
+        </field>
+    </record>
+</odoo>

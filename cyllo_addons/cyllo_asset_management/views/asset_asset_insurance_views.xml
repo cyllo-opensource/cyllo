@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Tree view of the asset insurance model-->
+    <record id="view_asset_asset_insurance_tree" model="ir.ui.view">
+        <field name="name">view.asset.asset.insurance.tree</field>
+        <field name="model">asset.asset.insurance</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="partner_id"/>
+                <field name="type_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--    Form view of the asset insurance model-->
+    <record id="view_asset_asset_insurance_form" model="ir.ui.view">
+        <field name="name">view.asset.asset.insurance.form</field>
+        <field name="model">asset.asset.insurance</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="action_view_assets" type="object"
+                                invisible="asset_count == 0">
+                            <i class="o_button_icon fa fa-fw fa-briefcase"/>
+                            Assets (<field name="asset_count"/>)
+                        </button>
+                        <button class="oe_stat_button" name="action_view_moves" type="object"
+                                invisible="account_move_count == 0">
+                            <i class="o_button_icon fa fa-fw fa-pencil-square-o"/>
+                            Claims (<field name="account_move_count"/>)
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="type_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--    Action for the asset insurance model-->
+    <record id="action_view_asset_insurance" model="ir.actions.act_window">
+        <field name="name">Asset Insurance</field>
+        <field name="res_model">asset.asset.insurance</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!--    Menuitem the asset insurance model -->
+    <menuitem id="menu_asset_asset_insurance"
+              name="Insurance"
+              parent="cyllo_asset_management.menu_asset_categ"
+              action="action_view_asset_insurance"
+              sequence="23"/>
+</odoo>

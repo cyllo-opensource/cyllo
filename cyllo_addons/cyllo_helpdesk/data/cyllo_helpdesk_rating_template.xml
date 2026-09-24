@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="help_desk_rating_template" model="mail.template">
+        <field name="name">Help Desk: Issue Solved</field>
+        <field name="model_id"
+               ref="cyllo_helpdesk.model_helpdesk_ticket"/>
+        <field name="subject">[Ticket #{{ object.ticket }}] {{ object.name }}: Issue Resolved</field>
+        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if object.user_id else object.company_id.partner_id.email_formatted) }}</field>
+        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and object.team_id.alias_id else object.company_id.partner_id.email_formatted }}</field>
+        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id else '') }}</field>
+        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email')) }}</field>
+        <field name="body_html" type="html">
+<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #333333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+    <div style="background-color: #9EA700; padding: 15px 20px; border-radius: 6px 6px 0 0; text-align: center; color: #ffffff;">
+        <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Helpdesk Support</h2>
+    </div>
+    <div style="padding: 20px;">
+        <p style="font-size: 15px;">Dear <strong t-out="object.customer_id.name or 'Customer'"/>,</p>
+        <p>This is to inform you that your reported issue has been successfully resolved:</p>
+        <div style="background-color: #f8f9fa; border-left: 4px solid #9EA700; padding: 12px 16px; margin: 15px 0; border-radius: 0 4px 4px 0;">
+            <p style="margin: 0; font-size: 15px; font-weight: bold; color: #212529;">
+                <t t-out="object.name"/>
+            </p>
+            <t t-if="object.description">
+                <div style="margin-top: 8px; font-size: 13px; color: #6c757d;">
+                    <t t-out="object.description"/>
+                </div>
+            </t>
+        </div>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px;">
+            <tr style="border-bottom: 1px solid #eeeeee;">
+                <td style="padding: 8px 0; color: #6c757d; width: 40%;"><strong>Ticket ID:</strong></td>
+                <td style="padding: 8px 0; font-weight: bold; color: #9EA700;"><t t-out="object.ticket"/></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eeeeee;">
+                <td style="padding: 8px 0; color: #6c757d;"><strong>Helpdesk Team:</strong></td>
+                <td style="padding: 8px 0;"><t t-out="object.team_id.name or 'Support'"/></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eeeeee;">
+                <td style="padding: 8px 0; color: #6c757d;"><strong>Status:</strong></td>
+                <td style="padding: 8px 0;"><t t-out="object.stage_id.name or 'Solved'"/></td>
+            </tr>
+            <t t-if="object.user_id">
+                <tr style="border-bottom: 1px solid #eeeeee;">
+                    <td style="padding: 8px 0; color: #6c757d;"><strong>Assigned To:</strong></td>
+                    <td style="padding: 8px 0;"><t t-out="object.user_id.name"/></td>
+                </tr>
+            </t>
+        </table>
+
+        <t t-set="access_token" t-value="object._rating_get_access_token()"/>
+        <t t-set="base_url" t-value="object.env['ir.config_parameter'].sudo().get_param('web.base.url')"/>
+        <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 16px; text-align: center; margin: 25px 0;">
+            <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: bold; color: #333333;">
+                How satisfied are you with our service?
+            </p>
+            <table style="width: 100%; border-collapse: collapse; text-align: center; margin: 0 auto;">
+                <tr>
+                    <td style="padding: 5px 10px; text-align: center;">
+                        <a t-attf-href="{{ base_url }}/rate/{{ access_token }}/5" style="text-decoration: none; display: inline-block;">
+                            <span style="display: inline-block; width: 48px; height: 48px; line-height: 48px; font-size: 30px; text-align: center; border-radius: 50%; background-color: #4CAF50; color: #ffffff; cursor: pointer;">&#128522;</span>
+                            <br/>
+                            <span style="font-size: 12px; color: #4CAF50; font-weight: bold; display: block; margin-top: 4px;">Satisfied</span>
+                        </a>
+                    </td>
+                    <td style="padding: 5px 10px; text-align: center;">
+                        <a t-attf-href="{{ base_url }}/rate/{{ access_token }}/3" style="text-decoration: none; display: inline-block;">
+                            <span style="display: inline-block; width: 48px; height: 48px; line-height: 48px; font-size: 30px; text-align: center; border-radius: 50%; background-color: #FF9800; color: #ffffff; cursor: pointer;">&#128528;</span>
+                            <br/>
+                            <span style="font-size: 12px; color: #FF9800; font-weight: bold; display: block; margin-top: 4px;">Okay</span>
+                        </a>
+                    </td>
+                    <td style="padding: 5px 10px; text-align: center;">
+                        <a t-attf-href="{{ base_url }}/rate/{{ access_token }}/1" style="text-decoration: none; display: inline-block;">
+                            <span style="display: inline-block; width: 48px; height: 48px; line-height: 48px; font-size: 30px; text-align: center; border-radius: 50%; background-color: #F44336; color: #ffffff; cursor: pointer;">&#128543;</span>
+                            <br/>
+                            <span style="font-size: 12px; color: #F44336; font-weight: bold; display: block; margin-top: 4px;">Dissatisfied</span>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <p style="font-size: 12px; color: #6c757d; margin: 10px 0 0 0;">
+                Click an option above to submit your rating. Your feedback helps us improve!
+            </p>
+        </div>
+
+        <p style="font-size: 13px; color: #6c757d;">
+            You can reply directly to this email if you need any additional assistance.
+        </p>
+        <br/>
+        <p style="margin-bottom: 0;">
+            Best regards,<br/>
+            <strong><t t-out="user.name or object.team_id.name or 'Support Team'"/></strong><br/>
+            <t t-out="object.company_id.name"/>
+        </p>
+    </div>
+</div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+</odoo>

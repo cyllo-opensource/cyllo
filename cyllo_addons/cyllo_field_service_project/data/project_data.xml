@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--Running state-->
+    <record id="project_task_type_running" model="project.task.type">
+        <field name="sequence">1</field>
+        <field name="name">Running</field>
+    </record>
+    <!--Done state-->
+    <record id="project_task_type_done" model="project.task.type">
+        <field name="sequence">2</field>
+        <field name="name">Done</field>
+    </record>
+    <!--Field Service Project-->
+    <record id="project_project_field_service" model="project.project">
+        <field name="name">Field Service</field>
+        <field name="color">3</field>
+        <field name="allow_billable">True</field>
+        <field name="allow_timesheets">True</field>
+        <field name="user_id" ref="base.user_admin"/>
+        <field name="type_ids"
+               eval="[Command.link(ref('cyllo_field_service_project.project_task_type_running')),Command.link(ref('cyllo_field_service_project.project_task_type_done'))]"/>
+        <field name="privacy_visibility">portal</field>
+        <field name="is_fsm" eval="True"/>
+    </record>
+</odoo>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_shopfloor_worksheet_popup" model="ir.ui.view">
+        <field name="name">shopfloor.worksheet.popup</field>
+        <field name="model">mrp.workorder</field>
+        <field name="arch" type="xml">
+            <form string="Operation Worksheet" create="false" edit="false">
+                <sheet>
+                    <field name="worksheet_type" invisible="1"/>
+                    <div invisible="worksheet_type != 'text'">
+                        <field name="operation_note" widget="html" readonly="1" nolabel="1"/>
+                    </div>
+                    <div invisible="worksheet_type != 'pdf'">
+                        <field name="worksheet" widget="pdf_viewer" readonly="1" nolabel="1"/>
+                    </div>
+                    <div invisible="worksheet_type != 'google_slide'">
+                        <field name="worksheet_google_slide" widget="video_preview" readonly="1" nolabel="1"/>
+                    </div>
+                    <div invisible="worksheet_type != False" class="alert alert-info text-center">
+                        No worksheet attached to this operation.
+                    </div>
+                </sheet>
+                <footer>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Client Action -->
+    <record id="action_shopfloor" model="ir.actions.client">
+        <field name="name">Shopfloor</field>
+        <field name="tag">shopfloor_screen</field>
+        <field name="target">fullscreen</field>
+    </record>
+
+    <!-- Main Menu -->
+    <menuitem id="menu_shopfloor_root"
+              name="Shopfloor"
+              web_icon="cyllo_shopfloor,static/description/shop-floor-black.svg"
+              sequence="10"
+              action="action_shopfloor"
+              groups="cyllo_shopfloor.group_cyllo_shopfloor_user"/>
+
+</odoo>

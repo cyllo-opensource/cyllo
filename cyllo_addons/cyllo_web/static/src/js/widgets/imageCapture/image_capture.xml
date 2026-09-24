@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!--    inheriting 'web.ImageField' template adding buttons-->
+    <t t-name="cyllo_web.CylloImageCapture" t-inherit="web.ImageField"
+       owl="1" t-inherit-mode="extension">
+        <!--        adding the attribute 't-ref' to the main div for accessing all elements -->
+        <xpath expr="//div[hasclass('d-inline-block')]" position="attributes">
+            <attribute name="t-ref">CylloImageCaptureRoot</attribute>
+        </xpath>
+        <!--        adding buttons after the 'FileUploader' component-->
+        <xpath expr="//FileUploader" position="after">
+            <button t-if="state.image =='image'"
+                    class="o_upload_image_button btn btn-light border-0 rounded-circle m-1 p-1"
+                    data-tooltip="Open Camera"
+                    aria-label="Open Camera" id="camera"
+                    t-on-click="() => state.image = 'camera'">
+                    <i class="fa fa-camera fa-fw"/>
+            </button>
+            <button t-if="state.image=='camera'"
+                    class="o_capture_image_button btn btn-light border-0 rounded-circle m-1 p-1"
+                    data-tooltip="Capture"
+                    aria-label="Capture" id="capture"
+                    t-on-click="() => state.image = 'capture'">
+                <i class="fa fa-camera-retro"/>
+            </button>
+            <button t-if="state.image!='image'"
+                    class="o_close_image_button btn btn-light border-0 rounded-circle m-1 p-1"
+                    data-tooltip="Close"
+                    aria-label="Close" id="closeCam"
+                    t-on-click="onClickCloseCam">
+                <i class="fa fa-times"/>
+            </button>
+            <button t-if="state.image == 'capture'"
+                    class="o_upload_image_button btn btn-light border-0 rounded-circle m-1 p-1"
+                    data-tooltip="Save"
+                    aria-label="Save" id="save_image"
+                    t-on-click="OnClickSaveImage">
+                <i class="fa fa-upload"/>
+            </button>
+        </xpath>
+        <!--        adding video, canvas and input tags after img tag-->
+        <xpath expr="//img" position="after">
+            <video t-if="state.image=='camera'" id="player" controls="true"
+                   autoplay="true" style="width: 220px;padding: 20px;"/>
+            <canvas t-if="state.image =='capture'" id="snapshot"
+                    width="320"
+                    height="240" style="width: 320px;padding: 20px;"/>
+            <input type="hidden" name="image" id="image"/>
+        </xpath>
+        <!--        adding attribute to img for displaying the image only in state of image -->
+        <xpath expr="//img" position="attributes">
+            <attribute name="t-if">state.image=='image'</attribute>
+        </xpath>
+        <!--        adding attribute to button edit for displaying the button  in state of image -->
+        <xpath expr="//button[hasclass('o_select_file_button')]"
+               position="attributes">
+            <attribute name="t-if">state.image=='image'</attribute>
+        </xpath>
+        <!--        adding attribute to button delete for displaying the button  in state of image -->
+        <xpath expr="//button[hasclass('o_clear_file_button')]"
+               position="attributes">
+            <attribute name="t-if">props.record.data[props.name] and state.isValid and state.image=='image'</attribute>
+        </xpath>
+    </t>
+</templates>

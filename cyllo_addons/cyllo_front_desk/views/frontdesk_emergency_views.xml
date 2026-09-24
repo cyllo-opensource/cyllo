@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Emergency Alert Views -->
+    <record id="frontdesk_emergency_alert_view_tree" model="ir.ui.view">
+        <field name="name">frontdesk.emergency.alert.view.tree</field>
+        <field name="model">frontdesk.emergency.alert</field>
+        <field name="arch" type="xml">
+            <tree string="Emergency Alerts">
+                <field name="name"/>
+                <field name="station_ids" widget="many2many_tags"/>
+
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="frontdesk_emergency_alert_view_form" model="ir.ui.view">
+        <field name="name">frontdesk.emergency.alert.view.form</field>
+        <field name="model">frontdesk.emergency.alert</field>
+        <field name="arch" type="xml">
+            <form string="Emergency Alert Configuration">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Fire Alert"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="station_ids" widget="many2many_tags" placeholder="Select stations..." options="{'no_create': True}"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Recipients" name="recipients">
+                            <group>
+                                <field name="recipient_employee_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                <field name="recipient_user_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                <field name="recipient_channel_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            </group>
+                        </page>
+                        <page string="Default Message" name="default_message">
+                            <field name="default_message" placeholder="Type default message here..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="frontdesk_emergency_alert_view_search" model="ir.ui.view">
+        <field name="name">frontdesk.emergency.alert.view.search</field>
+        <field name="model">frontdesk.emergency.alert</field>
+        <field name="arch" type="xml">
+            <search string="Search Emergency Alerts">
+                <field name="name"/>
+                <field name="station_ids"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Emergency Log Views -->
+    <record id="frontdesk_emergency_log_view_tree" model="ir.ui.view">
+        <field name="name">frontdesk.emergency.log.view.tree</field>
+        <field name="model">frontdesk.emergency.log</field>
+        <field name="arch" type="xml">
+            <tree string="Emergency Logs" create="false" edit="false" delete="false" duplicate="false">
+                <field name="name"/>
+                <field name="station_id"/>
+                <field name="alert_id"/>
+                <field name="user_id"/>
+                <field name="date"/>
+                <field name="recipient_summary"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="frontdesk_emergency_log_view_form" model="ir.ui.view">
+        <field name="name">frontdesk.emergency.log.view.form</field>
+        <field name="model">frontdesk.emergency.log</field>
+        <field name="arch" type="xml">
+            <form string="Emergency Log" create="false" edit="false" delete="false" duplicate="false">
+                <sheet>
+                    <!-- Premium Danger UI Log Header -->
+                    <div class="alert alert-danger" role="alert" style="border-radius: 8px; font-weight: bold; margin-bottom: 20px;">
+                        <span class="fa fa-exclamation-triangle mr-2" style="font-size: 1.4rem; vertical-align: middle;"/>
+                        OFFICIAL EMERGENCY BROADCAST LOG - AUDIT RECORD
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Trigger Info">
+                            <field name="station_id" readonly="1"/>
+                            <field name="alert_id" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="date" readonly="1"/>
+                        </group>
+                        <group string="Recipient Summary">
+                            <field name="recipient_summary" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Alert Message" name="alert_message">
+                            <field name="message" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="frontdesk_emergency_log_view_search" model="ir.ui.view">
+        <field name="name">frontdesk.emergency.log.view.search</field>
+        <field name="model">frontdesk.emergency.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Emergency Logs">
+                <field name="name"/>
+                <field name="station_id"/>
+                <field name="alert_id"/>
+                <field name="user_id"/>
+                <group expand="0" string="Group By">
+                    <filter string="Station" name="group_by_station" context="{'group_by': 'station_id'}"/>
+                    <filter string="Alert Type" name="group_by_alert" context="{'group_by': 'alert_id'}"/>
+                    <filter string="Triggered By" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_frontdesk_emergency_alert" model="ir.actions.act_window">
+        <field name="name">Emergency Alerts</field>
+        <field name="res_model">frontdesk.emergency.alert</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure Emergency Alerts
+            </p>
+            <p>
+                Setup alerts (like Fire, Medical, Security) that can be triggered dynamically from reception stations.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_frontdesk_emergency_log" model="ir.actions.act_window">
+        <field name="name">Emergency Logs</field>
+        <field name="res_model">frontdesk.emergency.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>
+                No emergency alerts have been triggered yet.
+            </p>
+            <p>
+                When an emergency alert is triggered from any reception station, it will be logged here for audit and reporting.
+            </p>
+        </field>
+    </record>
+
+</odoo>

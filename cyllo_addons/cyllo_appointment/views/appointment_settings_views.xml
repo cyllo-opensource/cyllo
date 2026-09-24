@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.appointment</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="25"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Appointment" name="cyllo_appointment" string="Appointment">
+                    <block title="Default Slot Settings" name="appointment_slot_defaults">
+                        <setting string="Default Slot Interval" help="Default time interval between available slots">
+                            <field name="appointment_default_slot_interval"/>
+                        </setting>
+                        <setting string="Default Min. Booking Notice (hours)" help="Minimum hours in advance to book">
+                            <field name="appointment_default_min_booking_notice"/>
+                        </setting>
+                        <setting string="Default Max Booking Horizon (days)" help="How far in advance can appointments be booked">
+                            <field name="appointment_default_max_booking_days"/>
+                        </setting>
+                    </block>
+
+                    <block title="Notifications" name="appointment_notifications">
+                        <setting string="Send Confirmation Emails by Default">
+                            <field name="appointment_send_confirmation"/>
+                        </setting>
+                        <setting string="Send Reminder Emails by Default">
+                            <field name="appointment_send_reminder"/>
+                        </setting>
+                        <setting string="Default Reminder Times (hours before)"
+                            help="Comma-separated: e.g. 24,2"
+                            invisible="appointment_send_reminder == False">
+                            <field name="appointment_default_reminder_hours"/>
+                        </setting>
+                        <setting string="Send Follow-up Emails by Default">
+                            <field name="appointment_send_followup"/>
+                        </setting>
+                        <setting string="Default Follow-up After (hours)"
+                            invisible="appointment_send_followup == False">
+                            <field name="appointment_followup_hours"/>
+                        </setting>
+                    </block>
+
+                    <block title="Google Calendar Integration"
+                           name="appointment_google_calendar"
+                           groups="base.group_system">
+                        <setting string="Google Calendar"
+                                 help="Synchronize appointments with Google Calendar"
+                                 id="appointment_sync_google_calendar_setting">
+                            <field name="module_google_calendar"/>
+                            <field name="google_calendar_installed" invisible="1"/>
+                            <div class="content-group" invisible="not module_google_calendar or google_calendar_installed">
+                                <div class="text-warning mt16">
+                                    <strong>Save</strong> this page and come back here to set up the credentials.
+                                </div>
+                            </div>
+                        </setting>
+                        <setting string="Client ID"
+                                 help="OAuth 2.0 Client ID from your Google Cloud Console project"
+                                 invisible="not google_calendar_installed">
+                            <field name="cal_client_id" placeholder="e.g. 123456789-xxxx.apps.googleusercontent.com"/>
+                        </setting>
+                        <setting string="Client Secret"
+                                 help="OAuth 2.0 Client Secret from your Google Cloud Console project"
+                                 invisible="not google_calendar_installed">
+                            <field name="cal_client_secret" password="True"/>
+                        </setting>
+                        <setting string="Pause Synchronization"
+                                 help="Temporarily pause automatic sync between appointments and Google Calendar"
+                                 invisible="not google_calendar_installed">
+                            <field name="cal_sync_paused"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

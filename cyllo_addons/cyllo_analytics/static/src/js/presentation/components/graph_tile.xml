@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="GraphTile">
+        <div t-attf-id="elem_{{ state.rec_id }}"
+             t-att-class="props.toggleClass"
+             class="card cp mr-1 mt-1 align-items-stretch cy_tile cy_dashboard_chart"
+             t-att-style="(props.width ? 'width: ' + props.width + ';' : '') + (state.cardStyle ? ' ' + state.cardStyle : '')"
+             t-on-click.prevent.stop="onClickChart"
+             t-on-dblclick="onDblClickChart">
+            <div t-if="props.item?.name || props.value?.name || state.name"
+                 class="sheet-header"
+                 t-att-class="{'cy-creator-mode': props.isCreator}">
+                <div class="sheet-title" t-esc="props.name || props.item?.name || props.value?.name || state.name"></div>
+                <div class="position-relative d-flex align-items-center gap-1">
+                    <t t-if="state.hasData" t-slot="ai-footer"/>
+                    <t t-if="props.footer" t-slot="footer"></t>
+                </div>
+            </div>
+            <div t-ref="root" class="cy-analytics-gt-chart-root" t-att-style="state.style || ''"></div>
+
+            <!-- Inline Annotation Overlay — appears on double-click of a chart point -->
+            <t t-if="state.showAnnotation">
+                <div class="position-absolute bg-white border cy-graph-annotation shadow rounded p-3 cy-analytics-gt-annotation-overlay">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted fw-bold cy-analytics-gt-annotation-label" t-esc="state.annotationLabel"/>
+                    </div>
+                    <textarea class="form-control cy-sidebar-input form-control-sm mb-2 cy-analytics-gt-annotation-textarea"
+                              rows="3"
+                              placeholder="Type your context / insight here..."
+                              t-model="state.annotationNote"
+                              t-on-click.stop="() => {}"/>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-sm btn-secondary" t-on-click.stop="closeAnnotation">Cancel</button>
+                        <button class="btn btn-sm btn-primary" t-on-click.stop="saveAnnotation">
+                            <i class="fa fa-save me-1"/>Save Note
+                        </button>
+                    </div>
+                </div>
+            </t>
+
+
+            <!-- Color Reference Panel -->
+            <t t-if="state.showColorGuide">
+                <div class="position-absolute border rounded p-2 cy-analytics-gt-color-guide">
+                    <div class="fw-bold mb-2 border-bottom pb-1 d-flex justify-content-between align-items-center cy-analytics-gt-color-guide-title">
+                        <span>Color Reference</span>
+                        <i class="fa fa-times cp cy-analytics-gt-color-guide-close" t-on-click.stop="toggleColorGuide"/>
+                    </div>
+                    <t t-set="all_mappings" t-value="props.value?.color_mappings || props.item?.color_mappings || []"/>
+                    <t t-foreach="all_mappings" t-as="m" t-key="m_index">
+                         <div class="d-flex align-items-center mb-1 py-1">
+                             <div class="cy-analytics-gt-color-swatch" t-attf-style="background: {{m.color}};"></div>
+                             <div class="text-truncate cy-analytics-gt-color-swatch-label">
+                                 <t t-esc="m.measure_alias"/>: <t t-esc="m.min_value"/>-<t t-esc="m.max_value || '+'"/>
+                             </div>
+                         </div>
+                    </t>
+                </div>
+            </t>
+
+            <!-- Floating Palette Button -->
+            <div class="cy-analytics-gt-palette-btn-wrapper">
+                <t t-if="props.value?.color_mappings?.length or props.item?.color_mappings?.length">
+                    <button t-on-click.stop="toggleColorGuide" class="btn cy-analytics-gt-palette-btn">
+                        <i class="ri-sip-line cy-analytics-gt-palette-icon"/>
+                    </button>
+                </t>
+            </div>
+
+            <t t-if="state.hasData and showZoom" t-slot="zoom-footer">
+                <div class="cy-zoom-widget" t-att-class="{ 'cy-zoom-widget--dark': props.isDarkMode }">
+                    <div t-if="state.showZoom" class="cy-zoom-pct">
+                        <t t-out="state.zoom"/>%
+                    </div>
+                    <div class="cy-zoom-pill">
+                        <button class="cy-zoom-btn" t-on-click.stop="() => this.zoom('in')" title="Zoom in">
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <div class="cy-zoom-divider"/>
+                        <button class="cy-zoom-btn" t-on-click.stop="() => this.zoom('out')" title="Zoom out">
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 5h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

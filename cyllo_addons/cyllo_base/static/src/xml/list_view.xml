@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.ListView" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-component='props.Renderer']" position="after">
+            <t t-if="is_split_view &amp;&amp; state.currentSelectedId">
+                <div class="cy_split_view col-6" t-ref="split-form-parent"
+                     style="height: -webkit-fill-available; flex: 0 0 50%; width: 50%; min-width: 50%; max-width: 50%;">
+                    <div data-role="splitter" class="h-100 overflow-auto"
+                         t-attf-style="border-left: solid #D9D9D9; border-left-width: 1.5px;">
+                        <i class="ri-close-line cy-split-close"
+                           t-on-click="closeSplit"
+                           style="font-size: 25px; cursor: pointer;"
+                           onmouseover="this.style.color='red';"
+                           onmouseout="this.style.color='';"/>
+                        <SplitFormHost viewProps="SpiltFormView"
+                              t-key="state.currentSelectedId"/>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </t>
+    <t t-inherit="web.ListRenderer" t-inherit-mode="extension" owl="1">
+        <xpath t-if="env.config.viewType =='list'"
+               expr="//div[hasclass('o_list_renderer')]" position="attributes">
+            <attribute name="t-attf-style"
+                       add="{{ spil.split_view_enable ? 'flex: 1 1 0; min-width: 0; overflow-x: auto;' : '' }}"
+                       separator=" "/>
+        </xpath>
+    </t>
+    <t t-inherit="web.ListView.Buttons" t-inherit-mode="extension" owl="1">
+        <xpath expr="//button[hasclass('o_list_button_save')]"
+               position="attributes">
+            <attribute name="class" add="d-none" separator=" "/>
+        </xpath>
+        <xpath expr="//button[hasclass('o_list_button_discard')]"
+               position="attributes">
+            <attribute name="class" add="d-none" separator=" "/>
+        </xpath>
+    </t>
+</templates>

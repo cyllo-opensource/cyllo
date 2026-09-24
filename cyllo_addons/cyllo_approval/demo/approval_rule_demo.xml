@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="approval_rule_demo_partner_button" model="approval.rule">
+        <field name="name">Partner Approval Rule</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="rule_type">button</field>
+        <field name="sequence">10</field>
+        <field name="approval_line_ids" eval="[
+            Command.create({'sequence': 10, 'name': 'Manager', 'user_id': ref('base.user_admin')}),
+            Command.create({'sequence': 20, 'name': 'Direction', 'group_id': ref('cyllo_approval.group_approval_manager')}),
+        ]"/>
+        <field name="domain">[]</field>
+        <field name="is_comment">1</field>
+        <field name="is_email">0</field>
+    </record>
+</odoo>

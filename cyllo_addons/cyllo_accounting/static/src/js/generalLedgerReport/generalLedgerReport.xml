@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="GeneralLedgerReport" t-inherit="cyllo_accounting.AccountingReportBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('cy_div-table-body_sheet')]" position="attributes">
+            <attribute name="class" add="gl-div-container-scroll" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_accounting_filters_sub')]" position="inside">
+            <t t-call="generalLedgerHeader"/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy_table_main-view')]" position="inside">
+            <div>
+                <div class="table_view_gl">
+                    <div>
+                        <div class="table_main_view">
+                            <table class="cy_accounting_report_table" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr class="o_heading">
+                                        <th colspan="6"/>
+                                        <th>Date</th>
+                                        <th>Communication</th>
+                                        <th>Partner</th>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="gn_tbody">
+                                    <t t-foreach="records" t-as="account" t-key="account_index">
+                                        <ReportDropdownWithPager
+                                                t-props="reportDropdownProps"
+                                                account="account"
+                                        />
+                                    </t>
+                                    <tr class="h-2-rem cy-report-line-acc">
+                                        <th/>
+                                        <th colspan="8" class="cy_o_heading">
+                                            Total
+                                        </th>
+                                        <th class="cy_o_heading">
+                                            <t t-out="currencySymbol"/>
+                                            <span class="mx-1" t-out="grandTotal.totalDebit.toLocaleString()"/>
+                                        </th>
+                                        <th class="cy_o_heading">
+                                            <t t-out="currencySymbol"/>
+                                            <span class="mx-1" t-out="grandTotal.totalCredit.toLocaleString()"/>
+                                        </th>
+                                        <th class="cy_o_heading">
+                                            <t t-out="currencySymbol"/>
+                                            <span class="mx-1" t-out="grandTotal.grandTotal.toLocaleString()"/>
+                                        </th>
+                                    </tr>
+                                    <tr class="h-2-rem"/>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+    <t t-name="parentGeneralLedger">
+        <tr t-on-click="onClickParent"
+            class="h-2-rem border-bottom border-gainsboro cy-report-line-acc on-hover-show">
+            <t t-set="sumAccount" t-value="props.sumRecords[props.account]"/>
+            <th>
+                <div class="ms-3 collapsed">
+                    <a class="btn header o_heading">
+                        <span class="toggle-icon" >
+                            <i t-att-class="caretDropdown"/>
+                        </span>
+                        <span t-attf-class="{{ state.showChildren and 'report-fw-bold'}}" class="mx-2" t-out="props.account"/>
+                    </a>
+                </div>
+            </th>
+            <th colspan="5">
+                <button class="btn btn-outline-primary btn-sm mb-1 mt-1"
+                        t-on-click.stop.prevent="() => this.props.gotoJournalItem(sumAccount[0]?.account_id, props.account)">
+                    Journal Items
+                </button>
+            </th>
+            <th/>
+            <th/>
+            <th/>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="sumAccount[0]?.total_debit.toLocaleString() || 0"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="sumAccount[0]?.total_credit.toLocaleString() || 0"/>
+                </span>
+            </th>
+            <th>
+                <span class="fw-bolder">
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1"
+                          t-out="((sumAccount[0]?.total_debit || 0) - (sumAccount[0]?.total_credit || 0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                </span>
+                <sup class="cy_report_info mx-1 position-relative">
+                    <span t-if="pager.total > 100" class="cy_report_info_ques position-absolute" title="The total presented represents the cumulative sum of all move lines, inclusive of those beyond the current page of pagination.">
+                        ?
+                    </span>
+                </sup>
+            </th>
+        </tr>
+    </t>
+    <t t-name="childGeneralLedger">
+        <tr t-if="pager.total > 100" class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+            <th t-foreach="Array(7)" t-as="th" t-key="th_index"/>
+            <th colspan="6">
+                <div class="d-flex justify-content-end me-3 p-0">
+                    <Pager total="pager.total"
+                           offset="pager.offset"
+                           limit="pager.limit"
+                           isEditable="false"
+                           onUpdate.bind="onPagerChanged"/>
+                </div>
+            </th>
+        </tr>
+        <tr t-if="pager.offset === 0" class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+            <th colspan="6"><span class="mx-4 fw-bold">Initial Balance</span></th>
+            <th/>
+            <th/>
+            <th/>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="(pager.opening_debit || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="(pager.opening_credit || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                </span>
+            </th>
+            <th>
+                <span class="fw-bold">
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="(pager.opening_balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                </span>
+            </th>
+        </tr>
+        <tr t-foreach="props.records[props.account]" t-as="record" t-key="record_index"
+            class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+            <th colspan="6" class="annotate_header">
+                <div class="mx-4 d-flex">
+                    <span class="d-flex gap-3" t-out="record.move_name"/>
+                    <t t-set="annotation"
+                       t-value="record.annotations and record.annotations.hasOwnProperty(this.props.ledgerId) ? record.annotations[this.props.ledgerId] : ''"/>
+                    <Dropdown class="'border_unset_button'">
+                        <t t-set-slot="toggler">
+                            <span class="mx-2 fa fa-caret-down"/>
+                        </t>
+                        <DropdownItem onSelected="() => this.props.openJournal(record.move_id, record.move_name)">
+                            View Entry
+                        </DropdownItem>
+                        <DropdownItem
+                                onSelected="() => this.props.openAnnotation(record.id, annotation, props.account)">
+                            Annotation
+                        </DropdownItem>
+                    </Dropdown>
+                    <div t-on-click="() => this.props.openAnnotation(record.id, annotation, props.account)"
+                         t-if="annotation" class="mx-2 cursor-pointer position-relative">
+                        <div class="cy-annotation-tooltip">
+                            <span class="ri-ball-pen-line"/>
+                        </div>
+                        <div class="cy-annotation-tooltip-content justify-content-around modal_background position-absolute"
+                             t-out="annotation"/>
+                    </div>
+                    <div class="mx-1 delete-on-h-show ri-delete-bin-6-line on-h-red cursor-pointer" t-if="annotation"
+                         t-on-click="() => this.props.removeAnnotation(record.id, props.account)" title="Remove Annotation"/>
+                </div>
+            </th>
+            <th>
+                <span t-out="record.date"/>
+            </th>
+            <th class="name_desc_class">
+                <span t-out="record.name"/>
+            </th>
+            <th>
+                <span t-out="record.partner_name"/>
+            </th>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="record.debit.toLocaleString() || 0"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="record.credit.toLocaleString() || 0"/>
+                </span>
+            </th>
+            <th>
+                <span t-if="record.balance != null">
+                    <t t-out="props.currencySymbol"/>
+                    <span class="mx-1" t-out="record.balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                </span>
+            </th>
+        </tr>
+    </t>
+
+    <t t-name="generalLedgerHeader">
+        <t t-call="dateRange">
+            <t t-set="dateFilterTemplate" t-value="'toAndFromDateFilter'"/>
+            <t t-set="separateAt" t-value="3"/>
+        </t>
+        <t t-call="journalTemplate"/>
+        <t t-call="analyticAccountTemplate"/>
+        <t t-call="reportExtraOptions"/>
+    </t>
+
+</templates>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Quality Teams -->
+    <record id="quality_team_main" model="quality.team">
+        <field name="name">Main Quality Team</field>
+        <field name="is_mail" eval="False"/>
+    </record>
+
+    <record id="quality_team_packaging" model="quality.team">
+        <field name="name">Packaging Quality Team</field>
+        <field name="is_mail" eval="False"/>
+    </record>
+
+    <!-- Inspection Actions -->
+    <record id="inspection_action_visual" model="inspection.action">
+        <field name="name">Visual Inspection</field>
+    </record>
+
+    <record id="inspection_action_measure" model="inspection.action">
+        <field name="name">Measure Dimensions</field>
+    </record>
+
+    <!-- Quality Control Points -->
+    <record id="quality_control_point_demo_1" model="quality.control.point">
+        <field name="qc_check_for">product</field>
+        <field name="control_type">product</field>
+        <field name="control_by">all</field>
+        <field name="quality_team_id" ref="quality_team_main"/>
+        <field name="product_ids" eval="[(4, ref('product.product_product_4'))]"/>
+        <field name="operation_type_ids" eval="[(4, ref('stock.picking_type_in'))]"/>
+        <field name="quality_inspection_ids" eval="[
+            (0, 0, {
+                'inspection_action_id': ref('inspection_action_visual'),
+                'inspection_type_id': ref('cyllo_quality.inspection_type_pass_fail'),
+                'instruction': 'Verify the product surface is clean and free of scratches.'
+            }),
+            (0, 0, {
+                'inspection_action_id': ref('inspection_action_measure'),
+                'inspection_type_id': ref('cyllo_quality.inspection_type_measure'),
+                'instruction': 'Measure the overall thickness of the panel.',
+                'measure_start': 18.0,
+                'measure_end': 20.0,
+                'unit_id': ref('uom.product_uom_millimeter')
+            })
+        ]"/>
+    </record>
+
+    <record id="quality_control_point_demo_2" model="quality.control.point">
+        <field name="qc_check_for">product</field>
+        <field name="control_type">product</field>
+        <field name="control_by">all</field>
+        <field name="quality_team_id" ref="quality_team_packaging"/>
+        <field name="product_ids" eval="[(4, ref('product.product_product_3'))]"/>
+        <field name="operation_type_ids" eval="[(4, ref('stock.picking_type_in'))]"/>
+        <field name="quality_inspection_ids" eval="[
+            (0, 0, {
+                'inspection_action_id': ref('inspection_action_visual'),
+                'inspection_type_id': ref('cyllo_quality.inspection_type_pass_fail'),
+                'instruction': 'Verify that packaging labels are printed clearly and correctly.'
+            })
+        ]"/>
+    </record>
+
+    <!-- Quality Checks -->
+    <record id="quality_check_demo_1" model="quality.check">
+        <field name="quality_control_id" ref="quality_control_point_demo_1"/>
+        <field name="product_id" ref="product.product_product_4"/>
+        <field name="quality_team_id" ref="quality_team_main"/>
+        <field name="state">todo</field>
+    </record>
+
+    <record id="quality_check_demo_2" model="quality.check">
+        <field name="quality_control_id" ref="quality_control_point_demo_2"/>
+        <field name="product_id" ref="product.product_product_3"/>
+        <field name="quality_team_id" ref="quality_team_packaging"/>
+        <field name="state">todo</field>
+    </record>
+
+</odoo>

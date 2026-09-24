@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="report_help_desk">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page pt-0">
+                    <h2 class="text-center mt-0 mb-4">Helpdesk Ticket</h2>
+                    <div>
+                        <t t-if="category">
+                            Helpdesk Category: <span t-esc="category"/>
+                        </t>
+                        <t t-if="customer">
+                            Customer: <span t-esc="customer"/>
+                        </t>
+                        <t t-if="team">
+                            Team: <span t-esc="team"/>
+                        </t>
+                        <br/>
+                        <t t-if="date_start">
+                            <t t-if="date_end">From Date :
+                                <span t-esc="date_start"/>
+                                <br/>
+                                To Date :
+                                <span t-esc="date_end"/>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            Date :
+                            <span t-esc="current_date"/>
+                        </t>
+                    </div>
+                    <br/>
+                    <table border="1" align="centre" class="table">
+                        <thead>
+                            <tr>
+                                <th>Sl.No</th>
+                                <th>Helpdesk Ticket Name</th>
+                                <th>Customer</th>
+                                <th>Category</th>
+                                <th>Stage</th>
+                                <th>Team</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="helpdesk_ticket_data" t-as="i">
+                                <tr>
+                                    <td>
+                                        <span t-esc="i_index+1"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="i['name']"/>
+                                    </td>
+                                        <td>
+                                            <t t-esc="i['customer']"/>
+                                        </td>
+                                    <td>
+                                        <t t-esc="i['category']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="i['stage']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="i['team']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="i['date']"/>
+                                    </td>
+                                    <td>
+                                        <t t-out="env['helpdesk.ticket'].browse(i['id']).description"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

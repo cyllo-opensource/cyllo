@@ -1,0 +1,46 @@
+<odoo>
+    <record id="view_inherit_merge_opportunity_form" model="ir.ui.view">
+        <field name="name">Inherit Merge Opportunity Form</field>
+        <field name="model">crm.lead2opportunity.partner</field>
+        <field name="inherit_id" ref="crm.view_crm_lead2opportunity_partner"/>
+        <field name="arch" type="xml">
+            <!-- Add a new button in the footer -->
+            <xpath expr="//footer" position="inside">
+                <button name="action_next_step" type="object" string="Next" class="btn-primary"
+                        invisible="name != 'merge'"/>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_apply']" position="attributes">
+                <attribute name="invisible">name != 'convert'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_crm_lead_duplicate_form" model="ir.ui.view">
+        <field name="name">crm.compare.fields.form</field>
+        <field name="model">crm.compare.fields</field>
+        <field name="arch" type="xml">
+            <form string="Compare CRM Leads">
+                <form string="Choose Values">
+                    <sheet>
+                        <div class="o_record_selection_wizard">
+                            <div>
+                                <h5>Choose the required values in the merged lead</h5>
+                                <field name="duplicate_ids" invisible="True"/>
+                                <field name="dissimilar_field_names">
+                                    <tree editable="bottom" readonly="1" options="{'no_open': True}">
+                                        <field name="name"/>
+                                        <field name="field_values" widget="dropdown_widget"/>
+                                    </tree>
+                                </field>
+                            </div>
+                        </div>
+                    </sheet>
+                    <footer>
+                        <button string="Apply" name="apply_merge" class="btn-primary" type="object"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </form>
+        </field>
+    </record>
+</odoo>

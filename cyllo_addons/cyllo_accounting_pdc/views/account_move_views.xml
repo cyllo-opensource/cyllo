@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_move_form_inherit_pdc" model="ir.ui.view">
+        <field name="name">view.account.move.form.inherit.pdc</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- PDC Payments-->
+            <xpath expr="//button[@name='action_register_payment']"
+                   position="after">
+                <button name="action_register_pdc_payment"
+                        id="account_invoice_pdc_payment_btn"
+                        type="object" class="oe_highlight"
+                        invisible="state != 'posted' or payment_state not in ('not_paid', 'partial') or move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')"
+                        context="{'dont_redirect_to_payments': True, 'display_account_trust': True}"
+                        string="PDC Payment" data-hotkey="g"
+                        groups="account.group_account_invoice"/>
+            </xpath>
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="pdc_payment_id" invisible="1"/>
+                <field name="pdc_reference"
+                       invisible="pdc_payment_id == False"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

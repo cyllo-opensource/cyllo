@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="cyllo_appointment_restaurant.Table"
+       t-inherit="pos_restaurant.Table"
+       t-inherit-mode="extension">
+
+        <!-- Inject the top-left appointment badge BEFORE the label span -->
+        <xpath expr="//span[hasclass('label')]" position="before">
+            <t t-set="firstAppt" t-value="this.getFirstAppointment(props.table)"/>
+            <t t-set="extraCount" t-value="this.getExtraCount(props.table)"/>
+            <div
+                t-if="firstAppt"
+                t-on-click="(ev) => this.onClickAppointment(ev, props.table)"
+                t-attf-class="appt-badge d-flex align-items-center
+                               {{ this.isCustomerLate(props.table) ? 'appt-badge--late' : '' }}"
+            >
+                <!-- Calendar icon -->
+                <span class="appt-badge__icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V9h14v10zM5 7V5h14v2H5z"/>
+                    </svg>
+                </span>
+                <!-- Earliest time -->
+                <span class="appt-badge__time">
+                    <t t-esc="this.getFormattedDate(firstAppt.start_datetime)"/>
+                </span>
+                <!-- +N overflow pill -->
+                <span t-if="extraCount > 0" class="appt-badge__extra">
+                    +<t t-esc="extraCount"/>
+                </span>
+            </div>
+        </xpath>
+
+    </t>
+</templates>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Defines the Action of Budget-->
+    <record id="action_view_budget" model="ir.actions.act_window">
+        <field name="name">Budget</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">budget.budget</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id" ref="view_budget_budget_kanban"/>
+        <field name="context">{'search_default_search_my_budgets': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder no_content_message">
+                Create New Budget..
+            </p>
+        </field>
+    </record>
+    <!--    Defines the Action of Debt-->
+    <record id="action_view_debt" model="ir.actions.act_window">
+        <field name="name">Debt</field>
+        <field name="res_model">debt.management</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+    <!--    Defines the Action of Budget Analysis Report-->
+    <record id="action_view_budget_analysis" model="ir.actions.act_window">
+        <field name="name">Budgets Analysis</field>
+        <field name="res_model">budget.lines</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="view_id" eval="False"/>
+        <field name="context">{'search_default_group_budget_id': True}</field>
+    </record>
+    <!--    Menu-->
+    <menuitem id="menu_budget_categ" name="Budget" sequence="4"
+              groups="group_budget_creation,account.group_account_manager"
+              parent="account.menu_finance"/>
+    <menuitem parent="account.account_reports_management_menu"
+              id="menu_budget_analysis" name="Budget Analysis"
+              action="action_view_budget_analysis" sequence="20"
+              groups="group_budget_creation,account.group_account_manager"/>
+    <menuitem parent="menu_budget_categ" action="action_view_budget"
+              id="menu_budget" name="Budget" sequence="40"/>
+    <menuitem parent="menu_budget_categ" action="action_view_debt"
+              id="menu_debt" name="Debt" sequence="42"/>
+</odoo>

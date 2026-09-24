@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template xml:space="preserve">
+    <!-- Create sticky note template from systray -->
+    <t t-name="StickyNotesSystray" owl="1">
+        <div data-tooltip="Sticky Notes" class="o_sticky_icon cy-systray-parent-class" t-on-click="sticky_note">
+             <div class="toggle-icon o_icon" >
+                 <i id="create_sticky" class="ri-edit-line cy-icons cy-stray-icon-sp" aria-label="Sticky Notes"/>
+             </div>
+            <span t-if="props.nameShow" class="cy-systray-label">
+                Sticky Notes
+            </span>
+        </div>
+        <!-- Portaled to body: this component can now mount inside the
+             systray "more" dropdown (cy-tray__menu ul/li), and StickyNotes
+             is a full page panel, not a dropdown-item — it must not live in
+             DOM that a Bootstrap dropdown can hide/unmount out from under
+             it. -->
+        <t t-if="this.state.isOpen" t-portal="'body'">
+            <StickyNotes/>
+        </t>
+    </t>
+</template>

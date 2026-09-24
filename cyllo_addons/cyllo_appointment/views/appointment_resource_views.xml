@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Resource Form View -->
+    <record id="view_appointment_resource_form" model="ir.ui.view">
+        <field name="name">appointment.resource.form</field>
+        <field name="model">appointment.resource</field>
+        <field name="arch" type="xml">
+            <form string="Resource">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_appointments" type="object"
+                            class="oe_stat_button" icon="fa-calendar">
+                            <field name="appointment_count" widget="statinfo" string="Appointments"/>
+                        </button>
+                    </div>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Resource Name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Details">
+                            <field name="resource_type"/>
+                            <field name="capacity"/>
+                            <field name="location" invisible="resource_type != 'room'"/>
+                            <field name="color" widget="color_picker"/>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Availability">
+                            <field name="working_hours_id"/>
+                        </group>
+                    </group>
+                    <group string="Appointment Types">
+                        <field name="appointment_type_ids" widget="many2many_tags"/>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Enter a description for this resource..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Resource List View -->
+    <record id="view_appointment_resource_list" model="ir.ui.view">
+        <field name="name">appointment.resource.list</field>
+        <field name="model">appointment.resource</field>
+        <field name="arch" type="xml">
+            <tree string="Resources">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="resource_type"/>
+                <field name="capacity"/>
+                <field name="location" optional="show" column_invisible="False"/>
+                <field name="working_hours_id"/>
+                <field name="appointment_count" string="Appointments"/>
+                <field name="active" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Resource Kanban View -->
+    <record id="view_appointment_resource_kanban" model="ir.ui.view">
+        <field name="name">appointment.resource.kanban</field>
+        <field name="model">appointment.resource</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="name"/>
+                <field name="resource_type"/>
+                <field name="capacity"/>
+                <field name="color"/>
+                <field name="appointment_count"/>
+                <field name="image"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="apt-resource-card oe_kanban_global_click">
+                            <div class="apt-resource-img">
+                                <img t-if="record.image.raw_value"
+                                    t-attf-src="/web/image/appointment.resource/{{record.id.raw_value}}/image"
+                                    t-att-alt="record.name.value"
+                                    class="o_image_64_max"/>
+                                <div t-else="" class="apt-resource-icon">
+                                    <i t-attf-class="fa fa-#{record.resource_type.raw_value == 'room' ? 'building' : record.resource_type.raw_value == 'equipment' ? 'wrench' : record.resource_type.raw_value == 'vehicle' ? 'car' : 'cube'} fa-2x" title="Resource Type"/>
+                                </div>
+                            </div>
+                            <strong><t t-esc="record.name.value"/></strong>
+                            <div class="text-muted small">
+                                <span class="badge badge-secondary"><t t-esc="record.resource_type.value"/></span>
+                                <span class="ml-1"><i class="fa fa-users"/> <t t-esc="record.capacity.value"/></span>
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge badge-info"><t t-esc="record.appointment_count.value"/> appointments</span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_appointment_resource" model="ir.actions.act_window">
+        <field name="name">Resources</field>
+        <field name="res_model">appointment.resource</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add your first resource!</p>
+            <p>Manage rooms, equipment, and other bookable resources.</p>
+        </field>
+    </record>
+</odoo>

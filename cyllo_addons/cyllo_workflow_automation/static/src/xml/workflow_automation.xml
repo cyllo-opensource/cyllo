@@ -1,0 +1,702 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Template for the Advanced Dashboard -->
+<templates id="template" xml:space="preserve">
+	<t t-name="client_action.automation_view">
+		<div class="cy-w-main-container">
+			<t t-if="state.saveLoading">
+			<SaveLoading message="'Building Your Workflow'"
+                         image="'cyllo_workflow_automation/static/src/img/building_flow/Building-flow.svg'"/>
+		</t>
+            <div class="cy-w-main-nav">
+<!--				Workflow Navbar-->
+                <div class="cy-draw-board-controls d-flex align-items-center justify-content-between" style="padding: 7px 7px 7px 5px;">
+                    <div class="work-auto-buttons d-flex align-items-center gap-3">
+						<div class="work-auto-inner-icons d-flex align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+
+									<a class="cy-menu_icon"  data-hotkey="b" t-on-click="handleClickBack">
+                                        <i class="ri-arrow-left-s-line"
+                                           style="font-size: 22px;color: #4d5572;"
+                                           title="Go Back"/>
+									</a>
+								<div class="d-flex" style="gap: 14px !important; position: relative;">
+									<a class="btn btn-primary d-flex align-items-center gap-1"
+									    data-hotkey="c"
+                                   t-on-click="() => this.onClickNewRule()">
+								<i class="ri-add-line" title="New Record"
+                                   style="font-size: 14px !important;margin: 0px !important;color: #ffffff !important;"/>
+										<div class="d-flex align-items-center">
+											New
+										</div>
+							</a>
+									<div>
+										<input
+                                        data-hotkey="f"
+                                        t-ref="inputNameRef"
+                                        type="text"
+                                        name="name"
+                                        id="cy-w-auto-name-input"
+                                        placeholder="Name"
+                                        class="cy-w-auto-name-text cy-w-o-input"
+                                        t-att-value="state.name"
+                                        t-on-input="(ev) => this.updateName(ev.target.value)"
+                                        autocomplete="off"/>
+									</div>
+								</div>
+							</div>
+						</div>
+                    </div>
+                    <div class="work-auto-buttons work-save-container d-flex gap-1">
+                        <div class="d-flex gap-2">
+                             <a t-if="state.canUndo"
+                                class="btn btn-secondary d-flex align-items-center gap-1"
+                                t-on-click="undo"
+                                title="Undo (Ctrl+Z)">
+                                <i class="ri-arrow-go-back-line"/>
+                            </a>
+                            <a t-if="state.canRedo"
+                                class="btn btn-secondary d-flex align-items-center gap-1"
+                                t-on-click="redo"
+                                title="Redo (Ctrl+Shift+Z)">
+                                <i class="ri-arrow-go-forward-line"/>
+                            </a>
+                            <a class="btn btn-secondary d-flex align-items-center gap-1"
+							    data-hotkey="x"
+                               t-on-click.prevent="clearModuleSelected">
+                                <i class="ri-eraser-line"
+                                   style="font-size: 14px !important;padding-bottom: 1px;"/>
+								<div class="d-flex align-items-center">
+											Clear
+										</div>
+							</a>
+                            <!-- Reusable toggle: marks this automation as callable from Reuse Automation nodes -->
+                            <a t-att-class="'btn d-flex align-items-center gap-1 ' + (state.isReusable ? 'btn-success' : 'btn-outline-secondary')"
+                               t-on-click="toggleReusable"
+                               t-att-title="state.isReusable ? 'Marked as Reusable - click to disable' : 'Click to mark as Reusable'">
+                                <i t-att-class="'ri-loop-' + (state.isReusable ? 'right' : 'left') + '-line'"/>
+                                <div class="d-flex align-items-center">
+                                    <t t-if="state.isReusable">Reusable</t>
+                                    <t t-else="">Reusable</t>
+                                </div>
+                            </a>
+                            <a t-att-class="'btn d-flex align-items-center gap-1 cy-test-trigger ' + (state.testRunning ? 'btn-secondary disabled' : 'btn-outline-primary')"
+                               t-on-click="onTestWorkflow">
+                                <i class="ri-flask-line"/>
+                                <div class="d-flex align-items-center">Test Workflow</div>
+                            </a>
+                            <a t-if="canShowSaveButton" class="btn btn-primary d-flex align-items-center gap-1" data-hotkey="s" t-att-class="saveClass" t-on-click="onSave">
+								<i class="ri-save-3-line"/>
+                                <div class="d-flex align-items-center">Save</div>
+							</a>
+						</div>
+                        <WorkPager recordList="recordList" currentRecord="currentRecord" update.bind="(navigateId)=>this.navigatePage(navigateId)"/>
+                    </div>
+                </div>
+			</div>
+            <div class="cy-work-main automation">
+<!--				Workflow Sidebar-->
+                <div class="cy_w_sidebar">
+					<div class="w_nav w_nav-tabs w_nav-tabs2" id="myTab" role="tablist">
+						<div class="w_nav-item">
+							<div t-attf-class="w_nav-link #{state.block ? 'active': ''}"
+                                 t-on-click="() => this.selectTab('block')">
+							   Blocks
+							</div>
+						</div>
+                        <div class="w_nav-item">
+							<div t-attf-class="w_nav-link #{state.block ? '': 'active'}"
+                                 t-on-click="() => this.selectTab('variable')">
+							Variables
+							</div>
+						</div>
+					</div>
+                    <t t-if="state.block">
+						<div class="cy-w-tab-content" t-if="!state.customTrigger" t-ref="mainBlk" id="myTabContent">
+                        <!-- Generic Mode banner: shown when automation has no fixed model -->
+                        <div t-if="state.isGenericReusable" class="alert alert-warning mx-3 mt-3 mb-2 py-2 px-3 small">
+                            <strong><i class="ri-global-line me-1"/>Generic Mode</strong> &#x2014; No object required.
+                            This automation works with any model passed by the calling workflow.
+                        </div>
+							<div class="form-group px-3 pt-3 mb-3" t-if="!state.isGenericReusable"
+                                 t-attf-class="#{model_blk? '': ' cy_w_disabled'}">
+								<label class="form-label  cy-modal-form_label">
+									<h6>Model</h6>
+								</label>
+                                <div class="form-control cy-w-select"
+                                     t-attf-class=" {{model_blk? 'glowing-border':'' }}"
+                                     data-node="model"
+                                     data-type="model">
+									<Many2XAutocomplete
+                                            resModel="'ir.model'"
+                                            getDomain="getDomain"
+                                            fieldString="'Models'"
+                                            activeActions="{}"
+                                            update.bind="onSelectPrimary"
+                                            value="state.model"
+                                            context="{'id':state.model_id}"
+                                            placeholder="'Choose a model'"/>
+								</div>
+							</div>
+                            <div id="accordion">
+								<div t-attf-class="w_card #{trigger_blk? ' ': ' cy_w_disabled'} ">
+									<div class="trigger w_card-header" data-bs-toggle="collapse"
+                                         data-bs-target="#trigger_blocks">
+										<h5 class="mb-0">
+											<button class="work_btn btn btn-link" data-toggle="collapse"
+                                                    data-target="#collapseOne"
+                                                    aria-expanded="true" aria-controls="collapseOne">
+												<span>
+													<img draggable="false"
+                                                         src="cyllo_workflow_automation/static/src/img/Group(2).svg"
+                                                         alt=""/>
+                                                    Trigger
+                                                    Blocks
+												</span>
+                                                <i class="fa fa-angle-down "/>
+											</button>
+										</h5>
+									</div>
+                                    <div class="collapse" id="trigger_blocks">
+                                        <div class="card-body cy_w_sidebar_btn">
+                                            <t t-foreach="triggerActions" t-as="action" t-key="action.id">
+												<t t-if="!action.model_id || action.model_id[0] === state.model_id">
+                                            <div t-att-class="'collapse_btn' + (isTriggerUsed(action) ? ' cy_w_disabled' : '')"
+                                                 t-on-dragstart="(ev) => this.dragStartTrigger(ev, action)"
+                                                 draggable="true"
+                                                 t-attf-data-node="{{action.name}}"
+                                                 t-attf-data-action="{{action.id}}"
+                                                 t-att-data-trigger_type="action.trigger_type"
+                                                 data-type="trigger">
+														<t t-if="action.icon">
+															<img draggable="false"
+                                                                 t-att-src="'data:image/svg+xml;base64,' + action.icon"
+                                                                 alt="Action Icon"
+                                                                 class="action-icon"/>
+														</t>
+                                                        <t t-else="">
+															<img draggable="false"
+                                                                 src="cyllo_workflow_automation/static/src/img/trigger/Vector (8).svg"
+                                                                 alt="Default Icon"
+                                                                 class="action-icon"/>
+														</t>
+                                                        <p t-esc="action.name"/>
+													</div>
+												</t>
+											</t>
+                                            <div id="cy_w_cr_trigger" t-attf-class="collapse_btn #{state.isGenericReusable ? 'cy_w_disabled' : ''}"
+                                                 style="border: 2px dotted #9ea70075;"
+                                                 t-att-draggable="state.isGenericReusable ? 'false' : 'true'"
+                                                 t-attf-data-node=""
+                                                 t-attf-data-action=""
+                                                 data-type="trigger"
+                                                 t-att-title="state.isGenericReusable ? 'Create Trigger requires a specific model and is not available in generic reusable automations' : ''"
+                                                 t-on-click="onCreateTrigger">
+                                                <i class="ri-add-circle-fill"></i>
+                                                <p>Create Trigger</p>
+                                            </div>
+										</div>
+									</div>
+								</div>
+                                <div t-attf-class="w_card #{other_blk? ' ': 'cy_w_disabled'}">
+										<div class="w_card-header" data-bs-toggle="collapse"
+                                             data-bs-target="#orm-blocks">
+											<h5 class="mb-0">
+												<button class="work_btn btn btn-link" data-toggle="collapse"
+                                                        data-target="#collapseOne"
+                                                        aria-expanded="true" aria-controls="collapseOne">
+													<span>
+														<img draggable="false"
+                                                             src="cyllo_workflow_automation/static/src/img/data-stroke-1.svg"
+                                                             alt=""/>
+                                                        Builtin Blocks
+													</span>
+                                                    <i class="fa fa-angle-down "/>
+												</button>
+											</h5>
+										</div>
+                                    <div class="collapse" id="orm-blocks">
+										<div class="card-body cy_w_sidebar_btn">
+                                            <div class="collapse_btn"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'create')"
+                                                 draggable="true" data-node="Create">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/trigger/Vector (8).svg"
+                                                     alt=""/>
+                                                <p>Create</p>
+                                            </div>
+                                            <div class="collapse_btn "
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'search')"
+                                                 draggable="true" data-node="Search">
+												<img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/search.svg"
+                                                     alt=""/>
+                                                <p>Search</p>
+											</div>
+                                            <div class="collapse_btn"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'write_action')"
+                                                 draggable="true" data-node="Write">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/trigger/Vector (9).svg"
+                                                     alt=""/>
+                                                <p>Write</p>
+                                            </div>
+										</div>
+									</div>
+								</div>
+                                <div t-attf-class="w_card #{other_blk? ' ': 'cy_w_disabled'}">
+								<div t-attf-class="w_card-header #{other_blk? ' ': 'cy_w_disabled'}"
+                                     data-bs-toggle="collapse"
+                                     data-bs-target="#logic-blocks">
+									<h5 class="mb-0">
+										<button class="work_btn btn btn-link" data-toggle="collapse"
+                                                data-target="#collapseOne"
+                                                aria-expanded="true" aria-controls="collapseOne">
+											<span>
+												<img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/puz-strok1.svg"
+                                                     alt=""/>
+                                                Logic Blocks
+											</span>
+                                            <i class="fa fa-angle-down "/>
+										</button>
+									</h5>
+								</div>
+                                    <div class="collapse" id="logic-blocks">
+										<div class="card-body cy_w_sidebar_btn">
+											<div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'condition')"
+                                                 data-node="Condition">
+												<img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/condition-cyllo.svg"
+                                                     alt=""/>
+                                                <p>Condition</p>
+											</div>
+                                        <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'loop')"
+                                                 data-node="Loop">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/iteration.svg"
+                                                     alt=""/>
+                                                <p>Loop</p>
+                                        </div>
+                                        </div>
+								    </div>
+							    </div>
+                                <div t-attf-class="w_card #{other_blk? ' ': 'cy_w_disabled'}">
+									<div t-attf-class="w_card-header #{other_blk? ' ': 'cy_w_disabled'}"
+                                         data-bs-toggle="collapse"
+                                         data-bs-target="#functional-blocks">
+										<h5 class="mb-0">
+											<button class="work_btn btn btn-link" data-toggle="collapse"
+                                                    data-target="#collapseOne"
+                                                    aria-expanded="true" aria-controls="collapseOne">
+												<span>
+													<img draggable="false"
+                                                         src="cyllo_workflow_automation/static/src/img/function 2.svg"
+                                                         alt=""/>
+                                                    Functional Blocks
+												</span>
+                                                <i class="fa fa-angle-down "/>
+											</button>
+										</h5>
+									</div>
+                                    <div class="collapse" id="functional-blocks">
+                                        <div class="card-body cy_w_sidebar_btn">
+                                            <div t-attf-class="collapse_btn #{state.isGenericReusable ? 'cy_w_disabled' : ''}"
+                                                 t-att-draggable="state.isGenericReusable ? 'false' : 'true'"
+                                                 t-on-dragstart="(ev) => this.dragStartButtonClick(ev)"
+                                                 data-node="Button Click"
+                                                 t-att-title="state.isGenericReusable ? 'Button Click requires a specific model and is not available in generic reusable automations' : ''">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/click.svg"
+                                                     alt=""/>
+                                                <p>Button Click</p>
+                                            </div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'code')"
+                                                 data-node="Code">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/code-box-line.svg"
+                                                     alt=""/>
+                                                <p>Code</p>
+                                            </div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'warning')"
+                                                 data-node="Warning">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/warning.svg"
+                                                     alt=""/>
+                                                <p>Warning</p>
+                                            </div>
+                                            <t t-if="!isFieldChangeTrigger">
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'follower')"
+                                                 data-node="Follower">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/add-followers.svg"
+                                                     alt=""/>
+                                                <p>Follower</p>
+                                            </div>
+                                            </t>
+                                            <t t-if="!isFieldChangeTrigger">
+                                            <div class="collapse_btn"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'mail')"
+                                                 draggable="true" data-node="Mail">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/mail.svg"
+                                                     alt=""/>
+                                                <p>Mail</p>
+                                            </div>
+                                            </t>
+                                            <t t-if="!isFieldChangeTrigger">
+                                            <div class="collapse_btn"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'SMS')"
+                                                 draggable="true" data-node="SMS">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/sms.svg"
+                                                     alt=""/>
+                                                <p>SMS</p>
+                                            </div>
+                                            </t>
+                                            <t t-if="state.hasWhatsappModule and !isFieldChangeTrigger">
+                                            <div class="collapse_btn"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'whatsapp')"
+                                                 draggable="true" data-node="WhatsApp">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/whatsapp.svg"
+                                                     alt=""/>
+                                                <p>WhatsApp</p>
+                                            </div>
+                                            </t>
+                                            <t t-if="!isFieldChangeTrigger">
+                                            <div class="collapse_btn"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'SMS')"
+                                                 draggable="true" data-node="Activity">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/activity.svg"
+                                                     alt=""/>
+                                                <p>Activity</p>
+                                            </div>
+                                            </t>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'reuseAutomation')"
+                                                 data-node="Reuse Automation">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/Map.svg"
+                                                     alt=""/>
+                                                <p>Reuse Automation</p>
+                                            </div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'window')"
+                                                 data-node="Window">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/window.svg"
+                                                     alt=""/>
+                                                <p>Window</p>
+                                            </div>
+                                            <div class="collapse_btn "
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'duplicate')"
+                                                 draggable="true" data-node="Duplicate">
+												<img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/duplicate.svg"
+                                                     alt=""/>
+                                                <p>Duplicate</p>
+											</div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'webhook')"
+                                                 data-node="Webhook">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/webhook.svg"
+                                                     alt=""/>
+                                                <p>Webhook</p>
+                                            </div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'try_catch')"
+                                                 data-node="Try Catch"
+                                                 data-type="action_to_do">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/try-catch.svg"
+                                                     alt=""/>
+                                                <p>Try Catch</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Inline Cron Schedule panel – visible only for time-based triggers -->
+                            <t t-if="isTimeTrigger">
+                                <div class="w_card">
+                                    <div class="w_card-header cy-w-trigger-panel" data-bs-toggle="collapse"
+                                         data-bs-target="#cron-settings-panel">
+                                        <h5 class="mb-0">
+                                            <button class="work_btn btn btn-link">
+                                                <span>
+                                                    <i class="ri-time-line" style="margin-right:4px;"/>
+                                                    Cron Schedule
+                                                </span>
+                                                <i class="fa fa-angle-down"/>
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div class="collapse show" id="cron-settings-panel">
+                                        <div class="card-body px-3 py-2">
+
+                                            <!-- Frequency -->
+                                            <div class="form-group mb-2">
+                                                <label class="form-label cy-modal-form_label">Frequency</label>
+                                                <select class="form-control form-select"
+                                                        t-on-change="(ev) => this.onCronFieldChange('time_trigger_mode', ev)">
+                                                    <option value="" t-att-selected="!state.cronMode">-- Choose --</option>
+                                                    <option value="hour" t-att-selected="state.cronMode === 'hour'">Every Hour</option>
+                                                    <option value="day"  t-att-selected="state.cronMode === 'day'">Every Day</option>
+                                                    <option value="week" t-att-selected="state.cronMode === 'week'">Every Week</option>
+                                                    <option value="month" t-att-selected="state.cronMode === 'month'">Every Month</option>
+                                                    <option value="year" t-att-selected="state.cronMode === 'year'">Every Year</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Time of day (12-hour format with AM/PM) -->
+                                            <div class="form-group mb-2">
+                                                <label class="form-label cy-modal-form_label">Time</label>
+                                                <div class="d-flex gap-2">
+                                                    <select class="form-control form-select"
+                                                            t-on-change="(ev) => this.onCronTimePartChange('hour12', ev)">
+                                                        <option value="1" t-att-selected="cronTimeParts.hour12 === 1">01</option>
+                                                        <option value="2" t-att-selected="cronTimeParts.hour12 === 2">02</option>
+                                                        <option value="3" t-att-selected="cronTimeParts.hour12 === 3">03</option>
+                                                        <option value="4" t-att-selected="cronTimeParts.hour12 === 4">04</option>
+                                                        <option value="5" t-att-selected="cronTimeParts.hour12 === 5">05</option>
+                                                        <option value="6" t-att-selected="cronTimeParts.hour12 === 6">06</option>
+                                                        <option value="7" t-att-selected="cronTimeParts.hour12 === 7">07</option>
+                                                        <option value="8" t-att-selected="cronTimeParts.hour12 === 8">08</option>
+                                                        <option value="9" t-att-selected="cronTimeParts.hour12 === 9">09</option>
+                                                        <option value="10" t-att-selected="cronTimeParts.hour12 === 10">10</option>
+                                                        <option value="11" t-att-selected="cronTimeParts.hour12 === 11">11</option>
+                                                        <option value="12" t-att-selected="cronTimeParts.hour12 === 12">12</option>
+                                                    </select>
+                                                    <input type="number" class="form-control"
+                                                           min="0" max="59" step="1"
+                                                           t-att-value="cronTimeParts.minute"
+                                                           t-on-change="(ev) => this.onCronTimePartChange('minute', ev)"/>
+                                                    <select class="form-control form-select"
+                                                            t-on-change="(ev) => this.onCronTimePartChange('ampm', ev)">
+                                                        <option value="AM" t-att-selected="cronTimeParts.ampm === 'AM'">AM</option>
+                                                        <option value="PM" t-att-selected="cronTimeParts.ampm === 'PM'">PM</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Day of week – only for week -->
+                                            <t t-if="state.cronMode === 'week'">
+                                                <div class="form-group mb-2">
+                                                    <label class="form-label cy-modal-form_label">Day of Week</label>
+                                                    <select class="form-control form-select"
+                                                            t-on-change="(ev) => this.onCronFieldChange('time_trigger_weekday', ev)">
+                                                        <option value="0" t-att-selected="state.cronWeekday === '0'">Monday</option>
+                                                        <option value="1" t-att-selected="state.cronWeekday === '1'">Tuesday</option>
+                                                        <option value="2" t-att-selected="state.cronWeekday === '2'">Wednesday</option>
+                                                        <option value="3" t-att-selected="state.cronWeekday === '3'">Thursday</option>
+                                                        <option value="4" t-att-selected="state.cronWeekday === '4'">Friday</option>
+                                                        <option value="5" t-att-selected="state.cronWeekday === '5'">Saturday</option>
+                                                        <option value="6" t-att-selected="state.cronWeekday === '6'">Sunday</option>
+                                                    </select>
+                                                </div>
+                                            </t>
+
+                                            <!-- Day of month – only for month / year -->
+                                            <t t-if="state.cronMode === 'month' or state.cronMode === 'year'">
+                                                <div class="form-group mb-2">
+                                                    <label class="form-label cy-modal-form_label">Day of Month (1–31)</label>
+                                                    <input type="number" class="form-control"
+                                                           min="1" max="31"
+                                                           t-att-value="state.cronDay"
+                                                           t-on-change="(ev) => this.onCronFieldChange('time_trigger_day', ev, 'int')"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- Month – only for year -->
+                                            <t t-if="state.cronMode === 'year'">
+                                                <div class="form-group mb-2">
+                                                    <label class="form-label cy-modal-form_label">Month (1–12)</label>
+                                                    <input type="number" class="form-control"
+                                                           min="1" max="12"
+                                                           t-att-value="state.cronMonth"
+                                                           t-on-change="(ev) => this.onCronFieldChange('time_trigger_month', ev, 'int')"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- Run Now button -->
+                                            <div class="form-group mt-3">
+                                                <button
+                                                    t-att-class="'btn btn-sm w-100 ' + (state.runNowLoading ? 'btn-secondary disabled' : 'btn-outline-success')"
+                                                    t-on-click="onRunNow"
+                                                    t-att-disabled="state.runNowLoading">
+                                                    <i t-att-class="state.runNowLoading ? 'fa fa-spinner fa-spin' : 'ri-play-circle-line'"/>
+                                                    <span class="ms-1">Run Now</span>
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- Inline Watched Field panel – visible only for field_change triggers -->
+                            <t t-if="isFieldChangeTrigger">
+                                <div class="w_card">
+                                    <div class="w_card-header cy-w-trigger-panel" data-bs-toggle="collapse"
+                                         data-bs-target="#field-change-panel">
+                                        <h5 class="mb-0">
+                                            <button class="work_btn btn btn-link">
+                                                <span>
+                                                    <i class="ri-git-branch-line" style="margin-right:4px;"/>
+                                                    Watched Field
+                                                </span>
+                                                <i class="fa fa-angle-down"/>
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div class="collapse show" id="field-change-panel">
+                                        <div class="card-body px-3 py-2">
+                                            <div class="form-group mb-2">
+                                                <label class="form-label cy-modal-form_label">Field to Watch</label>
+                                                <t t-if="state.watchedFieldName">
+                                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                                        <span class="badge bg-primary" t-esc="state.watchedFieldName"/>
+                                                        <a class="text-danger" style="cursor:pointer;"
+                                                           t-on-click="() => this.setWatchedField(false, '')">
+                                                            <i class="ri-close-line"/>
+                                                        </a>
+                                                    </div>
+                                                </t>
+                                                <div class="form-control cy-w-select">
+                                                    <Many2XAutocomplete
+                                                        resModel="'ir.model.fields'"
+                                                        getDomain="() => [['model_id', '=', state.model_id], ['store', '=', true]]"
+                                                        fieldString="'Field'"
+                                                        activeActions="{}"
+                                                        update.bind="(selection) => this.onWatchedFieldSelect(selection)"
+                                                        value="state.watchedFieldName"
+                                                        placeholder="'Choose a field to watch'"/>
+                                                </div>
+                                                <small class="text-muted">
+                                                    The workflow runs whenever this field changes on a record.
+                                                    Use <code>current_record</code> in action nodes to access the triggering record.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+
+						</div>
+                        <div class="cy-w-section-variable" t-if="state.customTrigger">
+							<CustomTrigger t-props="customTriggerProps"/>
+						</div>
+					</t>
+                    <div class="cy-w-section-variable" t-else="">
+						<t t-if="state.selectedVariable">
+							<VariableDetails t-props="variableDetailProps"/>
+						</t>
+                        <t t-else="">
+							<div class="make-variable-container">
+								<div class="make-variable-btn" t-on-click="makeVariable">
+									<span class="icon-wrapper">
+										<i class="ri-add-line"/>
+									</span>
+                                    <span class="btn-text">Make Variable</span>
+								</div>
+							</div>
+
+                            <FoldOut title="'Global Variables'">
+								<div class="variables-list">
+									<t t-foreach="globalVariablesContext" t-as="variable" t-key="variable_index">
+										<VariableItem name="variable.variable_name" type="variable.variable_type"
+                                                      selectVariable.bind="() => this.selectVariable(variable)"/>
+									</t>
+								</div>
+							</FoldOut>
+                            <t t-if="state.variables.length > 0">
+								<FoldOut title="'Flow Variables'">
+									<div class="variables-list">
+										<t t-foreach="state.variables" t-as="variable" t-key="variable_index">
+											<VariableItem
+                                                    name="variable.variable_name"
+                                                    type="variable.variable_type"
+                                                    showEdit="variable.delete"
+                                                    showDelete="variable.delete"
+                                                    edit.bind="() => this.editVariable(variable)"
+                                                    delete.bind="() => this.deleteVariable(variable)"
+                                                    selectVariable.bind="() => this.selectVariable(variable)"
+                                            />
+										</t>
+									</div>
+								</FoldOut>
+							</t>
+                            <t t-if="accessibleVariables.length > 0">
+								<FoldOut title="titleAccessibleVariables">
+									<div class="variables-list">
+										<t t-foreach="accessibleVariables" t-as="variable" t-key="variable_index">
+											<VariableItem name="variable.variable_name" type="variable.variable_type"
+                                                          selectVariable.bind="() => this.selectVariable(variable)"/>
+										</t>
+									</div>
+								</FoldOut>
+							</t>
+						</t>
+					</div>
+				</div>
+
+                <div t-ref="mainBtn" class="flow-diagram">
+					    <!-- Main container for the flow diagram -->
+                    <div t-on-drop="drop" t-on-dragover="allowDrop">
+						<div t-ref="drawBoard" id="drawflow"
+                             t-attf-style="pointer-events:{{this.drawBoardState.edit? 'all' : 'none'}};"/>
+                        <div t-if="state.canvasBusy" class="cy-canvas-busy">
+                            <div class="cy-canvas-busy__card">
+                                <i class="ri-loader-4-line cy-canvas-busy__spinner"/>
+                                <span t-esc="state.canvasBusyMessage"/>
+                            </div>
+                        </div>
+                        <div t-if="state.testRunning" class="cy-test-overlay">
+                            <div class="cy-test-overlay__card">
+                                <i class="ri-loader-4-line cy-test-overlay__spinner"/>
+                                <span>Running test...</span>
+                            </div>
+                        </div>
+                        <div t-if="!drawBoardState.edit &amp;&amp; (!state.testResult || state.testResultMinimized)" class="canvas-locked">
+							<i class="ri-lock-fill"/>
+                            <span>Locked!</span>
+						</div>
+                        <div t-if="!state.testResult || state.testResultMinimized"
+                             t-attf-class="btn-lock position-fixed {{drawBoardState.edit ? '' : 'locked'}}"
+                             t-on-click="changeMode">
+							<i t-if="drawBoardState.edit" class="ri-lock-fill"/>
+                            <i t-else="" class="ri-lock-unlock-fill"/>
+						</div>
+                         <div t-if="!state.testResult || state.testResultMinimized"
+                              class="cy-w-zoom-controls bar-zoom position-fixed">
+                            <button class="cy-w-zoom-button" title="Zoom In" t-on-click="zoomIn"><i style="color:#111;" class="ri-add-line"/></button>
+                            <div class="cy-w-divider"/>
+                            <span class="cy-w-zoom-percent" t-esc="state.zoomPercent or 100 + '%'"/>
+                            <div class="cy-w-divider"/>
+                            <button class="cy-w-zoom-button" title="Zoom Out" t-on-click="zoomOut"><i style="color:#111;" class="ri-subtract-line"/></button>
+                            <div class="cy-w-divider"/>
+                            <button class="cy-w-zoom-button" title="Fit to Screen" t-on-click="zoomReset"><i style="color:#111;" class="ri-focus-3-line"/></button>
+                        </div>
+
+                        <TestResultPanel
+                            visible="state.testResult ? true : false"
+                            minimized="state.testResultMinimized"
+                            summary="state.testResult ? state.testResult.summary : {}"
+                            results="state.testResult ? state.testResult.results : []"
+                            onToggleMinimize.bind="toggleTestResultPanel"
+                        />
+					</div>
+				</div>
+			</div>
+		</div>
+	</t>
+</templates>

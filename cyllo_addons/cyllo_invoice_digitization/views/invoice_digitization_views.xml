@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_invoice_digitization_tree" model="ir.ui.view">
+        <field name="name">view.invoice.digitization.tree</field>
+        <field name="model">invoice.digitization</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="account_type"/>
+                <field name="automation_method"/>
+                <field name="automation_type"/>
+                <field name="active_configuration"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_invoice_digitization_form" model="ir.ui.view">
+        <field name="name">view.invoice.digitization.form</field>
+        <field name="model">invoice.digitization</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h1 class="oe_title">
+                        <field name="name"
+                               placeholder="e.g. vendor bill digitization"/>
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="account_type"/>
+                            <field name="automation_method" widget="radio"/>
+                            <field name="automation_type" widget="radio"/>
+                            <field name="active_configuration"
+                                   widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Invoice Details"
+                              name="invoice_details"
+                              invisible="automation_method != 'manual_digitization'">
+                            <field name="invoice_field_details_ids">
+                                <tree editable="bottom">
+                                    <field name="invoice_field_id"
+                                           string="Fields"/>
+                                    <field name="field_keyword_ids"
+                                           widget="many2many_tags"
+                                           string="Keyword"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Invoice Line Details"
+                              name="invoice_line_details"
+                              invisible="automation_method != 'manual_digitization'">
+                            <field name="invoice_line_field_details_ids">
+                                <tree editable="bottom">
+                                    <field name="invoice_line_field_id"
+                                           string="Fields"/>
+                                    <field name="line_field_keyword_ids"
+                                           widget="many2many_tags"
+                                           string="Keyword"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Tax Details"
+                              name="tax_details"
+                              invisible="">
+                            <group>
+                                <group>
+                                    <field name="tax_type" widget="radio"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Product Creation"
+                              name="product_creation"
+                              invisible="">
+                            <group>
+                                <group>
+                                    <field name="product_creation_type"
+                                           widget="radio"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- actions -->
+    <record id="action_view_invoice_digitization" model="ir.actions.act_window">
+        <field name="name">Invoice Digitization</field>
+        <field name="res_model">invoice.digitization</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_view_invoices" model="ir.actions.act_window">
+        <field name="name">Invoices</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="account.view_out_invoice_tree"/>
+    </record>
+    <record id="action_view_bills" model="ir.actions.act_window">
+        <field name="name">Bills</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="account.view_in_invoice_bill_tree"/>
+    </record>
+    <menuitem id="menu_invoice_digitization_categ"
+              name="Invoice Digitization"
+              parent="cyllo_ocr_digitization.menu_cyllo_ocr_digitization_root"
+              sequence="2"/>
+    <menuitem id="menu_invoice_digitization_config"
+              name="Invoice Digitization Config"
+              parent="cyllo_ocr_digitization.menu_configuration_categ"
+              action="action_view_invoice_digitization"/>
+    <menuitem id="menu_invoices"
+              name="Invoices"
+              parent="menu_invoice_digitization_categ"
+              action="account.action_move_out_invoice_type"/>
+    <menuitem id="menu_bills"
+              name="Bills"
+              parent="menu_invoice_digitization_categ"
+              action="account.action_move_in_invoice_type"/>
+</odoo>

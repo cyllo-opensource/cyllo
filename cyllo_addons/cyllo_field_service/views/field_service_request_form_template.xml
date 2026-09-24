@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Template to add breadcrumbs to field service document -->
+    <template id="portal_my_home_menu_fs_request"
+              name="Portal layout : field_service_request menu entries"
+              inherit_id="portal.portal_breadcrumbs" priority="65">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'fs_requests'"
+                class="breadcrumb-item active">
+                <span>Field Service Request</span>
+            </li>
+            <li t-if="page_name == 'fs_requests_details'"
+                class="breadcrumb-item active">
+                <a t-attf-href="/my/field_service_request" aria-label="Home"
+                   title="Field Service">
+                    <span>Field Service Request</span>
+                </a>
+                <span>/
+                    <em t-out="object.name"/>
+                </span>
+            </li>
+        </xpath>
+    </template>
+    <!--  Table for the content in each stage  -->
+    <template id="portal_field_service_table">
+        <table class="table mt16">
+            <tbody>
+                <t t-foreach="table_content"
+                   t-as="service_request">
+                    <tr>
+                        <td>
+                            <div class="service_request_row">
+                                <div class="row">
+                                    <div class="request_top col-md-8">
+                                        <span class="request-title">
+                                            <h5>
+                                                <a t-att-href="service_request.get_portal_url()"
+                                                   class="service_request_name"
+                                                   t-esc="service_request.name"/>
+                                            </h5>
+                                        </span>
+                                        <span class="service_req_employee mr4">
+                                            Employee:
+                                            <t t-esc="service_request.partner_id.name"/>
+                                        </span>
+                                        <br/>
+                                        <span class="service_req_category">
+                                            Category:
+                                            <t t-esc="service_request.skill_category_id.name"/>
+                                        </span>
+                                        <br/>
+                                        <span class="service_req_category">
+                                            User:
+                                            <t t-esc="service_request.user_id.name"/>
+                                        </span>
+                                        <br/>
+                                    </div>
+                                    <div class="request_content col-md-4">
+                                        <t t-if="service_request.state == 'draft' or service_request.state == 'in_progress' or service_request.state == 'assigned'">
+                                            <span class="badge state_badge text-bg-warning">
+                                                <t t-esc="service_request.state.capitalize()"/>
+                                            </span>
+                                        </t>
+                                        <t t-if="service_request.state == 'submit' or service_request.state == 'completed'">
+                                            <span class="badge state_badge text-bg-success">
+                                                <t t-esc="service_request.state.capitalize()"/>
+                                            </span>
+                                        </t>
+                                        <t t-if="service_request.state == 'cancel'">
+                                            <span class="badge state_badge text-bg-danger">
+                                                Cancelled
+                                            </span>
+                                        </t>
+                                        <div class="o_cyllo_service_date">
+                                            <t t-if="service_request.submit_date">
+                                                <span t-field="service_request.submit_date"
+                                                      class="date"/>
+                                                <span class="img-rounded user_img"
+                                                      t-field="service_request.create_user_avatar"
+                                                      t-att-title="service_request.create_uid.name"
+                                                      t-options="{'widget': 'image', 'class': 'img-rounded create_user_image'}"/>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </t>
+            </tbody>
+        </table>
+    </template>
+    <!-- Template to view records of field service document-->
+    <template id="service_request_template" name="My Field Service Requests">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Field Service Requests</t>
+            </t>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white active"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#all" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">All
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#draft" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Draft
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#submit" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Submit
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#assigned" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Assigned
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#progress" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">In Progress
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#completed" type="button"
+                                    role="tab" aria-controls="profile"
+                                    aria-selected="false">Completed
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-6  d-flex justify-content-end">
+                    <a href="/field_service_request/new"
+                       class="btn btn-primary create_ticket_btn mt24 mb8">
+                        Create Request
+                    </a>
+
+                </div>
+            </div>
+            <div class="tab-content">
+                <t t-set="url" t-value="'/field_service_request/new'"/>
+                <t t-set="description"
+                   t-value="'There are no Field service request yet!'"/>
+                <div id="all" class="tab-pane fade show active w-100"
+                     role="tabpanel">
+                    <t t-call="cyllo_portal.no_record_portal"
+                       t-if="len(fs_request_all) == 0"/>
+                    <t t-set="table_content" t-value="fs_request_all"/>
+                    <t t-call="cyllo_field_service.portal_field_service_table"/>
+                </div>
+                <div id="draft" class="tab-pane fade  w-100" role="tabpanel">
+                    <t t-call="cyllo_portal.no_record_portal"
+                       t-if="len(fs_request_draft) == 0"/>
+                    <t t-set="table_content" t-value="fs_request_draft"/>
+                    <t t-call="cyllo_field_service.portal_field_service_table"/>
+                </div>
+                <div id="submit" class="tab-pane fade  w-100" role="tabpanel">
+                    <t t-call="cyllo_portal.no_record_portal"
+                       t-if="len(fs_request_submit) == 0"/>
+                    <t t-set="table_content"
+                       t-value="fs_request_submit"/>
+                    <t t-call="cyllo_field_service.portal_field_service_table"/>
+                </div>
+                <div id="assigned" class="tab-pane fade  w-100" role="tabpanel">
+                    <t t-call="cyllo_portal.no_record_portal"
+                       t-if="len(fs_request_assigned) == 0"/>
+                    <t t-set="table_content"
+                       t-value="fs_request_assigned"/>
+                    <t t-call="cyllo_field_service.portal_field_service_table"/>
+                </div>
+                <div id="progress" class="tab-pane fade  w-100" role="tabpanel">
+                    <t t-call="cyllo_portal.no_record_portal"
+                       t-if="len(fs_request_in_progress) == 0"/>
+                    <t t-set="table_content" t-value="fs_request_in_progress"/>
+                    <t t-call="cyllo_field_service.portal_field_service_table"/>
+                </div>
+                <div id="completed" class="tab-pane fade  w-100"
+                     role="tabpanel">
+                    <t t-call="cyllo_portal.no_record_portal"
+                       t-if="len(fs_request_completed) == 0"/>
+                    <t t-set="table_content" t-value="fs_request_completed"/>
+                    <t t-call="cyllo_field_service.portal_field_service_table"/>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!-- Template to view details of selected record of field service document -->
+    <template id="fs_service_request_details"
+              name="Field Service Request | My Website"
+              inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <t t-set="employee" t-value="request.env.user.employee_id"/>
+            <t t-set="o_portal_fullwidth_alert">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="url"
+                       t-value="'/field_service_request/#'"/>
+                </t>
+            </t>
+            <t t-set="o_portal_fullwidth_alert" groups="base.group_user">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url"
+                       t-value="'/web#return_label=Website&amp;model=field.service.request&amp;id=%s&amp;' % object.id"/>
+                </t>
+            </t>
+            <div class="row mt16 o_cyllo_portal_sidebar o_portal_fs_service_sidebar">
+                <t t-call="cyllo_portal.cy_portal_record_sidebar"
+                   id="service_portal_sidebar">
+                    <t t-set="classes"
+                       t-value="'col-lg-auto d-print-none'"/>
+                    <t t-set="title">
+                        <h2 t-field="object.name"/>
+                    </t>
+                    <t t-set="entries">
+                        <div class="d-flex flex-column gap-1 order-md-last order-lg-first"
+                             id="advance_salary_sidebar_button">
+                            <div class="d-flex flex-column gap-4"
+                                 t-if="object.state in ['assigned','in_progress','completed']">
+                                <div class="o_download_pdf">
+                                    <a class="btn btn-primary o_print_btn d-block"
+                                       t-att-href="object.get_portal_url(report_type='pdf')"
+                                       id="print_fs_request_report"
+                                       title="View Details" target="_blank">
+                                        <i class="fa fa-print"/>
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-4"
+                                 t-if="(employee and employee.id in object.field_service_worker_ids.mapped('employee_id').ids or request.env.user.has_group('cyllo_field_service.group_cyllo_field_service_manager')) and object.state == 'assigned'">
+                                <div class="o_btn_start_service">
+                                    <button class="btn w-100 btn-secondary o_print_btn d-block"
+                                            id="action_start_service"
+                                            t-att-value="object.id"
+                                            title="Start Service"
+                                            target="_blank">
+                                        <i class="fa fa-play"/>
+                                        Start Service
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-4"
+                                 t-if="(employee and employee.id in object.field_service_worker_ids.mapped('employee_id').ids) and object.state == 'in_progress' and all(obj.status == 'completed' for obj in object.service_checklist_ids if obj.required)">
+                                <div class="o_btn_mark_done">
+                                    <button class="btn w-100 btn-secondary o_print_btn d-block"
+                                            id="action_mark_done"
+                                            t-att-value="object.id"
+                                            title="Mark As Done"
+                                            target="_blank">
+                                        <i class="fa fa-check"/>
+                                        Mark As Done
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="navspy flex-grow-1 ps-0" t-ignore="true"
+                             role="complementary">
+                            <ul class="nav flex-column bs-sidenav"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.create_date">
+                            <small>
+                                <b>Requested Date</b>
+                            </small>
+                            <div t-field="object.create_date"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.company_id">
+                            <h6>
+                                <small class="text-muted">Your contact</small>
+                            </h6>
+                            <div class="o_portal_contact_details d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-start align-items-center gap-2">
+                                    <img t-att-src="'/logo.png?company=%s' % object.company_id.id"
+                                         style="padding: 0px; margin: 0px; height: auto; width: 80px;"
+                                         t-att-alt="'%s' % object.company_id.name"/>
+                                    <div>
+                                        <h6 class="mb-0"
+                                            t-out="object.company_id.name"/>
+                                        <a href="#discussion"
+                                           class="d-flex align-items-center gap-2 small fw-bold">
+                                            Send message
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </t>
+                </t>
+                <div id="quote_content"
+                     class="col-12 col-lg justify-content-end">
+                    <div class="p-3 bg-light">
+                        <h2 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
+                            Request -
+                            <t t-esc="object.name"/>
+                            <span t-if="object.state == 'draft'"
+                                  class="badge text-bg-secondary  state_badge mt-2"
+                                  style="font-size:15px;">
+                                Draft
+                            </span>
+                            <span t-if="object.state == 'in_progress'"
+                                  class="badge text-bg-warning  state_badge mt-2"
+                                  style="font-size:15px;">
+                                In Progress
+                            </span>
+                            <span t-if="object.state == 'assigned'"
+                                  class="badge text-bg-info  state_badge mt-2"
+                                  style="font-size:15px;">
+                                Assigned
+                            </span>
+                            <span t-if="object.state == 'submit'"
+                                  class="badge text-bg-primary  state_badge mt-2"
+                                  style="font-size:15px;">
+                                Submitted
+                            </span>
+                            <span t-if="object.state == 'completed'"
+                                  class="badge text-bg-success  state_badge mt-2"
+                                  style="font-size:15px;">
+                                Resolved
+                            </span>
+                        </h2>
+                        <br/>
+                        <div id="informations" class="row mt-4">
+                            <div id="customer_info"
+                                 class="col-12 col-lg-6 offset-lg-1 ms-auto">
+                                <hr class="my-0"/>
+                                <strong t-field="object.partner_id"/>
+                                <div t-field="object.partner_id"
+                                     t-options="{ 'widget': 'contact', 'fields': [ 'name', 'address', 'phone', 'email']}"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <section id="details" style="page-break-inside: auto;"
+                                 class="mt32 row">
+                            <h3 id="service_details" style="font-size: 20px;">
+                                Service Information
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-2"
+                                 id="service_request_information">
+                                <div class="col-md-3 mb-2"
+                                     t-if="object.partner_id">
+                                    <strong>Partner Name</strong>
+                                    <br/>
+                                    <span t-field="object.partner_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.user_id">
+                                    <strong>User</strong>
+                                    <br/>
+                                    <span t-field="object.user_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.company_id">
+                                    <strong>Company</strong>
+                                    <br/>
+                                    <span t-field="object.company_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.skill_category_id">
+                                    <strong>Category</strong>
+                                    <br/>
+                                    <span t-field="object.skill_category_id"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.create_date">
+                                    <strong>Requested Date</strong>
+                                    <br/>
+                                    <span t-field="object.create_date"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.submit_date">
+                                    <strong>Submitted Date</strong>
+                                    <br/>
+                                    <span t-field="object.submit_date"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.date_deadline">
+                                    <strong>Date Deadline</strong>
+                                    <br/>
+                                    <span t-field="object.date_deadline"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.priority">
+                                    <strong>Priority</strong>
+                                    <br/>
+                                    <span t-field="object.priority"/>
+                                </div>
+                                <div class="col-md-3 mt-2 mb-2"
+                                     t-if="object.sale_order_id">
+                                    <strong>Sale Order</strong>
+                                    <br/>
+                                    <a t-attf-href="/my/orders/{{ object.sale_order_id.id }}">
+                                        <span t-field="object.sale_order_id"/>
+                                    </a>
+                                </div>
+                            </div>
+                        </section>
+                        <section style="page-break-inside: auto;"
+                                 class="mt32 row"
+                                 t-if="object.description">
+                            <h3 id="service_details" style="font-size: 20px;">
+                                Service Description
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-3" style="margin-left:2px;"
+                                 id="service_request_description"
+                                 t-esc="object.description"/>
+                        </section>
+                        <section id="assigned_workers"
+                                 style="page-break-inside: auto;"
+                                 class="mt32 row"
+                                 t-if="object.field_service_worker_ids">
+                            <h3 id="service_details" style="font-size: 20px;">
+                                Service Workers
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-3" style="margin-left:2px;"
+                                 id="service_request_checklist">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Worker</th>
+                                            <th scope="col">Mobile</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-set="sl_no" t-value="1"/>
+                                        <tr t-foreach="object.field_service_worker_ids"
+                                            t-as="worker">
+                                            <th scope="row">
+                                                <t t-esc="sl_no"/>
+                                                <t t-set="sl_no"
+                                                   t-value="sl_no + 1"/>
+                                            </th>
+                                            <td>
+                                                <t t-esc="worker.employee_id.name"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="worker.mobile_number"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                        <section id="check_list"
+                                 style="page-break-inside: auto;"
+                                 class="mt32 row"
+                                 t-if="object.service_checklist_ids">
+                            <h3 id="service_details" style="font-size: 20px;">
+                                Service Checklist
+                            </h3>
+                            <br/>
+                            <div class="row mt-2 mb-3" style="margin-left:2px;"
+                                 id="service_request_checklist">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Service Cost</th>
+                                            <th scope="col">Required</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-set="sl_no" t-value="1"/>
+                                        <tr t-foreach="object.service_checklist_ids"
+                                            t-as="checklist">
+                                            <th scope="row">
+                                                <t t-esc="sl_no"/>
+                                                <t t-set="sl_no"
+                                                   t-value="sl_no + 1"/>
+                                            </th>
+                                            <td>
+                                                <t t-esc="checklist.product_id.name"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="checklist.service_cost"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <i class="fa fa-check text-success"
+                                                   t-if="checklist.required"/>
+                                                <i class="fa fa-times text-danger"
+                                                   t-else=""/>
+                                            </td>
+                                            <td>
+                                                <span t-field="checklist.status"/>
+                                            </td>
+                                            <td t-if="(employee.id in object.field_service_worker_ids.mapped('employee_id').ids) and checklist.status != 'completed' and object.state == 'in_progress'">
+                                                <span class="badge btn badge-pill button_action_done"
+                                                      style="background-color:blue"
+                                                      t-att-id="checklist.id">
+                                                    Mark As Done
+                                                </span>
+                                            </td>
+                                            <td t-else=""/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                        <!--====== Adding Chatter==========-->
+                        <div id="_communication">
+                            <h3>Communication history</h3>
+                            <t t-call="portal.message_thread"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <!-- Field Service Request Form -->
+    <template id="fs_service_request_form" name="Register Field Request">
+        <t t-call="website.layout">
+            <div id="wrap"
+                 class="oe_structure oe_empty o_portal_fs_service_request">
+                <div class="field_service-request_container m-0">
+                    <br/>
+                    <h3 class="heading_align-style d-flex mt-5">
+                        Field Service
+                    </h3>
+                    <br/>
+                    <p class="field_service_description">Submit your field
+                        service requests through our portal for prompt and
+                        efficient assistance.<br/>Our
+                        team will review your request and respond swiftly to
+                        ensure your service needs are met.
+                    </p>
+                </div>
+                <div class="s_col_no_bgcolor container s_allow_columns w-50 property_container_style">
+                    <div class="container mt-4 mb-5 justify-content-center d-flex">
+                        <form action="/fs_service_request/create"
+                              method="post"
+                              enctype="multipart/form-data"
+                              class="o_mark_required field_service-request_form"
+                              data-mark="*" data-model_name=""
+                              data-success-page="">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="partner_id"
+                                           class="field_request-label">
+                                        Partner
+                                    </label>
+                                    <input id="partner"
+                                           type="hidden"
+                                           name="csrf_token"
+                                           t-att-value="request.csrf_token()"
+                                           class="form-control"/>
+                                    <select id="service_partner"
+                                            name="partner_id"
+                                            class="form-control s_website_form_input"
+                                            required="1">
+                                        <t t-if="request.env.user.has_group('base.group_portal')">
+                                            <t t-foreach="partners or []"
+                                               t-as="partner">
+                                                <option t-att-value="partner.id">
+                                                    <t t-esc="partner.name"/>
+                                                </option>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <option/>
+                                            <t t-foreach="partners or []"
+                                               t-as="partner">
+                                                <option t-att-value="partner.id">
+                                                    <t t-esc="partner.name"/>
+                                                </option>
+                                            </t>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="skill_category_id"
+                                           class="field_request-label">
+                                        Category
+                                    </label>
+                                    <select id="skill_category_id"
+                                            name="skill_category_id"
+                                            class="form-control s_website_form_input"
+                                            required="1">
+                                        <option/>
+                                        <t t-foreach="categories or []"
+                                           t-as="category">
+                                            <option t-att-value="category.id">
+                                                <t t-esc="category.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="sale_order_id"
+                                           class="field_request-label">
+                                        Sale Order
+                                    </label>
+                                    <select id="sale_order_id"
+                                            name="sale_order"
+                                            t-attf-class="form-control s_website_form_input">
+                                        <option/>
+                                        <t t-foreach="sale_orders or []"
+                                           t-as="order">
+                                            <option t-att-value="order.id">
+                                                <t t-esc="order.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="date_deadline"
+                                           class="field_request-label">
+                                        Deadline
+                                    </label>
+                                    <input type="date" min="today"
+                                           name="date_deadline"
+                                           class="form-control field_service-request_input"/>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="priority"
+                                           class="field_request-label">
+                                        Priority
+                                    </label>
+                                    <select t-attf-class="form-control s_website_form_input"
+                                            name="priority">
+                                        <option t-attf-value="a">
+                                            Low
+                                        </option>
+                                        <option t-attf-value="b">
+                                            Medium
+                                        </option>
+                                        <option t-attf-value="c">
+                                            High
+                                        </option>
+                                        <option t-attf-value="d">
+                                            Very High
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="description" required="1"
+                                           class="field_request-label">
+                                        Description
+                                    </label>
+                                    <textarea
+                                            class="form-control field_service-request_input"
+                                            id="description" name="description"
+                                            required="1"/>
+                                </div>
+                                <div class="col-12">
+                                    <label for="attachment"
+                                           class="field_request-label">
+                                        Attachments
+                                    </label>
+                                    <br/>
+                                    <input type="file" multiple="true"
+                                           class="file form-control"
+                                           name="attachment_id"
+                                           id="attachment_id"/>
+                                </div>
+                                <div class="d-flex justify-content-left mt-5">
+                                    <button class="btn btn-primary"
+                                            type="submit">Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

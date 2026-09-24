@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Inherit the sale order template and add fields to create plan for subscription orders-->
+    <record id="view_sale_order_template_form" model="ir.ui.view">
+        <field name="name">view.sale.order.template.form.cyllo.subscription
+        </field>
+        <field name="model">sale.order.template</field>
+        <field name="inherit_id"
+               ref="sale_management.sale_order_template_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='mail_template_id']" position="after">
+                <field name="subscription_mail_template_id" string="Email Template" invisible="not is_subscription"
+                required="invoice_creation == 'sent'"/>
+            </xpath>
+            <xpath expr="//field[@name='mail_template_id']" position="attributes">
+                <attribute name="invisible">is_subscription</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button type="object" name="action_order"
+                            class="oe_stat_button"
+                            icon="fa-pencil-square-o"
+                            invisible="not is_subscription">
+                        <field name="order_count" string="Orders"
+                               widget="statinfo"/>
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//group[@name='sale_info']" position="after">
+                <group>
+                    <field name="is_subscription"/>
+                    <field name="customer_can_close"
+                           invisible="not is_subscription"/>
+                    <field name="renewal_request"
+                           invisible="not is_subscription"/>
+                    <field name="invoice_creation"
+                           invisible="not is_subscription"/>
+                </group>
+            </xpath>
+            <xpath expr="/form/sheet/notebook/page/field[@name='sale_order_template_line_ids']/tree/field[@name='name']"
+                   position="after">
+                <field name="product_template_id" column_invisible="1" context="{'default_is_subscription': True}"/>
+            </xpath>
+            <xpath expr="/form/sheet/notebook/page/field[@name='sale_order_template_line_ids']/tree/field[@name='product_id']"
+                   position="attributes">
+                <attribute name="domain">[('is_subscription', '=',
+                    parent.is_subscription)]
+                </attribute>
+                <attribute name="context">{'default_is_subscription': True}</attribute>
+                <attribute name="options">{'no_quick_create': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_sale_order_template_search" model="ir.ui.view">
+        <field name="name">view.sale.order.template.search</field>
+        <field name="model">sale.order.template</field>
+        <field name="inherit_id"
+               ref="sale_management.sale_order_template_view_search"/>
+        <field name="arch" type="html">
+            <xpath expr="//search/filter[@name='inactive']" position="after">
+                <filter string="Subscription" name="is_subscription"
+                        domain="[('is_subscription','=', 1)]"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_view_subscription_plan" model="ir.actions.act_window">
+        <field name="name">Subscription Plan</field>
+        <field name="res_model">sale.order.template</field>
+        <field name="context">
+            {
+                'search_default_is_subscription': 1,
+                'default_is_subscription': True
+            }
+        </field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id"
+               ref="sale_management.sale_order_template_view_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No subscription plan is found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

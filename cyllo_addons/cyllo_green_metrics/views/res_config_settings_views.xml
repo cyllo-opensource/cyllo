@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.carbon</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="90"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Green Metrics" string="Green Metrics" name="cyllo_green_metrics">
+                    <block title="Integration" name="mrp_integration_setting_block">
+                        <setting string="MRP Integration" help="Automatically calculate carbon emissions from Work Order operations.">
+                            <field name="module_cyllo_green_metrics_mrp"/>
+                        </setting>
+                        <setting string="Inventory Integration" help="Automatically calculate carbon emissions from Inventory operations.">
+                            <field name="module_cyllo_green_metrics_stock"/>
+                        </setting>
+                        <setting string="Initiatives" help="Track reduction initiatives using Project.">
+                            <field name="module_cyllo_green_metrics_project"/>
+                        </setting>
+                    </block>
+                    <block title="Fleet Integration" name="fleet_integration_setting_block">
+                        <setting string="Fleet Integration" help="Integrate fleet odometer readings with green metrics.">
+                            <field name="fleet_integration"/>
+                        </setting>
+                        <setting string="Credit Transfer" help="Enable buying and selling environmental credits.">
+                            <field name="enable_credit_transfer"/>
+                        </setting>
+                    </block>
+                    <block title="Allocation" name="allocation_setting_block">
+                        <div class="row">
+                            <setting string="Carbon Cap" help="Max allowed carbon emissions for the selected duration." class="col-lg-6">
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="carbon_duration" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="carbon_duration" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="carbon_cap" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="carbon_cap" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="carbon_unit" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="carbon_unit" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="previous_year_achieved" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="previous_year_achieved" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="targeted_achievement" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="targeted_achievement" class="oe_inline"/>
+                                    </div>
+                                </div>
+                            </setting>
+                            <setting string="Water Cap" help="Max allowed water usage for the selected duration." class="col-lg-6">
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="water_duration" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="water_duration" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="water_cap" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="water_cap" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="water_unit" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="water_unit" class="oe_inline"/>
+                                    </div>
+                                </div>
+                            </setting>
+                        </div>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_carbon_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'cyllo_green_metrics'}</field>
+    </record>
+</odoo>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+    <!-- WhatsappPartnerProfile Template -->
+    <t t-name="WhatsappPartnerProfile" owl="1">
+        <div class="d-flex py-3 border-bottom px-2 align-items-center whatsapp-partner-profile"
+             t-ref="profile" t-on-click="clickPartner">
+            <div class="flex-shrink-0 align-self-center mx-2 ps-2">
+                <img class="img-fluid rounded-circle border avatar-img"
+                     t-attf-src="/web/image/res.partner/{{props.channel.partner_id[0]}}/image_1920"
+                     alt="loading..."/>
+            </div>
+            <div class="flex-grow-1 text-start">
+                <div t-out="props.channel.name" t-att-value="props.channel.id"
+                     class="flex-grow-1 overflow-hidden"/>
+                <div class="sidebar-message flex-grow-1 text-start text-muted">
+                    <span t-if="props.channel.last_messenger">
+                        <t t-esc="props.channel.last_messenger.split(' ')[0]"/>:
+                    </span>
+                    <span t-if="props.channel.last_message"
+                          t-esc="props.channel.last_message"/>
+                    <span t-else="">
+                        <span t-if="props.channel.wa_message_ids.length">
+                            <i class="fa fa-paperclip border-0 rounded-pill"/>
+                        Media
+                        </span>
+                        <span t-else="">
+                        </span>
+                    </span>
+                </div>
+            </div>
+            <div t-if="!state.countVisible and window.Number(props.channel.message_count) > 0"
+                 class="wa_message_count">
+                <span t-out="window.Number(props.channel.message_count)"/>
+            </div>
+        </div>
+    </t>
+</templates>

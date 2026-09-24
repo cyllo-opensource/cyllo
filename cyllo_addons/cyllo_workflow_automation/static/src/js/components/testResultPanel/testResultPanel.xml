@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_workflow_automation.TestResultPanel">
+        <div t-if="props.visible" t-attf-class="cy-test-result-panel {{this.hasErrors ? 'is-error' : (this.hasWarnings ? 'is-warning' : 'is-success')}} {{props.minimized ? 'is-minimized' : ''}}">
+            <div class="cy-test-result-panel__header">
+                <div class="cy-test-result-panel__title">
+                    <t t-if="this.hasErrors">Workflow test found issues</t>
+                    <t t-elif="this.hasWarnings">Tests Passed with Warnings</t>
+                    <t t-else="">All Tests Passed!</t>
+                </div>
+                <div class="cy-test-result-panel__actions">
+                    <div class="cy-test-result-panel__summary">
+                        <span><t t-esc="props.summary?.success || 0"/> passed</span>
+                        <span><t t-esc="props.summary?.warning || 0"/> warning</span>
+                        <span><t t-esc="props.summary?.error || 0"/> failed</span>
+                    </div>
+                    <button
+                        type="button"
+                        class="cy-test-result-panel__minimize"
+                        t-on-click="toggleMinimize"
+                        t-att-title="props.minimized ? 'Expand panel' : 'Minimize panel'"
+                    >
+                        <i t-if="props.minimized" class="ri-add-line"/>
+                        <i t-else="" class="ri-subtract-line"/>
+                    </button>
+                </div>
+            </div>
+            <div t-if="!props.minimized" class="cy-test-result-panel__body">
+                <t t-foreach="props.results || []" t-as="item" t-key="item.node_id">
+                    <div t-attf-class="cy-test-result-panel__item is-{{item.status}}">
+                        <span class="cy-test-result-panel__item-label">
+                            <t t-esc="item.label || item.name"/>
+                        </span>
+                        <span class="cy-test-result-panel__item-message">
+                            <t t-esc="item.message"/>
+                        </span>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

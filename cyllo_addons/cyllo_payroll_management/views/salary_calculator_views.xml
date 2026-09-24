@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_salary_calculator" model="ir.actions.act_window">
+        <field name="name">Salary Calculator</field>
+        <field name="res_model">salary.calculator</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <record id="view_salary_calculator_form" model="ir.ui.view">
+        <field name="name">salary.calculator.form</field>
+        <field name="model">salary.calculator</field>
+        <field name="arch" type="xml">
+            <form string="Gross-Net Salary Calculator">
+                <sheet>
+                    <div class="row">
+                        <div class="col-md-7 border-end p-4">
+                            <group>
+                                <field name="wage_type" widget="radio"
+                                       options="{'horizontal': true}"/>
+                                <field name="calculation_type" widget="radio"
+                                       options="{'horizontal': true}"/>
+                                <label for="salary"
+                                       invisible="calculation_type != 'manual'"/>
+                                <div class="o_row"
+                                     invisible="calculation_type != 'manual'">
+                                    <field name="salary" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                </div>
+                                <field name="employee_id"
+                                       invisible="calculation_type != 'employee'"
+                                       required="calculation_type == 'employee'"
+                                       options="{'no_create': True}"/>
+                                <field name="department_id"
+                                       invisible="calculation_type != 'department'"
+                                       required="calculation_type == 'department'"
+                                       options="{'no_create': True}"/>
+                                <field name="struct_id"
+                                       options="{'no_create': True}"/>
+                                <field name="work_schedule_id"
+                                       options="{'no_create': True}" invisible="calculation_type == 'manual'"/>
+                                <field name="house_rent" invisible="calculation_type != 'manual'"/>
+                                <field name="travel_allowance" invisible="calculation_type != 'manual'"/>
+                                <field name="meal_allowance" invisible="calculation_type != 'manual'"/>
+                            </group>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="card bg-100 p-4 border-0 rounded shadow-sm h-100 justify-content-center">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tbody>
+                                        <tr class="mb-3">
+                                            <td class="h6">
+                                                <strong>Gross</strong>
+                                            </td>
+                                            <td class="text-end font-weight-bold">
+                                                <field name="gross_month"/>
+                                                / month
+                                            </td>
+                                        </tr>
+                                        <tr class="mb-3 text-success">
+                                            <td class="h6">
+                                                <strong>Allowance</strong>
+                                            </td>
+                                            <td class="text-end font-weight-bold">
+                                                <field name="total_allowance"/>
+                                                / month
+                                            </td>
+                                        </tr>
+                                        <tr class="mb-3 text-danger">
+                                            <td class="h6">
+                                                <strong>Deduction</strong>
+                                            </td>
+                                            <td class="text-end font-weight-bold">
+                                                <field name="deduction"/>
+                                                / month
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="h6">
+                                                <strong>Net</strong>
+                                            </td>
+                                            <td class="text-end font-weight-bold text-primary">
+                                                <field name="net_month"/>
+                                                / month
+                                            </td>
+                                        </tr>
+                                        <tr class="border-top">
+                                            <td class="pt-3 h6">
+                                                <strong>Company cost</strong>
+                                            </td>
+                                            <td class="pt-3 text-end">
+                                                <div class="h5 mb-0 font-weight-bold">
+                                                    <field name="net_month"/>
+                                                    / month
+                                                </div>
+                                                <div class="small text-muted">
+                                                    <field name="cost_year"/>
+                                                    / year
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <notebook>
+                        <page string="Salary Computation"
+                              name="salary_computation">
+                            <field name="line_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="category_id"/>
+                                    <field name="quantity"/>
+                                    <field name="rate"/>
+                                    <field name="amount"/>
+                                    <field name="total" decoration-bf="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <!--                <button string="Copy Link" class="btn-secondary" icon="fa-link"/>-->
+                    <button string="Close" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+</odoo>

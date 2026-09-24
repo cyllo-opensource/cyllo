@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_analytics.filterDropdown" owl="1">
+        <div class="position-relative mt-77" t-att-class="props.mainClass">
+            <button id="cydialogBtn"
+                    t-att-class="this.props.class"
+                    class="btn cy-button-primary-stroke dropdown-toggle filter_button collapsed"
+                    t-on-click="(ev) => this.onCLickFilterWindow(ev)"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    t-att-data-bs-target="'#' + containerId"
+                    aria-expanded="false"
+                    t-att-aria-controls="containerId"
+                    t-ref="filter_button">
+                <i t-if="this.props.display_name == 'Filters'"
+                   class="cy_icons ri-filter-line"/>
+                <span class="ms-1" t-esc="this.props.display_name"/>
+            </button>
+            <div class="cy-marketing-auto_add-parent-container collapse"
+                 t-att-id="containerId"
+                 t-on-click="(ev) => this.onCLickFilterWindow(ev)"
+                 t-ref="filter_dropdown">
+                <div class="cy-market-dialog-header padding-filter-heading cy-border-btm">
+                    <div class="cy-marketing-auto-dialog-head">
+                        <t t-esc="this.props.name"/>
+                    </div>
+                </div>
+                <form action="" class="p-3">
+                    <t t-slot="contents"/>
+                    <div t-if="this.props.footer" class="d-flex gap-2 mt-3">
+                        <a class="cy-button-primary-stroke filter_dropdown_apply py-2 px-4 cy-active-btn w-100 text-center cursor-pointer"
+                           t-on-click="props.onClick"
+                           data-bs-toggle="collapse"
+                           t-att-data-bs-target="'#' + containerId">
+                            Apply Filter
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </t>
+</templates>

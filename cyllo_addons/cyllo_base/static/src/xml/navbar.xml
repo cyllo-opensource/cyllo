@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="web.NavBar" t-inherit-mode="extension" owl="1">
+        <xpath expr="//nav" position="attributes">
+            <attribute name="class" add="navbar navbar-expand-lg cy-top-navbar"
+                separator=" " />
+        </xpath>
+        <xpath expr="//t[@t-call='web.NavBar.SectionsMenu']" position="replace" />
+        <xpath expr="//t[@t-call='web.NavBar.AppsMenu']" position="before">
+            <span class="cy-navbar-app-name" t-if="currentApp" t-esc="currentApp.name" />
+            <t t-if="currentAppSections.length" t-call="web.NavBar.SectionsMenu">
+                <t t-set="sections" t-value="currentAppSections" />
+            </t>
+        </xpath>
+        <xpath expr="//t[@t-call='web.NavBar.AppsMenu']" position="before">
+            <div class="container-fluid ps-0">
+                <ul class="navbar-nav">
+                    <t t-foreach="NavBarItems" t-as="item" t-key="item.key">
+                        <li class="nav-item" t-if="item.key !== 'QuickCreate'">
+                            <ErrorHandler
+                                onError="error => this.handleItemError(error, item)">
+                                <t t-component="item.Component"
+                                    t-props="item.props" />
+                            </ErrorHandler>
+                        </li>
+                    </t>
+                </ul>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o_menu_systray')]" position="before">
+            <t t-foreach="NavBarItems" t-as="item" t-key="item.key">
+                <t t-if="item.key === 'QuickCreate' and !cylloSystray.show">
+                    <ErrorHandler
+                        onError="error => this.handleItemError(error, item)">
+                        <t t-component="item.Component" t-props="item.props" />
+                    </ErrorHandler>
+                </t>
+            </t>
+        </xpath>
+        <xpath expr="//DropdownItem[@t-if='currentApp']" position="replace" />
+        <xpath expr="//t[@t-call='web.NavBar.AppsMenu']" position="replace">
+            <div class="d-none">
+                <t t-call="web.NavBar.AppsMenu">
+                    <t t-set="apps" t-value="menuService.getApps()" />
+                </t>
+            </div>
+        </xpath>
+    </t>
+    <t t-inherit="mail.MessagingMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-set-slot='toggler']" position="replace">
+            <t t-set-slot="toggler">
+                <div data-tooltip="Messages" class="cy-systray-parent-class">
+                    <div>
+                        <i class="ri-chat-3-line cy-icons cy-stray-icon-sp"
+                            role="img" aria-label="Messages"
+                            t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'main' ? 'main' : store.discuss.activeTab" />
+                        <span t-if="counter"
+                            class="o-mail-MessagingMenu-counter badge badge-clock">
+                            <t t-esc="counter &gt; 99 ? '99+' : counter" />
+                        </span>
+                    </div>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Messages
+                    </span>
+                </div>
+            </t>
+        </xpath>
+    </t>
+    <t t-inherit="mail.ActivityMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-set-slot='toggler']" position="replace">
+            <t t-set-slot="toggler">
+                <div data-tooltip="Activities" class="cy-systray-parent-class">
+                    <div>
+                        <i class="ri-time-line cy-icons cy-stray-icon-sp"
+                            role="img" aria-label="Activities" />
+                        <span t-if="store.activityCounter"
+                            class="o-mail-MessagingMenu-counter badge badge-clock">
+                            <t t-esc="store.activityCounter &gt; 99 ? '99+' : store.activityCounter" />
+                        </span>
+                    </div>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Activities
+                    </span>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

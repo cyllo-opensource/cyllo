@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Subscription order alert tree view -->
+    <record id="view_subscription_order_alert_tree" model="ir.ui.view">
+        <field name="name">view.subscription.order.alert.tree</field>
+        <field name="model">subscription.order.alert</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Subscription order alert form view -->
+    <record id="view_subscription_order_alert_form" model="ir.ui.view">
+        <field name="name">view.subscription.order.alert.form</field>
+        <field name="model">subscription.order.alert</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button type="object"  name="action_trigger" string="Trigger now">
+                    </button>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object"  name="action_show_subscription"
+                                class="oe_stat_button"
+                                icon="fa-book">
+                            <field name="order_count" string="Subscription" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" string="Alert Name"/>
+                        <h1><field name="name" placeholder="e.g. Take action"/></h1>
+                    </div>
+                    <group string="Conditions">
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="monthly_recurrence_min"/>
+                        <field name="monthly_recurrence_max"/>
+                        <field name="state_of_order"/>
+                        <field name="subscription_plan_ids" widget="many2many_tags"/>
+                        <field name="subscription_products_ids" widget="many2many_tags"/>
+                        <field name="partner_ids" widget="many2many_tags"/>
+                        <field name="action"/>
+                        <field name="email_template_id" placeholder="Choose a mail template" required="action == 'send_mail'" invisible="action != 'send_mail'"
+                               context="{'form_view_ref': 'cyllo_subscription.mail_template_form', 'default_is_subscription_template': True}"/>
+                    </group>
+                    <group string="Action" invisible="action != 'create_next_activity'">
+                        <field name="activity_type_id" required="action == 'create_next_activity'"/>
+                        <field name="summary" placeholder="eg:-Need to discuss...."/>
+                        <field name="note" placeholder="Write a note"/>
+                        <field name="dead_line"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Subscription order alert Action -->
+    <record id="action_view_alert" model="ir.actions.act_window">
+        <field name="name">Alert</field>
+        <field name="res_model">subscription.order.alert</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

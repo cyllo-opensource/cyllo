@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Inherit hr.expense.sheet form view to add payroll integration -->
+    <record id="view_hr_expense_sheet_form_inherit_payroll" model="ir.ui.view">
+        <field name="name">hr.expense.sheet.form.inherit.payroll</field>
+        <field name="model">hr.expense.sheet</field>
+        <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
+        <field name="arch" type="xml">
+            <!-- Add button in header after approve button -->
+            <xpath expr="//header/button[@name='action_approve_expense_sheets']" position="after">
+                <button name="action_report_to_payslip"
+                        type="object"
+                        string="Report To Next Payslip"
+                        class="oe_highlight"
+                        invisible="state != 'approve' or report_to_payslip == True"
+                        help="Include this expense in the employee's next payslip"
+                        groups="hr_expense.group_hr_expense_manager"/>
+            </xpath>
+
+            <!-- Add fields for tracking -->
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-success text-center"
+                     role="alert"
+                     invisible="report_to_payslip == False">
+                    <strong>This expense will be included in the next payslip</strong>
+                    <span invisible="payslip_id == False"> - Already included in
+                        <field name="payslip_id" readonly="1" class="oe_inline"/>
+                    </span>
+                </div>
+            </xpath>
+
+            <!-- Add invisible fields -->
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="report_to_payslip" invisible="1"/>
+            </xpath>
+
+            <!-- Hide Post Journal Entries button -->
+            <xpath expr="//button[@name='action_sheet_move_create']" position="attributes">
+                <attribute name="invisible">
+                    state != 'approve' or report_to_payslip
+                </attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

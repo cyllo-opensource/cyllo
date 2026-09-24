@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="mail_notification_layout"
+              inherit_id="mail.mail_notification_layout"
+              name="Mail: mail notification layout template">
+        <xpath expr="//body" position="replace">
+            <body style="padding: 0 !important; margin: 0 auto !important; display: block !important;
+            min-width: 100% !important; width: 100% !important; background: #f0f1f3; -webkit-text-size-adjust: none;">
+                <t t-set="subtype_internal"
+                   t-value="subtype and subtype.internal"/>
+                <t t-call="mail.notification_preview"/>
+                <center>
+                    <table width="100%" border="0" cellspacing="0"
+                           cellpadding="0" style="margin: 0; padding: 0; width: 100%; height: 100%;
+                    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                    Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',sans-serif;"
+                           bgcolor="#f0f1f3">
+                        <tr>
+                            <td style="margin: 0; padding: 0; width: 100%; height: 100%"
+                                align="center" valign="top">
+                                <table width="600" border="0" cellspacing="0"
+                                       cellpadding="0" class="m-shell"
+                                       style="background-color: #fff;  display: -webkit-box; -webkit-box-pack: center; padding: 1rem;
+                                        margin-top: 2rem; border: 1px solid #e0e0e0; border-top: 3px solid #9ea700">
+                                    <tr>
+                                        <div t-if="has_button_access"
+                                             itemscope="itemscope"
+                                             itemtype="http://schema.org/EmailMessage">
+                                            <div itemprop="potentialAction"
+                                                 itemscope="itemscope"
+                                                 itemtype="http://schema.org/ViewAction">
+                                                <link itemprop="target"
+                                                      t-att-href="button_access['url']"/>
+                                                <link itemprop="url"
+                                                      t-att-href="button_access['url']"/>
+                                                <meta itemprop="name"
+                                                      t-att-content="button_access['title']"/>
+                                            </div>
+                                        </div>
+                                    </tr>
+                                    <div t-if="subtitles or has_button_access or actions or not is_discussion"
+                                         summary="o_mail_notification">
+                                        <tr>
+                                            <td valign="center"
+                                                t-if="company and not company.uses_default_logo">
+                                                <img t-att-src="'/logo.png?company=%s' % company.id"
+                                                     style="display: flex;  display: -webkit-box; -webkit-box-pack: center;
+                                                     justify-content: center; padding: 1.5rem"
+                                                     t-att-alt="'%s' % company.name"/>
+                                            </td>
+                                        </tr>
+                                        <tr t-if="subtitles">
+                                            <td style="text-align: center">
+                                                <h6 style="margin-top:0px;margin-bottom:0px;"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="text-align: center"
+                                            t-if="subtitles">
+                                            <td style="line-height: 1.6; font-size: 16px; color: #656565">
+                                                <t t-foreach="subtitles"
+                                                   t-as="subtitle">
+                                                    <span>Your
+                                                        <t t-out="model_description or 'document'"/>
+                                                    </span>
+                                                    <span t-attf-style="{{ 'font-weight:bold;' if subtitle_first else '' }}">
+                                                        <t t-out="subtitle"/>
+                                                    </span>
+                                                    <br t-if="not subtitle_last"/>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                        <tr style="text-align: center"
+                                            t-else="">
+                                            <td style="line-height: 1.6; font-size: 16px; color: #656565">
+                                                <span>Your
+                                                    <t t-out="model_description or 'document'"/>
+                                                    <t t-out="record_name"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr t-if="has_button_access">
+                                            <td style="display: flex; justify-content: center; padding: 1rem 12rem;">
+                                                <a t-att-href="button_access['url']"
+                                                   t-att-style="'color: #fff; padding: 1rem 2rem; display: inline-block;
+                                                text-decoration: none; font-weight: 600; border-radius: 25px; background: ' + (company.email_secondary_color or '#9ea700') + ';'">
+                                                    <t t-out="button_access['title']"/>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr t-if="actions">
+                                            <td style="display: flex; justify-content: center; padding: 1rem 12rem;">
+                                                <t t-foreach="actions"
+                                                   t-as="action">
+                                                    <a t-att-href="action['url']"
+                                                       t-att-style="'color: #fff; padding: 1rem 2rem; display: inline-block;
+                                                       text-decoration: none; font-weight: 600; border-radius: 25px; background: ' + (company.email_secondary_color or '#9ea700') + ';'">
+                                                        <t t-out="action['title']"/>
+                                                    </a>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                        <tr style="text-align: center; background:#f2dede;"
+                                            t-if="subtype_internal">
+                                            <td>
+                                                <strong>Internal
+                                                    communication</strong>:
+                                                Replying will post an internal
+                                                note. Followers won't receive
+                                                any email notification.
+                                            </td>
+                                        </tr>
+                                    </div>
+                                    <tr>
+                                        <td>
+                                            <table width="100%" cellspacing="0"
+                                                   cellpadding="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="padding:24px; padding-left:0px; padding-right:0px;">
+                                                            <table width="100%"
+                                                                   cellspacing="0"
+                                                                   cellpadding="0">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>
+                                                                            <t t-out="message.body"
+                                                                               style="font-size: 13px;"/>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                        <td>
+                                                            <tr>
+                                                                <td>
+                                                                    <ul t-if="tracking_values">
+                                                                        <t t-foreach="tracking_values"
+                                                                           t-as="tracking">
+                                                                            <li>
+                                                                                <t t-out="tracking[0]"/>
+                                                                                :
+                                                                                <t t-out="tracking[1]"/>
+                                                                                &#8594;
+                                                                                <t t-out="tracking[2]"/>
+                                                                            </li>
+                                                                        </t>
+                                                                    </ul>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <t class="o_signature">
+                                                                        <div t-if="email_add_signature and not is_html_empty(signature)"
+                                                                             t-out="signature"
+                                                                             style="font-size: 13px; color:rgb(136,136,136);"/>
+                                                                    </t>
+                                                                </td>
+                                                            </tr>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="margin: 0; padding: 0; width: 100%; height: 100%"
+                                align="center" valign="top">
+                                <table width="600" cellspacing="0"
+                                       cellpadding="0">
+                                    <tbody>
+                                        <tr>
+                                            <td bgcolor="#394149"
+                                                style="border-radius: 0 0 10px 10px; padding: 50px;background-color:#394149 ;">
+                                                <table width="100%" border="0"
+                                                       cellspacing="0"
+                                                       cellpadding="0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="font-size:14px;  min-width:auto !important; line-height: 24px;
+                                                            text-align:center; color:#ffffff; padding-bottom: 20px;">
+                                                                <b t-out="company.name"/>
+                                                                <br/>
+                                                                <a t-att-href="'tel:%s' % company.phone"
+                                                                   target="_blank"
+                                                                   style="text-decoration:none; color:#ffffff;">
+                                                                    <span style="text-decoration:none; color:#ffffff;">
+                                                                        <t t-out="company.phone"/>
+                                                                    </span>
+                                                                </a>
+                                                                <br/>
+                                                                <a t-att-href="'mailto:%s' % company.email"
+                                                                   t-if="company.email"
+                                                                   target="_blank"
+                                                                   style="text-decoration:none; color:#ffffff;">
+                                                                    <span style="text-decoration:none; color:#ffffff;"
+                                                                          t-out="company.email"/>
+                                                                </a>
+                                                                -
+                                                                <a t-if="company.website"
+                                                                   t-att-href="'%s' % company.website"
+                                                                   target="_blank"
+                                                                   style="text-decoration:none; color:#ffffff;">
+                                                                    <span style="text-decoration:none; color:#ffffff;"
+                                                                          t-out="company.website"/>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td align="center"
+                                                                width="117"
+                                                                style="font-size:0pt; line-height:0pt; text-align:center;"
+                                                                t-if="company and not company.uses_default_logo">
+                                                                <img t-att-src="'/logo.png?company=%s' % company.id"
+                                                                     style="display: flex;  display: -webkit-box;
+                                                                -webkit-box-pack: center; justify-content: center; padding: 1.5rem"
+                                                                     t-att-alt="'%s' % company.name"/>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <table width="100%" border="0"
+                                               cellspacing="0" cellpadding="0">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="font-size:12px; color:#656565; min-width:auto !important; line-height: 22px;
+                                                    text-align:center; padding-top: 20px; padding-bottom: 20px;">
+                                                        Powered by
+                                                        <a href="www.cyllo.com"
+                                                           target="_blank"
+                                                           style="text-decoration:none; color:#656565;">
+                                                            <span style="white-space: nowrap; text-decoration:none; color:#656565;">
+                                                                Cyllo
+                                                            </span>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size:12px; color:#656565; min-width:auto !important; line-height: 22px;
+                                                    text-align:center; padding-top: 20px; padding-bottom: 20px;">
+                                                        <span id="mail_unfollow">
+                                                            |
+                                                            <a href="/mail/unfollow"
+                                                               style="text-decoration:none; color:#555555;">
+                                                                Unfollow
+                                                            </a>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </center>
+            </body>
+        </xpath>
+    </template>
+
+    <template id="mail_notification_light"
+              inherit_id="mail.mail_notification_light">
+        <xpath expr="//body" position="replace">
+            <body>
+                <t t-set="subtype_internal" t-value="False"/>
+                <t t-call="mail.notification_preview"/>
+                <table role="presentation" border="0" cellpadding="0"
+                       cellspacing="0"
+                       style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;">
+                    <tr>
+                        <td align="center">
+                            <table role="presentation" border="0"
+                                   cellpadding="0" cellspacing="0" width="590"
+                                   style="padding: 24px; background-color: white; color: #454748; border-collapse:separate;">
+                                <tbody>
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width: 590px;">
+                                            <table role="presentation"
+                                                   border="0" cellpadding="0"
+                                                   cellspacing="0"
+                                                   width="100%"
+                                                   style="background-color: white; padding: 0; border-collapse:separate;">
+                                                <tr>
+                                                    <td valign="middle">
+                                                        <span style="font-size: 10px;">
+                                                            Your
+                                                            <t t-out="model_description or 'document'"/>
+                                                        </span>
+                                                        <br/>
+                                                        <t t-if="has_button_access">
+                                                            <a t-att-href="button_access['url']">
+                                                                <span style="font-size: 20px; font-weight: bold;">
+                                                                    <t t-out="message.record_name and message.record_name.replace('/','-') or ''"/>
+                                                                </span>
+                                                            </a>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span style="font-size: 20px; font-weight: bold;">
+                                                                <t t-out="message.record_name and message.record_name.replace('/','-') or ''"/>
+                                                            </span>
+                                                        </t>
+                                                    </td>
+                                                    <td valign="middle"
+                                                        align="right"
+                                                        t-if="company and not company.uses_default_logo">
+                                                        <img t-att-src="'/logo.png?company=%s' % company.id"
+                                                             style="padding: 0px; margin: 0px; height: 48px;"
+                                                             t-att-alt="'%s' % company.name"/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2"
+                                                        style="text-align:center;">
+                                                        <hr width="100%"
+                                                            style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:4px 0px 32px 0px;"/>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <!-- CONTENT -->
+                                    <tr>
+                                        <td style="min-width: 590px;">
+                                            <t t-out="message.body"/>
+                                        </td>
+                                    </tr>
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td align="center"
+                                            style="min-width: 590px; padding: 0 8px 0 8px; font-size:11px;">
+                                            <hr width="100%"
+                                                style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 4px 0px;"/>
+                                            <b t-out="company.name"/>
+                                            <br/>
+                                            <div style="color: #999999;">
+                                                <t t-out="company.phone"/>
+                                                <t t-if="company.email and company.phone">
+                                                    |
+                                                </t>
+                                                <a t-if="company.email"
+                                                   t-att-href="'mailto:%s' % company.email"
+                                                   style="text-decoration:none; color: #999999;"
+                                                   t-out="company.email"/>
+                                                <t t-if="company.website and (company.phone or company.email)">
+                                                    |
+                                                </t>
+                                                <a t-if="company.website"
+                                                   t-att-href="'%s' % company.website"
+                                                   style="text-decoration:none; color: #999999;"
+                                                   t-out="company.website"/>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- POWERED BY -->
+                    <tr>
+                        <td align="center" style="min-width: 590px;">
+                            Powered by
+                            <a target="_blank" href="https://www.cyllo.com"
+                               t-att-style="'color: ' + (company.email_secondary_color or '#875A7B') + ';'">
+                                Cyllo
+                            </a>
+                            <span id="mail_unfollow">
+                                |
+                                <a href="/mail/unfollow"
+                                   style="text-decoration:none; color:#555555;">
+                                    Unfollow
+                                </a>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+        </xpath>
+    </template>
+
+    <template id="notification_preview">
+        <div style="display: none; max-height: 0px; overflow: hidden; color:#fff; font-size:0px; line-height:0px">
+            <t t-if="tracking_values">
+                <t t-out="tracking_values[0][0]"/>
+                :
+                <t t-out="tracking_values[0][1]"/>
+                &#8594;
+                <t t-out="tracking_values[0][2]"/>
+                <t t-if="len(tracking_values) > 1">|...</t>
+                <t t-if="message.preview">|</t>
+            </t>
+            <t t-if="subtype_internal">Internal communication:</t>
+            <t t-out="message.preview"/>
+            <!--Trailing whitespace to push back email content so that it doesn't appear in preview. Specific characters to use may change over time -->
+            <t t-out="'&#847; &#8203; ' * 140"/>
+        </div>
+    </template>
+
+    <template id="mail_notification_layout_with_responsible_signature"
+              name="Mail: mail notification layout with responsible signature (user_id of the record)"
+              inherit_id="mail.mail_notification_layout" primary="True">
+        <xpath expr="//t[hasclass('o_signature')]" position="replace">
+            <t class="o_signature">
+                <div t-if="email_add_signature and 'user_id' in record and record.user_id and not record.env.user._is_superuser() and not is_html_empty(record.user_id.sudo().signature)"
+                     t-out="record.user_id.sudo().signature"
+                     style="font-size: 13px;"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

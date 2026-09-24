@@ -1,0 +1,694 @@
+/* Blur Effect */
+.blur-background {
+    filter: blur(5px);
+    pointer-events: none; /* Disable interaction while loading */
+    transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+/* Loading container */
+.loading-container {
+    position: fixed; /* Keep it fixed relative to the viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.6); /* Semi-transparent white overlay */
+    display: flex; /* Flexbox for centering */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top */
+}
+
+/* Spinner Wrapper */
+.spinner-wrapper {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+/* Spinner Design */
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 8px solid rgba(0, 0, 0, 0.1); /* Light border */
+    border-top: 8px solid #9ea700; /* Primary color */
+    border-radius: 50%; /* Circular spinner */
+    animation: spin 1.5s linear infinite;
+}
+
+/* Keyframes for spinner animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Optional: Prevent content from overflowing */
+.chat-container {
+    overflow: hidden; /* Prevent unwanted scrolling or shifting */
+}
+
+
+
+.side-panel {
+    transition: transform 0.3s ease-out;
+    z-index: 100;
+    transform: translateX(-100%);
+}
+
+.side-panel.show {
+    transform: translateX(0);
+}
+
+.main-chat-section {
+    transition: margin-left 0.3s ease-out;
+    width: 100%;
+}
+
+.main-chat-section.shifted {
+    margin-left: 300px;
+}
+
+.toggle-sidebar-btn {
+    transition: all 0.3s ease;
+    z-index: 101;
+}
+
+.toggle-sidebar-btn.shifted {
+    margin-left: 310px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+@font-face {
+    font-family: "Cyllo-Font-Bold";
+    src: url("../../../assets/fonts/cyllofont-Bold.woff2") format("woff2");
+
+    font-weight: 700;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Cyllo-Font-Medium";
+    src: url("/assets/fonts/cyllofont-Bold.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Cyllo-Font-Regular";
+    src: url("/assets/fonts/cyllofont-Regular.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Cyllo-Font-Semibold";
+    src: url("/assets/fonts/cyllofont-Semibold.woff2") format("woff2");
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+}
+
+
+* {
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+
+body {
+    background: rgba(245, 246, 230, 1);
+    position: relative;
+
+}
+
+.cy-modal_content_ai {
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    position: relative;
+    width: 100%;
+    flex-grow: 1;
+}
+
+.cy-modal_body_ai {
+    text-align: center;
+    padding: 0 4rem 4rem
+}
+
+.cy-modal_dialog {
+    max-width: 934px;
+}
+
+.cy-modal-header {
+    color: rgba(158, 167, 0, 1);
+    font-size: 32px;
+    font-family: "Cyllo-Font-Semibold";
+    font-weight: 600;
+    line-height: 36.04px;
+    letter-spacing: 0.0165em;
+}
+
+.cy-modal_body_ai p {
+    color: rgb(141 141 141);
+    font-size: 14px;
+    font-weight: 400;
+
+}
+
+.cy-ai_search-container {
+    position: relative;
+    margin-top: 80px;
+    margin-bottom: 20px;
+}
+
+.cy-ai_search--icon {
+    position: absolute;
+    padding: 0.8rem;
+}
+
+.cy-ai_send-icon {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    padding: 1rem;
+    cursor: pointer;
+    opacity: 80%;
+}
+.cy-chat_container .cy-ai_send-icon {
+    padding: 1.6rem
+}
+
+
+.cy-ai_send-icon:hover {
+    opacity: 1;
+}
+
+.cy-ai_search--icon img {
+    width: 26px;
+}
+
+.cy-ai_search-container textarea {
+    width: 800px;
+    border-radius: 20px;
+    border: 1px solid #BBC14D;
+    background-color: white;
+    padding: 1rem 3rem 1rem 3rem;
+    font-size: 14px;
+    max-height: 250px;
+    /* height: 52px; */
+    resize: vertical;
+    overflow-y: hidden;
+}
+.cy-chat_container .cy-ai_search-container textarea{
+width:100%;
+}
+
+
+.cy-ai_search-container textarea:focus {
+    outline-color: #BBC14D;
+}
+
+.cy-ai_search--options {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cy-ai_option-list {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16.39px;
+    letter-spacing: 0.0162em;
+    border: 1px solid rgba(68, 70, 39, 0.3);
+    /* border-image-source: linear-gradient(270deg, rgba(68, 70, 39, 0.3) 0%, rgba(158, 167, 0, 0.3) 100%); */
+    border-image-slice: 1;
+    padding: 9px 14px;
+    border-radius: 30px !important;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: inherit;
+    text-decoration: none;
+    opacity: 80%;
+    transition: all 0.3s linear;
+    cursor: pointer;
+}
+
+.cy-ai_option-list:hover {
+    opacity: 100%;
+    color: inherit;
+    background: rgba(180, 180, 180, 0.15);
+
+}
+
+.cy-ai_clsbtn {
+    position: absolute;
+    opacity: 1;
+    width: 2em;
+    height: 2em;
+    right: 24px;
+    top: 24px;
+    background: url('/cyllo_studio_ai/static/src/img/close-outline.svg');
+    background-repeat: no-repeat;
+}
+
+.cy-ai_clsbtn:focus {
+    box-shadow: none;
+}
+
+
+.cy-sidebar_toggle-btn {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 36px;
+    height: 36px;
+    margin: 1rem;
+    background-color: #9EA700;
+    border-radius: 50px;
+    border: none;
+    transition: all 0.1s;
+    opacity: 0;
+    z-index: 111;
+}
+
+.cy-ai_chat {
+    width :100%;
+    display: flex;
+    overflow-y: auto;
+    background-color : rgba(245, 246, 230, 1);
+}
+
+
+.cy-ai-sidebar {
+    width: 300px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background-color: #373627;
+    color: white;
+    transition: transform 0.3s ease;
+    z-index: 1050;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.cy-ai-sidebar.hidden {
+    transform: translateX(-100%);
+}
+
+.cy-modal_content_ai {
+    margin-left: 300px;
+    transition: margin-left 0.3s ease;
+    width: calc(100vw - 300px);
+
+
+}
+
+.cy-modal_content_ai.full-width {
+    margin-left: 0;
+    width: 100vw;
+}
+
+
+
+.cy-sidebar_toggle-btn.visible {
+    opacity: 1;
+}
+
+.btn-sidebar {
+    background-color: transparent;
+    border: none;
+    border-radius: 50px;
+    width: 36px;
+    height: 36px;
+}
+
+.btn-sidebar:hover {
+    background-color: rgba(245, 246, 230, 0.1);
+}
+
+.btn-sidebar img {
+    width: 22px;
+}
+
+.cy-newchat_btn {
+    background-color: #9EA700;
+    border: 1px solid #9EA700;
+    margin: 1.8rem 0;
+    width: 100%;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    transition: all 0.3s linear;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    justify-content: center;
+
+}
+
+.cy-newchat_btn:hover {
+    background-color: #8e9600;
+}
+
+.cy-chat_history ul {
+    list-style: none;
+    padding-left: 0px;
+    padding-bottom: 0.7rem;
+
+
+}
+
+.cy-chat_history button:focus{
+    box-shadow: none !important
+}
+
+.cy-chat_history h4 {
+    text-transform: uppercase;
+
+    color: #777777;
+    font-size: 12.8px;
+}
+
+.cy-chat_items button {
+    font-size: 13px;
+    padding: 8px 8px 8px 1.8rem;
+    color: rgb(222, 222, 222) !important;
+    max-width: 250px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+    text-decoration: none;
+    font-weight: 300;
+    display: inline-block;
+    align-items: center;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+
+    position: relative;
+
+}
+
+.cy-chat_items button:hover {
+    color: #fff;
+    background-color: rgba(245, 246, 230, 0.1);
+}
+
+.cy-chat_items button:after {
+    content: '';
+    position: absolute;
+    left: 0px;
+    background-image: url('/cyllo_studio_ai/static/src/img/chat-icon.svg');
+    width: 14px;
+    height: 14px;
+    background-repeat: no-repeat;
+    margin-left: 6px;
+    bottom: 9px;
+}
+
+.cy-sidebarsticky {
+    position: sticky;
+    top: 0px;
+    z-index: 111;
+    background-color: #373627;
+
+}
+
+.cy-chat_container {
+    height: 100%;
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.cy-chat_container .cy-ai_search-container {
+    position: sticky;
+    bottom: 0px;
+    background-color: rgba(245, 246, 230, 1);
+    margin-top: 0px;
+    width: 100%;
+    padding: 1rem 0;
+}
+
+
+
+.cy-chating--content {
+
+
+    padding: 1rem 0;
+    flex: 1;
+
+}
+
+.cy-chat_list {
+    list-style: none;
+    padding: 0px;
+    margin-top: 2rem;
+}
+
+.cy-chat_list li {
+    clear: both;
+}
+
+.msg-list {
+    margin-bottom: 46px;
+    position: relative;
+    padding: 20px ;
+    font-size: 14px;
+    border-radius: 16px;
+    max-width: 82%;
+}
+.msg-option{
+    display: flex;
+    align-items: center;
+    position: absolute;
+    font-size: 12px;
+    gap: 6px;
+    bottom: -32px;
+    left: 6px;
+    color: rgba(108, 114, 117, 0.5);
+}
+.chat-prompt .msg-list {
+    float: right;
+    margin-right: 70px;
+    background-color: #FDFFDE;
+    border: 2px solid #F3F5F7;
+
+}
+.msg-edit_option{
+    color: #222222;
+    padding: 4px 8px;
+    background-color: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    opacity: 80%;
+    display: flex;
+    gap: 2px ;
+    align-items: center;
+}
+.msg-edit_option:hover{
+    opacity: 1;
+}
+.chat-reply .msg-option{
+    left: auto;
+    right: 0px;
+}
+.chat-reply .msg-list {
+    float: left;
+    margin-left: 70px;
+    background-color: #fff;
+    width: 80%;
+
+}
+.chat-reply .msg-list::before {
+    position: absolute;
+    top: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    overflow: hidden;
+    content: "";
+    left: -70px;
+    background-image: url(/cyllo_studio_ai/static/src/img/ai-chatprompt.svg);
+    border: 3px solid #fff;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+.chat-prompt .msg-list::before {
+    position: absolute;
+    top: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    overflow: hidden;
+    content: "";
+    right: -70px;
+    background-image: url(assets/Avatar.png);
+    border: 3px solid #fff;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+.cy-field_icons{
+    color: #9EA700;
+    margin-right: 0.3rem;
+}
+
+.cy-chat_list ul {
+    clear: both;
+}
+
+.cy-field_container {
+    background-color: #F5F5F5;
+    border: 1px solid #DFDFDF;
+    padding: 24px;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.cy-chat_fields-content {
+    margin-bottom: 0.5rem;
+    display: flex;
+}
+
+.cy-chat_fields-content strong {
+    min-width: 180px;
+}
+
+.cy-fields-list_item {
+    background-color: #fff;
+    border: 1px solid #dfdfdf;
+    padding: 14px;
+    border-radius: 4px;
+    font-size: 12.8px;
+    list-style: none;
+    color: #777777;
+    margin-bottom: 0.6rem;
+}
+
+.cy-field_name {
+    color: #222222;
+    font-weight: 600;
+    margin-right: 0.2rem;
+}
+
+.cy-confirm-btn {
+    width: fit-content;
+    margin: 1rem 0 0 auto;
+    font-size: 12.8px;
+    padding: 8px 12px;
+}
+
+
+@media (max-width:1200px) {
+    .cy-chat_container {
+        max-width: 90%;
+    }
+}
+
+@media (max-width:768px) {
+    .cy-modal_content_ai {
+        margin-left: 0;
+        width: 100%;
+    }
+
+
+}
+
+@media (max-width:600px) {
+    .cy-ai_search-container textarea {
+        width: 100%;
+        min-width: 300px;
+
+    }
+
+
+    .cy-modal_body_ai {
+        height: auto;
+    }
+
+    .cy-ai_search-container {
+        margin-top: 2rem;
+    }
+
+    .cy-modal-header {
+
+        font-size: 23px;
+    }
+
+    .cy-modal_body_ai p {
+        font-size: 12px;
+    }
+
+    .cy-ai_option-list {
+        font-size: 12px;
+    }
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    position: relative;
+    border: 3px solid #fff;
+    flex-shrink: 0;
+}
+
+.chat-prompt .msg-list .user-avatar {
+    margin-right: 0;
+    position: absolute;
+    right: -70px;
+    top: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    overflow: hidden;
+    content: "";
+    margin-left: 10px;
+    margin-right: 0;
+    margin-left: 10px; /* Adjust for prompt alignment */
+}
+
+.cy-exit-btn {
+    position: fixed;
+    top: 1;
+    top: 0px;
+    right: 0px;
+    padding: 1rem 2rem;
+    border:none;
+    background:transparent;
+}
+.cy-exit-btn img {
+    width: 30px;
+    height: 30px;
+}

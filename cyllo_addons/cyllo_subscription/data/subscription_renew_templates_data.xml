@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Template to notify the customer subscription going to end -->
+    <record id="mail_template_subscription_order_due_reminder_email" model="mail.template">
+        <field name="name">Subscription Order: Due Reminder Email</field>
+        <field name="model_id" ref="model_subscription_order"/>
+        <field name="email_to">{{object.partner_id.email}}</field>
+        <field name="subject">Your Subscription is Going to End</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <div style="align-items:center;justify-content: center;border: 2px solid; border-color:#9ea700; padding:0.6rem;padding-left: 35px;text-decoration: none; border-radius: 5px; font-size:13px;width:40%">
+                    <h2>
+                        Hi, <t t-out="object.partner_id.name"/>
+                    </h2>
+                    <div>
+                        <h3>
+                            Your subscription will expire. To keep using our services, please renew.
+                        </h3>
+                    </div>
+                    <div>
+                        <h3>
+                            To renew the subscription of <t t-out="object.subscription_order_line_ids.product_tmpl_id.name"/> Click on the below button
+                        </h3>
+                    </div>
+                </div>
+                <br/>
+                <div style="display: flex;justify-content: center;align-items:center;background-color: #9ea700; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size: 13px; width: 16%">
+                    <a t-attf-href="/details/{{object.id}}" style="text-decoration:none;color:#fff;">
+                        Click here
+                    </a>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>

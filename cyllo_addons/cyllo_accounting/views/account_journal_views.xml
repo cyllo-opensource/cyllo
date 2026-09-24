@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <record id="view_account_journal_dashboard" model="ir.ui.view">
+        <field name="name">view.account.journal.dashboard</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_configure_bank_journal']" position="after">
+                <button name="%(cyllo_accounting.action_view_reconciliation)s" id="reconcile_items" type="action"
+                        string="Reconcile" class="btn-primary ms-1"/>
+            </xpath>
+            <xpath expr="//div[@name='bank_journal_transactions']" position="replace">
+                <div name="bank_journal_transactions" class="w-100 d-flex" style="gap: 5px;">
+                    <a id="create_transaction"
+                       name="action_new_transaction"
+                       type="object"
+                       groups="account.group_account_invoice">
+                        New Transaction
+                    </a>
+                </div>
+            </xpath>
+            <xpath expr="//button[@id='reconcile_items']" position="after">
+                <button name="%(cyllo_accounting.action_view_import_bank_statement)s" type="action"
+                        string="Upload Statements" class="btn-primary"/>
+            </xpath>
+            <xpath expr="//t[@t-if=&quot;journal_type == 'cash'&quot;]" position="replace">
+                <t t-if="journal_type == 'cash'">
+                    <button name="%(cyllo_accounting.action_view_reconciliation)s"
+                            id="reconcile_cash_items"
+                            type="action"
+                            string="Reconcile"
+                            class="btn btn-primary me-1"
+                            groups="account.group_account_invoice"/><br/>
+                    <button t-if="dashboard.number_to_reconcile == 0"
+                            type="object"
+                            name="action_new_transaction"
+                            class="btn btn-primary"
+                            groups="account.group_account_invoice">
+                        New Transaction
+                    </button>
+                    <a t-if="dashboard.number_to_reconcile > 0"
+                       type="object"
+                       name="action_new_transaction"
+                       class="oe_inline"
+                       groups="account.group_account_invoice">
+                        New Transaction
+                    </a>
+                </t>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_account_journal_form" model="ir.ui.view">
+        <field name="name">view.account.journal.form</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook//field[@name='bank_statements_source']/.." position="after">
+                <group name="online_bank" string="Online Bank" groups="account.group_account_user">
+                    <label for="saltedge_account_id"/>
+                    <field name="saltedge_account_id" nolabel="1" readonly="1"/>
+                    <label for="online_bank_provider_id" string="Provider"
+                           invisible="online_bank_provider_id == False"/>
+                    <field name="online_bank_provider_id" nolabel="1" invisible="online_bank_provider_id == False"
+                            readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

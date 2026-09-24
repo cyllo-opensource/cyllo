@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherited for adding new fields -->
+    <record id="view_res_company_form" model="ir.ui.view">
+        <field name="name">view.res.company.form</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook[last()]" position="inside">
+                <page string="Geo Location">
+                    <group>
+                        <group>
+                            <span>Geo Location</span>
+                            <div>
+                                <span>Lat :
+                                    <field name="company_latitude" nolabel="1"
+                                           class="oe_inline"/>
+                                </span>
+                                <br/>
+                                <span>Long :
+                                    <field name="company_longitude" nolabel="1"
+                                           class="oe_inline"/>
+                                </span>
+                                <br/>
+                                <div name="geo_localize_button">
+                                    <button invisible="company_latitude != 0 or company_longitude != 0"
+                                            icon="fa-gear"
+                                            string="Compute based on address"
+                                            title="Compute Localization"
+                                            name="geo_localize" type="object"
+                                            class="btn btn-link p-0"/>
+                                    <button invisible="company_latitude != 0 or company_longitude != 0"
+                                            icon="fa-gear"
+                                            string="Compute based on browser"
+                                            title="Compute Localization"
+                                            name="geo_localize_browser"
+                                            type="object"
+                                            class="btn btn-link p-0"/>
+                                    <button invisible="company_latitude == 0 and company_longitude == 0"
+                                            icon="fa-refresh" string="Refresh"
+                                            title="Refresh Localization"
+                                            name="geo_localize" type="object"
+                                            class="btn btn-link p-0"/>
+                                </div>
+                            </div>
+                        </group>
+                        <group>
+                            <field name="range"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

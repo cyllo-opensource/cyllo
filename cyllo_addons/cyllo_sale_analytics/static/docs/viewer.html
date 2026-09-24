@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Documentation</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; background: #525659; }
+        iframe { border: 0; width: 100%; height: 100%; display: block; }
+    </style>
+</head>
+<body>
+    <script>
+        // Open a module PDF inline in this tab (built-in PDF viewer provides
+        // download/print), instead of the browser force-downloading it.
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var file = params.get('file') || 'Sales_Forecasting_User_Manual.pdf';
+            // Restrict to a plain local filename (no path traversal / external URLs).
+            file = file.replace(/[^A-Za-z0-9_.\-]/g, '');
+            if (!/\.pdf$/i.test(file)) { file = 'Sales_Forecasting_User_Manual.pdf'; }
+            document.title = file.replace(/\.pdf$/i, '').replace(/_/g, ' ');
+            var frame = document.createElement('iframe');
+            frame.src = file + '#toolbar=1';
+            frame.setAttribute('title', document.title);
+            document.body.appendChild(frame);
+        })();
+    </script>
+</body>
+</html>

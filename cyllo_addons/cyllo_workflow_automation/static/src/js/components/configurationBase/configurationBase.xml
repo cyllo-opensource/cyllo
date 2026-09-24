@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="ConfigurationBase">
+        <Dialog contentClass="'cy-work-config-modal'">
+            <t t-set-slot="header">
+                <div class="d-flex align-items-center w-100">
+                    <h4 class="mb-0">
+                        <t t-out="props.name"/>
+                    </h4>
+                    <div class="ms-2 cy-w-mod-info-container">
+                        <i class="ri-information-line cy-w-info-icon" t-on-click="this.toggleInfo"/>
+                        <span class="cy-w-mod-info-text" t-att-class="{ 'show': state.showInfo }">
+                            <t t-out="props.display_name"/>
+                        </span>
+                    </div>
+                    <div t-on-click="onClose" type="button" class="btn-close" aria-label="Close"/>
+                </div>
+            </t>
+            <div class="cy-w-modal-body modal-body py-0" t-ref="modal-body" style="overflow: hidden;">
+                <div class="d-none toast-message text-white" t-ref="toast-body"/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary o_save_button"
+                        t-on-click="onConfirm">
+                    <t t-out="confirmText"/>
+                </button>
+                <button class="btn btn-secondary" t-on-click="onDiscard">
+                    <t t-out="cancelText"/>
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

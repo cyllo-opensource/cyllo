@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="FieldTypeDropdown">
+        <!-- Dropdown component that allows selection of field types, displays a tooltip with information, and supports dynamic options -->
+        <div class="field-type-dropdown-wrapper" t-ref="dropdown">
+            <div class="dropdown-with-info">
+                <Dropdown class="'btn-group flex-grow-1 flex-md-grow-0'"
+                          togglerClass="'btn btn-primary dropdown-toggle cy-w-dropdown-toggler d-flex align-items-center    '"
+                          showCaret="true">
+                    <t t-set-slot="toggler">
+                        <t t-set="currentOption" t-value="state.options.find(o => o.label === props.currentLabel)"/>
+                        <span t-out="props.currentLabel"/>
+                        <div class="cy-w-info-toggler">
+                            <i class="ri-information-line "/>
+                            <div class="tooltip-container">
+                                <span>
+                                    <strong>Fixed:</strong>
+                                    Choose specific values.
+                                </span>
+                                <span>
+                                    <strong>Variable:</strong>
+                                    Use pre-made variables.
+                                </span>
+                                <span>
+                                    <strong>Record:</strong>
+                                    Get values from existing records.
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-foreach="state.options" t-as="option" t-key="option.value">
+                        <DropdownItem onSelected="() => this.onOptionSelected(option.value)">
+                            <t t-out="option.label"/>
+                        </DropdownItem>
+                    </t>
+                </Dropdown>
+            </div>
+        </div>
+    </t>
+</templates>

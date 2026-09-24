@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--Tree view of the Consolidation Group-->
+    <record id="view_consolidation_group_tree" model="ir.ui.view">
+        <field name="name">view.consolidation.group.tree</field>
+        <field name="model">consolidation.group</field>
+        <field name="arch" type="xml">
+            <tree string="consolidation.group">
+                <field name="view_name"/>
+            </tree>
+        </field>
+    </record>
+    <!--Form view of the Consolidation Group-->
+    <record id="view_consolidation_group_form" model="ir.ui.view">
+        <field name="name">view.consolidation.group.form</field>
+        <field name="model">consolidation.group</field>
+        <field name="arch" type="xml">
+            <form string="consolidation_group">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" class="oe_title" placeholder="e.g. Profit and Loss"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="chart_id" placeholder="Select Consolidation"/>
+                        </group>
+                        <group>
+                            <field name="group_id" placeholder="Select Parent Consolidation group" domain="[('chart_id', '=', chart_id), ('id', '!=', id)]"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="children" string="Consolidation Accounts">
+                            <field name="account_ids" domain="[('chart_id', '=', chart_id)]" context="{'default_chart_id':chart_id}">
+                                <tree string="Consolidation Accounts">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="children" string="Subgroups">
+                            <field name="group_ids" domain="[('chart_id', '=', chart_id)]" context="{'default_chart_id':chart_id}">
+                                <tree string="Account Groups">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                    <field name="activity_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--Search view of the Consolidation Group-->
+    <record id="view_consolidation_group_search" model="ir.ui.view">
+        <field name="name">view.consolidation.group.search</field>
+        <field name="model">consolidation.group</field>
+        <field name="priority">15</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field name="name" string="Group"/>
+                <field name="view_name" string="Name"/>
+                <field name="chart_id" string="Consolidation"/>
+                <field name="group_id" string="Parent Group"/>
+                <separator/>
+                <filter string="Creation Date" name="creation_date" date="create_date"/>
+                <separator/>
+                <group expand="0" string="Group By" colspan="16">
+                    <filter string="Consolidation" name="chart_id" context="{'group_by':'chart_id'}"/>
+                    <filter name="group_id" string="Parent Group" context="{'group_by':'group_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--Action specified for the Consolidation Group-->
+    <record id="action_view_account_group" model="ir.actions.act_window">
+        <field name="name">Account Group</field>
+        <field name="res_model">consolidation.group</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Groups Found
+            </p>
+            <p>
+                Create groups for consolidation
+            </p>
+        </field>
+    </record>
+</odoo>

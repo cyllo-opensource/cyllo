@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record model="ir.module.category" id="cyllo_helpdesk_groups">
+        <field name="name">Help Desk</field>
+        <field name="description">User access level for Helpdesk module
+        </field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="cyllo_helpdesk_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="cyllo_helpdesk_groups"/>
+    </record>
+    <record id="cyllo_helpdesk_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="cyllo_helpdesk_groups"/>
+        <field name="implied_ids" eval="[(4, ref('cyllo_helpdesk_user'))]"/>
+    </record>
+
+    <record id="helpdesk_ticket_portal_rule" model="ir.rule">
+        <field name="name">Portal Ticket Access</field>
+        <field name="model_id" ref="model_helpdesk_ticket"/>
+        <field name="domain_force">[('customer_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+         <!-- Restrict Helpdesk Users to only the teams they are a member of -->
+    <record id="helpdesk_team_member_rule" model="ir.rule">
+        <field name="name">Helpdesk Team: only own teams (User)</field>
+        <field name="model_id" ref="model_helpdesk_team"/>
+        <field name="domain_force">[('member_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('cyllo_helpdesk_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Managers can still see and manage every team -->
+    <record id="helpdesk_team_manager_rule" model="ir.rule">
+        <field name="name">Helpdesk Team: all teams (Manager)</field>
+        <field name="model_id" ref="model_helpdesk_team"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('cyllo_helpdesk_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <!-- Multi-company record rule: helpdesk.team -->
+    <record id="help_desk_team_company_rule" model="ir.rule">
+        <field name="name">Helpdesk Team: multi-company</field>
+        <field name="model_id" ref="model_helpdesk_team"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!-- Multi-company record rule: helpdesk.ticket -->
+    <record id="helpdesk_ticket_company_rule" model="ir.rule">
+        <field name="name">Helpdesk Ticket: multi-company</field>
+        <field name="model_id" ref="model_helpdesk_ticket"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_multi_company'))]"/>
+    </record>
+
+    <record id="sla_company_rule" model="ir.rule">
+        <field name="name">SLA Policies: multi-company</field>
+        <field name="model_id" ref="model_helpdesk_sla"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="customer_rating_company_rule" model="ir.rule">
+        <field name="name">Customer Rating: multi-company</field>
+        <field name="model_id" ref="model_rating_rating"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+</odoo>

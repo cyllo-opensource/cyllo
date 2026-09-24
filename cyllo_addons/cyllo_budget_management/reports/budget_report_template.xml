@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Pdf template of Budget Report-->
+    <template id="report_budget_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        <h2>Budget Report</h2>
+                        <br/>
+                        <p>
+                            Name :
+                            <span t-field="o.name"/>
+                        </p>
+                        <p>
+                            Period :
+                            <span t-field="o.start_date"/>-
+                            <span t-field="o.end_date"/>
+                        </p>
+                        <h3 class="text-center">Budget Report</h3>
+                        <table class="table table-bordered mt32">
+                            <thead>
+                                <tr>
+                                    <th>Sl.No</th>
+                                    <t t-set="counter" t-value="0"/>
+                                    <th class="text-center">
+                                        <span>Analytic Account</span>
+                                    </th>
+
+                                    <th class="text-center">
+                                        <span>Start Date</span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span>End Date</span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span>Earn/Spend</span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span>Planned Amount</span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span>Achievement</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.budget_line_ids" t-as="record">
+                                    <tr class="text-center">
+                                        <td>
+                                            <t t-set="counter"
+                                               t-value="counter + 1"/>
+                                            <t t-esc="counter"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="record.analytic_account_id.name"/>
+                                        </td>
+
+                                        <td>
+                                            <span t-field="record.start_date"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="record.end_date"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="record.budget_type"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="record.planned_amount"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="record.achievement"/>
+                                        </td>
+                                        <t t-if="record.include_child">
+                                            <thead style="background-color: #f2f2f2;">
+                                                <th colspan="5">Analytic
+                                                    Account
+                                                </th>
+                                                <th>Planned Amount</th>
+                                                <th>Achievement</th>
+                                            </thead>
+                                            <t t-foreach="request.env['budget.lines.configuration'].search([('budget_line_id','=',record.id)])"
+                                               t-as="line">
+                                                <tr class="text-center"
+                                                    style="background-color: #f2f2f2;">
+                                                    <td colspan="5">
+                                                        <span t-field="line.analytic_account_id.name"/>
+                                                    </td>
+                                                    <td>
+                                                        <span t-field="line.amount"/>
+                                                    </td>
+                                                    <td>
+                                                        <span t-field="line.achievement"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

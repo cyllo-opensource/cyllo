@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_event_form_appointment" model="ir.ui.view">
+        <field name="name">event.event.form.appointment</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_appointments" type="object" class="oe_stat_button" icon="fa-calendar"
+                        invisible="not requires_appointment"
+                        groups="cyllo_appointment.group_appointment_user">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value"><field name="appointment_count"/></span>
+                        <span class="o_stat_text">Appointments</span>
+                    </div>
+                </button>
+            </div>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_generate_appointment_slots" string="Generate Appointment Slots" type="object" class="btn-primary"
+                        invisible="not requires_appointment"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Appointments" name="appointments">
+                    <group>
+                        <group>
+                            <field name="requires_appointment"/>
+                            <field name="appointment_type_id" invisible="not requires_appointment" required="requires_appointment"/>
+                        </group>
+                        <group>
+                            <field name="appointment_staff_ids" widget="many2many_tags" invisible="not requires_appointment" required="requires_appointment"/>
+                        </group>
+                    </group>
+                    <field name="appointment_slot_ids" readonly="1" invisible="not requires_appointment">
+                        <tree string="Generated Slots">
+                            <field name="start_datetime"/>
+                            <field name="end_datetime"/>
+                            <field name="staff_id"/>
+                            <field name="booked_count"/>
+                            <field name="available_count"/>
+                            <field name="state" widget="badge" decoration-success="state == 'available'" decoration-warning="state == 'partially_booked'" decoration-danger="state == 'fully_booked'"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_commission.CommissionDashboard">
+        <div class="commission-dashboard-container" t-ref="commissionDashboard">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div>
+                    <h1 class="dashboard-title">Sales Commission Dashboard</h1>
+                    <p class="dashboard-subtitle">
+                        Track team performance and commission distribution
+                    </p>
+                </div>
+
+                <div class="header-controls">
+                    <!-- Filter Button -->
+                    <div class="filters-container" id="filters-toggle">
+                        <button class="filters-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round">
+                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                            </svg>
+                            Filters
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round" class="chevron-icon">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <!-- Filter Popup -->
+                        <div class="filters-popup" id="filters-popup">
+                            <div class="filters-popup-content">
+                                <!-- Date Range -->
+                                <div class="select-container">
+                                    <span class="select-label">Date Range</span>
+                                    <div class="custom-select">
+                                        <div class="select-trigger" id="date-range">
+                                            <span class="select-value">This Year</span>
+                                            <span class="select-arrow">▼</span>
+                                        </div>
+                                        <div class="select-dropdown">
+                                            <div class="select-option selected" data-value="this_year">This Year</div>
+                                            <div class="select-option" data-value="last_year">Last Year</div>
+                                            <div class="select-option" data-value="this_quarter">This Quarter</div>
+                                            <div class="select-option" data-value="last_quarter">Last Quarter</div>
+                                            <div class="select-option" data-value="this_month">This Month</div>
+                                            <div class="select-option" data-value="last_month">Last Month</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Plan Type -->
+                                <div class="select-container">
+                                    <span class="select-label">Plan Type</span>
+                                    <div class="custom-select">
+                                        <div class="select-trigger" id="plan-type">
+                                            <span class="select-value">All Plans</span>
+                                            <span class="select-arrow">▼</span>
+                                        </div>
+                                        <div class="select-dropdown">
+                                            <div class="select-option selected" data-value="all">All Plans</div>
+                                            <div class="select-option" data-value="target">Target-Based</div>
+                                            <div class="select-option" data-value="contribution">Contribution-Based
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Team Filter -->
+                                <div class="select-container">
+                                    <span class="select-label">Team</span>
+                                    <div class="custom-select multiple">
+                                        <div class="select-trigger" id="team-filter">
+                                            <div class="select-value">
+                                                <span class="select-placeholder">All Teams</span>
+                                            </div>
+                                            <span class="select-arrow">▼</span>
+                                        </div>
+                                        <div class="select-dropdown">
+                                            <div class="select-option selected" data-value="0">All Teams</div>
+                                            <t t-foreach="state.filteredData.teams" t-as="team" t-key="team.id">
+                                                <div class="select-option" t-att-data-value="team.id">
+                                                    <t t-esc="team.name"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Sales Rep Filter -->
+                                <div class="select-container">
+                                    <span class="select-label">Sales Rep</span>
+                                    <div class="custom-select multiple">
+                                        <div class="select-trigger" id="user-filter">
+                                            <div class="select-value">
+                                                <span t-if="!isUserManager" class="select-placeholder">
+                                                    <t t-esc="state.data.salespeople.find(u => u.id === checkAccess(state.data.access).id)?.name || ''"/>
+                                                </span>
+                                                <span t-else="" class="select-placeholder">
+                                                    All Sales Reps
+                                                </span>
+                                            </div>
+                                            <span class="select-arrow">▼</span>
+                                        </div>
+                                        <div class="select-dropdown">
+                                            <div t-if="isUserManager" class="select-option selected" data-value="0">All
+                                                Sales Reps
+                                            </div>
+                                            <t t-foreach="state.filteredData.salespeople" t-as="user" t-key="user.id">
+                                                <div class="select-option" t-att-data-value="user.id">
+                                                    <t t-esc="user.name"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="filters-popup-footer">
+                                <button class="filter-popup-button filter-popup-reset" t-on-click="onResetFilters">
+                                    Reset
+                                </button>
+                                <button class="filter-popup-button filter-popup-apply" t-on-click="onApplyFilters">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Export Button -->
+                    <t t-if="isUserManager">
+                        <div class="export-container">
+                            <button class="export-button" id="export-toggle">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                Export
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round" class="chevron-icon">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+
+                            <!-- Export Dropdown -->
+                            <div class="export-dropdown" id="export-dropdown">
+                                <div class="export-option" t-on-click="()=>this.exportData('pdf')">
+                                    <svg class="export-option-icon" xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                        <line x1="16" y1="13" x2="8" y2="13"/>
+                                        <line x1="16" y1="17" x2="8" y2="17"/>
+                                        <polyline points="10 9 9 9 8 9"/>
+                                    </svg>
+                                    <span class="export-option-text">Export as PDF</span>
+                                </div>
+                                <div class="export-option" t-on-click="()=>this.exportData('excel')">
+                                    <svg class="export-option-icon" xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <path d="M12 8v8"/>
+                                        <path d="M8 12h8"/>
+                                    </svg>
+                                    <span class="export-option-text">Export as Excel</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+
+            <!-- Rest of the template remains unchanged -->
+            <!-- KPI Summary Cards -->
+            <div class="dashboard-grid">
+                <div class="kpi-card" id="sales_card"/>
+                <div class="kpi-card" id="commission_card"/>
+                <div class="kpi-card" id="reps_card"/>
+                <div class="kpi-card" id="plan_cards"/>
+            </div>
+
+            <!-- Performance Analytics -->
+            <div class="dashboard-grid">
+                <!-- Sales Performance Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Sales Performance Trend</h3>
+                        <div class="chart-actions" id="sales">
+                            <!-- 1. Area Chart Icon -->
+                            <btn class="chart-icon default" data-graph="line"
+                                 data-source="sale"
+                                 t-on-click="() => this.handleGraphButtonClick()">
+                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 21h18M3 21V3"
+                                          stroke="currentColor" stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"/>
+                                    <path d="M5 17L9 13L13 15L19 9V21H5Z"
+                                          fill="currentColor" opacity="0.3"/>
+                                    <path d="M5 17L9 13L13 15L19 9"
+                                          stroke="currentColor" stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"/>
+                                </svg>
+                            </btn>
+
+                            <!-- 2. Bar Chart Icon -->
+                            <btn class="chart-icon" data-graph="bar"
+                                 data-source="sale"
+                                 t-on-click="() => this.handleGraphButtonClick()">
+                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 21h18M3 21V3"
+                                          stroke="currentColor" stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"/>
+                                    <rect x="5" y="12" width="2" height="9"
+                                          fill="currentColor"/>
+                                    <rect x="8" y="8" width="2" height="13"
+                                          fill="currentColor"/>
+                                    <rect x="11" y="5" width="2" height="16"
+                                          fill="currentColor"/>
+                                    <rect x="14" y="10" width="2" height="11"
+                                          fill="currentColor"/>
+                                    <rect x="17" y="7" width="2" height="14"
+                                          fill="currentColor"/>
+                                </svg>
+                            </btn>
+
+                            <!-- 3. Pie Chart Icon -->
+                            <btn class="chart-icon" data-graph="pie"
+                                 data-source="sale"
+                                 t-on-click="() => this.handleGraphButtonClick()">
+                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="9" fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"/>
+                                    <path d="M12 3 A9 9 0 0 1 19.5 8.5 L12 12 Z"
+                                          fill="currentColor" opacity="0.8"/>
+                                    <path d="M19.5 8.5 A9 9 0 0 1 16.5 19.5 L12 12 Z"
+                                          fill="currentColor" opacity="0.5"/>
+                                    <path d="M16.5 19.5 A9 9 0 0 1 12 3 L12 12 Z"
+                                          fill="currentColor" opacity="0.2"/>
+                                </svg>
+                            </btn>
+
+                            <!-- 4. Donut Chart Icon -->
+                            <btn class="chart-icon" data-graph="donut"
+                                 data-source="sale"
+                                 t-on-click="() => this.handleGraphButtonClick()">
+                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="9" fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="4" fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"/>
+                                    <path d="M12 3 A9 9 0 0 1 19.5 8.5 L16.24 10.26 A4 4 0 0 0 12 8 Z"
+                                          fill="currentColor" opacity="0.8"/>
+                                    <path d="M19.5 8.5 A9 9 0 0 1 16.5 19.5 L13.78 17.33 A4 4 0 0 0 16.24 10.26 Z"
+                                          fill="currentColor" opacity="0.5"/>
+                                    <path d="M16.5 19.5 A9 9 0 0 1 12 3 L12 8 A4 4 0 0 0 13.78 17.33 Z"
+                                          fill="currentColor" opacity="0.2"/>
+                                </svg>
+                            </btn>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="salesPerformanceChart"/>
+                    </div>
+                </div>
+
+                <!-- Commission Distribution Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Commission Distribution</h3>
+                        <div class="chart-actions" id="commissions">
+                            <!-- 1. Area Chart Icon -->
+                            <btn class="chart-icon" data-graph="line"
+                                 data-source="commission"
+                                 t-on-click="() => this.handleGraphButtonClick()">
+                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 21h18M3 21V3"
+                                          stroke="currentColor" stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"/>
+                                    <path d="M5 17L9 13L13 15L19 9V21H5Z"
+                                          fill="currentColor" opacity="0.3"/>
+                                    <path d="M5 17L9 13L13 15L19 9"
+                                          stroke="currentColor" stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"/>
+                                </svg>
+                            </btn>
+
+                            <!-- 2. Bar Chart Icon -->
+                            <btn class="chart-icon" data-graph="bar"
+                                 data-source="commission"
+                                 t-on-click="() => this.handleGraphButtonClick()">
+                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 21h18M3 21V3"
+                                          stroke="currentColor" stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"/>
+                                    <rect x="5" y="12" width="2" height="9"
+                                          fill="currentColor"/>
+                                    <rect x="8" y="8" width="2" height="13"
+                                          fill="currentColor"/>
+                                    <rect x="11" y="5" width="2" height="16"
+                                          fill="currentColor"/>
+                                    <rect x="14" y="10" width="2" height="11"
+                                          fill="currentColor"/>
+                                    <rect x="17" y="7" width="2" height="14"
+                                          fill="currentColor"/>
+                                </svg>
+                            </btn>
+
+                            <!-- 3. Pie Chart Icon -->
+                            <btn class="chart-icon default" data-graph="pie"
+                                 data-source="commission"
+                                 t-on-click="() => this.handleGraphButtonClick()">
+                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="9" fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"/>
+                                    <path d="M12 3 A9 9 0 0 1 19.5 8.5 L12 12 Z"
+                                          fill="currentColor" opacity="0.8"/>
+                                    <path d="M19.5 8.5 A9 9 0 0 1 16.5 19.5 L12 12 Z"
+                                          fill="currentColor" opacity="0.5"/>
+                                    <path d="M16.5 19.5 A9 9 0 0 1 12 3 L12 12 Z"
+                                          fill="currentColor" opacity="0.2"/>
+                                </svg>
+                            </btn>
+
+                            <!-- 4. Donut Chart Icon -->
+                            <btn class="chart-icon" data-graph="donut"
+                                 data-source="commission"
+                                 t-on-click="() => this.handleGraphButtonClick()">
+                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="9" fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="4" fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"/>
+                                    <path d="M12 3 A9 9 0 0 1 19.5 8.5 L16.24 10.26 A4 4 0 0 0 12 8 Z"
+                                          fill="currentColor" opacity="0.8"/>
+                                    <path d="M19.5 8.5 A9 9 0 0 1 16.5 19.5 L13.78 17.33 A4 4 0 0 0 16.24 10.26 Z"
+                                          fill="currentColor" opacity="0.5"/>
+                                    <path d="M16.5 19.5 A9 9 0 0 1 12 3 L12 8 A4 4 0 0 0 13.78 17.33 Z"
+                                          fill="currentColor" opacity="0.2"/>
+                                </svg>
+                            </btn>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="commissionDistribution"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid plan-selector-grid">
+                <div class="plan-selector-section">
+                    <div class="plan-selector-header">
+                        <h3 class="plan-selector-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                 height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2"
+                                      ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Plan Details
+                        </h3>
+                        <div class="plan-selector-dropdown">
+                            <div class="select-container inline">
+                                <span class="select-label">Select Plan:</span>
+                                <t t-if="state.filteredData.plans.length">
+                                    <div class="custom-select">
+                                        <div class="select-trigger"
+                                             id="detailed-plan-select">
+                                            <span class="select-value placeholder">
+                                                Choose a plan..
+                                            </span>
+                                            <i class="ri-arrow-down-s-fill select-arrow"></i>
+                                        </div>
+                                        <div class="select-dropdown">
+                                            <t t-foreach="state.filteredData.plans"
+                                               t-as="plan" t-key="plan.id">
+                                                <div class="select-option"
+                                                     t-att-data-value="plan.id">
+                                                    <t t-esc="plan.name"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="custom-select">
+                                        <div class="select-trigger"
+                                             id="detailed-plan-select">
+                                            <span class="select-value placeholder">
+                                                No plans available
+                                            </span>
+                                            <i class="ri-arrow-down-s-fill select-arrow"></i>
+                                        </div>
+                                        <div class="select-dropdown">
+                                            <div class="select-option selected"
+                                                 data-value="no_plans">
+                                                No plans available
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="selected-plan-container"
+                         id="selected-plan-container">
+                        <!--Commission Plans-->
+                    </div>
+                </div>
+
+                <div class="plan-selector-section" t-if="isUserManager">
+                    <div class="performance-selector-header">
+                        <div class="metrics-header">
+                            <h3 class="plan-selector-title">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     width="16" height="16" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                    <rect x="8" y="2" width="8" height="4"
+                                          rx="1" ry="1"/>
+                                    <path d="M12 11h4"/>
+                                    <path d="M12 16h4"/>
+                                    <path d="M8 11h.01"/>
+                                    <path d="M8 16h.01"/>
+                                </svg>
+                                Performance Analysis
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-card" id="customers-card">
+                            <!--New Customer-->
+                        </div>
+                        <div class="metric-card" id="winrate-card">
+                            <!--Win Rate-->
+                        </div>
+                        <div class="metric-card" id="max-sold-product-card">
+                            <!--Most sold product-->
+                        </div>
+                        <div class="metric-card" id="max-revenue-product-card">
+                            <!--Most Revenue Earned Product-->
+                        </div>
+                        <div class="metric-card" id="sale-team-card">
+                            <!--Top Sales team-->
+                        </div>
+                    </div>
+                </div>
+                <div class="plan-selector-section" t-if="! isUserManager">
+                    <div class="leaderboard" t-if="! isUserManager">
+                        <div class="leaderboard-header">
+                            <h3 class="leaderboard-title">
+                                <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                >
+                                    <polyline
+                                            points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                </svg>
+                                Leaderboard
+                            </h3>
+                            <div class="leaderboard-filter">
+                                <div class="plan-selector-dropdown">
+                                    <div class="select-container inline">
+                                        <span class="select-label">Sort by:
+                                        </span>
+                                        <div class="custom-select">
+                                            <div class="select-trigger"
+                                                 id="sort">
+                                                <span class="select-value placeholder">
+                                                </span>
+                                                <i class="ri-arrow-down-s-fill select-arrow"></i>
+                                            </div>
+                                            <div class="select-dropdown">
+                                                <div class="select-option"
+                                                     data-value="commission">
+                                                    Commission Earned
+                                                </div>
+                                                <div class="select-option"
+                                                     data-value="sale">
+                                                    Total Sales
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="leaderboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Sales Rep</th>
+                                    <th>Sales</th>
+                                    <th>Commission</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body">
+                                <!--Leader Board Data-->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="leaderboard" t-if="isUserManager">
+                <div class="leaderboard-header">
+                    <h3 class="leaderboard-title">
+                        <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                        >
+                            <polyline
+                                    points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                        Leaderboard
+                    </h3>
+                    <div class="leaderboard-filter">
+                        <div class="plan-selector-dropdown">
+                            <div class="select-container inline">
+                                <span class="select-label">Sort by:</span>
+                                <div class="custom-select">
+                                    <div class="select-trigger"
+                                         id="sort">
+                                        <span class="select-value placeholder">
+                                            Choose a plan..
+                                        </span>
+                                        <i class="ri-arrow-down-s-fill select-arrow"></i>
+                                    </div>
+                                    <div class="select-dropdown">
+                                        <div class="select-option"
+                                             data-value="commission">
+                                            Commission Earned
+                                        </div>
+                                        <div class="select-option"
+                                             data-value="sale">
+                                            Total Sales
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Sales Rep</th>
+                            <th>Sales</th>
+                            <th>Commission</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!--Leader Board Data-->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </t>
+</templates>

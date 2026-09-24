@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="docControllerView" t-inherit="web.KanbanView" t-inherit-mode="primary">
+        <xpath expr="//Layout[last()]" position="inside">
+            <t t-set-slot="control-panel-selection-actions">
+                <div t-if="nbSelected" class="d-flex gap-1">
+                    <t t-call="web.ListView.Selection"/>
+                </div>
+            </t>
+            <t t-set-slot="control-panel-cy-form-cogs">
+                <input type="file" t-ref="fileInput" class="fileInput d-none"
+                       t-on-change="handleOnChangeUpload"/>
+                <div class="cog-menu d-flex w-100 align-items-center doc_btn_container justify-content-between">
+                    <div>
+                        <ul class="navbar-nav flex-row flex-wrap gap-1">
+                            <li class="nav-item" t-on-click="handleUpload">
+                                <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0 nav-item-btn-upload-cy"
+                                     data-hotkey="a">
+                                    <i class="ri-upload-line on_upload_doc"/>
+                                    <span>Upload</span>
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0" data-hotkey="r"
+                                     t-on-click="handleCreateRequest">
+                                    <i class="ri-file-add-line on_add_request"/>
+                                    <span>Create Request</span>
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0" data-hotkey="l" t-on-click="handleAddUrl">
+                                    <i class="ri-link on_add_url"/>
+                                    <span>Add Url</span>
+                                </div>
+                            </li>
+                            <li class="nav-item select_document">
+                                <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0"
+                                     t-on-click="handleToggleSelection">
+                                    <t t-if="!docState.selection">
+                                        <i class="ri-checkbox-line"/>
+                                        <span>Select</span>
+                                    </t>
+                                    <t t-else="">
+                                        <i class="ri-close-line"/>
+                                        <span>Cancel</span>
+                                    </t>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div t-if="nbSelected">
+                        <div class="cy-cog-menu-spread d-flex gap-1">
+                            <button type="button" name="copy"
+                                    class="btn btn-secondary fa fa-share-alt btn-sm on_share_button cy_document_right_icons"
+                                    title="Share"
+                                    t-on-click="handleShareDoc"/>
+                            <button type="button" name="archive"
+                                    class="btn btn-secondary btn-sm on_download_archive fa fa-file-archive-o cy_document_right_icons"
+                                    title="Download Zip File"
+                                    t-on-click="handleDownloadZip"/>
+                            <button type="button" name="mail" title='Mail'
+                                    class="btn btn-secondary btn-sm fa fa-envelope on_mail_document cy_document_right_icons"
+                                    t-on-click="handleMailDocument"
+                            />
+                            <button type="button" name="copy"
+                                    title='Copy/Move'
+                                    class="btn btn-secondary btn-sm fa fa-clone on_copy_document cy_document_right_icons"
+                                    t-on-click="handleCopyDocument"
+                            />
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm fa fa-archive on_archive_document cy_document_right_icons"
+                                    title="Archive/Unarchive"
+                                    t-on-click="handleArchiveDocument"
+                            />
+                            <button type="button" name="Trash"
+                                    class="btn btn-secondary fa fa-trash on_delete_button cy_document_right_icons"
+                                    title="Move to Trash"
+                                    t-on-click="handleDocDelete"
+                            />
+                            <button name="Create Task" type="button"
+                                    title="Create Task"
+                                    class="btn btn-secondary btn-sm fa fa-tasks on_create_task cy_document_right_icons"
+                                    t-on-click="handleCreateTask"
+                            />
+                            <button name="Create Lead" type="button"
+                                    title="Create Lead"
+                                    class="btn btn-secondary btn-sm fa fa-level-up on_create_lead cy_document_right_icons"
+                                    t-on-click="handleCreateLead"
+                            />
+
+                        </div>
+                        <div>
+                            <Dropdown class="'cy-doc-cog-menu-btn'"
+                                      togglerClass="'cy-doc-cog_menu'">
+                                <t t-set-slot="toggler">
+                                    <i class="ri-settings-2-line"/>
+                                </t>
+                                <DropdownItem onSelected.bind="handleShareDoc">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fa fa-share-alt"/>
+                                        <div class="ms-2">Share</div>
+                                    </div>
+                                </DropdownItem>
+                                <DropdownItem onSelected.bind="handleDownloadZip">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fa fa-file-archive-o"/>
+                                        <div class="ms-2">Download Zip File</div>
+                                    </div>
+                                </DropdownItem>
+                                <DropdownItem onSelected.bind="handleMailDocument">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fa fa-envelope"/>
+                                        <div class="ms-2">Mail</div>
+                                    </div>
+                                </DropdownItem>
+                                <DropdownItem onSelected.bind="handleCopyDocument">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fa fa-clone"/>
+                                        <div class="ms-2">Copy/Move</div>
+                                    </div>
+                                </DropdownItem>
+                                <DropdownItem onSelected.bind="handleArchiveDocument">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fa fa-archive"/>
+                                        <div class="ms-2">Archive/Unarchive</div>
+                                    </div>
+                                </DropdownItem>
+                                <DropdownItem onSelected.bind="handleDocDelete">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fa fa-trash"/>
+                                        <div class="ms-2">Move to Trash</div>
+                                    </div>
+                                </DropdownItem>
+                                <DropdownItem onSelected.bind="handleCreateTask">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fa fa-tasks"/>
+                                        <div class="ms-2">Create Task</div>
+                                    </div>
+                                </DropdownItem>
+                                <DropdownItem onSelected.bind="handleCreateLead">
+                                    <div class="d-flex align-items-center">
+                                        <div class="fa fa-level-up"/>
+                                        <div class="ms-2">Create Lead</div>
+                                    </div>
+                                </DropdownItem>
+                            </Dropdown>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+        <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
+            <attribute name="selection">docState.selection</attribute>
+        </xpath>
+    </t>
+</templates>

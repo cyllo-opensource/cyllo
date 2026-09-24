@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+     <!-- Shared icon renderer (svg/image/base64/font-icon) for any component
+         that lists apps with a `getSvg(path, containerId)` method — used by
+         the regular sidebar.xml here and by Cyllo Studio's own menu editor
+         (cyllo_studio/studio_menu_sidebar/menu_sidebar.xml). -->
+    <t t-name="cyllo_base.AppIcon" owl="1">
+        <t t-if="app.webIcon or app.webIconData">
+               <!-- SVG Icon Handling -->
+            <t t-if="app.webIcon.endsWith('.svg')">
+                    <!-- iconKey defaults to the loop's own id; some callers pass
+                     a distinct one when they can show the same app twice in
+                     the same component — two DOM nodes can't share one id,
+                     and getSvg() targets it by id. -->
+                <t t-set="svgContainerId" t-value="'svg-container-' + (iconKey ?? app.id)"/>
+                <t t-set="svg_icon"
+                   t-value="getSvg(app.webIcon, svgContainerId)"/>
+                <div t-att-id="svgContainerId"
+                     class="cy-svg-container"/>
+            </t>
+               <!-- Image Icon Handling -->
+            <img t-elif="app.webIcon &amp;&amp; app.webIcon.includes('/')"
+                 class="cy-image"
+                 t-attf-src="/{{app.webIcon.split(',')[0]}}/{{app.webIcon.split(',')[1]}}"/>
+               <!-- Base64 Image Icon Handling -->
+            <img t-elif="app.webIconData"
+                 class="cy-image"
+                 t-attf-src="data:image/png;base64,{{app.webIconData}}"/>
+               <!-- Font Icon Handling -->
+            <i class="cy-icons m-0"
+               t-att-class="app.webIcon"
+               t-if="app.webIcon &amp;&amp; !app.webIcon.includes('/')"/>
+        </t>
+          <!-- Apps with neither webIcon nor webIconData still need a
+             same-size slot, otherwise their row's text sits flush left
+             and looks misaligned/differently sized next to icon rows. -->
+        <i class="cy-icons cy-icons-fallback m-0 ri-apps-line"
+           t-if="!app.webIcon and !app.webIconData"
+           t-att-title="app.name"/>
+    </t>
+</templates>

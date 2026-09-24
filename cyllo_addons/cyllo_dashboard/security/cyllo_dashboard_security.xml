@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="ir_module_category_user_dashboard_access"
+            model="ir.module.category">
+        <field name="name">User Dashboard Access</field>
+        <field name="description">Category for User Dashboard module</field>
+        <field name="sequence">25</field>
+    </record>
+    <record id="group_cyllo_dashboard_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id"
+               ref="cyllo_dashboard.ir_module_category_user_dashboard_access"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('base.group_user'))]"/>
+    </record>
+    <record id="group_cyllo_dashboard_admin" model="res.groups">
+        <field name="name">Admin</field>
+        <field name="category_id"
+               ref="cyllo_dashboard.ir_module_category_user_dashboard_access"/>
+        <field name="implied_ids"
+               eval="[Command.link(ref('group_cyllo_dashboard_user'))]"/>
+        <field name="users"
+               eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
+</odoo>

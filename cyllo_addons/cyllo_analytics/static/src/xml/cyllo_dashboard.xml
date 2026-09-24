@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_analytics.CylloDashboard" owl="1">
+        <t t-if="ui.size > 1">
+            <div t-ref="dashboard" class="scroll" style="width: 100%;">
+                <t t-if="state.isPrinting">
+                    <div class="cy-print-loading-overlay">
+                        <div class="cy-print-loading-card">
+                            <div class="cy-grid-loading-spinner">
+                                <span class="cy-grid-loading-dot"/>
+                                <span class="cy-grid-loading-dot"/>
+                                <span class="cy-grid-loading-dot"/>
+                            </div>
+                            <span class="cy-print-loading-label">Preparing dashboard for print…</span>
+                        </div>
+                    </div>
+                </t>
+                <div class="cy-dashboard-navbar container-fluid o_pj_dashboard background-image-banner control-panel">
+                    <div class="dashbd-info d-flex justify-content-center"
+                         style="flex-direction: column; width: 100%; align-items: baseline;">
+                        <div class="d-flex align-items-center">
+                            <t t-log="props.action.tag"/>
+                            <div class="heading">
+                                <span class="dashboard-header-title"
+                                      t-esc="state.name"></span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                <div class="date_records d-flex justify-content-end align-items-center"
+                     t-on-click="closeFilterSidebar"
+                     style="width: 100%;">
+
+                     <button class="btn btn-primary themed-bg"
+                            t-if="hasAccess and !is_subAction"
+                            t-on-click="addGraph"
+                            title="Create New Chart"
+                            data-hotkey="c"
+                            data-tooltip="Create New Chart">
+                        <i class="ri-add-line"></i> Create
+                    </button>
+                    <t t-if="state.sources.length > 1">
+                        <div class="nav-item dropdown d-flex"
+                                t-if="!is_subAction">
+                            <button class="btn btn-secondary themed-bg dropdown-toggle"
+                                    type="button"
+                                    id="dashboardDropdown"
+                                    role="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    data-tooltip="Select Dashboard"
+                                    t-on-click="closeFilter">
+                                <i class="ri-dashboard-line"></i>
+                                <t t-out="state.name"></t>
+                            </button>
+                            <ul class="dropdown-menu cy-dashboard_selection-dropdown"
+                                aria-labelledby="dashboardDropdown"
+                                style="width: fit-content; cursor: pointer;">
+                                <t t-foreach="state.sources" t-as="source"
+                                    t-key="source_index">
+                                    <li><a class="dropdown-item"
+                                            t-on-click="()=> this.sourceDashboard(source)">
+                                            <t t-out="source.name"></t>
+                                        </a></li>
+                                </t>
+                            </ul>
+                        </div>
+                    </t>
+
+                    <div class="position-relative d-flex gap-2 cy-dashboard-tools-systray-primary">
+                        
+                        
+                        <div class="d-flex gap-2 cy-filter-dropdown-container"
+                             t-on-blur="onFilterBlur">
+                            <button id="cydialogBtn" t-ref="filterButton"
+                                    class="btn btn-secondary themed-bg dropdown-toggle cy-dash-filter-btn cy-churn-filter-btn"
+                                    type="button"
+                                    t-att-title="timFrameDisplayName"
+                                    data-tooltip="Apply Filters"
+                                    t-on-click="onClickFilter">
+                                <i class="ri-filter-line"></i>
+                                <t t-out="filterDateLabel"/>
+                            </button>
+                            <div class="cy-marketing-auto_add-parent-container cy_filter_toggler"
+                                 t-ref="filter_dropdown"
+                                 id="cy-dialogcontainer"
+                                 data-bs-auto-close="true">
+                                <div class="cy-market-dialog-header cy-border-btm" style="padding: 12px 16px;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="cy-marketing-auto-dialog-head d-flex position-relative cy-filter-drop-head-text"> Filters
+                                            <div id="custom-tooltip"
+                                                 style="cursor: pointer;">
+                                                <span style="font-size: 10px;"
+                                                    t-att-data-tooltip="filterInfo"
+                                                      class="filter-info">?</span>
+                                            </div>
+                                        </div>
+                                        <i class="ri-close-fill"
+                                           style="cursor: pointer; font-size: 22px;"
+                                           t-on-click="onClickFilter"></i>
+                                    </div>
+                                </div>
+                                <form action="" class="p-3">
+                                    <div class="col-12">
+                                        <label for="date"
+                                               style="margin-bottom: 4px;">Period</label>
+                                        <div class="position-relative">
+                                            <select id="time_frames"
+                                                    name="time"
+                                                    t-att-value="timFrameState.selected"
+                                                    class="cy-sidebar-input"
+                                                    style="appearance: none; -webkit-appearance: none; padding-right: 2rem;"
+                                                    t-on-change="(ev) => this.timeFrameChange(ev)">
+                                                <option t-foreach="Object.keys(TimeFrame)"
+                                                        t-as="time"
+                                                        t-key="time_index"
+                                                        t-att-value="TimeFrame[time]"
+                                                        t-out="_t(time)"
+                                                        t-attf-style="{{TimeFrame[time] === 'custom' and 'display:none;' }}"></option>
+                                            </select>
+                                            <i class="ri-arrow-down-s-line position-absolute"
+                                               style="right: 0.5rem; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 16px; opacity: 0.6;"></i>
+                                        </div>
+                                    </div>
+                                    <t t-foreach="state.globalFilters"
+                                       t-as="filter" t-key="filter_index">
+                                        <div class="col-12 my-3"
+                                             t-on-click="closeFilterSidebar">
+                                            <label style="margin-bottom: 4px; display: block;">
+                                                <t t-esc="filter.name"></t>
+                                            </label>
+                                            <t t-if="filter.type == 'datetime'">
+                                                <input type="date"
+                                                       t-attf-id="date_{{filter_index}}"
+                                                       class="cy-sidebar-input d-block w-100"
+                                                       name="date"
+                                                       t-att-value="getDate(filter_index)"
+                                                       t-on-change="(ev) => this.onSelect(ev, filter)"></input>
+                                            </t>
+                                            <t t-if="filter.type == 'many2one'">
+                                                <div class="cy_analytic_d w-100">
+                                                    <div t-if="timFrameState[filter.code] and timFrameState[filter.code].length"
+                                                         class="cy-dashboard-tags mb-1">
+                                                        <t t-foreach="timFrameState[filter.code]"
+                                                           t-as="rec"
+                                                           t-key="rec.id">
+                                                            <span class="cy-dashboard-tag"
+                                                                t-att-class="'cy-tag-' + (rec.display_name.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % 11)">
+                                                                <t t-esc="rec.display_name" />
+                                                                <i t-on-click="() => this.onRemoveFilter(rec, filter)"
+                                                                   class="ri-close-line" />
+                                                            </span>
+                                                        </t>
+                                                    </div>
+                                                    <div class="cy-sidebar-widget-input">
+                                                        <Many2XAutocomplete
+                                                                resModel="filter.relation"
+                                                                getDomain.bind="() => this.getDomain(filter)"
+                                                                fieldString="filter.display_name"
+                                                                activeActions="{}"
+                                                                update.bind="(ev) => this.onSelect(ev, filter)"
+                                                                isToMany="true"
+                                                                autoSelect="true" />
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <div class="d-flex gap-2 mt-3 apply-filter-btn">
+                                        <a href="#"
+                                           class="cy-button-primary-stroke py-2 px-4 cy-active-btn w-100 "
+                                           t-on-click="applyFilter"
+                                           data-bs-target="#cy-dialogcontainer">
+                                            Apply Filter
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <Dropdown
+                        togglerClass="'nav-link dropdown-toggle print-dropdown-dash cy-dropdown-arrow'"
+                        beforeOpen.bind="closeFilter">
+                        <t t-set-slot="toggler">
+                            <button class="btn btn-secondary themed-bg icon-only"
+                                data-hotkey="p"
+                                data-tooltip="Print Sheet"
+                                style="cursor: pointer;">
+                                <i class="ri-printer-line"></i>
+                            </button>
+                        </t>
+                        <DropdownItem
+                                onSelected.bind="() => this.exportPDF('p')">
+                            Portrait
+                        </DropdownItem>
+                        <DropdownItem
+                                onSelected.bind="() => this.exportPDF('l')">
+                            Landscape
+                        </DropdownItem>
+                    </Dropdown>
+
+                    <button class="btn btn-secondary themed-bg icon-only"
+                        t-if="hasAccess and !is_subAction"
+                        data-hotkey="e"
+                        t-on-click="onEdit"
+                        data-tooltip="Edit Layout"
+                        style="cursor: pointer;">
+                        <i class="ri-edit-line"></i>
+                    </button>
+
+                    <div class="dash-conf" t-on-click="closeFilter">
+                        <Dropdown
+                                togglerClass="'nav-link dropdown-toggle cy-dropdown-arrow'"
+                                beforeOpen.bind="closeFilter">
+                            <t t-set-slot="toggler">
+                                <button class="btn btn-secondary themed-bg icon-only"
+                                    data-tooltip="More Options"
+                                    style="cursor: pointer;">
+                                    <i class="ri-more-2-fill"></i>
+                                </button>
+                            </t>
+                            <DropdownItem t-if="hasAccess and !is_subAction"
+                                          onSelected.bind="onConfig">
+                                <i class="ri-settings-4-line"></i>
+                                Configuration
+                            </DropdownItem>
+                            <DropdownItem t-if="hasAccess and !is_subAction"
+                                          onSelected.bind="onAddToMenu">
+                                <i class="ri-menu-add-fill"></i>
+                                Add to Menu
+                            </DropdownItem>
+                            <t t-if="this.id">
+                                <DropdownItem t-if="hasAccess and !is_subAction"
+                                              onSelected.bind="onDelete">
+                                    <i class="ri-delete-bin-4-line"></i>
+                                    Delete
+                                </DropdownItem>
+                            </t>
+                            <DropdownItem t-if="hasAccess"
+                                          onSelected.bind="onJsonExport">
+                                <i class="ri-braces-line"></i>
+                                Export as JSON
+                            </DropdownItem>
+                            <DropdownItem t-if="hasAccess and !is_subAction"
+                                          onSelected.bind="onShareDashboard">
+                                <i class="ri-share-forward-line"></i>
+                                Share
+                            </DropdownItem>
+                            <DropdownItem onSelected.bind="onPresent">
+                                <i class="ri-slideshow-2-line"></i>
+                                Presentation
+                            </DropdownItem>
+                            <DropdownItem parentClosingMode="'none'" class="">
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <div class="me-4">
+                                        <i class="ri-moon-line me-1"></i>
+                                        <span>Dark Mode</span>
+                                    </div>
+                                    <span class="ms-2 slider-container">
+                                    <label class="switch">
+                                    <input type="checkbox"
+                                           t-model="state.darkMode"></input>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </span>
+                                </div>
+                            </DropdownItem>
+                             <Dropdown>
+                                <t t-set-slot="toggler">
+                                    <i class="ri-palette-line"></i>
+                                    Themes
+                                </t>
+                                <t t-foreach="themes" t-as="theme"
+                                   t-key="theme.id">
+                                    <DropdownItem parentClosingMode="'none'"
+                                                  onSelected.bind="() => this.OnSelectTheme(theme.id)">
+                                        <div t-att-id="theme.id">
+                                            <t t-out="theme.name"></t>
+                                            <i t-att-class="themeState.currentTheme == theme.name and 'ri-check-line'"
+                                               style="margin-left: 5%;"></i>
+                                        </div>
+                                    </DropdownItem>
+                                </t>
+                            </Dropdown>
+                        </Dropdown>
+                    </div>
+                </div>
+            </div>
+            <div class="h-100 cy-dashboard-background cy-graph_filter justify-content-between position-relative"
+                 t-att-class="state.optionClass">
+                  <div t-att-class="{'cy-overlay-visible': !edit and state.sortedItems.length and (!state.gridRevealed or state.kpiPending > 0)}"
+                             class="cy-grid-loading-overlay">
+                            <div class="cy-grid-loading-spinner">
+                                <span class="cy-grid-loading-dot"/>
+                                <span class="cy-grid-loading-dot"/>
+                                <span class="cy-grid-loading-dot"/>
+                            </div>
+                        </div>
+                <div class="col-12 cy-dashboard-graph"
+                     t-ref="graph">
+                    <div class="stack-item cy_dash-card_container"
+                         t-att-style="cardContainerStyle"
+                         t-on-click="closeFilterSidebar"
+                         t-ref="chart-container">
+                       
+                        <t t-if="state.showInfo">
+                            <div class="cy-empty-state-wrapper">
+                                <div class="cy-empty-state-card">
+                                    <div class="cy-empty-state-icon-grid">
+                                        <div class="cy-empty-icon-cell"><i class="ri-bar-chart-2-line"></i></div>
+                                        <div class="cy-empty-icon-cell cy-empty-icon-accent"><i class="ri-pie-chart-2-line"></i></div>
+                                        <div class="cy-empty-icon-cell"><i class="ri-line-chart-line"></i></div>
+                                        <div class="cy-empty-icon-cell cy-empty-icon-accent"><i class="ri-donut-chart-line"></i></div>
+                                        <div class="cy-empty-icon-cell cy-empty-icon-main"><i class="ri-dashboard-3-line"></i></div>
+                                        <div class="cy-empty-icon-cell cy-empty-icon-accent"><i class="ri-table-2"></i></div>
+                                        <div class="cy-empty-icon-cell"><i class="ri-radar-line"></i></div>
+                                        <div class="cy-empty-icon-cell cy-empty-icon-accent"><i class="ri-bubble-chart-line"></i></div>
+                                        <div class="cy-empty-icon-cell"><i class="ri-map-2-line"></i></div>
+                                    </div>
+                                    <h2 class="cy-empty-state-title">Stop guessing. Start visualizing.</h2>
+                                    <p class="cy-empty-state-sub">
+                                        Add charts, KPIs, and tables to <strong t-out="state.name"></strong> to start visualizing your data.
+                                    </p>
+                                    <div class="cy-empty-state-actions">
+                                        <button class="btn btn-primary themed-bg d-flex align-items-center justify-content-center gap-1"
+                                                t-if="hasAccess and !is_subAction"
+                                                t-on-click="addGraph">
+                                            <i class="ri-add-line"></i>
+                                            Create Chart
+                                        </button>
+                                    </div>
+                                    <div class="cy-empty-state-steps">
+                                        <div class="cy-empty-step">
+                                            <span class="cy-empty-step-num">1</span>
+                                            <span>Click <strong>Create Chart</strong> to add a new visualization</span>
+                                        </div>
+                                        <div class="cy-empty-step">
+                                            <span class="cy-empty-step-num">2</span>
+                                            <span>Or go to <strong>Sheets</strong>, open a chart and add it to this dashboard</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-foreach="state.sortedItems" t-as="item"
+                           t-key="item.id" t-if="container.el and state.gridReady">
+                            <t t-set="data" t-value="this.computeStyle(item)"></t>
+                            <t t-if="item.type == 'kpi'">
+                                <t t-set="kpi" t-value="this.getKpi(item)"></t>
+                                <KpiSheetChart query="item"
+                                               kpi="kpi"
+                                               style="data.style"
+                                               name="item.name"
+                                               model="kpi.model"
+                                               theme="themeState.currentTheme">
+                                    <t t-if="hasAccess" t-set-slot="footer">
+                                        <div class="cy_options_container-tile">
+                                            <Dropdown
+                                                    t-if="item.filter_ids.length">
+                                                <t t-set-slot="toggler">
+                                                    <i class="ri-filter-2-line"
+                                                       title="Filter"></i>
+                                                </t>
+                                                <DropdownItem
+                                                        parentClosingMode="'none'"
+                                                        t-foreach="item.filter_ids"
+                                                        t-as="filter"
+                                                        t-key="filter.id"
+                                                        onSelected.bind="() => this.filterChange(filter, item_index)">
+                                                    <t t-out="filter.name"></t>
+                                                    <i t-att-class="filter.is_active and 'ri-check-line'"
+                                                       style="margin-left: 5%;"></i>
+                                                </DropdownItem>
+                                            </Dropdown>
+                                            <Dropdown>
+                                                <t t-set-slot="toggler"><i class="ri-more-2-fill"></i></t>
+                                                <DropdownItem
+                                                        t-if="!is_subAction"
+                                                        onSelected.bind="() => this.onEditSheet(item)">
+                                                    <i class="ri-edit-circle-line"></i>
+                                                    Edit</DropdownItem>
+                                                <DropdownItem
+                                                        t-if="kpi.redirect"
+                                                        onSelected.bind="() => this.openRecord(kpi, item)">
+                                                    <i class="ri-arrow-go-forward-line"></i>
+                                                    View Records</DropdownItem>
+                                                <DropdownItem
+                                                        t-if="!is_subAction"
+                                                        onSelected.bind="() => this.onDeleteSheet(item)">
+                                                    <i class="ri-delete-bin-4-line"></i>
+                                                    Delete</DropdownItem>
+                                                <DropdownItem
+                                                        t-if="!is_subAction"
+                                                        onSelected.bind="() => this.onHideSheet(item)">
+                                                    <i class="ri-rest-time-line"></i>
+                                                    Hide</DropdownItem>
+                                                <DropdownItem
+                                                        t-if="!is_subAction"
+                                                        onSelected.bind="() => this.onSetAlert(item)">
+                                                    <i class="ri-notification-3-line"></i>
+                                                    Set Alert</DropdownItem>
+                                            </Dropdown>
+                                        </div>
+                                    </t>
+                                </KpiSheetChart>
+                            </t>
+                            <t t-elif="item.type == 'table'">
+                                <Table item="item"
+                                       style="data.style"
+                                       toggleClass="'chart-container-absolute'"
+                                       theme="themeState.currentTheme">
+                                    <t t-if="hasAccess" t-set-slot="footer">
+                                         <div class="cy_options_container-tile cy-graph-option-container cy-table-container">
+                                             <Dropdown
+                                                     t-if="item.filter_ids.length">
+                                                <t t-set-slot="toggler">
+                                                    <i class="ri-filter-2-line"
+                                                       title="Filter"></i>
+                                                </t>
+                                                 <DropdownItem
+                                                         parentClosingMode="'none'"
+                                                         t-foreach="item.filter_ids"
+                                                         t-as="filter"
+                                                         t-key="filter.id"
+                                                         onSelected.bind="() => this.filterChange(filter, item_index)">
+                                                    <t t-out="filter.name"></t>
+                                                     <i t-att-class="filter.is_active and 'ri-check-line'"
+                                                        style="margin-left: 5%;"></i>
+                                                </DropdownItem>
+                                            </Dropdown>
+                                             <Dropdown>
+                                                <t t-set-slot="toggler"><i class="ri-more-2-fill"></i></t>
+                                                 <DropdownItem
+                                                         t-if="!is_subAction"
+                                                         onSelected.bind="() => this.onEditSheet(item)">
+                                                    <i class="ri-edit-circle-line"></i>
+                                                     Edit</DropdownItem>
+                                                 <DropdownItem
+                                                         t-if="!is_subAction"
+                                                         onSelected.bind="() => this.onDeleteSheet(item)">
+                                                    <i class="ri-delete-bin-4-line"></i>
+                                                     Delete</DropdownItem>
+                                                 <DropdownItem
+                                                         t-if="!is_subAction"
+                                                         onSelected.bind="() => this.onHideSheet(item)">
+                                                    <i class="ri-rest-time-line"></i>
+                                                     Hide</DropdownItem>
+                                                 <DropdownItem
+                                                         t-if="!is_subAction"
+                                                         onSelected.bind="() => this.onSetAlert(item)">
+                                                     <i class="ri-notification-3-line"></i>
+                                                     Set Alert</DropdownItem>
+                                             </Dropdown>
+                                         </div>
+                                    </t>
+                                </Table>
+                            </t>
+                            <t t-else="">
+                                <GraphTile item="item"
+                                           theme="themeState.currentTheme"
+                                           style="data.style"
+                                           toggleClass="data.toggleClass"
+                                           setImage.bind="setImage"
+                                           isDarkMode="state.darkMode"
+                                           themeColor="themeState.theme.theme_color_ids"
+                                           footer="true">
+                                    <t t-set-slot="footer">
+                                        <div class="cy_options_container-tile cy-graph-option-container">
+                                             <Dropdown
+                                                     t-if="item.filter_ids.length">
+                                                <t t-set-slot="toggler">
+                                                    <i class="ri-filter-2-line"
+                                                       title="Filter"></i>
+                                                </t>
+                                                 <DropdownItem
+                                                         parentClosingMode="'none'"
+                                                         t-foreach="item.filter_ids"
+                                                         t-as="filter"
+                                                         t-key="filter.id"
+                                                         onSelected.bind="() => this.filterChange(filter, item_index)">
+                                                    <t t-out="filter.name"></t>
+                                                     <i t-att-class="filter.is_active and 'ri-check-line'"
+                                                        style="margin-left: 5%;"></i>
+                                                </DropdownItem>
+                                            </Dropdown>
+                                            <Dropdown>
+                                                <t t-set-slot="toggler">
+                                                    <i class="ri-more-2-fill"></i>
+                                                </t>
+                                                <DropdownItem
+                                                        t-if="hasAccess and !is_subAction"
+                                                        onSelected.bind="() => this.onEditSheet(item)">
+                                                    <i class="ri-edit-circle-line"></i>
+                                                    Edit</DropdownItem>
+                                                <DropdownItem
+                                                        t-if="hasAccess and !is_subAction"
+                                                        onSelected.bind="() => this.onDeleteSheet(item)">
+                                                    <i class="ri-delete-bin-4-line"></i>
+                                                    Delete</DropdownItem>
+                                                <DropdownItem
+                                                        t-if="hasAccess and !is_subAction"
+                                                        onSelected.bind="() => this.onHideSheet(item)">
+                                                    <i class="ri-rest-time-line"></i>
+                                                    Hide</DropdownItem>
+                                                <DropdownItem
+                                                        t-if="hasAccess and !is_subAction"
+                                                        onSelected.bind="() => this.onSetAlert(item)">
+                                                    <i class="ri-notification-3-line"></i>
+                                                    Set Alert</DropdownItem>
+                                                <DropdownItem
+                                                        onSelected.bind="() => this.exportAsPNG(item)">
+                                                    <i class="ri-image-add-line"></i>
+                                                    Export as PNG</DropdownItem>
+                                            </Dropdown>
+                                        </div>
+                                    </t>
+                                    <t t-set-slot="ai-footer">
+                                        <div class="cy-ai-header-icon"
+                                             t-on-click.stop="() => this.explainWithAI(item)"
+                                             data-tooltip="Cyllo AI Insights">
+                                            <dotlottie-player
+                                                src="https://lottie.host/a67f0b6e-2baa-4912-9609-68750eb652ca/oDZqiBaV7g.json"
+                                                background="transparent"
+                                                speed="1"
+                                                style="width: 28px; height: 28px"
+                                                loop=""
+                                                autoplay=""
+                                            />
+                                        </div>
+                                    </t>
+                                </GraphTile>
+                            </t>
+                        </t>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </t>
+        <t t-else="">
+            <div t-ref="dashboard"
+                 class="d-flex justify-content-center align-items-center">
+                <h3>
+                    The dashboard is not supported in smaller devices yet.
+                </h3>
+            </div>
+        </t>
+    </t>
+</templates>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_category_form_inherit_anglo_saxon" model="ir.ui.view">
+        <field name="name">view.product.category.form.inherit.anglo.saxon</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="stock_account.view_category_property_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='account_property']" position="before">
+                <field name="property_valuation" invisible="1"/>
+            </xpath>
+            <xpath expr="//group[@name='account_property']" position="inside">
+                <group name="account_stock_property"
+                       invisible="property_valuation != 'real_time'"
+                       groups="stock_account.group_stock_accounting_automatic">
+                    <field name="property_stock_valuation_account_id"
+                           groups="stock_account.group_stock_accounting_automatic"
+                           options="{'no_create': True}"
+                           required="property_valuation == 'real_time'"/>
+                    <field name="property_stock_account_input_categ_id"
+                           groups="stock_account.group_stock_accounting_automatic"
+                           options="{'no_create': True}"
+                           required="property_valuation == 'real_time'"/>
+                    <field name="property_stock_account_output_categ_id"
+                           groups="stock_account.group_stock_accounting_automatic"
+                           options="{'no_create': True}"
+                           required="property_valuation == 'real_time'"/>
+                    <field name="property_stock_journal"
+                           groups="stock_account.group_stock_accounting_automatic"
+                           options="{'no_create': True}"
+                           required="property_valuation == 'real_time'"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_analytics.ConfigurationDialog" owl="1">
+        <Dialog title="'Dashboard Configuration'" size="'lg'">
+            <Record t-props="recordProps" t-slot-scope="data">
+                <form class="p-2 cy_dash_conf">
+                    <div class="row py-2">
+                        <div class="col-sm-6 px-2">
+                            <div class="col-12 mb-2">
+                                <label for="name" class="form-label cy-modal-form_label">Name</label>
+                                <CharField name="'name'"
+                                           record="data.record"
+                                           id="'name'"/>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <label for="group_ids" class="form-label cy-modal-form_label">Groups</label>
+                                <div class="o_field_widget d-block">
+                                    <Many2ManyTagsField id="'group_ids'"
+                                                        name="'group_ids'"
+                                                        record="data.record"
+                                                        t-props="defaultConfProps"/>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <label for="banner_id" class="form-label cy-modal-form_label">Banner</label>
+                                <Many2OneField id="'banner_id'"
+                                               name="'banner_id'"
+                                               record="data.record"
+                                               t-props="defaultConfProps"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 px-2">
+                            <div class="col-12 mb-2">
+                                <label for="company_id" class="form-label cy-modal-form_label">Company</label>
+                                <div class="o_field_widget d-block">
+                                    <Many2OneField name="'company_id'"
+                                                   record="data.record"
+                                                   t-props="defaultConfProps"/>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <label for="users" class="form-label cy-modal-form_label">Users</label>
+                                <div class="o_field_widget d-block">
+                                    <Many2ManyTagsField id="'user_ids'"
+                                                        name="'user_ids'"
+                                                        record="data.record"
+                                                        t-props="defaultConfProps"/>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <label for="theme_id" class="form-label cy-modal-form_label">Theme</label>
+                                <Many2OneField id="'theme_id'"
+                                               name="'theme_id'"
+                                               record="data.record"
+                                               t-props="defaultConfProps"/>
+                            </div>
+                        </div>
+                        <div t-if="hasLinkedMenu.length" class="col-sm-6 px-2">
+                            <div class="col-12 mb-2">
+                                <label for="ir_menu_ids"
+                                       class="form-label cy-modal-form_label"
+                                       title="This Menu shows all the Menus that are linked to this dashboard">
+                                    Linked Menus
+                                </label>
+                                <div class="o_field_widget d-block delete_field_widget">
+                                    <DeleteOnlyMany2ManyTagsField id="'ir_menu_ids'"
+                                                                   name="'ir_menu_ids'"
+                                                                   record="data.record"
+                                                                   t-props="defaultConfProps"
+                                                                   readonly="true"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </Record>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary"
+                        t-on-click="onConfigSave">Save</button>
+                <button class="btn btn-secondary"
+                        t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

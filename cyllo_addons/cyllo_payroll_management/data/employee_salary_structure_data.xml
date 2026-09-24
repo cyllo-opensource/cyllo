@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- =====================================================
+         Base Salary Structure For New Structures
+    ====================================================== -->
+
+    <record id="employee_salary_structure_base_for_new_structures"
+            model="employee.salary.structure">
+
+        <field name="code">BASE</field>
+        <field name="name">Base for new structures</field>
+
+        <!-- Salary Rules -->
+        <field name="employee_salary_rule_ids"
+       eval="[(6,0,[
+            ref('employee_salary_rule_basic_salary'),
+            ref('employee_salary_rule_gross'),
+            ref('employee_salary_rule_net_salary'),
+            ref('employee_salary_rule_attachment_of_salary'),
+            ref('employee_salary_rule_child_support'),
+            ref('employee_salary_rule_assignment_of_salary'),
+            ref('employee_salary_rule_gratuity_settlement'),
+            ref('employee_salary_rule_expense_reimbursement'),
+            ref('employee_salary_rule_advance_salary_deduction'),
+            ref('employee_salary_rule_commission')
+       ])]"/>
+
+
+        <!-- Other Input Types -->
+        <field name="other_input_line_type_ids"
+               eval="[(6,0,[
+                    ref('employee_payslip_other_input_attachment_of_salary'),
+                    ref('employee_payslip_other_input_assignment_of_salary'),
+                    ref('employee_payslip_other_input_child_support'),
+                    ref('employee_payslip_other_input_expense_reimbursement'),
+                    ref('employee_payslip_other_input_deduction'),
+                    ref('employee_payslip_other_input_commission')
+               ])]"/>
+
+        <!-- Company -->
+        <field name="company_id" ref="base.main_company"/>
+
+        <!-- Structure Type -->
+        <field name="type_id" ref="hr_contract.structure_type_employee"/>
+
+        <!-- Salary Journal -->
+        <field name="journal_id"
+               ref="cyllo_payroll_management.account_journal_salaries"/>
+
+    </record>
+
+</odoo>

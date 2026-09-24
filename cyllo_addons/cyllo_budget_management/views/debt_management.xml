@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Defines the tree view of debt management   -->
+    <record id="view_debt_management_tree" model="ir.ui.view">
+        <field name="name">view.debt.management.tree</field>
+        <field name="model">debt.management</field>
+        <field name="arch" type="xml">
+            <tree string="Debt">
+                <field name="display_name"/>
+                <field name="debt_type"/>
+                <field name="person_id"/>
+                <field name="amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="date"/>
+                <field name="returned_or_not" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="balance_amount"
+                       invisible="returned_or_not == True and balance_amount"
+                       widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'lend_borrow'"
+                       decoration-success="state in ['partial_return','return']"
+                       decoration-muted="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Defines the search view of debt management   -->
+    <record id="view_debt_management_search" model="ir.ui.view">
+        <field name="name">view.debt.management.search</field>
+        <field name="model">debt.management</field>
+        <field name="arch" type="xml">
+            <search string="Debt Search">
+                <field name="display_name" string="Name"/>
+                <field name="state"/>
+                <field name="person_id"/>
+                <field name="date"/>
+                <filter string="Lent" name="lent"
+                        domain="[('debt_type', '=', 'lend')]"/>
+                <filter string="Borrowed" name="borrowed"
+                        domain="[('debt_type', '=', 'borrow')]"/>
+                <filter string="Draft" name="draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="Lent/Borrowed" name="lend_borrow"
+                        domain="[('state', '=', 'lend_borrow')]"/>
+                <filter string="Returned" name="return"
+                        domain="[('state', 'in', ['return','partial_return'])]"/>
+                <filter string="Cancelled" name="cancel"
+                        domain="[('state', '=', 'cancel')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_debt_type" string="Type"
+                            context="{'group_by':'debt_type'}"/>
+                    <filter name="group_state" string="State"
+                            context="{'group_by':'state'}"/>
+                    <filter name="group_date" string="Date"
+                            context="{'group_by':'date'}"/>
+                    <filter name="group_person" string="Person"
+                            context="{'group_by':'person_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Defines the form view of debt management   -->
+    <record id="view_debt_management_form" model="ir.ui.view">
+        <field name="name">view.debt.management.form</field>
+        <field name="model">debt.management</field>
+        <field name="arch" type="xml">
+            <form string="Debt">
+                <header>
+                    <button type="object"
+                            name="action_confirm_debt"
+                            string="Confirm"
+                            class="btn-primary"
+                            invisible="state != 'draft'"
+                    />
+                    <button type="action"
+                            name="%(cyllo_budget_management.action_view_debt_payback_wizard)d"
+                            string="Payback"
+                            class="btn btn-primary"
+                            invisible="state not in ['lend_borrow','partial_return'] or returned_or_not == True"
+                            context="{'default_debt_id': id}"/>
+                    <button name="action_cancel_debt" type="object"
+                            string="Cancel" class="btn btn-primary"
+                            invisible="state in ['cancel','draft','return']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,lend_borrow,return"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_payments"
+                                class="oe_stat_button"
+                                icon="fa-bars"
+                                type="object"
+                                invisible="state in ['draft','cancel']">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Payments</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Partially"
+                            bg_color="text-bg-success"
+                            invisible="state != 'partial_return'"/>
+                    <widget name="web_ribbon" title="Fully Paid"
+                            bg_color="text-bg-success"
+                            invisible="state != 'return'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <div class="d-flex">
+                                <field name="display_name" class="text-break"
+                                       options="{'line_breaks': False}"
+                                       widget="text" readonly="1"/>
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="debt_type"
+                            readonly="state != 'draft'"/>
+                            <field name="person_id"
+                            readonly="state != 'draft'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="amount"
+                                   widget="monetary"
+                                   readonly="state != 'draft'"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="payback_period"/>
+                            <field name="payback_date"/>
+                            <field name="company_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="returned_or_not"
+                                   invisible="returned_or_not == False"/>
+                            <field name="returned_amount"
+                                   invisible="partially_returned == False"/>
+                            <field name="returned_date"
+                                   invisible="returned_or_not == False"
+                                   required="returned_or_not == True"/>
+                            <field name="partially_returned"
+                                   invisible="partially_returned == False"/>
+                            <field name="balance_amount"
+                                   invisible="partially_returned == False"
+                                   widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Defines the pivot view of debt management   -->
+    <record id="view_debt_management_pivot" model="ir.ui.view">
+        <field name="name">view.debt.management.pivot</field>
+        <field name="model">debt.management</field>
+        <field name="arch" type="xml">
+            <pivot string="Debt">
+                <field name="display_name" type="row"/>
+                <field name="debt_type"/>
+                <field name="person_id"/>
+                <field name="amount" type="measure" string="Amount"/>
+                <field name="date"/>
+                <field name="payback_date"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Defines the graph view of debt management   -->
+    <record id="view_debt_management_graph" model="ir.ui.view">
+        <field name="name">view.debt.management.graph</field>
+        <field name="model">debt.management</field>
+        <field name="arch" type="xml">
+            <graph string="Debt" sample="1">
+                <field name="display_name" type="row"/>
+                <field name="amount" type="measure" string="Amount"/>
+                <field name="balance_amount" type="measure" string="Balance"/>
+            </graph>
+        </field>
+    </record>
+</odoo>

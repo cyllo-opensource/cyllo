@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="report_action_report_commission_dashboard"
+            model="ir.actions.report">
+        <field name="name">Commission Report</field>
+        <field name="model">commission.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_commission.report_commission_dashboard</field>
+        <field name="report_file">cyllo_commission.report_commission_dashboard</field>
+    </record>
+
+    <template id="report_commission_dashboard">
+    <t t-call="web.html_container">
+        <t t-call="web.external_layout">
+            <div style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff; box-shadow: 0 0 20px rgba(0,0,0,0.1); border-radius: 10px; min-height: 100vh;">
+                <t t-set="currency_symbol" t-value="churnData.get('currency_symbol')" />
+                <t t-set="symbol_position" t-value="churnData.get('symbol_position')" />
+                <!-- Report Header -->
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #9ea809; padding-bottom: 20px;">
+                    <h1 style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 28px; font-weight: bold; color: #000; margin-bottom: 10px;">Commission Report</h1>
+                </div>
+                <!-- Period Information -->
+                <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; border: 1px solid #ddd;">
+                    <div style="font-size: 16px; font-weight: 600; color: #2c3e50;">
+                        Report Period: <strong><t t-esc="startDate"/></strong> to <strong><t t-esc="endDate"/></strong>
+                    </div>
+                </div>
+                <!-- Charts Section -->
+                <div style="margin: 30px 0; display: table; width: 100%; table-layout: fixed;">
+                    <div style="display: table-cell; width: 50%; margin: 0; padding: 15px; text-align: center; border: 2px solid #e0e0e0; border-radius: 8px; background-color: #fafafa; vertical-align: top; margin-right: 10px;">
+                        <div style="font-size: 18px; font-weight: bold; color: #34495e; margin-bottom: 15px;">Sales Performance</div>
+                        <img t-att-src="sales" style="max-width: 100%; height: auto;"/>
+                    </div>
+                    <div style="display: table-cell; width: 50%; margin: 0; padding: 15px; text-align: center; border: 2px solid #e0e0e0; border-radius: 8px; background-color: #fafafa; vertical-align: top; margin-left: 10px;">
+                        <div style="font-size: 18px; font-weight: bold; color: #34495e; margin-bottom: 15px;">Commission Analysis</div>
+                        <img t-att-src="commission" style="max-width: 100%; height: auto;"/>
+                    </div>
+                </div>
+                <!-- Commission Details Table -->
+                <t t-if="churnData.get('commissions')">
+                    <h2 style="font-size: 22px !important; font-weight: bold !important; color: #000 !important; margin: 40px 0 25px 0 !important; padding: 15px 0 !important; border-bottom: 3px solid #9ea809 !important; text-align: center !important; text-transform: uppercase; letter-spacing: 1px; background-color: #f8f9fa; border-radius: 5px 5px 0 0;">Commission Details</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 0 0 30px 0; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid #9ea809;">
+                        <thead>
+                            <tr>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Salesperson</th>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Period</th>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Plan</th>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Plan Type</th>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Sales Amount</th>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Commission Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="churnData.get('commissions')" t-as="commission">
+                                <tr style="background-color: #fff;">
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: center;"><t t-esc="commission.get('salesperson')"/></td>
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: center;"><t t-esc="commission.get('period_name')"/></td>
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: center;"><t t-esc="commission.get('plan_name')"/></td>
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: center;"><t t-esc="commission.get('plan_type')"/></td>
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: right; font-weight: 600; ">
+                                        <t t-if="symbol_position == 'before'">
+                                            <t t-raw="currency_symbol + str(commission.get('sale_amount', '0'))"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-raw="str(commission.get('sale_amount', '0')) + currency_symbol"/>
+                                        </t>
+                                    </td>
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: right; font-weight: 600; ">
+                                        <t t-if="symbol_position == 'before'">
+                                            <t t-raw="currency_symbol + str(commission.get('commission_amount', '0'))"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-raw="str(commission.get('commission_amount', '0')) + currency_symbol"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+                <t t-else="">
+                    <h2 style="font-size: 22px !important; font-weight: bold !important; color: #9ea809 !important; margin: 40px 0 25px 0 !important; padding: 15px 0 !important; border-bottom: 3px solid #9ea809 !important; text-align: center !important; text-transform: uppercase; letter-spacing: 1px; background-color: #f8f9fa; border-radius: 5px 5px 0 0;">Commission Details</h2>
+                    <div style="text-align: center; color: #7f8c8d; font-style: italic; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">No commission data available for this period.</div>
+                </t>
+                <!-- Leaderboard Table -->
+                <t t-if="leaderboardData">
+                    <h2 style="font-size: 22px !important; font-weight: bold !important; color: #9ea809 !important; margin: 40px 0 25px 0 !important; padding: 15px 0 !important; border-bottom: 3px solid #9ea809 !important; text-align: center !important; text-transform: uppercase; letter-spacing: 1px; background-color: #f8f9fa; border-radius: 5px 5px 0 0;">Sales Leaderboard</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 0 0 30px 0; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid #9ea809;">
+                        <thead>
+                            <tr>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Rank</th>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Salesperson</th>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Total Sales</th>
+                                <th style="background: #9ea809 !important; color: white !important; font-weight: bold !important; padding: 15px 10px !important; text-align: center !important; border: 2px solid #ddd !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px;">Total Commission</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="leaderboardData" t-as="leaderBoard">
+                                <tr style="background-color: #fff;">
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: center; font-weight: bold; color: #000000;">
+                                        <t t-esc="leaderBoard.get('rank')"/>
+                                    </td>
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: center;"><strong><t t-esc="leaderBoard.get('name')"/></strong></td>
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: right; font-weight: 600; ">
+                                        <t t-if="symbol_position == 'before'">
+                                            <t t-raw="currency_symbol + str(leaderBoard.get('sale', '0'))"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-raw="str(leaderBoard.get('sale', '0')) + currency_symbol"/>
+                                        </t>
+                                    </td>
+                                    <td style="padding: 12px 10px; border: 1px solid #ddd; background-color: #fff; text-align: right; font-weight: 600; ">
+                                        <t t-if="symbol_position == 'before'">
+                                            <t t-raw="currency_symbol + str(leaderBoard.get('commission', '0'))"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-raw="str(leaderBoard.get('commission', '0')) + currency_symbol"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+                <t t-else="">
+                    <h2 style="font-size: 22px !important; font-weight: bold !important; color: #9ea809 !important; margin: 40px 0 25px 0 !important; padding: 15px 0 !important; border-bottom: 3px solid #9ea809 !important; text-align: center !important; text-transform: uppercase; letter-spacing: 1px; background-color: #f8f9fa; border-radius: 5px 5px 0 0;">Sales Leaderboard</h2>
+                    <div style="text-align: center; color: #7f8c8d; font-style: italic; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">No leaderboard data available for this period.</div>
+                </t>
+            </div>
+        </t>
+    </t>
+</template>
+</odoo>

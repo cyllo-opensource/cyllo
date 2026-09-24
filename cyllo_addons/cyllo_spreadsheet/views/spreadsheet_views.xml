@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_spreadsheet_sheet_kanban" model="ir.ui.view">
+        <field name="name">view.spreadsheet.sheet.kanban</field>
+        <field name="model">spreadsheet.sheet</field>
+        <field name="arch" type="xml">
+            <kanban create="false" js_class="cy_spreadsheet_kanban"
+                    export_xlsx="0">
+                <field name="image_1920"/>
+                <field name="name"/>
+                <field name="create_uid" string="Created By"/>
+                <field name="create_date" string="Created Date"/>
+                <field name="write_uid" string="Last Updated By"/>
+                <field name="write_date" string="Last Updated Date"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="kanban_document cy-spreadsheet-main cy_sheet_kanban"
+                             t-att-data-id="record.id.value">
+                            <div class="o_kanban_record d-flex flex-grow-1 flex-md-shrink-1 flex-shrink-0 oe_file_request"
+                                 t-att-data-id="record.id.value">
+                                <div class="document_image background-transparent">
+                                    <div class="d-flex flex-column oe_kanban_global_area o_kanban_attachment o_documents_attachment oe_file_request"
+                                         t-att-data-id="record.id.value">
+                                        <div class="o_kanban_image o_request_image">
+                                            <div class="o_kanban_image_wrapper">
+                                                <img t-if="record.image_1920.raw_value"
+                                                     t-attf-src="/web/image/spreadsheet.sheet/{{record.id.value}}/image_1920"/>
+                                                <img t-else="" class="dummy"
+                                                     src="cyllo_documents/static/images/xls.png"
+                                                     t-att-data-id="record.id.value"
+                                                     alt="xlsx"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="no-border w-100">
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="d-flex justify-content-left align-items-center">
+                                            <img src="cyllo_spreadsheet/static/src/img/sheet-icon.svg"
+                                                 class="on_preview_image_pdf_button cy-doc-type-img me-1"
+                                                 t-att-data-id="record.id.value"
+                                                 alt="xlsx"/>
+                                            <field class="text-start fw-medium text-wrap-it"
+                                                   name="name"/>
+                                        </div>
+                                        <div class="d-flex justify-content-left">
+                                            <div class="d-flex justify-content-between w-100">
+                                                <field class="text-start mt-1"
+                                                       name="write_date"/>
+                                                <field name="write_uid"
+                                                       widget="many2one_avatar_user"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-name="kanban-menu">
+                        <a class="dropdown-item" type="object"
+                           name="share_sheet">
+                            <div><i class="ri-share-line me-1"/>Share
+                            </div>
+                        </a>
+                        <a class="dropdown-item" type="object"
+                           name="delete_sheet">
+                            <div><i class="ri-delete-bin-line me-1"/>Delete
+                            </div>
+                        </a>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="view_spreadsheet_sheet_tree" model="ir.ui.view">
+        <field name="name">view.spreadsheet.sheet.tree</field>
+        <field name="model">spreadsheet.sheet</field>
+        <field name="arch" type="xml">
+            <tree string="Action" js_class="cy_spreadsheet_list">
+                <field name="name"/>
+                <field name="create_uid" string="Created By"/>
+                <field name="create_date" string="Created Date"/>
+                <field name="write_uid" string="Last Updated By"/>
+                <field name="write_date" string="Last Updated Date"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_view_spreadsheet_sheet" model="ir.actions.act_window">
+        <field name="name">Spreadsheet sheet</field>
+        <field name="res_model">spreadsheet.sheet</field>
+        <field name="view_mode">kanban,tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Upload or Create new spreadsheet
+            </p>
+            <p>
+                To get started, either upload an existing spreadsheet or create
+                a new one using the tools provided
+                above. You can format the data, add new sheets, and easily
+                manipulate the content in your spreadsheet
+                for efficient processing.
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_spreadsheet_root" action="action_view_spreadsheet_sheet"
+              name="Spreadsheet"
+              web_icon="cyllo_spreadsheet,static/description/cyllo_spreadsheet.svg"
+              groups="cyllo_spreadsheet.group_cyllo_spreadsheet_write_user,cyllo_spreadsheet.group_cyllo_spreadsheet_admin"/>
+    <menuitem id="menu_spreadsheet"
+              parent="cyllo_spreadsheet.menu_spreadsheet_root"
+              action="action_view_spreadsheet_sheet"
+              name="Spreadsheet"
+              groups="cyllo_spreadsheet.group_cyllo_spreadsheet_write_user,cyllo_spreadsheet.group_cyllo_spreadsheet_admin"/>
+</odoo>

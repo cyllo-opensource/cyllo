@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Form view of the asset sell dispose model-->
+    <record id="view_asset_sell_dispose_form" model="ir.ui.view">
+        <field name="name">view.asset.sell.dispose.form</field>
+        <field name="model">asset.sell.dispose</field>
+        <field name="arch" type="xml">
+            <form string="Sell/Dispose">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_action" widget="radio" invisible="is_done == True"/>
+                            <label for="loss_account_id" name="dispose" string="Loss Account"
+                                   invisible="asset_action != 'dispose' or not is_entry or is_posted"/>
+                            <label for="loss_account_id" name="sell" string="Gain Account"
+                                   invisible="asset_action != 'sell' or not is_entry"/>
+                            <h1>
+                                <field name="loss_account_id"
+                                       invisible="not is_entry or is_posted and asset_action == 'dispose'"
+                                       required="asset_action != 'sell'"/>
+                            </h1>
+                            <field name="invoice_ids" invisible="asset_action != 'sell' or not is_entry"
+                                   widget="many2many_tags"/>
+                            <field name="invoice_line_ids" invisible="asset_action != 'sell' or not is_entry"
+                                   widget="many2many_tags"
+                                   domain="[('move_id', 'in', invoice_ids), ('display_type', 'in', ('product', 'line_section', 'line_note'))]"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="disposal_type" invisible="asset_action != 'dispose'"/>
+                            <field name="note"/>
+                            <field name="is_done" invisible="1"/>
+                            <field name="asset_asset_id" invisible="1"/>
+                            <field name="is_entry" invisible="1"/>
+                            <field name="is_posted" invisible="1"/>
+                        </group>
+                    </group>
+                    <!-- Chatter -->
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="message_ids"/>
+                    </div>
+                </sheet>
+                <footer>
+                    <button type="object" name="action_sell" string="Sell" class="oe_highlight"
+                            invisible="asset_action != 'sell'"/>
+                    <button type="object" name="action_dispose" string="Dispose" class="oe_highlight"
+                            invisible="asset_action != 'dispose'"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!--    List view of the asset sell dispose model-->
+    <record id="view_asset_sell_list" model="ir.ui.view">
+        <field name="name">view.asset.sell.list</field>
+        <field name="model">asset.sell.dispose</field>
+        <field name="arch" type="xml">
+            <tree create="0" delete="0" edit="0">
+                <field name="asset_asset_id" string="Asset Name"/>
+                <field name="date"/>
+                <field name="asset_action"/>
+                <field name="note"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_asset_dispose_list" model="ir.ui.view">
+        <field name="name">view.asset.dispose.list</field>
+        <field name="model">asset.sell.dispose</field>
+        <field name="arch" type="xml">
+            <tree create="0" delete="0" edit="0">
+                <field name="asset_asset_id" string="Asset Name"/>
+                <field name="date"/>
+                <field name="asset_action"/>
+                <field name="disposal_type"/>
+                <field name="note"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <!--    Action for the asset sell dispose model-->
+    <record id="action_view_asset_sell" model="ir.actions.act_window">
+        <field name="name">Sell</field>
+        <field name="res_model">asset.sell.dispose</field>
+        <field name="view_id" ref="view_asset_sell_list"/>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('asset_action', '=', 'sell')]</field>
+    </record>
+    <record id="action_view_asset_dispose" model="ir.actions.act_window">
+        <field name="name">Dispose</field>
+        <field name="res_model">asset.sell.dispose</field>
+        <field name="view_id" ref="view_asset_dispose_list"/>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('asset_action', '=', 'dispose')]</field>
+    </record>
+    <!--    parent menuitem for asset sell or dispose-->
+    <menuitem id="menu_sell_dispose" name="Disposal"
+              parent="cyllo_asset_management.menu_assets_categ"
+              action="action_view_asset_sell"
+              sequence="10"/>
+
+    <!--    Menuitem for asset sell or dispose-->
+    <menuitem id="menu_sell" name="Sell"
+              parent="cyllo_asset_management.menu_sell_dispose"
+              action="action_view_asset_sell"
+              sequence="10"/>
+    <menuitem id="menu_dispose" name="Dispose"
+              parent="cyllo_asset_management.menu_sell_dispose"
+              action="action_view_asset_dispose"
+              sequence="11"/>
+</odoo>

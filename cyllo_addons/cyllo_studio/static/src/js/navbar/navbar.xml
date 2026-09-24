@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+	<t t-name="cyllo_studio.CylloNavBar">
+		<header class="cy-NavHeader mb-2" t-ref="cy_nav_bar">
+			<div class="cy-navbar d-flex">
+				<div class="d-flex align-items-center gap-3" style="min-width: 412px;">
+					<t t-if="!state.studioEditableList">
+						<span t-if="state.bcActive and state.bcPrev" class="cy-current-model cy-bc-trail">
+							<a href="#" class="cy-bc-prev" t-on-click="breadcrumbBack" t-esc="state.bcPrev"/>
+							<i class="ri-arrow-right-s-line cy-bc-sep"/>
+							<span class="cy-bc-field" t-esc="state.bcField"/>
+						</span>
+						<span t-elif="state.configBcActive and state.configBcPrev" class="cy-current-model cy-bc-trail">
+							<a href="#" class="cy-bc-prev" t-on-click="configBreadcrumbBack" t-esc="state.configBcPrev"/>
+							<i class="ri-arrow-right-s-line cy-bc-sep"/>
+							<span class="cy-bc-field" t-esc="state.configBcField"/>
+						</span>
+						<span t-elif="currentModelName" class="cy-current-model" t-esc="currentModelName"/>
+					</t>
+					<div class="cy-studio-views ms-2">
+						<ViewSelectionDropDown t-props="viewSelectionProps"/>
+					</div>
+				</div>
+				<div class="d-flex align-items-center cy-nav-menu pe-2">
+					<t t-if="!state.studioEditableList">
+
+						<div t-if="state.isPreviewMode" style="
+							border: 1px solid #9ea700;
+							border-radius: 6px;
+							display: flex;
+							align-items: center;
+							gap: 8px;
+							min-width: 90px;
+							padding: 4px 10px;
+						">
+							<i class="ri-tv-2-line" style="color: #9ea700;"/>
+							<span style="color: white; font-size: 14px;">Preview</span>
+						</div>
+						<button t-if="state.studioAIInstalled and !state.isSearchView and !state.configBcActive"
+								class="cy-studio-ai-btn" type="button" title="Studio AI" aria-label="Studio AI"
+								t-on-click="()=>this.openStudioAI()">
+							<img src="/cyllo_studio/static/src/img/icons/cyllo-ai.svg" alt="" class="cy-studio-ai-btn__icon"/>
+						</button>
+						<button t-if="props.editButton and !state.isSearchView and !state.configBcActive" class="btn btn-primary cy-viewEdits" t-on-click="()=>this.handleEdit()">
+							<i class="ri-pencil-line"/>
+							Edit View
+						</button>
+						<div class="cy-nav-Menu-button" t-att-class="state.configOpen ? 'is-open' : ''">
+							<button class="btn btn-secondary" t-on-click="toggleConfig">
+								<i class="ri-settings-3-line"/>
+								Configuration
+								<i class="ri-arrow-down-s-line"/>
+							</button>
+							<div class="cy-miscellaneous_card" t-att-class="state.configOpen ? 'show' : ''">
+								<div class="menubar">
+									<div class="menu-item" t-if="state.isSystemAdmin" t-on-click="AccessRightsClick">
+										<div class="icon">
+											<i class="ri-user-settings-line"></i>
+										</div>
+										<div class="text">
+											<h3>
+												<a href="#">Access Right</a>
+											</h3>
+											<p>Manage user permissions: view, create, edit, delete.</p>
+										</div>
+										<span class="cy-arrow">
+											<i class="ri-arrow-right-s-line"></i>
+										</span>
+									</div>
+									<div class="menu-item" t-on-click="ReportClick">
+										<div class="icon">
+											<i class="ri-article-line"></i>
+										</div>
+										<div class="text">
+											<h3>
+												<a href="#">Report</a>
+											</h3>
+											<p>Customizable documents for export/printing.</p>
+										</div>
+										<span class="cy-arrow">
+											<i class="ri-arrow-right-s-line"></i>
+										</span>
+									</div>
+									<div class="menu-item" t-if="state.isSystemAdmin" t-on-click="RecordRuleClick">
+										<div class="icon">
+											<i class="ri-file-lock-line"></i>
+										</div>
+										<div class="text">
+											<h3>
+												<a href="#">Record Rules</a>
+											</h3>
+											<p>Rules define access for CRUD operations.</p>
+										</div>
+										<span class="cy-arrow">
+											<i class="ri-arrow-right-s-line"></i>
+										</span>
+									</div>
+									<div class="menu-item cy-studio-beta" t-on-click="EmailTemplateClick">
+										<div class="icon">
+											<i class="ri-mail-open-line"></i>
+										</div>
+										<div class="text">
+											<h3>
+												<a href="#">Email Template</a>
+											</h3>
+											<p>Customize Email Template Layouts.</p>
+										</div>
+										<span class="cy-arrow">
+											<i class="ri-arrow-right-s-line"></i>
+										</span>
+										<div class="cy-studio-ribbon">
+											<div class="inner-text">Coming Soon</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</t>
+					<button t-att-disabled="!state.canUndo" class="btn btn-secondary" t-on-click="undoChange">
+						<i class="ri-arrow-go-back-line"/>
+					</button>
+					<button t-att-disabled="!state.canRedo" class="btn btn-secondary" t-on-click="redoChange">
+						<i class="ri-arrow-go-forward-line"/>
+					</button>
+					<button class="btn btn-danger" t-on-click="handleClose">
+						<i class="ri-logout-box-r-line"/>
+						Exit
+					</button>
+				</div>
+			</div>
+		</header>
+	</t>
+</templates>

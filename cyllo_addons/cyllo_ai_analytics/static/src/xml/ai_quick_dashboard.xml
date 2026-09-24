@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="cyllo_ai_analytics.QuickDashboardWidget">
+        <div class="cy-ai-qd">
+
+            <!-- Selected tables as pills (shown once any are picked) -->
+            <div t-if="state.models.length" class="cy-ai-qd-pills">
+                <t t-foreach="state.models" t-as="m" t-key="m.model">
+                    <span class="cy-ai-qd-pill">
+                        <t t-esc="m.name"/>
+                        <i t-if="state.step === 'pick' or state.step === 'proposing'"
+                           class="fa fa-times" t-on-click="() => this.onRemoveModel(m.model)"/>
+                    </span>
+                </t>
+            </div>
+
+            <!-- Step 1: pick table(s) -->
+            <t t-if="state.step === 'pick' or state.step === 'proposing'">
+                <div class="cy-ai-qd-row">
+                    <label class="cy-ai-qd-label">Table</label>
+                    <div class="cy-ai-qd-picker">
+                        <Many2XAutocomplete resModel="'ir.model'" getDomain.bind="getDomain"
+                            fieldString="'Table'" activeActions="{}"
+                            update.bind="onSelectModel"/>
+                    </div>
+                </div>
+                <button class="cy-ai-qd-btn"
+                        t-att-disabled="!state.models.length or state.step === 'proposing'"
+                        t-on-click="() => this.onGenerate()">
+                    <t t-if="state.step === 'proposing'">
+                        <i class="fa fa-spinner fa-spin me-1"/>Generating…
+                    </t>
+                    <t t-else="">
+                        <i class="fa fa-magic me-1"/>Generate charts
+                    </t>
+                </button>
+            </t>
+
+            <!-- Step 2: review + create (charts grouped by table) -->
+            <t t-if="state.step === 'review' or state.step === 'creating'">
+                <div class="cy-ai-qd-hint">Pick the charts for your dashboard:</div>
+                <t t-foreach="state.groups" t-as="group" t-key="group.model">
+                    <div class="cy-ai-qd-group-name" t-esc="group.name"/>
+                    <t t-foreach="group.cards" t-as="card" t-key="card.id">
+                        <label class="cy-ai-qd-card">
+                            <input type="checkbox" t-model="state.selected[card.id]"/>
+                            <span class="cy-ai-qd-card-body">
+                                <span class="cy-ai-qd-card-title" t-esc="card.title"/>
+                                <span class="cy-ai-qd-chips">
+                                    <span class="cy-ai-chip" t-esc="card.dimension.label"/>
+                                    <span class="cy-ai-chip cy-ai-chip-measure" t-esc="card.measure.label"/>
+                                </span>
+                                <span class="cy-ai-qd-type-row">
+                                    <span class="cy-ai-qd-type-label">Chart</span>
+                                    <select class="cy-ai-qd-type" t-model="card.chart_type"
+                                            t-on-click.stop="() => {}">
+                                        <t t-foreach="card.allowed_chart_types" t-as="ct" t-key="ct">
+                                            <option t-att-value="ct" t-esc="ct"/>
+                                        </t>
+                                    </select>
+                                </span>
+                            </span>
+                        </label>
+                    </t>
+                </t>
+                <div class="cy-ai-qd-row">
+                    <label class="cy-ai-qd-label">Name</label>
+                    <input type="text" class="cy-ai-qd-name" t-model="state.name"
+                           placeholder="Dashboard name"/>
+                </div>
+                <button class="cy-ai-qd-btn"
+                        t-att-disabled="!checkedPicks.length or !state.name.trim() or state.step === 'creating'"
+                        t-on-click="() => this.onCreate()">
+                    <t t-if="state.step === 'creating'">
+                        <i class="fa fa-spinner fa-spin me-1"/>Creating…
+                    </t>
+                    <t t-else="">
+                        <i class="fa fa-check me-1"/>Create dashboard
+                    </t>
+                </button>
+            </t>
+
+            <!-- Step 3: done -->
+            <t t-if="state.step === 'done'">
+                <div class="cy-ai-qd-done">
+                    <i class="fa fa-check-circle me-1"/>
+                    Created <b t-esc="state.dashboard.name"/> with
+                    <t t-esc="state.dashboard.chart_count"/> chart(s).
+                </div>
+                <button class="cy-ai-qd-btn" t-on-click="() => this.openDashboard()">
+                    <i class="fa fa-external-link me-1"/>Open dashboard
+                </button>
+            </t>
+
+            <div t-if="state.error" class="cy-ai-qd-error" t-esc="state.error"/>
+        </div>
+    </t>
+
+</templates>

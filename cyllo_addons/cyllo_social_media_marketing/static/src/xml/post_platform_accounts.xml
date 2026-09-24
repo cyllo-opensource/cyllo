@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_social_media_marketing.PostPlatformAccounts">
+        <div class="o_platform_tiles_row">
+            <t t-foreach="state.accounts" t-as="account" t-key="account.platform + '-' + account.id">
+                <div t-attf-class="o_platform_tile{{ isSelected(account) ? ' o_platform_tile_active' : '' }}{{ (props.readonly || isModeDisabled(account)) ? ' o_platform_tile_readonly' : '' }}"
+                    t-on-click="() => this.toggle(account)">
+                    <div class="o_platform_tile_icon o_platform_tile_avatar">
+                        <img t-if="account.avatar_url" t-att-src="account.avatar_url" />
+                        <i t-else="" t-att-class="accountIcon(account)" />
+                        <span class="o_platform_tile_badge" t-attf-style="background-color: {{ accountColor(account) }};">
+                            <i t-att-class="accountIcon(account)" />
+                        </span>
+                        <div class="o_platform_tile_overlay" t-if="isSelected(account)">
+                            <i class="ri-check-line" />
+                        </div>
+                    </div>
+                    <span class="o_platform_tile_label" t-esc="account.name" />
+                </div>
+            </t>
+            <div class="o_platform_tiles_empty" t-if="!state.accounts.length">
+                No connected accounts yet - connect one from the Dashboard.
+            </div>
+        </div>
+    </t>
+</templates>

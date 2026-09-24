@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Defines the Tree View of Budget Lines -->
+    <record id="view_budget_lines_tree" model="ir.ui.view">
+        <field name="name">view.budget.lines.tree</field>
+        <field name="model">budget.lines</field>
+        <field name="arch" type="xml">
+            <tree string="Budget Lines" create="false">
+                <field name="display_name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="account_ids" widget="many2many_tags"/>
+                <field name="analytic_account_id"/>
+                <field name="budget_type"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="planned_amount" widget="monetary"/>
+                <field name="practical_amount" widget="monetary"/>
+                <field name="theoretical_amount" widget="monetary"/>
+                <field name="achievement"/>
+                <field name="stage"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Defines the Form View of Budget Lines -->
+    <record id="view_budget_lines_form" model="ir.ui.view">
+        <field name="name">view.budget.lines.form</field>
+        <field name="model">budget.lines</field>
+        <field name="arch" type="xml">
+            <form string="Budget Lines" edit="0" create="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <div class="d-flex">
+                                <field name="display_name" class="text-break"
+                                       options="{'line_breaks': False}"
+                                       widget="text"/>
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="analytic_account_id"/>
+                            <field name="account_ids" widget="many2many_tags"/>
+                            <field name="analytic_account_ids" invisible="1"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        <group>
+                            <field name="budget_type"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="planned_amount" widget="monetary"/>
+                            <field name="practical_amount" widget="monetary"/>
+                            <field name="theoretical_amount" widget="monetary"/>
+                            <field name="achievement"/>
+                            <field name="stage"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Defines the Tree Search of Budget Lines -->
+    <record id="view_budget_lines_search" model="ir.ui.view">
+        <field name="name">view.budget.lines.search</field>
+        <field name="model">budget.lines</field>
+        <field name="arch" type="xml">
+            <search string="Budget Lines">
+                <field name="display_name"/>
+                <field name="budget_id"/>
+                <field name="budget_type"/>
+                <filter name="filter_earn" string="Earn"
+                        domain="[('budget_type','=','earn')]"/>
+                <filter name="filter_spend" string="Spend"
+                        domain="[('budget_type','=','spend')]"/>
+                <separator/>
+                <filter string="Date" name="filter_start_date"
+                        date="start_date"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_budget_id" string="Budgets" domain="[]"
+                            context="{'group_by':'budget_id'}"/>
+                    <filter name="group_stages" string="Stage" domain="[]"
+                            context="{'group_by':'stage'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--    Defines the Pivot View of Budget Lines -->
+    <record id="view_budget_lines_pivot" model="ir.ui.view">
+        <field name="name">view.budget.lines.pivot</field>
+        <field name="model">budget.lines</field>
+        <field name="arch" type="xml">
+            <pivot string="Budget Lines" sample="1">
+                <field name="budget_id" type="row"/>
+                <field name="budget_id" type="row"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="planned_amount" type="measure"
+                       string="Planned amount" widget="monetary"/>
+                <!--                <field name="theoretical_amount" type="measure" string="Theoretical amount" widget="monetary" />-->
+                <field name="practical_amount" type="measure"
+                       string="Practical amount" widget="monetary"/>
+                <field name="achievement" type="measure" widget="percentage"/>
+            </pivot>
+        </field>
+    </record>
+    <!--    Defines the Graph View of Budget Lines -->
+    <record id="view_budget_lines_graph" model="ir.ui.view">
+        <field name="name">view.budget.lines.graph</field>
+        <field name="model">budget.lines</field>
+        <field name="arch" type="xml">
+            <graph string="Budget Lines" sample="1">
+                <field name="budget_id" type="row"/>
+                <field name="planned_amount" type="measure"
+                       string="Planned amount"/>
+                <field name="theoretical_amount" type="measure"
+                       string="Theoretical amount"/>
+                <field name="practical_amount" type="measure"
+                       string="Practical amount"/>
+                <field name="achievement" type="measure" widget="percentage"/>
+            </graph>
+        </field>
+    </record>
+</odoo>

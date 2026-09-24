@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Record for defining a tree view named 'marketing.participant.tree' for the model 'marketing.participant' -->
+    <record id="view_marketing_participant_tree" model="ir.ui.view">
+        <field name="name">view.marketing.participant.tree</field>
+        <field name="model">marketing.participant</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="record"/>
+                <field name="model_name"/>
+                <field name="state" widget='badge'
+                       decoration-success="state == 'completed'"
+                       decoration-warning="state == 'running'"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Record for defining a form view named 'marketing.participant.form' for the model 'marketing.participant' -->
+    <record id="view_marketing_participant_form" model="ir.ui.view">
+        <field name="name">view.marketing.participant.form</field>
+        <field name="model">marketing.participant</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="record"
+                                   options="{'hide_model': True}" readonly="1"/>
+                        </h1>
+                    </div>
+                    <widget name="web_ribbon" title="Test"
+                            bg_color="text-bg-danger"
+                            invisible="is_test_participant == False"/>
+                    <group>
+                        <group>
+                            <field name="campaign_id" readonly="1"/>
+                            <field name="model_name" readonly="1"/>
+                            <field name="record_id" readonly="1"/>
+                            <field name="test_date_started" invisible="1"/>
+                            <field name="is_inactive" invisible="1"/>
+                            <field name="record_count" invisible="1"/>
+                            <field name="is_test_participant" invisible="1"/>
+                            <field name="create_date" invisible="1"/>
+                            <field name="activity_ids" invisible="1"/>
+                            <field name="marketing_activity_count"
+                                   invisible="1"/>
+                            <field name="activity_executed_ids" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="activity_ids" invisible="1"
+                           class="o_ma_hierarchy_container o_ma_workitem_hierarchy">
+                        <kanban class="oe_highlight" create="false">
+                            <field name="participant_id"/>
+                            <field name="name"/>
+                            <field name="type"/>
+                            <field name="model_name"/>
+                            <field name="model_id"/>
+                            <field name="parent_activity_id"/>
+                            <field name="sub_parent_activity_id"/>
+                            <field name="mailing_mailing_id"/>
+                            <field name="test_date_started"/>
+                            <field name="h_level_css"/>
+                            <field name="activity_trigger"/>
+                            <field name="activity_trigger_type"/>
+                            <field name="trigger_schedule_type"/>
+                            <field name="state"/>
+                            <templates>
+                                <t t-name="kanban-box">
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                    <field name="test_activity_ids" invisible="1"
+                           class="o_ma_hierarchy_container o_ma_workitem_hierarchy">
+                        <kanban class="oe_highlight" create="false">
+                            <field name="activity_id"/>
+                            <field name="participant_id"/>
+                            <field name="state"/>
+                            <field name="mail_failure_message"/>
+                            <field name="mail_opened"/>
+                            <field name="mail_clicked"/>
+                            <field name="mail_replied"/>
+                            <field name="mail_bounced"/>
+                            <templates>
+                                <t t-name="kanban-box">
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                    <session class="cy_marketing-activity-session">
+                        <sheet>
+                            <div class="cy-component-widgetDiv-main">
+                                <field name="test_activity_ids"
+                                       widget="TestActivity"
+                                       class="cy-test_activity_ids-div"/>
+                            </div>
+                        </sheet>
+                    </session>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Record for defining an action window named 'action_view_marketing_participant_action' for the model 'marketing.participant' -->
+    <record id="action_view_marketing_participant_action"
+            model="ir.actions.act_window">
+        <field name="name">Participants</field>
+        <field name="res_model">marketing.participant</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

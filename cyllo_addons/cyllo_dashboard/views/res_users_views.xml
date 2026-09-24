@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="Big5" ?>
+<odoo>
+    <!-- Inherit Form View to Modify it -->
+    <record id="view_res_users_form" model="ir.ui.view">
+        <field name="name">view.res.users.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='messaging']" position="after">
+                <group>
+                    <group string="IDLE TIMER">
+                        <field name="idle_timer"/>
+                        <field name="idle_time" widget="float_time" invisible="idle_timer == False"/>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//page[@name='access_rights']" position="after">
+                <page string="Weather Settings">
+                    <group>
+                        <field name="api_key" password="True"/>
+                        <field name="location_set"/>
+                        <field name="city" invisible="location_set != 'manual'"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

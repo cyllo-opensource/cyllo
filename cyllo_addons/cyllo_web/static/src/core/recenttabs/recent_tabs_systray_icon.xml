@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!--Recent Tabs systray item-->
+    <t t-name="cyllo_web.RecentTabsMenu">
+        <Dropdown
+            position="'bottom-end'"
+            hotkey="'h'"
+            tooltip="'Recent Tabs'"
+            beforeOpen.bind="onBeforeOpen"
+            menuClass="'cy_recent_tabs_menu'">
+            <t t-set-slot="toggler">
+                <div class="cy-systray-parent-class">
+                    <i class="ri-history-line cy-icons cy-stray-icon-sp" role="img"
+                        aria-label="Recent Tabs"/>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Recent Tabs
+                    </span>
+                </div>
+            </t>
+            <t t-set-slot="default">
+                <div class="dropdown-header border-bottom cy_recent_tabs_header">
+                    <span>Recents</span>
+                    <i  class="ri-bar-chart-horizontal-line cy_recent_tab_action"
+                        data-tooltip="Clear All Tabs"
+                        t-on-click.stop.prevent="() => this.clearAllTabs()"/>
+                </div>
+                <DropdownItem t-foreach="state.tabs" t-as="tab" t-key="tab_index"
+                              class="{ cy_recent_tab: true, o_pinned: tab.pinned, 'border-top': tab_index === state.numberOfPinnedTabs }"
+                              href="tab.tab_url"
+                              onSelected="() => this.openTab(tab)">
+                    <div class="cy_recent_tab_item">
+                        <span class="cy_recent_tab_name" t-att-data-tooltip="tab.name+' '+tab.last_visited" t-out="tab.name"/>
+                        <span class="cy_recent_tab_last_visited" t-out="'Last Visited: '+tab.last_visited"/>
+                    </div>
+                    <span class="cy_recent_tab_actions">
+                        <i t-if="!tab.pinned"
+                           class="ri-pushpin-line cy_recent_tab_action"
+                           t-att-class="{ disabled: pinLimitReached }"
+                           data-tooltip="Pin this tab"
+                           t-on-click.stop.prevent="() => this.onPinTabClicked(tab)"/>
+                        <i t-else=""
+                           class="ri-unpin-line cy_recent_tab_action"
+                           data-tooltip="Unpin this tab"
+                           t-on-click.stop.prevent="() => this.onUnpinTabClicked(tab)"/>
+                        <i class="ri-external-link-line cy_recent_tab_action"
+                           data-tooltip="Open in new tab"
+                           t-on-click.stop.prevent="() => this.openInNewTab(tab)"/>
+                        <i class="ri-delete-bin-line cy_recent_tab_action"
+                            data-toofltip="Clear this tab"
+                            t-on-click.stop.prevent="() => this.clearTab(tab)"/>
+                    </span>
+                </DropdownItem>
+                <div t-if="!state.tabs.length" class="cy_recent_tabs_empty text-muted">
+                    No Recent Tabs found...
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+
+</templates>

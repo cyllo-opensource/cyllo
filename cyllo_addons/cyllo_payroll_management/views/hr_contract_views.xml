@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherited the Hr contract for adding new fields -->
+    <record id="view_hr_contract_form" model="ir.ui.view">
+        <field name="name">view.hr.contract.</field>
+        <field name="model">hr.contract</field>
+        <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="/form/header" position="inside">
+                <button name="action_approve_contract" string="Approve" class="oe_highlight" type="object"
+                        invisible="state!='training'" groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
+            </xpath>
+            <xpath expr="//header/field[@name='state'][@groups='!hr_contract.group_hr_contract_manager']" position="replace">
+                <field name="state" groups="!hr_contract.group_hr_contract_manager" widget="statusbar" statusbar_visible="draft,open,close,cancel" invisible="trainee == True"/>
+                <field name="state" groups="!hr_contract.group_hr_contract_manager" widget="statusbar" statusbar_visible="draft,training,open,close,cancel" invisible="trainee == False"/>
+            </xpath>
+            <xpath expr="//header/field[@name='state'][@groups='hr_contract.group_hr_contract_manager']" position="replace">
+                <field name="state" groups="hr_contract.group_hr_contract_manager" widget="statusbar" options="{'clickable': '1'}" statusbar_visible="draft,open,close,cancel" invisible="trainee == True"/>
+                <field name="state" groups="hr_contract.group_hr_contract_manager" widget="statusbar" options="{'clickable': '1'}" statusbar_visible="draft,training,open,close,cancel" invisible="trainee == False"/>
+            </xpath>
+            <xpath expr="//field[@name='employee_id']" position="after">
+                <field name="currency_id" invisible="1"/>
+                <field name="employee_training_period_id" invisible="1"/>
+                <field name="trainee" force_save="1"
+                       readonly="employee_training_period_id"
+                       invisible="(state not in ('draft','training')) or employee_training_period_id"/>
+                <field name="training_date_from" force_save="1"
+                       invisible="(state not in ('draft','training')) or not trainee"
+                       readonly="employee_training_period_id"
+                       required="trainee"/>
+                <field name="training_date_to" force_save="1"
+                       invisible="(state not in ('draft','training')) or not trainee"
+                       readonly="employee_training_period_id"
+                       required="trainee"/>
+            </xpath>
+            <xpath expr="//field[@name='employee_id']" position="attributes">
+                <attribute name="required">trainee</attribute>
+            </xpath>
+            <xpath expr="//field[@name='job_id']" position="after">
+                <field name="employee_salary_structure_id" force_save="1"/>
+                <field name="default_schedule_pay" force_save="1"/>
+            </xpath>
+            <xpath expr="//group[@name='salary']" position="before">
+                <group>
+                    <field name="wage_type"/>
+                    <field name="is_approved" invisible="1"/>
+                </group>
+            </xpath>
+            <xpath expr="//div[@name='wage']" position="after">
+                <div class="o_row mw-50" name="wage_hour" invisible="wage_type=='monthly' or wage_type==False">
+                    <field name="hourly_wage" class="oe_inline o_hr_narrow_field" nolabel="1"/>
+                    <div class="mb-3" name="wage_period_hour">/ hour</div>
+                </div>
+            </xpath>
+            <xpath expr="//div[@name='wage']" position="attributes">
+                <attribute name="invisible">wage_type == 'hourly'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_start']" position="attributes">
+                <attribute name="invisible">state in ('draft','training')</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_end']" position="attributes">
+                <attribute name="invisible">state in ('draft','training')</attribute>
+            </xpath>
+            <xpath expr="//notebook/page[@name='information']" position="inside">
+                <group>
+                    <group>
+                        <field name="yearly_wage" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_inline" invisible="wage_type == 'hourly'"/>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Allowance Details">
+                    <separator string="Employee Allowance Details"/>
+                    <group>
+                        <group>
+                            <field name="house_rent" force_save="1"/>
+                            <field name="travel_allowance" force_save="1"/>
+                            <field name="dearness_allowance" force_save="1"/>
+                        </group>
+                        <group>
+                            <field name="meal_allowance" force_save="1"/>
+                            <field name="medical_allowance" force_save="1"/>
+                            <field name="other_allowance" force_save="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_approval_rule_tree" model="ir.ui.view">
+        <field name="name">approval.rule.tree</field>
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="rule_type"/>
+                <field name="state_field_name" optional="hide"/>
+                <field name="level_count" string="Levels"/>
+                <field name="approver_names"/>
+                <field name="auto_execute" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_approval_rule_form" model="ir.ui.view">
+        <field name="name">approval.rule.form</field>
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <form string="Approval Rule">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="model_id"/>
+                            <field name="model_name" invisible="1"/>
+                            <field name="rule_type"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="auto_execute"/>
+                            <field name="approver_names" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="user_id" invisible="1"/>
+                            <field name="group_id" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Approval Levels" name="approval_levels">
+                            <field name="approval_line_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="level" string="#"/>
+                                    <field name="name"/>
+                                    <field name="user_id"
+                                           required="not group_id"
+                                           options="{'no_create': True}"/>
+                                    <field name="group_id"
+                                           required="not user_id"
+                                           options="{'no_create': True}"/>
+                                </tree>
+                            </field>
+                            <div class="text-muted mt-2">
+                                Levels are requested one after the other: the
+                                next level is asked automatically as soon as
+                                the previous approver accepts. The requester
+                                does not have to trigger the action again.
+                            </div>
+                        </page>
+
+                        <page string="Trigger Conditions">
+                            <group>
+                                <group string="State Change Configuration"
+                                       invisible="rule_type != 'state'">
+                                    <field name="state_field_id"
+                                           required="rule_type == 'state'"
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                    <field name="state_field_name" invisible="1"/>
+                                    <field name="state_field_type" invisible="1"/>
+                                    <field name="state_field_relation" invisible="1"/>
+                                    <field name="state_values_m2o_ids" invisible="1"/>
+                                    <field name="state_to_selection_id"
+                                           invisible="state_field_type != 'selection'"
+                                           required="rule_type == 'state' and state_field_type == 'selection'"
+                                           options="{'no_create': True, 'no_open': True}"/>
+
+                                    <field name="state_to_m2o_value_id"
+                                           invisible="state_field_type != 'many2one'"
+                                           required="rule_type == 'state' and state_field_type == 'many2one'"
+                                           options="{'no_create': True}"/>
+                                </group>
+                                <group string="Button Configuration"
+                                       invisible="rule_type != 'button'">
+                                    <label for="button_id"/>
+                                    <div class="o_row">
+                                        <field name="button_id"
+                                               options="{'no_create': True, 'no_open': True}"/>
+                                        <button name="action_sync_buttons"
+                                                type="object" class="fa fa-refresh"/>
+                                    </div>
+                                </group>
+                                <group string="Server Action Configuration"
+                                       invisible="rule_type != 'server'">
+                                    <field name="server_action_id"
+                                           required="rule_type == 'server'"
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </group>
+                                <group string="Additional Filters" col="1">
+                                    <field name="domain"
+                                           widget="domain"
+                                           options="{'model': 'model_name'}"
+                                           nolabel="1"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Notifications">
+                            <group>
+                                <group>
+                                    <field name="is_comment"/>
+                                    <field name="is_email"/>
+                                </group>
+                                <group invisible="not is_email">
+                                    <field name="is_email_request"
+                                           invisible="not is_email"/>
+                                    <field name="is_email_approve"
+                                           invisible="not is_email"/>
+                                    <field name="is_email_reject"
+                                           invisible="not is_email"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_approval_rule_search" model="ir.ui.view">
+        <field name="name">approval.rule.search</field>
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="approver_names" string="Approver"/>
+                <separator/>
+                <filter string="Multi Level" name="filter_multi_level"
+                        domain="[('level_count', '>', 1)]"/>
+                <separator/>
+                <filter string="Button Rules" name="filter_button"
+                        domain="[('rule_type', '=', 'button')]"/>
+                <filter string="State Rules" name="filter_state"
+                        domain="[('rule_type', '=', 'state')]"/>
+                <filter string="Server Action Rules" name="filter_server"
+                        domain="[('rule_type', '=', 'server')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Model" name="group_model"
+                            context="{'group_by': 'model_id'}"/>
+                    <filter string="Rule Type" name="group_type"
+                            context="{'group_by': 'rule_type'}"/>
+                    <filter string="First Approver" name="group_user"
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Company" name="group_company"
+                            context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_approval_rule" model="ir.actions.act_window">
+        <field name="name">Approval Rules</field>
+        <field name="res_model">approval.rule</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Approval Rule
+            </p>
+            <p>
+                Define approval workflows for buttons, state changes, or server actions.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_approval_root"
+              name="Approvals"
+              web_icon="cyllo_approval,static/description/Approval-black.svg"
+              sequence="10"
+              groups="cyllo_approval.group_approval_manager,cyllo_approval.group_approval_user"/>
+    <menuitem id="menu_approval_rules"
+              name="Rules"
+              parent="menu_approval_root"
+              action="action_approval_rule"
+              sequence="10"/>
+</odoo>

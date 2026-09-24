@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="cyllo_studio.StudioMenuSideBar" t-inherit="cyllo_studio.MenuSideBarNew" owl="1">
+        <xpath expr="//div[hasclass('cy-left-sidebar')]/ul/t[@t-foreach='this.state.apps']/li" position="attributes">
+            <attribute name="class" add="cy-menuLi" separator=" "/>
+            <attribute name="class" add="cy-ParentMenuDrag" separator=" "/>
+            <attribute name="class" add="menu-draggable" separator=" "/>
+            <attribute name="t-att-menu_id">app.id</attribute>
+            <attribute name="t-attf-style">background-image: {{(app.active) and 'none' or 'repeating-linear-gradient(45deg, #ffffff10, #ffffff10 5px, #00000010 5px, #00000000 10px)'}}</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('cy-left-sidebar')]/ul" position="attributes">
+            <attribute name="t-ref">MenuDragRef</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('cy-left-sidebar')]/ul/t[@t-foreach='this.state.apps']" position="before">
+            <li class="nav-item mb-2 cy-new-app-li prevent-drag">
+                <a class="nav-link d-flex align-items-center gap-2 cy-sidebar-nav position-relative cy-new-app-btn" href="#" t-on-click="createApp" title="New App">
+                    <i class="ri-add-line cy-new-app-icon"/>
+                    <t t-if="state.isSidebarOn">New App</t>
+                    <div t-if="!state.isSidebarOn" class="cy-app-hover-name">New App</div>
+                </a>
+            </li>
+        </xpath>
+        <xpath expr="//div[hasclass('cy-left-sidebar')]/ul/t[@t-foreach='this.state.apps']/li" position="inside">
+            <div class="cy-left-menuLi1">
+                <i t-if="state.isSidebarOn" class="ri-drag-move-line cy-drag-move-cust handle-drag" />
+                <i t-if="state.isSidebarOn" class="ri-edit-box-line cy-menu_cust handle-drag d-flex justify-content-center align-items-center" style="position: relative;" t-on-click="(e) => this.ParentMenuCust(e, app)"/>
+            </div>
+        </xpath>
+        <xpath expr="//nav" position="attributes">
+            <attribute name="t-attf-style">width: {{ state.isSidebarOn ? '14%' : '16%'}};</attribute>
+        </xpath>
+        <xpath expr="//ul[hasclass('cy-submenu-lists')]/li[hasclass('mb-1')]" position="attributes">
+            <attribute name="class" remove="mb-1" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('cy-submenu-logo')]" position="inside">
+            <span class="cy-submenu-logo-studio">Studio</span>
+        </xpath>
+        <!-- Cy SubMenu Sidebar -->
+        <xpath expr="//div[hasclass('cy-submenu-box')]/ul[hasclass('cy-submenu-lists')]" position="attributes">
+            <attribute name="t-ref">CySubMenuDragRef</attribute>
+        </xpath>
+
+        <xpath expr="//div[hasclass('cy-submenu-box')]/ul[hasclass('cy-submenu-lists')]" position="inside">
+            <a t-if="!state.isApp" class="addMenu prevent-drag add-fields menu-draggable" style="font-size: 100%; !important; " t-on-click="() => this.itemOnClick(ParentMenu,true)">
+                <div class="d-flex align-items-center">
+                    <i class="ri-add-line"/>
+                    <spaN>Add Menu</spaN>
+                </div>
+            </a>
+        </xpath>
+        <!--		drag and drop in submenu    -->
+        <xpath expr="//div[hasclass('cy-submenu-box')]/ul[hasclass('cy-submenu-lists')]/t[@t-foreach='this.state.menus']/t[@t-if='!menu.avoidClick &amp;&amp; !dropCheck(menu)']" position="replace">
+            <t t-if="!menu.avoidClick &amp;&amp; !dropCheck(menu)">
+                <li class="nav-item menu-draggable cy-SubMenuDrag" t-att-menu_id="menu.id">
+                    <div class="sidebar_container_list" t-on-contextmenu="studioOpenContextMenu" t-attf-class="{{menu and (!(menu.active) ? 'deactivated' : '')}}" t-attf-style="background-image: {{menu and (menu.active and 'none' or 'repeating-linear-gradient(45deg, #FFFFFF10, #FFFFFF10 5px, #00000010 5px, #00000010 10px)') or 'none'}};">
+                        <a class="nav-link d-flex align-items-center gap-2 cy-sidebar-nav position-relative w-100 justify-content-between cy-accordian collapsed" type="button" t-attf-id="main_menu{{menu.id}}" t-on-click="() => { this.onClickMenu(menu.id, false); this.resetSelectMenu();}">
+                            <div class="draggableDiv">
+                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" x="0" y="0" viewBox="4 0 24 24" xml:space="preserve" class="ri-drag-move-line handle-drag">
+                                    <g>
+                                        <g fill="#000" fill-rule="evenodd" clip-rule="evenodd">
+                                            <path d="M9.5 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm-2 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18.5 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm-2 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#bcbba7" opacity="1" data-original="#000000"></path>
+                                        </g>
+                                    </g>
+                                </svg>
+                                <i class="cy-icons" t-att-class="icon" t-if="icon" t-att-title="menu.name"/>
+                                <span t-esc="menu.name" t-on-contextmenu="studioOpenContextMenu" data-bs-toggle="tooltip" t-att-title="menu.name"/>
+                            </div>
+                            <div class="studio-context-menu" data-bs-toggle="tooltip" title="Edit Menu">
+                                <div t-if="name != 'Recent'" t-att-value="ParentMenu" t-on-click.stop="(e) => this.ParentMenuCust(e, menu)">
+                                    <i class="ri-pencil-line cy-menu_cust handle-drag text-end"/>
+                                </div>
+                            </div>
+                            <t t-if="isParent">
+                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12" x="0" y="0" viewBox="0 0 128 128" xml:space="preserve" class="menus-sidebar-arrows studio_arrow rotated-svg">
+                                    <g>
+                                        <path d="M64 88a3.988 3.988 0 0 1-2.828-1.172l-40-40c-1.563-1.563-1.563-4.094 0-5.656s4.094-1.563 5.656 0L64 78.344l37.172-37.172c1.563-1.563 4.094-1.563 5.656 0s1.563 4.094 0 5.656l-40 40A3.988 3.988 0 0 1 64 88z" fill="#bcbba7" opacity="1" data-original="#000000"></path>
+                                    </g>
+                                </svg>
+                            </t>
+                        </a>
+                    </div>
+                </li>
+            </t>
+        </xpath>
+        <xpath expr="//div[hasclass('cy-submenu-box')]/ul[hasclass('cy-submenu-lists')]/t[@t-foreach='this.state.menus']/t[@t-if='dropCheck(menu)']/li/t[@t-call='cyllo_studio.Accordian']" position="inside">
+            <t t-set="ParentMenu" t-value="menu"/>
+            <t t-set="isParent" t-value="true"/>
+        </xpath>
+    </t>
+    <t t-inherit="cyllo_studio.Accordian" t-inherit-mode="extension" owl="1">
+        <xpath expr="//a[hasclass('cy-accordian')]" position="replace">
+            <div class="menu-draggable" t-att-menu_id="menu.id">
+                <div class="sidebar_container_list" t-on-contextmenu="studioOpenContextMenu" t-attf-style="background-image: {{ParentMenu and (ParentMenu.active and 'none' or 'repeating-linear-gradient(45deg, #FFFFFF10, #FFFFFF10 5px, #00000010 5px, #00000010 10px)') or 'none'}};">
+                    <a class="nav-link d-flex align-items-center gap-2 cy-sidebar-nav position-relative w-100 justify-content-between cy-accordian collapsed" type="button" data-bs-toggle="collapse" t-attf-class="{{menuId == 'recent_apps' ? 'menuId w-100 mb-1' : 'menuId'}}" t-att-data-bs-target="'#app'+menuId" t-attf-id="main_menu{{menu.id}}" t-attf-data-id="{{actionID}}">
+                        <div class="draggableDiv">
+                            <t t-if="isParent">
+                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" x="0" y="0" viewBox="4 0 24 24" xml:space="preserve" class="ri-drag-move-line handle-drag">
+                                    <g>
+                                        <g fill="#000" fill-rule="evenodd" clip-rule="evenodd">
+                                            <path d="M9.5 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm-2 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18.5 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm-2 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#bcbba7" opacity="1" data-original="#000000"></path>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </t>
+                            <i class="cy-icons" t-att-class="icon" t-if="icon" t-att-title="name"/>
+                            <span t-esc="name" t-on-contextmenu="studioOpenContextMenu" data-bs-toggle="tooltip" t-att-title="name"/>
+                        </div>
+                        <div class="studio-context-menu" data-bs-toggle="tooltip" title="Edit Menu">
+                            <div t-if="name != 'Recent'" t-att-value="ParentMenu" t-on-click="(e) => this.ParentMenuCust(e, ParentMenu)">
+                                <i class="ri-pencil-line cy-menu_cust handle-drag text-end"/>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12" x="0" y="0" viewBox="0 0 128 128" xml:space="preserve" class="menus-sidebar-arrows studio_arrow rotated-svg">
+                            <g>
+                                <path d="M64 88a3.988 3.988 0 0 1-2.828-1.172l-40-40c-1.563-1.563-1.563-4.094 0-5.656s4.094-1.563 5.656 0L64 78.344l37.172-37.172c1.563-1.563 4.094-1.563 5.656 0s1.563 4.094 0 5.656l-40 40A3.988 3.988 0 0 1 64 88z" fill="#bcbba7" opacity="1" data-original="#000000"></path>
+                            </g>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//ul[@t-on-contextmenu='openContextMenu']" position="attributes">
+            <attribute name="class" add="children_content" separator=" "/>
+        </xpath>
+        <xpath expr="//ul/t[@t-if='menuChildren']/t[@t-foreach='menuChildren']/t[@t-if='ch_menu.childrenTree &amp;&amp; ch_menu.childrenTree.length']/t[@t-call='cyllo_studio.Accordian']" position="inside">
+            <t t-set="ParentMenu" t-value="ch_menu"/>
+            <t t-set="isParent" t-value="false"/>
+        </xpath>
+        <xpath expr="//ul/t[@t-if='menuChildren']/t[@t-foreach='menuChildren']/t[@t-else='']/li" position="replace">
+            <li class="nav-item" t-on-contextmenu="studioOpenContextMenu" t-on-click.prevent="() => this.accordianMenuClick(ch_menu)" t-attf-id="menu{{ch_menu.id}}" t-att-class="state.currentSelectedMenu == ch_menu.id ? 'cy_active_menu': ''" t-attf-style="background-image: {{(ch_menu.active and ParentMenu) and 'none' or 'repeating-linear-gradient(45deg, #ffffff10, #ffffff10 5px, #00000010 5px, #00000000 10px)'}};">
+                <a class="nav-link d-flex align-items-center gap-2 cy-sidebar-nav w-100">
+                    <span t-esc="ch_menu.name" t-on-contextmenu="studioOpenContextMenu" data-bs-toggle="tooltip" t-att-title="ch_menu.name"/>
+                    <t t-if="pin">
+                        <t t-if="state.pinnedMenu.map(res => res['app_id']).includes(ch_menu.id)">
+                            <i class="ri-pushpin-line"/>
+                        </t>
+                    </t>
+                    <div class="studio-context-submenu studio-context-menu" data-bs-toggle="tooltip" title="Edit Menu">
+                        <div t-on-click.stop="() => this.ChildMenuCust(ch_menu, ParentMenu, menuChildren)">
+                            <i class="ri-pencil-line cy-menu_cust handle-drag text-end"/>
+                        </div>
+                    </div>
+                </a>
+
+            </li>
+        </xpath>
+        <xpath expr="//ul/t[@t-if='menuChildren']/t[@t-foreach='menuChildren']/t[@t-else='']/li[@t-attf-id='menu{{ch_menu.id}}']" position="attributes">
+            <attribute name="class" add="cy-menuLi" separator=" "/>
+            <attribute name="class" add="cy-menuLi3" separator=" "/>
+        </xpath>
+    </t>
+</templates>

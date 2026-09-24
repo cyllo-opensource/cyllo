@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="GlobalSearch" owl="1">
+        <div class="o_searchview_input_container d-flex flex-grow-1 flex-wrap gap-1" t-ref="root">
+            <t t-call="GlobalSearch.Input"/>
+            <t t-call="GlobalSearchMobile.Input"/>
+            <a href="#" class="nav-link px-2 cy-mob-search-icon d-none" t-on-click="onClickSearchIcon" style="margin-left: -140px; z-index:1;">
+                <i class="ri-search-line cy-icons"/>
+            </a>
+        </div>
+    </t>
+
+    <t t-name="GlobalSearch.Input" owl="1">
+        <form class="d-flex cy_global_search_pc position-relative">
+            <div class="input-group cy-global_search_container">
+                <span class="input-group-text cy-search">
+                    <i class="ri-search-line cy-search-icon"/>
+                </span>
+                <input class="form-control cy-custom-search " type="search" placeholder="Type here to search.." t-ref="autofocus" accesskey="K"
+                       aria-label="Search" t-on-keydown="onSearchKeydown" t-on-input="onSearchInput" t-on-focus="onFocusSearchInput" t-on-blur="onBlurSearchInput"/>
+            </div>
+            <t t-if="this.state.items != undefined and this.state.items.length != 0">
+                <div class="cy-search_modal-container"/>
+                <div class="modal-dialog cy-search_modal m-0 " role="document">
+                    <div class="modal-content cy-search_modal-content">
+                        <div class="modal-body cy-search_modal-body px-0">
+                            <ul class="nav flex-column" t-foreach="state.items" t-as="item" t-key="item.id">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center justify-content-between gap-2  cy-sidebar-nav cy-search_suggestion-list"
+                                       t-attf-class="search-item-{{item.id}}" t-att-id="item.id" t-attf-href="#menu_id={{item.id}}"
+                                       t-on-click="(ev) => this.selectMenu(ev, this)">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="cy-icons" t-att-class="item.webIcon" t-if="item.webIcon"/>
+                                            <t t-esc="item.name"/>
+                                        </div>
+                                        <div class="cy-search-list_btn">
+                                            <button class="cy-button-stroke cy-ctrl-btn">CTRL</button>
+                                            +
+                                            <button class="cy-button-stroke cy-ctrl-btn">
+                                                <i class="ri-arrow-left-up-line"/></button>
+                                            new tab
+                                        </div>
+                                    </a>
+
+                </li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer cy-modal-search_footer">
+                            <span>TIP</span> — open me anywhere with <span class="mx-1" href=""> CONTROL </span>+ <span>K</span>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </form>
+    </t>
+
+    <t t-name="GlobalSearchMobile.Input" owl="1">
+        <form class="d-flex cy_search_global_mobile d-none" t-ref="GlobalSearchMobile">
+            <div class="input-group d-flex flex-row">
+                <span class="input-group-text cy-search">
+                    <i class="ri-search-line cy-search-icon"/>
+                </span>
+                <input class="form-control cy-custom-search " type="search" placeholder="Search" t-ref="autofocus_mobile" accesskey="K"
+                       aria-label="Search" t-on-keydown="onSearchKeydown" t-on-input="onSearchInput"/>
+                <span class="input-group-text cy-search_property">
+                    <i class="ri-command-line cy-search-icon cy-searchbox-K cy-button-stroke"/>
+                </span>
+                <span class="input-group-text cy-search_property">
+                    <a href="" class="cy-searchbox-K cy-button-stroke"> K</a>
+                </span>
+            </div>
+            <t t-if="this.state.items != undefined and this.state.items.length != 0">
+                <div class="cy-search_modal-container"/>
+                <div class="modal-dialog cy-search_modal m-0 " role="document">
+                    <div class="modal-content cy-search_modal-content">
+                        <div class="modal-body cy-search_modal-body px-0">
+                            <ul class="nav flex-column" t-foreach="state.items" t-as="item" t-key="item.id">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center justify-content-between gap-2  cy-sidebar-nav cy-search_suggestion-list"
+                                       t-att-id="item.id" t-attf-href="#menu_id={{item.id}}" t-on-click="(ev) => this.selectMenu(ev, this)">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="cy-icons" t-att-class="item.webIcon" t-if="item.webIcon"/>
+                                            <t t-esc="item.name"/>
+                                        </div>
+                                        <div class="cy-search-list_btn">
+                                            <button class="cy-button-stroke cy-ctrl-btn">CTRL</button>
+                                            +
+                                            <button class="cy-button-stroke cy-ctrl-btn">
+                                                <i class="ri-arrow-left-up-line"/></button>
+                                            new tab
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer cy-modal-search_footer">
+                            <span>TIP</span> — open me anywhere with <span href="">CONTROL </span>+ <span>K</span>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </form>
+    </t>
+
+    <t t-name="GlobalSearch.Items" owl="1">
+        <div class="cy-search_modal-container"/>
+        <ul class="dropdown-menu o_searchview_autocomplete dropdown-menu show" role="menu" style="margin-top:30px;width:28%" t-ref="scrollContainer">
+            <t t-foreach="state.items" t-as="item" t-key="item.id">
+                <li class="o_menu_item dropdown-item" t-att-class="{ o_indent: item.isChild, focus: item_index === state.focusedIndex}"
+                    t-att-id="item.id" t-attf-href="#menu_id={{item.id}}" t-on-click="(ev) => this.selectMenu(ev,this)">
+                    <t t-if="item.isParent">
+                        <a t-att-class="{ o_expand: true, 'ms-4': item.isFieldProperty}" href="#"
+                            t-on-click.stop.prevent="() => this.toggleItem(item, !item.isExpanded)">
+                            <i t-attf-class="fa fa-caret-{{ item.isExpanded ? 'down' : 'right' }}"/>
+                        </a>
+                    </t>
+                    <a href="#" t-att-class="{'ps-3 pe-2 text-truncate': item.isFieldProperty }" t-att-title="item.title" t-attf-href="#menu_id={{item.id}}">
+                        <t t-esc="item.name" t-attf-href="#menu_id={{item.id}}"/>
+                    </a>
+                </li>
+            </t>
+        </ul>
+    </t>
+
+</templates>

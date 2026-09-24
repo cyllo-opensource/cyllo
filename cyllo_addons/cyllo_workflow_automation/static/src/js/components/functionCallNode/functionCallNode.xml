@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="FunctionCallNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="p-2">
+                <div class="mb-3">
+                    <label for="label-input" class="form-label">Label</label>
+                    <input type="text"
+                           id="label-input"
+                           class="form-control"
+                           autocomplete="off"
+                           placeholder="Label"
+                           t-on-change="(ev) => this.setLabel(ev.target.value)"
+                           t-att-value="fieldState.label"
+                    />
+                </div>
+
+                <div class="mb-3 text-end">
+                    <TypeToggler
+                        options="getTogglerOptions"
+                        value="fieldState.function_type"
+                        updateValue.bind="setType"
+                        width="35"
+                    />
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Select Records to Apply</label>
+                        <CustomDropdown
+                            options="records"
+                            defaultValue="fieldState.function_record.id"
+                            onChange="(value) => this.onChangeVariable(value)"
+                            placeholder="'Select a record...'"
+                            searchable="true"
+                            width="''"
+                            maxHeight="'70px'"
+                        />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="function-select" class="form-label">Function</label>
+                        <CustomDropdown
+                            options="selectedFunctionItems"
+                            defaultValue="fieldState.function_name?.value || ''"
+                            onChange="(value) => this.onChangeFunction(value)"
+                            placeholder="'Select a function...'"
+                            searchable="true"
+                            width="''"
+                            maxHeight="'70px'"
+                        />
+                    </div>
+
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

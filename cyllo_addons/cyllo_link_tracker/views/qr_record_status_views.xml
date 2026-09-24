@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════
+         RECORD QR STATUS REPORT
+         Uses qr.record.status SQL view:
+           aggregates scan events per (record_id × qr_token)
+         Grouped by Record Name so user can see which records
+         have scanned which QR codes.
+         ══════════════════════════════════════════════════════════ -->
+
+    <!-- Tree view — grouped by Record Name -->
+    <record id="view_qr_record_status_tree" model="ir.ui.view">
+        <field name="name">qr.record.status.tree</field>
+        <field name="model">qr.record.status</field>
+        <field name="arch" type="xml">
+            <tree string="Record QR Status"
+                  decoration-success="is_scanned == True"
+                  create="0" edit="0" delete="0">
+                <field name="record_name"   string="Record Reference"/>
+                <field name="token_name"   string="QR Token"/>
+                <field name="report_name"  string="Report"/>
+                <field name="is_scanned"   string="Scanned?"
+                       widget="boolean"/>
+                <field name="scan_count"   string="Times Scanned"/>
+                <field name="last_scanned_at" string="Last Scanned"/>
+                <field name="track_analytics" string="Analytics On"
+                       widget="boolean"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form view — detail when user clicks a row -->
+    <record id="view_qr_record_status_form" model="ir.ui.view">
+        <field name="name">qr.record.status.form</field>
+        <field name="model">qr.record.status</field>
+        <field name="arch" type="xml">
+            <form string="QR Code Scan Status" create="0" edit="0">
+                <sheet>
+                    <field name="is_scanned" invisible="1"/>
+                    <!-- Scanned banner -->
+                    <div class="alert alert-success" role="alert"
+                         invisible="not is_scanned">
+                        <i class="fa fa-check-circle mr-2"/>
+                        <strong>Scanned ✓</strong> — This QR code has been scanned for this record.
+                    </div>
+
+                    <group>
+                        <group string="Record Details">
+                            <field name="record_name" string="Record Reference" readonly="1"/>
+                            <field name="report_name" string="Report" readonly="1"/>
+                        </group>
+                        <group string="QR Token">
+                            <field name="token_name" string="Token" readonly="1"/>
+                            <field name="track_analytics" string="Analytics Enabled" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Scan Statistics">
+                        <group>
+                            <field name="scan_count" string="Total Scans" readonly="1"/>
+                            <field name="last_scanned_at" string="Last Scanned At" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Kanban view -->
+    <record id="view_qr_record_status_kanban" model="ir.ui.view">
+        <field name="name">qr.record.status.kanban</field>
+        <field name="model">qr.record.status</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column" create="0">
+                <field name="record_name"/>
+                <field name="token_name"/>
+                <field name="report_name"/>
+                <field name="is_scanned"/>
+                <field name="scan_count"/>
+                <field name="last_scanned_at"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record"
+                             style="border-left: 4px solid #28a745">
+                            <div class="oe_kanban_content p-2">
+                                <div class="mb-2">
+                                    <span class="badge badge-success py-1 px-2">
+                                        ✓ Scanned
+                                    </span>
+                                </div>
+                                <strong class="o_kanban_record_title">
+                                    <field name="record_name"/>
+                                </strong>
+                                <div class="text-muted small mt-1">
+                                    <i class="fa fa-qrcode mr-1"/>
+                                    <field name="token_name"/>
+                                </div>
+                                <div class="mt-2 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">
+                                        Scans: <strong><field name="scan_count"/></strong>
+                                    </span>
+                                    <span t-if="record.last_scanned_at.raw_value" class="text-muted small">
+                                        <field name="last_scanned_at" widget="date"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search view -->
+    <record id="view_qr_record_status_search" model="ir.ui.view">
+        <field name="name">qr.record.status.search</field>
+        <field name="model">qr.record.status</field>
+        <field name="arch" type="xml">
+            <search string="Search Record QR Status">
+                <field name="record_name" string="Record Reference"/>
+                <field name="token_name" string="QR Token"/>
+                <!-- Filters -->
+                <filter string="Analytics On" name="filter_analytics"
+                        domain="[('track_analytics', '=', True)]"/>
+                <!-- Group By -->
+                <group expand="1" string="Group By">
+                    <filter string="Record Reference" name="group_by_record"
+                            context="{'group_by': 'record_name'}"/>
+                    <filter string="QR Token" name="group_by_token"
+                            context="{'group_by': 'token_name'}"/>
+                    <filter string="Report" name="group_by_report"
+                            context="{'group_by': 'report_name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_qr_record_status_report" model="ir.actions.act_window">
+        <field name="name">Record QR Status</field>
+        <field name="res_model">qr.record.status</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_qr_record_status_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record QR scan data found.
+            </p>
+            <p>
+                When a QR code generated by Cyllo Studio is scanned on a report,
+                the scan details will appear here globally for all models.
+            </p>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════
+         UNSCANNED QR TOKENS (all report types, scan_count = 0)
+         ══════════════════════════════════════════════════════════ -->
+    <record id="view_qr_token_unscanned_tree" model="ir.ui.view">
+        <field name="name">qr.download.token.unscanned.tree</field>
+        <field name="model">qr.download.token</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <tree string="Unscanned QR Tokens" create="0"
+                  decoration-warning="track_analytics == True"
+                  decoration-muted="track_analytics == False">
+                <field name="name"/>
+                <field name="report_id" string="Report"/>
+                <field name="track_analytics" string="Analytics On" widget="boolean"/>
+                <field name="tracking_status" widget="badge"
+                       decoration-warning="tracking_status == 'tracked_unscanned'"
+                       decoration-secondary="tracking_status == 'not_tracked'"/>
+                <field name="scan_count" string="Scans"/>
+                <field name="created_at" string="Created"/>
+                <field name="expires_at" string="Expires"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_qr_token_unscanned_search" model="ir.ui.view">
+        <field name="name">qr.download.token.unscanned.search</field>
+        <field name="model">qr.download.token</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <search string="Search Unscanned Tokens">
+                <field name="name"/>
+                <field name="report_id"/>
+                <filter string="Analytics Enabled" name="filter_analytics_on"
+                        domain="[('track_analytics', '=', True)]"/>
+                <filter string="Analytics Disabled" name="filter_analytics_off"
+                        domain="[('track_analytics', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Report" name="group_by_report"
+                            context="{'group_by': 'report_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_qr_token_unscanned" model="ir.actions.act_window">
+        <field name="name">Unscanned QR Tokens</field>
+        <field name="res_model">qr.download.token</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('scan_count', '=', 0)]</field>
+        <field name="search_view_id" ref="view_qr_token_unscanned_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                All QR codes have been scanned — great work!
+            </p>
+            <p>
+                QR tokens that have never been scanned appear here.
+            </p>
+        </field>
+    </record>
+
+</odoo>

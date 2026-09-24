@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_analytics.MenuDialog" owl="1">
+        <Dialog size="'md'" title="'Add To Menu'">
+            <t t-set-slot="header">
+                <h4 class="modal-title">Add To Menu
+                    <div class="field-tooltip cy-analytics-add-menu-field-tooltip">
+                        <span class="add-menu-info cy-analytics-add-menu-info">?</span>
+                    </div>
+                    <div class="tooltip-content justify-content-around modal_background cy-analytics-add-menu-tooltip-content">
+                        The dashboard menu will be displayed as a sub-menu
+                        of the selected parent menu with the given name.
+                    </div>
+                </h4>
+                <button type="button" class="btn-close" aria-label="Close" tabindex="-1" t-on-click="_cancel"/>
+            </t>
+            <Record t-props="recordProps" t-slot-scope="data">
+                <form class="p-2 cy_dash_conf">
+                    <div class="row py-2">
+                        <div class="col-12 mb-3 px-2" t-on-input="onNameInput">
+                            <label for="name" class="form-label cy-modal-form_label">Name</label>
+                            <CharField name="'name'"
+                                       record="data.record"
+                                       id="'name'"/>
+                        </div>
+                        <div class="col-12 mb-3 px-2 mt-2">
+                            <label class="form-label cy-modal-form_label">App (Top-Level Menu)</label>
+                            <SelectMenu
+                                choices="appChoices"
+                                value="state.selectedAppId || undefined"
+                                onSelect.bind="onSelectApp"
+                                class="'w-100'"
+                            >
+                                <t t-if="state.selectedAppId" t-esc="appChoices.find(c => c.value === state.selectedAppId)?.label || ''"/>
+                                <span t-else="" class="text-muted">Select an App...</span>
+                            </SelectMenu>
+                        </div>
+                        <div class="col-12 px-2" t-if="state.selectedAppId">
+                            <label class="form-label cy-modal-form_label">Menu Position</label>
+                            <div class="text-muted small mb-2">Drag the "New Menu" pill and drop it in the desired location.</div>
+                            <div class="menu-tree-container p-3 rounded cy-analytics-add-menu-tree-container">
+                                <div t-if="!state.isDropped" class="d-flex justify-content-center mb-4">
+                                    <div class="draggable-new-menu shadow cy-analytics-add-menu-draggable-pill"
+                                         draggable="true"
+                                         t-on-dragstart="onDragStartNewMenu"
+                                         t-on-dragend="onDragEndNewMenu">
+                                        <i class="ri-drag-move-2-fill me-2"/> <t t-esc="data.record.data.name || 'New Dashboard Menu'"/>
+                                    </div>
+                                </div>
+                                <t t-if="state.appTree">
+                                    <MenuTreeNode node="state.appTree" level="0" parentId="state.appTree.id" comp="this"/>
+                                </t>
+                                <div t-else="" class="text-center text-muted py-4">Loading menu structure...</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </Record>
+            <t t-set-slot="footer">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <div class="text-muted small px-3">
+                        <t t-if="state.targetParentId">
+                            Will be added under: <strong><t t-esc="state.targetParentName"/></strong> (Sequence: <t t-esc="state.targetSequence"/>)
+                        </t>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary themed-bg"
+                                t-on-click="handleConfirm"
+                                t-att-disabled="!state.targetParentId">Confirm</button>
+                        <button class="btn btn-secondary"
+                                t-on-click="_cancel">Cancel</button>
+                    </div>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+    <!-- Recursive Sub-Template for Menu Tree -->
+    <t t-name="cyllo_analytics.MenuTreeNode" owl="1">
+        <div class="menu-tree-node" t-att-style="'margin-left: ' + (props.level * 25) + 'px;'">
+            <!-- Drop zone before this item (disabled for the root app node) -->
+            <div t-if="!props.node.isTemp and props.level > 0" class="drop-zone-indicator cy-analytics-add-menu-drop-zone"
+                 t-att-data-parent-id="props.parentId"
+                 t-att-data-before-seq="props.node.sequence"
+                 t-att-data-before-id="props.node.id"
+                 t-on-dragover="onDragOver"
+                 t-on-dragleave="onDragLeave"
+                 t-on-drop="onDrop"></div>
+
+            <div class="menu-item p-2 rounded shadow-sm d-flex align-items-center"
+                 t-att-class="{
+                     'is-temp-node': props.node.isTemp,
+                     'drop-into-zone': !props.node.isTemp
+                 }"
+                 t-att-draggable="props.node.isTemp ? 'true' : 'false'"
+                 t-on-dragstart="onDragStartNewMenu"
+                 t-on-dragend="onDragEndNewMenu"
+                 t-att-data-into-parent-id="!props.node.isTemp ? props.node.id : null"
+                 t-att-data-into-parent-name="!props.node.isTemp ? props.node.name : null"
+                 t-on-dragover="onDragOverInto"
+                 t-on-dragleave="onDragLeaveInto"
+                 t-on-drop="onDropInto"
+                 t-att-style="props.node.isTemp ? 'background: #aabc14 !important; color: white !important; cursor: grab;' : 'transition: border 0.3s ease;'">
+
+                <t t-if="props.node.isTemp">
+                    <i class="ri-drag-move-2-fill me-2 text-white"/>
+                    <span class="fw-medium text-white"><t t-esc="props.node.name"/></span>
+                </t>
+                <t t-else="">
+                    <i class="ri-folder-2-line text-muted me-2" t-if="props.node.children and props.node.children.length > 0"/>
+                    <i class="ri-file-list-3-line text-muted me-2" t-else=""/>
+                    <span class="fw-medium text-dark"><t t-esc="props.node.name"/></span>
+                </t>
+            </div>
+            <!-- Children -->
+            <t t-if="props.node.children and props.node.children.length > 0">
+                <div class="children-container mt-1">
+                    <t t-foreach="props.node.children" t-as="child" t-key="child.id">
+                        <MenuTreeNode node="child" level="props.level + 1" parentId="props.node.id" comp="props.comp" isLast="child_last"/>
+                    </t>
+                </div>
+            </t>
+            <!-- Drop zone after the LAST item in a list (handled at the parent level, disabled for level 0) -->
+            <t t-if="props.isLast and !props.node.isTemp and props.level > 0">
+                 <div class="drop-zone-indicator cy-analytics-add-menu-drop-zone"
+                      t-att-data-parent-id="props.parentId"
+                      t-att-data-after-seq="props.node.sequence"
+                      t-att-data-after-id="props.node.id"
+                      t-on-dragover="onDragOver"
+                      t-on-dragleave="onDragLeave"
+                      t-on-drop="onDrop"></div>
+            </t>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Product template search view -->
+    <record id="view_product_template_search" model="ir.ui.view">
+        <field name="name">view.product.template.search</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="html">
+            <xpath expr="//search/filter[@name='filter_to_purchase']" position="after">
+                <filter string="Subscription" name="is_subscription"
+                        domain="[('is_subscription','=', 1)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Product form view -->
+    <record id="view_product_template_only_form" model="ir.ui.view">
+        <field name="name">view.product.template.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']" position="inside">
+                <span class="d-inline-block">
+                    <field name="is_subscription"/>
+                    <label for="is_subscription"/>
+                </span>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Time Based Pricing" invisible="not is_subscription" groups="sales_team.group_sale_manager,sales_team.group_sale_salesman">
+                    <form>
+                        <field name="time_based_ids"/>
+                    </form>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_product_product_form" model="ir.ui.view">
+        <field name="name">view.product.product.form.</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']" position="inside">
+                <span class="d-inline-block">
+                    <field name="is_subscription"/>
+                    <label for="is_subscription"/>
+                </span>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Time Based Pricing" invisible="not is_subscription" groups="sales_team.group_sale_manager,sales_team.group_sale_salesman">
+                    <form>
+                        <field name="time_based_ids"/>
+                    </form>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action to show product template -->
+    <record id="action_view_products" model="ir.actions.act_window">
+        <field name="name">Products</field>
+        <field name="res_model">product.template</field>
+        <field name="context">{"search_default_is_subscription":1, "default_is_subscription": 1}</field>
+        <field name="view_mode">tree,kanban,activity,form</field>
+        <field name="view_id" ref="product.product_template_kanban_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Product is Found!
+            </p>
+            <p>Create some Products!.</p>
+        </field>
+    </record>
+</odoo>

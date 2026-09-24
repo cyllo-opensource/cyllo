@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.Chatter" t-inherit="mail.Chatter"
+       t-inherit-mode="extension">
+        <xpath expr="//Thread" position="before">
+            <div t-if="pinnedMessages.length"
+                 class="o-mail-PinnedMessages mt-3">
+                <div class="d-flex align-items-center fw-bold cursor-pointer mb-2"
+                     t-on-click="togglePinnedMessages">
+                    <i class="fa me-2"
+                       t-att-class="state.showPinnedMessages ? 'fa-caret-down' : 'fa-caret-right'"/>
+                    Pinned Messages
+                    <span t-if="!state.showPinnedMessages"
+                          class="badge rounded-pill bg-primary ms-2">
+                        <span style="color: white;">
+                            <t t-esc="pinnedMessages.length"/>
+                        </span>
+                    </span>
+                </div>
+                <t t-if="state.showPinnedMessages">
+                    <MessageCardList messages="pinnedMessages"
+                                     thread="state.thread" mode="'extended'"
+                                     showEmpty="false"/>
+                </t>
+            </div>
+        </xpath>
+    </t>
+</templates>

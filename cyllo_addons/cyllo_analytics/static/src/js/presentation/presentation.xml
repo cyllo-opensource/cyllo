@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="PresentationSelectionMode">
+        <div class="cy_presentation w-100"
+             t-ref="rootRef"
+             t-att-style="isNoData ? 'overflow: hidden;': ''"
+             style="position: relative;">
+            <div class="container-fluid o_pj_dashboard  control-panel"
+                 style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="title_presentation position-relative d-flex gap-1 justify-content: space-between; align-items: center;"
+                     style="width: 25%;">
+                    <i class="ri-arrow-left-s-line cy_presentation_back cursor-pointer"
+                       t-on-click="goBack"
+                       title="Go Back"/>
+                    <h3 class="my-0 ps-0 title_presentation">Presentation Preview
+                        <div class="presentation-tooltip"
+                             style="cursor: pointer; width: 16px;">
+                            <span style="font-size: 12px;"
+                                  class="filter-info">?</span>
+                        </div>
+                        <div class="tooltip-content presentation-tooltip-info justify-content-around modal_background"
+                             style="">
+                            <span class="title_presentation"
+                                  t-out="filterContent"
+                                  style="text-align: center; padding: unset;"/>
+                            <div class="demo_video d-flex justify-content-center"
+                                 style="margin-bottom: 10px;">
+                                  <img src="/cyllo_analytics/static/src/img/presentation_help.gif"
+                                       class="presentation_helper"/>
+                            </div>
+                        </div>
+                    </h3>
+                </div>
+                <div class="save d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="btn btn-primary themed-bg cursor-pointer"
+                             data-hotkey="a"
+                             t-on-click="() => this.handlePresentation(state.autoSlide ? 'play' : 'start')">
+                            <i class="ri-play-line" style="font-size: 18px;"></i>
+                            <label class="present-btn-text cursor-pointer">
+                                <t t-if="state.autoSlide">Play</t>
+                                <t t-else="">Start</t>
+                            </label>
+                        </div>
+                        <div class="btn-group">
+                        <button class="btn btn-secondary themed-bg icon-only"
+                                type="button"
+                                id=""
+                                data-bs-toggle="dropdown"
+                                data-bs-auto-close="outside"
+                                aria-expanded="false">
+                                <i class="ri-more-2-fill"></i>
+                        </button>
+                        <div class="dropdown-menu slide-tools-extra mt-2">
+                            <form class="pt-2 px-3 pb-3">
+                                <div class="cy-market-dialog-header cy-border-btm">
+                                    <h2 class="cy-marketing-auto-dialog-head present-tool-tip-header">Settings</h2>
+                                </div>
+                                <div class="form-group d-flex justify-content-between align-items-center mt-2">
+                                    <label class="form-check-label cy-modal-form_label presentation-label"
+                                            style="color: unset !important;">Auto Slide</label>
+                                    <span class="ms-2 slider-container">
+                                        <label class="switch">
+                                            <input type="checkbox"
+                                                   t-model="state.autoSlide"/>
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </span>
+                                </div>
+                                <div t-if="state.autoSlide"
+                                        id="slideDuration"
+                                        class="mt-1 slideDuration">
+                                    <label for="slideDuration">Slide Duration (Seconds)</label>
+                                    <input class="px-2 mt-1 cy-sidebar-input"
+                                            type="number"
+                                            min="3"
+                                            name="slideDuration"
+                                            t-model="state.autoSlideTime"/>
+                                </div>
+                                <br t-if="state.autoSlide"/>
+                                <div class="form-group mt-1">
+                                    <label class="form-check-label  cy-modal-form_label presentation-label"
+                                            style="color: unset !important;">Title Page</label>
+                                    <div id="titlePageDetails"
+                                            class="titlePageDetails mt-2">
+                                        <label for="heading">Heading</label>
+                                        <input class="px-1 mt-1 cy-sidebar-input"
+                                                type="text"
+                                                name="heading"
+                                                t-model="state.heading"
+                                                t-on-blur="addHeading"/>
+                                        <label for="subheading"
+                                                class="mt-2">Subheading</label>
+                                        <input class="px-1 mt-1 cy-sidebar-input"
+                                                type="text"
+                                                name="subheading"
+                                                t-model="state.subheading"/>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-set="dataVal"
+               t-value="ChartData.data.filter(item => item.type !== 'kpi').length"/>
+            <div t-ref="containerRef"
+                 t-attf-class="{{dataVal lt 6 ? 'h-100' : ''}}"
+                 class="chart-container-div d-flex justify-content-center">
+                <div class="row d-flex container-fluid">
+                    <div class="col-12">
+                        <div class="card-collection" t-ref="collection">
+                            <t t-foreach="ChartData.data"
+                               t-as="data"
+                               t-key="data_index"
+                               t-if="data.data.length">
+                                <GraphTile
+                                        t-if="data.type != 'kpi' and data.type != 'table'"
+                                        value="data"
+                                        theme="themeState.currentTheme"
+                                        themeColor="themeState.theme.theme_color_ids"
+                                        onClickChart.bind="onClickChart"
+                                        style="style"
+                                        isDarkMode="state.darkMode"
+                                        toggleClass="'cy_db_presentation_select'"
+                                        width="style.width"/>
+                                <Table t-elif="data.type == 'table'"
+                                       onClickTable.bind="onClickChart"
+                                       data="data"
+                                       style="style"
+                                       theme="themeState.currentTheme"
+                                       toggleClass="'cy_db_presentation_select'"/>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-if="isNoData">
+                <t t-call="PresentationNoData"/>
+            </t>
+        </div>
+    </t>
+    <t t-name="PresentationNoData">
+        <div class="no-data-container">
+            <div class="no-data-icon"><i class="ri-close-circle-fill"/></div>
+            <div class="no-data-message">
+                <h1>No data available at this moment.</h1>
+            </div>
+        </div>
+    </t>
+</templates>

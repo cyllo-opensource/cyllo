@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_partner_map_view" model="ir.ui.view">
+        <field name="name">view.res.partner.map_view</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <map_view string="">
+                <field name="id"/>
+                <field name="street"/>
+                <field name="name"/>
+                <field name="zip"/>
+                <field name="country_id"/>
+                <field name="partner_latitude"/>
+                <field name="partner_longitude"/>
+                <field name="company_id"/>
+            </map_view>
+        </field>
+    </record>
+    <!-- Record for modifying the res.partner form view -->
+    <record id="view_res_partner_form_inherit_map" model="ir.ui.view">
+        <field name="name">view.res.partner.form.inherit.map</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='street']" position="attributes">
+                <attribute name="widget">address_from_map</attribute>
+            </xpath>
+            <xpath expr="//field[@name='zip']" position="attributes">
+                <attribute name="widget">address_auto_fill</attribute>
+            </xpath>
+        </field>
+    </record>
+    <!-- Record for modifying the res.company form view -->
+    <record id="view_res_company_form_inherit_map" model="ir.ui.view">
+        <field name="name">view.res.company.form.inherit.map</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='street']" position="attributes">
+                <attribute name="widget">address_from_map</attribute>
+            </xpath>
+            <xpath expr="//field[@name='zip']" position="attributes">
+                <attribute name="widget">address_auto_fill</attribute>
+            </xpath>
+        </field>
+    </record>
+    <!-- Record for modifying the hr.employee form view -->
+    <record id="view_hr_employee_form_inherit_map" model="ir.ui.view">
+        <field name="name">view.hr.employee.form.inherit.map</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='private_street']" position="attributes">
+                <attribute name="widget">address_from_map</attribute>
+            </xpath>
+            <xpath expr="//field[@name='private_zip']" position="attributes">
+                <attribute name="widget">address_auto_fill</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="contacts.action_contacts" model="ir.actions.act_window">
+        <field name="view_mode">kanban,tree,form,activity,map_view</field>
+    </record>
+</odoo>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="userShare">
+        <Dialog size="'md'" title="'Share'">
+            <div class="select-user-spreadsheet-modal">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="w-auto fs-5">Users:</div>
+                        <div>
+                            <MultiRecordSelector t-props="multiRecordProps"/>
+                        </div>
+                    </div>
+                    <div class="share-modal-dropdown">
+                        <Dropdown>
+                            <t t-set-slot="toggler">
+                                <div class="">
+                                    <t t-if="state.accessLevel === 'viewer'">
+                                        <i class="ri-eye-line me-1"/>Viewer
+                                    </t>
+                                    <t t-else="">
+                                        <i class="ri-pencil-line me-1"/>Editor
+                                    </t>
+                                </div>
+                            </t>
+                            <DropdownItem onSelected.bind="() => this.toggleAccess('viewer')">
+                                <div><i class="ri-eye-line me-1"/>Viewer
+                                </div>
+                            </DropdownItem>
+                            <DropdownItem onSelected.bind="() => this.toggleAccess('editor')">
+                                <div><i class="ri-pencil-line me-1"/>Editor
+                                </div>
+                            </DropdownItem>
+                        </Dropdown>
+                    </div>
+                </div>
+                <div class="spreadsheet-access-view">
+                    <t t-foreach="state.accessRecord" t-as="record" t-key="record.id">
+                        <div class="spreadsheet-record" t-if="record.access.length">
+                            <h3 class="record-name text-wrap-it-lg" t-esc="record.name"/>
+                            <div class="access-list mt-2">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Read Access</th>
+                                            <th>Write Access</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="record.access" t-as="access" t-key="access.id">
+                                            <tr>
+                                                <td t-esc="access.user"/>
+                                                <td class="cursor-pointer" t-on-click="() => this.toggleAccessBacked(record.id, access.id, 'read', !access.read)">
+                                                    <t t-if="access.read">
+                                                        <span class="access-yes">✔</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="access-no">✘</span>
+                                                    </t>
+                                                </td>
+                                                <td  class="cursor-pointer" t-on-click="() => this.toggleAccessBacked(record.id, access.id, 'write', !access.write)">
+                                                    <t t-if="access.write">
+                                                        <span class="access-yes">✔</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="access-no">✘</span>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" t-on-click="handleSubmit" type="button">Apply</button>
+                    <button class="btn btn-secondary" t-on-click="handleClose" type="button">Close</button>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+</templates>

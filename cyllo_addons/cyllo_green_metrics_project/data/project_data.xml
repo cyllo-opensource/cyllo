@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="project_green_initiatives" model="project.project">
+        <field name="name">Green Initiatives</field>
+        <field name="description">Track all company green and carbon reduction initiatives.</field>
+    </record>
+
+    <data noupdate="1">
+        <record id="project_water_initiatives" model="project.project">
+            <field name="name">Water Initiatives</field>
+            <field name="description">Track all company water pollution and usage initiatives.</field>
+        </record>
+
+        <record id="project_sound_initiatives" model="project.project">
+            <field name="name">Sound Initiatives</field>
+            <field name="description">Track all company noise and sound pollution initiatives.</field>
+        </record>
+
+        <!-- Specific Stages matching user request -->
+        <record id="stage_green_ideas" model="project.task.type">
+            <field name="name">Ideas</field>
+            <field name="sequence">10</field>
+            <field name="project_ids" eval="[(4, ref('project_green_initiatives')), (4, ref('project_water_initiatives')), (4, ref('project_sound_initiatives'))]"/>
+        </record>
+
+        <record id="stage_green_progress" model="project.task.type">
+            <field name="name">In Progress</field>
+            <field name="sequence">20</field>
+            <field name="project_ids" eval="[(4, ref('project_green_initiatives')), (4, ref('project_water_initiatives')), (4, ref('project_sound_initiatives'))]"/>
+        </record>
+
+        <record id="stage_green_done" model="project.task.type">
+            <field name="name">Done</field>
+            <field name="sequence">30</field>
+            <field name="fold">True</field>
+            <field name="project_ids" eval="[(4, ref('project_green_initiatives')), (4, ref('project_water_initiatives')), (4, ref('project_sound_initiatives'))]"/>
+        </record>
+    </data>
+</odoo>

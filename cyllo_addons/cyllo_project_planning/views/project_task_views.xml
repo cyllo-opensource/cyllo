@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--Adding fields to project task form view-->
+    <record id="view_project_task_form" model="ir.ui.view">
+        <field name="name">view.project.task.form</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_ids']" position="after">
+                <field name="plan_allocation_ids" invisible="1"/>
+                <field name="is_allocated" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_plan_task_allocations"
+                        type="object"
+                        string="Plan"
+                        invisible="is_allocated"/>
+            </xpath>
+
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <widget name="web_ribbon"
+                        title="Allocated"
+                        invisible="not is_allocated"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_allocations"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-list"
+                        invisible="not is_allocated">
+                    <field name="allocation_count"
+                           string="Allocations"
+                           widget="statinfo"/>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

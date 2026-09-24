@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+    <t t-name="cyllo_instagram.InstagramIcon" owl="1">
+        <Dropdown autoOpen="false" beforeOpen.bind="beforeOpen"
+                  onStateChanged="state => this.state.isOpen = state.open"
+                  position="'bottom-end'" menuClass="discussSystray.menuClass"
+                  togglerClass="'p-0'"
+                  class="discussSystray.class">
+            <t t-set-slot="toggler">
+                <div data-tooltip="Instagram" class="cy-systray-parent-class">
+                    <div>
+                         <i class="ri-instagram-line cy-icons cy-stray-icon-sp" role="img"
+                            aria-label="Messages"
+                            t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'main' ? 'main' : store.discuss.activeTab"/>
+                       <span t-if="this.ig_counter" class="o-mail-MessagingMenu-counter badge rounded-pill">
+                           <t t-esc="this.ig_counter"/>
+                       </span>
+                    </div>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Instagram
+                    </span>
+                </div>
+            </t>
+            <t t-set-slot="default">
+                <div t-att-class="`${discussSystray.contentClass} o-mail-MessagingMenu`">
+                    <div class="o-mail-MessagingMenu-header d-flex"
+                         t-att-class="{'text-uppercase border-start-0 border-end-0': ui.isSmall, 'cy-view border-bottom': !ui.isSmall, 'd-flex flex-shrink-0': !env.inDiscussApp }">
+                        <t t-if="!ui.isSmall">
+                            <button class="btn btn-link py-2 rounded-0"
+                                    t-att-class="store.discuss.activeTab === 'main' ? 'fw-bold' : 'text-muted'"
+                                    type="button" role="tab"
+                                    t-on-click="() => store.discuss.activeTab = 'main'">
+                                All
+                            </button>
+                            <button class="btn btn-link py-2 rounded-0"
+                                    t-att-class="store.discuss.activeTab === 'chat' ? 'fw-bold' : 'text-muted'"
+                                    type="button" role="tab"
+                                    t-on-click="() => store.discuss.activeTab = 'chat'">
+                                Chats
+                            </button>
+                            <button class="btn btn-link py-2 rounded-0"
+                                    t-att-class="store.discuss.activeTab === 'channel' ? 'fw-bold' : 'text-muted'"
+                                    type="button" role="tab"
+                                    t-on-click="() => store.discuss.activeTab = 'channel'">
+                                Channels
+                            </button>
+                            <div class="flex-grow-1"/>
+                            <button t-if="!ui.isSmall or (ui.isSmall and store.discuss.activeTab !== 'channel' and !state.addingChat and !(env.inDiscussApp and store.discuss.activeTab === 'main'))"
+                                    t-att-class="ui.isSmall ? 'w-100 p-2 btn btn-secondary m-1' : 'btn btn-link p-2'"
+                                    t-on-click.stop="onClickNewMessageInstagram">
+                                <t t-if="ui.isSmall">Start a conversation</t>
+                                <t t-elif="!store.discuss.isActive">New
+                                    Message
+                                </t>
+                            </button>
+                        </t>
+                    </div>
+                    <div class="d-flex flex-column overflow-auto flex-grow-1 list-group-flush">
+                        <t t-set="flag_ig"
+                           t-value="false"/>
+                        <t t-foreach="threads" t-as="thread"
+                           t-key="thread.localId">
+                            <t t-set="message"
+                               t-value="thread.isChatChannel or (thread.type === 'channel' and thread.needactionMessages.length === 0) ? thread.newestPersistentNotEmptyOfAllMessage : thread.needactionMessages.at(-1)"/>
+                            <t t-if="thread.description=='INSTAGRAM'">
+                                <t t-set="flag_ig"
+                                   t-value="true"/>
+                                <NotificationItem
+                                        body="message?.inlineBody"
+                                        counter="thread.message_unread_counter"
+                                        datetime="message?.datetime"
+                                        displayName="thread.displayName"
+                                        iconSrc="thread.imgUrl"
+                                        hasMarkAsReadButton="thread.isUnread"
+                                        muted="thread.muteUntilDateTime ? 2 : !thread.isUnread ? 1 : 0"
+                                        onClick="(isMarkAsRead) => this.onClickThread(isMarkAsRead, thread)"
+                                        onSwipeRight="hasTouch() and thread.isUnread ? { action: () => this.markAsRead(thread), icon: 'fa-check-circle', bgColor: 'bg-success' } : undefined"
+                                        onSwipeLeft="hasTouch() and threadService.canUnpin(thread) ? { action: () => this.threadService.unpin(thread), icon: 'fa-times-circle', bgColor: 'bg-danger' } : undefined"
+                                >
+                                    <t t-set-slot="icon">
+                                        <ImStatus t-if="thread.type === 'chat'"
+                                                  persona="thread.chatPartner"
+                                                  thread="thread"
+                                                  className="'position-absolute top-100 start-100 translate-middle mt-n1 ms-n1'"/>
+                                    </t>
+                                    <span t-if="thread.message_unread_counter"
+                                          class="o-mail-MessagingMenu-counter badge rounded-pill">
+                                        <t t-esc="thread.message_unread_counter"/>
+                                    </span>
+                                    <t t-if="message" t-set-slot="body-icon">
+                                        <t t-if="message.isSelfAuthored">
+                                            <i class="fa fa-mail-reply me-1"/>
+                                            You:
+                                        </t>
+                                        <t t-elif="message.author and !message.author?.eq(thread.correspondent)">
+                                            <t t-esc="message.author.name"/>:
+                                        </t>
+                                    </t>
+                                </NotificationItem>
+                            </t>
+                        </t>
+                        <t t-foreach="state.partner_insta_chats"
+                           t-as="partner_chat"
+                           t-if="store.discuss.activeTab !== 'channel'"
+                           t-key="partner_chat.id">
+                            <t t-set="flag_ig"
+                               t-value="true"/>
+                            <div class="o-mail-NotificationItem list-group-item d-flex cursor-pointer align-items-center cy-view w-100 gap-2 o-important p-2 pe-3"
+                                 t-on-click.prevent="() => this.openFormInsta(partner_chat.id)">
+                                <div class="position-relative bg-inherit m-1 flex-shrink-0"
+                                     style="width:40px;height:40px;">
+                                    <img class="o_avatar w-100 h-100 rounded"
+                                         alt="Notification Item Image"
+                                         t-attf-src="/web/image?model=res.partner&amp;field=image_1920&amp;id={{ partner_chat.id }}"/>
+                                </div>
+                                <div class="d-flex flex-column flex-grow-1 align-self-start overflow-auto">
+                                    <div class="d-flex text-nowrap">
+                                        <span class="o-mail-NotificationItem-name text-truncate fw-bold">
+                                            <t t-esc="partner_chat.name"/>
+                                        </span>
+                                        <span class="flex-grow-1"/>
+                                        <small class="o-mail-NotificationItem-date ms-2 opacity-75 opacity-50 fw-bold">
+                                            <t t-esc="partner_chat.insta_chat_time"/>
+                                        </small>
+                                    </div>
+                                    <div class="d-flex">
+                                        <div class="o-mail-NotificationItem-text text-truncate opacity-75">
+                                            <t t-esc="partner_chat.insta_chat"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                        <div class="d-flex justify-content-center py-4 px-2 text-muted"
+                             t-if="flag_ig == false">
+                            No conversation yet...
+                        </div>
+
+                    </div>
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+</templates>

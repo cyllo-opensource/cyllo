@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- See cyllo_base/static/src/js/cog_menu_item.js for usage. Classes
+         match every existing cog-menu item's own markup exactly. When a
+         `dropdown` slot is passed, this becomes a Bootstrap dropdown toggle
+         instead of a direct action (onClick is not called in that case —
+         Bootstrap's own data-bs-toggle handles opening it): the toggle <a>
+         and the <ul class="dropdown-menu"> are siblings inside the same <li>,
+         same pattern as the "More" overflow menu elsewhere in this row. -->
+    <t t-name="cyllo_web.CogMenuItem" owl="1">
+        <li t-attf-class="nav-item {{ props.slots and props.slots.dropdown ? 'dropdown' : '' }} {{ props.class or '' }}"
+            t-on-click="onClick" t-att-accesskey="props.accesskey">
+            <a class="btn btn-outline-secondary nav-link cy-navitem-list border-0" href="#"
+                t-att-data-bs-toggle="props.slots and props.slots.dropdown ? 'dropdown' : undefined">
+                <t t-if="props.slots and props.slots.icon" t-slot="icon" />
+                <t t-slot="text" />
+            </a>
+            <ul t-if="props.slots and props.slots.dropdown" class="dropdown-menu cy-cogmenu-dropdown">
+                <t t-slot="dropdown" />
+            </ul>
+        </li>
+    </t>
+</templates>

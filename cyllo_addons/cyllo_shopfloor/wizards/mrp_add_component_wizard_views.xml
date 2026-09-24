@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_mrp_add_component_wizard_form" model="ir.ui.view">
+        <field name="name">mrp.add.component.wizard.form</field>
+        <field name="model">mrp.add.component.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Add Component">
+                <group>
+                    <field name="production_id" invisible="1"/>
+                    <field name="mo_product_ids" invisible="1"/>
+                    <field name="allow_any_product" widget="boolean_toggle"/>
+                    <field name="product_id"
+                           options="{'no_create': True}"
+                           domain="[('type', 'in', ['product', 'consu'])] if allow_any_product else [('type', 'in', ['product', 'consu']), ('id', 'in', mo_product_ids)]"/>
+                    <label for="quantity"/>
+                    <div class="o_row">
+                        <field name="quantity" class="oe_inline"
+                               decoration-danger="quantity &gt; needed_quantity"
+                               decoration-warning="quantity &lt; needed_quantity"/>
+                        <span invisible="not product_id"
+                              class="mx-2 fw-bold text-muted"
+                              style="font-size: 1.1rem;">
+                            /
+                        </span>
+                        <span invisible="not product_id"
+                              class="text-muted mx-1"
+                              title="Required quantity from Manufacturing Order">
+                            Needed:
+                        </span>
+                        <field name="needed_quantity"
+                               class="oe_inline text-muted fw-bold"
+                               readonly="1"
+                               invisible="not product_id"/>
+                        <field name="uom_id"
+                               class="oe_inline text-muted"
+                               readonly="1"
+                               invisible="not product_id"/>
+                    </div>
+                </group>
+                <footer>
+                    <button name="action_add_component" type="object" string="Add Component" class="btn-primary"/>
+                    <button name="action_remove_component" type="object" string="Remove Component" class="btn-danger"
+                            icon="fa-trash"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mrp_add_component_wizard" model="ir.actions.act_window">
+        <field name="name">Add Component</field>
+        <field name="res_model">mrp.add.component.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

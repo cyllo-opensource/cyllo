@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="40"/>
+        <field name="inherit_id"
+               ref="cyllo_accounting.view_res_config_settings_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='module_cyllo_invoice_digitization']"
+                   position="after">
+                <div class="mt8">
+                    <button name="%(cyllo_invoice_digitization.action_view_invoice_digitization)d"
+                            icon="oi-arrow-right"
+                            type="action"
+                            string="Configure Digitization"
+                            class="btn-link"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_res_config_settings_form" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="15"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Invoice Digitization"
+                     data-string="Invoice Digitization"
+                     id="invoice_digitization_settings"
+                     name="invoice_digitization_settings">
+                    <block title="AI Credentials">
+                        <setting
+                                id="invoice_digitization_openai_api_credentials"
+                                help="Enter your OpenAI API key here. This key is required for accessing OpenAI services in case the default free AI service fails."
+                                documentation="https://openai.com/blog/openai-api">
+                            <field name="digitization_openai_key"
+                                   password="True"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_view_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="view_res_config_settings_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'invoice_digitization_settings',
+            'bin_size': False}
+        </field>
+    </record>
+
+    <menuitem id="menu_settings"
+              name="Settings"
+              sequence="100"
+              action="action_view_settings"
+              parent="cyllo_ocr_digitization.menu_configuration_categ"/>
+</odoo>

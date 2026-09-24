@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="studio.CylloFormController">
+        <div t-att-class="className" t-ref="root">
+            <div class="o_form_view_container">
+                <Layout model="props.resModel" className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display"
+                              type="'form'">
+                    <t t-set-slot="control-panel-create-button">
+                        <t t-if="canCreate">
+                            <button type="button" class="btn btn-secondary o_form_button_create" data-hotkey="c"
+                                    t-on-click.stop="create">New</button>
+                        </t>
+                    </t>
+
+                    <t t-set-slot="layout-buttons">
+                        <t t-if="env.inDialog">
+                            <t t-if="footerArchInfo">
+                                <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler"
+                                   archInfo="footerArchInfo"/>
+                            </t>
+                            <t t-else="">
+                                <t t-call="{{ props.buttonTemplate }}"/>
+                            </t>
+                        </t>
+                    </t>
+                        <t t-set-slot="layout-actions">
+                            <t t-if="!state.isX2Many and buttonBoxTemplate">
+                                <t t-call="{{ buttonBoxTemplate }}"
+                                   t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
+                            </t>
+                        </t>
+
+                    <t t-set-slot="control-panel-additional-actions">
+                        <CogMenu
+                                getActiveIds="() => model.root.isNew ? [] : [model.root.resId]"
+                                context="props.context"
+                                items="props.info.actionMenus ? this.actionMenuItems : {}"
+                                isDomainSelected="model.root.isDomainSelected"
+                                resModel="model.root.resModel"
+                                domain="props.domain"
+                                onActionExecuted="() => model.load({ resId: model.root.resId, resIds: model.root.resIds })"
+                                shouldExecuteAction.bind="shouldExecuteAction"
+                        />
+                    </t>
+
+                    <t t-set-slot="control-panel-status-indicator">
+                        <t t-if="canEdit">
+                            <FormStatusIndicator model="model" discard.bind="discard" save.bind="saveButtonClicked" />
+                        </t>
+                    </t>
+                    <t t-set-slot="control-panel-create-button">
+                        <t t-if="canCreate">
+                            <button type="button" class="btn btn-outline-primary o_form_button_create" data-hotkey="c"
+                                    t-on-click.stop="create">New</button>
+                        </t>
+                    </t>
+                    <t t-if="!state.isX2Many" t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="archInfo"
+                       translateAlert="translateAlert" onNotebookPageChange.bind="onNotebookPageChange"
+                       activeNotebookPages="props.state and props.state.activeNotebookPages"/>
+                    <CylloListRenderer t-elif="state.x2ManyDetails.viewMode === 'list'" t-props="rendererX2ManyProps" />
+                    <CylloKanbanRenderer t-elif="state.x2ManyDetails.viewMode === 'kanban'" t-props="rendererX2ManyProps" />
+                </Layout>
+            </div>
+        </div>
+</t>
+</templates>

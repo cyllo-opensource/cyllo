@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_fiscal_year_form" model="ir.ui.view">
+        <field name="name">view.account.fiscal.year.form</field>
+        <field name="model">account.fiscal.year</field>
+        <field name="arch" type="xml">
+            <form string="Fiscal Year">
+                <header>
+                    <button name="action_reopen" invisible="state != 'close'" string="Re-Open"
+                            type="object" class="oe_highlight"/>
+                    <button name="action_open" string="Open" type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_draft" invisible="state != 'open'" string="Set to draft"
+                            type="object" class="oe_highlight"/>
+                    <button name="action_close" invisible="state != 'open'"
+                            string="Close" type="object" class="oe_highlight"/>
+                    <field name="state" statusbar_visible="draft,open" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                    <label for="name"/>
+                    <h1><field name="name" placeholder="Fiscal year" readonly="state != 'draft'"/></h1>
+                    </div>
+                    <group col="2">
+                        <group>
+                            <field name="company_id"/>
+                        </group>
+                        <group>
+                            <field name="start_date" readonly="state != 'draft'"/>
+                            <field name="end_date" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_account_fiscal_year_tree" model="ir.ui.view">
+        <field name="name">view.account.fiscal.year.tree</field>
+        <field name="model">account.fiscal.year</field>
+        <field name="arch" type="xml">
+            <tree string="Fiscal Years">
+                <field name="name"/>
+                <field name="start_date"/>
+                <field name="end_date" />
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_account_fiscal_year_search" model="ir.ui.view">
+        <field name="name">view.account.fiscal.year.search</field>
+        <field name="model">account.fiscal.year</field>
+        <field name="arch" type="xml">
+            <search string="Fiscal Year">
+                <field name="name"/>
+                <filter name="closed" string="Closed" domain="[('state', '=', 'close')]"/>
+                <filter name="opened" string="Opened" domain="[('state', '=', 'open')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_view_fiscal_years" model="ir.actions.act_window">
+        <field name="name">Fiscal Years</field>
+        <field name="res_model">account.fiscal.year</field>
+        <field name="search_view_id" ref="view_account_fiscal_year_search"/>
+        <field name="view_ids" eval="[Command.clear(),
+            Command.create({'view_mode': 'tree', 'view_id': ref('view_account_fiscal_year_tree')}),
+            Command.create({'view_mode': 'form', 'view_id': ref('view_account_fiscal_year_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create new fiscal year...
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_appointment_form_hr_recruitment" model="ir.ui.view">
+        <field name="name">appointment.appointment.form.hr.recruitment</field>
+        <field name="model">appointment.appointment</field>
+        <field name="inherit_id" ref="cyllo_appointment.view_appointment_form"/>
+        <field name="arch" type="xml">
+            <!-- Inject category as an invisible field so it can be used in modifiers -->
+            <xpath expr="//field[@name='appointment_type_id']" position="after">
+                <field name="category" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button"
+                        type="object"
+                        name="action_open_applicant"
+                        icon="fa-user-o"
+                        invisible="category != 'interview' or applicant_id == False">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Applicant</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="applicant_id"
+                       options="{'no_create': True}"
+                       domain="[]"
+                       invisible="category != 'interview'"/>
+                <field name="job_id" readonly="1"
+                       invisible="category != 'interview' or applicant_id == False"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_hr_applicant_form_cyllo_appointment" model="ir.ui.view">
+        <field name="name">hr.applicant.form.cyllo.appointment</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Smart button: show count of linked appointments -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button"
+                        type="object"
+                        name="action_view_appointments"
+                        icon="fa-calendar"
+                        invisible="appointment_count == 0">
+                    <field name="appointment_count"
+                           widget="statinfo"
+                           string="Appointments"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='interviewer_ids']" position="after">
+                <field name="interview_invite_code"
+                       readonly="1"
+                       widget="CopyClipboardChar"
+                       string="Interview Booking Code"
+                       help="Share this code or the booking URL with the applicant so their appointment is automatically linked here."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

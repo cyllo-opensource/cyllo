@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--Tree view of the Consolidation Period-->
+    <record id="view_consolidation_period_tree" model="ir.ui.view">
+        <field name="name">view.consolidation.period.tree</field>
+        <field name="model">consolidation.period</field>
+        <field name="arch" type="xml">
+            <tree string="consolidation.period">
+                <field name="chart_id"/>
+                <field name="currency_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <!--Form view of the Consolidation Period-->
+    <record id="view_consolidation_period_form" model="ir.ui.view">
+        <field name="name">view.consolidation.period.form</field>
+        <field name="model">consolidation.period</field>
+        <field name="arch" type="xml">
+            <form string="consolidation_period">
+                <header>
+                    <button name="action_create_journal" string="Compute" invisible="state in ['closed']" type="object"
+                            class="btn-primary"/>
+                    <button name="action_close" string="Close" invisible="state in ['closed']" type="object"
+                            class="btn-primary"/>
+                    <button name="action_draft" string="Reset To Draft" invisible="state in ['draft']" type="object"
+                            class="btn-primary"/>
+                    <field name="state" widget="statusbar" string="Status"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(cyllo_consolidation.action_consolidated_balance)d" type="action"
+                                string="Balance" icon="fa-th" class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Consolidated Balance
+                                </span>
+                            </div>
+                        </button>
+                        <button name="action_open_accounts" type="object" string="Account" icon="fa-book"
+                                class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="account_ids_count" nolabel="1"/>
+                                </span>
+                                <span class="o_stat_text">Accounts</span>
+                            </div>
+                        </button>
+                        <button name="action_open_journals" type="object" string="Journal" icon="fa-list"
+                                class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="journal_ids_count" nolabel="1"/>
+                                </span>
+                                <span class="o_stat_text">Journals</span>
+                            </div>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="chart_id" placeholder="Select Consolidation"/>
+                            <field name="currency_id"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="CompanyPeriod" string="Company Period">
+                            <field name="company_period_ids">
+                                <tree editable="bottom" create="false">
+                                    <field name="company_id"/>
+                                    <field name="currency_id"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="consolidation_rate"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                    <field name="activity_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--Kanban view of the Consolidation Period-->
+    <record id="view_consolidation_period_kanban" model="ir.ui.view">
+        <field name="name">view.consolidation.period.kanban</field>
+        <field name="model">consolidation.period</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard o_account_kanban">
+                <field name="chart_id"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-menu">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-6 o_kanban_card_manage_section o_kanban_manage_view">
+                                    <h5 class="o_kanban_card_manage_title">
+                                        <span role="separator">Actions</span>
+                                    </h5>
+                                    <div>
+                                        <a t-if="record.state.raw_value == 'draft'" name="action_create_journal"
+                                           role="menuitem" type="object" class="dropdown-item">
+                                            Recompute
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <a role="menuitem" type="object"
+                                           name="action_state">
+                                            <t t-if="record.state.raw_value == 'draft'">
+                                                Close period
+                                            </t>
+                                            <t t-else="">Reopen period</t>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-6 o_kanban_card_manage_section o_kanban_manage_view">
+                                    <h5 class="o_kanban_card_manage_title">
+                                        <span role="separator">View</span>
+                                    </h5>
+                                    <div>
+                                        <a name="action_open_journals" role="menuitem" type="object">
+                                            Journals
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <a role="menuitem" type="object" name="action_open_accounts">
+                                            Consolidated accounts
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div class="d-flex flex-column oe_kanban_global_click"
+                             style="padding-top: 17px;padding-bottom: 14px;padding-right: 0px !important;padding-left: 0px !important;">
+                            <div class="d-flex align-items-center cy-border-btm justify-content-between"
+                                 style="padding: 0px 8px 7px 23px;">
+                                <div>
+                                    <h5 class="card-title cy-card-name">
+                                        <field name="dates"/>
+                                    </h5>
+                                    <p class="card-text cy-card-text">
+                                        <field name="chart_id"/>
+                                    </p>
+                                </div>
+                                <div class="float-end me-4" style="margin-right: 40px !important;">
+                                    <field name="state" widget="badge" decoration-warning="state == 'closed'"
+                                           decoration-success="state == 'draft'"/>
+                                </div>
+                            </div>
+                            <div>
+
+                                <div style="padding: 1px 22px;">
+
+                                    <p class="card-text cy-card-text mt-3">
+                                        <field name="start_date"/>
+                                        -
+                                        <field name="end_date"/>
+                                    </p>
+                                    <p class="card-text cy-card-text">
+                                        <field name="currency_id"/>
+                                    </p>
+                                    <div class="d-flex justify-content-between mt-3">
+                                        <h6 class="card-title cy-card-name">
+                                            <field name="total_amount"/>
+                                        </h6>
+                                        <button type="action" name="%(cyllo_consolidation.action_consolidated_balance)d"
+                                                class="btn btn-primary">
+                                            <span>Consolidated Balance</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--Search view of the Consolidation Period-->
+    <record id="view_consolidation_period_search" model="ir.ui.view">
+        <field name="name">view.consolidation.period.search</field>
+        <field name="model">consolidation.period</field>
+        <field name="priority">15</field>
+        <field name="arch" type="xml">
+            <search string="Search">
+                <field name="state" string="State"/>
+                <field name="dates" string="Name"/>
+                <field name="currency_id"/>
+                <separator/>
+                <filter string="Creation Date" name="creation_date" date="create_date"/>
+                <filter string="Start Date" name="start_date" date="start_date"/>
+                <filter string="Ending Date" name="end_date" date="end_date"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="['&amp;', ('active', '=', True), ('state', '=', 'draft')]"/>
+                <filter string="Closed" name="closed"
+                        domain="['&amp;', ('active', '=', True), ('state', '=', 'closed')]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By" colspan="16">
+                    <filter string="Consolidation" name="chart_id" context="{'group_by':'chart_id'}"/>
+                    <filter name="state" string="State" context="{'group_by':'state'}"/>
+                    <filter string="Currency" name="currency_id" context="{'group_by':'currency_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!--Action specified for the Consolidation Period-->
+    <record id="action_view_periods" model="ir.actions.act_window">
+        <field name="name">Periods</field>
+        <field name="res_model">consolidation.period</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Consolidation Period Found
+            </p>
+            <p>
+                Enables users to create and organize specific time frames for
+                consolidating financial data, ensuring accurate and timely
+                reporting.
+            </p>
+        </field>
+    </record>
+    <!--Action specified for the Consolidation Dashboard-->
+    <record id="action_view_dashboard" model="ir.actions.act_window">
+        <field name="name">Periods</field>
+        <field name="res_model">consolidation.period</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Consolidation Period Found
+            </p>
+            <p>
+                Enables users to create and organize specific time frames for
+                consolidating financial data, ensuring accurate and timely
+                reporting.
+            </p>
+        </field>
+    </record>
+</odoo>

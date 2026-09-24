@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.SmartButtonProperties" owl="1">
+        <div class="smart_button_overall_container_list icon_popup ">
+            <div class="mb-2">
+                <label for="" class="cy-navbar_label">Label Name</label>
+                <input type="text" class="cy-input" name="label" style="width:100%;" autocomplete="off" t-on-input="handleLabelChange" t-model="state.label" placeholder="Button Name" t-att-class="state.readOnly" t-on-change="() => this.autoSave()"/>
+            </div>
+            <div class="mb-2">
+                <label for="" class="cy-navbar_label">Icon</label>
+                <div class="cy-studio-custom-dropdown">
+                    <IconPicker icons="IconClass" value="state.icon || ''" onChange="(v) => { this.state.icon = v; this.autoSave(); }"/>
+                </div>
+            </div>
+            <div class="mb-2" t-if="props.properties?.new_button">
+                <label for="" class="cy-navbar_label">Related Field</label>
+                <div class="cy-input related-field button-related-field">
+                    <ModelFieldSelector path="state.related_field" resModel="props.viewDetails.model" update="updateFieldType.bind(this)" filter="(field, path)=> field.type.includes('one2many', 'many2one', 'many2many')" followRelations="false" readonly="false"/>
+                </div>
+            </div>
+            <div class="mb-2" t-if="this.state.fieldDetails">
+                <label for="" class="cy-navbar_label">Domain</label>
+                <input type="text" class="cy-input" t-on-click="fieldDomain" readonly="1" t-att-value="state.domain"/>
+            </div>
+            <div class="mb-2 SmartButtonMultiRecord">
+                <label for="" class="cy-navbar_label">Smart Button Visibility</label>
+                <div class="cy-studio-custom-dropdown cy-studio-visible-to-drop-align">
+                    <MultiSelectDropDown allValues="groupsAllValues" selectedValues="groupsSelectedValues" onUpdate="(v) => this.updateGroupIds(v)"/>
+                </div>
+            </div>
+
+
+            <div class="cy-prop-toggle-row">
+                <span class="cy-toggle-label">Invisible</span>
+                <div class="cy-prop-toggle-right">
+                    <button class="cy-basedOn" data-attribute="required" t-on-click="(ev) => this.attrDomain(ev)">
+                        <span>Based on</span>
+                        <i class="fa fa-cog cy-setting-icon"/>
+                    </button>
+                    <label class="cy-switch">
+                        <input type="checkbox" t-on-click="handleInvisibleChange"
+                            t-att-checked="!['0', 'false', 'False', null].includes(state.invisible)"/>
+                        <span class="cy-slider"/>
+                    </label>
+                </div>
+            </div>
+
+            <div class="d-flex btn_div w-100 my-3 gap-2">
+                <button class="w-100 btn btn-secondary" t-on-click="removeSmartButton">
+                    <t t-esc="props.new_button ? 'Cancel' : 'Remove'"/>
+                </button>
+            </div>
+        </div>
+    </t>
+</templates>

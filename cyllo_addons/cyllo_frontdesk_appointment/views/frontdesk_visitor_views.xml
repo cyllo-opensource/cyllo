@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Visitor Tree View to add expected_arrival and partner_id -->
+    <record id="frontdesk_visitor_view_tree_inherit_appointment" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.tree.inherit.appointment</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="inherit_id" ref="cyllo_front_desk.frontdesk_visitor_view_tree"/>
+        <field name="arch" type="xml">
+            <field name="company" position="before">
+                <field name="partner_id" widget="many2one_avatar"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Inherit Visitor Form View -->
+    <record id="frontdesk_visitor_view_form_inherit_appointment" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.form.inherit.appointment</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="inherit_id" ref="cyllo_front_desk.frontdesk_visitor_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_book_now" string="Book Now" type="object" class="oe_highlight" invisible="appointment_id != False"/>
+            </xpath>
+            <xpath expr="//field[@name='host_id']" position="after">
+                <field name="appointment_id" invisible="not appointment_id"/>
+            </xpath>
+            <xpath expr="//field[@name='company']" position="before">
+                <field name="partner_id" widget="many2one_avatar"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

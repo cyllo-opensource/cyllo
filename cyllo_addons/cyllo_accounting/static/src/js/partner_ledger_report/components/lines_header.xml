@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t t-name="LinesHeaderPartnerLedger">
+    <t t-set="partner_ledger_total" t-value="props.partner_ledger_total"/>
+    <tr class="h-2-rem border-bottom border-gainsboro cy-report-line-acc on-hover-show" t-on-click="onClickHeader">
+        <th>
+            <div class="ms-3">
+                <div class="cursor-pointer header o_heading">
+                    <div class="d-flex justify-content-left">
+                        <span class="me-2">
+                            <i class="fa" t-att-class="state.show_lines ? 'fa-caret-down' : 'fa-caret-right'"/>
+                        </span>
+                        <span t-attf-class="{{ state.show_lines and 'report-fw-bold'}}" t-esc="partner_ledger_total?.partner_name"/>
+                    </div>
+                </div>
+            </div>
+        </th>
+        <th colspan="5">
+            <!-- Journal Items Button -->
+            <button class="btn btn-outline-primary btn-sm me-1 mt-1 mb-1"
+                    t-on-click="()=> this.goToJournalItem(partner_ledger_total?.partner_id)">
+                Journal Items
+            </button>
+        </th>
+        <th/>
+        <th/>
+        <th/>
+        <th/>
+        <th/>
+        <th>
+            <span>
+                <t t-if="partner_ledger_total?.total_debit"
+                   t-esc="partner_ledger_total?.format_total_debit"/>
+            </span>
+        </th>
+        <th>
+            <span>
+                <t t-if="partner_ledger_total?.total_credit"
+                   t-esc="partner_ledger_total?.format_total_credit"/>
+            </span>
+        </th>
+        <th/>
+        <th class="text-nowrap">
+            <span class="fw-bolder">
+                <t t-esc="partner_ledger_total?.format_balance"/>
+            </span>
+            <sup class="cy_report_info me-1 position-relative">
+                <span t-if="pager.total > 100" class="cy_report_info_ques position-absolute" title="The total presented represents the cumulative sum of all move lines, inclusive of those beyond the current page of pagination.">
+                    ?
+                </span>
+            </sup>
+        </th>
+
+    </tr>
+    <t t-if="state.show_lines">
+        <tr t-if="pager.total > 100" class="h-2-rem border-gainsboro">
+            <th colspan="12" class="border-0"/>
+            <th colspan="6" class="border-0">
+                <div class="d-flex justify-content-end p-0">
+                    <Pager total="pager.total"
+                           offset="pager.offset"
+                           limit="pager.limit"
+                           isEditable="false"
+                           onUpdate.bind="onPagerChanged"/>
+                </div>
+            </th>
+        </tr>
+        <tr t-if="pager.offset === 0" class="h-2-rem border-bottom border-gainsboro cy-report-line-acc">
+            <th colspan="11"><span class="mx-3 fw-bold">Initial Balance</span></th>
+            <th>
+                <span>
+                    <t t-esc="partner_ledger_total?.format_opening_debit"/>
+                </span>
+            </th>
+            <th>
+                <span>
+                    <t t-esc="partner_ledger_total?.format_opening_credit"/>
+                </span>
+            </th>
+            <th/>
+            <th>
+                <span class="fw-bold">
+                    <t t-esc="partner_ledger_total?.format_opening_balance"/>
+                </span>
+            </th>
+        </tr>
+        <LinesPartnerLedger move_lines="partner_ledger_total?.move_lines"
+                            currency_id="partner_ledger_total?.currency_id" ledgerId="props.ledgerId"
+                            openAnnotation.bind="props.openAnnotation" removeAnnotation.bind="props.removeAnnotation" saveSession="props.saveSession"/>
+    </t>
+</t>

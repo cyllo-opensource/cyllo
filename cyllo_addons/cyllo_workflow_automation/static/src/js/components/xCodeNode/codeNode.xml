@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="CodeNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                <t t-foreach="variables" t-as="variable" t-key="variable.id">
+                    <div t-att-class="'variable-pill d-flex align-items-center mb-2 btn-sm '+ variable.class"
+                         title="Click to copy — use inside f&quot;&quot;&quot; &quot;&quot;&quot; for string interpolation">
+                        <span class="variable-name px-2 " t-out="variable.variable_name" />
+                        <span class=" px-1 py-2 d-flex align-items-center" t-on-click="(ev) => this.copyToClipboard(ev, variable.variable_name)">
+                            <i class="ri-clipboard-line me-2"/>
+                        </span>
+                    </div>
+                </t>
+                <t t-if="variables and variables.length">
+                    <small class="text-muted ms-1 mb-2" style="font-size:0.78rem;">
+                        💡 Use variables in strings with Python f-strings: <code>f"text {var_error}"</code>
+                    </small>
+                </t>
+            </div>
+            <Record t-props="recordProps" t-slot-scope="data">
+                    <div class="row py-2">
+                        <div class="col-12">
+                            <label for="label" class="form-label  cy-modal-form_label">
+                                 <h6>Label</h6>
+                            </label>
+                            <CharField t-on-change="ev => this.onChangeLabel(ev.target.value)" name="'label'" record="data.record" id="'label'"/>
+                            <label for="code_code"
+                                   class="form-label  cy-modal-form_label">
+                                <h6>Code</h6>
+                            </label>
+                            <AceField name="'code_code'"
+                                       record="data.record"
+                                       id="'code_code'"
+                            />
+                        </div>
+                    </div>
+            </Record>
+        </xpath>
+    </t>
+</templates>

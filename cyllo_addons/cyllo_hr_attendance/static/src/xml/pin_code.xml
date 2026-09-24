@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Inherit the EmployeeBadge template used in both Pin Code and Greetings -->
+    <t t-inherit="hr_attendance.EmployeeBadge" t-inherit-mode="extension" owl="1">
+        <xpath expr="//img[hasclass('o_hr_attendance_employee_badge')]" position="replace">
+
+            <!-- If the employee has a profile image, use the standard base64 rendering -->
+            <t t-if="employeeAvatar">
+                <img class="o_hr_attendance_employee_badge img rounded-circle"
+                     t-attf-onerror="this.src='/web/image?model=hr.employee&amp;id={{this.props.employeeData.id}}&amp;field=avatar_128';"
+                     t-attf-src="data:image/png;base64,{{employeeAvatar}}" height="80"/>
+            </t>
+
+            <!-- If no image exists, fallback to Odoo's dynamic avatar route which generates the first-letter background -->
+            <t t-else="">
+                <img class="o_hr_attendance_employee_badge img rounded-circle"
+                     t-attf-src="/web/image?model=hr.employee&amp;id={{this.props.employeeData.id}}&amp;field=avatar_128" height="80"/>
+            </t>
+
+        </xpath>
+    </t>
+
+</templates>

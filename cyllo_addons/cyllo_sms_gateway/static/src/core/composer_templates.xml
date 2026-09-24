@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <!-- Extend the 'sendButton' template from 'mail.Composer' -->
+    <t t-inherit="mail.Composer.sendButton" t-inherit-mode="extension" owl="1">
+        <!-- Insert the 'Send SMS' button after the 'o-mail-Composer-send' button -->
+        <xpath expr="//button[hasclass('o-mail-Composer-send')]" position="after">
+            <button t-if="!compact or ui.isSmall"
+                    class="o-mail-Composer-send btn o-last border-start-0"
+                    t-att-class="{'btn-primary': extended, 'rounded-0 rounded-end-3': !extended and !compact, 'btn-link align-self-stretch': !extended, 'border-start-0 ms-2 me-3': env.inDiscussApp}"
+                    t-on-click="sendSMS"
+                    t-att-disabled="isSendButtonDisabled"
+                    t-att-aria-label="SEND_TEXT">
+                Send SMS
+            </button>
+        </xpath>
+    </t>
+</templates>

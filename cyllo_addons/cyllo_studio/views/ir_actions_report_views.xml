@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ir_actions_report_kanban" model="ir.ui.view">
+        <field name="name">view.ir.actions.report.kanban</field>
+        <field name="model">ir.actions.report</field>
+        <field name="arch" type="xml">
+            <kanban js_class="n_kanban" action="get_custom_report_page" type="object" limit="80">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="report_name"/>
+                <field name="report_type"/>
+                <field name="model"/>
+                <field name="report_thumbnail"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <t t-set="record_name" t-value="record.name.raw_value || ''"/>
+
+                        <!-- Clean, minimal SVG placeholder matching Cyllo Analytics aesthetic (with centered icon) -->
+                        <t t-set="placeholder_data_uri" t-value="'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNzAnIGhlaWdodD0nMTM1JyB2aWV3Qm94PScwIDAgMTcwIDEzNSc+PHJlY3Qgd2lkdGg9JzE3MCcgaGVpZ2h0PScxMzUnIGZpbGw9JyNmOGZhZmMnLz48cGF0aCBkPSdNNjAgNDAgaDUwIHY1NSBxMCA1IC01IDUgaC00MCBxLTUgMCAtNSAtNSB6JyBmaWxsPSd3aGl0ZScgc3Ryb2tlPScjZTJlOGYwJy8+PHJlY3QgeD0nNzAnIHk9JzUwJyB3aWR0aD0nMzAnIGhlaWdodD0nMicgZmlsbD0nI2YxZjVmOScgcng9JzEnLz48cmVjdCB4PSc3MCcgeT0nNTgnIHdpZHRoPScyMCcgaGVpZ2h0PScyJyBmaWxsPScjZjFmNWY5JyByeD0nMScvPjxyZWN0IHg9JzcwJyB5PSc2Nicgd2lkdGg9JzMwJyBoZWlnaHQ9JzInIGZpbGw9JyNmMWY1ZjknIHJ4PScxJy8+PHJlY3QgeD0nNzAnIHk9Jzc0JyB3aWR0aD0nMjUnIGhlaWdodD0nMicgZmlsbD0nI2YxZjVmOScgcng9JzEnLz48Y2lyY2xlIGN4PSc4NScgY3k9Jzg4JyByPSc2JyBmaWxsPScjZjhmYWZjJy8+PHBhdGggZD0nTTgzIDg2IGw0IDQgTTg3IDg2IGwtNCA0JyBzdHJva2U9JyM5NGEzYjgnIHN0cm9rZS13aWR0aD0nMScvPjwvc3ZnPg=='"/>
+
+                        <!-- Cyllo Analytics Tile Card Layout -->
+                        <div class="oe_kanban_global_click cyllo_report_card">
+                            <!-- Delete Button (Top Right) -->
+                            <button type="delete" name="unlink" class="btn btn-sm cyllo_report_delete" title="Delete Report">
+                                <i class="fa fa-trash-o"/>
+                            </button>
+
+                            <div class="cyllo_report_thumbnail_wrapper">
+                                <t t-if="record.report_thumbnail.raw_value">
+                                    <img t-att-src="'/web/image/ir.actions.report/' + record.id.raw_value + '/report_thumbnail'" class="cyllo_report_thumbnail" alt="Report Preview"/>
+                                </t>
+                                <t t-else="">
+                                    <img t-att-src="placeholder_data_uri" class="cyllo_report_thumbnail" alt="Report Placeholder"/>
+                                </t>
+                            </div>
+                            <div class="cyllo_report_title" t-att-title="record_name">
+                                <t t-esc="record_name"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

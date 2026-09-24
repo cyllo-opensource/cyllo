@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_social_media_post_form" model="ir.ui.view">
+        <field name="name">view.social.media.post.form</field>
+        <field name="model">social.media.post</field>
+        <field name="inherit_id" ref="cyllo_social_media_marketing.view_social_media_post_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='mode']" position="before">
+                <field name="posted_on_linkedin" invisible="1"/>
+                <field name="linkedin_organization_ids" invisible="1"/>
+                <field name="linkedin_content_type" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='mode']" position="after">
+                <field name="linkedin_poll_question"
+                       invisible="not posted_on_linkedin or mode != 'poll'"
+                       required="posted_on_linkedin and mode == 'poll'"
+                       readonly="state != 'draft'"
+                       placeholder="Ask a question..."/>
+                <field name="linkedin_poll_option_1"
+                       invisible="not posted_on_linkedin or mode != 'poll'"
+                       required="posted_on_linkedin and mode == 'poll'"
+                       readonly="state != 'draft'"
+                       placeholder="Option 1"/>
+                <field name="linkedin_poll_option_2"
+                       invisible="not posted_on_linkedin or mode != 'poll'"
+                       required="posted_on_linkedin and mode == 'poll'"
+                       readonly="state != 'draft'"
+                       placeholder="Option 2"/>
+                <field name="linkedin_poll_option_3"
+                       invisible="not posted_on_linkedin or mode != 'poll'"
+                       readonly="state != 'draft'"
+                       placeholder="Option 3 (optional)"/>
+                <field name="linkedin_poll_option_4"
+                       invisible="not posted_on_linkedin or mode != 'poll'"
+                       readonly="state != 'draft'"
+                       placeholder="Option 4 (optional)"/>
+                <field name="linkedin_poll_duration"
+                       invisible="not posted_on_linkedin or mode != 'poll'"
+                       readonly="state != 'draft'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

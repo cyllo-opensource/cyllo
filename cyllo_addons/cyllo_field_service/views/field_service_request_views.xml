@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action, views and menu items for the fs service request model -->
+    <record id="view_field_service_request_form" model="ir.ui.view">
+        <field name="name">view.field.service.request.form</field>
+        <field name="model">field.service.request</field>
+        <field name="arch" type="xml">
+            <form string="Service Request">
+                <header>
+                    <button name="action_submit" string="Submit"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_service_start"
+                            string="Start Service" type="object"
+                            class="oe_highlight"
+                            groups="cyllo_field_service.group_cyllo_field_service_user"
+                            invisible="state != 'assigned'"/>
+                    <button name="action_mark_as_done" string="Mark As Done"
+                            type="object" class="oe_highlight"
+                            groups="cyllo_field_service.group_cyllo_field_service_user"
+                            invisible="state != 'in_progress'"/>
+                    <button name="action_assign_workers" type="object"
+                            class="btn btn-primary"
+                            string="Assign To Workers"
+                            groups="cyllo_field_service.group_cyllo_field_service_manager"
+                            invisible="state != 'submit'"/>
+                    <button name="action_fetch_suitable_workers" type="object"
+                            string="Suggest Employees"
+                            groups="cyllo_field_service.group_cyllo_field_service_manager"
+                            invisible="state != 'submit'"/>
+                    <button name="action_draft" type="object"
+                            string="Reset to Draft"
+                            invisible="state not in ['submit', 'cancel']"/>
+                    <button name="action_cancel" type="object"
+                            string="Cancel"
+                            invisible="state not in ['in_progress', 'assigned'] or is_mark_as_done"/>
+                    <button name="action_create_invoice" type="object"
+                            string="Create Invoice"
+                            groups="cyllo_field_service.group_cyllo_field_service_manager"
+                            class="btn btn-primary"
+                            invisible="state != 'completed' or is_invoiced"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submit,in_progress,completed"/>
+                </header>
+                <sheet>
+                    <div name="button_box" position="inside">
+                        <button name="action_invoices"
+                                type="object" class="oe_stat_button"
+                                icon="fa-pencil-square-o"
+                                invisible="state != 'completed' or num_invoices == 0">
+                            <span>Invoices</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Name"/>
+                            <field name="ready_to_invoice" invisible="1"/>
+                            <field name="num_invoices" invisible="1"/>
+                            <field name="is_mark_as_done" invisible="1"/>
+                            <field name="is_manager" invisible="1"/>
+                            <field name="is_invoiced" invisible="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="group_creation_info">
+                            <field name="partner_id"
+                                   widget="res_partner_many2one"
+                                   context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
+                                   readonly="state not in ['draft']"
+                                   placeholder="Type to find a customer..."
+                                   options='{"always_reload": True, "no_quick_create": True}'/>
+                            <field name="skill_category_id" readonly="state not in ['draft']"/>
+                            <field name="hr_skill_ids"
+                                   widget="many2many_tags"
+                                   invisible="state == 'draft'"
+                                   readonly="0"/>
+                            <field name="priority" widget="priority"
+                                   readonly="state not in ['draft']"
+                                   string="Priority"/>
+                        </group>
+                        <group>
+                            <field name="date_assigned" invisible="not date_assigned"/>
+                            <field name="date_deadline"
+                                   readonly="state not in ['draft','submit','assigned']"/>
+                            <field name="sale_order_id" string="Sale Order"
+                                   readonly="state == 'completed'"/>
+
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="description" string="Description">
+                            <field name="description" placeholder="Add details"
+                                   readonly="state not in ['draft']"/>
+                        </page>
+                        <page name="service_workers" string="Workers"
+                              invisible="state == 'draft'">
+                            <field name="field_service_worker_ids" mode="tree"
+                                   nolabel="1"
+                                   readonly="state in ['assigned', 'in_progress', 'completed']">
+                                <tree editable="bottom">
+                                    <field name="employee_id"
+                                           domain="[('id','in',employee_ids)]"/>
+                                    <field name="mobile_number"/>
+                                    <field name="employee_ids"
+                                           column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="checklist" string="Service Checklist">
+                            <field name="service_checklist_ids"
+                                   readonly="state in ['in_progress', 'completed']">
+                                <tree editable="bottom">
+                                    <field name="product_id"
+                                           readonly="parent.state not in ['draft', 'submit']"/>
+                                    <field name="service_cost"
+                                           readonly="parent.state not in ['draft', 'submit']"/>
+                                    <field name="currency_id"
+                                           column_invisible="1"/>
+                                    <field name="required"
+                                           widget="boolean_toggle"
+                                           readonly="parent.state not in ['draft', 'submit']"/>
+                                    <field name="status"
+                                           readonly="parent.state not in ['draft', 'submit']"/>
+                                    <field name="time_required"
+                                           readonly="parent.state not in ['draft', 'submit']"
+                                           column_invisible="1"/>
+                                    <button name="action_mark_as_done"
+                                            type="object"
+                                            string="Mark As Done"
+                                            invisible="status == 'completed' or parent.state != 'in_progress' "/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="other_information"
+                              string="Other Information">
+                            <group>
+                                <group name="group_creation_info">
+                                    <field name="user_id"
+                                           readonly="1"/>
+                                    <field name="company_id"
+                                           readonly="1"/>
+                                </group>
+                                <group name="group_date_info">
+                                    <field name="create_date"/>
+                                    <field name="submit_date" readonly="1"
+                                           invisible="not submit_date"/>
+                                    <field name="confirmation_date" readonly="1"
+                                           invisible="not confirmation_date"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"
+                           widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_field_service_request_tree" model="ir.ui.view">
+        <field name="name">view.field.service.request.tree</field>
+        <field name="model">field.service.request</field>
+        <field name="arch" type="xml">
+            <tree string="Service Request">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="skill_category_id"/>
+                <field name="submit_date" optional="hide"/>
+                <field name="date_assigned"/>
+                <field name="date_deadline"/>
+                <field name="priority" widget="priority"
+                       readonly="state not in ['draft']" optional="show"/>
+                <field name="company_id" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state in ('assigned', 'in_progress')"
+                       decoration-success="state in ('submit', 'completed')"/>
+                <field name="sale_order_id" string="Sale Order"
+                       optional="hide"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_field_service_request_search" model="ir.ui.view">
+        <field name="name">view.field.service.request.search</field>
+        <field name="model">field.service.request</field>
+        <field name="arch" type="xml">
+            <search string="Service Request">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="skill_category_id"/>
+                <field name="hr_skill_ids"/>
+                <filter string="My requests"
+                        name="my_field_request_id"
+                        domain="['|', ('user_id', '=', uid), ('field_service_worker_ids.employee_id.user_id.id', '=', uid)]"/>
+                <filter string="Unassigned"
+                        name="unassigned_request"
+                        domain="[('field_service_worker_ids', '=', False)]"/>
+                <filter string="Completed"
+                        name="completed_request"
+                        domain="[('state', '=', 'completed')]"/>
+                <filter string="Create Date" name="filter_create_date"
+                        date="create_date"/>
+                <group expand="1" string="Group By">
+                    <filter string="Customers" name="partner_id"
+                            context="{'group_by':'partner_id'}"/>
+                    <filter string="Category" name="skill_category_id"
+                            context="{'group_by':'skill_category_id'}"/>
+
+                    <filter string="State"
+                            name="state"
+                            context="{'group_by':'state'}"/>
+                    <filter string="Deadline Date" name="deadline_month"
+                            domain="[]"
+                            context="{'group_by': 'date_deadline'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_field_service_request_kanban" model="ir.ui.view">
+        <field name="name">view.field.service.request.kanban</field>
+        <field name="model">field.service.request</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state">
+                <field name="name"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-menu">
+                        <t t-if="widget.editable">
+                            <a role="menuitem" type="edit"
+                               class="dropdown-item">Edit
+                            </a>
+                        </t>
+                        <t t-if="widget.deletable">
+                            <a role="menuitem" type="delete"
+                               class="dropdown-item">Delete
+                            </a>
+                        </t>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <field name="partner_id"/>
+                                    <br/>
+                                    <field name="skill_category_id"/>
+                                    <field name="hr_skill_ids"
+                                           widget="many2many_tags"/>
+                                    <field name="date_assigned"/><br/>
+                                    <field name="priority" widget="priority"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="view_field_service_request_calendar" model="ir.ui.view">
+        <field name="name">view.field.service.request.calendar</field>
+        <field name="model">field.service.request</field>
+        <field name="arch" type="xml">
+            <calendar string="Field Service Requests" create="0" mode="month"
+                      date_start="date_deadline" color="state"
+                      event_limit="5" quick_create="0">
+                <field name="state" filters="1" invisible="1"/>
+                <field name="activity_ids" options="{'icon': 'fa fa-clock-o'}"/>
+                <field name="partner_id" avatar_field="avatar_128"
+                       options="{'icon': 'fa fa-users'}"/>
+            </calendar>
+        </field>
+    </record>
+    <record id="view_field_service_request_pivot" model="ir.ui.view">
+        <field name="name">view.field.service.request.pivot</field>
+        <field name="model">field.service.request</field>
+        <field name="arch" type="xml">
+            <pivot string="Field Service Requests" sample="1"
+                   js_class="project_pivot">
+                <field name="date_deadline" interval="day" type="row"/>
+                <field name="name" invisible="1"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_field_service_request_graph" model="ir.ui.view">
+        <field name="name">view.field.service.request.graph</field>
+        <field name="model">field.service.request</field>
+        <field name="arch" type="xml">
+            <graph string="Field Service" sample="1"
+                   js_class="hr_timesheet_graphview">
+                <field name="date_deadline" interval="day"/>
+                <field name="state"/>
+                <field name="name" invisible="1"/>
+            </graph>
+        </field>
+    </record>
+    <record id="action_view_my_requests" model="ir.actions.act_window">
+        <field name="name">My Requests</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">field.service.request</field>
+        <field name="view_mode">kanban,tree,form,calendar,pivot,graph</field>
+        <field name="domain">['|', ('user_id', '=', uid),
+            ('field_service_worker_ids.employee_id.user_id.id', '=', uid)]
+        </field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create New Field Service Request
+            </p>
+            <p>
+                You can create/view Service Request from here.
+            </p>
+        </field>
+    </record>
+    <record id="action_view_all_requests"
+            model="ir.actions.act_window">
+        <field name="name">All Requests</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">field.service.request</field>
+        <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create New Field Service Request
+            </p>
+            <p>
+                You can create/view Service Request from here.
+            </p>
+        </field>
+    </record>
+    <record id="action_view_overdue_requests" model="ir.actions.act_window">
+        <field name="name">Overdue Requests</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">field.service.request</field>
+        <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+        <field name="domain">[
+            ('date_deadline', '&lt;', context_today()),
+            ('state', 'not in', ['completed', 'cancel'])
+            ]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create New Field Service Request
+            </p>
+            <p>You can create/view Service Request from here.</p>
+        </field>
+    </record>
+</odoo>

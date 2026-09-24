@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="CreateNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <Record t-props="recordProps" t-slot-scope="data">
+                <div class="cy-work-auto-form d-flex cy-flex-column">
+                    <label for="label" class="form-label  cy-modal-form_label">
+                        Label
+                    </label>
+                    <input type="text"
+                           class="o_input"
+                           autocomplete="off"
+                           placeholder="Label"
+                           t-on-focusout="(ev) => this.setLabel(ev.target.value)"
+                           t-att-value="getLabel"/>
+                    <div class="mt-3">
+                        <div class="variable-input-container">
+                            <label for="variableName" class="form-label  cy-modal-form_label">Variable Name</label>
+                            <div class="input-wrapper">
+                                <input
+                                        id="variableName"
+                                        class="variable-input "
+                                        autocomplete="off"
+                                        t-model="state.searchInput"
+                                        t-on-input="handleInput"
+                                        placeholder="Enter variable name"
+                                        t-on-change="() => this.setNewValue()"
+                                        t-attf-class="{{ state.errorMessage ? 'is-invalid': ''}} {{state.successMessage ? 'is-valid': ''}}"
+                                />
+                                <span t-if="state.successMessage" class="valid-icon">
+                                    <i class="ri-check-line"/>
+                                </span>
+                            </div>
+                            <t t-if="variableNameSuggestions.length > 0">
+                                <div class="mt-2">
+                                    <span class="text-muted small fw-semibold me-1">Suggestions:</span>
+                                    <t t-foreach="variableNameSuggestions" t-as="s" t-key="s">
+                                        <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-secondary me-1 mb-1 px-2 py-0"
+                                                t-on-click="() => this.selectSuggestion(s)"
+                                        >
+                                            <t t-esc="s"/>
+                                        </button>
+                                    </t>
+                                </div>
+                            </t>
+                            <p t-if="state.errorMessage"
+                               t-attf-class="error-message d-flex align-items-end message-animate {{ state.isHiding ? 'hiding' : '' }}">
+                                <span class="error-icon d-flex align-items-end">
+                                    <i class="ri-error-warning-line"/>
+                                </span>
+                                <span class="text" t-esc="state.errorMessage"/>
+                            </p>
+                            <p t-if="state.successMessage"
+                               t-attf-class="success-message message-animate {{ state.isHiding ? 'hiding' : '' }}">
+                                <span class="success-icon">
+                                    <i class="ri-check-line"/>
+                                </span>
+                                <span t-esc="state.successMessage"/>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="model_id"
+                               class="form-label  cy-modal-form_label">
+                            Model
+                        </label>
+                        <Many2OneField
+                                canOpen="false"
+                                record="data.record"
+                                name="'model_id'"
+                                id="'model_id'"
+                                domain="getDomain"
+                        />
+                    </div>
+                    <div class="cy-w-warning mt-2">Please check all required fields in the form. If any are missing, add
+                        them. Incomplete forms may cause errors.
+                    </div>
+                    <t t-if="requiredField">
+                        <t t-foreach="requiredField" t-as="field" t-key="field_index">
+                            <div class="mb-2">
+                                <label class="form-label  cy-modal-form_label">
+                                    <t t-esc="field.string"/>
+                                </label>
+                                <t t-set="info" t-value="this.getValueEditorInfo(field)"/>
+                                <div class="d-flex gap-2">
+                                    <div class="flex-grow-1">
+                                        <t t-component="info.component"
+                                           t-props="getComponentProps(info, field)"/>
+                                    </div>
+                                    <div class="flex-shrink-0 d-flex align-items-end justify-content-end">
+                                        <FieldTypeDropdown
+                                                currentLabel="getDropdownLabel(field.selectionType)"
+                                                onSelected="(type) => this.toggleIncludeVariable(type, field.name)"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                    <CustomTreeEditor
+                            getPathEditorInfo.bind="getPathEditorInfo"
+                            resModel="modelState.model.model" tree="tree"
+                            createNewNode.bind="createNewNode"
+                            nodeUpdate.bind="nodeUpdate"
+                            nodeValueUpdate.bind="nodeValueUpdate"
+                            deleteNode.bind="deleteNode"
+                            variables="variables"
+                    >
+                        <t t-set-slot="newButton">
+                            <span><i class="ri-add-fill"/>Add Field
+                            </span>
+                        </t>
+                    </CustomTreeEditor>
+                </div>
+            </Record>
+        </xpath>
+    </t>
+    <t t-name="cyllo_workflow_automation.create.field">
+        <div t-attf-class="o_tree_editor_editor #{_classes}">
+            <t t-component="info.component" t-props="info.extractProps({ value, update })"/>
+        </div>
+    </t>
+</templates>

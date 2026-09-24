@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Action for helpdesk SLA -->
+    <record id="helpdesk_sla_action" model="ir.actions.act_window">
+        <field name="name">SLA Policy</field>
+        <field name="res_model">helpdesk.sla</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!-- Tree view for helpdesk SLA -->
+    <record id="helpdesk_sla_view_tree" model="ir.ui.view">
+        <field name="name">helpdesk.sla.view.tree</field>
+        <field name="model">helpdesk.sla</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="team_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Form view for helpdesk SLA -->
+    <record id="helpdesk_sla_view_form" model="ir.ui.view">
+        <field name="name">helpdesk.sla.view.form</field>
+        <field name="model">helpdesk.sla</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sla_tickets" type="object" class="oe_stat_button" icon="fa-life-ring">
+                            <field name="ticket_count" widget="statinfo" string="Tickets"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"
+                                   placeholder="Eg: Close within 8 hours"/>
+                        </h1>
+                        <h4>
+                            <field name="description" placeholder="Description of the policy"/>
+                        </h4>
+                    </div>
+                    <group>
+                        <group>
+                            <group>
+                            <field name="team_ids" widget="many2many_tags" domain="[('use_sla', '=', True)]"/>
+                            <field name="category_ids" widget="many2many_tags"/>
+                            <field name="customer_ids" widget="many2many_tags"/>
+                            <field name="target_stage"/>
+                            <field name="within_hour" widget="float_time"/>
+                            <field name="excluded_stage_ids" widget="many2many_tags"/>
+                        </group>
+                            <group>
+                                <field name="company_id"/>
+                                <field name="tag_ids" widget="many2many_tags"/>
+                            </group>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

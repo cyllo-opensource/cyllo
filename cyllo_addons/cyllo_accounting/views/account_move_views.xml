@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_move_form" model="ir.ui.view">
+        <field name="name">view.account.move.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <field name="asset_type" invisible="1"/>
+                <button type="object" name="action_get_asset_moves"
+                        class="oe_stat_button" icon="fa-book" invisible="asset_count == 0 or asset_type != 'revenue'">
+                    <field name="asset_count" string="Deferred Revenues" widget="statinfo"/>
+                </button>
+                <button type="object" name="action_get_asset_moves"
+                        class="oe_stat_button" icon="fa-book" invisible="asset_count == 0 or asset_type != 'expense'">
+                    <field name="asset_count" string="Deferred Expenses" widget="statinfo"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']" position="before">
+                <field name='create_from_payment' invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='account_id']"
+                   position="before">
+                <field name='move_type' column_invisible="1"/>
+                <field name='move_asset_type' column_invisible="1"/>
+                <field name='asset'
+                       column_invisible="parent.move_type not in ['out_invoice','in_invoice']"
+                       optional="hide"/>
+                <field name='asset_type_id'
+                       column_invisible="parent.move_type not in ['out_invoice','in_invoice']"
+                       invisible="asset == False"
+                       domain="[('type', '=', move_asset_type)]"
+                       optional="hide"
+                       required="[('asset', '=', True)]"
+                       options="{'no_create': True}"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="readonly">create_from_payment == True or state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name='fiscal_year_id'/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_search" model="ir.ui.view">
+        <field name="name">view.account.move.search</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group/filter[@name='salesperson']" position="before">
+                <separator/>
+                <filter name="payment_status" string="Payment Status"
+                        context="{'group_by': 'payment_state'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action: Dynamic Aged Receivable -->
+    <record id="action_aged_receivable" model="ir.actions.client">
+        <field name="name">Aged Receivable</field>
+        <field name="tag">age_r</field>
+    </record>
+
+    <!-- Action: Dynamic Aged Payable -->
+    <record id="action_aged_payable" model="ir.actions.client">
+        <field name="name">Aged Payable</field>
+        <field name="tag">age_p</field>
+    </record>
+
+    <!-- Action: Dynamic Profit and Loss -->
+    <record id="action_dynamic_profit_and_loss" model="ir.actions.client">
+        <field name="name">Profit and Loss</field>
+        <field name="tag">pnl_report</field>
+    </record>
+
+    <record id="action_dynamic_balance_sheet" model="ir.actions.client">
+        <field name="name">Balance Sheet</field>
+        <field name="tag">balance_sheet</field>
+    </record>
+
+    <record id="action_dynamic_bank_book" model="ir.actions.client">
+        <field name="name">Bank Book Report</field>
+        <field name="tag">bank_book</field>
+    </record>
+
+    <record id="action_dynamic_partner_ledger" model="ir.actions.client">
+        <field name="name">Partner Ledger</field>
+        <field name="tag">p_l</field>
+    </record>
+
+    <record id="action_dynamic_cash_book" model="ir.actions.client">
+        <field name="name">Cash Book Report</field>
+        <field name="tag">cash_book</field>
+    </record>
+
+    <record id="action_dynamic_tax_report" model="ir.actions.client">
+        <field name="name">Tax Report</field>
+        <field name="tag">tax_r</field>
+    </record>
+
+    <record id="action_dynamic_trial_balance" model="ir.actions.client">
+        <field name="name">Trial Balance</field>
+        <field name="tag">tb_r</field>
+    </record>
+
+    <record id="action_dynamic_general_ledger" model="ir.actions.client">
+        <field name="name">General Ledger</field>
+        <field name="tag">general_ledger</field>
+    </record>
+</odoo>

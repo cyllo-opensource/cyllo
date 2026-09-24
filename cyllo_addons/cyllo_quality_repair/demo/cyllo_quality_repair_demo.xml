@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- 1. Quality Control Point for Repair operations -->
+    <record id="quality_control_point_repair_demo_1" model="quality.control.point">
+        <field name="qc_check_for">product</field>
+        <field name="control_type">product</field>
+        <field name="control_by">all</field>
+        <field name="quality_team_id" ref="cyllo_quality.quality_team_main"/>
+        <field name="product_ids" eval="[(4, ref('product.product_product_3'))]"/>
+        <field name="quality_inspection_ids" eval="[
+            (0, 0, {
+                'inspection_action_id': ref('cyllo_quality.inspection_action_visual'),
+                'inspection_type_id': ref('cyllo_quality.inspection_type_pass_fail'),
+                'instruction': 'Verify that the repaired product functions correctly and meets visual criteria.'
+            })
+        ]"/>
+    </record>
+
+    <!-- Dynamic update of operation type for the Repair Picking Type (repair_operation) -->
+    <function model="quality.control.point" name="write">
+        <value eval="[ref('quality_control_point_repair_demo_1')]"/>
+        <value model="quality.control.point" eval="{'operation_type_ids': [(6, 0, obj().env['stock.picking.type'].search([('code', '=', 'repair_operation')]).ids)]}"/>
+    </function>
+
+    <!-- 2. Quality Check linked to the Control Point and standard Repair Demo Order -->
+    <record id="quality_check_repair_demo_1" model="quality.check">
+        <field name="quality_control_id" ref="quality_control_point_repair_demo_1"/>
+        <field name="product_id" ref="product.product_product_3"/>
+        <field name="quality_team_id" ref="cyllo_quality.quality_team_main"/>
+        <field name="repair_id" ref="repair.repair_r1"/>
+        <field name="state">todo</field>
+    </record>
+
+</odoo>

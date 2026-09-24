@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_users_form" model="ir.ui.view">
+        <field name="name">view.res.users.form</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <form class="o_wrap_label">
+                <style>
+                    .modal-dialog {
+                    height: -1% !important;
+                    width: 25% !important;
+                    }
+                    .o_form_label {
+                    padding-bottom: 4px !important;
+                    padding-top: 6px !important;
+                    }
+                    .main-field-toggle .o_wrap_label {
+                    width: 60px !important;
+                    }
+                    .main-field-toggle .o_wrap_input {
+                    max-width: 35px !important;
+                    padding-top:8px !important;
+                    }
+                    .o_group_wa {
+                    margin-left: 75px;
+                    display: inline-flex;
+                    }
+                    .o_img .img{
+                    border-radius: 100px;
+                    }
+                </style>
+                <sheet>
+                    <field name="image_1920" widget="image" class="o_img"
+                           style="max-width: 35%; margin: 0 auto; display: block;"/>
+                    <group class="d-flex align-items-center gap-1 cy-whatsapp-user-form">
+                        <i class="ri-user-line" style="padding:10px;"/>
+                        <field name="name"/>
+                    </group>
+                    <group class="d-flex align-items-center gap-1 cy-whatsapp-user-form">
+                        <i class="ri-mail-line" style="padding:10px;"/>
+                        <field name="login" string="Email"/>
+                    </group>
+                    <group class="d-flex align-items-center gap-1 cy-whatsapp-user-form">
+                        <i class="ri-contacts-book-line" style="padding:10px;"/>
+                        <field name="partner_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_res_users_form_config" model="ir.ui.view">
+        <field name="name">view.res.users.form</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <form class="o_wrap_label">
+                <style>
+                    .modal-dialog {
+                    height: -1% !important;
+                    width: 25% !important;
+                    }
+                    .o_form_label {
+                    padding-bottom: 4px !important;
+                    padding-top: 6px !important;
+                    }
+                    .main-field-toggle .o_wrap_label {
+                    width: 60px !important;
+                    }
+                    .main-field-toggle .o_wrap_input {
+                    max-width: 35px !important;
+                    padding-top:8px !important;
+                    }
+                    .o_group_wa {
+                    margin-left: 75px;
+                    display: inline-flex;
+                    }
+                    .o_img .img{
+                    border-radius: 100px;
+                    }
+                </style>
+                <sheet>
+                    <field name="image_1920" widget="image" class="o_img"
+                           style="max-width: 35%; margin: 0 auto; display: block;"/>
+                    <group class="d-flex align-items-center gap-1 cy-whatsapp-user-form">
+                        <i class="ri-user-line" style="padding:10px;"/>
+                        <field name="name"/>
+                    </group>
+                    <group class="d-flex align-items-center gap-1 cy-whatsapp-user-form">
+                        <i class="ri-mail-line" style="padding:10px;"/>
+                        <field name="login" string="Email"/>
+                    </group>
+                    <group>
+                        <field name="app_uid"/>
+                        <field name="account_uid"/>
+                        <field name="phone_uid"/>
+                        <field name="token"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_res_users_whatsapp_acc_form" model="ir.ui.view">
+        <field name="name">view.res.users.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='preferences']" position="after">
+                <page name="wa_account_details" string="Whatsapp Account">
+                    <group string="Sending Messages">
+                        <p>
+                            Set up the whatsapp account credentials for sending
+                            messages
+                            <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started#phone-number"
+                               title="Documentation" class="o_doc_link"
+                               target="_blank"/>
+                        </p>
+                        <group>
+                            <field name="user_ids" widget="many2many_tags"/>
+                            <button name="action_config_whatsapp_account"
+                                    type="object" invisible="not user_ids">
+                                Share
+                            </button>
+                        </group>
+                        <group>
+                            <field name="app_uid"
+                                   placeholder="e.g. 123456789012345"/>
+                            <field name="account_uid"
+                                   placeholder="e.g. 1234562345"/>
+                        </group>
+                        <group>
+                            <field name="token" password="True"
+                                   placeholder="e.g. EGQUOTRWHRWERTYTHETHWRBTEJETHGQE"/>
+                            <field name="phone_uid"
+                                   placeholder="e.g. 123456789"/>
+                        </group>
+                    </group>
+                    <group string="Receiving Messages">
+                        <group>
+                            <field name="webhook_callback_url"
+                                   widget="CopyClipboardURL"/>
+                            <label for="return_token"/>
+                            <div class="o_row">
+                                <field class="flex-1" name="return_token" invisible="not return_token"/>
+                                <button name="action_generate_token" type="object" string="Generate Token"/>
+                            </div>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <!-- Inheriting User View  to add whatsapp account-->
+    <record id="action_view_res_users_form" model="ir.actions.act_window">
+        <field name="name">User</field>
+        <field name="res_model">res.users</field>
+        <field name="view_id" ref="view_res_users_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

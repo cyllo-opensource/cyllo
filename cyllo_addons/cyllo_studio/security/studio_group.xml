@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Module Category -->
+    <record id="cyllo_studio_module_management" model="ir.module.category">
+        <field name="name">Cyllo Studio</field>
+        <field name="description">Cyllo Studio Access Management</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- Studio User -->
+    <record id="group_cyllo_studio_user" model="res.groups">
+        <field name="name">Studio User</field>
+        <field name="category_id" ref="cyllo_studio.cyllo_studio_module_management"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Studio Administrator -->
+    <record id="group_cyllo_studio_admin" model="res.groups">
+        <field name="name">Studio Administrator</field>
+        <field name="category_id" ref="cyllo_studio.cyllo_studio_module_management"/>
+        <field name="implied_ids" eval="[
+            (4, ref('cyllo_studio.group_cyllo_studio_user'))
+        ]"/>
+    </record>
+
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('cyllo_studio.group_cyllo_studio_admin'))]"/>
+    </record>
+
+</odoo>

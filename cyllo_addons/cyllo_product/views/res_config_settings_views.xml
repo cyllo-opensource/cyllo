@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Adding field in res.config.settings-->
+    <record id="view_res_config_settings_form_inherit_product_approval" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form.inherit.product.approval</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority">110</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Product" string="Product" name="cyllo_product"
+                     groups="cyllo_product.group_cyllo_product">
+                    <block title="Approvals">
+                        <setting id="approval_type" company_dependent="1"
+                                 help='Select an approval type (Single Level:
+                                 If Single Level is selected, just one approver
+                                 is required to approve the product.
+                                 Multi Level: If Multi Level is selected,
+                                 all approvers must approve the product).'>
+                            <field name="product_approval_type" widget="radio"/>
+                        </setting>
+                        <setting id="approval_manager" company_dependent="1"
+                                 help="Select managers to approve the product">
+                            <field name="product_approver_ids" widget="many2many_avatar_user" required="product_approval_type"/>
+                        </setting>
+                        <setting id="product_category" company_dependent="1"
+                             help="Enable this field to select category for approval">
+                            <field name="product_category"/>
+                            <div invisible="not product_category">
+                                <div>
+                                    <label for="category_ids" class="col-lg-4 o_light_label"/>
+                                    <field name="category_ids" widget="many2many_tags"
+                                           required="product_category"/>
+                                </div>
+                            </div>
+                        </setting>
+                        <setting id="minimum_cost_limit" company_dependent="1"
+                             help="Enable this field to select minimum cost limit for approval">
+                            <field name="minimum_cost_limit"/>
+                            <div invisible="not minimum_cost_limit">
+                                <div>
+                                    <label for="cost_limit" class="col-lg-4 o_light_label"/>
+                                    <field name="cost_limit" widget="monetary" options="{'currency_field': 'currency_id'}"
+                                           required="minimum_cost_limit"/>
+                                </div>
+                            </div>
+                        </setting>
+                        <setting id="minimum_price_limit" company_dependent="1"
+                             help="Enable this field to select minimum price limit for approval">
+                            <field name="minimum_price_limit"/>
+                            <div invisible="not minimum_price_limit">
+                                <div>
+                                    <label for="price_limit" class="col-lg-4 o_light_label"/>
+                                    <field name="price_limit" widget="monetary" options="{'currency_field': 'currency_id'}"
+                                           required="minimum_price_limit"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+    <!--Acton for res config settings-->
+     <record id="action_view_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'cyllo_product', 'bin_size': False}</field>
+    </record>
+</odoo>
