@@ -1810,9 +1810,15 @@ class WorkAuto(models.Model):
             }
 
         try:
+            started = self.env.cr.now()
             with self.env.cr.savepoint():
                 self._process({'trigger_type': 'time', 'records': test_record})
-            return {'ok': True, 'records_processed': 1, 'errors': []}
+            Model = self.env[model_name].sudo()
+            updated = (
+                Model.search_count([('write_date', '>=', started)])
+                if Model._log_access else 0
+            )
+            return {'ok': True, 'records_processed': updated, 'errors': []}
         except Exception as exc:
             return {
                 'ok': True,

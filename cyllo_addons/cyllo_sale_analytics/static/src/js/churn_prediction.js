@@ -504,9 +504,14 @@ export class ChurnPredictionDashboard extends Component {
     }
 
     get chartStyle() {
+        // ECharts sizes a pie off min(width, height), so the height is what
+        // decides how big this one is drawn. It is the card's whole height
+        // budget less the header and wrapper padding that churn_dashboard.css
+        // trims — see --cy-chart-h there before changing it, or the card
+        // overflows .churn-chart and is clipped by its overflow:hidden.
         return {
-            height: `320px`,
-            width: `400px`,
+            height: `348px`,
+            width: `420px`,
         }
     }
     onClickCustomerDetails(cust) {

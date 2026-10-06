@@ -1940,7 +1940,8 @@ export class WorkFlowAuto extends Component {
                         type: "notification_panel",
                         notificationType: "info",
                     });
-                } else {
+                }
+                else {
                     this.env.services.effect.add({
                         title: _t("Run Now succeeded"),
                         message: _t("Workflow executed on %s record(s).", processed),

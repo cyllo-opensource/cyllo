@@ -34,22 +34,19 @@ class AppointmentHrRecruitmentController(AppointmentWebsiteController):
     matching ``hr.applicant`` record via ``applicant_id``.
     """
 
-    @http.route(
-        ['/appointment/<model("appointment.type"):appointment_type>/submit'],
-        type='http', auth='public', website=True, methods=['POST'], csrf=True,
-    )
-    def appointment_submit(self, appointment_type, **post):
+    @http.route()
+    def appointment_submit(self, appointment_type_id, **post):
         """Intercept the standard submit to inject ``applicant_id`` when an
         ``applicant_code`` token is present in the POST payload.
         """
         applicant_code = post.get('applicant_code')
 
         if not applicant_code:
-            return super().appointment_submit(appointment_type, **post)
+            return super().appointment_submit(appointment_type_id, **post)
         existing_ids = set(
             request.env['appointment.appointment'].sudo().search([]).ids
         )
-        response = super().appointment_submit(appointment_type, **post)
+        response = super().appointment_submit(appointment_type_id, **post)
         new_appointments = request.env['appointment.appointment'].sudo().search([
             ('id', 'not in', list(existing_ids)),
         ])
@@ -62,16 +59,13 @@ class AppointmentHrRecruitmentController(AppointmentWebsiteController):
 
         return response
 
-    @http.route(
-        ['/appointment/<model("appointment.type"):appointment_type>'],
-        type='http', auth='public', website=True,
-    )
-    def appointment_details(self, appointment_type, **kw):
+    @http.route()
+    def appointment_details(self, appointment_type_id, **kw):
         """Forward ``applicant_code`` from the URL into the template rendering
         context so the booking form can embed it as a hidden input field.
         Also pre-fills the applicant's name, email and phone so the candidate
         does not have to type their details again."""
-        response = super().appointment_details(appointment_type, **kw)
+        response = super().appointment_details(appointment_type_id, **kw)
 
         applicant_code = kw.get('applicant_code')
         if applicant_code and hasattr(response, 'qcontext'):

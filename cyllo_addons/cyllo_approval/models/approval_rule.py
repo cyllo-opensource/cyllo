@@ -137,8 +137,7 @@ class ApprovalRule(models.Model):
     )
     button_id = fields.Many2one('ir.buttons',
                                 domain="[('model_id','=',model_id)]",
-                                help="Select the button that requires an approval."
-                                     "If not found, use the sync buttons action.")
+                                help="Select the button that requires an approval.")
 
     server_action_id = fields.Many2one(
         'ir.actions.server',
@@ -486,44 +485,52 @@ class ApprovalRule(models.Model):
                 'field_description': 'Approval Requests',
                 'ttype': 'many2many',
                 'relation': 'approval.request',
+                'copied': False,
             },
             {
                 'name': 'x_is_state_approval',
                 'field_description': 'Is State Approval',
                 'ttype': 'boolean',
+                'copied': False,
             },
             {
                 'name': 'x_approval_comment',
                 'field_description': 'Approval Comment',
                 'ttype': 'text',
+                'copied': False,
             },
             {
                 'name': 'x_current_approver_id',
                 'field_description': 'Current Approver',
                 'ttype': 'many2one',
                 'relation': 'res.users',
+                'copied': False,
+
             },
             {
                 'name': 'x_current_group_id',
                 'field_description': 'Current Approver Group',
                 'ttype': 'many2one',
                 'relation': 'res.groups',
+                'copied': False,
             },
             {
                 'name': 'x_approval_level_info',
                 'field_description': 'Approval Level',
                 'ttype': 'char',
+                'copied': False,
             },
             {
                 'name': 'x_approval_request_count',
                 'field_description': 'Approval Requests',
                 'ttype': 'integer',
+                'copied': False,
             },
         ]
         created = False
         for field_data in fields_to_create:
             if field_data['name'] not in model_fields:
-                IrModelFields.create({
+                IrModelFields.sudo().create({
                     **field_data,
                     'model_id': self.model_id.id,
                 })

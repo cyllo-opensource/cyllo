@@ -1,7 +1,59 @@
 /**
- * Appointment Booking Page JS
+ * Appointment Booking & Listing Page JS
  * Handles slot fetching, attendee count and additional attendee fields.
+ *
+ * Also fixes a SecurityError that occurs when the appointment list is viewed
+ * inside Odoo's website-preview backend iframe and "Book Now" is clicked.
+ * When inside the iframe, clicks on .o_appointment_book_btn anchors are
+ * intercepted and redirected via window.top so that the iframe never enters
+ * a cross-origin navigation state (which causes Odoo's _onPageLoaded handler
+ * to throw "Failed to read 'href'/'addEventListener' from 'Window'").
  */
+
+/* ── Cross-origin iframe fix (appointment list) ─────────────────────────── */
+(function () {
+    'use strict';
+
+    function isInsideIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function initAppointmentListFix() {
+        if (!isInsideIframe()) {
+            return; // Public website – standard navigation is fine.
+        }
+
+        // Use capture phase so we run before Owl's bubble-phase handlers.
+        document.addEventListener('click', function (e) {
+            var anchor = e.target.closest('a.o_appointment_book_btn');
+            if (!anchor) { return; }
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            var url = anchor.getAttribute('href');
+            if (url) {
+                try {
+                    window.top.location.href = url;
+                } catch (err) {
+                    window.location.href = url;
+                }
+            }
+        }, true);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAppointmentListFix);
+    } else {
+        initAppointmentListFix();
+    }
+})();
+
+/* ── Booking page (slot picker, attendee fields) ────────────────────────── */
 function initBooking() {
     const date_select = $('#date_select');
     if (!date_select.length) return;
