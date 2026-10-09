@@ -115,7 +115,7 @@ class FieldServiceRequest(models.Model):
             if not self.task_id:
                 project = self.project_id or self.env.ref(
                     'cyllo_field_service_project.project_project_field_service')
-                task_id = self.env['project.task'].with_context(
+                task_id = self.env['project.task'].sudo().with_context(
                     skip_fsm_request_creation=True
                 ).create({
                     'name': self.name,
@@ -197,7 +197,7 @@ class FieldServiceRequest(models.Model):
         """
         if self.task_id:
             timesheets = []
-            timesheet_ids = self.task_id.timesheet_ids
+            timesheet_ids = self.task_id.sudo().timesheet_ids
             for timesheet in timesheet_ids:
                 timesheets.append(
                     fields.Command.create({

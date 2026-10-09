@@ -49,7 +49,7 @@ class ProjectTask(models.Model):
         """
         self.service_id = False
         for rec in self:
-            service = self.env['field.service.request'].search(
+            service = self.env['field.service.request'].sudo().search(
                 [('task_id', '=', rec.id)], limit=1)
             rec.service_id = service.id
 

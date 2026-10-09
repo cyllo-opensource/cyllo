@@ -36,6 +36,7 @@
     'depends': ['cyllo_field_service', 'fleet'],
     'data': [
         'security/ir.model.access.csv',
+        'security/security.xml',
         'views/field_service_request_views.xml',
         'views/field_service_request_form_templates.xml',
         'views/field_service_fleet_menus.xml',

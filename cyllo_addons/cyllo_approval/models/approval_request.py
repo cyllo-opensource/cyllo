@@ -375,4 +375,12 @@ class ApprovalRequest(models.Model):
             "view_mode": "form",
             "res_id": self.res_id,
             "target": "current",
+            "context": {
+                **self.env.context,
+                "approval_request_id": self.id,
+                "create": False,
+                "read": True,
+                "edit": False,
+                "delete": False,
+            },
         }

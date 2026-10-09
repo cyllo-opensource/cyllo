@@ -221,14 +221,14 @@ class FieldServiceRequest(models.Model):
     def action_submit(self):
         """ Generate a sequence for the field service request. This method computes sequence based on the code
         field.service.request."""
-        self.write({
+        self.with_context(skip_kanban_action=True).write({
             'state': 'submit',
             'submit_date': datetime.now(),
         })
 
     def action_confirm(self):
         """This function is used for submitting the field service request"""
-        self.write({'state': 'submit'})
+        self.with_context(skip_kanban_action=True).write({'state': 'submit'})
 
     def action_fetch_suitable_workers(self):
         """In this function, we are going to fetch the workers based on the skills"""
@@ -315,12 +315,12 @@ class FieldServiceRequest(models.Model):
                 }
             }
         if self.field_service_worker_ids:
-            self.sudo().write(
+            self.sudo().with_context(skip_kanban_action=True).write(
                 {'state': 'assigned', 'date_assigned': fields.datetime.now()})
             for worker in self.field_service_worker_ids:
                 followers = self.message_follower_ids.mapped('partner_id.id')
                 if worker.employee_id.work_contact_id.id not in followers:
-                    self.message_follower_ids.create({
+                    self.sudo().message_follower_ids.create({
                         'res_id': self.id,
                         'res_model': 'field.service.request',
                         'partner_id': worker.employee_id.work_contact_id.id
@@ -348,7 +348,7 @@ class FieldServiceRequest(models.Model):
     def action_draft(self):
         """Function for sending notification to assigned workers and move
         request to assigned state"""
-        self.sudo().write({'state': 'draft'})
+        self.sudo().with_context(skip_kanban_action=True).write({'state': 'draft'})
 
     def action_cancel(self):
         """Function to cancel the field service request"""
@@ -372,7 +372,7 @@ class FieldServiceRequest(models.Model):
         if (self.env.user.has_group(
                 'cyllo_field_service.group_cyllo_field_service_manager') or self.env.user.id in
                 self.field_service_worker_ids.mapped('employee_id.user_id.id')):
-            self.sudo().write(
+            self.sudo().with_context(skip_kanban_action=True).write(
                 {'state': 'in_progress', 'confirmation_date': datetime.today()})
         else:
             raise UserError(
@@ -393,7 +393,9 @@ class FieldServiceRequest(models.Model):
                     'type': 'warning',
                 }}
         else:
-            self.sudo().write({'state': 'completed'})
+            self.sudo().with_context(skip_mark_as_done=True, skip_kanban_action=True).write({
+                'state': 'completed'
+            })
 
     def action_create_invoice(self):
         """
@@ -449,7 +451,7 @@ class FieldServiceRequest(models.Model):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_id.id,
-            'currency_id': self.company_id.id,
+            'currency_id': self.company_id.currncy_id.id,
             'invoice_date': date.today(),
             'invoice_origin': self.name,
         })

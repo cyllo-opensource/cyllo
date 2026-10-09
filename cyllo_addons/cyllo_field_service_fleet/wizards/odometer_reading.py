@@ -47,7 +47,7 @@ class OdometerReading(models.Model):
             else:
                 self.field_request_id.sudo().write({'state': 'completed'})
                 self.fleet_id.sudo().write({'odometer': self.new_reading})
-                contract = self.fleet_id.log_contracts.filtered(lambda l: l.field_service_request_id == self.field_request_id)
+                contract = self.sudo().fleet_id.log_contracts.filtered(lambda l: l.field_service_request_id == self.field_request_id)
                 if contract:
                     contract.action_close()
 

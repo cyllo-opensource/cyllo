@@ -45,6 +45,6 @@ class AccountAnalyticLine(models.Model):
         """
         self.service_id = False
         for rec in self:
-            service = self.env['field.service.request'].browse(
+            service = self.env['field.service.request'].sudo().browse(
                 self.env.context.get('service_id'))
             rec.service_id = service.id

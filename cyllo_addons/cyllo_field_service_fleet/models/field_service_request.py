@@ -77,7 +77,7 @@ class FieldServiceRequest(models.Model):
         """Override method to start fleet contract when service has started"""
         res = super().action_service_start()
         if self.fleet_id:
-            contract = self.fleet_id.log_contracts.filtered(
+            contract = self.sudo().fleet_id.log_contracts.filtered(
                 lambda c: c.field_service_request_id == self)
             if contract:
                 contract[0].action_open()

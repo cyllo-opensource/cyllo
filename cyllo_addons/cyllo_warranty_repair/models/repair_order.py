@@ -52,7 +52,7 @@ class RepairOrder(models.Model):
                 repair.warranty_status = False
                 continue
 
-            expiration_date = repair.sale_order_line_id.warranty_expiration_date
+            expiration_date = repair.sale_order_line_id.sale_warranty_expiration_date
             if not expiration_date:
                 repair.warranty_status = 'none'
             elif expiration_date >= today:

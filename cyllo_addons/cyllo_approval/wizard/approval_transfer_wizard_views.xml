@@ -5,10 +5,13 @@
         <field name="model">approval.transfer.wizard</field>
         <field name="arch" type="xml">
             <form string="Approval Transfer" create="false" edit="false">
-                 <group>
+                <group>
+                    <field name="approval_user_ids" invisible="1"/>
                     <field name="request_id" readonly="1"/>
                     <field name="current_user_id" readonly="1"/>
-                    <field name="user_id" options="{'no_create': True}"/>
+                    <field name="user_id"
+                           options="{'no_create': True}"
+                           domain="[('id', 'in', approval_user_ids)]"/>
                     <field name="note" placeholder="Reason for transfer..."/>
                 </group>
                 <footer>
@@ -18,6 +21,4 @@
             </form>
         </field>
     </record>
-
-
 </odoo>

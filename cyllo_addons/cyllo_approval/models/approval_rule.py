@@ -779,6 +779,29 @@ class ApprovalRuleLine(models.Model):
         string='Requests',
         help="Approval requests created for this level."
     )
+    approval_user_ids = fields.Many2many(
+        'res.users',
+        compute='_compute_approval_user_ids',
+    )
+
+    @api.depends("user_id")
+    def _compute_approval_user_ids(self):
+        approval_user_group = self.env.ref(
+            'cyllo_approval.group_approval_user'
+        )
+        approval_manager_group = self.env.ref(
+            'cyllo_approval.group_approval_manager'
+        )
+
+        users = self.env['res.users'].search([
+            '|',
+            ('groups_id', 'in', approval_user_group.id),
+            ('groups_id', 'in', approval_manager_group.id),
+            ('id', '!=', self.env.user.id),
+        ])
+
+        for wizard in self:
+            wizard.approval_user_ids = users
 
     @api.constrains('user_id', 'group_id')
     def _constraint_approver(self):

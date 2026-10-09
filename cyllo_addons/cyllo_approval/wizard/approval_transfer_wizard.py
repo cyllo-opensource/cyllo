@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import  fields, models
+from odoo import  api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -42,6 +42,28 @@ class ApprovalTransferWizard(models.TransientModel):
         required=True,
         help="Reason for transferring the approval."
     )
+    approval_user_ids = fields.Many2many(
+        'res.users',
+        compute='_compute_approval_user_ids',
+    )
+
+    @api.depends("user_id")
+    def _compute_approval_user_ids(self):
+        approval_user_group = self.env.ref(
+            'cyllo_approval.group_approval_user', raise_if_not_found=False
+        )
+        approval_manager_group = self.env.ref(
+            'cyllo_approval.group_approval_manager', raise_if_not_found=False
+        )
+        group_ids = [g.id for g in (approval_user_group, approval_manager_group) if g]
+
+        users = self.env['res.users'].search([
+            ('groups_id', 'in', group_ids),
+            ('id', '!=', self.env.user.id),
+        ]) if group_ids else self.env['res.users']
+
+        for wizard in self:
+            wizard.approval_user_ids = users
 
     def action_transfer_approval(self):
         """Transfer approval from one user to another."""
