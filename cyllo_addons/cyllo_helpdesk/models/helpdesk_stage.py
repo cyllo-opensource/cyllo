@@ -32,4 +32,10 @@ class HelpDeskStage(models.Model):
                               help="Order of stage")
     is_closed = fields.Boolean(string="Is Closed Stage", help="Tick if it is closed stage")
     fold = fields.Boolean(string="Fold", help="Stage folded in kanban")
-    template_id = fields.Many2one('mail.template', string='Email Template', help="Automated email sent to the customer when the ticket reaches this stage.")
+    template_id = fields.Many2one(
+        'mail.template',
+        string='Email Template',
+        domain=[('model_id.model', '=', 'helpdesk.ticket')],
+        help='Automated email sent to the customer when the ticket reaches this stage.',
+    )
+

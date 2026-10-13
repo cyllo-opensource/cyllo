@@ -36,7 +36,6 @@ class CarbonComputeWizard(models.TransientModel):
         activities = self.calculation_id.carbon_activity_ids
         if self.apply_rules:
             activities.action_apply_rules()
-        activities.action_compute()
         if self.mark_done:
             self.calculation_id.action_done()
         return {'type': 'ir.actions.act_window_close'}

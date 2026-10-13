@@ -4,28 +4,18 @@
         <field name="name">Help Desk</field>
         <field name="model_id"
                ref="cyllo_helpdesk.model_helpdesk_ticket"/>
-        <field name="subject">[Ticket #{{ object.ticket }}] {{ object.name }}: We received your
-            ticket
-        </field>
-        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if
-            object.user_id else object.company_id.partner_id.email_formatted) }}
-        </field>
-        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and
-            object.team_id.alias_id else object.company_id.partner_id.email_formatted }}
-        </field>
-        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id
-            else '') }}
-        </field>
-        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email'))
-            }}
-        </field>
+        <field name="subject">[Ticket #{{ object.ticket }}] {{ object.name }}: We received your ticket</field>
+        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if object.user_id else object.company_id.partner_id.email_formatted) }}</field>
+        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or object.company_id.partner_id.email_formatted }}</field>
+        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id else '') }}</field>
+        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email')) }}</field>
         <field name="body_html" type="html">
             <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #333333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
                 <div style="background-color: #9EA700; padding: 15px 20px; border-radius: 6px 6px 0 0; text-align: center; color: #ffffff;">
                     <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Helpdesk Support</h2>
                 </div>
                 <div style="padding: 20px;">
-                    <p style="font-size: 15px;">Dear<strong
+                    <p style="font-size: 15px;">Dear <strong
                             t-out="object.customer_id.name or 'Customer'"/>,
                     </p>
                     <p>We have successfully received your support request regarding your issue:</p>
@@ -108,8 +98,8 @@
         <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if
             object.user_id else object.company_id.partner_id.email_formatted) }}
         </field>
-        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and
-            object.team_id.alias_id else object.company_id.partner_id.email_formatted }}
+        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or
+            object.company_id.partner_id.email_formatted }}
         </field>
         <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id
             else '') }}
@@ -170,8 +160,8 @@
         <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if
             object.user_id else object.company_id.partner_id.email_formatted) }}
         </field>
-        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and
-            object.team_id.alias_id else object.company_id.partner_id.email_formatted }}
+        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or
+            object.company_id.partner_id.email_formatted }}
         </field>
         <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id
             else '') }}

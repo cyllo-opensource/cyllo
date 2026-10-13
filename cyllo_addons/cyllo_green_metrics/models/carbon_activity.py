@@ -251,15 +251,6 @@ class CarbonActivity(models.Model):
         for rec in self:
             rec.state = 'done'
 
-    def action_compute(self):
-        """Validate the emission factor and mark the activity as done."""
-        for rec in self:
-            if not rec.factor_value:
-                raise ValidationError('Selected factor has no value.')
-            # Safety net for activities that predate the gas cascade.
-            if not rec.gas_id and rec.factor_id.gas_id:
-                rec.gas_id = rec.factor_id.gas_id
-
     def action_set_draft(self):
         """Reopen done activities so they can be edited again."""
         if not self.env.user.has_group('cyllo_green_metrics.group_carbon_manager'):
