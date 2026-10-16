@@ -216,7 +216,7 @@
                         Handled
                     </div>
                 </div>
-                <div class="chat-bubble bot" t-ref="bubble" t-else="">
+                <div class="chat-bubble bot" t-ref="bubble" t-else="" t-on-click="onBubbleClick">
                     <t t-if="props.html" t-out="answerParts.before" />
                     <t t-elif="props.text" t-out="props.text" />
                 </div>
@@ -270,6 +270,9 @@
                             <div class="cy-ai-chart-head">
                                 <span class="cy-ai-chart-title" t-esc="chartTitle" />
                                 <div class="graph-icon">
+                                    <t t-foreach="chartActions" t-as="act" t-key="act.key">
+                                        <t t-component="act.Comp" chartConfig="props.chart_config" />
+                                    </t>
                                     <i class="ri-fullscreen-line"
                                         t-on-click="onExpandGraph"
                                         style="padding: 5px;"
@@ -323,14 +326,17 @@
                                 </div>
                             </t>
                             <!-- Dynamic chart container -->
-                            <div t-ref="chartContainer" style="width: 100%; min-height: 400px;padding: 5px;"></div>
+                            <div t-if="chartLibMissing" class="alert alert-info m-2 mb-0">
+                                Install the Cyllo Analytics app to view charts and dashboards.
+                            </div>
+                            <div t-else="" t-ref="chartContainer" style="width: 100%; min-height: 400px;padding: 5px;"></div>
                         </div>
                     </div>
                 </t>
                 <!-- Whatever the model wrote AFTER the marker, so the chart lands
                      where it asked rather than always at the end. Empty (and this
                      div absent) when no marker was used. -->
-                <div class="chat-bubble bot" t-if="answerParts.after" t-ref="bubbleAfter">
+                <div class="chat-bubble bot" t-if="answerParts.after" t-ref="bubbleAfter" t-on-click="onBubbleClick">
                     <t t-out="answerParts.after" />
                 </div>
                 <!-- Action row: copy (always) + meta (time/tokens when known) -->

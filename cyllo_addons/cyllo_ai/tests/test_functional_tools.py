@@ -126,3 +126,50 @@ class TestFunctionalTools(TransactionCase):
         names = [t.name for t in build_default_registry().tools()]
         for expected in ("describe_feature", "find_menu", "find_setting"):
             self.assertIn(expected, names)
+
+
+class TestAggregateCurrencySplit(TransactionCase):
+    """A monetary total never adds different currencies together."""
+
+    def setUp(self):
+        super().setUp()
+        self.tools = self.env['chatbot.tools']
+        self.partner = self.env['res.partner'].create({'name': 'AI Currency Test'})
+        company_cur = self.env.company.currency_id
+        other = self.env['res.currency'].with_context(active_test=False).search(
+            [('id', '!=', company_cur.id)], limit=1)
+        other.active = True
+        self.currencies = company_cur | other
+
+    def _order(self, currency):
+        pricelist = self.env['product.pricelist'].create(
+            {'name': f'PL {currency.name}', 'currency_id': currency.id})
+        return self.env['sale.order'].create({
+            'partner_id': self.partner.id, 'pricelist_id': pricelist.id})
+
+    def test_single_currency_is_not_split(self):
+        self._order(self.currencies[0])
+        out = self.tools.aggregate_records(
+            'sale.order', [('partner_id', '=', self.partner.id)],
+            aggregates=['amount_total:sum'])
+        self.assertNotIn('error', out)
+        self.assertEqual(out['group_count'], 1)
+        self.assertNotIn('note', out)
+
+    def test_mixed_currencies_are_split(self):
+        self._order(self.currencies[0])
+        self._order(self.currencies[1])
+        out = self.tools.aggregate_records(
+            'sale.order', [('partner_id', '=', self.partner.id)],
+            aggregates=['amount_total:sum'])
+        self.assertNotIn('error', out)
+        self.assertEqual(out['group_count'], 2)
+        self.assertIn('currency', out['note'])
+
+    def test_count_is_not_split(self):
+        self._order(self.currencies[0])
+        self._order(self.currencies[1])
+        out = self.tools.aggregate_records(
+            'sale.order', [('partner_id', '=', self.partner.id)],
+            aggregates=['id:count'])
+        self.assertEqual(out['group_count'], 1)

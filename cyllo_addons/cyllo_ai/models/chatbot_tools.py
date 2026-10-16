@@ -37,11 +37,15 @@ from typing import Any, Dict
 from dateutil.relativedelta import relativedelta
 
 import psycopg2
+from lxml import etree
 from odoo import models
 from odoo.exceptions import AccessError
 from odoo.fields import Date, _logger
 from odoo.tools import SQL, Query, plaintext2html
 
+from odoo.addons.cyllo_ai.core.app_availability import (
+    ANALYTICS_MODULE, app_for_model, is_installed, not_installed_message,
+)
 from odoo.addons.cyllo_ai.core.field_security import SENSITIVE_COLUMNS
 from odoo.addons.cyllo_ai.core.llm_client import LLMClient
 from odoo.addons.cyllo_ai.core.retrieval.schema_index import SchemaIndex
@@ -75,6 +79,18 @@ ORM_DEFAULT_LIMIT = 80
 ORM_MAX_LIMIT = 200
 GROUP_GRANULARITIES = {'year', 'quarter', 'month', 'week', 'day', 'hour'}
 AGG_OPERATORS = {'sum', 'avg', 'min', 'max', 'count'}
+DOCUMENT_DATE_FIELDS = (
+    'date_order', 'invoice_date', 'scheduled_date', 'date_planned_start',
+    'date_start', 'date_approve', 'request_date', 'date_done', 'check_in',
+)
+WEBSITE_SPLIT_NOTE = (
+    "website_split gives the same figures for normal sale orders (no website) and "
+    "website orders. Answer with all three: Sale orders (normal), Website orders, "
+    "and Total (= normal + website, the main figure above). Never add website "
+    "orders on top of the total.")
+ANALYTICS_MISSING_MSG = not_installed_message(
+    'Cyllo Analytics', 'analytics', 'charts and dashboards'
+) + " You may give the figures as a Markdown table instead. Do not write [[chart]]."
 
 # analytic_record (LLM-generated SQL) guardrails
 ANALYTIC_DEFAULT_LIMIT = 200      # applied when the plan gives no limit
@@ -381,6 +397,32 @@ class ChatbotTools(models.AbstractModel):
             domain.append((field, operator, value))
         return domain
 
+    def _form_buttons(self, model_name):
+        """``{method: label}`` of the object buttons on the model's form view as
+        the current user sees it (group-restricted buttons are already removed
+        by get_views). These are the only methods the assistant may run."""
+        try:
+            arch = self.env[model_name].get_views([(False, 'form')])['views']['form']['arch']
+            root = etree.fromstring(arch)
+        except Exception as e:
+            _logger.info("[cyllo_ai] form buttons unavailable for %s: %s", model_name, e)
+            return {}
+        buttons = {}
+        for b in root.iter('button'):
+            name = b.get('name') or ''
+            if b.get('type') != 'object' or not name or name.startswith('_'):
+                continue
+            label = (b.get('string') or b.get('title') or name).strip()
+            buttons.setdefault(name, label)
+        return buttons
+
+    def _buttons_hint(self, model_name):
+        buttons = self._form_buttons(model_name)
+        if not buttons:
+            return "This model has no form buttons available to you."
+        return "Available buttons: " + ", ".join(
+            f"{label} ({name})" for name, label in buttons.items())
+
     def _describe_operation(self, op):
         """Build a human preview for a write op; also validates fields early
         (raises on an unknown field/operator before the user is asked)."""
@@ -404,6 +446,9 @@ class ChatbotTools(models.AbstractModel):
                     names += ", …"
                 match_desc += f" → {names}"
             lines.append("**Match:** " + match_desc)
+        if action == "button":
+            label = self._form_buttons(model_name).get(op.get("button"), op.get("button"))
+            lines.append(f"**Button:** {label} ({op.get('button')})")
         values = op.get("values") or {}
         if values:
             self._plan_build_values(model_name, values)  # validate
@@ -411,6 +456,56 @@ class ChatbotTools(models.AbstractModel):
                 f"{k} = {v!r}" for k, v in values.items()))
         lines.append("\nReply **proceed** to apply, or tell me what to change.")
         return "\n".join(lines)
+
+    def _apply_onchanges(self, rec, values):
+        """Run the form-view onchanges of the fields set on a freshly created
+        record, as the UI does (e.g. a quotation template fills the order lines,
+        a customer fills pricelist and addresses). Explicit scalar values are
+        re-applied afterwards so an onchange never overrides what was asked;
+        x2many fields keep what the onchange produced. Returns the fields whose
+        onchanges ran."""
+        methods_by_field = getattr(rec, '_onchange_methods', None) or {}
+        ran = []
+        for fname in values:
+            methods = methods_by_field.get(fname) or []
+            for method in methods:
+                try:
+                    with self.env.cr.savepoint():
+                        method(rec)
+                except Exception as e:
+                    _logger.info("[cyllo_ai] onchange %s on %s skipped: %s",
+                                 getattr(method, '__name__', method), fname, e)
+            if methods:
+                ran.append(fname)
+        if ran:
+            scalar = {k: v for k, v in values.items()
+                      if k in rec._fields and rec._fields[k].type not in ('one2many', 'many2many')}
+            if scalar:
+                rec.write(scalar)
+        return ran
+
+    def _run_button(self, Model, domain, method):
+        """Press a form button on the matching records exactly as the UI does,
+        so its whole workflow runs (e.g. Confirm on a sale order creates the
+        delivery). Re-checks the button against the user's form view."""
+        label = self._form_buttons(Model._name).get(method)
+        if not label:
+            return {"error": f"Unknown button {method!r}. {self._buttons_hint(Model._name)}"}
+        recs = Model.search(domain)
+        if not recs:
+            return {"message": "No matching records to run the button on."}
+        result = getattr(recs, method)()
+        self._audit_action("update", Model._name, {"button": method}, recs)
+        out = {"message": f"✅ Ran '{label}' on {len(recs)} record(s).",
+               "model": Model._name, "ids": recs.ids,
+               "records": [{"id": r.id, "name": r.display_name,
+                            **({"state": r.state} if "state" in r._fields else {})}
+                           for r in recs[:20]]}
+        if isinstance(result, dict) and result.get("type") == "ir.actions.act_window" \
+                and result.get("target") == "new":
+            out["message"] = (f"⚠️ '{label}' opened a dialog ('{result.get('name') or result.get('res_model')}') "
+                              f"that needs input in the screen — open the record and finish it there.")
+        return out
 
     def _execute_plan(self, plan):
         """Execute a typed CRUD operation directly via the ORM (no eval).
@@ -423,10 +518,10 @@ class ChatbotTools(models.AbstractModel):
             return {"error": "Invalid operation."}
         action = plan.get("action")
         model_name = plan.get("model")
-        if action not in ("create", "read", "update", "delete"):
+        if action not in ("create", "read", "update", "delete", "button"):
             return {"error": f"Unsupported action: {action!r}."}
         if not model_name or model_name not in self.env:
-            return {"error": f"Unknown model: {model_name!r}."}
+            return {"error": self._missing_app_message(model_name) or f"Unknown model: {model_name!r}."}
         try:
             Model = self.env[model_name]
             values = self._plan_build_values(model_name, plan.get("values") or {})
@@ -434,9 +529,13 @@ class ChatbotTools(models.AbstractModel):
 
             if action == "create":
                 rec = Model.create(values)
+                applied = self._apply_onchanges(rec, values)
                 self._audit_action("create", model_name, values, rec)
-                return {"message": "✅ Record created.", "model": model_name,
-                        "id": rec.id, "name": rec.display_name}
+                out = {"message": "✅ Record created.", "model": model_name,
+                       "id": rec.id, "name": rec.display_name}
+                if applied:
+                    out["onchanges_applied"] = applied
+                return out
             if action == "read":
                 recs = Model.search(domain)
                 # Bounded for now; full cap-and-spill is a later phase.
@@ -450,6 +549,8 @@ class ChatbotTools(models.AbstractModel):
                 self._audit_action("update", model_name, values, recs)
                 return {"message": f"✅ Updated {len(recs)} record(s).",
                         "model": model_name, "ids": recs.ids}
+            if action == "button":
+                return self._run_button(Model, domain, plan.get("button"))
             if action == "delete":
                 recs = Model.search(domain)
                 if not recs:
@@ -783,7 +884,21 @@ GROUP BY / ORDER BY (strings, comma-separated): table.column terms or a SELECT
 "AS" label by name (GROUP BY may also use the scalar functions; ORDER BY may also
 use aggregates and a trailing ASC/DESC).
 
+Correct filters (any model):
+- Unless the User Query says otherwise, count only confirmed / done / posted
+  records: filter the state column to the confirmed values listed for it in
+  "Fields to Retrieve" (e.g. "state (values: ...)") — never guess a value, and
+  exclude draft, quotation, cancelled and rejected ones.
+- Filter dates on the column that records the event asked about (confirmation,
+  invoice/accounting, delivery or completion date), not a deadline or
+  create_date, unless asked.
+- When summing money from records that carry a currency_id, also select and
+  group by that currency so different currencies are never added together.
+
 Correct measures (avoid double counting):
+- Header totals come from the header table; breakdowns by a line attribute
+  (product, category, …) come from the line table's subtotal, never the header
+  total repeated across a line join. For example:
 - To total money at the ORDER level, aggregate sale_order.amount_total joined
   only to sale_order (no line join).
 - To total money by a LINE-level attribute (product, category), aggregate the
@@ -907,7 +1022,25 @@ Output JSON only — no explanations or text outside the structure.
         except Exception as e:
             return f"⚠️ Error in analytic_record: {str(e)}"
 
-    def write_records(self, model, action, values=None, filters=None):
+    def _check_button_op(self, model, action, values, filters, button):
+        """Validate a button press, and refuse to fake a workflow step by writing
+        ``state`` directly (that skips the button's side effects, e.g. a sale
+        confirmation creating its delivery). Returns an error string or None."""
+        if action == "button":
+            buttons = self._form_buttons(model)
+            if not button or button not in buttons:
+                return (f"Unknown button {button!r} on {model}. "
+                        f"{self._buttons_hint(model)}")
+            if not filters:
+                return "A button needs filters selecting the record(s) to run it on."
+            return None
+        if action == "update" and "state" in (values or {}) and "state" in self.env[model]._fields:
+            return ("Do not change 'state' directly: it skips the workflow (deliveries, "
+                    "invoices, emails, accounting). Use action 'button' with the "
+                    f"matching button instead. {self._buttons_hint(model)}")
+        return None
+
+    def write_records(self, model, action, values=None, filters=None, button=None):
         """Single typed entry point for create/read/update/delete.
 
         The agent calls this directly with typed args (no separate planning LLM
@@ -917,12 +1050,17 @@ Output JSON only — no explanations or text outside the structure.
         """
         op = {"model": model, "action": action,
               "values": values or {}, "filters": filters or []}
-        if action not in ("create", "read", "update", "delete"):
+        if button:
+            op["button"] = button
+        if action not in ("create", "read", "update", "delete", "button"):
             return {"error": f"Unsupported action: {action!r}."}
         if not model or model not in self.env:
-            return {"error": f"Unknown model: {model!r}."}
+            return {"error": self._missing_app_message(model) or f"Unknown model: {model!r}."}
         if action == "read":
             return self._execute_plan(op)
+        button_err = self._check_button_op(model, action, values, filters, button)
+        if button_err:
+            return {"error": button_err}
         # Write: validate + preview, then pause for confirmation.
         try:
             preview = self._describe_operation(op)
@@ -988,8 +1126,20 @@ Output JSON only — no explanations or text outside the structure.
             return self.env(context=dict(self.env.context, allowed_company_ids=company_ids))
         return self.env
 
+    def _missing_app_message(self, model):
+        """Install prompt when ``model`` belongs to an app that is not installed."""
+        if not model:
+            return None
+        app = app_for_model(model)
+        if app and not is_installed(self.env, app['module']):
+            return not_installed_message(app['label'], app['search'], app['covers'])
+        return None
+
     def _check_model_and_domain(self, schema, model, domain):
         """Return a corrective error string, or None if model + domain are valid."""
+        missing = self._missing_app_message(model)
+        if missing:
+            return missing
         if not schema.has_model(model):
             return schema.describe_model(model).get('error', f"Unknown model '{model}'.")
         if not schema.is_searchable(model):
@@ -1050,6 +1200,7 @@ Output JSON only — no explanations or text outside the structure.
             err = "; ".join(errs) if errs else None
         if err:
             return {"error": err}
+        domain, scope_note = self._scope_domain(model, domain)
 
         try:
             limit = max(1, min(int(limit or ORM_DEFAULT_LIMIT), ORM_MAX_LIMIT))
@@ -1062,16 +1213,82 @@ Output JSON only — no explanations or text outside the structure.
                 domain, fields or self._default_fields(schema, model),
                 limit=limit, order=order or None)
             total = env[model].search_count(domain)
-            return json.loads(json.dumps({
+            out = {
                 "model": model,
                 "total_count": total,
                 "returned": len(records),
                 "records": records,
-            }, default=str))
+            }
+            date_note = self._audit_date_note(env[model], domain, [])
+            if date_note:
+                out["date_note"] = date_note
+            if scope_note:
+                out["scope_note"] = scope_note
+            return json.loads(json.dumps(out, default=str))
         except Exception as e:
             self.env.cr.rollback()
             _logger.warning("[cyllo_ai] search_records failed model=%s: %s", model, e)
             return {"error": f"search_records failed: {e}"}
+
+    def _empty_state_note(self, Model, domain):
+        """When a domain filtering on ``state`` matched nothing, say which states
+        the records matching the rest of the domain are actually in, so the model
+        can correct a wrong status filter. None if not applicable."""
+        state_field = Model._fields.get('state')
+        if not state_field or state_field.type != 'selection':
+            return None
+        if not any(isinstance(t, (list, tuple)) and t and t[0] == 'state' for t in domain):
+            return None
+        rest = [t if not (isinstance(t, (list, tuple)) and t and t[0] == 'state')
+                else (1, '=', 1) for t in domain]
+        try:
+            groups = Model.read_group(rest, ['state'], ['state'], lazy=False)
+        except Exception:
+            return None
+        labels = dict(state_field._description_selection(self.env))
+        found = [f"{g['state']} ({labels.get(g['state'], g['state'])}): {g['__count']}"
+                 for g in groups if g.get('__count')]
+        if not found:
+            return None
+        return ("No records matched the state filter, but without it the matching "
+                "records are in these states — " + ", ".join(found) + ". If the "
+                "filter was too narrow, retry including every completed state.")
+
+    def _website_split(self, Model, domain, agg_fields=None):
+        """For sale.order with eCommerce installed and no website filter in the
+        domain, the same count/aggregates split into normal (no website) and
+        website orders. None when not applicable."""
+        if Model._name != 'sale.order' or 'website_id' not in Model._fields:
+            return None
+        if any(isinstance(t, (list, tuple)) and t and str(t[0]).split('.')[0] == 'website_id'
+               for t in domain):
+            return None
+        split = {}
+        for key, extra in (('normal_sale_orders', [('website_id', '=', False)]),
+                           ('website_orders', [('website_id', '!=', False)])):
+            dom = list(domain) + extra
+            if agg_fields:
+                row = Model.read_group(dom, agg_fields, [], lazy=False)[0]
+                row.pop('__domain', None)
+                split[key] = row
+            else:
+                split[key] = {'__count': Model.search_count(dom)}
+        return split
+
+    def _scope_domain(self, model, domain):
+        """Restrict stock quants to real stock locations (internal / transit) when
+        the domain does not filter on location itself: quants in virtual
+        locations (inventory adjustment, vendors, customers) are negative
+        mirrors and must never be read as stock. Returns ``(domain, note)``."""
+        if model != 'stock.quant':
+            return domain, None
+        if any(isinstance(t, (list, tuple)) and t and str(t[0]).startswith('location_id')
+               for t in domain):
+            return domain, None
+        return (list(domain) + [('location_id.usage', 'in', ['internal', 'transit'])],
+                "Counted only internal and transit stock locations; quants in virtual "
+                "locations (inventory adjustment, vendors, customers) are negative "
+                "mirrors of real stock and are excluded.")
 
     def count_records(self, model, domain=None, company_ids=None):
         """Count records matching a domain via ORM ``search_count``."""
@@ -1079,16 +1296,89 @@ Output JSON only — no explanations or text outside the structure.
         err = self._check_model_and_domain(schema, model, domain or [])
         if err:
             return {"error": err}
+        domain, scope_note = self._scope_domain(model, domain or [])
         try:
-            count = self._company_env(company_ids)[model].search_count(domain or [])
-            return {"model": model, "count": count}
+            Model = self._company_env(company_ids)[model]
+            count = Model.search_count(domain or [])
+            out = {"model": model, "count": count}
+            split = count and self._website_split(Model, domain or [])
+            if split:
+                out["website_split"] = split
+                out["note"] = WEBSITE_SPLIT_NOTE
+            date_note = self._audit_date_note(Model, domain or [], [])
+            if date_note:
+                out["date_note"] = date_note
+            if scope_note:
+                out["scope_note"] = scope_note
+            if not count:
+                state_note = self._empty_state_note(Model, domain or [])
+                if state_note:
+                    out["note"] = state_note
+            return out
         except Exception as e:
             self.env.cr.rollback()
             _logger.warning("[cyllo_ai] count_records failed model=%s: %s", model, e)
             return {"error": f"count_records failed: {e}"}
 
+    def _document_date_field(self, Model):
+        """The stored date that records when the business event happened (order
+        date, accounting date, …): the first date field of the model's default
+        order, else a common document-date name. None if there is none."""
+        flds = Model._fields
+        def usable(name):
+            f = flds.get(name)
+            return f is not None and f.store and f.type in ('date', 'datetime') \
+                and name not in ('create_date', 'write_date')
+        for part in (Model._order or '').split(','):
+            name = part.strip().split(' ')[0]
+            if usable(name):
+                return name
+        for name in DOCUMENT_DATE_FIELDS:
+            if usable(name):
+                return name
+        return None
+
+    def _audit_date_note(self, Model, domain, groupby):
+        """Warn when a query groups or filters on create_date / write_date while
+        the model has a real document date."""
+        used = {g.split(':')[0] for g in groupby or []} | {
+            str(t[0]).split('.')[0] for t in domain or [] if isinstance(t, (list, tuple)) and t}
+        audit = used & {'create_date', 'write_date'}
+        doc_date = audit and self._document_date_field(Model)
+        if not doc_date:
+            return None
+        field = sorted(audit)[0]
+        return (f"This used {field} (when the record was entered in the system), not "
+                f"the business date. For {Model._name} the document date is "
+                f"'{doc_date}' — unless the user explicitly asked about creation or "
+                f"modification time, redo this query with '{doc_date}' and answer "
+                f"from that result.")
+
+    def _aggregate_orderby(self, schema, model, order, groupby):
+        """Translate ``order`` ("qty:sum desc", "count desc", "partner_id") into a
+        read_group orderby, or return ``(None, error)``."""
+        if not order:
+            return None, None
+        terms = []
+        for part in str(order).split(','):
+            bits = part.strip().split()
+            if not bits:
+                continue
+            fname = bits[0].split(':')[0]
+            is_group = fname in [g.split(':')[0] for g in groupby]
+            direction = bits[1].lower() if len(bits) > 1 else ('asc' if is_group else 'desc')
+            if direction not in ('asc', 'desc'):
+                return None, f"Order direction must be asc or desc, got '{bits[1]}'."
+            if fname in ('count', '__count', 'id'):
+                fname = '__count'
+            elif fname not in [g.split(':')[0] for g in groupby] and schema.field_meta(model, fname) is None:
+                return None, (f"Cannot order by '{fname}': use a groupby field, an "
+                              f"aggregated field, or 'count'.")
+            terms.append(f"{fname} {direction}")
+        return (", ".join(terms) or None), None
+
     def aggregate_records(self, model, domain=None, groupby=None, aggregates=None,
-                          company_ids=None):
+                          company_ids=None, order=None, limit=None):
         """Tier-2 grouped aggregation via ORM ``read_group``."""
         schema = self._schema()
         domain = domain or []
@@ -1098,6 +1388,7 @@ Output JSON only — no explanations or text outside the structure.
         err = self._check_model_and_domain(schema, model, domain)
         if err:
             return {"error": err}
+        domain, scope_note = self._scope_domain(model, domain)
 
         errors = []
         for g in groupby:
@@ -1138,6 +1429,14 @@ Output JSON only — no explanations or text outside the structure.
             else:
                 agg_fields.append(f"{fname}:{op}")
 
+        orderby, order_err = self._aggregate_orderby(schema, model, order, groupby)
+        if order_err:
+            errors.append(order_err)
+        try:
+            limit = int(limit) if limit else None
+        except (TypeError, ValueError):
+            errors.append(f"limit must be a whole number, got {limit!r}.")
+
         if errors:
             return {"error": "; ".join(errors)}
         if not groupby and not agg_fields:
@@ -1145,24 +1444,118 @@ Output JSON only — no explanations or text outside the structure.
 
         try:
             env = self._company_env(company_ids)
-            groups = env[model].read_group(domain, agg_fields, groupby, lazy=False)
+            currency_field = self._mixed_currency_field(env[model], domain, agg_fields, groupby)
+            if currency_field:
+                groupby = groupby + [currency_field]
+            groups = env[model].read_group(domain, agg_fields, groupby, lazy=False,
+                                           orderby=orderby, limit=limit)
             cleaned = []
             for g in groups[:ORM_MAX_LIMIT]:
                 g.pop('__domain', None)
                 g.pop('__range', None)
                 cleaned.append(g)
             out = {"model": model, "group_count": len(groups), "groups": cleaned}
+            notes = []
+            if currency_field:
+                notes.append(f"The matching records use more than one currency, so "
+                             f"the totals are split by {currency_field}. Report each "
+                             f"currency separately; do not add them together.")
             if len(groups) > ORM_MAX_LIMIT:
-                out["note"] = f"Showing first {ORM_MAX_LIMIT} of {len(groups)} groups."
+                notes.append(f"Showing first {ORM_MAX_LIMIT} of {len(groups)} groups.")
+            date_note = self._audit_date_note(env[model], domain, groupby)
+            if date_note:
+                notes.append(date_note)
+            if scope_note:
+                notes.append(scope_note)
+            if not sum(g.get('__count', 0) for g in groups):
+                state_note = self._empty_state_note(env[model], domain)
+                if state_note:
+                    notes.append(state_note)
+            elif not groupby:
+                split = self._website_split(env[model], domain, agg_fields)
+                if split:
+                    out["website_split"] = split
+                    notes.append(WEBSITE_SPLIT_NOTE)
+            if notes:
+                out["note"] = " ".join(notes)
             return json.loads(json.dumps(out, default=str))
         except Exception as e:
             self.env.cr.rollback()
             _logger.warning("[cyllo_ai] aggregate_records failed model=%s: %s", model, e)
             return {"error": f"aggregate_records failed: {e}"}
 
+    def _mixed_currency_field(self, Model, domain, agg_fields, groupby):
+        """Return the currency field to split by when a monetary aggregate
+        would otherwise add amounts in different currencies, else ``None``.
+
+        Applies to any model: the currency comes from each Monetary field's own
+        ``currency_field``. Only splits when the matching records really span
+        more than one currency, so single-currency totals keep their shape.
+        """
+        currency_fields = set()
+        for agg in agg_fields:
+            fname, _, op = agg.partition(':')
+            field = Model._fields.get(fname)
+            if op == 'count' or field is None or field.type != 'monetary':
+                continue
+            currency_fields.add(field.get_currency_field(Model))
+        if len(currency_fields) != 1:
+            return None
+        cur = currency_fields.pop()
+        cur_field = Model._fields.get(cur)
+        if (not cur_field or cur_field.type != 'many2one' or not cur_field.store
+                or cur in [g.partition(':')[0] for g in groupby]):
+            return None
+        try:
+            currencies = Model.read_group(domain, [cur], [cur], lazy=False)
+        except Exception:
+            return None
+        return cur if len(currencies) > 1 else None
+
     def get_model_fields(self, model):
         """Describe a model: fields, types, relations, groupable/aggregatable."""
         return self._schema().describe_model(model)
+
+    def search_schema(self, query, limit=15):
+        """Find where a business concept lives: models and stored fields whose
+        technical name or label matches any keyword of ``query`` (e.g. "return
+        reason"), restricted to queryable models the user can read."""
+        words = [w for w in re.findall(r'[a-zA-Z]+', (query or '').lower()) if len(w) > 2]
+        if not words:
+            return {"error": "Give one or more keywords, e.g. 'return reason'."}
+        stems = {w[:-1] if w.endswith('s') and len(w) > 4 else w for w in words}
+        schema = self._schema()
+        hits = {}
+        for m in schema.search_models(" ".join(stems), limit=60):
+            hits.setdefault(m['model'], {'model': m['model'], 'name': m['name'], 'fields': []})
+        domain = []
+        for s in stems:
+            domain = (['|'] + domain if domain else domain) + ['|', ('name', 'ilike', s),
+                                                               ('field_description', 'ilike', s)]
+        fields_found = self.env['ir.model.fields'].sudo().search(
+            [('store', '=', True)] + domain, limit=400)
+        for f in fields_found:
+            if not schema.is_searchable(f.model):
+                continue
+            entry = hits.setdefault(f.model, {'model': f.model, 'name': f.model_id.name, 'fields': []})
+            if len(entry['fields']) < 8:
+                entry['fields'].append({'name': f.name, 'label': f.field_description,
+                                        'type': f.ttype, 'relation': f.relation or None})
+        results = []
+        for entry in hits.values():
+            model = entry['model']
+            if model not in self.env or not self.env[model].check_access_rights('read', raise_exception=False):
+                continue
+            entry['score'] = sum(s in model for s in stems) * 3 + len(entry['fields'])
+            results.append(entry)
+        results.sort(key=lambda e: -e['score'])
+        for e in results:
+            e.pop('score', None)
+        return {"query": query, "matches": results[:limit],
+                "note": "Pick the model whose fields hold the concept, check it with "
+                        "get_model_fields if needed, then query it. If no field stores "
+                        "the concept (e.g. no reason field), say so and use the closest "
+                        "data (notes, descriptions, chatter)."}
 
     # -------------------------------------------------------------------------
     # Functional introspection — "how do I / where is" answers are read from
@@ -1956,13 +2349,35 @@ Output JSON only — no explanations or text outside the structure.
                        "direct costs; 'total_earnings' is net profit.")
         return out
 
-    def render_chart(self, chart_type='bar', title='', categories=None, series=None):
+    def _chart_source(self, source):
+        """Validated ``{model, group_by, measure, dashboard_name}`` a chart was
+        built from, so it can later be saved as a live Analytics sheet; None if
+        it does not describe one stored group-by field and one stored number."""
+        if not isinstance(source, dict):
+            return None
+        model = source.get('model')
+        if not model or model not in self.env:
+            return None
+        flds = self.env[model]._fields
+        group_by = (source.get('group_by') or '').split(':')[0]
+        measure = source.get('measure') or ''
+        gb, ms = flds.get(group_by), flds.get(measure)
+        if not (gb and gb.store and ms and ms.store
+                and ms.type in ('integer', 'float', 'monetary')):
+            return None
+        return {'model': model, 'group_by': group_by, 'measure': measure,
+                'dashboard_name': (source.get('dashboard_name') or '').strip()}
+
+    def render_chart(self, chart_type='bar', title='', categories=None, series=None,
+                     source=None):
         """Build an Apache ECharts option from a simple spec.
 
         Returns ``{'chart_config': <echarts option>, 'message': <ack>}``. The
         orchestrator strips chart_config out to the UI and feeds only the short
         ack back to the LLM (so the full config doesn't bloat the context).
         """
+        if not is_installed(self.env, ANALYTICS_MODULE):
+            return {'error': ANALYTICS_MISSING_MSG, 'message': ANALYTICS_MISSING_MSG}
         categories = categories or []
         series = series or []
         ctype = (chart_type or 'bar').lower()
@@ -1983,11 +2398,11 @@ Output JSON only — no explanations or text outside the structure.
             }]
         elif ctype == 'scatter':
             option['tooltip'] = {'trigger': 'item'}
-            option['xAxis'] = {'type': 'value'}
+            option['xAxis'] = {'type': 'category', 'data': categories}
             option['yAxis'] = {'type': 'value'}
             option['series'] = [{
                 'name': s.get('name'), 'type': 'scatter',
-                'data': [[i, v] for i, v in enumerate(s.get('data', []) or [])],
+                'data': s.get('data', []) or [],
             } for s in series]
         else:  # bar / line
             option['tooltip'] = {'trigger': 'axis'}
@@ -1997,6 +2412,9 @@ Output JSON only — no explanations or text outside the structure.
             option['series'] = [{
                 'name': s.get('name'), 'type': ctype, 'data': s.get('data', []) or [],
             } for s in series]
+        chart_source = self._chart_source(source)
+        if chart_source:
+            option['cyllo_source'] = dict(chart_source, chart_type=ctype)
         # This ack is the model's only feedback about the chart, and it arrives
         # exactly when the model is deciding what to write — so it repeats the
         # placement instruction from the system prompt rather than just confirming.

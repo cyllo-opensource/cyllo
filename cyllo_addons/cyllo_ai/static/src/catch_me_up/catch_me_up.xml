@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="cyllo_ai.CatchMeUpCogItem">
+        <CogMenuItem onClick="() => this.onClick()" class="'o_cyllo_cmu_item'">
+            <t t-set-slot="icon">
+                <i class="ri-sparkling-line"/>
+            </t>
+            <t t-set-slot="text">Catch me up</t>
+        </CogMenuItem>
+    </t>
+
+    <t t-name="cyllo_ai.CatchMeUpChatCard">
+        <div class="o_cyllo_cmu_card" role="button" tabindex="0"
+             t-att-title="brief ? 'Open the full briefing' : ''"
+             t-on-click="expand" t-on-keydown="onKeydown">
+            <div class="cmu-card-head">
+                <i class="ri-sparkling-line cmu-card-icon"/>
+                <div class="cmu-card-titles">
+                    <div class="cmu-card-title">
+                        <t t-if="brief" t-esc="brief.title"/>
+                        <t t-else="">Catch me up</t>
+                    </div>
+                    <div t-if="brief" class="cmu-card-sub" t-esc="brief.subtitle"/>
+                </div>
+                <i t-if="brief" class="ri-expand-diagonal-line cmu-card-expand"/>
+            </div>
+
+            <div t-if="state.loading" class="cmu-card-loading">
+                <span class="spinner-border spinner-border-sm" role="status"/>
+                <span>Reading orders, invoices, tickets and messages…</span>
+            </div>
+            <div t-elif="state.error and !brief" class="cmu-card-error" t-esc="state.error"/>
+            <t t-elif="brief">
+                <div class="cmu-card-chips">
+                    <span t-if="riskCounts.high" class="cmu-card-chip cmu-card-chip-high">
+                        <t t-esc="riskCounts.high"/> high risk
+                    </span>
+                    <span t-if="riskCounts.medium" class="cmu-card-chip cmu-card-chip-medium">
+                        <t t-esc="riskCounts.medium"/> to watch
+                    </span>
+                    <span t-if="!brief.risks.length" class="cmu-card-chip">Nothing urgent</span>
+                    <span t-if="moodLabel" t-attf-class="cmu-card-chip cmu-card-mood-{{ brief.mood }}"
+                          t-att-title="brief.mood_reason">
+                        Mood: <t t-esc="moodLabel"/>
+                    </span>
+                </div>
+                <p class="cmu-card-summary" t-esc="brief.summary"/>
+                <div class="cmu-card-next">
+                    <i class="ri-arrow-right-circle-line"/>
+                    <span t-esc="brief.next_step"/>
+                </div>
+                <div class="cmu-card-foot">
+                    Open full briefing
+                    <span t-if="savedAt" class="cmu-card-saved">· as of <t t-esc="savedAt"/></span>
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="cyllo_ai.CatchMeUpDialog">
+        <Dialog title="title" size="'lg'" contentClass="'o_cyllo_cmu'">
+            <div t-if="state.loading" class="cmu-loading">
+                <div class="cmu-loading-head">
+                    <span class="spinner-border spinner-border-sm" role="status"/>
+                    <span>Reading orders, invoices, tickets, messages and activities…</span>
+                </div>
+                <div class="cmu-skeleton w-75"/>
+                <div class="cmu-skeleton w-100"/>
+                <div class="cmu-skeleton w-50"/>
+            </div>
+
+            <div t-elif="state.error" class="alert alert-danger mb-0" role="alert">
+                <t t-esc="state.error"/>
+            </div>
+
+            <div t-elif="state.brief" class="cmu-body">
+                <t t-set="brief" t-value="state.brief"/>
+
+                <div class="cmu-meta">
+                    <span class="cmu-subtitle" t-esc="brief.subtitle"/>
+                    <span t-if="moodLabel" t-attf-class="cmu-chip cmu-mood-{{ brief.mood }}"
+                          t-att-title="brief.mood_reason">
+                        Mood: <t t-esc="moodLabel"/>
+                    </span>
+                    <span class="cmu-chip cmu-source">
+                        <t t-if="brief.source === 'ai'">AI summary</t>
+                        <t t-else="">Rule-based summary</t>
+                    </span>
+                </div>
+
+                <div class="cmu-brief">
+                    <p class="cmu-summary" t-esc="brief.summary"/>
+                    <div class="cmu-next">
+                        <i class="ri-arrow-right-circle-line"/>
+                        <div>
+                            <div class="cmu-next-label">Suggested next step</div>
+                            <div class="cmu-next-text" t-esc="brief.next_step"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div t-if="brief.notice" class="cmu-notice" t-esc="brief.notice"/>
+
+                <section t-if="brief.risks.length" class="cmu-section">
+                    <h6 class="cmu-section-title">Needs attention</h6>
+                    <div class="cmu-risks">
+                        <button t-foreach="brief.risks" t-as="risk" t-key="risk_index" type="button"
+                                t-attf-class="cmu-risk cmu-risk-{{ risk.severity }}"
+                                t-on-click="() => this.openLink(risk.link)">
+                            <span class="cmu-dot"/>
+                            <span class="cmu-risk-text" t-esc="risk.text"/>
+                            <i class="ri-arrow-right-up-line cmu-open"/>
+                        </button>
+                    </div>
+                </section>
+
+                <section t-if="brief.kpis.length" class="cmu-section">
+                    <h6 class="cmu-section-title">Key figures</h6>
+                    <div class="cmu-kpis">
+                        <button t-foreach="brief.kpis" t-as="kpi" t-key="kpi.key" type="button"
+                                t-attf-class="cmu-kpi cmu-tone-{{ kpi.tone }}"
+                                t-on-click="() => this.openLink(kpi.link)">
+                            <span class="cmu-kpi-label" t-esc="kpi.label"/>
+                            <span class="cmu-kpi-value" t-esc="kpi.value"/>
+                            <span class="cmu-kpi-hint" t-esc="kpi.hint"/>
+                        </button>
+                    </div>
+                </section>
+
+                <section t-foreach="brief.sections" t-as="section" t-key="section_index"
+                         class="cmu-section">
+                    <div class="cmu-section-head">
+                        <h6 class="cmu-section-title" t-esc="section.title"/>
+                        <a t-if="section.more" href="#" class="cmu-more"
+                           t-on-click.prevent="() => this.openLink(section.more)">View all</a>
+                    </div>
+                    <div class="cmu-rows">
+                        <button t-foreach="section.rows" t-as="row" t-key="row_index" type="button"
+                                t-attf-class="cmu-row cmu-tone-{{ row.tone }}"
+                                t-on-click="() => this.openLink(row.link)">
+                            <span class="cmu-row-main">
+                                <span class="cmu-row-label" t-esc="row.label"/>
+                                <span class="cmu-row-detail" t-esc="row.detail"/>
+                                <span t-if="row.excerpt" class="cmu-row-excerpt" t-esc="row.excerpt"/>
+                            </span>
+                            <span t-if="row.amount" class="cmu-row-amount" t-esc="row.amount"/>
+                        </button>
+                    </div>
+                </section>
+
+                <p t-if="!brief.risks.length and !brief.kpis.length and !brief.sections.length"
+                   class="cmu-empty">
+                    There is no recent activity on this record yet.
+                </p>
+            </div>
+
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="props.close">Close</button>
+                <button class="btn btn-secondary" t-att-disabled="state.loading"
+                        t-on-click="() => this.load()">
+                    <i class="ri-refresh-line me-1"/>Refresh
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

@@ -217,6 +217,8 @@ class ChatBotController(Controller):
                         text, session_id, company_ids, interrupted,
                         ui_context=ui_context,
                     ):
+                        if event.get('type') == 'records_changed':
+                            cr.commit()
                         yield f"data: {json.dumps(event)}\n\n"
                     cr.commit()
                 except Exception as e:

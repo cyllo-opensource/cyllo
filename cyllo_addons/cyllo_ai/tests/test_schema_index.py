@@ -57,3 +57,36 @@ class TestColumnsFor(TransactionCase):
         first = self.schema.columns_for('res_partner')
         second = self.schema.columns_for('res_partner')
         self.assertIs(first, second)
+
+
+class TestSelectionAndOrdering(TransactionCase):
+    """Status values are exposed and listed first, for any model."""
+
+    def setUp(self):
+        super().setUp()
+        SchemaIndex.invalidate(self.env.cr.dbname)
+        self.schema = SchemaIndex(self.env)
+
+    def test_selection_values_cached(self):
+        meta = self.schema.field_meta('sale.order', 'state')
+        values = [v for v, _l in meta['selection']]
+        self.assertIn('sale', values)
+        self.assertIn('cancel', values)
+
+    def test_compact_lists_state_values_first(self):
+        compact = self.schema.compact_fields('sale.order', max_fields=5)
+        self.assertTrue(compact.startswith('state:selection('), compact)
+        self.assertIn('|sale|', compact)
+
+    def test_compact_keeps_dates_and_money_under_cap(self):
+        compact = self.schema.compact_fields('sale.order', max_fields=12)
+        self.assertIn('date_order:datetime', compact)
+        self.assertIn('amount_total:monetary', compact)
+
+    def test_describe_model_includes_selection(self):
+        fields = {f['name']: f for f in self.schema.describe_model('sale.order')['fields']}
+        self.assertIn('selection', fields['state'])
+
+    def test_fields_for_models_shows_values(self):
+        labels = self.schema.fields_for_models(['sale.order'])['sale.order']
+        self.assertTrue(any(l.startswith('state (values:') for l in labels), labels)

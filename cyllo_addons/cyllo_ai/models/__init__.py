@@ -26,3 +26,5 @@ from . import chatbot_session
 from . import chatbot_history
 from . import cyllo_llm
 from . import cyllo_ai_config
+from . import cyllo_ai_briefing
+from . import cyllo_ai_digest

@@ -3,6 +3,7 @@ import { Component, onWillStart, onMounted, useState, useRef, onPatched, onWillD
 import { useService } from "@web/core/utils/hooks";
 import { loadJS } from "@web/core/assets";
 import { registry } from "@web/core/registry";
+import { escape } from "@web/core/utils/strings";
 
 // SheetJS, vendored (0.20.3, Apache-2.0). Deliberately NOT in the asset bundle:
 // it is ~930KB and only needed when someone clicks "download table". Loaded on
@@ -16,6 +17,16 @@ const XLSX_LIB = "/cyllo_ai/static/src/lib/xlsx/xlsx.full.min.js";
 const CHART_MARKER_RE = /<p>\s*\[\[chart\]\]\s*<\/p>|\[\[chart\]\]/i;
 // Same pattern, global: used to sweep up any marker beyond the first.
 const CHART_MARKER_RE_ALL = new RegExp(CHART_MARKER_RE.source, "gi");
+const INSTALL_MARKER_RE_ALL = /<p>\s*\[\[install:([^|\]]+)\|([^\]]+)\]\]\s*<\/p>|\[\[install:([^|\]]+)\|([^\]]+)\]\]/gi;
+const INSTALL_LINK_RE_ALL = /<a\s+[^>]*href="(?:#[^"]*)?"[^>]*>\s*Install\s+(?:the\s+)?([^<]+?)(?:\s+app)?\s*<\/a>/gi;
+
+/** Replacement for an [[install:Label|search]] marker: an inline Install button
+ *  whose click is handled by ChatResponse.onBubbleClick. */
+function installButtonHtml(match, pLabel, pSearch, label, search) {
+    const button = `<button type="button" class="btn btn-primary btn-sm cy-ai-install-btn" data-search="${escape((pSearch || search).trim())}">`
+        + `<i class="ri-download-2-line me-1"></i>Install ${escape((pLabel || label).trim())}</button>`;
+    return pLabel ? `<p>${button}</p>` : button;
+}
 
 
 export class ChatResponse extends Component {
@@ -104,8 +115,11 @@ export class ChatResponse extends Component {
             showGraphPopup: false,
             hasTable: false,
         })
+        this.state.chatSelectedType = this.baseChartType;
+        this.state.popupSelectedType = this.baseChartType;
         this.rpc = useService("rpc");
         this.notification = useService("notification");
+        this.action = useService("action");
 
         this.resizeObserver = null;
 
@@ -151,6 +165,9 @@ export class ChatResponse extends Component {
             const nextJSON = this.props.chart_config ? JSON.stringify(this.props.chart_config) : null;
             if (nextJSON !== this._lastChartConfigJSON) {
                 this._lastChartConfigJSON = nextJSON;
+                this.state.chart_config = nextJSON ? JSON.parse(nextJSON) : null;
+                this.state.chatSelectedType = this.baseChartType;
+                this.state.popupSelectedType = this.baseChartType;
                 if (this.chartContainer.el && this.resizeObserver) {
                     this.resizeObserver.observe(this.chartContainer.el);
                 }
@@ -166,6 +183,14 @@ export class ChatResponse extends Component {
         this.baseChartConfig = this.props.chart_config ? JSON.parse(JSON.stringify(this.props.chart_config)) : null;
         this.state.chart_config = this.baseChartConfig;
     };
+
+    /** Picker name of the chart's original type (bar/line/pie/donut/scatter). */
+    get baseChartType() {
+        const first = this.state.chart_config?.series?.[0] || this.props.chart_config?.series?.[0];
+        if (!first) return "default";
+        if (first.type === "pie") return Array.isArray(first.radius) ? "donut" : "pie";
+        return ["bar", "line", "scatter"].includes(first.type) ? first.type : "default";
+    }
 
     /** Copy the visible response text to the clipboard, with brief feedback. */
     /** Both halves of the answer — it is split in two when a [[chart]] marker
@@ -254,6 +279,13 @@ export class ChatResponse extends Component {
         return key ? registry.category("cyllo_ai.chat_widgets").get(key, null) : null;
     }
 
+    /** Toolbar components host modules add to the chat chart header (e.g. the
+     *  analytics "Add to Analytics" button); each gets the chart's config. */
+    get chartActions() {
+        return registry.category("cyllo_ai.chart_actions").getEntries()
+            .map(([key, Comp]) => ({ key, Comp }));
+    }
+
     /** Compact token formatter: 463 → "463", 22240 → "22k", 1240 → "1.2k". */
     formatTokens(n) {
         n = n || 0;
@@ -278,7 +310,12 @@ export class ChatResponse extends Component {
      *  deleting the key, so nothing depends on merge semantics. */
     _withoutTitle(config) {
         if (!config) return config;
-        return { ...config, title: { ...(config.title || {}), show: false } };
+        const { cyllo_source, ...echartsConfig } = config;
+        return { ...echartsConfig, title: { ...(config.title || {}), show: false } };
+    }
+
+    get chartLibMissing() {
+        return typeof echarts === "undefined";
     }
 
     /** Is there actually a chart to position? */
@@ -294,10 +331,12 @@ export class ChatResponse extends Component {
      *  the text but not the config) -> the marker is stripped and the answer stays
      *  in one piece, so `[[chart]]` never leaks to the user. */
     get answerParts() {
-        const raw = String(this.props.html || "");
+        const raw = String(this.props.html || "")
+            .replace(INSTALL_MARKER_RE_ALL, installButtonHtml)
+            .replace(INSTALL_LINK_RE_ALL, (m, label) => installButtonHtml(m, null, null, label, label));
         const m = raw.match(CHART_MARKER_RE);
         if (!m) {
-            return { before: this.props.html || "", after: "" };
+            return { before: markup(raw), after: "" };
         }
         // Only the FIRST marker positions the chart. Any further ones are
         // stripped rather than left to render as literal "[[chart]]" text: the
@@ -310,6 +349,48 @@ export class ChatResponse extends Component {
             return { before: markup(before + after), after: "" };
         }
         return { before: markup(before), after: markup(after) };
+    }
+
+    /** Route clicks on the inline Install buttons rendered into the answer. */
+    onBubbleClick(ev) {
+        const btn = ev.target.closest(".cy-ai-install-btn");
+        if (btn) {
+            this.onInstallApp({ search: btn.dataset.search });
+            return;
+        }
+        const digestLink = ev.target.closest('a[href*="cyllo_digest="]');
+        if (digestLink) {
+            ev.preventDefault();
+            this.onOpenDigestLink(digestLink.getAttribute("href"));
+        }
+    }
+
+    /** Open the filtered list behind an activity-digest link. */
+    async onOpenDigestLink(href) {
+        const params = new URLSearchParams(href.slice(href.indexOf("#") + 1));
+        const action = await this.rpc("/web/dataset/call_kw/cyllo.ai.digest/get_metric_action", {
+            model: "cyllo.ai.digest",
+            method: "get_metric_action",
+            args: [params.get("cyllo_digest"), params.get("from"), params.get("to")],
+            kwargs: {},
+        });
+        this.action.doAction(action);
+    }
+
+    /** Open the Apps screen filtered on the app to install. */
+    onInstallApp(app) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            name: "Apps",
+            res_model: "ir.module.module",
+            views: [[false, "kanban"], [false, "list"], [false, "form"]],
+            domain: [],
+            context: {
+                search_default_app: 0,
+                search_default_cyllo_modules: 0,
+                search_default_name: app.search,
+            },
+        });
     }
 
     get steps() {
@@ -337,9 +418,11 @@ export class ChatResponse extends Component {
             update: "ri-pencil-line",
             delete: "ri-delete-bin-line",
             read: "ri-search-line",
+            button: "ri-cursor-line",
         };
         const matchLine = raw.match(/\*\*Match:\*\*\s*(.+)/);
         const valuesLine = raw.match(/\*\*Values:\*\*\s*(.+)/);
+        const buttonLine = raw.match(/\*\*Button:\*\*\s*(.+)/);
         // Split on ", " only where it precedes another "field = " pair — a
         // plain ", ".split would break on a value that itself contains a
         // comma (e.g. name = 'Doe, John').
@@ -349,6 +432,9 @@ export class ChatResponse extends Component {
             const m = pair.match(/^([A-Za-z_][A-Za-z0-9_.]*)\s=\s([\s\S]*)$/);
             return m ? { key: m[1], value: m[2] } : { key: pair, value: "" };
         });
+        if (buttonLine) {
+            values.unshift({ key: "button", value: buttonLine[1].trim() });
+        }
 
         // The Match line is "<filter> → <display names>" once the backend has
         // resolved the domain to actual records (_describe_operation). Split

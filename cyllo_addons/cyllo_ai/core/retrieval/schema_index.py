@@ -54,6 +54,7 @@ RELATIONAL_TYPES = {'many2one', 'one2many', 'many2many'}
 NON_BUSINESS_PREFIXES = ('message_', 'activity_', 'website_message_', 'access_', 'has_message')
 NON_BUSINESS_FIELDS = {'create_uid', 'write_uid', 'write_date'}
 NON_BUSINESS_TYPES = {'binary', 'html'}
+SELECTION_MAX_VALUES = 10
 
 
 class SchemaIndex:
@@ -87,16 +88,19 @@ class SchemaIndex:
         table2model, model2table, models_meta, auto_names = {}, {}, [], []
         searchable = set()
         for r in records:
-            if r.table_name:
-                table2model[r.table_name] = r.model
-                model2table[r.model] = r.table_name
+            cls = registry.get(r.model)
+            # The table comes from the registry itself, so this works on any
+            # database — not only where a module stores it on ir.model.
+            table = cls._table if cls is not None and not cls._abstract else None
+            if table:
+                table2model[table] = r.model
+                model2table[r.model] = table
                 # data models only: abstract engines (no table) are already
                 # excluded; transient wizards hold UI state, never business data
                 if not r.transient:
                     searchable.add(r.model)
             models_meta.append((r.model, r.name or ''))
             if not r.transient:
-                cls = registry.get(r.model)
                 if cls is not None and getattr(cls, '_auto', True):
                     auto_names.append(r.model)
         return {
@@ -214,7 +218,10 @@ class SchemaIndex:
                 [('model', 'in', list(to_query)), ('store', '=', True)])
             built = {m: {} for m in to_query}
             for f in records:
+                selection = (self._selection_options(f.model, f.name)
+                             if f.ttype == 'selection' else None)
                 built.setdefault(f.model, {})[f.name] = {
+                    'selection': selection,
                     'type': f.ttype,
                     'relation': f.relation or None,
                     'label': f.field_description or f.name,
@@ -232,6 +239,18 @@ class SchemaIndex:
             for m in to_query:
                 result[m] = built.get(m, {})
         return result
+
+    def _selection_options(self, model, fname):
+        """``[(value, label)]`` of a selection field, from the live registry
+        (covers selections extended by other modules and dynamic ones).
+        ``None`` when they cannot be resolved."""
+        try:
+            field = self.env[model]._fields.get(fname)
+            if field is None:
+                return None
+            return [(v, l) for v, l in field._description_selection(self.env)]
+        except Exception:
+            return None
 
     def model_fields(self, model):
         """``{field_name: meta}`` for one model (cached)."""
@@ -266,6 +285,9 @@ class SchemaIndex:
                 if meta['type'] in ('many2many', 'one2many'):
                     if crud:
                         labels.append(f"{fname} ({meta['type']} → {meta['relation']})")
+                elif meta.get('selection'):
+                    values = [str(v) for v, _l in meta['selection']][:SELECTION_MAX_VALUES]
+                    labels.append(f"{fname} (values: {'|'.join(values)})")
                 else:
                     labels.append(fname)
             out[m] = labels
@@ -290,7 +312,7 @@ class SchemaIndex:
             fields = self.model_fields(current)
             if not fields:
                 return False, f"Unknown model '{current}'."
-            meta = fields.get(part)
+            meta = fields.get(part) or self._searchable_meta(current, part)
             if meta is None:
                 sugg = self.suggest_fields(current, part)
                 hint = f" Did you mean: {', '.join(sugg)}?" if sugg else ""
@@ -301,6 +323,17 @@ class SchemaIndex:
                                    f"'{meta['type']}' and cannot be traversed with '.'")
                 current = meta['relation']
         return True, ""
+
+    def _searchable_meta(self, model, fname):
+        """Minimal meta for a non-stored field Odoo can still search on (related
+        fields like product.product.name, computed fields with a search method),
+        so domains may filter on it. None if it is not searchable."""
+        if model not in self.env:
+            return None
+        fld = self.env[model]._fields.get(fname)
+        if fld is None or not fld._description_searchable:
+            return None
+        return {'type': fld.type, 'relation': getattr(fld, 'comodel_name', None) or None}
 
     def validate_domain(self, model, domain):
         """Validate every field path in an Odoo domain. Returns a list of errors."""
@@ -327,16 +360,32 @@ class SchemaIndex:
 
     # -- rendering for the planner --------------------------------------------
 
+    @staticmethod
+    def _field_rank(fname, meta):
+        """Listing priority for :meth:`compact_fields` (lower comes first)."""
+        if meta['type'] == 'selection' and fname in ('state', 'status', 'stage'):
+            return 0
+        if meta['type'] in ('date', 'datetime', 'monetary') or fname == 'currency_id':
+            return 1
+        if meta['type'] == 'selection':
+            return 2
+        return 3
+
     def compact_fields(self, model, max_fields=60):
         """One-line, business-only field listing for prompt injection."""
         metas = self.model_fields(model)
         parts = []
-        for fname in sorted(metas):
+        for fname in sorted(metas, key=lambda n: (self._field_rank(n, metas[n]), n)):
             meta = metas[fname]
             if not meta['business']:
                 continue
             if meta['relation']:
                 parts.append(f"{fname}:{meta['type']}({meta['relation']})")
+            elif meta.get('selection'):
+                values = [str(v) for v, _l in meta['selection']]
+                if len(values) > SELECTION_MAX_VALUES:
+                    values = values[:SELECTION_MAX_VALUES] + ['…']
+                parts.append(f"{fname}:selection({'|'.join(values)})")
             else:
                 parts.append(f"{fname}:{meta['type']}")
         extra = len(parts) - max_fields
@@ -357,7 +406,9 @@ class SchemaIndex:
         return {
             'model': model,
             'fields': [
-                {'name': n, 'type': m['type'], 'relation': m['relation'], 'label': m['label']}
+                dict({'name': n, 'type': m['type'], 'relation': m['relation'],
+                      'label': m['label']},
+                     **({'selection': m['selection']} if m.get('selection') else {}))
                 for n, m in sorted(metas.items()) if m['business']
             ],
             'groupable': self.groupable_fields(model),

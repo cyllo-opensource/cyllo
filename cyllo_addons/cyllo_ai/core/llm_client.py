@@ -51,6 +51,7 @@ PROVIDER_NAMES = {
 }
 # Max chars of an LLM response logged verbatim (rest is truncated).
 RESPONSE_LOG_LIMIT = 6000
+TEMPERATURE = 0
 
 
 class LLMClient:
@@ -121,11 +122,15 @@ class LLMClient:
                  'parts': [{'text': m.get('content', '')}]}
                 for m in messages
             ]
-            data = self._post_gemini(model_name, api_key, {'contents': contents}, timeout)
+            data = self._post_gemini(model_name, api_key,
+                                     {'contents': contents,
+                                      'generationConfig': {'temperature': TEMPERATURE}},
+                                     timeout)
             text = self._gemini_text(data)
             self._record_usage(self._usage_gemini(data))
         elif provider in ('ChatOpenAI', 'OpenRouter'):
-            payload = {'model': model_name, 'messages': messages}
+            payload = {'model': model_name, 'messages': messages,
+                       'temperature': TEMPERATURE}
             data = self._post_openai(provider, api_key, payload, timeout)
             text = data['choices'][0]['message']['content']
             self._record_usage(self._usage_openai(data))
@@ -263,9 +268,8 @@ class LLMClient:
             base_url = 'https://api.openai.com/v1'
             headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
         try:
-            response = requests.post(
-                f'{base_url}/chat/completions', headers=headers, json=payload, timeout=timeout
-            )
+            response = self._post_with_temperature_fallback(
+                f'{base_url}/chat/completions', headers, payload, timeout)
         except requests.exceptions.RequestException as e:
             _logger.warning("[cyllo_ai] cannot reach %s: %s", provider, e)
             raise self._network_error(provider, e) from e
@@ -273,12 +277,29 @@ class LLMClient:
 
         return response.json()
 
+    @staticmethod
+    def _post_with_temperature_fallback(url, headers, payload, timeout, stream=False):
+        """POST ``payload``; if the model rejects ``temperature`` (HTTP 400
+        naming it), retry once without it. Returns the response."""
+        response = requests.post(url, headers=headers, json=payload,
+                                 timeout=timeout, stream=stream)
+        if (response.status_code == 400 and 'temperature' in payload
+                and 'temperature' in (response.text or '')):
+            _logger.info("[cyllo_ai] model %s rejects temperature; retrying without it",
+                         payload.get('model'))
+            response.close()
+            payload = {k: v for k, v in payload.items() if k != 'temperature'}
+            response = requests.post(url, headers=headers, json=payload,
+                                     timeout=timeout, stream=stream)
+        return response
+
     def _tools_openai(self, messages, tools, model_name, api_key, provider, timeout):
         payload = {
             'model': model_name,
             'messages': self._to_openai_messages(messages),
             'tools': self._openai_specs(tools),
             'tool_choice': 'auto',
+            'temperature': TEMPERATURE,
         }
         data = self._post_openai(provider, api_key, payload, timeout)
         msg = data['choices'][0]['message']
@@ -410,6 +431,7 @@ class LLMClient:
                 }
                 for t in tools
             ]}],
+            'generationConfig': {'temperature': TEMPERATURE},
         }
         data = self._post_gemini(model_name, api_key, payload, timeout)
         parts = data['candidates'][0]['content'].get('parts', [])
@@ -473,6 +495,7 @@ class LLMClient:
             'tools': self._openai_specs(tools),
             'tool_choice': 'auto',
             'stream': True,
+            'temperature': TEMPERATURE,
         }
         # Ask for token usage in the stream (final chunk). OpenAI uses
         # stream_options.include_usage; OpenRouter uses usage.include.
@@ -484,8 +507,9 @@ class LLMClient:
         calls = {}  # index -> {id, name, args}
         usage = None
         try:
-            with requests.post(f'{base_url}/chat/completions', headers=headers,
-                               json=payload, stream=True, timeout=timeout) as resp:
+            with self._post_with_temperature_fallback(
+                    f'{base_url}/chat/completions', headers, payload, timeout,
+                    stream=True) as resp:
                 self._check_response(resp)
                 for raw in resp.iter_lines(decode_unicode=True):
                     if not raw:
@@ -555,6 +579,7 @@ class LLMClient:
                 }
                 for t in tools
             ]}],
+            'generationConfig': {'temperature': TEMPERATURE},
         }
         text_parts = []
         tool_calls = []

@@ -30,6 +30,7 @@ import json
 from datetime import date
 
 from .fragment import ContextFragment
+from ..app_availability import DATA_HINTS, app_statuses, install_marker
 
 # Chart-explain context (dashboard "Explain with AI" flow) — bounded so the
 # chart's data doesn't blow up the prompt on every follow-up turn.
@@ -66,6 +67,55 @@ class DateContextFragment(ContextFragment):
     def body(self) -> str:
         today = date.today()
         return f"today: {today.isoformat()} ({today.strftime('%A')})"
+
+
+class AppAvailabilityFragment(ContextFragment):
+    """Live install status of the key apps, so the model checks every app a
+    request needs and asks for the missing ones (with Install buttons)."""
+
+    marker = "cyllo_app_status"
+
+    def __init__(self, env):
+        self.env = env
+
+    def body(self) -> str:
+        apps = app_statuses(self.env)
+        installed = [a for a in apps if a['installed']]
+        missing = [a for a in apps if not a['installed']]
+        lines = ["Current app status (checked now; it OVERRIDES anything said "
+                 "earlier in this conversation — apps may have been installed since):"]
+        if installed:
+            lines.append("INSTALLED: " + ", ".join(
+                f"{a['label']} ({a['covers']})" for a in installed))
+            hints = [f"- {a['label']}: {DATA_HINTS[a['module']]}"
+                     for a in installed if a['module'] in DATA_HINTS]
+            if hints:
+                lines.append("Where the data of installed apps lives:")
+                lines.extend(hints)
+        if missing:
+            lines.append("NOT INSTALLED:")
+            for app in missing:
+                lines.append(f"- {app['label']} ({app['covers']}): "
+                             f"{install_marker(app['label'], app['search'])}")
+        lines.append(
+            "Before answering, work out EVERY app the request needs — e.g. 'a sales "
+            "dashboard with a bar chart' needs Sales (the data) AND Cyllo Analytics "
+            "(any chart, graph or dashboard); 'stock value of purchased products' "
+            "needs Purchase AND Inventory; 'orders from POS, sales and website' needs "
+            "Point of Sale, Sales AND eCommerce. Check each against this status. If "
+            "the request names ANY app, channel or feature not listed here, you MUST "
+            "call check_apps for it BEFORE answering or asking the user anything — "
+            "never ask the user how that data is identified. If every needed app is "
+            "installed, answer normally and never say an installed app is missing. "
+            "If any are missing, do NOT query their data, do NOT call render_chart "
+            "while Cyllo Analytics is missing and do NOT claim a chart was shown. "
+            "Tell the user which needed apps are not installed (all of them, in "
+            "one answer) and write each one's [[install:...]] marker exactly as "
+            "given, on its own line — each becomes an Install button. Copy the "
+            "marker literally, with the double square brackets; never turn it into "
+            "a Markdown link like [Install X](#) or a list item. Still answer "
+            "the parts that use installed apps.")
+        return "\n".join(lines)
 
 
 class UserContextFragment(ContextFragment):

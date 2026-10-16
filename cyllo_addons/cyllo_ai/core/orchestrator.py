@@ -49,6 +49,7 @@ import time
 from odoo.exceptions import UserError
 
 from .context.fragments import (
+    AppAvailabilityFragment,
     ChartContextFragment,
     CompanyContextFragment,
     DateContextFragment,
@@ -71,7 +72,23 @@ _logger = logging.getLogger(__name__)
 # how many prior turns to replay each request (sliding window)
 HISTORY_WINDOW = 12
 # safety bound on tool-calling iterations per user turn
-MAX_STEPS = 6
+MAX_STEPS = 10
+FINAL_ANSWER_NUDGE = (
+    "Tool step limit reached. Do not call any more tools. Answer the user now from "
+    "the tool results above: give every figure you did obtain, and say plainly "
+    "which part could not be found and why (quote the exact error or missing "
+    "field). Never answer with only an apology or a description of the problem.")
+NO_DATA_NUDGE = (
+    "Self-check: every tool call so far returned an error or no records, so this "
+    "answer has no data. Do not ask the user how the data is stored and do not "
+    "stop yet. Call search_schema with the key concept of the question to find the "
+    "models and fields that hold it, then query those (another model, a wider "
+    "filter, or no status filter). Only if that also finds nothing, explain exactly "
+    "what you checked and what is not recorded.")
+SCHEMA_ONLY_TOOLS = frozenset({
+    "get_model_fields", "search_schema", "check_apps", "describe_feature",
+    "find_menu", "find_setting", "get_url", "get_currency_name",
+})
 # cap-and-spill: bound tool-result size so a large query can't flood the
 # context (per call) or accumulate across a turn (aggregate budget).
 MAX_RESULT_CHARS = 40000       # per-result cap before truncation kicks in
@@ -106,6 +123,9 @@ class Orchestrator:
         # running total of tool-result chars appended this turn (cap-and-spill
         # aggregate budget); reset per turn in _begin.
         self._turn_result_chars = 0
+        self._turn_tool_calls = 0
+        self._turn_got_data = False
+        self._turn_self_checked = False
 
     def run(self, text, session_id, company_ids=None, interrupted=False):
         """Process one user turn and return ``{response, last_message}``."""
@@ -129,7 +149,10 @@ class Orchestrator:
                 self.store.save(session_id, state)
                 return {'response': 'none', 'last_message': terminal,
                         'chart_config': None, 'usage': turn_usage}
-            return self._agent_loop(state, ctx, session_id, turn_usage)
+            result = self._agent_loop(state, ctx, session_id, turn_usage)
+            result['records_changed'] = self._turn_records_changed
+            result['open_record'] = self._turn_created_record
+            return result
         except UserError as e:
             # Deliberate, already-explained failure (e.g. the server cannot
             # reach the provider). One line, no traceback — the condition is
@@ -173,6 +196,8 @@ class Orchestrator:
             _logger.exception("[cyllo_ai] stream setup failed session=%s: %s", session_id, str(e))
             yield {'type': 'error', 'message': str(e)}
             return
+        if self._turn_records_changed:
+            yield {'type': 'records_changed', 'open': self._turn_created_record}
 
         if terminal is not None:
             # A confirmed write failed — report it and end the turn instead of
@@ -209,9 +234,18 @@ class Orchestrator:
                              step, session_id, [tc.get("name") for tc in tool_calls],
                              not tool_calls, (time.perf_counter() - t0) * 1000)
 
+                if not tool_calls and self._needs_self_check(step):
+                    self._turn_self_checked = True
+                    _logger.info("[cyllo_ai] self-check: no data yet, retrying session=%s", session_id)
+                    state.messages.append(Message(role='assistant', content=content or ''.join(step_text)))
+                    state.messages.append(Message(role='user', content=NO_DATA_NUDGE))
+                    yield {'type': 'delta', 'text': '\n\n'}
+                    continue
+
                 if not tool_calls:
                     final_text = content if content is not None else ''.join(step_text)
                     state.messages.append(Message(role='assistant', content=final_text or ''))
+                    self._drop_nudges(state)
                     self.store.save(session_id, state)
                     _logger.info("[cyllo_ai] stream done session=%s answer_len=%d tokens=%d",
                                  session_id, len(final_text or ''), turn_usage['total'])
@@ -236,13 +270,24 @@ class Orchestrator:
                     yield {'type': 'confirm', 'message': confirm}
                     return
 
-            self.store.save(session_id, state)
-            last = next((m.content for m in reversed(state.messages)
-                         if m.role == "assistant" and m.content), "")
             _logger.warning("[cyllo_ai] stream step budget exhausted session=%s", session_id)
-            yield {'type': 'done',
-                   'last_message': last or "I couldn't complete that within the step limit.",
-                   'usage': turn_usage}
+            messages = normalize(self._assemble(state) + [Message(role='user', content=FINAL_ANSWER_NUDGE)])
+            final_parts, assembled = [], None
+            for ev_type, payload in self.llm.stream(messages, tools):
+                if ev_type == 'delta':
+                    final_parts.append(payload)
+                    yield {'type': 'delta', 'text': payload}
+                elif ev_type == 'final':
+                    assembled = payload or {}
+            final_text = ''.join(final_parts) or (assembled or {}).get('content') or ''
+            if not final_text:
+                final_text = next((m.content for m in reversed(state.messages)
+                                   if m.role == "assistant" and m.content), "") \
+                    or "I couldn't complete that within the step limit."
+            state.messages.append(Message(role='assistant', content=final_text))
+            self._drop_nudges(state)
+            self.store.save(session_id, state)
+            yield {'type': 'done', 'last_message': final_text, 'usage': turn_usage}
         except UserError as e:
             _logger.warning("[cyllo_ai] stream aborted session=%s: %s", session_id, e)
             yield {'type': 'error', 'message': str(e)}
@@ -274,14 +319,17 @@ class Orchestrator:
                 continue
 
             t0 = time.perf_counter()
+            args, ignored = self._clean_args(tool, args)
             try:
                 out = tool.run(ctx, **args)
             except Exception as e:
                 _logger.exception("[cyllo_ai] tool %s failed session=%s", name, session_id)
-                self._append_tool_result(state, call_id, name, {"error": str(e)})
+                self._append_tool_result(state, call_id, name,
+                                         self._with_arg_note(tool, {"error": str(e)}, ignored, True))
                 yield {'type': 'tool_end', 'id': call_id, 'name': name,
                        'ok': False, 'summary': str(e)[:200]}
                 continue
+            out = self._with_arg_note(tool, out, ignored)
 
             if isinstance(out, dict) and out.get("__interrupt__"):
                 state.pending = {
@@ -326,6 +374,38 @@ class Orchestrator:
             yield {'type': 'tool_end', 'id': call_id, 'name': name,
                    'ok': ok, 'summary': self._tool_summary(out)}
         return None
+
+    @staticmethod
+    def _clean_args(tool, args):
+        """Drop arguments the tool's schema does not declare, so a stray one
+        (e.g. ``limit`` on a tool without it) does not crash the call.
+        Returns ``(kept_args, ignored_names)``."""
+        props = (getattr(tool, "input_schema", None) or {}).get("properties")
+        if not props or not isinstance(args, dict):
+            return args, []
+        kept = {k: v for k, v in args.items() if k in props}
+        return kept, [k for k in args if k not in props]
+
+    @staticmethod
+    def _with_arg_note(tool, out, ignored, failed=False):
+        """Tell the model which arguments were ignored and which the tool takes,
+        or (on a failure) the tool's accepted arguments so it can fix the call."""
+        if not ignored and not failed:
+            return out
+        schema = getattr(tool, "input_schema", None) or {}
+        accepted = ", ".join(schema.get("properties", {}))
+        required = ", ".join(schema.get("required", []))
+        parts = []
+        if ignored:
+            parts.append(f"Ignored unsupported argument(s): {', '.join(ignored)}.")
+        parts.append(f"Accepted arguments: {accepted or 'none'}"
+                     + (f" (required: {required})." if required else "."))
+        if failed:
+            parts.append("Fix the call from the error above and retry, or use another tool.")
+        note = " ".join(parts)
+        if isinstance(out, dict):
+            return dict(out, _args_note=note)
+        return {"result": out, "_args_note": note}
 
     @staticmethod
     def _split_chart(out):
@@ -404,6 +484,11 @@ class Orchestrator:
     def _begin(self, session_id, text, company_ids, interrupted):
         """Shared setup: load session, resume pending or append the user turn."""
         self._turn_result_chars = 0  # reset the per-turn cap-and-spill budget
+        self._turn_records_changed = False
+        self._turn_created_record = None
+        self._turn_tool_calls = 0
+        self._turn_got_data = False
+        self._turn_self_checked = False
         state = self.store.load(session_id)
         if company_ids:
             state.company_ids = company_ids
@@ -487,8 +572,16 @@ class Orchestrator:
                          step, session_id, [tc.get("name") for tc in tool_calls],
                          not tool_calls)
 
+            if not tool_calls and self._needs_self_check(step):
+                self._turn_self_checked = True
+                _logger.info("[cyllo_ai] self-check: no data yet, retrying session=%s", session_id)
+                state.messages.append(Message(role="assistant", content=content or ""))
+                state.messages.append(Message(role="user", content=NO_DATA_NUDGE))
+                continue
+
             if not tool_calls:
                 state.messages.append(Message(role="assistant", content=content or ""))
+                self._drop_nudges(state)
                 self.store.save(session_id, state)
                 return {'response': 'none', 'last_message': content or "",
                         'chart_config': chart_config, 'usage': turn_usage}
@@ -514,12 +607,18 @@ class Orchestrator:
                         'chart_config': chart_config, 'usage': turn_usage}
 
         # Step budget exhausted.
+        messages = normalize(self._assemble(state) + [Message(role="user", content=FINAL_ANSWER_NUDGE)])
+        final_text = (self.llm.complete_with_tools(messages, tools).get("content") or "").strip()
+        if not final_text:
+            final_text = next((m.content for m in reversed(state.messages)
+                               if m.role == "assistant" and m.content), "") \
+                or "I couldn't complete that within the step limit."
+        state.messages.append(Message(role="assistant", content=final_text))
+        self._drop_nudges(state)
         self.store.save(session_id, state)
-        last = next((m.content for m in reversed(state.messages)
-                     if m.role == "assistant" and m.content), "")
         return {
             'response': 'none',
-            'last_message': last or "I couldn't complete that within the step limit.",
+            'last_message': final_text,
             'chart_config': chart_config,
             'usage': turn_usage,
         }
@@ -541,12 +640,16 @@ class Orchestrator:
                 self._append_tool_result(state, call_id, name, {"error": f"Unknown tool: {name}"})
                 continue
 
+            tool = self.registry.get(name)
+            args, ignored = self._clean_args(tool, args)
             try:
-                out = self.registry.get(name).run(ctx, **args)
+                out = tool.run(ctx, **args)
             except Exception as e:
                 _logger.exception("Tool %s failed: %s", name, str(e))
-                self._append_tool_result(state, call_id, name, {"error": str(e)})
+                self._append_tool_result(state, call_id, name,
+                                         self._with_arg_note(tool, {"error": str(e)}, ignored, True))
                 continue
+            out = self._with_arg_note(tool, out, ignored)
 
             if isinstance(out, dict) and out.get("__interrupt__"):
                 # Defer this write; its tool-result is added on resume.
@@ -607,6 +710,10 @@ class Orchestrator:
             execute = executors.get(pending.get("name"),
                                     self.env['chatbot.tools'].execute_confirmed_crud)
             out = execute(pending["query"])
+            self._turn_records_changed = not (isinstance(out, dict) and out.get("error"))
+            if self._turn_records_changed and isinstance(out, dict) \
+                    and out.get("model") and isinstance(out.get("id"), int):
+                self._turn_created_record = {"model": out["model"], "id": out["id"]}
             # A confirmed write that failed ends the turn: report the failure
             # rather than letting the model re-plan it into another confirm loop.
             if isinstance(out, dict) and out.get("error"):
@@ -656,6 +763,9 @@ class Orchestrator:
         result always gets at least a preview). Oversized results are truncated
         with an explicit hint rather than flooding the context.
         """
+        self._turn_tool_calls += 1
+        if name not in SCHEMA_ONLY_TOOLS and self._has_data(out):
+            self._turn_got_data = True
         remaining = TURN_RESULT_BUDGET - self._turn_result_chars
         max_chars = max(RESULT_MIN_CHARS, min(MAX_RESULT_CHARS, remaining))
         content, capped = cap_result(
@@ -669,6 +779,43 @@ class Orchestrator:
         ))
 
     @staticmethod
+    def _has_data(out):
+        """True when a tool result carries business data (not an error, not an
+        empty result set)."""
+        if isinstance(out, str):
+            text = out.strip()
+            if not text or text.lower().startswith("error"):
+                return False
+            try:
+                out = json.loads(text)
+            except ValueError:
+                return True
+        if not isinstance(out, dict):
+            return bool(out)
+        if out.get("error"):
+            return False
+        if "groups" in out:
+            return any(g.get("__count", 1) for g in out["groups"] or [])
+        if "count" in out:
+            return bool(out["count"])
+        for key in ("records", "result", "rows", "data"):
+            if key in out:
+                return bool(out[key])
+        return True
+
+    def _needs_self_check(self, step):
+        """Before accepting a final answer: tools ran this turn but none returned
+        data, the check has not run yet, and there are steps left to retry."""
+        return (self._turn_tool_calls and not self._turn_got_data
+                and not self._turn_self_checked and step < MAX_STEPS - 2)
+
+    @staticmethod
+    def _drop_nudges(state):
+        """Remove the transient self-check prompt from the saved history."""
+        state.messages = [m for m in state.messages
+                          if not (m.role == "user" and m.content == NO_DATA_NUDGE)]
+
+    @staticmethod
     def _last_user_query(state, fallback):
         return next((m.content for m in reversed(state.messages) if m.role == "user"), fallback)
 
@@ -678,6 +825,7 @@ class Orchestrator:
             DateContextFragment(self.env),
             UserContextFragment(self.env),
             CompanyContextFragment(self.env, state.company_ids),
+            AppAvailabilityFragment(self.env),
             UIContextFragment(self.env, self.ui_context),
             MentionContextFragment(self.env, self.ui_context),
             ChartContextFragment(self.env, self.ui_context),

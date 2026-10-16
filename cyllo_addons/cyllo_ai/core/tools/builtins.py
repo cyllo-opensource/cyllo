@@ -28,7 +28,9 @@ these for native function-calling) and dispatches to the ORM-bound method on
 originating query are injected from the context, never taken from the LLM.
 """
 from .base import Tool, ToolContext
+from ..app_availability import check_apps
 from .communication import SendEmailTool, SendTextTool, SendInternalMessageTool
+from .digest import ActivityDigestTool
 from .functional import DescribeFeatureTool, FindMenuTool, FindSettingTool
 from ..registry import ToolRegistry
 
@@ -42,7 +44,9 @@ class FinancialMetricTool(Tool):
         "report engine — the same calculation as Reporting > Accounting Reports. "
         "ALWAYS use this for accounting/financial metric questions; NEVER compute "
         "them with aggregate_records, search_records or analytic_record (those "
-        "give wrong accounting numbers)."
+        "give wrong accounting numbers). NOT for totals of business documents "
+        "or records (orders, POS orders, employee expenses, timesheets, …): "
+        "query that model with aggregate_records instead."
     )
     is_read_only = True
     input_schema = {
@@ -271,7 +275,10 @@ class AggregateRecordsTool(Tool):
         "Grouped aggregation over a Cyllo model (totals, averages, counts by group). "
         "Use for 'total/sum/average/breakdown of X by Y' questions. groupby supports "
         "date granularity like 'date_order:month'. Prefer this over analytic_record "
-        "for single-model aggregations."
+        "for single-model aggregations. This is the tool for totals of any "
+        "business document or record (orders, invoices, expenses, timesheets, "
+        "…). Filter on status and the event's date; a mixed-currency monetary "
+        "total is split per currency automatically."
     )
     is_read_only = True
     input_schema = {
@@ -290,13 +297,48 @@ class AggregateRecordsTool(Tool):
                 "description": "Numeric aggregations as 'field:op' with op in "
                                "sum/avg/min/max/count, e.g. 'amount_total:sum'.",
             },
+            "order": {
+                "type": "string",
+                "description": "Sort the groups, for top/bottom-N questions: an "
+                               "aggregated or groupby field plus asc/desc, or "
+                               "'count desc', e.g. 'product_uom_qty desc'.",
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Return only the first N groups after ordering.",
+            },
         },
         "required": ["model"],
     }
 
-    def run(self, ctx: ToolContext, model, domain=None, groupby=None, aggregates=None):
+    def run(self, ctx: ToolContext, model, domain=None, groupby=None, aggregates=None,
+            order=None, limit=None):
         return ctx.env['chatbot.tools'].aggregate_records(
-            model, domain, groupby, aggregates, ctx.company_ids)
+            model, domain, groupby, aggregates, ctx.company_ids, order, limit)
+
+
+class SearchSchemaTool(Tool):
+    """Find which models and fields hold a business concept."""
+
+    name = "search_schema"
+    label = "Searching the data model"
+    is_read_only = True
+    description = (
+        "Find where a business concept is stored when you are not sure which model "
+        "or field to query — e.g. 'return', 'return reason', 'scrap', 'refund', "
+        "'delivery delay'. Returns matching models with their matching fields. Use it "
+        "BEFORE guessing model or field names, and after an 'unknown model/field' error."
+    )
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "Keywords for the concept, e.g. 'return reason'."},
+        },
+        "required": ["query"],
+    }
+
+    def run(self, ctx: ToolContext, query):
+        return ctx.env['chatbot.tools'].search_schema(query)
 
 
 class GetModelFieldsTool(Tool):
@@ -358,7 +400,14 @@ class WriteRecordsTool(Tool):
         "fields accept a name or id; x2many fields accept a list of line "
         "objects), and `filters` for read/update/delete. To change a field that "
         "lives on a related line, target that line's model (filter through the "
-        "parent) or set it inside the parent's x2many `values`. Data-modifying "
+        "parent) or set it inside the parent's x2many `values`. On create, the "
+        "form's onchanges run as in the UI: a template (e.g. sale_order_template_id) "
+        "fills the lines, a partner fills pricelist/addresses, a product fills price. "
+        "So pass only what the user asked for — never invent lines, products or ids "
+        "the user did not mention. To confirm, validate, post, cancel, lock, send or "
+        "any other workflow step, use action 'button' with the button's method — "
+        "NEVER write 'state' directly (that skips deliveries, invoices, emails and "
+        "accounting). Data-modifying "
         "actions are previewed and confirmed with the user automatically — call "
         "this directly, do not ask permission first."
     )
@@ -372,7 +421,18 @@ class WriteRecordsTool(Tool):
             },
             "action": {
                 "type": "string",
-                "enum": ["create", "read", "update", "delete"],
+                "enum": ["create", "read", "update", "delete", "button"],
+                "description": "'button' presses a form button (e.g. Confirm, "
+                               "Validate, Post, Cancel) on the records matched by "
+                               "`filters` — the full workflow runs, as in the UI.",
+            },
+            "button": {
+                "type": "string",
+                "description": "For action 'button': the button's method name, e.g. "
+                               "'action_confirm' (sale/purchase Confirm), "
+                               "'button_validate' (delivery Validate), "
+                               "'action_post' (invoice Post). An unknown name "
+                               "returns the list of available buttons.",
             },
             "values": {
                 "type": "object",
@@ -391,9 +451,9 @@ class WriteRecordsTool(Tool):
         "required": ["model", "action"],
     }
 
-    def run(self, ctx: ToolContext, model, action, values=None, filters=None):
+    def run(self, ctx: ToolContext, model, action, values=None, filters=None, button=None):
         return ctx.env['chatbot.tools'].write_records(
-            model, action, values=values, filters=filters)
+            model, action, values=values, filters=filters, button=button)
 
 
 class GetUrlTool(Tool):
@@ -457,6 +517,36 @@ class GetCurrencyNameTool(Tool):
         return ctx.env['chatbot.tools'].get_currency_name(currency_id)
 
 
+class CheckAppsTool(Tool):
+    """Install status of any app by name, for apps outside the app-status list."""
+
+    name = "check_apps"
+    label = "Checking installed apps"
+    description = (
+        "Check whether apps are installed, by name (e.g. ['fleet', 'events', "
+        "'subscriptions']). Use it for apps the request needs that are not in the "
+        "app status list in the context. For each not_installed app, tell the user "
+        "to install it and write its install_marker on its own line, copied literally "
+        "(never as a Markdown link) — it becomes "
+        "an Install button. Do not query data of a not_installed app."
+    )
+    is_read_only = True
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "apps": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "App names in the user's words or technical module names.",
+            },
+        },
+        "required": ["apps"],
+    }
+
+    def run(self, ctx: ToolContext, apps=None):
+        return {"apps": check_apps(ctx.env, apps)}
+
+
 class RenderChartTool(Tool):
     name = "render_chart"
     label = "Building a chart"
@@ -492,12 +582,28 @@ class RenderChartTool(Tool):
                 },
                 "description": "One or more data series.",
             },
+            "source": {
+                "type": "object",
+                "description": "Where the numbers came from, when the chart is ONE "
+                               "model grouped by ONE field with ONE summed number "
+                               "(e.g. sales by customer = sale.order / partner_id / "
+                               "amount_total). Always pass it in that case — it lets "
+                               "the user save the chart to Cyllo Analytics.",
+                "properties": {
+                    "model": {"type": "string", "description": "Technical model, e.g. sale.order."},
+                    "group_by": {"type": "string", "description": "Stored field the chart groups by, e.g. partner_id."},
+                    "measure": {"type": "string", "description": "Stored numeric field that is summed, e.g. amount_total."},
+                    "dashboard_name": {"type": "string", "description": "Dashboard name the user asked for, if any."},
+                },
+                "required": ["model", "group_by", "measure"],
+            },
         },
         "required": ["chart_type", "series"],
     }
 
-    def run(self, ctx: ToolContext, chart_type="bar", title="", categories=None, series=None):
-        return ctx.env['chatbot.tools'].render_chart(chart_type, title, categories, series)
+    def run(self, ctx: ToolContext, chart_type="bar", title="", categories=None, series=None,
+            source=None):
+        return ctx.env['chatbot.tools'].render_chart(chart_type, title, categories, series, source)
 
 
 # The built-in tool belt (ORM tiers first). Exposed as a constant so the agent
@@ -511,6 +617,7 @@ DEFAULT_TOOL_CLASSES = (
     CountRecordsTool,
     AggregateRecordsTool,
     GetModelFieldsTool,
+    SearchSchemaTool,
     DescribeFeatureTool,
     FindMenuTool,
     FindSettingTool,
@@ -523,6 +630,8 @@ DEFAULT_TOOL_CLASSES = (
     CurrencyConversionTool,
     GetCurrencyNameTool,
     RenderChartTool,
+    CheckAppsTool,
+    ActivityDigestTool,
 )
 
 

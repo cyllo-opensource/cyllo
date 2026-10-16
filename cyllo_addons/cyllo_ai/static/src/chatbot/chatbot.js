@@ -233,7 +233,13 @@ export class ChatBot extends Component {
             }
         });
         useBus(this.env.bus, "CY_AI:CLEAR_OFFER", () => { this.state.offer = null; });
-        useBus(this.env.bus, "CY_AI:PUSH_MESSAGE", (ev) => { this._pushHostMessage(ev.detail || {}); });
+        useBus(this.env.bus, "CY_AI:PUSH_MESSAGE", async (ev) => {
+            const detail = ev.detail || {};
+            if (detail.open && this.state.minimized) {
+                await this._maximize_chatbot();
+            }
+            this._pushHostMessage(detail);
+        });
         // Explain a host chart: expand the chat, keep its data as context (rides
         // in ui_context so follow-ups stay chart-aware), and ask the agent to
         // explain it — with the chart attached to the USER turn (see handleSend).
@@ -441,12 +447,17 @@ export class ChatBot extends Component {
                         htmlContent = msg.html || "";
                     }
                     const safeId = msg.id ? msg.id : `temp_${msg.timestamp || Date.now()}_${index}`;
+                    const savedWidget = this._savedWidget(msg);
+                    if (savedWidget) {
+                        htmlContent = markup(this.escapeHtml(savedWidget.intro || ""));
+                    }
                     return {
                         id: safeId,
                         from: msg.from,
                         html: htmlContent,
                         text: msg.text,
-                        chart_config: msg.chart_config || null,
+                        chart_config: savedWidget ? null : (msg.chart_config || null),
+                        widget: savedWidget ? { key: savedWidget.key, props: savedWidget.props || {} } : null,
                         chart: msg.chart || null,
                         interrupted: msg.interrupted,
                         timestamp: msg.timestamp,
@@ -1691,20 +1702,71 @@ export class ChatBot extends Component {
 
     /** Push a host-injected bot message (optionally carrying suggestion cards)
      *  into the current conversation and scroll to it. */
-    _pushHostMessage({ html, suggestions, chart, widget } = {}) {
+    _pushHostMessage({ html, intro, userText, persist, suggestions, chart, widget } = {}) {
         this.state.offerLoading = false;   // the host has replied — stop the spinner
-        const id = "host_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+        const stamp = Date.now() + "_" + Math.random().toString(36).slice(2);
+        if (userText) {
+            this.state.messages.push({ id: "host_user_" + stamp, from: "user", text: userText });
+        }
+        const id = "host_" + stamp;
         this.state.messages.push({
             id,
             from: "bot",
-            html: html ? markup(html) : markup(""),
+            html: html ? markup(html) : markup(intro ? this.escapeHtml(intro) : ""),
             chart_config: null,
             suggestions: suggestions || null,
             chart: chart || null,
             widget: widget || null,
         });
+        if (persist && widget) {
+            const message = this.state.messages.at(-1);
+            message.widget = {
+                ...widget,
+                props: {
+                    ...(widget.props || {}),
+                    onReady: (saved) => this._saveHostMessage(message, { userText, intro, ...saved }),
+                },
+            };
+        }
         this.render();
         this.scrollToBottom();
+    }
+
+    /**
+     * Save a host card turn to the chat history once its data is ready, so the
+     * card comes back when the conversation is reopened. The card's own props
+     * (``saved.props``) are stored with it; ``saved.responseText`` is the plain
+     * answer used for the history title and as a text fallback.
+     */
+    async _saveHostMessage(message, { userText, intro, responseText, props }) {
+        if (message.saved) {
+            return;
+        }
+        message.saved = true;
+        try {
+            const record = await this.rpc("/chatbot/set_conversation", {
+                user_id: this.user.userId,
+                session_id: this.state.session_id,
+                user_message: userText || null,
+                response_message: responseText || "",
+                chart_config: { cyllo_widget: { key: message.widget.key, props, intro: intro || "" } },
+                interrupted: false,
+                company_ids: this._getActiveCompanyIds(),
+            });
+            if (record?.title) {
+                this.state.currentTitle = record.title;
+            }
+            this.env.bus.trigger("LOAD_SIDEBAR", {});
+        } catch (err) {
+            message.saved = false;
+            console.error("Cyllo AI: card could not be saved to the chat history", err);
+        }
+    }
+
+    /** Host card saved with a history turn ({key, props, intro}), or null. */
+    _savedWidget(msg) {
+        const saved = msg.chart_config && msg.chart_config.cyllo_widget;
+        return saved && saved.key ? saved : null;
     }
 
     /**
@@ -2369,6 +2431,31 @@ export class ChatBot extends Component {
         this.state.playingMessageId = null;
     }
 
+    /** After the AI changed records: open the record it just created in its form
+     *  view, otherwise reload the view behind the chat, so the change shows
+     *  without a manual refresh. Skipped when the current screen is the
+     *  full-screen chat itself (leaving or reloading it would reset the
+     *  conversation mid-answer). */
+    reloadCurrentView(openRecord = null) {
+        const controller = this.actionService.currentController;
+        const tag = controller && controller.action && controller.action.tag;
+        if (!controller || tag === "cyllo_ai.ChatBotScreen") {
+            return;
+        }
+        const action = openRecord && openRecord.model && openRecord.id
+            ? {
+                type: "ir.actions.act_window",
+                res_model: openRecord.model,
+                res_id: openRecord.id,
+                views: [[false, "form"]],
+                target: "current",
+            }
+            : "soft_reload";
+        this.actionService.doAction(action).catch((e) => {
+            console.warn("cyllo_ai: view refresh after write failed", e);
+        });
+    }
+
     /**
      * Send a query and consume the SSE stream from /chatbot/query/stream.
      * Calls callbacks as events arrive and resolves to { raw, isInterrupted }.
@@ -2403,6 +2490,7 @@ export class ChatBot extends Component {
             let isInterrupted = false;
             if (r.response !== 'none') { isInterrupted = true; raw = r.response; }
             if (raw) { onDelta?.(raw); }
+            if (r.records_changed) { this.reloadCurrentView(r.open_record); }
             return {
                 raw, isInterrupted, chartConfig: r.chart_config || null,
                 usage: r.usage || null
@@ -2457,6 +2545,8 @@ export class ChatBot extends Component {
                         widget = ev.widget || widget;
                     } else if (ev.type === "apply_qd") {
                         applyQd = ev.patch || applyQd;
+                    } else if (ev.type === "records_changed") {
+                        this.reloadCurrentView(ev.open);
                     } else if (ev.type === "apply_dash") {
                         applyDash = ev.patch || applyDash;
                     } else if (ev.type === "confirm") {
@@ -2742,12 +2832,17 @@ export class ChatBot extends Component {
                 // not markdown. See the note there.
                 htmlContent = msg.html || "";
             }
+            const savedWidget = this._savedWidget(msg);
+            if (savedWidget) {
+                htmlContent = markup(this.escapeHtml(savedWidget.intro || ""));
+            }
             return {
                 id: safeId, //  Use the safeId
                 from: msg.from,
                 html: htmlContent,
                 text: msg.text,
-                chart_config: msg.chart_config || null,
+                chart_config: savedWidget ? null : (msg.chart_config || null),
+                widget: savedWidget ? { key: savedWidget.key, props: savedWidget.props || {} } : null,
                 chart: msg.chart || null,
                 interrupted: msg.interrupted,
                 timestamp: msg.timestamp,

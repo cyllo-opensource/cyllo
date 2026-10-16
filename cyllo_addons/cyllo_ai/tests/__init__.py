@@ -34,3 +34,6 @@ from . import test_schema_index
 from . import test_analytic_security
 from . import test_result_cap
 from . import test_agent_seam
+from . import test_briefing
+from . import test_digest
+from . import test_ai_access
