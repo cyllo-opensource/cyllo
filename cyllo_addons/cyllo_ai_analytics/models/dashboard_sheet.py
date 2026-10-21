@@ -301,6 +301,28 @@ class DashboardSheet(models.Model):
         return {"dashboard_id": config.id, "name": config.name,
                 "chart_count": len(sheets)}
 
+    @api.model
+    def add_chat_chart_to_analytics(self, source, title=""):
+        """Save a chat chart (its ``cyllo_source``: model, group_by, measure,
+        chart_type, dashboard_name) as a new dashboard holding one live sheet.
+
+        :returns: ``{dashboard_id, name, chart_count}``.
+        """
+        source = source or {}
+        model_name = source.get("model")
+        if not model_name or model_name not in self.env:
+            raise ValidationError(_("This chart has no data source to save."))
+        table = self.env[model_name]._table
+        pick = {
+            "model": model_name,
+            "dimension_column": f"{table}.{source.get('group_by')}",
+            "measure_column": f"{table}.{source.get('measure')}",
+            "title": title or False,
+            "chart_type": source.get("chart_type") or "",
+        }
+        name = (source.get("dashboard_name") or title or "AI Dashboard").strip()
+        return self.create_quick_dashboard(name, [pick])
+
     def _build_quick_sheet_vals(self, pick, dim, measure, model, ir_model,
                                 company_id, chart_type):
         """Build ``create()`` vals for one chart: tables + dimension/measure axes

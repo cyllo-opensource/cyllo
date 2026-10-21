@@ -37,6 +37,7 @@
         "web.assets_backend": [
             "cyllo_ai_analytics/static/src/js/ai_chart_suggestions.js",
             "cyllo_ai_analytics/static/src/js/ai_chart_tile.js",
+            "cyllo_ai_analytics/static/src/js/ai_add_to_analytics.js",
             "cyllo_ai_analytics/static/src/js/ai_quick_dashboard.js",
             "cyllo_ai_analytics/static/src/js/dashboard_insight.js",
             "cyllo_ai_analytics/static/src/xml/ai_quick_dashboard.xml",
@@ -47,5 +48,5 @@
     'license': 'LGPL-3',
     "installable": True,
     "application": False,
-    "auto_install": False,
+    "auto_install": True,
 }
