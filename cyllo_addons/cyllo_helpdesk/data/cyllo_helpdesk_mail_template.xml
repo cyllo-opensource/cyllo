@@ -1,199 +1,608 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+    <!-- Minimal Clean Notification Layout -->
+    <template id="cyllo_helpdesk_mail_notification_layout">
+        <t t-call="mail.notification_preview"/>
+        <t t-out="message.body"/>
+    </template>
+
     <record id="help_desk_mail_template" model="mail.template">
         <field name="name">Help Desk</field>
-        <field name="model_id"
-               ref="cyllo_helpdesk.model_helpdesk_ticket"/>
+        <field name="model_id" ref="cyllo_helpdesk.model_helpdesk_ticket"/>
         <field name="subject">[Ticket #{{ object.ticket }}] {{ object.name }}: We received your ticket</field>
         <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if object.user_id else object.company_id.partner_id.email_formatted) }}</field>
-        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or object.company_id.partner_id.email_formatted }}</field>
+        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and object.team_id.alias_id else object.company_id.partner_id.email_formatted }}</field>
         <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id else '') }}</field>
         <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email')) }}</field>
+        <!-- Use clean notification layout to remove unwanted default intro and portal button -->
+        <field name="email_layout_xmlid">cyllo_helpdesk.cyllo_helpdesk_mail_notification_layout</field>
         <field name="body_html" type="html">
-            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #333333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-                <div style="background-color: #9EA700; padding: 15px 20px; border-radius: 6px 6px 0 0; text-align: center; color: #ffffff;">
-                    <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Helpdesk Support</h2>
-                </div>
-                <div style="padding: 20px;">
-                    <p style="font-size: 15px;">Dear <strong
-                            t-out="object.customer_id.name or 'Customer'"/>,
-                    </p>
-                    <p>We have successfully received your support request regarding your issue:</p>
-                    <div style="background-color: #f8f9fa; border-left: 4px solid #9EA700; padding: 12px 16px; margin: 15px 0; border-radius: 0 4px 4px 0;">
-                        <p style="margin: 0; font-size: 15px; font-weight: bold; color: #212529;">
-                            <t t-out="object.name"/>
-                        </p>
-                        <t t-if="object.description">
-                            <div style="margin-top: 8px; font-size: 13px; color: #6c757d;">
-                                <t t-out="object.description"/>
-                            </div>
-                        </t>
-                    </div>
-                    <p>Our support team is actively reviewing your request and we will resolve your
-                        issue as soon as possible.
-                    </p>
+            <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                   style="background-color: #f4f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #374151; line-height: 1.6; padding: 24px 0;">
+                <tr>
+                    <td align="center">
+                        <!-- 600px Max-Width Email Card -->
+                        <table border="0" cellpadding="0" cellspacing="0"
+                               width="600"
+                               style="max-width: 600px; width: 100%; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
 
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px;">
-                        <tr style="border-bottom: 1px solid #eeeeee;">
-                            <td style="padding: 8px 0; color: #6c757d; width: 40%;">
-                                <strong>Ticket ID:</strong>
-                            </td>
-                            <td style="padding: 8px 0; font-weight: bold; color: #9EA700;">
-                                <t t-out="object.ticket"/>
-                            </td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #eeeeee;">
-                            <td style="padding: 8px 0; color: #6c757d;">
-                                <strong>Helpdesk Team:</strong>
-                            </td>
-                            <td style="padding: 8px 0;">
-                                <t t-out="object.team_id.name or 'Support'"/>
-                            </td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #eeeeee;">
-                            <td style="padding: 8px 0; color: #6c757d;">
-                                <strong>Status:</strong>
-                            </td>
-                            <td style="padding: 8px 0;">
-                                <t t-out="object.stage_id.name or 'New'"/>
-                            </td>
-                        </tr>
-                        <t t-if="object.user_id">
-                            <tr style="border-bottom: 1px solid #eeeeee;">
-                                <td style="padding: 8px 0; color: #6c757d;">
-                                    <strong>Assigned To:</strong>
-                                </td>
-                                <td style="padding: 8px 0;">
-                                    <t t-out="object.user_id.name"/>
+                            <!-- Brand Header Banner -->
+                            <tr>
+                                <td style="background-color: #FFFFFF; padding: 20px 24px; text-align: left;">
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%">
+                                        <tr>
+                                            <td valign="middle">
+                                                <h2 style="margin: 0; font-size: 19px; font-weight: 600; color: #000000; letter-spacing: -0.2px;">
+                                                    Helpdesk Support
+                                                </h2>
+                                                <span style="font-size: 15px; color: #6b7280; opacity: 0.9;">
+                                                    <t t-out="object.team_id.name or 'Support Team'"/>
+                                                </span>
+                                            </td>
+                                            <td valign="middle" align="right">
+                                                <span style="background-color: rgba(255,255,255,0.22); color: #858D00; font-size: 20px; font-weight: 600; padding: 4px 10px; border-radius: 12px;">
+                                                    #
+                                                    <t t-out="object.ticket"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </td>
                             </tr>
-                        </t>
-                    </table>
 
-                    <p style="font-size: 13px; color: #6c757d;">
-                        You can reply directly to this email if you have any additional details or
-                        updates regarding this issue.
-                    </p>
-                    <br/>
-                    <p style="margin-bottom: 0;">
-                        Best regards,
-                        <br/>
-                        <strong>
-                            <t t-out="user.name or object.team_id.name or 'Support Team'"/>
-                        </strong>
-                        <br/>
-                        <t t-out="object.company_id.name"/>
-                    </p>
-                </div>
-            </div>
+                            <!-- Email Body Content -->
+                            <tr>
+                                <td style="padding: 5px 28px 24px 28px;">
+                                    <p style="margin: 0 0 10px 0; font-size: 15px;">
+                                        Dear
+                                        <strong
+                                                t-out="object.customer_id.name or 'Customer'"/>
+                                        ,
+                                    </p>
+                                    <p style="margin: 0 0 18px 0; color: #4b5563;">
+                                        We have received your support request.
+                                        Our team is actively reviewing the
+                                        details and will update you shortly.
+                                    </p>
+
+                                    <!-- Highlighted Issue Card -->
+                                    <div style="background-color: #f9fafb; border-left: 4px solid #9EA700; border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 20px 0;">
+                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #858D00; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                            Subject
+                                        </div>
+                                        <div style="font-size: 15px; font-weight: 600; color: #111827;">
+                                            <t t-out="object.name"/>
+                                        </div>
+                                        <t t-if="object.description">
+                                            <div style="margin-top: 8px; font-size: 13px; color: #6b7280; line-height: 1.5;">
+                                                <t t-out="object.description"/>
+                                            </div>
+                                        </t>
+                                    </div>
+
+                                    <!-- Ticket Metadata Table -->
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%"
+                                           style="border-collapse: collapse; margin: 22px 0 24px 0; background-color: #ffffff; border: 1px solid #f3f4f6; border-radius: 6px;">
+                                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                                            <td style="padding: 10px 14px; color: #6b7280; font-size: 13px; width: 35%;">
+                                                Ticket ID
+                                            </td>
+                                            <td style="padding: 10px 14px; font-size: 13px; font-weight: 600; color: #111827;">
+                                                #
+                                                <t t-out="object.ticket"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                                            <td style="padding: 10px 14px; color: #6b7280; font-size: 13px;">
+                                                Helpdesk Team
+                                            </td>
+                                            <td style="padding: 10px 14px; font-size: 13px; color: #111827;">
+                                                <t t-out="object.team_id.name or 'Support'"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                                            <td style="padding: 10px 14px; color: #6b7280; font-size: 13px;">
+                                                Current Status
+                                            </td>
+                                            <td style="padding: 10px 14px; font-size: 13px;">
+                                                <span style="display: inline-block; background-color: #ecfccb; color: #4d5400; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 10px;">
+                                                    <t t-out="object.stage_id.name or 'New'"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <t t-if="object.user_id">
+                                            <tr>
+                                                <td style="padding: 10px 14px; color: #6b7280; font-size: 13px;">
+                                                    Assigned To
+                                                </td>
+                                                <td style="padding: 10px 14px; font-size: 13px; color: #111827;">
+                                                    <t t-out="object.user_id.name"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </table>
+
+                                    <!-- Action Button (Portal Access) -->
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%"
+                                           style="margin: 24px 0 18px 0;">
+                                        <tr>
+                                            <td align="center">
+                                                <a t-attf-href="{{ object.get_base_url() }}/my/ticket/{{ object.id }}"
+                                                   style="background-color: #9EA700; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px 24px; border-radius: 6px; display: inline-block;">
+                                                    View Ticket Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p style="margin: 18px 0 0 0; font-size: 13px; color: #6b7280; text-align: center;">
+                                        You can also reply directly to this
+                                        email to provide additional notes or
+                                        screenshots.
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <!-- Corrected Unified Footer -->
+                            <tr>
+                                <td style="background-color: #f9fafb; border-top: 1px solid #e5e7eb; padding: 20px 28px; font-size: 13px; color: #6b7280;">
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%">
+                                        <tr>
+                                            <td valign="middle" align="left">
+                                                <p style="margin: 0; line-height: 1.5; color: #6b7280; font-size: 13px;">
+                                                    Best regards,
+                                                    <br/>
+                                                    <strong style="color: #111827;">
+                                                        <t t-out="user.name or object.team_id.name or 'Support Team'"/>
+                                                    </strong>
+                                                    <br/>
+                                                    <t t-out="object.company_id.name"/>
+                                                </p>
+                                            </td>
+                                            <td valign="middle" align="right"
+                                                style="padding-left: 15px;">
+                                                <!-- Reliable Company Logo Loading -->
+                                                <t t-if="object.company_id.logo">
+                                                    <img t-attf-src="{{ object.get_base_url() }}/logo.png?company={{ object.company_id.id }}"
+                                                         t-att-alt="object.company_id.name"
+                                                         width="70"
+                                                         height="32"
+                                                         style="width: 70px; max-width: 70px; height: auto; display: block; border: 0; outline: none;"/>
+                                                </t>
+                                                <t t-else="">
+
+
+                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_helpdesk/static/src/img/cyllo.png"
+                                                         alt="Cyllo Logo"
+                                                         width="70"
+                                                         height="32"
+                                                         style="width: 70px; max-width: 70px; height: auto; display: block; border: 0; outline: none;"/>
+
+
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </field>
         <field name="auto_delete" eval="False"/>
     </record>
+
     <record id="help_desk_in_progress_mail_template" model="mail.template">
         <field name="name">Help Desk: Ticket In Progress</field>
         <field name="model_id" ref="cyllo_helpdesk.model_helpdesk_ticket"/>
-        <field name="subject">[Ticket #{{ object.ticket }}] {{ object.name }}: We are working on
-            your ticket
-        </field>
-        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if
-            object.user_id else object.company_id.partner_id.email_formatted) }}
-        </field>
-        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or
-            object.company_id.partner_id.email_formatted }}
-        </field>
-        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id
-            else '') }}
-        </field>
-        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email'))
-            }}
-        </field>
+        <field name="subject">[Ticket #{{ object.ticket }}] Is in Progress State</field>
+        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if object.user_id else object.company_id.partner_id.email_formatted) }}</field>
+        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and object.team_id.alias_id else object.company_id.partner_id.email_formatted }}</field>
+        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id else '') }}</field>
+        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email')) }}</field>
+        <field name="email_layout_xmlid">cyllo_helpdesk.cyllo_helpdesk_mail_notification_layout</field>
         <field name="body_html" type="html">
-            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; color: #333333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-                <div style="background-color: #9EA700; padding: 15px 20px; border-radius: 6px 6px 0 0; text-align: center; color: #ffffff;">
-                    <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Helpdesk Support</h2>
-                </div>
-                <div style="padding: 20px;">
-                    <p>Dear<strong t-out="object.customer_id.name or 'Customer'"/>,
-                    </p>
-                    <p>Our support team has started working on your ticket.</p>
-                    <p style="font-size: 16px; font-weight: bold; color: #212529;">
-                        <t t-out="object.name"/>
-                    </p>
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px;">
-                        <tr style="border-bottom: 1px solid #eeeeee;">
-                            <td style="padding: 8px 0; color: #6c757d; width: 40%;">
-                                <strong>Ticket ID:</strong>
-                            </td>
-                            <td style="padding: 8px 0; font-weight: bold; color: #9EA700;">
-                                <t t-out="object.ticket"/>
-                            </td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #eeeeee;">
-                            <td style="padding: 8px 0; color: #6c757d;">
-                                <strong>Status:</strong>
-                            </td>
-                            <td style="padding: 8px 0;">
-                                <t t-out="object.stage_id.name or 'In Progress'"/>
-                            </td>
-                        </tr>
-                    </table>
-                    <p>We will update you when there is further progress. You can reply to this
-                        email if you have additional information.
-                    </p>
-                    <p style="margin-bottom: 0;">Best regards,
-                        <br/>
-                        <strong>
-                            <t t-out="user.name or object.team_id.name or 'Support Team'"/>
-                        </strong>
-                        <br/>
-                        <t t-out="object.company_id.name"/>
-                    </p>
-                </div>
-            </div>
+            <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                   style="background-color: #f4f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #374151; line-height: 1.6; padding: 24px 0;">
+                <tr>
+                    <td align="center">
+                        <table border="0" cellpadding="0" cellspacing="0"
+                               width="600"
+                               style="max-width: 600px; width: 100%; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+
+                            <!-- Header Banner -->
+                            <tr>
+                                <td style="background-color: #FFFFFF; padding: 20px 24px; text-align: left;">
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%">
+                                        <tr>
+                                            <td valign="middle">
+                                                <h2 style="margin: 0; font-size: 19px; font-weight: 600; color: #000000; letter-spacing: -0.2px;">
+                                                    Helpdesk Support
+                                                </h2>
+                                                <span style="font-size: 15px; color: #6b7280; opacity: 0.9;">
+                                                    <t t-out="object.team_id.name or 'Support Team'"/>
+                                                </span>
+                                            </td>
+                                            <td valign="middle" align="right">
+                                                <span style="background-color: rgba(255,255,255,0.22); color: #858D00; font-size: 20px; font-weight: 600; padding: 4px 10px; border-radius: 12px;">
+                                                    #
+                                                    <t t-out="object.ticket"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+
+                            <!-- Body -->
+                            <tr>
+                                <td style="padding: 5px 28px 24px 28px;">
+                                    <p style="margin: 0 0 10px 0; font-size: 15px;">
+                                        Dear
+                                        <strong
+                                                t-out="object.customer_id.name or 'Customer'"/>
+                                        ,
+                                    </p>
+                                    <p style="margin: 0 0 18px 0; color: #4b5563;">
+                                        Our support team has started working on
+                                        your ticket. Here is the latest progress
+                                        on your issue:
+                                    </p>
+
+                                    <!-- Issue Card -->
+                                    <div style="background-color: #f9fafb; border-left: 4px solid #9EA700; border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 20px 0;">
+                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #858D00; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                            Ticket Subject
+                                        </div>
+                                        <div style="font-size: 15px; font-weight: 600; color: #111827;">
+                                            <t t-out="object.name"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Details Table -->
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%"
+                                           style="border-collapse: collapse; margin: 22px 0 24px 0; background-color: #ffffff; border: 1px solid #f3f4f6; border-radius: 6px;">
+                                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                                            <td style="padding: 10px 14px; color: #6b7280; font-size: 13px; width: 35%;">
+                                                Ticket ID
+                                            </td>
+                                            <td style="padding: 10px 14px; font-size: 13px; font-weight: 600; color: #111827;">
+                                                #
+                                                <t t-out="object.ticket"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                                            <td style="padding: 10px 14px; color: #6b7280; font-size: 13px;">
+                                                Status
+                                            </td>
+                                            <td style="padding: 10px 14px; font-size: 13px;">
+                                                <span style="display: inline-block; background-color: #dbeafe; color: #1e40af; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 10px;">
+                                                    <t t-out="object.stage_id.name or 'In Progress'"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <t t-if="object.user_id">
+                                            <tr>
+                                                <td style="padding: 10px 14px; color: #6b7280; font-size: 13px;">
+                                                    Assigned To
+                                                </td>
+                                                <td style="padding: 10px 14px; font-size: 13px; color: #111827;">
+                                                    <t t-out="object.user_id.name"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </table>
+
+                                    <!-- CTA Button -->
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%"
+                                           style="margin: 24px 0 18px 0;">
+                                        <tr>
+                                            <td align="center">
+                                                <a t-attf-href="{{ object.get_base_url() }}/my/ticket/{{ object.id }}"
+                                                   style="background-color: #9EA700; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px 24px; border-radius: 6px; display: inline-block;">
+                                                    Check Ticket Progress
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p style="margin: 18px 0 0 0; font-size: 13px; color: #6b7280; text-align: center;">
+                                        We will keep you informed as we make
+                                        progress. You can reply directly to this
+                                        email at any time.
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td style="background-color: #f9fafb; border-top: 1px solid #e5e7eb; padding: 20px 28px; font-size: 13px; color: #6b7280;">
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%">
+                                        <tr>
+                                            <td valign="middle" align="left">
+                                                <p style="margin: 0; line-height: 1.5; color: #6b7280; font-size: 13px;">
+                                                    Best regards,
+                                                    <br/>
+                                                    <strong style="color: #111827;">
+                                                        <t t-out="user.name or object.team_id.name or 'Support Team'"/>
+                                                    </strong>
+                                                    <br/>
+                                                    <t t-out="object.company_id.name"/>
+                                                </p>
+                                            </td>
+                                            <td valign="middle" align="right"
+                                                style="padding-left: 15px;">
+                                                <!-- Reliable Company Logo Loading -->
+                                                <t t-if="object.company_id.logo">
+                                                    <img t-attf-src="{{ object.get_base_url() }}/logo.png?company={{ object.company_id.id }}"
+                                                         t-att-alt="object.company_id.name"
+                                                         width="70"
+                                                         height="32"
+                                                         style="width: 70px; max-width: 70px; height: auto; display: block; border: 0; outline: none;"/>
+                                                </t>
+                                                <t t-else="">
+
+
+                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_helpdesk/static/src/img/cyllo.png"
+                                                         alt="Cyllo Logo"
+                                                         width="70"
+                                                         height="32"
+                                                         style="width: 70px; max-width: 70px; height: auto; display: block; border: 0; outline: none;"/>
+
+
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </field>
+
         <field name="auto_delete" eval="False"/>
     </record>
-    <record id="help_desk_mail_template_auto_close_reminder" model="mail.template">
+    <record id="help_desk_mail_template_auto_close_reminder"
+            model="mail.template">
+
         <field name="name">Help Desk: Auto-close Reminder</field>
-        <field name="model_id" ref="cyllo_helpdesk.model_helpdesk_ticket"/>
+        <field name="model_id"
+               ref="cyllo_helpdesk.model_helpdesk_ticket"/>
+
         <field name="subject">Reminder: Your ticket will be closed soon</field>
-        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if
-            object.user_id else object.company_id.partner_id.email_formatted) }}
-        </field>
-        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or
-            object.company_id.partner_id.email_formatted }}
-        </field>
-        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id
-            else '') }}
-        </field>
-        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email'))
-            }}
-        </field>
+
+        <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if object.user_id else object.company_id.partner_id.email_formatted) }}</field>
+        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and object.team_id.alias_id else object.company_id.partner_id.email_formatted }}</field>
+        <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id else '') }}</field>
+        <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email')) }}</field>
+        <field name="email_layout_xmlid">cyllo_helpdesk.cyllo_helpdesk_mail_notification_layout</field>
+
         <field name="body_html" type="html">
-            <div>
-                <br/>
-                <h4>Dear<t t-out="object.customer_id.name"/>,
-                </h4>
-                <p>We are following up on your ticket
-                    <strong>
-                        <t t-out="object.name"/>
-                    </strong>
-                    (No.<t t-out="object.ticket"/>).
-                </p>
-                <p>Since we haven't heard from you in a while, we wanted to let you know that this
-                    ticket will be automatically closed soon if there is no further activity.
-                </p>
-                <p>If the issue is still ongoing, please reply to this email or update the ticket on
-                    the portal.
-                </p>
-                <br/>
-                <p>Best regards,
-                    <br/>
-                    <t t-out="object.team_id.name"/>
-                    Support Team
-                </p>
-            </div>
+            <table border="0" cellpadding="0" cellspacing="0"
+                   width="100%"
+                   style="background-color: #f4f5f7;
+                          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                          font-size: 14px;
+                          color: #374151;
+                          line-height: 1.6;">
+
+                <tr>
+                    <td align="center" style="padding: 24px 12px;">
+
+                        <!-- Main Email Card -->
+                        <table border="0" cellpadding="0" cellspacing="0"
+                               width="600"
+                               style="max-width: 600px;
+                                      width: 100%;
+                                      background-color: #ffffff;
+                                      border: 1px solid #e5e7eb;
+                                      border-radius: 8px;">
+
+                            <!-- Header -->
+                            <tr>
+                                <td style="background-color: #ffffff;
+                                           padding: 20px 24px;
+                                           text-align: left;">
+
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%">
+                                        <tr>
+                                            <td valign="middle">
+                                                <h2 style="margin: 0;
+                                                           font-size: 19px;
+                                                           font-weight: 600;
+                                                           color: #000000;
+                                                           letter-spacing: -0.2px;">
+                                                    Helpdesk Support
+                                                </h2>
+
+                                                <span style="font-size: 15px;
+                                                             color: #6b7280;">
+                                                    Inactivity Reminder
+                                                </span>
+                                            </td>
+
+                                            <td valign="middle" align="right">
+                                                <span style="background-color: #ffffff;
+                                                             color: #858D00;
+                                                             font-size: 20px;
+                                                             font-weight: 600;
+                                                             padding: 4px 10px;
+                                                             border-radius: 12px;">
+                                                    #
+                                                    <t t-out="object.ticket"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <!-- Content Area -->
+                            <tr>
+                                <td style="padding: 5px 28px 24px 28px;">
+
+                                    <p style="margin: 0 0 10px 0;
+                                              font-size: 15px;">
+                                        Dear
+                                        <strong t-out="object.customer_id.name or 'Customer'"/>
+                                        ,
+                                    </p>
+
+                                    <p style="margin: 0 0 18px 0;
+                                              color: #4b5563;">
+                                        We are following up regarding your
+                                        ticket
+                                        <strong>
+                                            <t t-out="object.name"/>
+                                        </strong>
+                                        (No.<t t-out="object.ticket"/>).
+                                    </p>
+
+                                    <!-- Reminder Box -->
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%"
+                                           style="margin: 20px 0;">
+                                        <tr>
+                                            <td style="background-color: #fffbeb;
+                                                       border-left: 4px solid #f59e0b;
+                                                       border-radius: 0 6px 6px 0;
+                                                       padding: 14px 18px;
+                                                       font-size: 13px;
+                                                       color: #92400e;
+                                                       line-height: 1.5;">
+
+                                                <strong>Ticket closing soon:
+                                                </strong>
+                                                Since there has been no activity
+                                                on this ticket for a while, it
+                                                will be automatically closed
+                                                soon
+                                                if no further response is
+                                                received.
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p style="margin: 0 0 20px 0;
+                                              color: #4b5563;">
+                                        If your issue is still ongoing or you
+                                        require more assistance, simply reply
+                                        directly to this email or update your
+                                        ticket via the customer portal.
+                                    </p>
+
+                                    <!-- CTA Button -->
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%"
+                                           style="margin: 24px 0 18px 0;">
+                                        <tr>
+                                            <td align="center">
+                                                <a t-attf-href="{{ object.get_base_url() }}/my/ticket/{{ object.id }}"
+                                                   target="_blank"
+                                                   style="background-color: #9EA700;
+                                                          color: #ffffff;
+                                                          text-decoration: none;
+                                                          font-size: 14px;
+                                                          font-weight: 600;
+                                                          padding: 10px 24px;
+                                                          border-radius: 6px;
+                                                          display: inline-block;">
+                                                    Keep Ticket Open / Update
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td style="background-color: #f9fafb;
+                                           border-top: 1px solid #e5e7eb;
+                                           padding: 20px 28px;
+                                           font-size: 13px;
+                                           color: #6b7280;">
+
+                                    <table border="0" cellpadding="0"
+                                           cellspacing="0" width="100%">
+                                        <tr>
+                                            <td valign="middle" align="left">
+                                                <p style="margin: 0;
+                                                          line-height: 1.5;
+                                                          color: #6b7280;
+                                                          font-size: 13px;">
+                                                    Best regards,
+                                                    <br/>
+
+                                                    <strong style="color: #111827;">
+                                                        <t t-out="user.name or object.team_id.name or 'Support Team'"/>
+                                                    </strong>
+
+                                                    <br/>
+
+                                                    <t t-out="object.company_id.name"/>
+                                                </p>
+                                            </td>
+
+                                            <td valign="middle" align="right"
+                                                style="padding-left: 15px;">
+
+                                                <!-- Company Logo -->
+                                                <t t-if="object.company_id.logo">
+                                                    <img t-attf-src="{{ object.get_base_url() }}/logo.png?company={{ object.company_id.id }}"
+                                                         t-att-alt="object.company_id.name"
+                                                         width="70"
+                                                         style="width: 70px;
+                                                                max-width: 70px;
+                                                                height: auto;
+                                                                display: block;
+                                                                border: 0;
+                                                                outline: none;"/>
+                                                </t>
+
+                                                <!-- Fallback Cyllo Logo -->
+                                                <t t-else="">
+                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_helpdesk/static/src/img/cyllo.png"
+                                                         alt="Cyllo Logo"
+                                                         width="70"
+                                                         style="width: 70px;
+                                                                max-width: 70px;
+                                                                height: auto;
+                                                                display: block;
+                                                                border: 0;
+                                                                outline: none;"/>
+                                                </t>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+                        </table>
+                        <!-- End Main Email Card -->
+
+                    </td>
+                </tr>
+            </table>
         </field>
+
         <field name="auto_delete" eval="False"/>
+
     </record>
 </odoo>

@@ -451,7 +451,7 @@ class FieldServiceRequest(models.Model):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_id.id,
-            'currency_id': self.company_id.currncy_id.id,
+            'currency_id': self.company_id.currency_id.id,
             'invoice_date': date.today(),
             'invoice_origin': self.name,
         })

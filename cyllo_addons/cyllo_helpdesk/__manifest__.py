@@ -37,6 +37,7 @@
         'data/helpdesk_stage_data.xml',
         'data/cyllo_helpdesk_mail_template.xml',
         'data/cyllo_helpdesk_rating_template.xml',
+        'data/helpdesk_stage_email_template_data.xml',
         'reports/helpdesk_ticket_report.xml',
         'reports/helpdesk_ticket_report_templates.xml',
         'reports/helpdesk_ticket_pdf_report.xml',

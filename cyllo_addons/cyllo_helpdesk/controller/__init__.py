@@ -21,3 +21,4 @@
 #############################################################################
 from . import cyllo_helpdesk
 from . import helpdesk_portal
+from . import helpdesk_rating

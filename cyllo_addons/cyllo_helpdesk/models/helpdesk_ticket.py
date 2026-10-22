@@ -551,6 +551,26 @@ class HelpDeskTicket(models.Model):
     def _expand_states(self, states, domain, order):
         return self.env['helpdesk.stage'].search([])
 
+    def _rating_get_partner(self):
+        """Use the ticket customer as the person giving the rating."""
+        self.ensure_one()
+        return self.customer_id
+
+    def _rating_get_access_token(self, partner=None):
+        """Return one stable rating token for the lifetime of the ticket.
+        """
+        self.ensure_one()
+        partner = partner or self._rating_get_partner()
+
+        existing_rating = self.env['rating.rating'].sudo().search([
+            ('res_model', '=', 'helpdesk.ticket'),
+            ('res_id', '=', self.id),
+        ], order='id desc', limit=1)
+        if existing_rating:
+            return existing_rating.access_token
+
+        return super()._rating_get_access_token(partner=partner)
+
     def write(self, vals):
         if 'stage_id' in vals:
             new_stage_id = vals['stage_id']
@@ -593,16 +613,6 @@ class HelpDeskTicket(models.Model):
                     'start_date': fields.Datetime.now()
                 })
         result = super(HelpDeskTicket, self).write(vals)
-        in_progress_stage = self.env.ref(
-            'cyllo_helpdesk.in_progress_ticket').id
-        solved_stage = self.env.ref('cyllo_helpdesk.solved_ticket').id
-        in_progress_mail_template = self.env.ref(
-            'cyllo_helpdesk.help_desk_in_progress_mail_template',
-            raise_if_not_found=False,
-        )
-        solved_mail_template = self.env.ref(
-            'cyllo_helpdesk.help_desk_rating_template',
-            raise_if_not_found=False)
         if 'stage_id' in vals:
             for ticket in tickets_with_stage_change:
                 # Filter children to only those that actually need a stage update
@@ -611,21 +621,13 @@ class HelpDeskTicket(models.Model):
                     lambda t: t.stage_id.id != vals['stage_id'])
                 if children_to_update:
                     children_to_update.write({'stage_id': vals['stage_id']})
-                # Check stages for email notifications
+                # Send the email configured on the destination stage.
                 if ticket.stage_id.template_id:
-                    ticket.with_context(mail_notify_force_send=True, force_send=True).message_post_with_source(
+                    ticket.with_context(
+                        mail_notify_force_send=True,
+                        force_send=True,
+                    ).message_post_with_source(
                         ticket.stage_id.template_id,
-                        subtype_xmlid='mail.mt_comment',
-                    )
-                elif (ticket.stage_id.id == in_progress_stage
-                      and in_progress_mail_template):
-                    ticket.with_context(mail_notify_force_send=True, force_send=True).message_post_with_source(
-                        in_progress_mail_template,
-                        subtype_xmlid='mail.mt_comment',
-                    )
-                elif ticket.stage_id.id == solved_stage and solved_mail_template:
-                    ticket.with_context(mail_notify_force_send=True, force_send=True).message_post_with_source(
-                        solved_mail_template,
                         subtype_xmlid='mail.mt_comment',
                     )
         # SLA Status Sync and Reach Logic
