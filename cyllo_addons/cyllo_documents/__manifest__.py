@@ -32,7 +32,7 @@
     'category': 'Document Management',
     'depends': ['mail', 'hr', 'cyllo_base', 'cyllo_portal', 'website', 'cyllo_spreadsheet'],
     'external_dependencies': {'python': ['linkpreview']},
-    'icon': '/cyllo_documents/static/description/documents.svg',
+    'icon': '/cyllo_documents/static/description/cyllo_documents.svg',
     'data': [
         'data/ir_cron_data.xml',
         'data/ir_sequence_data.xml',

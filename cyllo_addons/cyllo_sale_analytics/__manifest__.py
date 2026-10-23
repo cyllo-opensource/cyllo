@@ -39,7 +39,7 @@
     "external_dependencies": {
         'python': ['pandas', 'scikit-learn', 'prophet', 'statsmodels', 'shap', 'xgboost', 'lightgbm']
     },
-    'icon': '/cyllo_sale_analytics/static/description/sales-analytics.svg',
+    'icon': '/cyllo_sale_analytics/static/description/cyllo_sale_analytics.svg',
     'data': [
         'security/ir.model.access.csv',
         'data/algo_config_data.xml',

@@ -30,7 +30,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['hr_timesheet', 'sale_management'],
-    'icon':'/cyllo_timesheet_grid/static/description/grid.svg',
+    'icon': '/cyllo_timesheet_grid/static/description/cyllo_timesheet_grid.svg',
     'data': [
         'views/cyllo_timesheet_grid_views.xml',
         'views/res_config_settings_views.xml',

@@ -30,7 +30,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['mail', 'crm', 'cyllo_social_media_marketing'],
-    'icon': '/cyllo_youtube/static/description/youtube.svg',
+    'icon': '/cyllo_youtube/static/description/cyllo_youtube.svg',
     'data': [
         'security/youtube_account_security.xml',
         'security/ir.model.access.csv',

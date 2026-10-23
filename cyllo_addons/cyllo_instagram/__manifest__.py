@@ -31,7 +31,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['mail', 'crm', 'cyllo_social_media_marketing'],
-    'icon': '/cyllo_instagram/static/description/instagram.svg',
+    'icon': '/cyllo_instagram/static/description/cyllo_instagram.svg',
     'data': [
         'security/ir.model.access.csv',
         'security/social_insta_account_security.xml',

@@ -36,7 +36,7 @@ Cyllo Front Desk manages front desk operations:
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['hr', 'mail'],
-    'icon': '/cyllo_front_desk/static/description/front-desk.svg',
+    'icon': '/cyllo_front_desk/static/description/cyllo_front_desk.svg',
     'data': [
         'security/frontdesk_security.xml',
         'security/ir.model.access.csv',

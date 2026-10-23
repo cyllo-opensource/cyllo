@@ -58,7 +58,7 @@
             'cyllo_barcode/static/src/tests/*'
         ]
     },
-    'icon': '/cyllo_barcode/static/description/barcode.svg',
+    'icon': '/cyllo_barcode/static/description/cyllo_barcode.svg',
     'data': [
         'reports/cyllo_barcode_report.xml',
         'reports/cyllo_barcode_templates.xml',

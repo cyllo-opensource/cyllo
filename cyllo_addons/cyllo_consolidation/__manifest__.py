@@ -32,7 +32,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['mail', 'cyllo_base', 'cyllo_accounting'],
-    'icon':'/cyllo_consolidation/static/description/consolidaton.svg',
+    'icon': '/cyllo_consolidation/static/description/cyllo_consolidation.svg',
     'data': [
         'data/ir_actions_client_data.xml',
         'security/ir.model.access.csv',

@@ -32,7 +32,7 @@
     'website': "https://www.cyllo.com",
     'category': 'Extra Tools',
     'depends': ['mail'],
-    'icon': '/cyllo_database_backup/static/description/database-backup.svg',
+    'icon': '/cyllo_database_backup/static/description/cyllo_database_backup.svg',
     'data': [
         'security/ir.model.access.csv',
         'data/backup_destination_data.xml',

@@ -35,7 +35,7 @@
         'security/ir.model.access.csv',
         'views/spreadsheet_views.xml',
     ],
-    'icon': '/cyllo_spreadsheet/static/description/spreadsheet.svg',
+    'icon': '/cyllo_spreadsheet/static/description/cyllo_spreadsheet.svg',
     'assets': {
         'web.assets_backend': [
             'cyllo_spreadsheet/static/src/style.css',

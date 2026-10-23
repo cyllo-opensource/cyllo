@@ -33,7 +33,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['sale_management', 'hr_skills', 'cyllo_base', 'cyllo_portal'],
-    'icon': '/cyllo_field_service/static/description/field-services.svg',
+    'icon': '/cyllo_field_service/static/description/cyllo_field_services.svg',
     'data': [
         'security/field_service_request_security.xml',
         'security/ir.model.access.csv',

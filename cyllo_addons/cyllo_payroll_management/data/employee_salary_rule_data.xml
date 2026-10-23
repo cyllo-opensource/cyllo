@@ -34,7 +34,7 @@ else:
         <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_net"/>
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
-        <field name="amount_python_compute">result = categories.BASIC + categories.ALW - categories.DED + categories.GRA + categories.REIMB</field>
+        <field name="amount_python_compute">result = categories.BASIC + categories.ALW + categories.DED + categories.GRA + categories.REIMB</field>
     </record>
     <!-- House Rent Allowance salary rule -->
     <record id="employee_salary_rule_house_rent_allowance" model="employee.salary.rule">
@@ -158,8 +158,8 @@ else:
         <field name="code">ADVSAL_DED</field>
         <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_deduction"/>
         <field name="condition_select">python</field>
-        <field name="condition_python">result = inputs.DED and inputs.DED &lt; 0</field>
+        <field name="condition_python">result = inputs.DED and inputs.DED > 0</field>
         <field name="amount_select">code</field>
-        <field name="amount_python_compute">result = inputs.DED</field>
+        <field name="amount_python_compute">result = -inputs.DED</field>
     </record>
 </odoo>

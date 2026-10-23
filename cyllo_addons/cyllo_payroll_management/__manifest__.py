@@ -44,7 +44,7 @@
         'cyllo_commission',
         'cyllo_accounting',
     ],
-    'icon': '/cyllo_payroll_management/static/description/payroll.svg',
+    'icon': '/cyllo_payroll_management/static/description/cyllo_payroll_management.svg',
     'data': [
         'security/cyllo_payroll_management_groups.xml',
         'security/cyllo_payroll_management_rules.xml',

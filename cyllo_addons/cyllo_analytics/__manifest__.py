@@ -31,7 +31,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['cyllo_base', 'web', 'base_automation', 'mail'],
-    'icon': '/cyllo_analytics/static/description/analytics.svg',
+    'icon': '/cyllo_analytics/static/description/cyllo_analytics.svg',
     'data': [
         'security/dashboard_config_security.xml',
         'security/ir.model.access.csv',

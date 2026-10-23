@@ -32,7 +32,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['cyllo_repair', 'repair'],
-    'icon': '/cyllo_shopfloor_repair/static/description/repair-floor.svg',
+    'icon': '/cyllo_shopfloor_repair/static/description/cyllo_shopfloor_repair.svg',
     'data': [
         'security/shopfloor_repair_security.xml',
         'security/ir.model.access.csv',

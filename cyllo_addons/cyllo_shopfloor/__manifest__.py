@@ -33,7 +33,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['mrp', 'bus', 'web', 'hr'],
-    'icon': '/cyllo_shopfloor/static/description/shop-floor.svg',
+    'icon': '/cyllo_shopfloor/static/description/cyllo_shopfloor.svg',
     'data': [
         'security/cyllo_shopfloor_security.xml',
         'security/ir.model.access.csv',

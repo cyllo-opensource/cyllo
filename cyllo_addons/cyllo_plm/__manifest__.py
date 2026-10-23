@@ -43,7 +43,7 @@
         'product',
         'cyllo_documents',
     ],
-    'icon': '/cyllo_plm/static/description/plm_icon.svg',
+    'icon': '/cyllo_plm/static/description/cyllo_plm.svg',
     'data': [
         'security/cyllo_plm_security.xml',
         'security/ir.model.access.csv',

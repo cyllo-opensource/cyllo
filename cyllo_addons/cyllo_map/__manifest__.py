@@ -30,7 +30,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['hr', 'website', 'contacts', 'base_geolocalize'],
-    'icon': '/cyllo_map/static/description/maps.svg',
+    'icon': '/cyllo_map/static/description/cyllo_map.svg',
     'data': [
         'views/res_partner_views.xml',
         'views/openstreet_map_snippet.xml',

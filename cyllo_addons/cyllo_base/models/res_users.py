@@ -43,6 +43,32 @@ class ResUsers(models.Model):
             return super(ResUsers, self.sudo()).action_reset_password()
         return super().action_reset_password()
 
+    @api.model
+    def _set_cyllo_mail_templates_noupdate_false(self):
+        """Set noupdate to False for Cyllo auth_signup and portal mail templates to allow XML updates"""
+        imds = self.env['ir.model.data'].search([
+            ('name', 'in', [
+                'set_password_email',
+                'mail_template_user_signup_account_created',
+                'reset_password_email',
+                'mail_template_data_portal_welcome',
+            ]),
+        ])
+        imds.write({'noupdate': False})
+
+    @api.model
+    def _set_cyllo_mail_templates_noupdate_true(self):
+        """Restore noupdate to True for Cyllo auth_signup and portal mail templates"""
+        imds = self.env['ir.model.data'].search([
+            ('name', 'in', [
+                'set_password_email',
+                'mail_template_user_signup_account_created',
+                'reset_password_email',
+                'mail_template_data_portal_welcome',
+            ]),
+        ])
+        imds.write({'noupdate': True})
+
 class CheckIdentity(models.TransientModel):
     _inherit = 'res.users.identitycheck'
 

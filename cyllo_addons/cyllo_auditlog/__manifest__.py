@@ -40,7 +40,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'icon': '/cyllo_auditlog/static/description/audit-log-system.svg',
+    'icon': '/cyllo_auditlog/static/description/cyllo_auditlog.svg',
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

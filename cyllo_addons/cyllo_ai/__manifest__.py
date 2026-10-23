@@ -33,7 +33,7 @@
     'website': "https://www.cyllo.com",
     "category": "Extra Tools",
     "depends": ['web', 'sale', 'cyllo_web'],
-    'icon': '/cyllo_ai/static/description/ai.svg',
+    'icon': '/cyllo_ai/static/description/cyllo_ai.svg',
     'post_init_hook': 'post_init_hook',
     "data": [
             'security/cyllo_ai_security.xml',

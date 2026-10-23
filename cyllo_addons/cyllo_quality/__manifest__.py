@@ -30,7 +30,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['hr', 'stock', 'cyllo_web', 'sales_team'],
-    'icon': '/cyllo_quality/static/description/quality-control-white.svg',
+    'icon': '/cyllo_quality/static/description/cyllo_quality.svg',
     'data': [
         'data/ir_sequenece_data.xml',
         'data/email_template_quality_control_point.xml',

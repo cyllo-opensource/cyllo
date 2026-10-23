@@ -31,7 +31,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['contacts', 'web', 'cyllo_web'],
-    'icon': '/cyllo_twilio_voice_call/static/description/twillio.svg',
+    'icon': '/cyllo_twilio_voice_call/static/description/cyllo_twilio_voice_call.svg',
     'data': [
         'security/cyllo_twilio_voice_call_security.xml',
         'security/ir.model.access.csv',

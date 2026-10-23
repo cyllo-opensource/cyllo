@@ -36,7 +36,7 @@
     'external_dependencies': {
         'python': ['geocoder']
     },
-    'icon': '/cyllo_dashboard/static/description/user-dashboard.svg',
+    'icon': '/cyllo_dashboard/static/description/cyllo_dashboard.svg',
     'data': [
         'security/cyllo_dashboard_security.xml',
         'security/ir.model.access.csv',

@@ -789,7 +789,7 @@ class EmployeePayslip(models.Model):
                             input_line_values.append({
                                 'type_id': deduction_input_type.id,
                                 'code': deduction_input_type.code,
-                                'amount': -deduction,
+                                'amount': deduction,
                                 'payslip_id': self.id,
                                 'is_attachment': False,
                                 'advance_salary_id': advance.id,
@@ -1353,8 +1353,7 @@ class EmployeePayslip(models.Model):
                         localdict) and rule.id not in blacklist:
                     amount, qty, rate = rule._compute_rule(localdict)
                     # Enforce that rules in the Deduction category are strictly negative.
-                    if (rule.category_id.code or '').upper() == 'DED' and amount > 0:
-                        amount = -amount
+
                     previous_amount = rule.code in localdict and localdict[
                         rule.code] or 0.0
                     tot_rule = amount * qty * rate / 100.0

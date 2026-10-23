@@ -29,7 +29,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['mail','cyllo_ui_component'],
-    'icon': '/cyllo_approval/static/description/Approval.svg',
+    'icon': '/cyllo_approval/static/description/cyllo_approval.svg',
     'data': [
         'security/cyllo_approval_security.xml',
         'security/ir.model.access.csv',

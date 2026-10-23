@@ -34,7 +34,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['sale_management', 'delivery', 'stock', 'website', 'portal', 'website_sale'],
-    'icon': '/cyllo_dhl_connector/static/description/dhl.svg',
+    'icon': '/cyllo_dhl_connector/static/description/cyllo_dhl_connector.svg',
     'data': [
         'data/product_product_data.xml',
         'views/delivery_carrier_views.xml',

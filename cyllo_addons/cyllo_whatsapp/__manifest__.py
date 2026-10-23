@@ -37,7 +37,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['cyllo_base', 'sale', 'crm'],
-    'icon': '/cyllo_whatsapp/static/description/whatsapp.svg',
+    'icon': '/cyllo_whatsapp/static/description/cyllo_whatsapp.svg',
     'data': [
         'security/ir.model.access.csv',
         'security/cyllo_whatsapp_security.xml',

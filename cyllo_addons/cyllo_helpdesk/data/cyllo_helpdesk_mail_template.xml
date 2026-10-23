@@ -11,7 +11,7 @@
         <field name="model_id" ref="cyllo_helpdesk.model_helpdesk_ticket"/>
         <field name="subject">[Ticket #{{ object.ticket }}] {{ object.name }}: We received your ticket</field>
         <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if object.user_id else object.company_id.partner_id.email_formatted) }}</field>
-        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and object.team_id.alias_id else object.company_id.partner_id.email_formatted }}</field>
+        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or object.company_id.partner_id.email_formatted }}</field>
         <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id else '') }}</field>
         <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email')) }}</field>
         <!-- Use clean notification layout to remove unwanted default intro and portal button -->
@@ -176,7 +176,7 @@
                                                 <t t-else="">
 
 
-                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_helpdesk/static/src/img/cyllo.png"
+                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_web/static/src/img/cyllo.svg"
                                                          alt="Cyllo Logo"
                                                          width="70"
                                                          height="32"
@@ -202,7 +202,7 @@
         <field name="model_id" ref="cyllo_helpdesk.model_helpdesk_ticket"/>
         <field name="subject">[Ticket #{{ object.ticket }}] Is in Progress State</field>
         <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if object.user_id else object.company_id.partner_id.email_formatted) }}</field>
-        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and object.team_id.alias_id else object.company_id.partner_id.email_formatted }}</field>
+        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or object.company_id.partner_id.email_formatted }}</field>
         <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id else '') }}</field>
         <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email')) }}</field>
         <field name="email_layout_xmlid">cyllo_helpdesk.cyllo_helpdesk_mail_notification_layout</field>
@@ -353,7 +353,7 @@
                                                 <t t-else="">
 
 
-                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_helpdesk/static/src/img/cyllo.png"
+                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_web/static/src/img/cyllo.svg"
                                                          alt="Cyllo Logo"
                                                          width="70"
                                                          height="32"
@@ -384,7 +384,7 @@
         <field name="subject">Reminder: Your ticket will be closed soon</field>
 
         <field name="email_from">{{ user.email_formatted or (object.user_id.email_formatted if object.user_id else object.company_id.partner_id.email_formatted) }}</field>
-        <field name="reply_to">{{ object.team_id.alias_id.alias_full_name if object.team_id and object.team_id.alias_id else object.company_id.partner_id.email_formatted }}</field>
+        <field name="reply_to">{{ object._notify_get_reply_to().get(object.id) or object.company_id.partner_id.email_formatted }}</field>
         <field name="email_to">{{ object.email or (object.customer_id.email if object.customer_id else '') }}</field>
         <field name="email_cc">{{ ','.join(object.email_cc_ids.filtered('email').mapped('email')) }}</field>
         <field name="email_layout_xmlid">cyllo_helpdesk.cyllo_helpdesk_mail_notification_layout</field>
@@ -576,7 +576,7 @@
 
                                                 <!-- Fallback Cyllo Logo -->
                                                 <t t-else="">
-                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_helpdesk/static/src/img/cyllo.png"
+                                                    <img t-attf-src="{{ object.get_base_url() }}/cyllo_web/static/src/img/cyllo.svg"
                                                          alt="Cyllo Logo"
                                                          width="70"
                                                          style="width: 70px;

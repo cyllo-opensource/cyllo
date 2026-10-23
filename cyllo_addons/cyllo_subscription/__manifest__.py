@@ -30,7 +30,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['sale_management', 'portal'],
-    'icon':'/cyllo_subscription/static/description/subscription.svg',
+    'icon': '/cyllo_subscription/static/description/cyllo_subscription.svg',
     'data': [
         'security/cyllo_subscription_security.xml',
         'security/ir.model.access.csv',

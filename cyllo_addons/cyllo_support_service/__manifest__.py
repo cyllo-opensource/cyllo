@@ -32,7 +32,7 @@
     'website': "https://www.cyllo.com",
     'depends': ['sale_management', 'hr_timesheet', 'cyllo_portal',
                 'cyllo_web', 'repair', 'cyllo_facebook', 'sale_timesheet'],
-    'icon': '/cyllo_support_service/static/description/support-service.svg',
+    'icon': '/cyllo_support_service/static/description/cyllo_support_service.svg',
     'data': [
         'security/support_service_ticket_security.xml',
         'security/ir.model.access.csv',

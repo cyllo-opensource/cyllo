@@ -66,6 +66,7 @@ publicWidget.registry.LoginBehavior = publicWidget.Widget.extend({
     selector: '.cy-instance-login',
     events: {
         'click #continue_button': '_onContinueButtonClick',
+        'click #toggle_password_login': '_onTogglePassword',
     },
 
     start: function () {
@@ -95,6 +96,19 @@ publicWidget.registry.LoginBehavior = publicWidget.Widget.extend({
                 self._onContinueButtonClick(event);
             }
         });
+    },
+
+    _onTogglePassword: function (ev) {
+        ev.preventDefault();
+        const $passwordInput = this.$('#password');
+        const $icon = this.$('.toggle_password_icon');
+        if ($passwordInput.attr('type') === 'password') {
+            $passwordInput.attr('type', 'text');
+            $icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            $passwordInput.attr('type', 'password');
+            $icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
     },
 
     _onContinueButtonClick: function (ev) {
@@ -131,6 +145,8 @@ publicWidget.registry.Signup = publicWidget.Widget.extend({
     selector: '.cy-instance-signup',
     events: {
         'click #signup_button': '_onButtonClick',
+        'click .cy-password-toggle': '_onTogglePassword',
+
     },
 
     start: function () {
@@ -143,6 +159,20 @@ publicWidget.registry.Signup = publicWidget.Widget.extend({
             if (msg) {
                 showToast(msg, 'error');
             }
+        }
+    },
+
+     _onTogglePassword: function (ev) {
+        ev.preventDefault();
+        const $btn = $(ev.currentTarget);
+        const $input = $btn.closest('.floating-label-group').find('input');
+        const $icon = $btn.find('i');
+        if ($input.attr('type') === 'password') {
+            $input.attr('type', 'text');
+            $icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            $input.attr('type', 'password');
+            $icon.removeClass('fa-eye-slash').addClass('fa-eye');
         }
     },
 

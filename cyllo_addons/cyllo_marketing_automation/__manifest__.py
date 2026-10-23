@@ -33,7 +33,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     "depends": ['mail', 'mass_mailing'],
-    'icon': '/cyllo_marketing_automation/static/description/marketing-automation.svg',
+    'icon': '/cyllo_marketing_automation/static/description/cyllo_marketing_automation.svg',
     'data': [
         'security/cyllo_marketing_automation_security.xml',
         'security/ir.model.access.csv',

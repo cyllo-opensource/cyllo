@@ -30,7 +30,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['base', 'mail', 'rating', 'portal', 'resource'],
-    'icon': '/cyllo_helpdesk/static/description/Help desk.svg',
+    'icon': '/cyllo_helpdesk/static/description/cyllo_helpdesk.svg',
     'data': [
         'security/cyllo_helpdesk_security_group.xml',
         'security/ir.model.access.csv',

@@ -35,7 +35,7 @@
         'hr_maintenance',
         'cyllo_accounting',
     ],
-    'icon': '/cyllo_asset_management/static/description/assets.svg',
+    'icon': '/cyllo_asset_management/static/description/cyllo_asset_management.svg',
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',

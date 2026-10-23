@@ -29,7 +29,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     "depends": ["cyllo_base", "mail", "portal", "website", "cyllo_portal", 'payment'],
-    'icon': '/cyllo_sign/static/description/sign.svg',
+    'icon': '/cyllo_sign/static/description/cyllo_sign.svg',
     "data": [
         'data/sign_data.xml',
         'data/email_template_data.xml',

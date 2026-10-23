@@ -33,7 +33,7 @@
     'depends': [
         'sale_management', 'purchase', 'mail', 'cyllo_ocr_digitization'
     ],
-    'icon': '/cyllo_email_digitization/static/description/email-digitalization.svg',
+    'icon': '/cyllo_email_digitization/static/description/cyllo_email_digitization.svg',
     'data': [
         'security/email_digitization_security.xml',
         'security/ir.model.access.csv',

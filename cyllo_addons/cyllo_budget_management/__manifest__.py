@@ -31,7 +31,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['cyllo_base', 'cyllo_accounting'],
-    'icon': '/cyllo_budget_management/static/description/budget-management.svg',
+    'icon': '/cyllo_budget_management/static/description/cyllo_budget_management.svg',
     'data': [
         'security/ir_rule.xml',
         'security/ir.model.access.csv',

@@ -37,7 +37,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'icon':'/cyllo_pos_kitchen_screen/static/description/pos-kitchen-screen.svg',
+    'icon': '/cyllo_pos_kitchen_screen/static/description/cyllo_pos_kitchen_screen.svg',
     'depends': ['pos_restaurant'],
     'data': [
         'security/pos_kitchen_screen_groups.xml',

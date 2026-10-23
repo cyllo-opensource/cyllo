@@ -29,7 +29,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['base', 'cyllo_base', 'web'],
-    'icon': '/cyllo_workflow_automation/static/description/workflow-icon.svg',
+    'icon': '/cyllo_workflow_automation/static/description/cyllo_workflow_automation.svg',
     'data': [
         'security/workflow_group.xml',
         'security/ir.model.access.csv',

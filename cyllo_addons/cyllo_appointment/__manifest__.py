@@ -41,7 +41,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'icon': '/cyllo_appointment/static/description/cyllo_appointment_tick.svg',
+    'icon': '/cyllo_appointment/static/description/cyllo_appointment.svg',
     'depends': [
         'portal',
         'mail',

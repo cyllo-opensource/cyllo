@@ -32,7 +32,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     "depends": ['mail', 'web', 'cyllo_ui_component'],
-    'icon': '/cyllo_access_management/static/description/Access-management.svg',
+    'icon': '/cyllo_access_management/static/description/cyllo_access_management.svg',
     'data' : [
             'security/cyllo_access_management_security.xml',
             'security/ir.model.access.csv',
