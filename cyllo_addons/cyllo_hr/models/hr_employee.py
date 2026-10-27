@@ -233,6 +233,7 @@ class HrEmployee(models.Model):
             for leave in leaves:
                 timeoff_records.append({
                     'id': leave['id'],
+                    'employee_id': leave['employee_id'][0],
                     'employee_name': leave['employee_id'][1],
                     'leave_type': leave['holiday_status_id'][1],
                     'request_type': 'leave',
@@ -251,6 +252,7 @@ class HrEmployee(models.Model):
             for alloc in allocations:
                 timeoff_records.append({
                     'id': alloc['id'],
+                    'employee_id': alloc['employee_id'][0],
                     'employee_name': alloc['employee_id'][1],
                     'leave_type': alloc['holiday_status_id'][1],
                     'request_type': 'allocation',
@@ -266,7 +268,6 @@ class HrEmployee(models.Model):
             upcoming_leaves_raw = self.env['hr.leave'].search_read(
                 [('state', '=', 'validate'), ('request_date_from', '>=', today)],
                 ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to'],
-                limit=3,
                 order='request_date_from asc'
             )
             for leave in upcoming_leaves_raw:
@@ -283,6 +284,8 @@ class HrEmployee(models.Model):
         return {
             'total_employees': total_employees,
             'job_applied_count': job_applied_count,
+            'start_date': start_date,
+            'end_date': end_date,
             'attendance_rate': round(attendance_rate, 2),
             'employee_status_labels': employee_status_labels,
             'employee_status_counts': employee_status_counts,

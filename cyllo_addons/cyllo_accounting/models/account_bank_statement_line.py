@@ -641,6 +641,7 @@ class AccountBankStatementLine(models.Model):
         """Method to get matching lines for statement and validate."""
         try:
             for line in self:
+                was_reconciled = line.is_reconciled
                 matching_moves, model = line.get_match_invoice()
                 if not matching_moves or not model:
                     continue
@@ -749,6 +750,16 @@ class AccountBankStatementLine(models.Model):
                         'data': moves_to_store
                     }
                 })
+                if not was_reconciled and line.is_reconciled and line.create_uid.partner_id:
+                    self.env['bus.bus']._sendone(
+                        line.create_uid.partner_id,
+                        'simple_notification',
+                        {
+                            'type': 'success',
+                            'title': _('Reconciliation'),
+                            'message': _('Reconciliation completed successfully.'),
+                        },
+                    )
         except Exception as e:
             _logger.error(f"Failed to validate statement :{e}")
 

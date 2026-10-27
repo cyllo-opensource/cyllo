@@ -27,6 +27,7 @@ tools wrap ``chatbot.tools``: they declare name/description/schema and dispatch
 to this module's ORM model via the runtime context's ``env``.
 """
 from odoo.addons.cyllo_ai.core.tools.base import Tool, ToolContext
+from odoo.addons.cyllo_ai.core.chart_intent import user_asked_for_chart
 
 
 class RecommendChartTool(Tool):
@@ -77,7 +78,7 @@ class RecommendChartTool(Tool):
     def run(self, ctx: ToolContext, series=None, categories=None, title="",
             category_kind="category"):
         return ctx.env["cyllo.ai.analytics.tools"].recommend_chart(
-            series, categories, title, category_kind)
+            series, categories, title, category_kind, user_asked_for_chart(ctx))
 
 
 class SuggestSheetChartsTool(Tool):

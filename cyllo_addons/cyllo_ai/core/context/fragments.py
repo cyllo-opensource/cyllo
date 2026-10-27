@@ -199,9 +199,46 @@ class UIContextFragment(ContextFragment):
             lines.append(screen)
             if snapshot:
                 lines.append(snapshot)
+        workflow_line = self._workflow_line()
+        if workflow_line:
+            lines.append(workflow_line)
         if self.ui.get("studio"):
             lines.append("studio: active")
         return "\n".join(lines)
+
+    def _workflow_line(self) -> str:
+        """The Workflow Automation builder the user has open, so short requests
+        about it ("also send an SMS", "remove the activity") reach build_workflow."""
+        workflow = self.ui.get("workflow")
+        if not isinstance(workflow, dict) or 'work.auto' not in self.env:
+            return ""
+        line = "workflow builder open"
+        workflow_id = workflow.get("id")
+        if isinstance(workflow_id, int) and workflow_id > 0:
+            record = self.env['work.auto'].browse(workflow_id)
+            try:
+                if record.exists():
+                    line += f': workflow automation (work.auto) id {workflow_id} ("{record.name[:80]}")'
+            except Exception:
+                pass
+        if workflow.get("error"):
+            line += "; its steps cannot be changed from the chat"
+        elif workflow.get("has_workflow"):
+            model = workflow.get("object")
+            if isinstance(model, str) and model in self.env:
+                line += f"; it runs on {self.env[model]._description or model}"
+            actions = [str(action)[:40] for action in workflow.get("existing_actions") or []
+                       if isinstance(action, str)][:10]
+            line += f"; steps: {', '.join(actions) if actions else 'none yet'}"
+        elif workflow.get("reusable"):
+            line += "; an empty reusable workflow"
+        else:
+            line += "; an empty workflow"
+        return line + (". The user is building this workflow: any request that describes an action "
+                       "(send an email or SMS, schedule an activity, show a warning, set a field, run a "
+                       "reusable automation) or removes a step is a step for this workflow — call "
+                       "build_workflow with their words, even short ones like 'also send an SMS'; never ask "
+                       "which record it is for and never suggest Run Now.")
 
     def _record_snapshot(self, rec) -> str:
         """A compact, access-checked dump of the current record's main field

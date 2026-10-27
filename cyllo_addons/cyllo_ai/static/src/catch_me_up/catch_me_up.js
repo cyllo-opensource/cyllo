@@ -9,6 +9,8 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { FormController } from "@web/views/form/form_controller";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 import { CogMenuItem } from "@cyllo_base/js/cog_menu_item";
+import { CogMenu } from "@web/search/cog_menu/cog_menu";
+import { CyCogMenu } from "@cyllo_base/js/cog_menu_form";
 
 const BRIEFING_MODELS = ["res.partner", "crm.lead", "project.project"];
 const CACHE_MS = 10 * 60 * 1000;
@@ -146,7 +148,7 @@ export class CatchMeUpDialog extends Component {
 
 /**
  * Compact briefing card posted in the AI chat: the summary, the risk count and
- * the next step. Clicking it opens the full briefing (CatchMeUpDialog).
+ * the next step. Its expand button opens the full briefing (CatchMeUpDialog).
  */
 export class CatchMeUpChatCard extends Component {
     static template = "cyllo_ai.CatchMeUpChatCard";
@@ -226,13 +228,6 @@ export class CatchMeUpChatCard extends Component {
             });
         }
     }
-
-    onKeydown(ev) {
-        if (ev.key === "Enter" || ev.key === " ") {
-            ev.preventDefault();
-            this.expand();
-        }
-    }
 }
 
 registry.category("cyllo_ai.chat_widgets").add("catch_me_up", CatchMeUpChatCard);
@@ -283,6 +278,17 @@ export class CatchMeUpCogItem extends Component {
         }
     }
 }
+
+patch(CogMenu.prototype, {
+    /** Show "Catch me up" only in Cyllo's top action bar, never in a gear (Actions) menu. */
+    async _registryItems() {
+        const items = await super._registryItems(...arguments);
+        if (this instanceof CyCogMenu) {
+            return items;
+        }
+        return items.filter((item) => item.Component !== CatchMeUpCogItem);
+    },
+});
 
 registry.category("cogMenu").add(
     "cyllo-ai-catch-me-up",

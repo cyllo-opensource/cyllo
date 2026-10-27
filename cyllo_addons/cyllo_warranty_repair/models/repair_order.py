@@ -75,7 +75,7 @@ class RepairOrder(models.Model):
         if self.sale_order_line_id:
             self.product_id = self.sale_order_line_id.product_id
             today = fields.Date.today()
-            expiration_date = self.sale_order_line_id.warranty_expiration_date
+            expiration_date = self.sale_order_line_id.sale_warranty_expiration_date
             if not expiration_date:
                 self.warranty_status = 'none'
                 self.under_warranty = False

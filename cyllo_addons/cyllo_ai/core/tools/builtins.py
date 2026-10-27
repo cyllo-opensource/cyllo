@@ -29,6 +29,7 @@ originating query are injected from the context, never taken from the LLM.
 """
 from .base import Tool, ToolContext
 from ..app_availability import check_apps
+from ..chart_intent import user_asked_for_chart
 from .communication import SendEmailTool, SendTextTool, SendInternalMessageTool
 from .digest import ActivityDigestTool
 from .functional import DescribeFeatureTool, FindMenuTool, FindSettingTool
@@ -603,7 +604,8 @@ class RenderChartTool(Tool):
 
     def run(self, ctx: ToolContext, chart_type="bar", title="", categories=None, series=None,
             source=None):
-        return ctx.env['chatbot.tools'].render_chart(chart_type, title, categories, series, source)
+        return ctx.env['chatbot.tools'].render_chart(
+            chart_type, title, categories, series, source, user_asked_for_chart(ctx))
 
 
 # The built-in tool belt (ORM tiers first). Exposed as a constant so the agent

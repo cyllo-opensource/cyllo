@@ -53,7 +53,7 @@ class AccountMoveLine(models.Model):
 
     @api.model
     def get_js_list_view(self):
-        view = self.env.ref("cyllo_accounting.view_account_move_line_tree")
+        view = self.env.ref("cyllo_accounting.view_account_move_line_tree_reconcile")
         return view.id if view else False
 
     def reconcile(self):
@@ -145,4 +145,3 @@ class AccountMoveLine(models.Model):
         else:
             res = super(AccountMoveLine, self)._prepare_reconciliation_amls(values_list, shadowed_aml_values=None)
             return res
-

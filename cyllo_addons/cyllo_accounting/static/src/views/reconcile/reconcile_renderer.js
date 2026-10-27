@@ -700,7 +700,7 @@ export class ReconcileRenderer extends Component {
 
         // Trigger UI updates
         this.env.bus.trigger("validate-lines");
-        this.notificationService.add("Record has been reconciled ", {type: "success"});
+        this.notificationService.add("Reconciliation completed successfully.", { type: "success" });
     }
 
     getCurrentDate() {
@@ -781,6 +781,9 @@ export class ReconcileRenderer extends Component {
                     resModel: "account.move.line",
                     selectedRecord: this.state.selectedRecord,
                     onRecordSelect: this.onRecordSelect,
+                    selectedLineIds: this.state.reconcileLines
+                        .filter((line) => line.id)
+                        .map((line) => line.id),
                     companyId: this.state.selectedJournalAccount.company_id[0],
                 },
             },

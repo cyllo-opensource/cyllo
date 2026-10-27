@@ -20,7 +20,7 @@
 #
 #############################################################################
 {
-    'name': 'Cyllo User Dashboard',
+    'name': 'Cyllo Dashboard',
     "summary": "A dashboard featuring details of the current logged in user",
     "description": """
         A dashboard that displays information about the currently logged-in user. It includes various aspects such as 
@@ -50,6 +50,7 @@
         'web.assets_backend': [
             'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js',
             'cyllo_dashboard/static/src/js/company_dialog.js',
+            'cyllo_dashboard/static/src/js/dashboard_kpi.js',
             'cyllo_dashboard/static/src/js/banner_crop_dialog.js',
             'cyllo_dashboard/static/src/js/cyllo_dashboard.js',
             'cyllo_dashboard/static/src/xml/cyllo_dashboard.xml',

@@ -22,6 +22,8 @@
 import pytz
 import logging
 
+from datetime import timedelta
+
 from odoo import api, fields, models, SUPERUSER_ID
 from odoo.exceptions import AccessDenied,ValidationError
 from odoo.http import request
@@ -314,6 +316,89 @@ class ResUsers(models.Model):
     @api.model
     def get_auto_edit_value(self):
         return self.env.user.auto_edit
+
+    @api.model
+    def get_user_presence_kpi(self):
+        """User counts for the dashboard Overview tab.
+
+        Total users is split into internal (``share=False``) and portal
+        (``share=True``) users. Presence buckets (online/away/offline) are
+        derived from ``bus.presence`` records; active users without a
+        presence record count as offline. Only ``active`` users are counted
+        and the superuser is excluded.
+        """
+        Users = self.env['res.users'].sudo()
+        base_domain = [('active', '=', True), ('id', '!=', SUPERUSER_ID)]
+        total_ids = set(Users.search(base_domain).ids)
+        internal_ids = set(
+            Users.search(base_domain + [('share', '=', False)]).ids)
+        portal_ids = set(
+            Users.search(base_domain + [('share', '=', True)]).ids)
+        online_ids, away_ids = set(), set()
+        presences = []
+        try:
+            presences = self.env['bus.presence'].sudo().search(
+                [('user_id', 'in', list(total_ids))])
+            for presence in presences:
+                if presence.user_id.id not in total_ids:
+                    continue
+                if presence.status == 'online':
+                    online_ids.add(presence.user_id.id)
+                elif presence.status == 'away':
+                    away_ids.add(presence.user_id.id)
+        except Exception:
+            _logger.warning("Could not read bus.presence for user KPI",
+                            exc_info=True)
+        offline_ids = total_ids - online_ids - away_ids
+        status_by_id = {p.user_id.id: p.status for p in presences
+                        if p.user_id.id in total_ids}
+        users_data = Users.search_read(list(base_domain),
+                                       ['name', 'share'])
+        status_order = {'online': 0, 'away': 1, 'offline': 2}
+        heatmap_users = []
+        for user_data in users_data:
+            status = status_by_id.get(user_data['id'], 'offline')
+            heatmap_users.append({
+                'id': user_data['id'],
+                'name': user_data.get('name') or '',
+                'internal': not user_data.get('share'),
+                'status': status,
+            })
+        heatmap_users.sort(key=lambda u: (status_order.get(u['status'], 3),
+                                           (u['name'] or '').lower()))
+        now = fields.Datetime.now()
+        this_month_start = now - timedelta(days=30)
+        prev_month_start = now - timedelta(days=60)
+        new_this_month = Users.search_count(
+            base_domain + [('create_date', '>=',
+                            fields.Datetime.to_string(this_month_start))])
+        new_prev_month = Users.search_count(
+            base_domain + [('create_date', '>=',
+                            fields.Datetime.to_string(prev_month_start)),
+                           ('create_date', '<',
+                            fields.Datetime.to_string(this_month_start))])
+        if new_prev_month:
+            user_growth = round(
+                ((new_this_month - new_prev_month) / new_prev_month) * 100, 1)
+        else:
+            user_growth = 100.0 if new_this_month else 0.0
+        return {
+            'total': len(total_ids),
+            'internal': len(internal_ids),
+            'portal': len(portal_ids),
+            'online': len(online_ids),
+            'away': len(away_ids),
+            'offline': len(offline_ids),
+            'total_ids': sorted(total_ids),
+            'internal_ids': sorted(internal_ids),
+            'portal_ids': sorted(portal_ids),
+            'online_ids': sorted(online_ids),
+            'away_ids': sorted(away_ids),
+            'offline_ids': sorted(offline_ids),
+            'users': heatmap_users,
+            'new_users': new_this_month,
+            'user_growth': user_growth,
+        }
 
 
 class ChangePasswordOwn(models.TransientModel):

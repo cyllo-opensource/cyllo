@@ -406,16 +406,49 @@ export class HrDashboard extends Component {
 	}
 
 	openTimeOff(record) {
-		const model = record.request_type === "allocation" ? "hr.leave.allocation" : "hr.leave";
-		this.action.doAction({
+		// The KPI card calls this with the click event, not a dashboard row.
+		const isRow = !!(record && record.request_type && record.id);
+		const model = isRow && record.request_type === "allocation" ? "hr.leave.allocation" : "hr.leave";
+
+		// Period of the active dashboard filter (falls back to "today").
+		const todayStr = new Date().toISOString().slice(0, 10);
+		const start = this.state.start_date || todayStr;
+		const end = this.state.end_date || todayStr;
+
+		// Mirror the exact domains used in get_hr_dashboard_data.
+		let domain;
+		if (!isRow) {
+			// "Upcoming Time Off" card: validated leaves starting today or later.
+			domain = [["state", "=", "validate"], ["request_date_from", ">=", todayStr]];
+		} else if (model === "hr.leave.allocation") {
+			domain = [["date_from", ">=", start]];
+		} else {
+			domain = [
+				["request_date_from", ">=", start],
+				["request_date_to", "<=", end],
+			];
+		}
+
+		if (isRow && record.employee_id) {
+			domain.push(["employee_id", "=", record.employee_id]);
+		}
+
+		const action = {
 			type: "ir.actions.act_window",
 			name: "Time Off",
 			res_model: model,
-			res_id: record.id,
-			views: [[false, "form"]],
-			view_mode: "form",
+			views: [[false, "list"], [false, "form"]],
+			view_mode: "list,form",
 			target: "current",
-		});
+			domain: domain,
+		};
+
+		// Open the clicked record's form; the list behind it stays filtered.
+		if (isRow) {
+			action.res_id = record.id;
+		}
+
+		this.action.doAction(action);
 	}
 
 	openContract(contractId) {

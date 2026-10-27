@@ -59,6 +59,8 @@ from .context.fragments import (
     UIContextFragment,
     UserContextFragment,
 )
+from .app_availability import ANALYTICS_MODULE, is_installed
+from .chart_intent import CHART_REQUEST_HINT, user_asked_for_chart
 from .llm_client import LLMClient
 from .normalize import normalize
 from .profiles import DEFAULT_PROFILE
@@ -253,6 +255,10 @@ class Orchestrator:
                            'usage': turn_usage}
                     return
 
+                if step_text and any(tc.get("name") == "build_workflow" for tc in tool_calls):
+                    yield {'type': 'retract', 'text': ''.join(step_text)}
+                    content = ''
+
                 # Record the assistant's tool-calling turn (narration text kept).
                 state.messages.append(Message(
                     role='assistant',
@@ -355,6 +361,9 @@ class Orchestrator:
             out, apply_edit = self._split_apply_edit(out)
             if apply_edit is not None:
                 yield {'type': 'apply_edit', 'edit': apply_edit}
+            out, apply_workflow = self._split_apply_workflow(out)
+            if apply_workflow is not None:
+                yield {'type': 'apply_workflow', 'workflow': apply_workflow}
             # A widget to render in the chat (e.g. the quick-dashboard builder).
             out, widget = self._split_widget(out)
             if widget is not None:
@@ -436,6 +445,16 @@ class Orchestrator:
         if isinstance(out, dict) and out.get("apply_edit") and not out.get("error"):
             ack = {"message": out.get("message", "Applied the change to the chart.")}
             return ack, out["apply_edit"]
+        return out, None
+
+    @staticmethod
+    def _split_apply_workflow(out):
+        """If a tool result carries an `apply_workflow` directive (and is not an
+        error), return (llm_ack, directive); otherwise (out, None). The workflow
+        builder screen draws the nodes, so the LLM only needs a short ack."""
+        if isinstance(out, dict) and out.get("apply_workflow") and not out.get("error"):
+            ack = {"message": out.get("message", "Added the workflow to the canvas.")}
+            return ack, out["apply_workflow"]
         return out, None
 
     @staticmethod
@@ -521,6 +540,10 @@ class Orchestrator:
         )
         # Built once per turn → byte-identical across loop steps (cache-friendly).
         self._schema_ctx = self._build_schema_block(user_query)
+        self._chart_hint = ""
+        if not interrupted and is_installed(self.env, ANALYTICS_MODULE) \
+                and user_asked_for_chart(ctx):
+            self._chart_hint = CHART_REQUEST_HINT
         return state, ctx, terminal
 
     def _build_schema_block(self, user_query):
@@ -668,6 +691,7 @@ class Orchestrator:
             # (non-stream can't act on them, but the model still needs only the ack).
             out, _suggestions = self._split_suggestions(out)
             out, _apply_edit = self._split_apply_edit(out)
+            out, _apply_workflow = self._split_apply_workflow(out)
             out, _widget = self._split_widget(out)
             out, _apply_qd = self._split_apply_qd(out)
             out, _apply_dash = self._split_apply_dash(out)
@@ -836,6 +860,8 @@ class Orchestrator:
         parts = [self.profile.system_prompt, rendered]
         if getattr(self, "_schema_ctx", ""):
             parts.append(self._schema_ctx)
+        if getattr(self, "_chart_hint", ""):
+            parts.append(self._chart_hint)
         messages = [Message(role="user", content="\n\n".join(parts))]
         messages.extend(state.messages[-HISTORY_WINDOW:])
         return messages

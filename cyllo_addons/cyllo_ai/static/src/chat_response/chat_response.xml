@@ -258,9 +258,19 @@
                         </t>
                     </div>
                 </t>
-                <t t-if="props.chart_config">
-                    <t t-log="'props.chart_config', props.chart_config.__target__" />
-                    <div class="chart-config">
+                <div t-if="tableChartOffered" class="cy-ai-view-chart">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" t-on-click="viewTableAsChart">
+                        <i class="ri-bar-chart-2-line me-1"/>View as chart
+                    </button>
+                </div>
+                <t t-if="chartConfig">
+                    <t t-log="'chart_config', chartConfig" />
+                    <div t-if="chartOnDemand" class="cy-ai-view-chart">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" t-on-click="revealChart">
+                            <i class="ri-bar-chart-2-line me-1"/>View as chart
+                        </button>
+                    </div>
+                    <div t-else="" class="chart-config">
                         <div
                             class="chat-bubble bot bg-white w-100">
                             <!-- Title + toolbar on one line. The title is pulled out
@@ -271,7 +281,7 @@
                                 <span class="cy-ai-chart-title" t-esc="chartTitle" />
                                 <div class="graph-icon">
                                     <t t-foreach="chartActions" t-as="act" t-key="act.key">
-                                        <t t-component="act.Comp" chartConfig="props.chart_config" />
+                                        <t t-component="act.Comp" chartConfig="chartConfig" />
                                     </t>
                                     <i class="ri-fullscreen-line"
                                         t-on-click="onExpandGraph"

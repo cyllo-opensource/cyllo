@@ -45,7 +45,7 @@ class FieldServiceRequest(models.Model):
                        help="Sequence number of current request")
     partner_id = fields.Many2one("res.partner",
                                  help="The name of the customer who is making the request.",
-                                 string="Customer")
+                                 string="Customer", required=True)
     description = fields.Html(help="Description about the service request")
     user_id = fields.Many2one("res.users", default=lambda self: self.env.user,
                               help="Current user")
@@ -104,6 +104,7 @@ class FieldServiceRequest(models.Model):
     is_manager = fields.Boolean(compute="_compute_is_manager")
     is_invoiced = fields.Boolean(default=False)
     is_overdue = fields.Boolean(string="Is Overdue")
+    is_assigned = fields.Boolean(string="Is Assigned")
 
     _sql_constraints = [
         ('check_date_assigned', 'CHECK(date_deadline >= date_assigned)',
@@ -217,6 +218,36 @@ class FieldServiceRequest(models.Model):
         template = self.env.ref('cyllo_field_service.mail_template_field_service_request_creation')
         template.send_mail(res.id, force_send=True, email_values={'auto_delete': False})
         return res
+
+
+    def write(self, vals):
+        """Assigned states need not be changed back to Submit or Draft state through kanban view"""
+        if vals.get('state') == 'assigned':
+            self.is_assigned = True
+        if vals.get('state') in ['submit', 'draft'] and self.is_assigned:
+            raise UserError(_("An assigned field service request cannot be changed back to the Previous state."))
+
+        if 'state' in vals and not self.env.context.get('skip_kanban_action'):
+            new_state = vals['state']
+            for rec in self:
+                old_state = rec.state
+                if old_state != new_state:
+                    if old_state == 'draft' and new_state == 'submit':
+                        rec.with_context(skip_kanban_action=True).action_submit()
+                    elif old_state == 'submit' and new_state == 'assigned':
+                        res = rec.with_context(skip_kanban_action=True).action_assign_workers()
+                        if isinstance(res, dict) and res.get('type') == 'ir.actions.client':
+                            msg = res.get('params', {}).get('message', _("Cannot assign workers."))
+                            raise UserError(msg)
+                    elif old_state == 'assigned' and new_state == 'in_progress':
+                        rec.with_context(skip_kanban_action=True).action_service_start()
+                    elif old_state == 'in_progress' and new_state == 'completed':
+                        res = rec.with_context(skip_kanban_action=True).action_mark_as_done()
+                        if isinstance(res, dict) and res.get('type') == 'ir.actions.client':
+                            msg = res.get('params', {}).get('message', _("Cannot mark as done."))
+                            raise UserError(msg)
+
+        return super().write(vals)
 
     def action_submit(self):
         """ Generate a sequence for the field service request. This method computes sequence based on the code

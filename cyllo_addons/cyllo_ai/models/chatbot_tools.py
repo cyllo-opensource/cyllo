@@ -2369,12 +2369,14 @@ Output JSON only — no explanations or text outside the structure.
                 'dashboard_name': (source.get('dashboard_name') or '').strip()}
 
     def render_chart(self, chart_type='bar', title='', categories=None, series=None,
-                     source=None):
+                     source=None, user_asked_for_chart=False):
         """Build an Apache ECharts option from a simple spec.
 
         Returns ``{'chart_config': <echarts option>, 'message': <ack>}``. The
         orchestrator strips chart_config out to the UI and feeds only the short
         ack back to the LLM (so the full config doesn't bloat the context).
+        A chart the user did not ask for is offered behind a "View as chart"
+        button instead of being drawn, and is dropped when it has a single value.
         """
         if not is_installed(self.env, ANALYTICS_MODULE):
             return {'error': ANALYTICS_MISSING_MSG, 'message': ANALYTICS_MISSING_MSG}
@@ -2415,6 +2417,19 @@ Output JSON only — no explanations or text outside the structure.
         chart_source = self._chart_source(source)
         if chart_source:
             option['cyllo_source'] = dict(chart_source, chart_type=ctype)
+        if user_asked_for_chart:
+            option['cyllo_user_asked'] = True
+        elif len((option.get('series') or [{}])[0].get('data') or []) == 1:
+            return {'message': 'Not shown: the chart has only one value. Give that '
+                               'figure in text and do not write `[[chart]]` or say a '
+                               'chart is shown.'}
+        else:
+            option['cyllo_on_demand'] = True
+            return {'chart_config': option,
+                    'message': 'The user did not ask for a chart, so it is not drawn: '
+                               'a "View as chart" button under your answer opens it. '
+                               'Give the figures as text or a table, do not write '
+                               '`[[chart]]`, and do not say a chart is shown.'}
         # This ack is the model's only feedback about the chart, and it arrives
         # exactly when the model is deciding what to write — so it repeats the
         # placement instruction from the system prompt rather than just confirming.

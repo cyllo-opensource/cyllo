@@ -48,12 +48,13 @@ class TestAgentToolSeam(TransactionCase):
     def setUp(self):
         super().setUp()
         self.agent = self.env["chatbot.agent"]
+        self.base_count = len(self.agent._ai_build_registry(DEFAULT_PROFILE).tools())
 
     def test_default_registry_has_the_builtin_belt(self):
         reg = self.agent._ai_build_registry(DEFAULT_PROFILE)
         names = {t.name for t in reg.tools()}
-        # Regression: the full built-in belt is present and unchanged in size.
-        self.assertEqual(len(reg.tools()), len(DEFAULT_TOOL_CLASSES))
+        # Regression: the full built-in belt is present (installed add-ons may add more).
+        self.assertLessEqual({cls.name for cls in DEFAULT_TOOL_CLASSES}, names)
         for expected in ("search_records", "analytic_record", "render_chart"):
             self.assertIn(expected, names)
         self.assertNotIn("dummy_tool", names)
@@ -70,5 +71,5 @@ class TestAgentToolSeam(TransactionCase):
             names = {t.name for t in reg.tools()}
         # The contributed tool appears alongside the full built-in belt.
         self.assertIn("dummy_tool", names)
-        self.assertEqual(len(reg.tools()), len(DEFAULT_TOOL_CLASSES) + 1)
+        self.assertEqual(len(reg.tools()), self.base_count + 1)
         self.assertIn("search_records", names)

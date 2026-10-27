@@ -114,6 +114,8 @@ export class ChatResponse extends Component {
             chart_config: this.props.chart_config ? JSON.parse(JSON.stringify(this.props.chart_config)) : null,
             showGraphPopup: false,
             hasTable: false,
+            chartRevealed: false,
+            tableChart: null,
         })
         this.state.chatSelectedType = this.baseChartType;
         this.state.popupSelectedType = this.baseChartType;
@@ -162,6 +164,14 @@ export class ChatResponse extends Component {
         // changes so a chart that arrives after mount actually gets drawn.
         this._lastChartConfigJSON = this.props.chart_config ? JSON.stringify(this.props.chart_config) : null;
         onPatched(() => {
+            if (this._initRevealedChart && this.chartContainer.el) {
+                this._initRevealedChart = false;
+                if (this.resizeObserver) {
+                    this.resizeObserver.observe(this.chartContainer.el);
+                }
+                this.initChart();
+                this.resizeChart();
+            }
             const nextJSON = this.props.chart_config ? JSON.stringify(this.props.chart_config) : null;
             if (nextJSON !== this._lastChartConfigJSON) {
                 this._lastChartConfigJSON = nextJSON;
@@ -302,7 +312,70 @@ export class ChatResponse extends Component {
      *  in the DOM beside the toolbar icons instead of being painted inside the
      *  canvas (where nothing else can align with it). */
     get chartTitle() {
-        return this.props.chart_config?.title?.text || "";
+        return this.chartConfig?.title?.text || "";
+    }
+
+    /** The chart to draw: the one sent with the answer, or one built from its table. */
+    get chartConfig() {
+        return this.props.chart_config || this.state.tableChart;
+    }
+
+    /** ECharts bar option built from the answer's first table (first column as
+     *  labels, every all-numeric column as a series), or null when it has none. */
+    get tableChartOption() {
+        const html = String(this.props.html || "");
+        if (this._tableChartHtml === html) {
+            return this._tableChartOption;
+        }
+        this._tableChartHtml = html;
+        this._tableChartOption = null;
+        if (!html.includes("<table")) {
+            return null;
+        }
+        const table = new DOMParser().parseFromString(html, "text/html").querySelector("table");
+        const rows = [...(table?.querySelectorAll("tr") || [])]
+            .map((tr) => [...tr.querySelectorAll("th, td")].map((cell) => cell.textContent.trim()));
+        const [header, ...body] = rows;
+        if (!header || !body.length) {
+            return null;
+        }
+        const toNumber = (text) => {
+            const cleaned = text.replace(/[^0-9.\-]/g, "");
+            return cleaned && !isNaN(Number(cleaned)) ? Number(cleaned) : null;
+        };
+        const series = header.slice(1).map((name, index) => {
+            const data = body.map((row) => toNumber(row[index + 1] || ""));
+            return data.every((value) => value !== null) ? { name, type: "bar", data } : null;
+        }).filter(Boolean);
+        if (!series.length) {
+            return null;
+        }
+        this._tableChartOption = {
+            title: { text: "" },
+            legend: {},
+            tooltip: { trigger: "axis" },
+            grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
+            xAxis: { type: "category", data: body.map((row) => row[0] || "") },
+            yAxis: { type: "value" },
+            series,
+        };
+        return this._tableChartOption;
+    }
+
+    /** True when a finished answer shows a table of figures but no chart of its own. */
+    get tableChartOffered() {
+        return !this.props.streaming && !this.props.chart_config && !this.state.tableChart
+            && !!this.tableChartOption;
+    }
+
+    /** Draw the answer's table as a chart. */
+    viewTableAsChart() {
+        const option = JSON.parse(JSON.stringify(this.tableChartOption));
+        this.state.chart_config = option;
+        this.state.chatSelectedType = "bar";
+        this.state.popupSelectedType = "bar";
+        this._initRevealedChart = true;
+        this.state.tableChart = option;
     }
 
     /** ECharts must not draw the title as well, or it appears twice and eats
@@ -318,9 +391,20 @@ export class ChatResponse extends Component {
         return typeof echarts === "undefined";
     }
 
+    /** True while a chart the user did not ask for waits behind "View as chart". */
+    get chartOnDemand() {
+        return !!this.props.chart_config?.cyllo_on_demand && !this.state.chartRevealed;
+    }
+
+    /** Draw the chart offered behind the "View as chart" button. */
+    revealChart() {
+        this._initRevealedChart = true;
+        this.state.chartRevealed = true;
+    }
+
     /** Is there actually a chart to position? */
     get hasPlacedChart() {
-        return !!(this.props.chart_config || (this.props.chart && this.chartComponent));
+        return !!(this.chartConfig || (this.props.chart && this.chartComponent));
     }
 
     /** The answer, split at the model's [[chart]] marker into the part before the
@@ -528,7 +612,7 @@ export class ChatResponse extends Component {
 
     initChart() {
         try {
-            const { chart_config } = this.props;
+            const chart_config = this.chartConfig;
             const popupRef = this.popupChartContainer?.el;
             const baseRef = this.chartContainer?.el;
             const container = popupRef || baseRef;
@@ -806,10 +890,10 @@ export class ChatResponse extends Component {
         }
         this.state.showChartOptions = false;
 
-        if (!this.props.chart_config) return;
+        if (!this.chartConfig) return;
 
         // Safely transform chart config based on type
-        const updatedConfig = this.props.chart_config ? this.convertChartType(this.state.chart_config, type) : null;
+        const updatedConfig = this.convertChartType(this.state.chart_config, type);
 
         const container = this.state.showGraphPopup ? this.popupChartContainer.el : this.chartContainer.el;
         if (container && typeof echarts !== "undefined") {

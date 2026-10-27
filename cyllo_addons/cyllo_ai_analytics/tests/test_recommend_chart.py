@@ -64,10 +64,21 @@ class TestRecommendChart(TransactionCase):
 
     def test_recommend_chart_renders_and_explains(self):
         out = self.tools.recommend_chart(
-            [{"name": "Sales", "data": [1, 2, 3]}], ["A", "B", "C"], "By region")
+            [{"name": "Sales", "data": [1, 2, 3]}], ["A", "B", "C"], "By region",
+            user_asked_for_chart=True)
         self.assertIn("chart_config", out)
         self.assertIsNotNone(out["chart_config"])
         self.assertIn("pie", out["message"])  # 1 series, 3 categories -> pie
+
+    def test_unrequested_chart_is_offered_behind_a_button(self):
+        out = self.tools.recommend_chart(
+            [{"name": "Sales", "data": [1, 2, 3]}], ["A", "B", "C"], "By region")
+        self.assertTrue(out["chart_config"].get("cyllo_on_demand"))
+        self.assertIn("View as chart", out["message"])
+
+    def test_unrequested_single_value_is_not_charted(self):
+        out = self.tools.recommend_chart([{"name": "Sales", "data": [5]}], ["A"])
+        self.assertNotIn("chart_config", out)
 
     def test_no_series_is_an_error(self):
         out = self.tools.recommend_chart([], [])

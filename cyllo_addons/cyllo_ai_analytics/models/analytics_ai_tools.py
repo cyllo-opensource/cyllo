@@ -55,7 +55,7 @@ class CylloAiAnalyticsTools(models.AbstractModel):
         return "bar", "a categorical comparison reads clearest as bars"
 
     def recommend_chart(self, series, categories=None, title="",
-                        category_kind="category"):
+                        category_kind="category", user_asked_for_chart=False):
         """Choose the best chart type for the data and render it.
 
         Reuses ``chatbot.tools.render_chart`` to build the ECharts config, so
@@ -69,8 +69,11 @@ class CylloAiAnalyticsTools(models.AbstractModel):
         chart_type, reason = self._recommend_chart_type(
             categories, series, category_kind)
         rendered = self.env["chatbot.tools"].render_chart(
-            chart_type, title, categories, series)
-        if isinstance(rendered, dict) and rendered.get("error"):
+            chart_type, title, categories, series,
+            user_asked_for_chart=user_asked_for_chart)
+        if isinstance(rendered, dict) and (
+                rendered.get("error") or not rendered.get("chart_config")
+                or rendered["chart_config"].get("cyllo_on_demand")):
             return rendered
         return {
             "chart_config": rendered.get("chart_config"),

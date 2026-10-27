@@ -24,6 +24,10 @@ export class ViewWrapper extends Component {
             matchingRecords: [],
             listViewId: false,
         });
+        this.reconcileSelection = useState({ selectedLineIds: this.props.selectedLineIds || [] });
+        useEffect(() => {
+            this.reconcileSelection.selectedLineIds = this.props.selectedLineIds || [];
+        }, () => [this.props.selectedLineIds]);
         useEffect(() => {
             this.state.showView = false;
             setTimeout(() => this.state.showView = true, 50)
@@ -75,12 +79,14 @@ export class ViewWrapper extends Component {
                 searchPanel: false,
             },
             editable: false,
+            allowSelectors: false,
             noBreadcrumbs: true,
             noContentHelp: markup(`<p>${escape(translatedText)}</p>`),
             showButtons: false,
             selectRecord: (resId) => this.onRecordSelect(resId),
             onSelectionChanged: (resIds) => {
             },
+            globalState: this.reconcileSelection,
             context: this.props.context,
             domain: domain,
             dynamicFilters: this.dynamicFilters,

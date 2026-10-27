@@ -1,13 +1,27 @@
 /** @odoo-module **/
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, onWillStart, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+
+let canCreateDashboards = null;
+
+/** Whether the user may create dashboards and sheets, as add_chat_chart_to_analytics
+ *  requires; asked once per page load and shared by every chart. */
+function userCanCreateDashboards(orm) {
+    if (!canCreateDashboards) {
+        canCreateDashboards = Promise.all(
+            ["dashboard.config", "dashboard.sheet"].map((model) =>
+                orm.call(model, "check_access_rights", ["create", false]))
+        ).then((rights) => rights.every(Boolean), () => false);
+    }
+    return canCreateDashboards;
+}
 
 export class AiAddToAnalytics extends Component {
     static props = { chartConfig: { type: Object, optional: true } };
 
     static template = xml`
-        <t t-if="source">
+        <t t-if="source and state.canCreate">
             <button t-if="!state.dashboard" class="btn btn-primary btn-sm cy-ai-add-analytics"
                     t-att-disabled="state.saving" t-on-click="onAdd"
                     title="Save this chart as a dashboard and sheet in Cyllo Analytics">
@@ -24,7 +38,10 @@ export class AiAddToAnalytics extends Component {
         this.orm = useService("orm");
         this.action = useService("action");
         this.notification = useService("notification");
-        this.state = useState({ saving: false, dashboard: null });
+        this.state = useState({ saving: false, dashboard: null, canCreate: false });
+        onWillStart(async () => {
+            this.state.canCreate = await userCanCreateDashboards(this.orm);
+        });
     }
 
     /** The chart's data source set by render_chart, or null if it has none. */

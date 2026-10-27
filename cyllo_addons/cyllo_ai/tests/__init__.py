@@ -37,3 +37,4 @@ from . import test_agent_seam
 from . import test_briefing
 from . import test_digest
 from . import test_ai_access
+from . import test_chart_intent

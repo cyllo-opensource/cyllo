@@ -33,6 +33,7 @@
     'website': "https://www.cyllo.com",
     'depends': ['payment','portal'],
     'data': [
+        'data/mail_template_data.xml',
         'views/portal_templates.xml',
         'views/portal_views.xml',
         'views/portal_add_address_templates.xml',

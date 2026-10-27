@@ -42,6 +42,7 @@ const VIEWPORT_MARGIN = 4;  // keep the launcher this far from the edges
  */
 // Longest excerpt select-to-quote will carry into a prompt.
 const MAX_QUOTE_CHARS = 1000;
+const CONFIRM_CARDS = ["workflow_confirm"];
 
 const SLASH_COMMANDS = [
     {
@@ -280,6 +281,9 @@ export class ChatBot extends Component {
         useBus(this.env.bus, "CY_AI:QD_CLEAR", () => { this._qdContext = null; });
         useBus(this.env.bus, "CY_AI:DASH_STATE", (ev) => { this._dashContext = ev.detail || null; });
         useBus(this.env.bus, "CY_AI:DASH_CLEAR", () => { this._dashContext = null; });
+        this._workflowContext = null;
+        useBus(this.env.bus, "CY_AI:WORKFLOW_STATE", (ev) => { this._workflowContext = ev.detail || null; });
+        useBus(this.env.bus, "CY_AI:WORKFLOW_CLEAR", () => { this._workflowContext = null; });
         this.rpc = useService("rpc");
         this.actionService = useService("action");
         // Record links in chat bubbles navigate in the SAME tab via the web
@@ -1838,6 +1842,20 @@ export class ChatBot extends Component {
         if (this._dashContext) {
             out.dashboard = this._dashContext;
         }
+        if (this._workflowContext) {
+            try {
+                out.workflow = typeof this._workflowContext === "function"
+                    ? this._workflowContext()
+                    : this._workflowContext;
+            } catch {
+                out.workflow = { error: "The workflow canvas could not be read." };
+            }
+            const action = this.actionService.currentController?.action;
+            const workflowId = action?.tag === "automation_view" ? Number(action.context?.id) : 0;
+            if (out.workflow && workflowId > 0) {
+                out.workflow = { ...out.workflow, id: workflowId };
+            }
+        }
         // @ mentions are NOT added here — handleSend attaches them, since
         // whether they should ride along depends on typed-vs-programmatic
         // send (same rule as the quote), which this method has no way to know.
@@ -2112,7 +2130,7 @@ export class ChatBot extends Component {
                     this.scrollToBottom();
                 }
             };
-            const { raw, isInterrupted, chartConfig, suggestions, applyEdit, widget, applyQd, applyDash, usage } = await this.streamQuery(
+            const { raw, isInterrupted, chartConfig, suggestions, applyEdit, widget, applyQd, applyDash, applyWorkflow, usage } = await this.streamQuery(
                 {
                     text, userId, interrupted, session_id, company_ids: companyIds,
                     ui_context: __outgoingUiContext
@@ -2132,6 +2150,12 @@ export class ChatBot extends Component {
                         if (!__workedMs) __workedMs = Date.now() - __t0;
                         streamBuf += chunk;
                         renderLive();
+                    },
+                    onRetract: (retracted) => {
+                        if (retracted && streamBuf.endsWith(retracted)) {
+                            streamBuf = streamBuf.slice(0, -retracted.length);
+                            renderLive();
+                        }
                     },
                     onActivity: (phase, ev) => {
                         if (phase === "start") {
@@ -2224,7 +2248,7 @@ export class ChatBot extends Component {
             ensureLiveBot();
             const hasStreamed = !!(streamBuf && streamBuf.trim());
             let cfg = chartConfig || (parsed && parsed.chart_config) || null;
-            if (cfg?.series?.[0]?.data?.length === 1) {
+            if (cfg?.series?.[0]?.data?.length === 1 && !cfg.cyllo_user_asked) {
                 cfg = null;  // a single data point isn't worth charting
             }
             // Skipped when interrupted: `raw` there is the confirm card's own
@@ -2257,6 +2281,12 @@ export class ChatBot extends Component {
             if (applyDash) {
                 this.env.bus.trigger("CY_AI:DASH_APPLY", applyDash);
             }
+            if (applyWorkflow) {
+                liveBot.widget = {
+                    key: "workflow_confirm",
+                    props: { summary: applyWorkflow.summary || {}, directive: applyWorkflow },
+                };
+            }
             liveBot.interrupted = isInterrupted;
             liveBot.streaming = false;
             liveBot.usage = usage || null;
@@ -2288,7 +2318,9 @@ export class ChatBot extends Component {
                     session_id: session_id || null,
                     user_message: text || null,
                     response_message: isInterrupted ? raw : (parsed?.text ?? raw),
-                    chart_config: cfg,
+                    chart_config: !cfg && CONFIRM_CARDS.includes(liveBot.widget?.key)
+                        ? { cyllo_widget: { key: liveBot.widget.key, props: { summary: liveBot.widget.props.summary || {} }, intro: liveBot.text } }
+                        : cfg,
                     user_chart_config: pendingMsg.chart || null,
                     interrupted: isInterrupted,
                     company_ids: companyIds,
@@ -2461,7 +2493,7 @@ export class ChatBot extends Component {
      * Calls callbacks as events arrive and resolves to { raw, isInterrupted }.
      * Falls back to the non-streaming /chatbot/query endpoint on failure.
      */
-    async streamQuery(params, { onDelta, onActivity, signal } = {}) {
+    async streamQuery(params, { onDelta, onRetract, onActivity, signal } = {}) {
         let resp;
         try {
             resp = await fetch("/chatbot/query/stream", {
@@ -2508,6 +2540,7 @@ export class ChatBot extends Component {
         let widget = null;        // a widget to render in the bot message (e.g. dashboard builder)
         let applyQd = null;       // a patch to the live quick-dashboard builder
         let applyDash = null;     // a live (created) dashboard was edited — reload it
+        let applyWorkflow = null;
         let usage = null;     // {prompt, completion, total} for the whole turn
 
         let streamed = "";       // text seen so far (kept if the user stops)
@@ -2531,6 +2564,12 @@ export class ChatBot extends Component {
                     if (ev.type === "delta") {
                         streamed += ev.text || "";
                         onDelta?.(ev.text || "");
+                    } else if (ev.type === "retract") {
+                        const retracted = ev.text || "";
+                        if (retracted && streamed.endsWith(retracted)) {
+                            streamed = streamed.slice(0, -retracted.length);
+                        }
+                        onRetract?.(retracted);
                     } else if (ev.type === "tool_start") {
                         onActivity?.("start", ev);
                     } else if (ev.type === "tool_end") {
@@ -2549,6 +2588,8 @@ export class ChatBot extends Component {
                         this.reloadCurrentView(ev.open);
                     } else if (ev.type === "apply_dash") {
                         applyDash = ev.patch || applyDash;
+                    } else if (ev.type === "apply_workflow") {
+                        applyWorkflow = ev.workflow || applyWorkflow;
                     } else if (ev.type === "confirm") {
                         isInterrupted = true;
                         finalText = ev.message || "";
@@ -2591,7 +2632,7 @@ export class ChatBot extends Component {
         if (aborted && !finalText) finalText = streamed;
         return {
             raw: finalText, isInterrupted, chartConfig, suggestions, applyEdit,
-            widget, applyQd, applyDash, usage, aborted
+            widget, applyQd, applyDash, applyWorkflow, usage, aborted
         };
     }
 

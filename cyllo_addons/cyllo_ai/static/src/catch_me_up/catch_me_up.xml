@@ -11,9 +11,7 @@
     </t>
 
     <t t-name="cyllo_ai.CatchMeUpChatCard">
-        <div class="o_cyllo_cmu_card" role="button" tabindex="0"
-             t-att-title="brief ? 'Open the full briefing' : ''"
-             t-on-click="expand" t-on-keydown="onKeydown">
+        <div class="o_cyllo_cmu_card">
             <div class="cmu-card-head">
                 <i class="ri-sparkling-line cmu-card-icon"/>
                 <div class="cmu-card-titles">
@@ -23,7 +21,10 @@
                     </div>
                     <div t-if="brief" class="cmu-card-sub" t-esc="brief.subtitle"/>
                 </div>
-                <i t-if="brief" class="ri-expand-diagonal-line cmu-card-expand"/>
+                <button t-if="brief" type="button" class="btn btn-link p-0 cmu-card-expand"
+                        title="Open the full briefing" aria-label="Open the full briefing" t-on-click="expand">
+                    <i class="ri-expand-diagonal-line"/>
+                </button>
             </div>
 
             <div t-if="state.loading" class="cmu-card-loading">
@@ -50,10 +51,7 @@
                     <i class="ri-arrow-right-circle-line"/>
                     <span t-esc="brief.next_step"/>
                 </div>
-                <div class="cmu-card-foot">
-                    Open full briefing
-                    <span t-if="savedAt" class="cmu-card-saved">· as of <t t-esc="savedAt"/></span>
-                </div>
+                <div t-if="savedAt" class="cmu-card-foot cmu-card-saved">As of <t t-esc="savedAt"/></div>
             </t>
         </div>
     </t>

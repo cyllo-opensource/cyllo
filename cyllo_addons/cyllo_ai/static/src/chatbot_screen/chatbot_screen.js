@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { onMounted, onWillUnmount, onWillStart } from "@odoo/owl";
+import { onMounted, onWillUnmount, onWillStart, status } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { ChatBot } from "../chatbot/chatbot";
 
@@ -54,6 +54,9 @@ export class ChatBotScreen extends ChatBot {
             );
             this.state.sessions = sessions || [];
         } catch (e) {
+            if (status(this) === "destroyed") {
+                return;
+            }
             console.error('Failed to load recent sessions:', e);
             this.state.sessions = [];
         }

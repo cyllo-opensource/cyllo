@@ -120,7 +120,19 @@ patch(CylloDashboard.prototype, {
         );
     },
 
+    /** True when Cyllo AI has a complete "Use For AI" configuration, so its chat can answer. */
+    async _cylloAiChatReady() {
+        try {
+            return (await this.env.services.rpc("/cyllo/get_ai_widget_enabled")) === "1";
+        } catch {
+            return false;
+        }
+    },
+
     async explainWithAI(item) {
+        if (!(await this._cylloAiChatReady())) {
+            return super.explainWithAI(item);
+        }
         // Fetch the chart's data for the agent to reason over (the chart itself
         // is rendered by GraphTile, which self-fetches from `item`).
         let rows = [];

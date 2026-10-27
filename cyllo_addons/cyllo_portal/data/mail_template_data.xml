@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <function model="res.users" name="_set_cyllo_mail_templates_noupdate_false"/>
+
+    <record id="portal.mail_template_data_portal_welcome" model="mail.template">
+        <field name="subject">Your account at {{ object.user_id.company_id.name or 'Acme Inc' }}</field>
+        <field name="body_html" type="html">
+<table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 590px; box-sizing: border-box; padding: 16px; background-color: white; color: #454748; border-collapse:separate;">
+<tbody>
+    <!-- HEADER -->
+    <tr>
+        <td align="center" style="min-width: 0;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 590px; box-sizing: border-box; min-width: 0; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle">
+                    <span style="font-size: 10px;">Your Account</span><br/>
+                    <span style="font-size: 20px; font-weight: bold;" t-out="object.user_id.name or 'Nathan Bennet'">Nathan Bennet</span>
+                </td><td valign="middle" align="right" t-if="not object.user_id.company_id.uses_default_logo">
+                    <img t-attf-src="/logo.png?company={{ object.user_id.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="object.user_id.company_id.name or 'Acme Inc'"/>
+                </td></tr>
+                <tr><td colspan="2" style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- CONTENT -->
+    <tr>
+        <td align="center" style="min-width: 0;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 590px; box-sizing: border-box; min-width: 0; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="top" style="font-size: 13px;">
+                    <div>
+                        Dear <t t-out="object.user_id.name or 'Nathan Bennet'">Nathan Bennet</t>,<br/> <br/>
+                        Welcome to <t t-out="object.user_id.company_id.name or 'Acme Inc'">Acme Inc</t>'s Portal!<br/><br/>
+                        An account has been created for you with the following login: <b><a t-attf-href="/web/login?login={{ object.user_id.login }}" style="color: #9EA700; text-decoration: none;" target="_blank"><t t-out="object.user_id.login or 'admin@yourcompany.example.com'">admin@yourcompany.example.com</t></a></b><br/><br/>
+                        Click on the button below to pick a password and activate your account.
+                        <div style="margin: 16px 0px 16px 0px; text-align: center;">
+                            <a t-att-href="object.user_id.signup_url" style="display: inline-block; padding: 10px 20px; text-decoration: none; font-size: 12px; background-color: #9EA700; color: #fff; border-radius: 5px;">
+                                <strong>Activate Account</strong>
+                            </a>
+                        </div>
+                        <t t-out="object.wizard_id.welcome_message or ''">Welcome to Acme Inc's portal.</t>
+                    </div>
+                </td></tr>
+                <tr><td style="text-align:center;">
+                  <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;"/>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <!-- FOOTER -->
+    <tr>
+        <td align="center" style="min-width: 0;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 590px; box-sizing: border-box; min-width: 0; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;">
+                <tr><td valign="middle" align="left">
+                    <t t-out="object.user_id.company_id.name or 'Acme Inc'">Acme Inc</t>
+                </td></tr>
+                <tr><td valign="middle" align="left" style="opacity: 0.7;">
+                    <t t-out="object.user_id.company_id.phone or '+5 555-555-5555'">+5 555-555-5555</t>
+                    <t t-if="object.user_id.company_id.email">
+                        | <a t-att-href="'mailto:%s' % object.user_id.company_id.email" style="text-decoration:none; color: #454748;" t-out="object.user_id.company_id.email or 'info@yourcompany.com'">info@yourcompany.com</a>
+                    </t>
+                    <t t-if="object.user_id.company_id.website">
+                        | <a t-att-href="'%s' % object.user_id.company_id.website" style="text-decoration:none; color: #454748;" t-out="object.user_id.company_id.website or 'http://www.example.com'">http://www.example.com</a>
+                    </t>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+</td></tr>
+<!-- POWERED BY -->
+<tr><td align="center" style="min-width: 0;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 590px; box-sizing: border-box; min-width: 0; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;">
+      <tr><td style="text-align: center; font-size: 13px;">
+        Powered by <a target="_blank" href="https://www.cyllo.com/" style="color: #9EA700;">Cyllo</a>
+      </td></tr>
+    </table>
+</td></tr>
+</table>
+        </field>
+        <field name="lang">{{ object.partner_id.lang }}</field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+    <function model="res.users" name="_set_cyllo_mail_templates_noupdate_true"/>
+</odoo>
