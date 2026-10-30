@@ -171,6 +171,8 @@ class ResUsers(models.Model):
     _inherit = 'res.users'
 
     banner_image = fields.Binary("Banner Image")
+    quick_access_wallpaper = fields.Binary("Quick Access Wallpaper")
+    quick_access_wallpaper_mime = fields.Char("Quick Access Wallpaper Mime")
 
     @classmethod
     def _login(cls, db, login, password, user_agent_env):
@@ -258,6 +260,10 @@ class ResUsers(models.Model):
                 for lang in
                 self.env['res.lang'].search([('active', '=', True)])],
             'work_email': current_user.email,
+            'phone': current_user.partner_id.phone or '',
+            'company': current_user.company_id.name or '',
+            'job_position': current_user.employee_id.job_id.name
+            if hasattr(current_user, 'employee_id') and current_user.employee_id else '',
             'timezone': _tz_get(),
             'current_tz': _tz_mapping()[
                 current_user.tz] if current_user.tz in _tz_mapping() else current_user.tz,

@@ -255,6 +255,12 @@ class Appointment(models.Model):
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'appointment.appointment') or _('New')
+            if vals.get('slot_id'):
+                slot = self.env['appointment.slot'].browse(vals['slot_id'])
+                if not vals.get('start_datetime') and slot.start_datetime:
+                    vals['start_datetime'] = slot.start_datetime
+                if not vals.get('end_datetime') and slot.end_datetime:
+                    vals['end_datetime'] = slot.end_datetime
         records = super().create(vals_list)
         #Creating calendar event
         for record in records:
@@ -441,9 +447,11 @@ class Appointment(models.Model):
                     ) % (rec.slot_id.name, rec.attendee_count,
                          max(0, spots_before_this)))
 
-    @api.constrains('start_datetime', 'appointment_type_id')
+    @api.constrains('start_datetime', 'appointment_type_id', 'state')
     def _check_min_booking_notice(self):
         for rec in self:
+            if rec.state in ('in_progress','done', 'cancelled', 'rejected'):
+                continue
             if rec.appointment_type_id and rec.start_datetime:
                 min_notice = rec.appointment_type_id.min_booking_notice
                 if min_notice > 0:
@@ -543,28 +551,61 @@ class Appointment(models.Model):
         return credit_note
 
     def _reconcile_credit_note(self, credit_note, invoice):
-        """Auto-generate an outbound refund payment to reconcile the credit note."""
+        """Reconcile the credit note against the original invoice payment.
+
+        In Odoo 17, ``account.move.reversal.reverse_moves()`` automatically
+        reconciles the credit note with the original invoice (both receivable
+        lines are matched against each other, effectively cancelling the debt).
+        Attempting to run ``account.payment.register`` on a credit note that is
+        already fully reconciled raises:
+          "You can't register a payment because there is nothing left to pay."
+        We therefore check for an unreconciled residual before proceeding.
+        """
         self.ensure_one()
         if credit_note.state != 'posted':
             return
-        payment_register = self.env['account.payment.register'].with_context(
-            active_model='account.move',
-            active_ids=credit_note.ids,
-        ).create({})
-        payment_register._create_payments()
+        # Check whether the credit note still has open receivable/payable lines.
+        # reverse_moves() in Odoo 17 may have already reconciled them.
+        open_lines = credit_note.line_ids.filtered(
+            lambda l: l.account_id.account_type in (
+                'asset_receivable', 'liability_payable')
+            and not l.reconciled
+            and abs(l.amount_residual) > 0.001
+        )
+        if not open_lines:
+            _logger.info(
+                'Credit note %s for appointment %s is already fully '
+                'reconciled (auto-reconciled by reverse_moves). '
+                'Skipping payment registration.',
+                credit_note.name, self.name,
+            )
+            return
+        try:
+            payment_register = self.env['account.payment.register'].with_context(
+                active_model='account.move',
+                active_ids=credit_note.ids,
+            ).create({})
+            payment_register._create_payments()
+        except Exception as e:
+            _logger.warning(
+                'Could not auto-register refund payment for appointment %s '
+                '(credit note %s): %s',
+                self.name, credit_note.name, str(e),
+            )
 
     def _create_calendar_event(self):
         """Create a calendar event linked to this appointment."""
         self.ensure_one()
-        if self.calendar_event_id:
+        if self.calendar_event_id or not self.start_datetime:
             return
+        stop = self.end_datetime or (self.start_datetime + timedelta(hours=self.duration or 1.0))
         partner_ids = [(4, self.partner_id.id)]
         if self.staff_id and self.staff_id.user_id and self.staff_id.user_id.partner_id:
             partner_ids.append((4, self.staff_id.user_id.partner_id.id))
         event = self.env['calendar.event'].create({
             'name': self.display_name or self.name,
             'start': self.start_datetime,
-            'stop': self.end_datetime,
+            'stop': stop,
             'partner_ids': partner_ids,
             'description': self.customer_notes or '',
             'user_id': self.staff_id.user_id.id if self.staff_id and self.staff_id.user_id else self.env.user.id,
@@ -663,7 +704,9 @@ class Appointment(models.Model):
 
     def action_no_show(self):
         for rec in self:
-            rec.write({'state' : 'no_show'})
+            if rec.start_datetime and rec.start_datetime > fields.Datetime.now():
+                raise UserError(_('You cannot mark a future appointment as no-show.'))
+            rec.write({'state': 'no_show'})
 
     def _send_confirmation_email(self):
         self.ensure_one()

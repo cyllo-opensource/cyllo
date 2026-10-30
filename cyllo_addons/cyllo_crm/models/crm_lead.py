@@ -380,23 +380,117 @@ class CrmLead(models.Model):
             ),
         }
 
+    # ------------------------------------------------------------------
+    # Raw-SQL helpers for the dashboard (query-based fast data fetching)
+    # ------------------------------------------------------------------
+
+    def _dashboard_where_from_domain(self, domain, alias="l"):
+        """Translate the (simple, JS-built) dashboard domain into a SQL
+        WHERE fragment + params. Only the leaves the dashboard can emit
+        are supported:
+            ('create_date', '>=', ts) / ('create_date', '<=', ts)
+            ('date_closed', '>=', d) / ('date_closed', '<=', d)
+            ('team_id', 'in', [ids])
+            ('user_id', 'in', [ids]) / ('user_id', '=', id)
+        """
+        conditions = ["TRUE"]
+        params = []
+        for leaf in (domain or []):
+            if not (isinstance(leaf, (list, tuple)) and len(leaf) == 3):
+                raise ValueError(
+                    f"Unsupported dashboard domain leaf: {leaf!r}")
+            field, operator, value = leaf
+            if field not in ("create_date", "date_closed", "team_id",
+                             "user_id"):
+                raise ValueError(
+                    f"Unsupported dashboard domain field: {field!r}")
+            if operator not in ("=", ">=", "<=", "in"):
+                raise ValueError(
+                    f"Unsupported dashboard domain operator: {operator!r}")
+            column = f"{alias}.{field}"
+            if operator == "in":
+                conditions.append(f"{column} = ANY(%s)")
+                params.append(list(value))
+            else:
+                conditions.append(f"{column} {operator} %s")
+                params.append(value)
+        return " AND ".join(conditions), params
+
+    def _dashboard_access_conditions(self, alias="l"):
+        """SQL equivalent of the crm.lead record rules applied by the ORM:
+        - global multi-company rule (company_id in allowed companies + null)
+        - 'Personal Leads' group rule for plain salesmen (own + unassigned)
+        """
+        conditions = [f"({alias}.company_id IS NULL OR "
+                      f"{alias}.company_id = ANY(%s))"]
+        params = [self.env.companies.ids]
+        if self.env.user.has_group(
+                "sales_team.group_sale_salesman") and not self.env.user.has_group(
+                "sales_team.group_sale_salesman_all_leads"):
+            conditions.append(f"({alias}.user_id = %s OR "
+                              f"{alias}.user_id IS NULL)")
+            params.append(self.env.uid)
+        return " AND ".join(conditions), params
+
+    def _dashboard_won_active_ids(self, where_sql, where_params, won=True):
+        """Fetch lead ids for one won/active bucket in a single light query.
+        Ordered like the model _order so id lists keep the same order the
+        ORM search produced."""
+        won_test = "TRUE" if won else "FALSE"
+        self.env.cr.execute(
+            f"""
+            SELECT l.id
+            FROM crm_lead l
+            LEFT JOIN crm_stage s ON s.id = l.stage_id
+            WHERE l.active = TRUE AND {where_sql}
+              AND COALESCE(s.is_won, FALSE) = {won_test}
+            ORDER BY l.priority DESC, l.id DESC
+            """,
+            where_params,
+        )
+        return [row[0] for row in self.env.cr.fetchall()]
+
     def _get_company_currency_sale_revenue(self, leads):
         """Return confirmed sales revenue converted to current company currency."""
         company_id = self.env.company
         revenue = 0
         label = "Total Revenue"
         if 'order_ids' in self.env['crm.lead']._fields:
-            sale_orders = leads.order_ids.filtered(
-                lambda order: order.state == 'sale') if leads else []
-            for order_id in sale_orders:
-                revenue += order_id.currency_id._convert(
-                    order_id.amount_total,
-                    company_id.currency_id,
-                    company_id,
-                    fields.Date.to_date(order_id.date_order),
+            lead_ids = leads.ids if leads else []
+            if lead_ids:
+                # One grouped SQL query per (currency, order date) instead
+                # of a conversion call per order — the rate is picked at
+                # each order's own date exactly like before.
+                self.env.cr.execute(
+                    """
+                    SELECT o.currency_id, DATE(o.date_order),
+                           SUM(o.amount_total)
+                    FROM sale_order o
+                    WHERE o.opportunity_id = ANY(%s) AND o.state = 'sale'
+                    GROUP BY 1, 2
+                    """,
+                    (lead_ids,),
                 )
+                for currency_id, order_date, amount_sum in \
+                        self.env.cr.fetchall():
+                    currency = self.env['res.currency'].browse(currency_id)
+                    revenue += currency._convert(
+                        float(amount_sum),
+                        company_id.currency_id,
+                        company_id,
+                        order_date,
+                    )
         else:
-            revenue = sum(leads.mapped('expected_revenue')) if leads else 0
+            if leads:
+                self.env.cr.execute(
+                    """
+                    SELECT COALESCE(SUM(l.expected_revenue), 0)
+                    FROM crm_lead l
+                    WHERE l.id = ANY(%s)
+                    """,
+                    (leads.ids,),
+                )
+                revenue = float(self.env.cr.fetchone()[0])
             label = "Total Expected Revenue"
         return revenue, label
 
@@ -404,10 +498,6 @@ class CrmLead(models.Model):
         """Calculate key metrics with month-over-month comparison"""
         start_date = next(
             (d[2].split(' ')[0] for d in domain if d[1] == '>='), None)
-        team_id = next(
-            (d[2] for d in domain if d[0] == 'team_id'), None)
-        user_id = next(
-            (d[2] for d in domain if d[0] == 'user_id'), None)
 
         # Convert the strings to dates and set them as the start and end dates
         start_date = datetime.strptime(start_date,
@@ -431,45 +521,62 @@ class CrmLead(models.Model):
             prev_start_date = yesterday
             prev_end_date = yesterday
 
-        current_leads = self.search(domain)
-        prev_leads = []
+        # Raw SQL: one light query per bucket (won / not-won partition the
+        # result set exactly like the old filtered() calls did).
+        where_sql, where_params = self._dashboard_where_from_domain(domain)
+        access_sql, access_params = self._dashboard_access_conditions()
+        bucket_params = access_params + where_params
+
+        current_won_ids = self._dashboard_won_active_ids(
+            f"{access_sql} AND {where_sql}", bucket_params, won=True)
+        current_active_ids = self._dashboard_won_active_ids(
+            f"{access_sql} AND {where_sql}", bucket_params, won=False)
+        current_won_leads = self.browse(current_won_ids)
+        current_active_leads = self.browse(current_active_ids)
+        current_leads_count = len(current_won_ids) + len(current_active_ids)
+
+        prev_won_leads = self.env['crm.lead']
+        prev_active_leads = self.env['crm.lead']
         if prev_start_date != datetime.now().date() and prev_end_date != datetime.now().date():
-            prev_leads_domain = [
+            # Keep the team / salesperson leaves with their OWN operators so
+            # multi-select ('in', [...]) filters still apply to the
+            # previous-period comparison (the date leaves are dropped here,
+            # exactly like the old code did).
+            extra_leaves = [
+                leaf for leaf in (domain or [])
+                if isinstance(leaf, (list, tuple)) and len(leaf) == 3
+                and leaf[0] in ('team_id', 'user_id')
+            ]
+            prev_domain = [
                 ('date_closed', '>=', prev_start_date),
                 ('date_closed', '<=', prev_end_date),
-            ]
-            if team_id:
-                prev_leads_domain.append(('team_id', '=', team_id))
-            if user_id:
-                prev_leads_domain.append(('user_id', '=', user_id))
-            prev_leads = self.search(prev_leads_domain)
+            ] + extra_leaves
+            prev_where_sql, prev_where_params = \
+                self._dashboard_where_from_domain(prev_domain)
+            prev_params = access_params + prev_where_params
 
-        current_won_leads = current_leads.filtered(
-            lambda r: r.stage_id.is_won) if current_leads else []
-        previous_won_leads = prev_leads.filtered(
-            lambda r: r.stage_id.is_won) if prev_leads else []
-        current_active_leads = current_leads.filtered(
-            lambda r: not r.stage_id.is_won) if current_leads else []
-        previous_active_leads = prev_leads.filtered(
-            lambda r: not r.stage_id.is_won) if prev_leads else []
+            prev_won_leads = self.browse(self._dashboard_won_active_ids(
+                f"{access_sql} AND {prev_where_sql}", prev_params, won=True))
+            prev_active_leads = self.browse(self._dashboard_won_active_ids(
+                f"{access_sql} AND {prev_where_sql}", prev_params, won=False))
 
         # Calculate metrics
         current_revenue, label = self._get_company_currency_sale_revenue(
             current_won_leads)
         last_month_revenue, label = self._get_company_currency_sale_revenue(
-            previous_won_leads)
+            prev_won_leads)
 
         active_leads_count = len(current_active_leads)
-        last_month_active_leads = len(previous_active_leads)
+        last_month_active_leads = len(prev_active_leads)
 
-        current_conversion_rate = (len(current_won_leads) / len(
-            current_leads) * 100) if current_leads else 0
+        current_conversion_rate = (len(current_won_leads) / current_leads_count
+                                   * 100) if current_leads_count else 0
         last_month_conversion_rate = (
-                len(previous_won_leads) / len(
-            previous_active_leads) * 100) if previous_active_leads else 0
+                len(prev_won_leads) / len(
+            prev_active_leads) * 100) if prev_active_leads else 0
 
         deals_closed_count = len(current_won_leads)
-        last_month_deals_closed = len(previous_won_leads)
+        last_month_deals_closed = len(prev_won_leads)
 
         # Calculate percentage changes
         revenue_change = self._calculate_percentage_change(current_revenue,
@@ -506,44 +613,77 @@ class CrmLead(models.Model):
         """Get revenue and leads trend for the last 6 months"""
         data = []
         today = datetime.now().date()
+        domain = list(domain or [])
 
-        for i in range(5, -1, -1):  # Last 6 months
-            month_start = (today.replace(day=1) - relativedelta(months=i))
-            month_end = (month_start + relativedelta(months=1) - timedelta(
-                days=1))
+        # Month windows for the last 6 months (oldest first, like before)
+        month_starts = [
+            today.replace(day=1) - relativedelta(months=i)
+            for i in range(5, -1, -1)
+        ]
+        first_start = month_starts[0]
+        last_end = month_starts[-1] + relativedelta(months=1) - timedelta(
+            days=1)
 
-            # Build domains for revenue
-            won_leads_domain = [
-                ('stage_id.is_won', '=', True),
-                ('date_closed', '>=', month_start),
-                ('date_closed', '<=', month_end)
-            ]
+        has_orders = 'order_ids' in self.env['crm.lead']._fields
+        revenue_by_month = {}
+        leads_counts = {}
 
-            # Build domains for leads created
-            leads_created_domain = [
-                ('create_date', '>=', month_start),
-                ('create_date', '<=', month_end)
-            ]
+        where_sql, where_params = self._dashboard_where_from_domain(domain)
+        access_sql, access_params = self._dashboard_access_conditions()
 
-            # Add custom domain if provided
-            if domain:
-                won_leads_domain.extend(domain)
-                leads_created_domain.extend(domain)
+        # Grouping by month must use the same timezone the ORM used (the
+        # context tz); dates are stored in UTC.
+        tz = self.env.context.get('tz')
+        if tz not in pytz.all_timezones_set:
+            tz = 'UTC'
 
-            # Get revenue for the month
-            won_leads = self.search(won_leads_domain)
+        # Leads created per month — one grouped SQL query instead of six
+        # searches
+        self.env.cr.execute(
+            f"""
+            SELECT date_trunc('month',
+                     l.create_date AT TIME ZONE 'UTC' AT TIME ZONE %s),
+                   COUNT(*)
+            FROM crm_lead l
+            WHERE l.create_date >= %s AND l.create_date <= %s
+              AND l.active = TRUE
+              AND {access_sql} AND {where_sql}
+            GROUP BY 1
+            """,
+            [tz, first_start, last_end] + access_params + where_params,
+        )
+        for created_month, count in self.env.cr.fetchall():
+            leads_counts[created_month.strftime('%Y-%m')] = count
 
-            # Get leads created in the month
-            leads_created = self.search(leads_created_domain)
+        # Revenue per month: won leads closed in the window, orders joined
+        # and summed in one SQL query (all order states, like before)
+        if has_orders:
+            self.env.cr.execute(
+                f"""
+                SELECT date_trunc('month',
+                         l.date_closed AT TIME ZONE 'UTC' AT TIME ZONE %s),
+                       SUM(o.amount_total)
+                FROM crm_lead l
+                LEFT JOIN crm_stage s ON s.id = l.stage_id
+                JOIN sale_order o ON o.opportunity_id = l.id
+                WHERE COALESCE(s.is_won, FALSE) = TRUE
+                  AND l.date_closed >= %s AND l.date_closed <= %s
+                  AND l.active = TRUE
+                  AND {access_sql} AND {where_sql}
+                GROUP BY 1
+                """,
+                [tz, first_start, last_end] + access_params + where_params,
+            )
+            for closed_month, amount_sum in self.env.cr.fetchall():
+                revenue_by_month[closed_month.strftime('%Y-%m')] = \
+                    float(amount_sum or 0)
 
-            revenue = sum(won_leads.mapped('order_ids.amount_total') or [
-                0]) if 'order_ids' in won_leads._fields else 0
-            leads_count = len(leads_created)
-
+        for month_start in month_starts:
+            month_key = month_start.strftime('%Y-%m')
             data.append({
                 'month': month_start.strftime('%b'),
-                'revenue': revenue,
-                'leads': leads_count
+                'revenue': revenue_by_month.get(month_key, 0),
+                'leads': leads_counts.get(month_key, 0),
             })
 
         return data
@@ -552,36 +692,52 @@ class CrmLead(models.Model):
         """Get pipeline distribution by stages"""
         stages = self.env['crm.stage'].search([])
 
-        # Build domain for total leads
-        total_leads_domain = [('active', '=', True)]
-        if domain:
-            total_leads_domain.extend(domain)
+        # Raw SQL: total + per-stage counts, two light queries instead of
+        # one search per stage (N+1). Record-rule equivalent: multi-company
+        # + personal-leads rule (same rows the ORM search returned).
+        where_sql, where_params = self._dashboard_where_from_domain(domain)
+        access_sql, access_params = self._dashboard_access_conditions()
+        sql_params = access_params + where_params
 
-        total_leads = len(self.search(total_leads_domain))
+        self.env.cr.execute(
+            f"""
+            SELECT COUNT(*)
+            FROM crm_lead l
+            WHERE l.active = TRUE AND {access_sql} AND {where_sql}
+            """,
+            sql_params,
+        )
+        total_leads = self.env.cr.fetchone()[0]
 
         if total_leads == 0:
             return []
 
+        self.env.cr.execute(
+            f"""
+            SELECT l.stage_id, COUNT(*)
+            FROM crm_lead l
+            WHERE l.active = TRUE AND {access_sql} AND {where_sql}
+            GROUP BY l.stage_id
+            """,
+            sql_params,
+        )
+        counts_by_stage = {
+            stage_id: count for stage_id, count in self.env.cr.fetchall()
+        }
+
         pipeline_data = []
-        colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
-                  '#06B6D4']
+        colors = ['#4C5814', '#7E8C2F', '#A9B85A', '#D3C91F',
+                  '#48521B', '#8B9A3E', '#BCC680', '#DDE3C0']
 
         for i, stage in enumerate(stages):
-            # Build domain for leads in this stage
-            stage_domain = [
-                ('stage_id', '=', stage.id),
-                ('active', '=', True)
-            ]
-            if domain:
-                stage_domain.extend(domain)
-
-            leads_in_stage = len(self.search(stage_domain))
+            leads_in_stage = counts_by_stage.get(stage.id, 0)
             percentage = round((leads_in_stage / total_leads) * 100, 1)
 
             if percentage > 0:  # Only include stages with leads
                 pipeline_data.append({
                     'stage': stage.name,
                     'value': percentage,
+                    'count': leads_in_stage,
                     'color': colors[i % len(colors)]
                 })
 
@@ -600,17 +756,44 @@ class CrmLead(models.Model):
         start_date = datetime.strptime(start_date,
                                        "%Y-%m-%d").date() + timedelta(days=1)
         end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-        lead_ids = self.search(domain).mapped("id")
-        activities = self.env['mail.activity'].search(
-            [('res_model', '=', 'crm.lead'), ('res_id', 'in', lead_ids),
-             ('date_deadline', '>=', start_date),
-             ('date_deadline', '<=', end_date)])
+        # Raw SQL: visible lead ids (record-rule equivalent) + one joined
+        # query for the activities instead of ORM field prefetching.
+        where_sql, where_params = self._dashboard_where_from_domain(domain)
+        access_sql, access_params = self._dashboard_access_conditions()
 
-        for act in activities:
+        self.env.cr.execute(
+            f"SELECT l.id FROM crm_lead l WHERE l.active = TRUE "
+            f"AND {access_sql} AND {where_sql}",
+            access_params + where_params,
+        )
+        lead_ids = [row[0] for row in self.env.cr.fetchall()]
+
+        self.env.cr.execute(
+            """
+            SELECT t.name->>%s, t.name->>'en_US', a.date_deadline, p.name
+            FROM mail_activity a
+            LEFT JOIN mail_activity_type t ON t.id = a.activity_type_id
+            JOIN res_users u ON u.id = a.user_id
+            LEFT JOIN res_partner p ON p.id = u.partner_id
+            WHERE a.res_model = 'crm.lead'
+              AND a.res_id = ANY(%s)
+              AND a.date_deadline >= %s
+              AND a.date_deadline <= %s
+            ORDER BY a.date_deadline ASC, a.id ASC
+            """,
+            (
+                self.env.lang or 'en_US',
+                lead_ids,
+                start_date,
+                end_date,
+            ),
+        )
+        for type_name, type_name_en, deadline, user_name in \
+                self.env.cr.fetchall():
             activity_data.append({
-                'name': act.activity_type_id.name,
-                'date_deadline': str(act.date_deadline),
-                'user_name': act.user_id.name,
+                'name': (type_name or type_name_en) or False,
+                'date_deadline': str(deadline),
+                'user_name': user_name or False,
             })
         return activity_data
 
@@ -626,32 +809,65 @@ class CrmLead(models.Model):
         end_date = next(
             (d[2] for d in domain if d[1] == '<='), None)
 
-        performers = []
-        for user in salespeople:
-            # Build domain for won deals
-            won_deals_domain = [
-                ('user_id', '=', user.id),
-                ('stage_id.is_won', '=', True),
+        # Strip the logged-in-user restriction: every salesperson must be
+        # counted against their OWN deals. Keeping the caller's user_id leaf
+        # here would AND "user_id = performer" with "user_id = current user",
+        # so only the logged-in user could ever show up.
+        date_domain = [
+            leaf for leaf in (domain or [])
+            if isinstance(leaf, (list, tuple)) and len(leaf) == 3
+            and leaf[0] in ('date_closed', 'team_id', 'create_date')
+        ]
+        # One raw SQL grouped query: per-salesperson deal count + expected
+        # revenue sum, instead of one search per salesperson (N+1).
+        # sudo()-equivalent: the old code searched with sudo() so the
+        # plain salesman's record rules don't hide other users' leads.
+        # (The "won" condition is applied directly in the SQL below, so it
+        # must not be part of the domain passed to the WHERE builder.)
+        won_where_sql, won_where_params = self._dashboard_where_from_domain(
+            [
                 ('date_closed', '>=', start_date),
-                ('date_closed', '<=', end_date)
-            ]
+                ('date_closed', '<=', end_date),
+            ] + date_domain)
+        self.env.cr.execute(
+            f"""
+            SELECT l.user_id, COUNT(*), COALESCE(SUM(l.expected_revenue), 0)
+            FROM crm_lead l
+            LEFT JOIN crm_stage s ON s.id = l.stage_id
+            WHERE COALESCE(s.is_won, FALSE) = TRUE
+              AND l.active = TRUE AND {won_where_sql}
+            GROUP BY l.user_id
+            """,
+            won_where_params,
+        )
+        # Consume the result immediately — any ORM access below (image
+        # prefetch…) runs its own queries on the same cursor and would
+        # overwrite this result set.
+        won_rows = self.env.cr.fetchall()
 
-            # Add a custom domain if provided
-            if domain:
-                won_deals_domain.extend(domain)
+        allowed_ids = set(salespeople.ids)
+        sudo_users = salespeople.sudo()
+        avatars = {user.id: bool(user.image_128) for user in sudo_users}
 
-            # Get won deals
-            won_deals = self.search(won_deals_domain)
+        performers = []
+        for user_id, deals_count, total_amount in won_rows:
+            # Only sales people with deals (empty groups / non-salesman
+            # owners are skipped, same as the old per-user loop)
+            if not user_id or user_id not in allowed_ids:
+                continue
+            user = sudo_users.browse(user_id) if user_id in avatars \
+                else None
 
-            if won_deals:
-                total_amount = sum(won_deals.mapped('expected_revenue') or [0])
-                deals_count = len(won_deals)
-
-                performers.append({
-                    'name': user.name,
-                    'deals': deals_count,
-                    'amount': total_amount
-                })
+            performers.append({
+                'name': user.name,
+                'deals': deals_count,
+                'amount': float(total_amount),
+                # Use the /web/image controller instead of inline base64 —
+                # image_128 already returns base64 text, and serving via the
+                # controller avoids encoding/oversize payload issues.
+                'user_id': user_id,
+                'avatar': avatars.get(user_id, False),
+            })
 
         # Sort by amount and return top 4
         performers.sort(key=lambda x: x['amount'], reverse=True)
@@ -668,16 +884,12 @@ class CrmLead(models.Model):
         """Dismiss lead notifications"""
         leads = self.browse(lead_ids)
         leads.write({'is_dismissed_notification': True})
-        for lead in leads:
-            lead.is_dismissed_notification = True
 
-            # Also update related activities
-            activities = self.env['mail.activity'].search([
-                ('res_model', '=', 'crm.lead'),
-                ('res_id', '=', lead.id)
-            ])
-
-            activities.write({'is_dismissed_notification': True})
+        # One query for all related activities instead of one per lead
+        self.env['mail.activity'].search([
+            ('res_model', '=', 'crm.lead'),
+            ('res_id', 'in', lead_ids),
+        ]).write({'is_dismissed_notification': True})
 
         return True
 
@@ -686,16 +898,13 @@ class CrmLead(models.Model):
         """Mark lead notifications as read"""
         leads = self.browse(lead_ids).sudo()
         leads.write({'is_marked_as_read': True})
-        for lead in leads:
-            lead.is_marked_as_read = True
 
-            # Also update related activities
-            activities = self.env['mail.activity'].search([
-                ('res_model', '=', 'crm.lead'),
-                ('res_id', '=', lead.id)
-            ])
-
-            activities.write({'is_marked_as_read': True})
+        # One query for all related activities instead of one per lead
+        activities = self.env['mail.activity'].search([
+            ('res_model', '=', 'crm.lead'),
+            ('res_id', 'in', lead_ids),
+        ])
+        activities.write({'is_marked_as_read': True})
 
         return {
             'updated': len(leads),
@@ -715,7 +924,7 @@ class CrmLead(models.Model):
                 ('create_date', '>=', recent_date),
                 ('type', '=', 'lead'),
                 ('is_dismissed_notification', '=', False),
-            ], order='create_date desc', limit=10)
+            ], order='create_date desc')
             notifications.extend([
                 self.build_notifications('new_lead', lead, 'New Lead Created',
                                          f'New lead "{lead.name}" has been created',
@@ -728,7 +937,7 @@ class CrmLead(models.Model):
                 ('date_deadline', '<=', current_date),
                 ('is_dismissed_notification', '=', False),
                 ('user_id', '=', self.env.user.id)
-            ], limit=5)
+            ], order='date_deadline desc')
 
             # Batch leads for activities
             leads_by_id = {lead.id: lead for lead in
@@ -752,14 +961,18 @@ class CrmLead(models.Model):
                     lead, title, message, 'activity_due', priority
                 ))
 
-            avg_revenue = self.search_read(
-                [('expected_revenue', '>', 0)],
-                ['expected_revenue']
+            # Single SQL query for the average instead of reading every
+            # matching lead
+            self.env.cr.execute(
+                """
+                SELECT COALESCE(SUM(l.expected_revenue), 0), COUNT(*)
+                FROM crm_lead l
+                WHERE l.active = TRUE AND l.expected_revenue > 0
+                """,
             )
-
-            if avg_revenue:
-                avg_val = sum(l['expected_revenue'] for l in avg_revenue) / len(
-                    avg_revenue)
+            revenue_sum, lead_count = self.env.cr.fetchone()
+            if lead_count:
+                avg_val = float(revenue_sum) / lead_count
                 high_value_leads = self.search([
                     ('create_date', '>=', recent_date),
                     ('expected_revenue', '>', avg_val),
@@ -774,9 +987,9 @@ class CrmLead(models.Model):
                     for lead in high_value_leads
                 ])
 
-            # Final sorting & limiting
+            # Final sorting & limiting (frontend shows all with scroll)
             return sorted(notifications, key=lambda x: x['create_date'],
-                          reverse=True)[:20]
+                          reverse=True)[:50]
 
 
         except Exception as e:
@@ -816,237 +1029,7 @@ class CrmLead(models.Model):
         return exit_criteria_activities > 0
 
     # todo: Getting location using AI is pending (change langchain)
-    # def action_get_customer_local_time(self):
-    #     """
-    #     Function for getting partner time and current time using Google Gemini API.
-    #     Automatically pins the working hours table in the chatter.
-    #     """
-    #     # Check if already fetched
-    #     if self.partner_work_status:
-    #         return {
-    #             'type': 'ir.actions.client',
-    #             'tag': 'display_notification',
-    #             'params': {
-    #                 'title': "Customer Current Time",
-    #                 'message': "Working hours already fetched!",
-    #                 'type': 'info',
-    #                 'sticky': False,
-    #             }
-    #         }
-    #
-    #     API_KEY = request.env[
-    #         'ir.config_parameter'
-    #     ].sudo().get_param('cyllo_agent.api_key')
-    #     model_id = self.env['ir.config_parameter'].sudo().get_param(
-    #         'agent.llm_model_id'
-    #     )
-    #
-    #     if not model_id:
-    #         return {
-    #             'type': 'ir.actions.client',
-    #             'tag': 'display_notification',
-    #             'params': {
-    #                 'title': "Configuration Error",
-    #                 'message': "LLM Model ID is not configured. Please set it in settings.",
-    #                 'type': 'danger',
-    #                 'sticky': False,
-    #             }
-    #         }
-    #
-    #     llm_model = self.env['cyllo.llm'].sudo().browse(int(model_id))
-    #     model_name = llm_model.name
-    #
-    #     if not API_KEY:
-    #         return {
-    #             'type': 'ir.actions.client',
-    #             'tag': 'display_notification',
-    #             'params': {
-    #                 'title': "Missing API Key",
-    #                 'message': "API Key is missing. Please configure it before proceeding.",
-    #                 'type': 'danger',
-    #                 'sticky': False,
-    #             }
-    #         }
-    #
-    #     llm = ChatGoogleGenerativeAI(
-    #         model=model_name,
-    #         google_api_key=API_KEY
-    #     )
-    #
-    #     message = HumanMessage(
-    #         content=[
-    #             {
-    #                 "type": "text",
-    #                 "text": (
-    #                     f"Search Google and provide the official working hours of "
-    #                     f"{self.partner_id.name} ({self.state_id.name}, {self.country_id.name}). "
-    #                     f"First, show today's working shift in HH:MM to HH:MM format. "
-    #                     f"Then show the IANA timezone (e.g., Asia/Kolkata, America/Los_Angeles, Europe/London). "
-    #                     f"IMPORTANT: Only provide the IANA timezone name without any prefix or additional text. "
-    #                     f"Then list the working hours for each weekday in HH:MM to HH:MM format. "
-    #                     f"Do not add extra text, explanations, headings, or formatting. "
-    #                     f"Format example:\n"
-    #                     f"09:00 to 17:00\n"
-    #                     f"Asia/Kolkata\n"
-    #                     f"Monday: 09:00 to 17:00\n"
-    #                     f"Tuesday: 09:00 to 17:00\n"
-    #                     f"If the company cannot be found or no official working hours are available, "
-    #                     f"output exactly: 'Sorry, company is not found'."
-    #                 )
-    #             }
-    #         ]
-    #     )
-    #
-    #     try:
-    #         response = llm.invoke([message])
-    #         data = response.content.split('\n')
-    #
-    #         if len(data) > 1 and 'Sorry, company is not found' not in response.content:
-    #             # Save values
-    #             self.partner_id.partner_working_hours = data[0]
-    #
-    #             # Clean timezone string
-    #             timezone_str = data[1].strip()
-    #
-    #             # Remove common prefixes if present
-    #             if timezone_str.lower().startswith('time zone:'):
-    #                 timezone_str = timezone_str.split(':', 1)[1].strip()
-    #             elif timezone_str.lower().startswith('timezone:'):
-    #                 timezone_str = timezone_str.split(':', 1)[1].strip()
-    #
-    #             # Map common abbreviations to IANA format
-    #             timezone_mapping = {
-    #                 'IST': 'Asia/Kolkata',
-    #                 'IST (UTC+5:30)': 'Asia/Kolkata',
-    #                 'PST': 'America/Los_Angeles',
-    #                 'EST': 'America/New_York',
-    #                 'CST': 'America/Chicago',
-    #                 'MST': 'America/Denver',
-    #                 'GMT': 'Europe/London',
-    #                 'CET': 'Europe/Paris',
-    #                 'JST': 'Asia/Tokyo',
-    #                 'AEST': 'Australia/Sydney',
-    #             }
-    #
-    #             # Check if we need to map the timezone
-    #             for abbr, iana_tz in timezone_mapping.items():
-    #                 if timezone_str.upper().startswith(abbr):
-    #                     timezone_str = iana_tz
-    #                     break
-    #
-    #             self.partner_id.partner_time_zone = timezone_str
-    #
-    #             # Days of week
-    #             days = [
-    #                 "Monday", "Tuesday", "Wednesday",
-    #                 "Thursday", "Friday", "Saturday", "Sunday"
-    #             ]
-    #
-    #             # Build HTML table
-    #             table_html = """
-    #             <table style="border-collapse: collapse; width: 100%; margin: 10px 0;">
-    #                 <thead>
-    #                     <tr style="background-color: #f0f0f0;">
-    #                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Information</th>
-    #                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Details</th>
-    #                     </tr>
-    #                 </thead>
-    #                 <tbody>
-    #             """
-    #
-    #             # ---- Time Zone Row ----
-    #             table_html += f"""
-    #                 <tr style="background-color: #ffffff;">
-    #                     <td style="border: 1px solid #ddd; padding: 8px;">
-    #                         <strong>Time Zone</strong>
-    #                     </td>
-    #                     <td style="border: 1px solid #ddd; padding: 8px;">
-    #                         {timezone_str}
-    #                     </td>
-    #                 </tr>
-    #             """
-    #
-    #             # ---- Working Hours Rows ----
-    #             for i, day in enumerate(days):
-    #                 if i + 2 >= len(data):
-    #                     break
-    #
-    #                 value = data[i + 2]
-    #
-    #                 # Remove "Monday:" from "Monday: 09:00 to 17:00"
-    #                 if ':' in value:
-    #                     day_label, value = value.split(':', 1)
-    #                     value = value.strip()
-    #
-    #                 # Alternating row background
-    #                 bg_color = "#f9f9f9" if i % 2 else "#ffffff"
-    #
-    #                 # Make value text red if closed
-    #                 value_style = "color: red;" if value in ["00:00 to 00:00",
-    #                                                          "Closed"] else ""
-    #
-    #                 table_html += f"""
-    #                     <tr style="background-color: {bg_color};">
-    #                         <td style="border: 1px solid #ddd; padding: 8px;">
-    #                             <strong>{day}</strong>
-    #                         </td>
-    #                         <td style="border: 1px solid #ddd; padding: 8px; {value_style}">
-    #                             {value}
-    #                         </td>
-    #                     </tr>
-    #                 """
-    #
-    #             table_html += """
-    #                 </tbody>
-    #             </table>
-    #             """
-    #
-    #             # Save to partner
-    #             self.partner_id.write({
-    #                 'partner_working_details': table_html
-    #             })
-    #
-    #             # Trigger the write method which will create and pin the message
-    #             self.write({})
-    #
-    #             return {
-    #                 'type': 'ir.actions.client',
-    #                 'tag': 'display_notification',
-    #                 'params': {
-    #                     'title': "Success!",
-    #                     'message': "Working hours fetched and pinned to chatter successfully!",
-    #                     'type': 'success',
-    #                     'sticky': False,
-    #                     'next': {
-    #                         'type': 'ir.actions.client',
-    #                         'tag': 'reload',
-    #                     }
-    #                 }
-    #             }
-    #
-    #         return {
-    #             'type': 'ir.actions.client',
-    #             'tag': 'display_notification',
-    #             'params': {
-    #                 'title': "Not Found",
-    #                 'message': "Company not found while fetching working hours",
-    #                 'type': 'warning',
-    #                 'sticky': False,
-    #             }
-    #         }
-    #
-    #     except Exception as e:
-    #         _logger.error(f"Error during Gemini invocation: {e}")
-    #         return {
-    #             'type': 'ir.actions.client',
-    #             'tag': 'display_notification',
-    #             'params': {
-    #                 'title': "Error",
-    #                 'message': f"An error occurred: {str(e)}",
-    #                 'type': 'danger',
-    #                 'sticky': False,
-    #             }
-    #         }
+
 
     def _compute_partner_work_status(self):
         """Compute Partner Work Status using day-wise working hours"""

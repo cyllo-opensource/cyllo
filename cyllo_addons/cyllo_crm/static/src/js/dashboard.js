@@ -5,9 +5,23 @@ import {registry} from "@web/core/registry";
 import {useService} from "@web/core/utils/hooks";
 import {formatCurrency} from "@web/core/currency";
 
+// Options shown in the Date Range checkbox dropdown (same design as the
+// Sales Team / Sales Persons dropdowns)
+const DATE_RANGE_OPTIONS = [
+    {value: "today", label: "Today"},
+    {value: "this_week", label: "This Week"},
+    {value: "this_month", label: "This Month"},
+    {value: "this_quarter", label: "This Quarter"},
+    {value: "this_year", label: "This Year"},
+    {value: "custom", label: "Custom Range"},
+];
 
 export class CRMDashboard extends Component {
     static template = "crm_dashboard.crm_dashboard_template";
+
+    get dateRangeOptions() {
+        return DATE_RANGE_OPTIONS;
+    }
 
     setup() {
         this.orm = useService("orm");
@@ -28,8 +42,8 @@ export class CRMDashboard extends Component {
                 dateRange: "this_month",
                 dateFrom: "",
                 dateTo: "",
-                salesTeam: "",
-                salesperson: "",
+                salesTeams: [],
+                salesPersons: [],
             },
             hideSalespersonFilter: false,
             salesTeams: [],
@@ -44,6 +58,16 @@ export class CRMDashboard extends Component {
             unreadVisibleCount: 0,
             showFilters: false,
             showAllNotifications: false,
+            // Staged filter selections — only "Apply" commits these
+            // into state.filters and re-renders the dashboard.
+            filterDraft: {
+                dateRange: "this_month",
+                dateFrom: "",
+                dateTo: "",
+                salesTeams: [],
+                salesPersons: [],
+            },
+            openDropdown: null,
         });
         this.charts = {};
 
@@ -59,15 +83,27 @@ export class CRMDashboard extends Component {
 
         onMounted(() => {
             this.loadInitialData();
+            // Close the checkbox dropdowns when clicking outside the popover
+            this._onClickOutsideFilters = (ev) => {
+                if (!ev.target.closest(".cy-dropdown")) {
+                    this.state.openDropdown = null;
+                }
+            };
+            document.addEventListener("click", this._onClickOutsideFilters);
         });
     }
 
     onToggleFilters() {
         this.state.showFilters = !this.state.showFilters;
+        if (this.state.showFilters) {
+            // Path responds to committed filters; staging starts from those
+            Object.assign(this.state.filterDraft, this.state.filters);
+        }
+        this.state.openDropdown = null;
     }
 
-    onToggleNotifications() {
-        this.state.showAllNotifications = !this.state.showAllNotifications;
+    toggleFilterDropdown(name) {
+        this.state.openDropdown = this.state.openDropdown === name ? null : name;
     }
 
     async loadInitialData() {
@@ -90,10 +126,10 @@ export class CRMDashboard extends Component {
             );
             this.state.hideSalespersonFilter = !!context.hide_salesperson_filter;
             if (this.state.hideSalespersonFilter && context.current_team_id) {
-                this.state.filters.salesTeam = String(context.current_team_id);
+                this.state.filters.salesTeams = [Number(context.current_team_id)];
             }
             if (this.state.hideSalespersonFilter && context.current_user_id) {
-                this.state.filters.salesperson = String(context.current_user_id);
+                this.state.filters.salesPersons = [Number(context.current_user_id)];
             }
         } catch (error) {
             console.warn("Error loading dashboard user context:", error);
@@ -160,18 +196,18 @@ export class CRMDashboard extends Component {
                 deals_closed: {value: 89, change: 15.3, records: []},
             },
             revenue_trend: [
-                {month: "Jan", revenue: 65000, leads: 120},
-                {month: "Feb", revenue: 59000, leads: 98},
-                {month: "Mar", revenue: 80000, leads: 145},
-                {month: "Apr", revenue: 81000, leads: 167},
-                {month: "May", revenue: 95000, leads: 189},
-                {month: "Jun", revenue: 88000, leads: 156},
+                {month: "Jan", revenue: 65000, leads: 120, previous_year: 45000},
+                {month: "Feb", revenue: 59000, leads: 98, previous_year: 38000},
+                {month: "Mar", revenue: 80000, leads: 145, previous_year: 52000},
+                {month: "Apr", revenue: 81000, leads: 167, previous_year: 60000},
+                {month: "May", revenue: 95000, leads: 189, previous_year: 72000},
+                {month: "Jun", revenue: 88000, leads: 156, previous_year: 64000},
             ],
             pipeline: [
-                {stage: "New", value: 35, color: "#3B82F6"},
-                {stage: "Qualified", value: 28, color: "#10B981"},
-                {stage: "Proposal", value: 22, color: "#F59E0B"},
-                {stage: "Won", value: 15, color: "#EF4444"},
+                {stage: "New", value: 50, count: 75, color: "#4C5814"},
+                {stage: "Proposition", value: 26.7, count: 40, color: "#7E8C2F"},
+                {stage: "Won", value: 6.7, count: 10, color: "#A9B85A"},
+                {stage: "Qualified", value: 13.7, count: 21, color: "#D3C91F"},
             ],
             activities: [
                 {day: "Mon", calls: 24, emails: 45, meetings: 8},
@@ -224,6 +260,7 @@ export class CRMDashboard extends Component {
                 change: data.metrics.total_revenue.change,
                 records: [],
                 icon: "ri-money-dollar-circle-line",
+                unit: "",
             },
             {
                 type: "leads",
@@ -233,6 +270,7 @@ export class CRMDashboard extends Component {
                 change: data.metrics.active_leads.change,
                 records: data.metrics.active_leads.records || [],
                 icon: "ri-group-line",
+                unit: "Units",
             },
             {
                 type: "conversion",
@@ -251,6 +289,7 @@ export class CRMDashboard extends Component {
                 change: data.metrics.deals_closed.change,
                 records: data.metrics.deals_closed.records || [],
                 icon: "ri-award-line",
+                unit: "Deals",
             },
         ];
 
@@ -258,6 +297,15 @@ export class CRMDashboard extends Component {
         this.state.revenueData = data.revenue_trend;
         this.state.pipeline = data.pipeline;
         this.state.activities = data.activities;
+
+        // HTML legend for the Activities Overview card (mirrors chart datasets)
+        const activityTypeNames = Array.from(
+            new Set((data.activities || []).map((a) => a.name))
+        );
+        this.state.activityLegend = activityTypeNames.map((name, index) => ({
+            name,
+            color: this.generateColor(index, Math.max(activityTypeNames.length, 8)).border,
+        }));
 
         // Format top performers
         this.state.topPerformers = data.top_performers.map((performer) => ({
@@ -281,6 +329,15 @@ export class CRMDashboard extends Component {
         this.createActivitiesChart();
     }
 
+    themeColor(name, fallback) {
+        // Resolve a CSS variable (defined in dashboard_style.css) at runtime
+        // so canvas colors stay in sync with the dashboard theme
+        const val = getComputedStyle(document.documentElement)
+            .getPropertyValue(name)
+            .trim();
+        return val || fallback;
+    }
+
     createRevenueChart() {
         const ctx = this.revenueChartRef.el.getContext("2d");
         const data = this.state.revenueData;
@@ -293,21 +350,57 @@ export class CRMDashboard extends Component {
                     {
                         label: "Revenue",
                         data: data.map((d) => d.revenue),
-                        borderColor: "#3B82F6",
-                        backgroundColor: "rgba(59, 130, 246, 0.1)",
-                        borderWidth: 3,
+                        borderColor: this.themeColor("--cy-line-dark", "#4C5814"),
+                        backgroundColor: this.themeColor(
+                            "--cy-accent-fill",
+                            "rgba(126, 140, 47, 0.12)"
+                        ),
+                        borderWidth: 2,
                         fill: true,
                         tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: this.themeColor(
+                            "--cy-line-dark",
+                            "#4C5814"
+                        ),
+                        yAxisID: "y1",
+                    },
+                    {
+                        label: "Lead",
+                        data: data.map((d) => d.leads),
+                        borderColor: this.themeColor("--cy-line-lead", "#D3C91F"),
+                        backgroundColor: "transparent",
+                        borderWidth: 2,
+                        borderDash: [],
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: this.themeColor(
+                            "--cy-line-lead",
+                            "#D3C91F"
+                        ),
                         yAxisID: "y",
                     },
                     {
-                        label: "Leads",
-                        data: data.map((d) => d.leads),
-                        borderColor: "#10B981",
-                        backgroundColor: "rgba(16, 185, 129, 0.1)",
-                        borderWidth: 3,
+                        label: "Previous year",
+                        data: data.map((d) =>
+                            d.previous_year != null
+                                ? d.previous_year
+                                : Math.round(d.revenue * 0.6)
+                        ),
+                        borderColor: this.themeColor("--cy-line-muted", "#B9B7A8"),
+                        backgroundColor: "transparent",
+                        borderWidth: 1.5,
+                        borderDash: [3, 3],
                         fill: false,
                         tension: 0.4,
+                        pointRadius: 0,
+                        pointBackgroundColor: this.themeColor(
+                            "--cy-line-muted",
+                            "#B9B7A8"
+                        ),
                         yAxisID: "y1",
                     },
                 ],
@@ -315,18 +408,52 @@ export class CRMDashboard extends Component {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    // Inset the plot inside the rounded track (canvas now fills
+                    // .chart-container edge to edge — no CSS padding)
+                    padding: {top: 16, right: 22, bottom: 8, left: 12},
+                },
                 interaction: {
                     mode: "index",
                     intersect: false,
                 },
                 scales: {
+                    x: {
+                        grid: {
+                            display: true,
+                            color: this.themeColor("--cy-grid-line", "#F0EFE8"),
+                            borderDash: [3, 5],
+                            drawTicks: false,
+                        },
+                        border: {
+                            display: false,
+                        },
+                        ticks: {
+                            color: this.themeColor("--cy-tick", "#9A9A8C"),
+                            font: {size: 11},
+                        },
+                    },
                     y: {
                         type: "linear",
                         display: true,
                         position: "left",
                         title: {
                             display: true,
-                            text: "Revenue ($)",
+                            text: "Leads",
+                            color: this.themeColor("--cy-muted", "#8B8B7E"),
+                            font: {size: 11, weight: 500},
+                        },
+                        border: {
+                            display: false,
+                        },
+                        grid: {
+                            color: this.themeColor("--cy-grid-line", "#F0EFE8"),
+                            borderDash: [3, 5],
+                            drawTicks: false,
+                        },
+                        ticks: {
+                            color: this.themeColor("--cy-tick-lead", "#9FA32E"),
+                            font: {size: 11},
                         },
                     },
                     y1: {
@@ -335,17 +462,26 @@ export class CRMDashboard extends Component {
                         position: "right",
                         title: {
                             display: true,
-                            text: "Leads",
+                            text: "Revenue ($)",
+                            color: this.themeColor("--cy-muted", "#8B8B7E"),
+                            font: {size: 11, weight: 500},
                         },
                         grid: {
                             drawOnChartArea: false,
+                            border: {
+                                display: false,
+                            },
+                        },
+                        ticks: {
+                            color: this.themeColor("--cy-tick", "#9A9A8C"),
+                            font: {size: 11},
                         },
                     },
                 },
                 plugins: {
                     legend: {
-                        display: true,
-                        position: "top",
+                        // HTML legend below the title (see .cy-series-legend)
+                        display: false,
                     },
                     tooltip: {
                         mode: "index",
@@ -359,6 +495,38 @@ export class CRMDashboard extends Component {
     createPipelineChart() {
         const ctx = this.pipelineChartRef.el.getContext("2d");
         const data = this.state.pipeline;
+        const self = this;
+        const totalDeals = data.reduce((sum, d) => sum + (d.count || 0), 0);
+
+        const centerText = {
+            id: "pipelineCenterText",
+            afterDraw(chart) {
+                const {ctx} = chart;
+                // With no deals the doughnut renders no arc — fall back to
+                // the chart-area center and still show the total (0).
+                let cx, cy;
+                const meta = chart.getDatasetMeta(0);
+                if (meta.data.length) {
+                    cx = meta.data[0].x;
+                    cy = meta.data[0].y;
+                } else {
+                    const area = chart.chartArea;
+                    if (!area) return;
+                    cx = (area.left + area.right) / 2;
+                    cy = (area.top + area.bottom) / 2;
+                }
+                ctx.save();
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = "500 10px Roboto, sans-serif";
+                ctx.fillStyle = self.themeColor("--cy-tick", "#9A9A8C");
+                ctx.fillText("Total Deals", cx, cy - 8);
+                ctx.font = "700 17px Roboto, sans-serif";
+                ctx.fillStyle = self.themeColor("--cy-text", "#24241C");
+                ctx.fillText(String(totalDeals), cx, cy + 9);
+                ctx.restore();
+            },
+        };
 
         this.charts.pipeline = new Chart(ctx, {
             type: "doughnut",
@@ -373,10 +541,14 @@ export class CRMDashboard extends Component {
                     },
                 ],
             },
+            plugins: [centerText],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: "60%",
+                layout: {
+                    padding: {top: 28, right: 28, bottom: 28, left: 28},
+                },
+                cutout: "62%",
                 plugins: {
                     legend: {
                         display: false,
@@ -395,115 +567,102 @@ export class CRMDashboard extends Component {
 
     // Generate colors dynamically for activity types matching the dashboard theme
     generateColor(index, total) {
-        // Predefined colors matching the dashboard design
-        const dashboardColors = [
-            {background: "rgba(239, 68, 68, 0.85)", border: "rgba(239, 68, 68, 1)"}, // Red (Call)
-            {background: "rgba(34, 197, 94, 0.85)", border: "rgba(34, 197, 94, 1)"}, // Green (Email)
-            {
-                background: "rgba(59, 130, 246, 0.85)",
-                border: "rgba(59, 130, 246, 1)",
-            }, // Blue
-            {
-                background: "rgba(249, 115, 22, 0.85)",
-                border: "rgba(249, 115, 22, 1)",
-            }, // Orange
-            {
-                background: "rgba(168, 85, 247, 0.85)",
-                border: "rgba(168, 85, 247, 1)",
-            }, // Purple
-            {
-                background: "rgba(236, 72, 153, 0.85)",
-                border: "rgba(236, 72, 153, 1)",
-            }, // Pink
-            {
-                background: "rgba(14, 165, 233, 0.85)",
-                border: "rgba(14, 165, 233, 1)",
-            }, // Sky Blue
-            {
-                background: "rgba(132, 204, 22, 0.85)",
-                border: "rgba(132, 204, 22, 1)",
-            }, // Lime
+        // Palette resolved from the CSS variables (--cy-*) defined in dashboard_style.css
+        const paletteVars = [
+            ["--cy-accent-light", "#A9B85A"],
+            ["--cy-line-dark", "#4C5814"],
+            ["--cy-accent", "#7E8C2F"],
+            ["--cy-accent-pale", "#C9D49A"],
+            ["--cy-accent-darker", "#48521B"],
+            ["--cy-gray-soft", "#9B9E91"],
+            ["--cy-gray-light", "#BEC0B2"],
+            ["--cy-accent-deep", "#5C6A1E"],
         ];
 
-        // Return color from predefined set, cycling if more activities than colors
-        return dashboardColors[index % dashboardColors.length];
+        // Return color from palette, cycling if more activities than colors
+        const [name, fallback] = paletteVars[index % paletteVars.length];
+        const color = this.themeColor(name, fallback);
+        return {
+            background: color + "D9", // ~85% alpha
+            border: color,
+        };
     }
 
-    // Process data for the chart
+    // Process data for the chart (grouped by month, like the design)
     processActivityData(data) {
-        const dateGroups = {};
+        const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthGroups = {};
         const activityTypes = new Set();
-        // First pass: collect all activity types and group by date
+        // First pass: collect all activity types and group by month
         data.forEach((activity) => {
-            const deadline = activity.date_deadline;
+            const d = new Date(activity.date_deadline);
+            const month = MONTHS[d.getMonth()];
             const name = activity.name;
 
             activityTypes.add(name);
 
-            if (!dateGroups[deadline]) {
-                dateGroups[deadline] = {};
+            if (!monthGroups[month]) {
+                monthGroups[month] = {};
             }
-            if (!dateGroups[deadline][name]) {
-                dateGroups[deadline][name] = 0;
+            if (!monthGroups[month][name]) {
+                monthGroups[month][name] = 0;
             }
-            dateGroups[deadline][name]++;
+            monthGroups[month][name]++;
         });
 
-        // Ensure all dates have all activity types (with 0 if not present)
+        // Ensure all months have all activity types (with 0 if not present)
         const allActivityTypes = Array.from(activityTypes);
-        Object.keys(dateGroups).forEach((date) => {
+        Object.keys(monthGroups).forEach((month) => {
             allActivityTypes.forEach((activityType) => {
-                if (!dateGroups[date][activityType]) {
-                    dateGroups[date][activityType] = 0;
+                if (!monthGroups[month][activityType]) {
+                    monthGroups[month][activityType] = 0;
                 }
             });
         });
-        return {dateGroups: dateGroups, activityTypes: allActivityTypes};
+        return {dateGroups: monthGroups, activityTypes: allActivityTypes};
     }
 
     createActivitiesChart() {
         const ctx = this.activitiesChartRef.el.getContext("2d");
         const data = this.state.activities;
         const {dateGroups, activityTypes} = this.processActivityData(data);
-        const dates = Object.keys(dateGroups).sort();
-
-        // Format dates for display
-        const formattedDates = dates.map((date) => {
-            const d = new Date(date);
-            return d.toLocaleDateString("en-us", {month: "short", day: "numeric"});
-        });
+        const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const labels = MONTHS.filter((month) => month in dateGroups);
 
         // Create datasets for each activity type with dynamic colors
         const datasets = activityTypes.map((activityType, index) => {
             const colors = this.generateColor(index, activityTypes.length);
-            const data = dates.map((date) => dateGroups[date][activityType] || 0);
+            const data = labels.map((month) => dateGroups[month][activityType] || 0);
             return {
                 label: activityType,
                 data: data,
                 backgroundColor: colors.background,
                 borderColor: colors.border,
-                borderWidth: 2,
-                borderRadius: 4,
+                borderWidth: 0,
+                borderRadius: 12,
                 borderSkipped: false,
+                categoryPercentage: 0.55,
+                barPercentage: 0.8,
             };
         });
         this.charts.activities = new Chart(ctx, {
             type: "bar",
             data: {
-                labels: formattedDates,
+                labels: labels,
                 datasets: datasets,
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {top: 10, right: 6, bottom: 2, left: 2},
+                },
                 plugins: {
                     legend: {
-                        display: true,
-                        position: "bottom",
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                        },
+                        // HTML legend below the title (see .cy-series-legend)
+                        display: false,
                     },
                     tooltip: {
                         mode: "index",
@@ -517,15 +676,15 @@ export class CRMDashboard extends Component {
                 },
                 scales: {
                     x: {
-                        title: {
-                            display: true,
-                            text: "Date",
-                            font: {
-                                weight: "bold",
-                            },
+                        border: {
+                            display: false,
                         },
                         grid: {
                             display: false,
+                        },
+                        ticks: {
+                            color: this.themeColor("--cy-tick", "#9A9A8C"),
+                            font: {size: 11},
                         },
                     },
                     y: {
@@ -533,15 +692,24 @@ export class CRMDashboard extends Component {
                         title: {
                             display: true,
                             text: "Number of Activities",
+                            color: this.themeColor("--cy-muted", "#8B8B7E"),
                             font: {
-                                weight: "bold",
+                                size: 11,
+                                weight: 500,
                             },
                         },
+                        border: {
+                            display: false,
+                        },
                         grid: {
-                            color: "rgba(0,0,0,0.1)",
+                            color: this.themeColor("--cy-grid-line", "#F0EFE8"),
+                            borderDash: [3, 5],
+                            drawTicks: false,
                         },
                         ticks: {
                             stepSize: 1,
+                            color: this.themeColor("--cy-tick", "#9A9A8C"),
+                            font: {size: 11},
                         },
                     },
                 },
@@ -573,44 +741,64 @@ export class CRMDashboard extends Component {
         });
     }
 
-    // Filter event handlers
-    onDateRangeChange(ev) {
-        this.state.filters.dateRange = ev.target.value;
-        if (ev.target.value !== "custom") {
-            this.state.filters.dateFrom = "";
-            this.state.filters.dateTo = "";
-            this.loadDashboardData();
+    // Filter event handlers — staged: they only update the draft; the
+    // dashboard is re-rendered only when "Apply" is clicked.
+    async onDraftDateRangeOption(value) {
+        const d = this.state.filterDraft;
+        d.dateRange = value;
+        if (value !== "custom") {
+            d.dateFrom = "";
+            d.dateTo = "";
         }
     }
 
-    onCustomDateChange() {
-        if (this.state.filters.dateFrom && this.state.filters.dateTo) {
-            this.loadDashboardData();
+    async onDraftSalesTeamOption(teamId) {
+        const d = this.state.filterDraft;
+        if (!teamId) {
+            // "All Teams" clears the selection
+            d.salesTeams = [];
+        } else {
+            // Checkbox behavior: toggle the clicked id in the selection
+            const id = Number(teamId);
+            d.salesTeams = d.salesTeams.includes(id)
+                ? d.salesTeams.filter((x) => x !== id)
+                : d.salesTeams.concat([id]);
         }
+        d.salesPersons = [];
+        // Refresh the persons list for the staged teams (no dashboard reload)
+        await this.loadSalespersons(d.salesTeams);
     }
 
-    async onSalesTeamChange(ev) {
-        this.state.filters.salesTeam = ev.target.value;
-        this.state.filters.salesperson = ""; // Reset salesperson
-        await this.loadSalespersons();
-        this.loadDashboardData();
-    }
-
-    onSalespersonChange(ev) {
-        this.state.filters.salesperson = ev.target.value;
-        this.loadDashboardData();
+    onDraftSalespersonOption(personId) {
+        const d = this.state.filterDraft;
+        if (!personId) {
+            d.salesPersons = [];
+        } else {
+            const id = Number(personId);
+            d.salesPersons = d.salesPersons.includes(id)
+                ? d.salesPersons.filter((x) => x !== id)
+                : d.salesPersons.concat([id]);
+        }
     }
 
     // Filter actions
-    onApplyFilters() {
-        if (this.state.filters.dateRange === "custom") {
-            if (!this.state.filters.dateFrom || !this.state.filters.dateTo) {
-                this.notification.add("Please select both start and end dates", {
-                    type: "warning",
-                });
-                return;
-            }
+    async onApplyFilters() {
+        const d = this.state.filterDraft;
+        if (d.dateRange === "custom" && (!d.dateFrom || !d.dateTo)) {
+            this.notification.add("Please select both start and end dates", {
+                type: "warning",
+            });
+            return;
         }
+        Object.assign(this.state.filters, {
+            dateRange: d.dateRange,
+            dateFrom: d.dateFrom,
+            dateTo: d.dateTo,
+            salesTeams: d.salesTeams,
+            salesPersons: d.salesPersons,
+        });
+        this.state.openDropdown = null;
+        await this.loadSalespersons();
         this.loadDashboardData();
     }
 
@@ -619,37 +807,37 @@ export class CRMDashboard extends Component {
             dateRange: "this_month",
             dateFrom: "",
             dateTo: "",
-            salesTeam: "",
-            salesperson: "",
+            salesTeams: [],
+            salesPersons: [],
         });
+        Object.assign(this.state.filterDraft, this.state.filters);
+        this.state.openDropdown = null;
         await this.loadSalespersons();
         this.loadDashboardData();
     }
 
-    // Individual filter clearing
+    // Individual filter clearing — clears the staged draft; "Apply" commits
     clearDateFilter() {
-        this.state.filters.dateRange = "this_month";
-        this.state.filters.dateFrom = "";
-        this.state.filters.dateTo = "";
-        this.loadDashboardData();
+        this.state.filterDraft.dateRange = "this_month";
+        this.state.filterDraft.dateFrom = "";
+        this.state.filterDraft.dateTo = "";
     }
 
     async clearSalesTeamFilter() {
-        this.state.filters.salesTeam = "";
-        this.state.filters.salesperson = "";
-        await this.loadSalespersons();
-        this.loadDashboardData();
+        this.state.filterDraft.salesTeams = [];
+        this.state.filterDraft.salesPersons = [];
+        await this.loadSalespersons([]);
     }
 
     clearSalespersonFilter() {
-        this.state.filters.salesperson = "";
-        this.loadDashboardData();
+        this.state.filterDraft.salesPersons = [];
     }
 
     // Helper methods for filters
     hasActiveFilters() {
-        const f = this.state.filters;
-        return f.dateRange !== "this_month" || f.salesTeam || f.salesperson;
+        const f = this.state.filterDraft;
+        return f.dateRange !== "this_month" || f.salesTeams.length
+            || f.salesPersons.length || f.dateFrom || f.dateTo;
     }
 
     getDateRangeLabel() {
@@ -659,23 +847,23 @@ export class CRMDashboard extends Component {
             this_month: "This Month",
             this_quarter: "This Quarter",
             this_year: "This Year",
-            custom: `${this.state.filters.dateFrom} - ${this.state.filters.dateTo}`,
+            custom: `${this.state.filterDraft.dateFrom} - ${this.state.filterDraft.dateTo}`,
         };
-        return labels[this.state.filters.dateRange] || "This Month";
+        return labels[this.state.filterDraft.dateRange] || "This Month";
     }
 
-    getSalesTeamName() {
-        const team = this.state.salesTeams.find(
-            (t) => t.id == this.state.filters.salesTeam
-        );
-        return team ? team.name : "";
+    getSalesTeamsNames() {
+        return this.state.salesTeams
+            .filter((t) => this.state.filterDraft.salesTeams.includes(t.id))
+            .map((t) => t.name)
+            .join(", ");
     }
 
-    getSalespersonName() {
-        const person = this.state.salespersons.find(
-            (p) => p.id == this.state.filters.salesperson
-        );
-        return person ? person.name : "";
+    getSalesPersonsNames() {
+        return this.state.salespersons
+            .filter((p) => this.state.filterDraft.salesPersons.includes(p.id))
+            .map((p) => p.name)
+            .join(", ");
     }
 
     // Data loading methods
@@ -694,7 +882,7 @@ export class CRMDashboard extends Component {
         }
     }
 
-    async loadSalespersons() {
+    async loadSalespersons(teamIds = this.state.filters.salesTeams) {
         try {
             if (this.state.hideSalespersonFilter) {
                 this.state.salespersons = [];
@@ -702,15 +890,20 @@ export class CRMDashboard extends Component {
             }
             let domain = [["active", "=", true]];
 
-            if (this.state.filters.salesTeam) {
-                // Get users from selected team
-                const teamUsers = await this.orm.searchRead(
+            const ids = (teamIds || []).map(Number).filter(Boolean);
+            if (ids.length) {
+                // Members from ALL selected teams (union)
+                const teams = await this.orm.searchRead(
                     "crm.team",
-                    [["id", "=", parseInt(this.state.filters.salesTeam)]],
+                    [["id", "in", ids]],
                     ["member_ids"]
                 );
-                if (teamUsers.length > 0 && teamUsers[0].member_ids.length > 0) {
-                    domain.push(["id", "in", teamUsers[0].member_ids]);
+                const members = new Set();
+                teams.forEach((t) => (t.member_ids || []).forEach(
+                    (m) => members.add(m)
+                ));
+                if (members.size > 0) {
+                    domain.push(["id", "in", Array.from(members)]);
                 }
             }
 
@@ -737,14 +930,16 @@ export class CRMDashboard extends Component {
             domain.push(["create_date", "<=", dateRange.end]);
         }
 
-        // Sales team filter
-        if (this.state.filters.salesTeam) {
-            domain.push(["team_id", "=", parseInt(this.state.filters.salesTeam)]);
+        // Sales team filter (multi-select)
+        const teamIds = (this.state.filters.salesTeams || []).map(Number);
+        if (teamIds.length) {
+            domain.push(["team_id", "in", teamIds]);
         }
 
-        // Salesperson filter
-        if (this.state.filters.salesperson) {
-            domain.push(["user_id", "=", parseInt(this.state.filters.salesperson)]);
+        // Salesperson filter (multi-select)
+        const personIds = (this.state.filters.salesPersons || []).map(Number);
+        if (personIds.length) {
+            domain.push(["user_id", "in", personIds]);
         }
 
         return domain;
@@ -829,18 +1024,40 @@ export class CRMDashboard extends Component {
         const pdf = new jsPDF(); // Create a new PDF
 
         if (format === "sale") {
-            let salesWrapper = sales.closest("#salesChartWrapper");
+            let salesWrapper = sales.closest(".cy-pipeline-track");
             const salesCanvas = await html2canvas(salesWrapper);
             const salesImage = salesCanvas.toDataURL("image/png");
 
             pdf.addImage(salesImage, "PNG", 10, 10, 190, 100); // x, y, width, height
             pdf.save("sales_chart.pdf");
         } else if (format === "lead") {
-            const leadsCanvas = await html2canvas(leads);
+            const leadsCanvas = await html2canvas(leads.closest(".cy-trend-card"));
             const leadsImage = leadsCanvas.toDataURL("image/png");
 
             pdf.addImage(leadsImage, "PNG", 10, 10, 190, 100); // x, y, width, height
             pdf.save("leads_chart.pdf");
+        } else if (format === "report") {
+            // Full dashboard report: both charts in one PDF
+            const revCanvas = await html2canvas(leads.closest(".cy-trend-card"));
+            pdf.addImage(revCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 90);
+
+            const salesCanvas = await html2canvas(sales.closest(".cy-pipeline-track"));
+            pdf.addImage(salesCanvas.toDataURL("image/png"), "PNG", 15, 105, 90, 80);
+            pdf.save("crm_dashboard_report.pdf");
+        } else if (format === "activity") {
+            const activitiesCanvas = await html2canvas(
+                this.activitiesChartRef.el.closest(".activities-card")
+            );
+            pdf.addImage(activitiesCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 100);
+            pdf.save("activities_chart.pdf");
+        } else if (format === "performers") {
+            const performersCanvas = await html2canvas(
+                this.state.topPerformers?.length
+                    ? document.querySelector(".cy_crm_dashboard .performers-card")
+                    : this.pipelineChartRef.el
+            );
+            pdf.addImage(performersCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 100);
+            pdf.save("top_performers.pdf");
         }
     }
 
@@ -853,6 +1070,11 @@ export class CRMDashboard extends Component {
     willUnmount() {
         // Clean up charts
         Object.values(this.charts).forEach((chart) => chart?.destroy());
+        // Clean up the Outside click listener for the filter dropdowns
+        if (this._onClickOutsideFilters) {
+            document.removeEventListener("click",
+                this._onClickOutsideFilters);
+        }
     }
 
     getNotificationIconClass(type) {
@@ -1015,6 +1237,29 @@ export class CRMDashboard extends Component {
         }
     }
 
+    async onClearNotifications() {
+        try {
+            const leadIds = this.state.leadNotifications
+                .map((n) => n.lead_id)
+                .filter(Boolean);
+
+            if (leadIds.length) {
+                await this.orm.call("crm.lead", "dismiss_notification",
+                    [leadIds]);
+            }
+
+            this.state.leadNotifications = [];
+            this.state.showAllNotifications = false;
+            await this.loadNotifications();
+            this.notification.add("All notifications cleared",
+                {type: "success"});
+        } catch (error) {
+            console.error("Error while clearing notifications:", error);
+            this.notification.add("Failed to clear notifications",
+                {type: "danger"});
+        }
+    }
+
     getNotificationClass(notification) {
         let classes = ["notification-item"];
 
@@ -1035,16 +1280,17 @@ export class CRMDashboard extends Component {
 
     getNotificationIcon(type) {
         const icons = {
-            new_lead: "fa fa-user-plus",
-            lead_updated: "fa fa-edit",
-            stage_changed: "fa fa-flag",
-            activity_due: "fa fa-clock",
-            won: "fa fa-trophy",
-            lost: "fa fa-times-circle",
-            email: "fa fa-envelope",
-            call: "fa fa-phone",
-            meeting: "fa fa-calendar",
-            default: "fa fa-bell",
+            new_lead: "ri-user-add-line",
+            high_value: "ri-vip-crown-line",
+            lead_updated: "ri-edit-line",
+            stage_changed: "ri-flag-line",
+            activity_due: "ri-alarm-line",
+            won: "ri-trophy-line",
+            lost: "ri-close-circle-line",
+            email: "ri-mail-line",
+            call: "ri-phone-line",
+            meeting: "ri-calendar-line",
+            default: "ri-notification-3-line",
         };
 
         return icons[type] || icons.default;

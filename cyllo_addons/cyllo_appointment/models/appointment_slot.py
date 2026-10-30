@@ -56,13 +56,13 @@ class AppointmentSlot(models.Model):
         store=True
     )
     booked_count = fields.Integer(
-        string='Booked', compute='_compute_booked_count'
+        string='Booked', compute='_compute_booked_count', store=True
     )
     available_count = fields.Integer(
-        string='Available Spots', compute='_compute_booked_count'
+        string='Available Spots', compute='_compute_booked_count', store=True
     )
     is_available = fields.Boolean(
-        string='Available', compute='_compute_booked_count', store=False
+        string='Available', compute='_compute_booked_count', store=True
     )
     state = fields.Selection([
         ('available', 'Available'),

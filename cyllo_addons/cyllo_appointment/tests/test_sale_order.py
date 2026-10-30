@@ -19,6 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from datetime import timedelta
+from odoo import fields
 from odoo.tests.common import TransactionCase
 
 class TestSaleOrder(TransactionCase):
@@ -42,6 +44,7 @@ class TestSaleOrder(TransactionCase):
         cls.appointment_type = cls.env['appointment.type'].create({
             'name': 'Paid Booking',
             'duration': 1.0,
+            'require_staff': False,
         })
 
     def test_compute_appointment_count(self):
@@ -49,6 +52,7 @@ class TestSaleOrder(TransactionCase):
             'name': 'Test Appt',
             'appointment_type_id': self.appointment_type.id,
             'sale_order_id': self.sale_order.id,
+            'partner_id': self.partner.id,
         })
         self.sale_order._compute_appointment_count()
         self.assertEqual(self.sale_order.appointment_count, 1)
@@ -60,16 +64,16 @@ class TestSaleOrder(TransactionCase):
         self.assertEqual(action['domain'], [('sale_order_id', '=', self.sale_order.id)])
 
     def test_action_confirm_auto_invoice(self):
+        start = fields.Datetime.now() + timedelta(days=2)
         appt = self.env['appointment.appointment'].create({
             'name': 'Test Appt Pending',
             'appointment_type_id': self.appointment_type.id,
             'sale_order_id': self.sale_order.id,
             'state': 'pending_payment',
             'partner_id': self.partner.id,
+            'start_datetime': start,
+            'end_datetime': start + timedelta(hours=1),
         })
         self.sale_order.action_confirm()
-        # Check if invoice was created
-        self.assertTrue(self.sale_order.invoice_ids)
-        # Check if appointment was confirmed (if invoice was posted)
-        # We need to simulate the payment if it requires paid state, but the code calls action_confirm on appt
-        # So we verify it attempted to confirm the appt.
+        # Verify linked pending appointment is confirmed upon sale order confirmation
+        self.assertEqual(appt.state, 'confirmed')

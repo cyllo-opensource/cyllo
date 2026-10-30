@@ -21,3 +21,4 @@
 #############################################################################
 from . import test_google_form
 from . import test_google_form_questions
+from . import test_google_form_fetch

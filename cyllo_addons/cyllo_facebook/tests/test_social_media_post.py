@@ -61,7 +61,7 @@ class TestSocialMediaPostFacebook(TransactionCase):
 
         data = result['dashboard_data']
         fb_data = next(
-            (d for d in data if d['platform'] == 'social.fb.account'), None
+            (d for d in data if d['platform'] == 'social.fb.account' and d.get('id') == self.fb_account.id), None
         )
         self.assertIsNotNone(fb_data)
         self.assertEqual(fb_data['account_name'], 'FB Page')

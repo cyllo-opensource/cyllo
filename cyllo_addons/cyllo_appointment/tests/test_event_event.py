@@ -29,6 +29,7 @@ class TestEventEvent(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.partner = cls.env['res.partner'].create({'name': 'Event Customer'})
         cls.employee = cls.env['hr.employee'].create({'name': 'Event Staff'})
         cls.appointment_type = cls.env['appointment.type'].create({
             'name': 'Event Booking',
@@ -71,6 +72,8 @@ class TestEventEvent(TransactionCase):
             'name': 'Event Appt',
             'appointment_type_id': self.appointment_type.id,
             'slot_id': slot.id,
+            'partner_id': self.partner.id,
+            'staff_id': self.employee.id,
             'state': 'confirmed',
         })
         self.event._compute_appointment_count()

@@ -25,4 +25,105 @@
         min-width: 280px;
         max-width: 360px;
     }
+
+    // On desktop the wrapper has no layout effect, so the detail remains a side panel.
+    .booking-detail-modal {
+        display: contents;
+    }
+
+    .booking-detail-close {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+
+        .booking-tabs {
+            overflow: auto !important;
+            scrollbar-width: none;
+            button {
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+        }
+
+        // Keep the booking columns readable on narrow screens. The list scrolls
+        // sideways as one table instead of compressing customer/table names.
+        .booking-list-container {
+            overflow: auto !important;
+            min-width: 0;
+            max-width: 100%;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        // A table-style layout calculates one width per column from all rows,
+        // while the container above provides horizontal scrolling when needed.
+        .booking-list {
+            display: table;
+            width: max-content;
+            min-width: 100%;
+            padding-bottom: 0.75rem;
+            border-collapse: collapse;
+            border-spacing: 0;
+
+            .header-row,
+            .booking-row {
+                display: table-row;
+
+                > div {
+                    display: table-cell;
+                    padding: 0.5rem;
+                    vertical-align: middle;
+                }
+            }
+
+            .text-truncate {
+                overflow: visible;
+                text-overflow: clip;
+                white-space: nowrap;
+            }
+        }
+
+        .booking-detail-modal {
+            position: fixed;
+            z-index: 1050;
+            inset: 0;
+            display: flex;
+            align-items: flex-end;
+            background: rgba(0, 0, 0, 0.4);
+            animation: booking-detail-backdrop-in 0.2s ease-out;
+        }
+
+        .booking-detail {
+            width: 100%;
+            min-width: 0;
+            max-width: none;
+            max-height: 82vh;
+            overflow-y: auto;
+            border: 0 !important;
+            border-radius: 1.25rem 1.25rem 0 0;
+            box-shadow: 0 -0.5rem 1.5rem rgba(0, 0, 0, 0.18) !important;
+            animation: booking-detail-sheet-in 0.28s ease-out;
+            padding-bottom: 1.5rem;
+        }
+
+        .booking-detail-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+        }
+    }
+
+    @keyframes booking-detail-backdrop-in {
+        from { background: transparent; }
+        to { background: rgba(0, 0, 0, 0.4); }
+    }
+
+    @keyframes booking-detail-sheet-in {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
 }

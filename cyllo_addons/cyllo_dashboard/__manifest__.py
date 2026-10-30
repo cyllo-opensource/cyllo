@@ -49,12 +49,13 @@
     'assets': {
         'web.assets_backend': [
             'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js',
-            'cyllo_dashboard/static/src/js/company_dialog.js',
             'cyllo_dashboard/static/src/js/dashboard_kpi.js',
             'cyllo_dashboard/static/src/js/banner_crop_dialog.js',
             'cyllo_dashboard/static/src/js/cyllo_dashboard.js',
+            'cyllo_dashboard/static/src/js/account_settings_panel.js',
             'cyllo_dashboard/static/src/xml/cyllo_dashboard.xml',
             'cyllo_dashboard/static/src/xml/banner_crop_dialog.xml',
+            'cyllo_dashboard/static/src/xml/account_settings_panel.xml',
             'cyllo_dashboard/static/src/xml/add_to_shortcuts.xml',
             'cyllo_dashboard/static/src/js/add_to_shortcuts.js',
             'cyllo_dashboard/static/src/js/form_controller.js',

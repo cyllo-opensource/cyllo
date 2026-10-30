@@ -63,6 +63,9 @@ class RequestDocument(models.Model):
             'view_mode': 'kanban,tree,form',
             'domain': [('id', 'in', self.document_file_ids.ids)],
         }
+        if len(self.document_file_ids) == 1:
+            action['view_mode'] = 'form'
+            action['res_id'] = self.document_file_ids.id
         return action
 
     @api.model_create_multi

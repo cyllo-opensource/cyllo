@@ -23,4 +23,37 @@
             </xpath>
         </field>
     </record>
+
+    <!-- POS Restaurant Appointments Window Action -->
+    <record id="action_pos_restaurant_appointment" model="ir.actions.act_window">
+    <field name="name">Restaurant Appointments</field>
+    <field name="res_model">appointment.appointment</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain" eval="[
+        '|',
+        ('resource_id.pos_table_ids', '!=', False),
+        ('appointment_type_id', '=', ref('cyllo_appointment_restaurant.appointment_type_table'))
+    ]"/>
+    <field name="context" eval="{
+        'search_default_upcoming': 1,
+        'default_appointment_type_id': ref('cyllo_appointment_restaurant.appointment_type_table')
+    }"/>
+    <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+            No restaurant appointments found!
+        </p>
+        <p>
+            Table reservations made through the website or back-office will appear here.
+        </p>
+    </field>
+</record>
+
+
+    <!-- POS Menu Item for Restaurant Appointments -->
+    <menuitem id="menu_pos_restaurant_appointment"
+              name="Restaurant Appointments"
+              parent="point_of_sale.menu_point_of_sale"
+              action="action_pos_restaurant_appointment"
+              sequence="4"
+              groups="point_of_sale.group_pos_user"/>
 </odoo>

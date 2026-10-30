@@ -23,11 +23,19 @@ export class AddToShortcut extends Component {
             isAddedToShortcut: false,
         });
         onMounted(async () => {
-                var shortcut = await this.orm.searchRead('shortcut.menu', [])
-                var is_added_to_shortcut = shortcut.find((rec) => rec.window_action_id[0] === this.env.config.actionId
-                    && rec.create_uid[0] === session.uid)
-                if (is_added_to_shortcut) {
-                    this.state.isAddedToShortcut = true
+                try {
+                    var shortcut = await this.orm.searchRead('shortcut.menu', [])
+                    var is_added_to_shortcut = (shortcut || []).find((rec) => {
+                        var recActionId = rec.window_action_id ? rec.window_action_id[0] : false;
+                        var recUserId = rec.create_uid ? rec.create_uid[0] : false;
+                        return recActionId === this.env.config.actionId
+                            && recUserId === session.uid;
+                    })
+                    if (is_added_to_shortcut) {
+                        this.state.isAddedToShortcut = true
+                    }
+                } catch (e) {
+                    console.error('Error checking shortcut state:', e);
                 }
             }
         )
@@ -44,10 +52,11 @@ export class AddToShortcut extends Component {
             const result = await jsonrpc('/add_to_shortcuts', {
                 actionId: this.env.config.actionId,
                 name: this.state.name,
-                model: this.env.searchModel.resModel,
+                model: this.env.searchModel ? this.env.searchModel.resModel : false,
                 menu_id: parseInt(this.action.currentController?.action?.context?.params?.menu_id || this.getMenuIdFromUrl()),
+                view_type: this.env.config.viewType,
             });
-            if (result) {
+            if (result === true || (result && result.id)) {
                 this.notification.add(
                     sprintf(_t(`"%s" added to your shortcuts`), this.state.name),
                     {
@@ -56,11 +65,15 @@ export class AddToShortcut extends Component {
                     }
                 );
                 this.state.name = this.env.config.getDisplayName();
-                this.env.services['action'].doAction('reload_context');
+                this.state.isAddedToShortcut = true;
             } else {
-                this.notification.add(_t("Could not add shortcut to dashboard"), {
-                    type: "danger",
-                });
+                this.notification.add(
+                    (result && result.error) || _t("Could not add shortcut to dashboard"),
+                    {
+                        title: 'Shortcut Not Added',
+                        type: "danger",
+                    }
+                );
             }
         }
     }
@@ -69,8 +82,10 @@ export class AddToShortcut extends Component {
         if (this.env.config.actionId) {
             const result = await jsonrpc('/remove_from_shortcuts', {
                 actionId: this.env.config.actionId,
+                view_type: this.env.config.viewType,
+                name: this.state.name,
             });
-            if (result) {
+            if (result === true) {
                 this.notification.add(
                     sprintf(_t(`"%s" removed from shortcut`), this.state.name),
                     {
@@ -79,11 +94,14 @@ export class AddToShortcut extends Component {
                     }
                 );
                 this.state.name = this.env.config.getDisplayName();
-                this.env.services['action'].doAction('reload_context');
+                this.state.isAddedToShortcut = false;
             } else {
-                this.notification.add(_t("Could not remove shortcut from dashboard"), {
-                    type: "danger",
-                });
+                this.notification.add(
+                    (result && result.error) || _t("Could not remove shortcut from dashboard"),
+                    {
+                        type: "danger",
+                    }
+                );
             }
         }
     }

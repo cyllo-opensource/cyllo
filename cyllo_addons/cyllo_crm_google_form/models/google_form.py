@@ -173,9 +173,12 @@ class GoogleForm(models.Model):
             error_data = response.json()
         except ValueError:
             return response.text
+        error = error_data.get("error")
+        if isinstance(error, dict):
+            error = error.get("message")
         return (
             error_data.get("error_description")
-            or error_data.get("error")
+            or error
             or response.text
         )
 
@@ -392,8 +395,30 @@ class GoogleForm(models.Model):
         elif ttype == 'boolean':
             return raw_value.strip().lower() in ('true', 'yes', '1', 'y', 'on')
 
+        elif ttype == 'selection':
+            return self._match_selection_value(field, raw_value)
+
+        elif ttype in ('date', 'datetime'):
+            try:
+                converter = (fields.Date.to_date if ttype == 'date'
+                             else fields.Datetime.to_datetime)
+                return converter(raw_value.strip()) or False
+            except (ValueError, TypeError):
+                return False
+
         else:
             return raw_value.strip()
+
+    def _match_selection_value(self, field, raw_value):
+        """Return the selection key matching an answer by key or label."""
+        value = raw_value.strip().lower()
+        selection = self.env[field.model]._fields[field.name].selection
+        if callable(selection):
+            selection = selection(self.env[field.model])
+        for key, label in selection or []:
+            if value in (str(key).lower(), str(label).lower()):
+                return key
+        return False
 
     def _company_domain_for_model(self, model):
         if 'company_id' not in model._fields:
@@ -424,6 +449,25 @@ class GoogleForm(models.Model):
     # CORE: PROCESS A SINGLE FORM'S RESPONSES  (internal, no active check)
     # ======================================================================
 
+    def _raise_fetch_error(self, response, what):
+        """Log a failed Google API read and surface it instead of hiding it."""
+        _logger.warning(
+            f"google.form [{self.id}] — could not fetch {what}: {response.text}"
+        )
+        message = _(
+            "Could not fetch the %(what)s from Google: %(error)s",
+            what=what, error=self._get_google_error_message(response),
+        )
+        if response.status_code in (401, 403):
+            message += _(
+                "\n\nHint: the Google refresh token is missing a required "
+                "scope. Generate it again with "
+                "'https://www.googleapis.com/auth/forms.body' and "
+                "'https://www.googleapis.com/auth/forms.responses.readonly', "
+                "then update it under Settings → Google Forms Configuration."
+            )
+        raise ValidationError(message)
+
     def _process_form_responses(self, access_token):
         """
         Internal method that does the actual API calls and lead creation
@@ -443,10 +487,7 @@ class GoogleForm(models.Model):
             timeout=10,
         )
         if form_resp.status_code != 200:
-            _logger.warning(
-                f"google.form [{self.id}] — could not fetch form structure: {form_resp.text}"
-            )
-            return 0
+            self._raise_fetch_error(form_resp, _("form structure"))
 
         title_map = {}  # questionId → question title string
         record_map = {}  # questionId → google.form.questions record
@@ -475,21 +516,27 @@ class GoogleForm(models.Model):
                 if matched:
                     record_map[gqid] = matched[0]
 
-        # ── 2. Fetch all responses ─────────────────────────────────────────
-        resp = requests.get(
-            f"https://forms.googleapis.com/v1/forms/{self.google_form_id}/responses",
-            headers=headers,
-            timeout=10,
-        )
-        if resp.status_code != 200:
-            _logger.warning(
-                f"google.form [{self.id}] — could not fetch responses: {resp.text}"
+        # ── 2. Fetch all responses (following pagination) ─────────────────
+        submissions = []
+        page_token = None
+        while True:
+            resp = requests.get(
+                f"https://forms.googleapis.com/v1/forms/{self.google_form_id}/responses",
+                headers=headers,
+                params={"pageToken": page_token} if page_token else None,
+                timeout=10,
             )
-            return 0
+            if resp.status_code != 200:
+                self._raise_fetch_error(resp, _("responses"))
+            payload = resp.json()
+            submissions.extend(payload.get("responses", []))
+            page_token = payload.get("nextPageToken")
+            if not page_token:
+                break
 
         already_processed = self._get_processed_ids()
 
-        for submission in resp.json().get("responses", []):
+        for submission in submissions:
             response_id = submission.get("responseId", "")
 
             # ── DUPLICATE GUARD ──────────────────────────────────────────
@@ -576,16 +623,27 @@ class GoogleForm(models.Model):
                 else:
                     lead_vals['name'] = f"{self.name}'s Opportunity"
 
-            if self.lead_id:
+            if self.lead_id and 'parent_id' in self.env['crm.lead']._fields:
                 lead_vals.setdefault('parent_id', self.lead_id.id)
 
             lead_vals['company_id'] = self.company_id.id
 
             # ── Create the lead ───────────────────────────────────────────
-            self.env['crm.lead'].sudo().with_company(self.company_id).with_context(
-                mail_create_nosubscribe=True,
-                tracking_disable=True,
-            ).create(lead_vals)
+            # A savepoint keeps one bad response from blocking the others.
+            try:
+                with self.env.cr.savepoint():
+                    self.env['crm.lead'].sudo().with_company(
+                        self.company_id
+                    ).with_context(
+                        mail_create_nosubscribe=True,
+                        tracking_disable=True,
+                    ).create(lead_vals)
+            except Exception:
+                _logger.exception(
+                    f"google.form [{self.id}] — could not create lead for "
+                    f"responseId {response_id or '(no id)'}; skipping it."
+                )
+                continue
 
             leads_created += 1
             _logger.info(

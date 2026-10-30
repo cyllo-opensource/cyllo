@@ -31,9 +31,11 @@ class TestAppointmentResource(TransactionCase):
             'resource_type': 'room',
             'capacity': 5,
         })
+        cls.partner = cls.env['res.partner'].create({'name': 'Test Partner'})
         cls.appointment_type = cls.env['appointment.type'].create({
             'name': 'Room Booking',
             'duration': 1.0,
+            'require_staff': False,
         })
 
     def test_compute_appointment_count(self):
@@ -42,6 +44,7 @@ class TestAppointmentResource(TransactionCase):
             'name': 'Test Appointment',
             'appointment_type_id': self.appointment_type.id,
             'resource_id': self.resource.id,
+            'partner_id': self.partner.id,
         })
         self.resource._compute_appointment_count()
         self.assertEqual(self.resource.appointment_count, 1)

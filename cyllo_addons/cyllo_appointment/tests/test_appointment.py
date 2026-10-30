@@ -148,8 +148,9 @@ class TestAppointment(TransactionCase):
     def test_compute_staff_resource_domain_empty(self):
         appt = self._create_appt()
         appt._compute_staff_resource_domain()
-        self.assertEqual(appt.staff_domain, '[]')
-        self.assertEqual(appt.resource_domain, '[]')
+        company_id = appt.company_id.id or appt.env.company.id
+        self.assertEqual(appt.staff_domain, f"[('company_id', '=', {company_id})]")
+        self.assertEqual(appt.resource_domain, f"[('company_id', '=', {company_id})]")
 
     def test_compute_staff_resource_domain_with_staff(self):
         self.appt_type.write({'staff_ids': [(4, self.employee.id)]})

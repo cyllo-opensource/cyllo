@@ -20,3 +20,4 @@
 #
 ##############################################################################
 from . import test_crm_survey
+from . import test_crm_survey_flows

@@ -62,7 +62,7 @@ class PosSession(models.Model):
         domain = [
             ('start_datetime', '>=', window_start),
             ('start_datetime', '<', window_end),
-            ('state', 'not in', ['draft','cancelled', 'no_show', 'done']),
+            ('state', 'not in', ['draft', 'no_show', 'done']),
         ]
         pos_table_resource_ids = self.env['appointment.resource'].search([
             ('pos_table_ids', '!=', False),

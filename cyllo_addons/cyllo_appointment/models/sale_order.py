@@ -48,7 +48,7 @@ class SaleOrder(models.Model):
             'res_model': 'appointment.appointment',
             'view_mode': 'tree,form',
             'domain': [('sale_order_id', '=', self.id)],
-            'context': {'default_sale_order_id': self.id},
+            'context': {'create': False,},
         }
 
     def action_confirm(self):
@@ -60,6 +60,8 @@ class SaleOrder(models.Model):
                 lambda a: a.state == 'pending_payment'
             )
             for appt in pending:
+                if appt.partner_id and order.partner_id != appt.partner_id:
+                    order.sudo().write({'partner_id': appt.partner_id.id})
                 try:
                     appt.action_confirm()
                 except Exception as e:

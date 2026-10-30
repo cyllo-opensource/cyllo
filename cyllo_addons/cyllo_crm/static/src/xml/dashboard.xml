@@ -1,106 +1,145 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
     <t t-name="crm_dashboard.crm_dashboard_template">
-        <div t-att-class="'o_crm_dashboard' + (state.isSampleData ? ' sample-data-mode' : '')">
+        <div t-att-class="'cy_crm_dashboard' + (state.isSampleData ? ' sample-data-mode' : '')">
             <!-- Header Section -->
             <div
-                class="dashboard-header o_pj_dashboard background-image-banner control-panel">
+                class="dashboard-header cy_pj_dashboard background-image-banner control-panel">
                 <div class="header-content">
                     <div class="heading">
                         <span class="dashboard-header-title">Dashboard</span>
+                        <p class="dashboard-header-subtitle">Get a clear view of your sales, activities, and team performance</p>
                     </div>
                 </div>
                 <div class="dashboard-filters-section">
-                    <button id="cydialogBtn" t-ref="filterButton"
-                        class="btn btn-secondary themed-bg dropdown-toggle cy-dash-filter-btn cy-churn-filter-btn"
-                        type="button"
-                        t-on-click="onToggleFilters"
-                        data-tooltip="Apply Filters">
-                        <i class="ri-filter-line"></i> Filters
-                    </button>
-
+                    <div class="cy-header-actions">
+                        <button class="btn cy-view-report-btn"
+                            type="button"
+                            t-on-click="onViewReportsClick"
+                            data-tooltip="Open CRM Analysis Report">
+                            <i class="ri-file-chart-line"></i> View Report
+                        </button>
+                        <button id="cydialogBtn" t-ref="filterButton"
+                            class="btn btn-secondary themed-bg dropdown-toggle cy-dash-filter-btn cy-churn-filter-btn"
+                            type="button"
+                            t-on-click="onToggleFilters"
+                            data-tooltip="Apply Filters">
+                            <i class="ri-filter-line"></i> Filter
+                        </button>
+                    </div>
                     <div class="filters-content" t-if="state.showFilters">
                         <!-- Main filter row - all filters in one row -->
                         <div class="filter-row">
-                            <!-- Date Range Filter -->
+                            <!-- Date Range Filter (checkbox dropdown) -->
                             <div class="filter-item">
                                 <label class="filter-label">
                                     <i class="fa fa-calendar"/>
                                     Date Range
                                 </label>
-                                <div class="filter-control">
-                                    <select class="form-select"
-                                            t-model="state.filters.dateRange"
-                                            t-on-change="onDateRangeChange">
-                                        <option value="today">Today</option>
-                                        <option value="this_week">This Week</option>
-                                        <option value="this_month"
-                                                selected="selected">This Month
-                                        </option>
-                                        <option value="this_quarter">This Quarter
-                                        </option>
-                                        <option value="this_year">This Year</option>
-                                        <option value="custom">Custom Range</option>
-                                    </select>
+                                <div class="cy-dropdown">
+                                    <button type="button"
+                                            class="form-select cy-dropdown-toggle"
+                                            t-att-class="state.filterDraft.dateRange !== 'this_month' ? 'cy-select-filled' : ''"
+                                            t-on-click.stop="() => this.toggleFilterDropdown('dates')">
+                                        <span t-esc="getDateRangeLabel()"/>
+                                    </button>
+                                    <div class="cy-dropdown-menu"
+                                         t-if="state.openDropdown === 'dates'">
+                                        <div class="cy-dropdown-option"
+                                             t-foreach="dateRangeOptions"
+                                             t-as="opt" t-key="opt.value"
+                                             t-att-class="state.filterDraft.dateRange == opt.value ? 'cy-option-selected' : ''"
+                                             t-on-click.stop="() => this.onDraftDateRangeOption(opt.value)">
+                                            <input type="checkbox"
+                                                   t-att-checked="state.filterDraft.dateRange == opt.value"/>
+                                            <span class="cy-option-label"
+                                                  t-esc="opt.label"/>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Sales Team Filter -->
+                            <!-- Sales Team Filter (checkbox dropdown) -->
                             <div class="filter-item">
                                 <label class="filter-label">
                                     <i class="fa fa-users"/>
                                     Sales Team
                                 </label>
-                                <div class="filter-control">
-                                    <select class="form-select"
-                                            t-model="state.filters.salesTeam"
-                                            t-on-change="onSalesTeamChange">
-                                        <option value="">All Teams</option>
-                                        <t t-if="state.salesTeams">
-                                            <t t-foreach="state.salesTeams"
-                                               t-as="team" t-key="team.id">
-                                                <option t-att-value="team.id"
-                                                        t-esc="team.name"/>
-                                            </t>
-                                        </t>
-                                    </select>
+                                <div class="cy-dropdown">
+                                    <button type="button"
+                                            class="form-select cy-dropdown-toggle"
+                                            t-att-class="state.filterDraft.salesTeams.length ? 'cy-select-filled' : ''"
+                                            t-on-click.stop="() => this.toggleFilterDropdown('teams')">
+                                        <span t-esc="getSalesTeamsNames() or 'All Teams'"/>
+                                    </button>
+                                    <div class="cy-dropdown-menu"
+                                         t-if="state.openDropdown === 'teams'">
+                                        <div class="cy-dropdown-option"
+                                             t-on-click.stop="() => this.onDraftSalesTeamOption('')">
+                                            <input type="checkbox"
+                                                   t-att-checked="!state.filterDraft.salesTeams.length"/>
+                                            <span class="cy-option-label">All Teams</span>
+                                        </div>
+                                        <div class="cy-dropdown-option"
+                                             t-foreach="state.salesTeams"
+                                             t-as="team" t-key="team.id"
+                                             t-att-class="state.filterDraft.salesTeams.includes(team.id) ? 'cy-option-selected' : ''"
+                                             t-on-click.stop="() => this.onDraftSalesTeamOption(team.id)">
+                                            <input type="checkbox"
+                                                   t-att-checked="state.filterDraft.salesTeams.includes(team.id)"/>
+                                            <span class="cy-option-label"
+                                                  t-esc="team.name"/>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Salesperson Filter -->
+                            <!-- Sales Persons Filter (checkbox dropdown) -->
                             <div class="filter-item"
                                  t-if="!state.hideSalespersonFilter">
                                 <label class="filter-label">
                                     <i class="fa fa-user"/>
-                                    Salesperson
+                                    Sales Persons
                                 </label>
-                                <div class="filter-control">
-                                    <select class="form-select"
-                                            t-model="state.filters.salesperson"
-                                            t-on-change="onSalespersonChange">
-                                        <option value="">All Salespersons</option>
-                                        <t t-if="state.salespersons">
-                                            <t t-foreach="state.salespersons"
-                                               t-as="person" t-key="person.id">
-                                                <option t-att-value="person.id"
-                                                        t-esc="person.name"/>
-                                            </t>
-                                        </t>
-                                    </select>
+                                <div class="cy-dropdown">
+                                    <button type="button"
+                                            class="form-select cy-dropdown-toggle"
+                                            t-att-class="state.filterDraft.salesPersons.length ? 'cy-select-filled' : ''"
+                                            t-on-click.stop="() => this.toggleFilterDropdown('persons')">
+                                        <span t-esc="getSalesPersonsNames() or 'All sales persons'"/>
+                                    </button>
+                                    <div class="cy-dropdown-menu"
+                                         t-if="state.openDropdown === 'persons'">
+                                        <div class="cy-dropdown-option"
+                                             t-on-click.stop="() => this.onDraftSalespersonOption('')">
+                                            <input type="checkbox"
+                                                   t-att-checked="!state.filterDraft.salesPersons.length"/>
+                                            <span class="cy-option-label">All sales persons</span>
+                                        </div>
+                                        <div class="cy-dropdown-option"
+                                             t-foreach="state.salespersons"
+                                             t-as="person" t-key="person.id"
+                                             t-att-class="state.filterDraft.salesPersons.includes(person.id) ? 'cy-option-selected' : ''"
+                                             t-on-click.stop="() => this.onDraftSalespersonOption(person.id)">
+                                            <input type="checkbox"
+                                                   t-att-checked="state.filterDraft.salesPersons.includes(person.id)"/>
+                                            <span class="cy-option-label"
+                                                  t-esc="person.name"/>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Custom Date Range (appears when custom is selected) -->
                         <div class="custom-date-section"
-                             t-if="state.filters.dateRange === 'custom'">
+                             t-if="state.filterDraft.dateRange === 'custom'">
                             <div class="date-inputs">
                                 <div class="date-input-group">
                                     <label class="date-label">From Date</label>
                                     <input type="date" class=" date-input"
-                                           t-model="state.filters.dateFrom"
-                                           t-att-max="state.filters.dateTo"
-                                           t-on-change="onCustomDateChange"/>
+                                           t-model="state.filterDraft.dateFrom"
+                                           t-att-max="state.filterDraft.dateTo"/>
                                 </div>
                                 <div class="date-separator">
                                     <i class="fa fa-arrow-right"/>
@@ -108,9 +147,8 @@
                                 <div class="date-input-group">
                                     <label class="date-label">To Date</label>
                                     <input type="date" class="date-input"
-                                           t-model="state.filters.dateTo"
-                                           t-att-min="state.filters.dateFrom"
-                                           t-on-change="onCustomDateChange"/>
+                                           t-model="state.filterDraft.dateTo"
+                                           t-att-min="state.filterDraft.dateFrom"/>
                                 </div>
                             </div>
                         </div>
@@ -126,23 +164,23 @@
                             </div>
                             <div class="filter-tags">
                                 <span class="filter-tag"
-                                      t-if="state.filters.dateRange !== 'this_month'">
+                                      t-if="state.filterDraft.dateRange !== 'this_month'">
                                     <span class="tag-content"
                                           t-esc="getDateRangeLabel()"/>
                                     <i class="fa fa-times tag-remove"
                                        t-on-click="clearDateFilter"/>
                                 </span>
                                 <span class="filter-tag"
-                                      t-if="state.filters.salesTeam">
+                                      t-if="state.filterDraft.salesTeams.length">
                                     <span class="tag-content"
-                                          t-esc="'Team: ' + getSalesTeamName()"/>
+                                          t-esc="'Team: ' + getSalesTeamsNames()"/>
                                     <i class="fa fa-times tag-remove"
                                        t-on-click="clearSalesTeamFilter"/>
                                 </span>
                                 <span class="filter-tag"
-                                      t-if="!state.hideSalespersonFilter and state.filters.salesperson">
+                                      t-if="!state.hideSalespersonFilter and state.filterDraft.salesPersons.length">
                                     <span class="tag-content"
-                                          t-esc="'Person: ' + getSalespersonName()"/>
+                                          t-esc="'Person: ' + getSalesPersonsNames()"/>
                                     <i class="fa fa-times tag-remove"
                                        t-on-click="clearSalespersonFilter"/>
                                 </span>
@@ -154,62 +192,73 @@
                                 </span>
                             </div>
                         </div>
+
+                        <!-- Popover footer: Clear Filter / Apply -->
+                        <div class="filter-footer">
+                            <button class="cy-filter-clear"
+                                    type="button"
+                                    t-on-click="onResetFilters">
+                                Clear Filter
+                            </button>
+                            <button class="cy-filter-apply"
+                                    type="button"
+                                    t-on-click="onApplyFilters">
+                                Apply
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="sample-data-banner" t-if="state.isSampleData">
-                <i class="ri-information-line"/>
-                <span>No data found. Showing sample data.</span>
+            <div class="o_view_nocontent cy-nocontent-wrap" t-if="state.isSampleData">
+                <div class="o_nocontent_help">
+                    <p class="o_view_nocontent_smiling_face">
+                        No data found. Showing sample data.
+                    </p>
+                    <p>
+                        Create a new lead, the first step of a new opportunity!<br/>
+                        You can also widen the date range or clear the filters
+                        to include more records.
+                    </p>
+                </div>
             </div>
 
                 <!-- Key Metrics Cards -->
             <div class="metrics-grid">
                 <t t-foreach="state.metrics" t-as="metric" t-key="metric_index">
-                    <div class="metric-card"
+                    <div class="metric-card cy-kpi-card"
                         t-att-data-metric-type="metric.type"
                         t-on-click="() => onMetricClick(metric, this.action)">
                         <div class="metric-content">
                             <div class="metric-info">
                                 <p class="metric-label" t-esc="metric.label"/>
-                                <p class="metric-value"
-                                   t-esc="metric.formatted_value"/>
+                                <div class="metric-value-row">
+                                    <span class="metric-value" t-esc="metric.formatted_value"/>
+                                    <span class="metric-unit" t-if="metric.unit" t-esc="metric.unit"/>
+                                </div>
                                 <p class="metric-change"
                                    t-att-class="metric.change >= 0 ? 'positive-change' : 'negative-change'">
-                                    <t t-if="metric.change >= 0">+</t>
-                                    <t t-esc="metric.change"/>% from last period
+                                    <t t-if="metric.change >= 0">
+                                        <i class="ri-arrow-right-up-line"/>
+                                        <t t-esc="'+' + metric.change"/>% from last period
+                                    </t>
+                                    <t t-else="">
+                                        <i class="ri-arrow-right-down-line"/>
+                                        <t t-esc="metric.change"/>% from last period
+                                    </t>
                                 </p>
                             </div>
-                            <div class="metric-icon"
-                                 t-att-class="metric.type + '-icon'">
+                            <div class="metric-icon">
                                 <i t-att-class="metric.icon"/>
                             </div>
                         </div>
                     </div>
                 </t>
             </div>
-
-                <!-- Charts Section -->
-            <div class="charts-grid" t-ref="crmDashboardChartGrids">
-                <!-- Revenue Chart -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Revenue &amp; Leads Trend</h3>
-                        <div class="chart-actions">
-                            <button class="btn btn-sm btn-secondary"
-                                t-on-click="()=>this.exportData('lead')"
-                                data-chart="revenue">
-                                <i class="fa fa-download" />
-                            </button>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas t-ref="revenueChart" />
-                    </div>
-                </div>
-
+            <!-- Row 3: Sales Pipeline + Top Performers + Updates -->
+            <div class="performance-grid">
                 <!-- Pipeline Chart -->
-                <div class="chart-card">
+                <div class="chart-card cy-kpi-card cy-pipeline-card">
                     <div class="chart-header">
                         <h3 class="chart-title">Sales Pipeline</h3>
                         <div class="chart-actions">
@@ -220,44 +269,52 @@
                             </button>
                         </div>
                     </div>
-                    <div id="salesChartWrapper">
+                    <div class="cy-pipeline-track">
                         <div class="chart-container">
                             <canvas t-ref="pipelineChart"/>
                         </div>
-                        <div class="chart-legend">
+                        <div class="chart-legend pipeline-legend">
                             <t t-foreach="state.pipeline" t-as="stage"
                                t-key="stage_index">
                                 <div class="legend-item">
-                                    <span class="legend-color"
-                                          t-att-style="'background-color: ' + stage.color"/>
-                                    <span class="legend-text"
-                                          t-esc="stage.stage + ': ' + stage.value + '%'"/>
+                                     <span class="legend-color"
+                                              t-att-style="'background-color: ' + stage.color"/>
+                                    <div class="legend-line">
+
+                                        <span class="legend-text"
+                                              t-esc="stage.stage"/>
+                                        <span class="legend-value"
+                                          t-esc="stage.value + '%'"/>
+                                    </div>
+
                                 </div>
+                            </t>
+                        </div>
+                        <div class="cy-pipeline-counts"
+                             t-if="state.pipeline and state.pipeline.length and state.pipeline[0].count !== undefined">
+                            <t t-foreach="state.pipeline" t-as="stage"
+                               t-key="stage_index">
+                                <span class="pipeline-count">
+                                    <span class="pipeline-count-num"
+                                          t-esc="stage.count"/>
+                                    <span class="pipeline-count-label"
+                                          t-esc="stage.count === 1 ? 'deal' : 'deals'"/>
+                                </span>
                             </t>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Activities and Performance Section -->
-            <div class="performance-grid">
-                <!-- Weekly Activities -->
-                <div class="activities-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Activities Overview</h3>
-                    </div>
-                    <div class="chart-container">
-                        <canvas t-ref="activitiesChart"/>
-                    </div>
-                </div>
 
                 <!-- Top Performers -->
-                <div class="performers-card">
+                <div class="performers-card cy-kpi-card">
                     <div class="chart-header">
                         <h3 class="chart-title">Top Performers</h3>
-                        <div class="chart-subtitle"
-                             t-if="state.filters.salesTeam">
-                            <span t-esc="'Team: ' + getSalesTeamName()"/>
+                        <div class="chart-actions">
+                            <button class="btn btn-sm btn-secondary"
+                                    t-on-click="()=>this.exportData('performers')"
+                                    data-chart="performers">
+                                <i class="fa fa-download"/>
+                            </button>
                         </div>
                     </div>
                     <t t-if="state.topPerformers and state.topPerformers.length > 0">
@@ -266,17 +323,27 @@
                            t-key="performer_index">
                             <div class="performer-item">
                                 <div class="performer-info">
+                                    <img class="performer-avatar-img"
+                                         t-if="performer.avatar and performer.user_id"
+                                         t-att-src="'/web/image/res.users/' + performer.user_id + '/image_128'"
+                                         alt="performer.name"/>
                                     <div class="performer-avatar"
+                                         t-if="!performer.avatar or !performer.user_id"
                                          t-esc="performer.initials"/>
                                     <div class="performer-details">
                                         <p class="performer-name"
                                            t-esc="performer.name"/>
                                         <p class="performer-deals"
-                                           t-esc="performer.deals + ' deals'"/>
+                                           t-esc="performer.deals + (performer.deals === 1 ? ' deal' : ' deals')"/>
                                     </div>
                                 </div>
-                                <div class="performer-amount"
-                                     t-esc="performer.formatted_amount"/>
+                                <div class="performer-right">
+                                    <span class="performer-amount"
+                                          t-esc="performer.formatted_amount"/>
+                                    <span class="performer-rank">
+                                        Top <t t-esc="performer_index + 1"/>
+                                    </span>
+                                </div>
                             </div>
                             </t>
                     </div>
@@ -289,23 +356,23 @@
         </div>
     </t>
                 </div>
-            </div>
 
-            <!-- Lead Notifications and Activities Status Section - Side by Side -->
-            <div class="notifications-activities-grid">
-                <!-- Lead Notifications Section -->
-                <div class="notifications-section">
+                <!-- Updates (row 3 — third card) -->
+                <div class="notifications-section cy-kpi-card cy-updates-card">
                     <div class="notifications-header">
                         <div class="notifications-title-group">
                             <span class="notifications-title">
                                 <i class="fa fa-bell"/>
                                 Updates
                             </span>
-                            <span class="notifications-count"
-                                  t-if="state.unreadVisibleCount and state.leadNotifications.length">
-                                <t t-esc="state.unreadVisibleCount"/>
-                            </span>
                         </div>
+                        <!-- Clear Records -->
+                        <button class="btn btn-secondary"
+                                t-on-click="onClearNotifications"
+                                t-if="state.leadNotifications and state.leadNotifications.length">
+                            <i class="ri-delete-bin-line"/>
+                            Clear 
+                        </button>
                     </div>
 
                     <div class="notifications-content">
@@ -323,35 +390,40 @@
                                 </p>
                             </div>
                         </div>
-                        <!-- Notifications List -->
+                        <!-- Notifications List (all rows, scrollable) -->
                         <div class="notifications-list"
                              t-if="state.leadNotifications and state.leadNotifications.length">
-                            <t t-set="displayNotifications"
-                               t-value="state.showAllNotifications ? state.leadNotifications : state.leadNotifications.slice(0, 6)"/>
-                            <t t-foreach="displayNotifications"
+                            <t t-foreach="state.leadNotifications"
                                t-as="notification" t-key="notification.id">
-                                <div class="notification-item"
+                                <div class="notification-item cy-update-row"
                                      t-att-class="getNotificationClass(notification)"
                                      t-on-click="onNotificationClick"
                                      t-att-data-id="notification.id">
 
-                                    <!-- Notification Content -->
-                                    <div class="notification-content">
-                                        <div class="notification-header">
-                                            <div class="notification-meta">
-                                            </div>
-                                        </div>
-
-                                        <div class="notification-body">
-                                            <p class="notification-message"
-                                               t-esc="notification.message"/>
-                                        </div>
+                                    <!-- Type icon chip -->
+                                    <div class="notification-icon-chip">
+                                        <i t-att-class="getNotificationIcon(notification.type)"/>
                                     </div>
+
+                                    <!-- Title + description -->
+                                    <div class="notification-content">
+                                        <p class="notification-title"
+                                           t-esc="notification.title"/>
+                                        <p class="notification-desc"
+                                           t-esc="notification.message"/>
+                                    </div>
+
+                                    <!-- Time -->
+                                    <span class="notification-time"
+                                          t-if="notification.create_date">
+                                        <i class="ri-time-line"/>
+                                        <t t-esc="formatNotificationTime(notification.create_date)"/>
+                                    </span>
 
                                     <!-- Notification Actions -->
                                     <div class="notification-actions">
                                         <!-- View Lead Button -->
-                                        <button class="btn btn-view-lead"
+                                        <button class="btn cy-btn-view-lead"
                                                 t-on-click.stop="onViewLead"
                                                 t-att-data-lead-id="notification.lead_id"
                                                 t-if="notification.lead_id">
@@ -359,7 +431,7 @@
                                         </button>
 
                                         <!-- Dismiss Button -->
-                                        <button class="btn btn-dismiss"
+                                        <button class="btn btn-secondary"
                                                 t-on-click.stop="onDismissNotification"
                                                 t-att-data-id="notification.id">
                                             Dismiss
@@ -367,54 +439,70 @@
                                     </div>
                                 </div>
                             </t>
-
-                            <!-- Show More/Less Button -->
-                            <div class="notifications-toggle-section"
-                                 t-if="state.leadNotifications.length > 6">
-                                <button class="btn btn-view-lead"
-                                        t-on-click="onToggleNotifications">
-                                    <i t-att-class="state.showAllNotifications ? 'fa fa-chevron-up' : 'fa fa-chevron-down'"/>
-                                    <span t-if="state.showAllNotifications">
-                                        Show Less
-                                    </span>
-                                    <span t-else="">
-                                        Show
-                                        <t t-esc="state.leadNotifications.length - 6"/>
-                                        More Notifications
-                                    </span>
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
-            <!-- Quick Actions -->
-            <div class="actions-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">Quick Actions</h3>
+             <div class="charts-grid" t-ref="crmDashboardChartGrids">
+                <!-- Revenue Chart -->
+                <div class="chart-card cy-kpi-card cy-trend-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Revenue &amp; Leads Trend</h3>
+                        <div class="chart-actions">
+                            <button class="btn btn-sm btn-secondary"
+                                    t-on-click="()=>this.exportData('lead')"
+                                    data-chart="revenue">
+                                <i class="fa fa-download"/>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- HTML series legend below the title -->
+                    <div class="chart-legend cy-series-legend">
+                        <div class="legend-item">
+                            <span class="legend-color lead-dot"></span>
+                            <span class="legend-text">Lead</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color revenue-dot"></span>
+                            <span class="legend-text">Revenue</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dash"></span>
+                            <span class="legend-text">Previous year</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas t-ref="revenueChart" />
+                    </div>
                 </div>
-                <div class="actions-grid">
-                    <!--                   TODO - commented due to its usage in crm. can be used in the future -->
 
-                    <!--                    <button class="action-btn calls-btn" t-on-click="onMakeCallsClick">-->
-                    <!--                        <i class="fa fa-phone"/>-->
-                    <!--                        <span>Make Calls</span>-->
-                    <!--                    </button>-->
-                    <!--                    <button class="action-btn emails-btn" t-on-click="onSendEmailsClick">-->
-                    <!--                        <i class="fa fa-envelope"/>-->
-                    <!--                        <span>Send Emails</span>-->
-                    <!--                    </button>-->
-                    <!--                    <button class="action-btn meetings-btn" t-on-click="onScheduleMeetingClick">-->
-                    <!--                        <i class="fa fa-calendar"/>-->
-                    <!--                        <span>Schedule Meeting</span>-->
-                    <!--                    </button>-->
-                    <button class="action-btn btn-view-lead"
-                            t-on-click="onViewReportsClick">
-                        <i class="fa fa-chart-line"/>
-                        <span>View Reports</span>
-                    </button>
+                <!-- Weekly Activities (row 2 — beside Revenue &amp; Leads Trend) -->
+                <div class="activities-card cy-kpi-card cy-activities-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Activities Overview</h3>
+                        <div class="chart-actions">
+                            <button class="btn btn-sm btn-secondary"
+                                    t-on-click="()=>this.exportData('activity')"
+                                    data-chart="activities">
+                                <i class="fa fa-download"/>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- HTML series legend below the title -->
+                    <div class="chart-legend cy-series-legend"
+                         t-if="state.activityLegend and state.activityLegend.length">
+                        <t t-foreach="state.activityLegend" t-as="item"
+                           t-key="item_index">
+                            <div class="legend-item">
+                                <span class="legend-color"
+                                      t-att-style="'background-color: ' + item.color"/>
+                                <span class="legend-text" t-esc="item.name"/>
+                            </div>
+                        </t>
+                    </div>
+                    <div class="chart-container">
+                        <canvas t-ref="activitiesChart"/>
+                    </div>
                 </div>
             </div>
         </div>

@@ -55,5 +55,6 @@ class CrmLead(models.Model):
             'context': {
                 'default_title': f'{lead.display_name} Survey' if lead else 'New Survey',
                 'default_lead_id': lead.id,
+                'default_create_lead': True,
             },
         }

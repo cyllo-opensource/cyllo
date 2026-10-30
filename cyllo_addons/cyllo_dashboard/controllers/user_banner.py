@@ -33,3 +33,31 @@ class UserBannerController(Controller):
             return {"success": True}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    @route('/user/upload_wallpaper', type='json', auth='user', csrf=False)
+    def upload_wallpaper(self, wallpaper_data=False, mime=False):
+        try:
+            if not wallpaper_data:
+                return {"success": False, "error": "No data provided"}
+            if mime not in ('image/png', 'image/jpeg', 'image/webp'):
+                mime = 'image/png'
+            user = request.env.user
+            user.sudo().write({
+                'quick_access_wallpaper': wallpaper_data,
+                'quick_access_wallpaper_mime': mime,
+            })
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    @route('/user/remove_wallpaper', type='json', auth='user', csrf=False)
+    def remove_wallpaper(self):
+        try:
+            user = request.env.user
+            user.sudo().write({
+                'quick_access_wallpaper': False,
+                'quick_access_wallpaper_mime': False,
+            })
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "error": str(e)}

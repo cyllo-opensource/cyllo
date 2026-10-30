@@ -59,8 +59,12 @@ class TestAppointmentRecruitment(TransactionCase):
             'user_id': cls.user_interviewer.id,
         })
 
+        # Partner for appointments
+        cls.partner = cls.env['res.partner'].create({'name': 'Test Recruitment Partner'})
+
         # Applicant with a responsible user set.
         cls.applicant = cls.env['hr.applicant'].create({
+            'name': 'Test Jane Application',
             'partner_name': 'Jane Doe',
             'job_id': cls.job.id,
             'email_from': 'jane@example.com',
@@ -71,6 +75,8 @@ class TestAppointmentRecruitment(TransactionCase):
         cls.apt_type = cls.env['appointment.type'].create({
             'name': 'Recruitment Interview Type',
             'category': 'interview',
+            'require_staff': False,
+            'min_booking_notice': 0.0,
         })
 
      
@@ -80,8 +86,9 @@ class TestAppointmentRecruitment(TransactionCase):
         defaults = {
             'appointment_type_id': self.apt_type.id,
             'name': 'Test Interview Appointment',
-            'start': '2026-08-01 10:00:00',
-            'stop': '2026-08-01 11:00:00',
+            'partner_id': self.partner.id,
+            'start_datetime': '2026-08-01 10:00:00',
+            'end_datetime': '2026-08-01 11:00:00',
         }
         if vals:
             defaults.update(vals)
@@ -131,6 +138,7 @@ class TestAppointmentRecruitment(TransactionCase):
     def test_create_with_applicant_having_no_user_does_not_assign_staff(self):
         """An applicant without a user_id must not cause staff_id assignment."""
         no_user_applicant = self.env['hr.applicant'].create({
+            'name': 'No User Applicant',
             'partner_name': 'No User Applicant',
             'job_id': self.job.id,
         })
@@ -146,8 +154,9 @@ class TestAppointmentRecruitment(TransactionCase):
             {
                 'appointment_type_id': self.apt_type.id,
                 'name': f'Bulk Interview {i}',
-                'start': f'2026-08-0{i + 2} 09:00:00',
-                'stop': f'2026-08-0{i + 2} 10:00:00',
+                'partner_id': self.partner.id,
+                'start_datetime': f'2026-08-0{i + 2} 09:00:00',
+                'end_datetime': f'2026-08-0{i + 2} 10:00:00',
                 'applicant_id': self.applicant.id,
             }
             for i in range(3)
@@ -248,6 +257,7 @@ class TestAppointmentRecruitment(TransactionCase):
     def test_applicant_id_ondelete_set_null(self):
         """Deleting an applicant must set applicant_id to False (ondelete='set null')."""
         disposable_applicant = self.env['hr.applicant'].create({
+            'name': 'Disposable Applicant',
             'partner_name': 'Disposable Candidate',
             'job_id': self.job.id,
         })

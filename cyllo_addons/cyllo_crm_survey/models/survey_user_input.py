@@ -19,7 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from odoo import models
+from markupsafe import Markup
+from odoo import _, models
 
 
 class SurveyUserInput(models.Model):
@@ -123,10 +124,22 @@ class SurveyUserInput(models.Model):
 
                 if lead_vals:
                     lead = self.env['crm.lead'].create(lead_vals)
-                    backend_url = f"/web#id={user_input.id}&model=survey.user_input&view_type=form"
-                    frontend_url = f"/survey/print/{user_input.survey_id.access_token}?answer_token={user_input.access_token}"
-                    message_body = f"<strong>Lead created from Survey:</strong> <a href='/web#id={user_input.survey_id.id}&model=survey.survey&view_type=form'>{user_input.survey_id.title}</a>.<br/>" \
-                                   f"• <a href='{backend_url}' target='_blank'>View User Input in Backend</a><br/>" \
-                                   f"• <a href='{frontend_url}' target='_blank'>View Print Answers (Frontend)</a>"
+                    survey = user_input.survey_id
+                    message_body = Markup(
+                        '<p><strong>%(created)s</strong> '
+                        '<a href="%(survey_url)s">%(title)s</a></p>'
+                        '<ul>'
+                        '<li><a href="%(backend_url)s">%(backend)s</a></li>'
+                        '<li><a href="%(frontend_url)s" target="_blank">%(frontend)s</a></li>'
+                        '</ul>'
+                    ) % {
+                        'created': _("Lead created from Survey:"),
+                        'survey_url': f"/web#id={survey.id}&model=survey.survey&view_type=form",
+                        'title': survey.title,
+                        'backend': _("View User Input in Backend"),
+                        'backend_url': f"/web#id={user_input.id}&model=survey.user_input&view_type=form",
+                        'frontend': _("View Print Answers (Frontend)"),
+                        'frontend_url': user_input.get_print_url(),
+                    }
                     lead._message_log(body=message_body)
         return res

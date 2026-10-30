@@ -15,28 +15,44 @@
                 </section>
                 <section class="pt48 pb48">
                     <div class="container">
-                        <div class="row">
-                            <t t-foreach="appointment_types" t-as="type">
-                                <div class="col-md-4 mb32">
-                                    <div class="card h-100 shadow-sm border-0" style="transition: transform 0.2s; border-radius: 12px;">
-                                        <div class="card-body">
-                                            <div class="mb-3">
-                                                <span class="badge bg-primary rounded-pill"><t t-esc="dict(type.fields_get(allfields=['category'])['category']['selection'])[type.category]"/></span>
+                        <t t-if="appointment_types">
+                            <div class="row">
+                                <t t-foreach="appointment_types" t-as="type">
+                                    <div class="col-md-4 mb32">
+                                        <div class="card h-100 shadow-sm border-0" style="transition: transform 0.2s; border-radius: 12px;">
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <span class="badge bg-primary rounded-pill"><t t-esc="dict(type.fields_get(allfields=['category'])['category']['selection'])[type.category]"/></span>
+                                                </div>
+                                                <h4 class="card-title"><t t-esc="type.name"/></h4>
+                                                <div class="text-muted mb-4 small">
+                                                    <span><i class="fa fa-clock-o me-1"/> <t t-esc="type.duration"/> h</span>
+                                                    <span class="ms-3" t-if="type.location_type"><i class="fa fa-map-marker me-1"/> <t t-esc="dict(type.fields_get(allfields=['location_type'])['location_type']['selection'])[type.location_type]"/></span>
+                                                </div>
+                                                <div t-if="type.description" class="card-text mb-4 text-muted small" t-raw="type.description"/>
+                                                <a t-attf-href="/appointment/{{type.id}}"
+                           class="btn btn-primary d-block mt-auto w-100 o_appointment_book_btn"
+                           style="border-radius: 8px;">Book Now</a>
                                             </div>
-                                            <h4 class="card-title"><t t-esc="type.name"/></h4>
-                                            <div class="text-muted mb-4 small">
-                                                <span><i class="fa fa-clock-o me-1"/> <t t-esc="type.duration"/> h</span>
-                                                <span class="ms-3" t-if="type.location_type"><i class="fa fa-map-marker me-1"/> <t t-esc="dict(type.fields_get(allfields=['location_type'])['location_type']['selection'])[type.location_type]"/></span>
-                                            </div>
-                                            <div t-if="type.description" class="card-text mb-4 text-muted small" t-raw="type.description"/>
-                                            <a t-attf-href="/appointment/{{type.id}}"
-                   class="btn btn-primary d-block mt-auto w-100 o_appointment_book_btn"
-                   style="border-radius: 8px;">Book Now</a>
                                         </div>
                                     </div>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <!-- Empty state: no published appointment types -->
+                            <div class="row justify-content-center">
+                                <div class="col-md-6 text-center py-5">
+                                    <h3 class="fw-bold mb-2" style="color:#1e1e2d;">No Appointments Available</h3>
+                                    <p class="text-muted mb-4" style="font-size:1.05rem;">
+                                        There are currently no appointment types published.<br/>
+                                    </p>
+                                    <a href="/" class="btn btn-primary btn-lg px-5" style="border-radius:10px; font-weight:600;">
+                                        <i class="fa fa-home me-2"/>Go to Home
+                                    </a>
                                 </div>
-                            </t>
-                        </div>
+                            </div>
+                        </t>
                     </div>
                 </section>
             </div>

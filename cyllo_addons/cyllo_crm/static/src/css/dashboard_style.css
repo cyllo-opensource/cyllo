@@ -1,17 +1,58 @@
-/* Global scrolling fix */
-html,
-body {
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-}
-
-.o_action_manager .o_action {
-    overflow-y: auto;
-    height: 100%;
-}
-
 /* CRM Dashboard Styles */
-.o_crm_dashboard {
+:root {
+    /* Page & cards */
+    --cy-bg: #F7F7F3;
+    --cy-card-bg: #FFFFFF;
+    --cy-card-border: #ECEDF0;
+    --cy-border-hover: #DDDCCF;
+    --cy-card-shadow: rgba(36, 36, 28, 0.04);
+    --cy-card-shadow-hover: rgba(36, 36, 28, 0.08);
+
+    /* Chart canvas track */
+    --cy-chart-track: #FAFAF6;
+    --cy-pipeline-track: #F9F8F8;
+
+    /* Text */
+    --cy-text: #24241C;
+    --cy-muted: #8B8B7E;
+    --cy-tick: #9A9A8C;
+    --cy-tick-lead: #9FA32E;
+    --cy-legend-text: #55534A;
+
+    /* Olive accent */
+    --cy-cyllo: #9EA700;
+    --cy-cyllo-hover: #8C9400;
+    --cy-accent: #7E8C2F;
+    --cy-accent-deep: #5C6A1E;
+    --cy-accent-darker: #48521B;
+    --cy-accent-light: #A9B85A;
+    --cy-accent-pale: #C9D49A;
+    --cy-accent-soft: #F4F3EC;
+    --cy-accent-fill: rgba(126, 140, 47, 0.12);
+
+    /* Neutral chart series */
+    --cy-line-muted: #B9B7A8;
+    --cy-line-dark: #4C5814;
+    --cy-line-lead: #D3C91F;
+    --cy-gray-soft: #9B9E91;
+    --cy-gray-light: #BEC0B2;
+
+    /* Gridlines */
+    --cy-grid-line: #F0EFE8;
+
+    /* Change badges */
+    --cy-positive: #5C8A16;
+    --cy-positive-soft: #F0F5E3;
+    --cy-negative: #C0392B;
+    --cy-negative-soft: #FBEAE7;
+
+    /* Rows (top performers) */
+    --cy-row: #F9F9F5;
+    --cy-row-hover: #F4F3EC;
+    --cy-rank-pill-bg: #EFF0D9;
+}
+
+.cy_crm_dashboard {
     font-family: 'Roboto', sans-serif;
     overflow-x: hidden;
     overflow-y: auto;
@@ -19,54 +60,71 @@ body {
     height: 100%;
     box-sizing: border-box;
     position: relative;
-    padding: 0 16px 10px;
-
+    padding: 24px;
+    background: #FAFAFA;
 }
 
-.o_crm_dashboard .dashboard-header {
+.cy_crm_dashboard .dashboard-header {
     background: #FAFAFA;
     top: 0;
     z-index: 1;
     position: relative;
 }
 
-.o_crm_dashboard .dashboard-header-title {
-    letter-spacing: -0.4px;
-    color: var(--body-color);
-    line-height: 1;
-    font-weight: 500;
-    font-size: 18px;
+.cy_crm_dashboard .heading {
+    display: flex;
+    flex-direction: column;
 }
 
-.o_crm_dashboard.sample-data-mode {
+.cy_crm_dashboard .dashboard-header-title {
+    color: var(--cy-text);
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.cy_crm_dashboard .dashboard-header-subtitle {
+    margin: 3px 0 0 0;
+    color: var(--cy-muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.1px;
+}
+
+.cy_crm_dashboard.sample-data-mode {
     background: #f5f7fb;
 }
 
-.o_crm_dashboard .sample-data-banner {
+/* Odoo-style empty-state helper — absolutely positioned and centered in
+   the dashboard content area, like the views' native no-content state.
+   The face is a :before on .o_view_nocontent_smiling_face that only
+   renders inside a .o_view_nocontent > .o_nocontent_help chain. */
+.cy_crm_dashboard .cy-nocontent-wrap {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    border: 1px solid #86b2f5;
-    border-left: 4px solid #86b2f5;
-    border-radius: 8px;
-    background: #f9fafb;
-    color: #4b5563;
-    font-size: 0.95rem;
-    font-weight: 600;
+    justify-content: center;
+    margin: 0;
 }
 
-.o_crm_dashboard .sample-data-banner i {
-    font-size: 1.1rem;
+.cy_crm_dashboard .cy-nocontent-wrap .o_nocontent_help {
+    pointer-events: auto;
+    text-align: center;
+    padding: 32px 48px;
+    margin: 0;
 }
 
-.o_crm_dashboard.sample-data-mode .metric-card,
-.o_crm_dashboard.sample-data-mode .chart-card,
-.o_crm_dashboard.sample-data-mode .activities-card,
-.o_crm_dashboard.sample-data-mode .performers-card,
-.o_crm_dashboard.sample-data-mode .notifications-section,
-.o_crm_dashboard.sample-data-mode .actions-card {
+.cy_crm_dashboard.sample-data-mode .metric-card,
+.cy_crm_dashboard.sample-data-mode .chart-card,
+.cy_crm_dashboard.sample-data-mode .activities-card,
+.cy_crm_dashboard.sample-data-mode .performers-card,
+.cy_crm_dashboard.sample-data-mode .notifications-section,
+.cy_crm_dashboard.sample-data-mode .actions-card {
     background: #f9fafb;
     box-shadow: none;
     border: 1px solid rgba(0, 0, 0, 0.125);
@@ -74,28 +132,28 @@ body {
     opacity: 0.72;
 }
 
-.o_crm_dashboard.sample-data-mode .metric-card:hover,
-.o_crm_dashboard.sample-data-mode .performer-item:hover {
+.cy_crm_dashboard.sample-data-mode .metric-card:hover,
+.cy_crm_dashboard.sample-data-mode .performer-item:hover {
     box-shadow: none;
     transform: none;
 }
 
-.o_crm_dashboard.sample-data-mode .metric-value,
-.o_crm_dashboard.sample-data-mode .chart-title,
-.o_crm_dashboard.sample-data-mode .performer-name,
-.o_crm_dashboard.sample-data-mode .performer-amount {
+.cy_crm_dashboard.sample-data-mode .metric-value,
+.cy_crm_dashboard.sample-data-mode .chart-title,
+.cy_crm_dashboard.sample-data-mode .performer-name,
+.cy_crm_dashboard.sample-data-mode .performer-amount {
     color: #4b5563;
 }
 
-.o_crm_dashboard.sample-data-mode .positive-change,
-.o_crm_dashboard.sample-data-mode .negative-change,
-.o_crm_dashboard.sample-data-mode .legend-text,
-.o_crm_dashboard.sample-data-mode .performer-deals {
+.cy_crm_dashboard.sample-data-mode .positive-change,
+.cy_crm_dashboard.sample-data-mode .negative-change,
+.cy_crm_dashboard.sample-data-mode .legend-text,
+.cy_crm_dashboard.sample-data-mode .performer-deals {
     color: #6b7280;
 }
 
 /* Header Styles */
-.o_crm_dashboard .dashboard-header {
+.cy_crm_dashboard .dashboard-header {
     display: flex;
     align-items: center;
 }
@@ -105,285 +163,595 @@ body {
 }
 
 .cy-filter-toggle-btn {
-    width: 120px;
+    width: fit-content;
 }
 
 
-.o_crm_dashboard .notification-item .notification-message {
+.cy_crm_dashboard .notification-item .notification-message {
     font-weight: normal;
     /* Default when read */
 }
 
-.o_crm_dashboard .notification-item.unread .notification-message {
+.cy_crm_dashboard .notification-item.unread .notification-message {
     font-weight: bold;
     /* Highlight unread */
 }
 
-.o_crm_dashboard .dashboard-title {
+.cy_crm_dashboard .dashboard-title {
     font-size: 2.5rem;
     font-weight: 700;
     color: #1f2937;
 }
 
-.o_crm_dashboard .dashboard-subtitle {
+.cy_crm_dashboard .dashboard-subtitle {
     color: #6b7280;
     font-size: 1.1rem;
     margin: 0;
 }
 
 /* Metrics Grid */
-.o_crm_dashboard .metrics-grid {
+.cy_crm_dashboard .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 8px;
     margin-bottom: 8px;
 }
 
-.o_crm_dashboard .charts-grid .chart-card {
-    border: 1px solid rgba(0, 0, 0, 0.125);
-}
-
-.o_crm_dashboard .metric-card,
-.chart-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.125);
+/* =========================================
+   Unified KPI Cards (cy-kpi-card)
+   All metric cards share the same class
+   ========================================= */
+.cy_crm_dashboard .cy-kpi-card {
+    background: var(--cy-card-bg);
+    border: 1px solid var(--cy-card-border);
+    border-radius: 12px;
+    padding: 18px 20px;
     cursor: pointer;
+    /* Grid items may shrink below their content width (prevents mobile blowout) */
+    min-width: 0;
 }
 
-.o_crm_dashboard .chart-card:hover {
-    transition: none;
-    transform: none;
-}
-
-.o_crm_dashboard .metric-content {
+.cy_crm_dashboard .metric-content {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
 }
 
-.o_crm_dashboard .metric-label {
-    color: #6b7280;
-    font-size: 0.875rem;
+.cy_crm_dashboard .metric-info {
+    min-width: 0;
+}
+
+.cy_crm_dashboard .metric-label {
+    color: var(--cy-muted);
+    font-size: 12.5px;
     font-weight: 500;
-    margin: 0 0 8px 0;
+    letter-spacing: 0.2px;
+    margin: 0 0 12px 0;
+    line-height: 1;
 }
 
-.o_crm_dashboard .metric-value {
-    font-size: 2rem;
+.cy_crm_dashboard .metric-value-row {
+    display: flex;
+    align-items: baseline;
+    margin: 0 0 10px 0;
+}
+
+.cy_crm_dashboard .metric-value {
+    font-size: 28px;
     font-weight: 700;
-    color: #1f2937;
-    margin: 0 0 8px 0;
-}
-
-.o_crm_dashboard .metric-change {
-    font-size: 0.875rem;
+    color: var(--cy-text);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
     margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.cy_crm_dashboard .metric-unit {
+    color: var(--cy-muted);
+    font-size: 12.5px;
     font-weight: 500;
+    margin: 0 0 0 6px;
 }
 
-.o_crm_dashboard .positive-change {
-    color: #10b981;
+.cy_crm_dashboard .metric-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.1px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    margin: 0;
+    width: fit-content;
 }
 
-.o_crm_dashboard .negative-change {
-    color: #ef4444;
+.cy_crm_dashboard .metric-change i {
+    font-size: 12px;
+    line-height: 1;
 }
 
-.o_crm_dashboard .metric-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+.cy_crm_dashboard .positive-change {
+    color: var(--cy-positive);
+    background: var(--cy-positive-soft);
+}
+
+.cy_crm_dashboard .negative-change {
+    color: var(--cy-negative);
+    background: var(--cy-negative-soft);
+}
+
+.cy_crm_dashboard .metric-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 1.25rem;
-}
-
-.o_crm_dashboard .revenue-icon {
-    background: linear-gradient(135deg, #10b981, #059669);
-}
-
-.o_crm_dashboard .leads-icon {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-
-.o_crm_dashboard .conversion-icon {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-}
-
-.o_crm_dashboard .deals-icon {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    background: var(--cy-accent-soft);
+    color: var(--cy-accent);
+    font-size: 20px;
+    margin: 0 0 0 12px;
 }
 
 /* Charts Grid */
-.o_crm_dashboard .charts-grid {
+.cy_crm_dashboard .charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    /* Row 2: equal halves — both cards 6/12 columns */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 8px;
     margin-bottom: 8px;
 }
 
-.o_crm_dashboard .chart-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
+.cy_crm_dashboard .chart-card.cy-kpi-card,
+.cy_crm_dashboard .activities-card.cy-kpi-card,
+.cy_crm_dashboard .performers-card.cy-kpi-card {
+    padding: 20px;
+    transform: none;
+    cursor: default;
+}
+
+.cy_crm_dashboard .chart-card.cy-kpi-card:hover,
+.cy_crm_dashboard .activities-card.cy-kpi-card:hover,
+.cy_crm_dashboard .performers-card.cy-kpi-card:hover {
+    transform: none;
 }
 
 
-.o_crm_dashboard .chart-header {
-    margin-bottom: 16px;
+.cy_crm_dashboard .chart-header {
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.o_crm_dashboard .chart-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1f2937;
+.cy_crm_dashboard .chart-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cy-text);
+    letter-spacing: -0.3px;
     margin: 0;
+    line-height: 1.2;
 }
 
-.o_crm_dashboard .chart-container {
-    height: 300px;
+.cy_crm_dashboard .chart-container {
+    height: 260px;
     position: relative;
+    background: var(--cy-chart-track);
+    border: 1px solid var(--cy-grid-line);
+    border-radius: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
-.o_crm_dashboard .chart-legend {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 16px;
+/* Canvas must never force its container wider (Chart.js leaves inline px
+   widths behind; without this clamp the grid tracks blow out on mobile) */
+.cy_crm_dashboard .chart-container canvas {
+    max-width: 100%;
 }
 
-.o_crm_dashboard .legend-item {
+/* Header actions: View Report + Filters (right side of the title block) */
+.cy_crm_dashboard .cy-header-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
-.o_crm_dashboard .legend-color {
-    width: 12px;
-    height: 12px;
+/* Both header buttons share the "cyllo" fill (#9EA600) */
+.cy_crm_dashboard .cy-view-report-btn,
+.cy_crm_dashboard .cy-header-actions .cy-dash-filter-btn,
+.cy_crm_dashboard .cy-header-actions .cy-churn-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 34px;
+    padding: 0 12px;
+    background: var(--cy-cyllo);
+    border: none;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: none;
+    transition: background 0.2s ease;
+}
+
+.cy_crm_dashboard .cy-view-report-btn:hover,
+.cy_crm_dashboard .cy-view-report-btn:focus,
+.cy_crm_dashboard .cy-header-actions .cy-dash-filter-btn:hover,
+.cy_crm_dashboard .cy-header-actions .cy-dash-filter-btn:focus,
+.cy_crm_dashboard .cy-header-actions .cy-churn-filter-btn:hover,
+.cy_crm_dashboard .cy-header-actions .cy-churn-filter-btn:focus {
+    background: var(--cy-cyllo-hover);
+    color: #FFFFFF;
+    box-shadow: none;
+}
+
+.cy_crm_dashboard .cy-view-report-btn i {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.cy_crm_dashboard .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.cy_crm_dashboard .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.cy_crm_dashboard .legend-color {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
-.o_crm_dashboard .legend-text {
-    font-size: 0.875rem;
-    color: #6b7280;
+.cy_crm_dashboard .legend-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--cy-legend-text);
+    line-height: 1;
 }
 
-/* Performance Grid */
-.o_crm_dashboard .performance-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 8px;
-    margin-bottom: 8px;
+/* ===== Sales Pipeline card =====
+   Card 378x398 · track 338x301 (inset 20px) · 4-col legend + counts row */
+.cy_crm_dashboard .cy-pipeline-card .chart-header {
+    margin-bottom: 16px;
 }
 
-@media (max-width: 1024px) {
-    .o_crm_dashboard .performance-grid {
-        grid-template-columns: 1fr;
+.cy_crm_dashboard .cy-pipeline-track {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    background: var(--cy-chart-track);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cy_crm_dashboard .cy-pipeline-track .chart-container {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.cy_crm_dashboard .cy-pipeline-track .pipeline-legend {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    gap: 32px;
+    margin: 0;
+    padding: 6px 14px 10px;
+}
+
+/* Dot and stage name share one line; % value sits under it */
+.cy_crm_dashboard .cy-pipeline-track .pipeline-legend .legend-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    min-width: 0;
+    flex: 0 0 auto;
+}
+
+.cy_crm_dashboard .cy-pipeline-track .pipeline-legend .legend-line {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.cy_crm_dashboard .cy-pipeline-track .pipeline-legend .legend-line .legend-color {
+    margin-top: 0;
+}
+
+.cy_crm_dashboard .cy-pipeline-track .pipeline-legend .legend-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.cy_crm_dashboard .legend-value {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cy-text);
+    line-height: 1.1;
+}
+
+
+.cy_crm_dashboard .cy-pipeline-counts {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 32px;
+    padding: 8px 14px 10px;
+    border-top: 1px solid var(--cy-grid-line);
+    margin-top: 2px;
+}
+
+.cy_crm_dashboard .pipeline-count {
+    display: inline-flex;
+    align-items: baseline;
+    min-width: 0;
+}
+
+/* Below 1400px the 4-across legend/counts overlap, so both drop to
+   2 sections per row. Placed AFTER the base rules so it wins the cascade. */
+@media (max-width: 1400px) {
+    .cy_crm_dashboard .cy-pipeline-track .pipeline-legend {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 24px;
+    }
+
+    .cy_crm_dashboard .cy-pipeline-track .pipeline-legend .legend-item {
+        flex: 0 0 calc(50% - 12px);
+        box-sizing: border-box;
+    }
+
+    .cy_crm_dashboard .cy-pipeline-counts {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 24px;
+    }
+
+    .cy_crm_dashboard .pipeline-count {
+        flex: 0 0 calc(50% - 12px);
+        box-sizing: border-box;
     }
 }
 
-.o_crm_dashboard .activities-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    border: 1px solid rgba(0, 0, 0, 0.125);
+.cy_crm_dashboard .pipeline-count-num {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--cy-text);
 }
 
-.o_crm_dashboard .activities-legend {
+.cy_crm_dashboard .pipeline-count-label {
+    font-size: 15px;
+    color: var(--cy-line-muted);
+    margin-left: 8px;
+    white-space: nowrap;
+}
+
+/* Revenue chart series legend (HTML, below the title) */
+.cy_crm_dashboard .cy-series-legend {
     display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    margin: 0 0 14px 0;
 }
 
-.o_crm_dashboard .calls-color {
-    background-color: #3b82f6;
+.cy_crm_dashboard .cy-series-legend .legend-color {
+    width: 9px;
+    height: 9px;
+    margin-top: 0;
 }
 
-.o_crm_dashboard .emails-color {
-    background-color: #10b981;
+.cy_crm_dashboard .lead-dot {
+    background: var(--cy-cyllo);
 }
 
-.o_crm_dashboard .meetings-color {
-    background-color: #f59e0b;
+.cy_crm_dashboard .revenue-dot {
+    background: var(--cy-line-dark);
 }
 
-.o_crm_dashboard .performers-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    border: 1px solid rgba(0, 0, 0, 0.125);
+.cy_crm_dashboard .legend-dash {
+    width: 18px;
+    height: 0;
+    border-top: 2px dashed var(--cy-line-muted);
+    flex-shrink: 0;
 }
 
-.o_crm_dashboard .performers-list {
+.cy_crm_dashboard #salesChartWrapper .chart-container {
+    height: 200px;
+}
+
+/* Trend card — stretches to the same height as the Activities card;
+   track keeps 299px as minimum */
+.cy_crm_dashboard .cy-trend-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.cy_crm_dashboard .cy-trend-card .chart-container {
+    flex: 1;
+    min-height: 299px;
+    height: auto;
+}
+
+/* Activities card — stretches to the Trend card's height (same grid row) */
+.cy_crm_dashboard .activities-card.cy-kpi-card {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.cy_crm_dashboard .cy-activities-card .chart-container {
+    flex: 1;
+    min-height: 220px;
+    height: auto;
+}
+
+/* Performers card — stretches to the Pipeline card's height (same grid row) */
+.cy_crm_dashboard .performers-card.cy-kpi-card {
+    height: auto;
+    overflow: hidden;
+}
+
+.cy_crm_dashboard .performers-card .chart-header {
+    margin-bottom: 16px;
+}
+
+.cy_crm_dashboard .performers-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.o_crm_dashboard .performer-item {
+.cy_crm_dashboard .performer-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    background: #f9fafb;
+    padding: 12px 14px;
+    background: var(--cy-chart-track);
+    border: 1px solid var(--cy-grid-line);
     border-radius: 12px;
     transition: background-color 0.2s ease;
 }
 
-.o_crm_dashboard .performer-item:hover {
-    background: #f3f4f6;
+.cy_crm_dashboard .performer-item:hover {
+    background: var(--cy-row-hover);
 }
 
-.o_crm_dashboard .performer-info {
+.cy_crm_dashboard .performer-info {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
 }
 
-.o_crm_dashboard .performer-avatar {
-    width: 40px;
-    height: 40px;
+.cy_crm_dashboard .performer-avatar {
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, var(--cy-accent-light), var(--cy-accent-deep));
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #FFFFFF;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
 }
 
-.o_crm_dashboard .performer-name {
-    font-weight: 500;
-    color: #1f2937;
-    margin: 0 0 4px 0;
+/* Real user photo (base64 from backend) — same 36px circle */
+.cy_crm_dashboard .performer-avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
 }
 
-.o_crm_dashboard .performer-deals {
-    font-size: 0.875rem;
-    color: #6b7280;
+.cy_crm_dashboard .performer-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.cy_crm_dashboard .performer-amount {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--cy-text);
+}
+
+.cy_crm_dashboard .performer-rank {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--cy-rank-pill-bg);
+    color: var(--cy-accent-darker);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+/* Performance Grid — Row 3: Pipeline 378 · Performers 378 · Updates ≈ 504 */
+.cy_crm_dashboard .performance-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+@media (max-width: 1024px) {
+    .cy_crm_dashboard .performance-grid {
+        /* Cards shrink with the viewport: Pipeline + Performers share the row,
+           Updates takes the full width underneath */
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .cy_crm_dashboard .cy-updates-card {
+        grid-column: 1 / -1;
+    }
+}
+
+.cy_crm_dashboard .activities-legend {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.cy_crm_dashboard .calls-color {
+    background-color: #3b82f6;
+}
+
+.cy_crm_dashboard .emails-color {
+    background-color: #10b981;
+}
+
+.cy_crm_dashboard .meetings-color {
+    background-color: #f59e0b;
+}
+
+.cy_crm_dashboard .performer-name {
+    font-weight: 600;
+    color: var(--cy-text);
+    margin: 0 0 2px 0;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+.cy_crm_dashboard .performer-deals {
+    font-size: 11px;
+    color: var(--cy-line-muted);
     margin: 0;
 }
 
-.o_crm_dashboard .performer-amount {
-    font-weight: 600;
-    color: #10b981;
-    font-size: 1rem;
-}
-
 /* Actions Card */
-.o_crm_dashboard .actions-card {
+.cy_crm_dashboard .actions-card {
     background: white;
     border-radius: 16px;
     padding: 24px;
@@ -391,13 +759,13 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.125);
 }
 
-.o_crm_dashboard .actions-grid {
+.cy_crm_dashboard .actions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 8px;
 }
 
-.o_crm_dashboard .action-btn {
+.cy_crm_dashboard .action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -411,51 +779,51 @@ body {
     transition: all 0.2s ease;
     font-size: 0.875rem;
 }
-.o_crm_dashboard .no-data-message{
+.cy_crm_dashboard .no-data-message{
     text-align: center;
     padding: 20px;
     color: #888;
 }
-.o_crm_dashboard .action-btn:hover {
+.cy_crm_dashboard .action-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.o_crm_dashboard .calls-btn {
+.cy_crm_dashboard .calls-btn {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
 }
 
-.o_crm_dashboard .calls-btn:hover {
+.cy_crm_dashboard .calls-btn:hover {
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
-.o_crm_dashboard .emails-btn {
+.cy_crm_dashboard .emails-btn {
     background: linear-gradient(135deg, #10b981, #059669);
 }
 
-.o_crm_dashboard .emails-btn:hover {
+.cy_crm_dashboard .emails-btn:hover {
     background: linear-gradient(135deg, #059669, #047857);
 }
 
-.o_crm_dashboard .meetings-btn {
+.cy_crm_dashboard .meetings-btn {
     background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
-.o_crm_dashboard .meetings-btn:hover {
+.cy_crm_dashboard .meetings-btn:hover {
     background: linear-gradient(135deg, #d97706, #b45309);
 }
 
-.o_crm_dashboard .reports-btn {
+.cy_crm_dashboard .reports-btn {
     background-color: #9ea700;
 }
 
-.o_crm_dashboard .reports-btn:hover {
+.cy_crm_dashboard .reports-btn:hover {
     background-color: #9ea700;
 
 }
 
 /* Loading States */
-.o_crm_dashboard .loading-spinner {
+.cy_crm_dashboard .loading-spinner {
     display: inline-block;
     width: 20px;
     height: 20px;
@@ -477,77 +845,136 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .o_crm_dashboard {
+    .cy_crm_dashboard {
         padding: 16px;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
 
-    .o_crm_dashboard .dashboard-title {
+    .cy_crm_dashboard .dashboard-title {
         font-size: 2rem;
     }
 
-    .o_crm_dashboard .metrics-grid {
-        grid-template-columns: 1fr;
+    /* Hide the header subtitle on small screens */
+    .cy_crm_dashboard .dashboard-header-subtitle {
+        display: none;
+    }
+
+    .cy_crm_dashboard .metrics-grid {
+        grid-template-columns: minmax(0, 1fr);
         gap: 8px;
     }
 
-    .o_crm_dashboard .charts-grid {
-        grid-template-columns: 1fr;
+    .cy_crm_dashboard .charts-grid {
+        grid-template-columns: minmax(0, 1fr);
         gap: 8px;
     }
 
-    .o_crm_dashboard .chart-container {
+    .cy_crm_dashboard .performance-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cy_crm_dashboard .chart-container {
         height: 250px;
         width:100%;
     }
 
-    .o_crm_dashboard .activities-legend {
+    .cy_crm_dashboard .activities-legend {
         flex-direction: column;
         gap: 12px;
     }
 
-    .o_crm_dashboard .actions-grid {
+    .cy_crm_dashboard .actions-grid {
         grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
 
-    .o_crm_dashboard .action-btn {
+    .cy_crm_dashboard .action-btn {
         padding: 12px;
         font-size: 0.8rem;
     }
 
-    .o_crm_dashboard .chart-actions {
-         padding: 5px;
-    }
-}
-
-@media (max-width: 480px) {
-    .o_crm_dashboard {
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .o_crm_dashboard .dashboard-title {
-        font-size: 1.75rem;
-    }
-
-    .o_crm_dashboard .metric-value {
-        font-size: 1.5rem;
-    }
-
-    .o_crm_dashboard .actions-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .o_crm_dashboard .chart-legend {
-        flex-direction: column;
+    .cy_crm_dashboard .cy-header-actions {
         gap: 8px;
     }
 }
 
+/* Chart cards adapt below 1024px — tracks shrink instead of staying fixed */
+@media (max-width: 1024px) {
+    /* Pipeline: elastic track, donut keeps a sensible floor */
+    .cy_crm_dashboard .cy-pipeline-track {
+        height: auto;
+    }
+
+    .cy_crm_dashboard .cy-pipeline-track .chart-container {
+        min-height: 260px;
+        max-height: 320px;
+    }
+
+    /* Trend & activities: shrink from their desktop minimums */
+    .cy_crm_dashboard .cy-trend-card .chart-container {
+        min-height: 240px;
+        max-height: 300px;
+    }
+
+    .cy_crm_dashboard .cy-activities-card .chart-container {
+        min-height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cy_crm_dashboard {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .cy_crm_dashboard .dashboard-title {
+        font-size: 1.6rem;
+    }
+
+    /* Slightly smaller header buttons so title + actions stay on one
+       row on narrow phones (iPhone 12 Pro ≈ 390px) */
+    .cy_crm_dashboard .cy-header-actions {
+        gap: 6px;
+    }
+
+    .cy_crm_dashboard .cy-view-report-btn,
+    .cy_crm_dashboard .cy-header-actions .cy-dash-filter-btn,
+    .cy_crm_dashboard .cy-header-actions .cy-churn-filter-btn {
+        height: 30px;
+        padding: 0 10px;
+        font-size: 11px;
+        gap: 4px;
+    }
+
+    .cy_crm_dashboard .cy-view-report-btn i {
+        font-size: 12px;
+    }
+
+    .cy_crm_dashboard .metric-value {
+        font-size: 1.5rem;
+    }
+
+    .cy_crm_dashboard .actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cy_crm_dashboard .chart-legend:not(.pipeline-legend) {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .cy_crm_dashboard .pipeline-legend {
+        gap: 10px 16px;
+    }
+
+    .cy_crm_dashboard .legend-value {
+        font-size: 13px;
+    }
+}
+
 /* Animation Classes */
-.o_crm_dashboard .fade-in {
+.cy_crm_dashboard .fade-in {
     animation: fadeIn 0.5s ease-in;
 }
 
@@ -563,7 +990,7 @@ body {
     }
 }
 
-.o_crm_dashboard .slide-up {
+.cy_crm_dashboard .slide-up {
     animation: slideUp 0.6s ease-out;
 }
 
@@ -579,40 +1006,41 @@ body {
     }
 }
 
-.o_crm_dashboard .o_pj_dashboard {
+.cy_crm_dashboard .cy_pj_dashboard {
     display: flex;
-    height: 60px;
-    margin-right: -14px;
+    height: auto;
+    min-height: 60px;
+    margin-right: 0;
     align-items: center;
     justify-content: space-between;
-    z-index: 99;
-    position: sticky;
-    padding: 0 2px
+    z-index: auto;
+    position: relative;
+    padding: 0px 2px 16px;
 
 }
 
 /* Focus and Accessibility */
-.o_crm_dashboard .action-btn:focus {
+.cy_crm_dashboard .action-btn:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }
 
-.o_crm_dashboard .metric-card:focus-within {
+.cy_crm_dashboard .metric-card:focus-within {
     box-shadow: 0 0 0 2px #3b82f6;
 }
 
 /* Print Styles */
 @media print {
-    .o_crm_dashboard {
+    .cy_crm_dashboard {
         background: white;
         padding: 0;
     }
 
-    .o_crm_dashboard .actions-card {
+    .cy_crm_dashboard .actions-card {
         display: none;
     }
 
-    .o_crm_dashboard .chart-container {
+    .cy_crm_dashboard .chart-container {
         height: 200px;
     }
 
@@ -636,7 +1064,7 @@ body {
         transition: none;
     }
 
-    .o_crm_dashboard .loading-spinner {
+    .cy_crm_dashboard .loading-spinner {
         animation: none;
         border: 2px solid #3b82f6;
     }
@@ -647,13 +1075,14 @@ body {
     }
 }
 
-.o_crm_dashboard .dashboard-filters-section {
+.cy_crm_dashboard .dashboard-filters-section {
     transition: all 0.3s ease;
     height: fit-content;
     width: auto;
+    position: relative;   /* anchor for the filter popover */
 }
 
-.o_crm_dashboard .filters-header {
+.cy_crm_dashboard .filters-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -664,7 +1093,7 @@ body {
 
 }
 
-.o_crm_dashboard .filters-title {
+.cy_crm_dashboard .filters-title {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
@@ -674,17 +1103,17 @@ body {
     gap: 8px;
 }
 
-.o_crm_dashboard .filters-title i {
+.cy_crm_dashboard .filters-title i {
     color: #9EA709;
     font-size: 14px;
 }
 
-.o_crm_dashboard .filters-actions {
+.cy_crm_dashboard .filters-actions {
     display: flex;
     gap: 8px;
 }
 
-.o_crm_dashboard .filters-actions .btn {
+.cy_crm_dashboard .filters-actions .btn {
     padding: 6px 14px;
     font-size: 13px;
     font-weight: 500;
@@ -695,119 +1124,207 @@ body {
     gap: 6px;
 }
 
-.o_crm_dashboard .filters-actions .btn:hover {
+.cy_crm_dashboard .filters-actions .btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.o_crm_dashboard .filters-content {
-    padding: 16px 20px 20px 20px;
-    position: absolute;
-    margin-top: 2px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    z-index: 5;
-    right: 2px;
+/* ============================================================
+   Checkbox dropdowns inside the filter popover
+   ============================================================ */
+.cy_crm_dashboard .cy-dropdown {
+    position: relative;
+    min-width: 0;
 }
 
-.o_crm_dashboard .filter-row {
+.cy_crm_dashboard .cy-dropdown-toggle {
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.cy_crm_dashboard .cy-dropdown-toggle:focus {
+    outline: none;
+}
+
+.cy_crm_dashboard .cy-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    min-width: 170px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #FFFFFF;
+    border: 1px solid var(--cy-grid-line);
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(36, 36, 28, 0.14);
+    padding: 6px;
+    z-index: 1090;
+}
+
+.cy_crm_dashboard .cy-dropdown-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--cy-text);
+    white-space: nowrap;
+}
+
+.cy_crm_dashboard .cy-dropdown-option:hover {
+    background: var(--cy-row-hover);
+}
+
+.cy_crm_dashboard .cy-dropdown-option.cy-option-selected {
+    background: var(--cy-rank-pill-bg);
+    font-weight: 600;
+}
+
+.cy_crm_dashboard .cy-dropdown-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    flex-shrink: 0;
+    pointer-events: none;
+    accent-color: var(--cy-cyllo);
+}
+
+.cy_crm_dashboard .cy-dropdown-option .cy-option-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   Filter popover — mock 547 x ~176 · radius 12 · floats over cards
+   ============================================================ */
+.cy_crm_dashboard .filters-content {
+    padding: 16px;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 547px;
+    max-width: calc(100vw - 60px);
+    background: #FFFFFF;
+    border: 1px solid var(--cy-card-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(36, 36, 28, 0.14);
+    z-index: 1060;
+}
+
+.cy_crm_dashboard .filter-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
     align-items: flex-end;
 }
 
-.o_crm_dashboard .filter-item {
+.cy_crm_dashboard .filter-item {
     display: flex;
     flex-direction: column;
-    min-width: 180px;
-    flex: 1;
-    max-width: 250px;
+    min-width: 0;
+    max-width: none;
 }
 
-.o_crm_dashboard .filter-label {
+.cy_crm_dashboard .filter-label {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #475569;
-    margin-bottom: 6px;
-}
-
-.o_crm_dashboard .filter-label i {
     font-size: 12px;
-    color: #64748b;
+    font-weight: 600;
+    color: var(--cy-text);
+    margin-bottom: 8px;
 }
 
-.o_crm_dashboard .filter-control {
+.cy_crm_dashboard .filter-label i {
+    display: none;
+}
+
+.cy_crm_dashboard .filter-control {
     position: relative;
 }
 
-.o_crm_dashboard .form-select,
-.o_crm_dashboard .form-control {
+.cy_crm_dashboard .filters-content .form-select,
+.cy_crm_dashboard .filters-content .form-control {
+    height: 38px;
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border: 1px solid var(--cy-grid-line);
+    border-radius: 10px;
     font-size: 13px;
-    background-color: #ffffff;
+    color: var(--cy-line-muted);
+    background-color: #FFFFFF;
+    box-shadow: none;
     transition: all 0.2s ease;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 8px center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23939a9e' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 10px center;
     background-repeat: no-repeat;
     background-size: 16px;
-    padding-right: 36px;
+    padding-right: 34px;
 }
 
-.o_crm_dashboard .form-select:focus,
-.o_crm_dashboard .form-control:focus {
+/* Select carrying a value: dark text + olive border (mock "Kiosk sale team") */
+.cy_crm_dashboard .filters-content .form-select.cy-select-filled {
+    color: var(--cy-text);
+    border-color: var(--cy-cyllo);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237E8C2F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+}
+
+.cy_crm_dashboard .filters-content .form-select:focus,
+.cy_crm_dashboard .filters-content .form-control:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    background-color: #fefefe;
+    border-color: var(--cy-cyllo);
+    color: var(--cy-text);
+    box-shadow: 0 0 0 3px rgba(158, 166, 0, 0.15);
 }
 
-.o_crm_dashboard .form-select:hover,
-.o_crm_dashboard .form-control:hover {
-    border-color: #9ca3af;
-    background-color: #fefefe;
+.cy_crm_dashboard .filters-content .form-select:hover,
+.cy_crm_dashboard .filters-content .form-control:hover {
+    border-color: var(--cy-cyllo);
+    background-color: #FFFFFF;
 }
 
 /* Custom Date Range Section */
-.o_crm_dashboard .custom-date-section {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
-    background: linear-gradient(135deg, #fefefe 0%, #f9fafb 100%);
-    border-radius: 8px;
-    padding: 16px;
+.cy_crm_dashboard .filters-content .custom-date-section {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px dashed var(--cy-grid-line);
+    border-top: 1px dashed var(--cy-grid-line);
+    background: #FFFFFF;
+    border-radius: 10px;
 }
 
-.o_crm_dashboard .date-inputs {
+.cy_crm_dashboard .date-inputs {
     display: flex;
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
 }
 
-.o_crm_dashboard .date-input-group {
+.cy_crm_dashboard .date-input-group {
     display: flex;
     flex-direction: column;
     min-width: 140px;
     flex: 1;
 }
 
-.o_crm_dashboard .date-label {
+.cy_crm_dashboard .date-label {
     font-size: 12px;
     font-weight: 500;
     color: #6b7280;
     margin-bottom: 4px;
 }
 
-.o_crm_dashboard .date-input {
+.cy_crm_dashboard .date-input {
     padding: 8px 12px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
@@ -816,81 +1333,81 @@ body {
     transition: all 0.2s ease;
 }
 
-.o_crm_dashboard .date-input:focus {
+.cy_crm_dashboard .date-input:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.o_crm_dashboard .date-separator {
+.cy_crm_dashboard .date-separator {
     color: #9ca3af;
     font-size: 14px;
     margin-top: 18px;
 }
 
 /* Active Filters Section */
-.o_crm_dashboard .active-filters-section {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
+.cy_crm_dashboard .filters-content .active-filters-section {
+    margin-top: 14px;
+    padding-top: 0;
+    border-top: none;
 }
 
-.o_crm_dashboard .active-filters-header {
-    margin-bottom: 10px;
+.cy_crm_dashboard .active-filters-header {
+    margin-bottom: 8px;
 }
 
-.o_crm_dashboard .active-filters-label {
+.cy_crm_dashboard .active-filters-label {
     font-size: 12px;
     font-weight: 600;
-    color: #374151;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: var(--cy-text);
+    text-transform: none;
+    letter-spacing: 0;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.o_crm_dashboard .active-filters-label i {
-    color: #f59e0b;
-    font-size: 11px;
+.cy_crm_dashboard .active-filters-label i {
+    display: none;
 }
 
-.o_crm_dashboard .filter-tags {
+.cy_crm_dashboard .filter-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.o_crm_dashboard .filter-tag {
+/* Chip — pale olive pill with dark olive text (mock "This Month — ×") */
+.cy_crm_dashboard .filter-tag {
     display: inline-flex;
     align-items: center;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
+    background: var(--cy-rank-pill-bg);
+    color: var(--cy-accent-darker);
     padding: 4px 8px 4px 12px;
-    border-radius: 16px;
+    border-radius: 999px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     gap: 6px;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+    box-shadow: none;
 }
 
-.o_crm_dashboard .filter-tag:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+.cy_crm_dashboard .filter-tag:hover {
+    background: #E6E8CD;
+    transform: none;
+    box-shadow: none;
 }
 
-.o_crm_dashboard .tag-content {
+.cy_crm_dashboard .tag-content {
     white-space: nowrap;
 }
 
-.o_crm_dashboard .tag-remove {
+.cy_crm_dashboard .tag-remove {
     cursor: pointer;
     padding: 2px;
     border-radius: 50%;
     transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.2);
+    background: transparent;
     width: 16px;
     height: 16px;
     display: flex;
@@ -899,13 +1416,56 @@ body {
     font-size: 10px;
 }
 
-.o_crm_dashboard .tag-remove:hover {
-    background: rgba(255, 255, 255, 0.3);
+.cy_crm_dashboard .tag-remove:hover {
+    background: rgba(92, 106, 30, 0.15);
     transform: scale(1.1);
 }
 
+/* Popover footer — Clear Filter (red) / Apply (olive) */
+.cy_crm_dashboard .filters-content .filter-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+}
+
+.cy_crm_dashboard .filters-content .cy-filter-clear {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #E02D2D;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    box-shadow: none;
+}
+
+.cy_crm_dashboard .filters-content .cy-filter-clear:hover,
+.cy_crm_dashboard .filters-content .cy-filter-clear:focus {
+    background: none;
+    color: #C71F1F;
+}
+
+.cy_crm_dashboard .filters-content .cy-filter-apply {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--cy-cyllo);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: none;
+}
+
+.cy_crm_dashboard .filters-content .cy-filter-apply:hover,
+.cy_crm_dashboard .filters-content .cy-filter-apply:focus {
+    background: none;
+    color: var(--cy-cyllo-hover);
+    box-shadow: none;
+}
+
 /* Refresh Button Styling */
-.o_crm_dashboard .filter-item .btn-outline-primary {
+.cy_crm_dashboard .filter-item .btn-outline-primary {
     color: #3b82f6;
     border-color: #3b82f6;
     background-color: transparent;
@@ -919,7 +1479,7 @@ body {
     gap: 6px;
 }
 
-.o_crm_dashboard .filter-item .btn-outline-primary:hover {
+.cy_crm_dashboard .filter-item .btn-outline-primary:hover {
     background-color: #3b82f6;
     color: white;
     transform: translateY(-1px);
@@ -932,91 +1492,103 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .o_crm_dashboard .filter-item {
+    .cy_crm_dashboard .filter-item {
         min-width: 160px;
         max-width: 200px;
     }
 }
 
 @media (max-width: 992px) {
-    .o_crm_dashboard .filter-row {
+    .cy_crm_dashboard .filter-row {
         gap: 12px;
     }
 
-    .o_crm_dashboard .filter-item {
+    .cy_crm_dashboard .filter-item {
         min-width: 140px;
         max-width: 180px;
     }
 
-    .o_crm_dashboard .filters-header {
+    .cy_crm_dashboard .filters-header {
         flex-direction: column;
         gap: 12px;
         align-items: flex-start;
     }
 
-    .o_crm_dashboard .filters-actions {
+    .cy_crm_dashboard .filters-actions {
         align-self: stretch;
         justify-content: flex-end;
     }
 }
 
 @media (max-width: 768px) {
-    .o_crm_dashboard .filter-row {
+    .cy_crm_dashboard .filter-row {
+        /* Row is a grid (not flex) — stack the three filter groups,
+           each taking the full width of its row */
+        grid-template-columns: minmax(0, 1fr);
         flex-direction: column;
         gap: 16px;
     }
 
-    .o_crm_dashboard .filter-item {
+    .cy_crm_dashboard .filter-item {
         min-width: unset;
         max-width: unset;
         width: 100%;
     }
 
-    .o_crm_dashboard .date-inputs {
+    /* Popover hugs the phone width instead of its desktop 547px.
+       170px clears the mobile navbar drawer (~145px) that overlays
+       the dashboard, so the left edge stays visible. */
+    .cy_crm_dashboard .filters-content {
+        width: calc(100vw - 170px);
+        max-width: 100%;
+        right: 0;
+    }
+
+    .cy_crm_dashboard .date-inputs {
         flex-direction: column;
         gap: 12px;
     }
 
-    .o_crm_dashboard .date-input-group {
+    .cy_crm_dashboard .date-input-group {
         min-width: unset;
         width: 100%;
     }
 
-    .o_crm_dashboard .date-separator {
+    .cy_crm_dashboard .date-separator {
         margin-top: 0;
         transform: rotate(90deg);
     }
 
-    .o_crm_dashboard .filters-content {
+    .cy_crm_dashboard .filters-content {
         padding: 12px 16px 16px 16px;
     }
 
-    .o_crm_dashboard .filters-header {
+    .cy_crm_dashboard .filters-header {
         padding: 12px 16px;
     }
 }
 
 /* Animation for smooth transitions */
-.o_crm_dashboard .dashboard-filters-section * {
+.cy_crm_dashboard .dashboard-filters-section * {
     transition: all 0.2s ease;
 }
 
 /* Focus styles for accessibility */
-.o_crm_dashboard .form-select:focus-visible,
-.o_crm_dashboard .form-control:focus-visible,
-.o_crm_dashboard .btn:focus-visible {
-    outline: 2px solid #3b82f6;
+.cy_crm_dashboard .form-select:focus-visible,
+.cy_crm_dashboard .form-control:focus-visible,
+.cy_crm_dashboard .btn:focus-visible {
+    outline: 2px solid var(--cy-cyllo);
     outline-offset: 2px;
 }
 
 /* Loading state for filters */
-.o_crm_dashboard .filter-loading {
+.cy_crm_dashboard .filter-loading {
     opacity: 0.6;
     pointer-events: none;
     position: relative;
 }
 
-.o_crm_dashboard .filter-loading::after {
+.cy_crm_dashboard .filter-loading::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -1043,33 +1615,33 @@ body {
 /* Notifications Section Container */
 /* === Notifications Section Styling === */
 /* === Notifications Section === */
-.o_crm_dashboard .notifications-section {
+.cy_crm_dashboard .notifications-section {
     background-color: #fff;
     border-radius: 16px;
     padding: 24px;
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    border: 1px solid var(--cy-card-border);
 }
 
-.o_crm_dashboard .notifications-header {
+.cy_crm_dashboard .notifications-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
 }
 
-.o_crm_dashboard .notifications-title-group {
+.cy_crm_dashboard .notifications-title-group {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.o_crm_dashboard .notifications-title {
+.cy_crm_dashboard .notifications-title {
     font-size: 1.5rem;
     font-weight: 600;
     color: #333;
 }
 
-.o_crm_dashboard .notifications-count {
+.cy_crm_dashboard .notifications-count {
     background-color: #007bff;
     color: #fff;
     font-size: 0.875rem;
@@ -1077,20 +1649,20 @@ body {
     border-radius: 12px;
 }
 
-.o_crm_dashboard .notifications-actions button {
+.cy_crm_dashboard .notifications-actions button {
     margin-left: 10px;
 }
 
 /* === Notification Item === */
 
 
-.o_crm_dashboard .notification-item:hover {
+.cy_crm_dashboard .notification-item:hover {
     background-color: #f8f8e7;
     border-left-color: #9EA709;
 }
 
 /* === Notification Icon === */
-.o_crm_dashboard .notification-icon {
+.cy_crm_dashboard .notification-icon {
     font-size: 1.25rem;
     margin-right: 12px;
     color: #6c757d;
@@ -1105,37 +1677,37 @@ body {
 }
 
 /* === Notification Content === */
-.o_crm_dashboard .notification-content {
+.cy_crm_dashboard .notification-content {
     flex: 1;
 }
 
-.o_crm_dashboard .notification-header {
+.cy_crm_dashboard .notification-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
 }
 
-.o_crm_dashboard .notification-title {
+.cy_crm_dashboard .notification-title {
     font-size: 0.95rem;
     font-weight: 600;
     margin-bottom: 2px;
     color: #212529;
 }
 
-.o_crm_dashboard .notification-meta {
+.cy_crm_dashboard .notification-meta {
     font-size: 0.8rem;
     color: #6c757d;
     margin-top: 2px;
 }
 
-.o_crm_dashboard .notification-body {
+.cy_crm_dashboard .notification-body {
     font-size: 0.9rem;
     color: #495057;
 }
 
 /* === Priority Styling === */
-.o_crm_dashboard .notification-priority {
+.cy_crm_dashboard .notification-priority {
     font-weight: 500;
     margin-left: 8px;
     padding: 2px 6px;
@@ -1144,21 +1716,21 @@ body {
     text-transform: capitalize;
 }
 
-.o_crm_dashboard .priority-high {
+.cy_crm_dashboard .priority-high {
     color: #fff;
 }
 
-.o_crm_dashboard .priority-medium {
+.cy_crm_dashboard .priority-medium {
     color: #212529;
 }
 
-.o_crm_dashboard .priority-low {
+.cy_crm_dashboard .priority-low {
     background-color: #17a2b8;
     color: #fff;
 }
 
 /* === Notification Actions === */
-.o_crm_dashboard .notification-item {
+.cy_crm_dashboard .notification-item {
     position: relative;
     padding: 10px 10px 10px 16px;
     border: 1px solid #ddd;
@@ -1169,23 +1741,23 @@ body {
     align-items: center;
 }
 
-.o_crm_dashboard .notification-item.priority-medium {
+.cy_crm_dashboard .notification-item.priority-medium {
     border-left-color: #ffc107;
     ;
     border-left-width: 5px;
 }
 
-.o_crm_dashboard .notification-item.priority-high {
+.cy_crm_dashboard .notification-item.priority-high {
     border-left-color: #c7c998;
     border-left-width: 5px;
 }
 
-.o_crm_dashboard .notification-item.priority-low {
+.cy_crm_dashboard .notification-item.priority-low {
     border-left-color: #17a2b8;
     border-left-width: 5px;
 }
 
-.o_crm_dashboard .notification-actions {
+.cy_crm_dashboard .notification-actions {
     display: flex;
     gap: 6px;
     margin-top: 6px;
@@ -1200,7 +1772,7 @@ body {
 }
 
 
-.o_crm_dashboard .notification-action-btn {
+.cy_crm_dashboard .notification-action-btn {
     font-size: 0.8rem;
     padding: 4px 8px;
     border-radius: 4px;
@@ -1210,14 +1782,14 @@ body {
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
-.o_crm_dashboard .notification-action-btn:hover {
+.cy_crm_dashboard .notification-action-btn:hover {
     background-color: #007bff;
     color: #fff;
     border-color: #007bff;
 }
 
 /* === Unread Indicator === */
-.o_crm_dashboard .notification-unread-indicator {
+.cy_crm_dashboard .notification-unread-indicator {
     width: 8px;
     height: 8px;
     background-color: #c6ccd1;
@@ -1227,14 +1799,14 @@ body {
 }
 
 /* Notification Actions Container */
-.o_crm_dashboard .notification-actions {
+.cy_crm_dashboard .notification-actions {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
 }
 
 /* Base Button Styles */
-.o_crm_dashboard .notification-actions .btn {
+.cy_crm_dashboard .notification-actions .btn {
     padding: 0.375rem 0.75rem;
     font-size: 0.8125rem;
     font-weight: 500;
@@ -1246,48 +1818,48 @@ body {
 }
 
 /* View Lead Button */
-.o_crm_dashboard .btn-view-lead {
+.cy_crm_dashboard .btn-view-lead {
     background-color: #9EA709;
     color: white;
 }
 
-.o_crm_dashboard .btn-view-lead:hover {
+.cy_crm_dashboard .btn-view-lead:hover {
     background-color: #7a8108;
     transform: translateY(-1px);
 }
 
 /* Mark Read Button */
-.o_crm_dashboard .btn-mark-read {
+.cy_crm_dashboard .btn-mark-read {
     background-color: #f8f9fa;
     color: #495057;
     border-color: #dee2e6;
 }
 
-.o_crm_dashboard .btn-mark-read:hover {
+.cy_crm_dashboard .btn-mark-read:hover {
     background-color: #e9ecef;
     border-color: #ced4da;
 }
 
 /* Dismiss Button */
-.o_crm_dashboard .btn-dismiss {
+.cy_crm_dashboard .btn-dismiss {
     background-color: #f8f9fa;
     color: #dc3545;
     border-color: #f1aeb5;
 }
 
-.o_crm_dashboard .btn-dismiss:hover {
+.cy_crm_dashboard .btn-dismiss:hover {
     background-color: #f1aeb5;
     color: white;
 }
 
 /* Icon spacing */
-.o_crm_dashboard .notification-actions .btn i {
+.cy_crm_dashboard .notification-actions .btn i {
     margin-right: 0.25rem;
     font-size: 0.75rem;
 }
 
 /* Notification Actions Container */
-.o_crm_dashboard .notifications-actions {
+.cy_crm_dashboard .notifications-actions {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
@@ -1295,7 +1867,7 @@ body {
 }
 
 /* Base Button Styles */
-.o_crm_dashboard .notifications-actions .btn {
+.cy_crm_dashboard .notifications-actions .btn {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
     font-weight: 500;
@@ -1308,40 +1880,40 @@ body {
 }
 
 /* Refresh Button */
-.o_crm_dashboard .btn-refresh {
+.cy_crm_dashboard .btn-refresh {
     background-color: #f8f9fa;
     border-color: #dee2e6;
     color: #495057;
 }
 
-.o_crm_dashboard .btn-refresh:hover {
+.cy_crm_dashboard .btn-refresh:hover {
     background-color: #e9ecef;
     border-color: #ced4da;
 }
 
-.o_crm_dashboard .btn-refresh i {
+.cy_crm_dashboard .btn-refresh i {
     color: #0d6efd;
 }
 
 /* Mark All Read Button */
-.o_crm_dashboard .btn-mark-all-read {
+.cy_crm_dashboard .btn-mark-all-read {
     background-color: #f8f9fa;
     border-color: #dee2e6;
     color: #198754;
     /* Green color */
 }
 
-.o_crm_dashboard .btn-mark-all-read:hover {
+.cy_crm_dashboard .btn-mark-all-read:hover {
     background-color: rgba(25, 135, 84, 0.1);
     border-color: #198754;
 }
 
-.o_crm_dashboard .btn-mark-all-read i {
+.cy_crm_dashboard .btn-mark-all-read i {
     color: #198754;
 }
 
 /* Toggle Notifications Button */
-.o_crm_dashboard .btn-toggle-notifications {
+.cy_crm_dashboard .btn-toggle-notifications {
     background-color: #0d6efd;
     border-color: #0d6efd;
     color: white;
@@ -1349,21 +1921,21 @@ body {
     /* Pushes to the right */
 }
 
-.o_crm_dashboard .notifications-toggle-section .btn:hover,
-.o_crm_dashboard .btn-toggle-notifications:hover {
+.cy_crm_dashboard .notifications-toggle-section .btn:hover,
+.cy_crm_dashboard .btn-toggle-notifications:hover {
     background-color: #7a8108 !important;
     border-color: #7a8108 !important;
     color: #ffffff !important;
 }
 
 /* Button Icons */
-.o_crm_dashboard .notifications-actions .btn i {
+.cy_crm_dashboard .notifications-actions .btn i {
     font-size: 0.875rem;
     transition: transform 0.2s ease;
 }
 
 /* Loading Animation for Refresh */
-.o_crm_dashboard .btn-refresh.loading i {
+.cy_crm_dashboard .btn-refresh.loading i {
     animation: spin 0.8s linear infinite;
 }
 
@@ -1378,29 +1950,34 @@ body {
 }
 
 [data-darkreader-scheme="dark"] {
-    .o_crm_dashboard {
+    .cy_crm_dashboard {
         background: #0f110a;
     }
 
-    .o_crm_dashboard .dashboard-filters-section {
+    .cy_crm_dashboard .dashboard-filters-section {
         border: none;
     }
 
-    .o_crm_dashboard .filters-header,
-    .o_crm_dashboard .filters-content,
-    .o_crm_dashboard .chart-card,
-    .o_crm_dashboard .activities-card,
-    .o_crm_dashboard .performers-card,
-    .o_crm_dashboard .notifications-section,
-    .o_crm_dashboard .actions-card,
-    .o_crm_dashboard .metric-card {
+    .cy_crm_dashboard .filters-header,
+    .cy_crm_dashboard .filters-content,
+    .cy_crm_dashboard .chart-card,
+    .cy_crm_dashboard .activities-card,
+    .cy_crm_dashboard .performers-card,
+    .cy_crm_dashboard .notifications-section,
+    .cy_crm_dashboard .actions-card,
+    .cy_crm_dashboard .metric-card {
         background: #1e1e15;
         border: 1px solid rgba(0, 0, 0, 0.125);
     }
 
-    .o_crm_dashboard select,
-    .o_crm_dashboard .performer-item {
+    .cy_crm_dashboard select,
+    .cy_crm_dashboard .performer-item {
         background: #323227;
+    }
+
+    .cy_crm_dashboard .chart-container {
+        background: #26261C;
+        border-color: rgba(255, 255, 255, 0.06);
     }
 }
 
@@ -1457,7 +2034,271 @@ body {
 }
 
 @media (max-width: 768px) {
-    .o_crm_dashboard {
+    .cy_crm_dashboard {
         padding: 0 16px 16px;
+    }
+}
+
+/* ============================================================
+   Updates / Notifications card — new mock design
+   Card 1296 x 345 · rows: icon chip · title+desc · time · pills
+   ============================================================ */
+.cy_crm_dashboard .cy-updates-card {
+    padding: 20px;
+    /* Match the Sales Pipeline card height in this grid row; the list scrolls */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-header {
+    margin-bottom: 16px;
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cy-text);
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-title i {
+    font-size: 17px;
+    color: var(--cy-text);
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-count {
+    background: #E02D2D;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 7px;
+    border-radius: 999px;
+}
+
+.cy_crm_dashboard .cy-view-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 0 12px;
+    background: var(--cy-cyllo);
+    border: none;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: none;
+}
+
+.cy_crm_dashboard .cy-view-all-btn:hover,
+.cy_crm_dashboard .cy-view-all-btn:focus {
+    background: var(--cy-cyllo-hover);
+    color: #FFFFFF;
+    box-shadow: none;
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-content {
+    flex: 1;
+    min-height: 0;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    overflow: auto;
+    scrollbar-width: thin;
+    max-height: 400px;
+
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-list::-webkit-scrollbar-thumb {
+    background: var(--cy-grid-line);
+    border-radius: 999px;
+}
+
+.cy_crm_dashboard .cy-updates-card .notifications-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Row — same pill design as the Top Performers rows */
+.cy_crm_dashboard .cy-update-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--cy-chart-track);
+    border: 1px solid var(--cy-grid-line);
+    border-radius: 12px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.cy_crm_dashboard .cy-update-row:hover {
+    background: var(--cy-row-hover);
+}
+
+.cy_crm_dashboard .notification-icon-chip {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: var(--cy-line-lead);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+/* No priority color strips on the new rows */
+.cy_crm_dashboard .cy-update-row.priority-high,
+.cy_crm_dashboard .cy-update-row.priority-medium,
+.cy_crm_dashboard .cy-update-row.priority-low {
+    border: 1px solid var(--cy-grid-line);
+    border-left: 1px solid var(--cy-grid-line);
+}
+
+.cy_crm_dashboard .cy-update-row .notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.cy_crm_dashboard .cy-update-row .notification-title {
+    margin: 0 0 2px 0;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--cy-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cy_crm_dashboard .cy-update-row .notification-desc {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--cy-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cy_crm_dashboard .notification-time {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--cy-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.cy_crm_dashboard .notification-time i {
+    font-size: 13px;
+    color: var(--cy-line-muted);
+}
+
+.cy_crm_dashboard .cy-update-row .notification-actions {
+    flex-shrink: 0;
+    display: none;
+    align-items: center;
+    gap: 16px;
+    margin: 0;
+}
+
+/* Actions appear on row hover only — time stays pinned at the right end */
+.cy_crm_dashboard .cy-update-row:hover .notification-actions {
+    display: flex;
+}
+
+/* While hovered the buttons take over the right side — hide the time */
+.cy_crm_dashboard .cy-update-row .notification-time {
+    display: inline-flex;
+}
+
+.cy_crm_dashboard .cy-update-row:hover .notification-time {
+    display: none;
+}
+
+.cy_crm_dashboard .cy-update-row .cy-btn-view-lead,
+.cy_crm_dashboard .cy-update-row .cy-btn-dismiss {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 8px 12px;
+    gap: 3.4px;
+    border: none;
+    border-radius: 8px;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 100%;
+    white-space: nowrap;
+    box-shadow: none;
+}
+
+.cy_crm_dashboard .cy-update-row .cy-btn-view-lead {
+    width: 85px;
+    background: var(--cy-cyllo);
+    color: #FFFFFF;
+}
+
+.cy_crm_dashboard .cy-update-row .cy-btn-view-lead:hover,
+.cy_crm_dashboard .cy-update-row .cy-btn-view-lead:focus {
+    background: var(--cy-cyllo-hover);
+    color: #FFFFFF;
+    transform: none;
+}
+
+.cy_crm_dashboard .cy-update-row .cy-btn-dismiss {
+    background: transparent;
+    color: var(--cy-text);
+}
+
+.cy_crm_dashboard .cy-update-row .cy-btn-dismiss:hover,
+.cy_crm_dashboard .cy-update-row .cy-btn-dismiss:focus {
+    background: transparent;
+    color: var(--cy-accent-darker);
+    transform: none;
+}
+
+.cy_crm_dashboard .cy-update-row .btn i {
+    margin-right: 0;
+    font-size: 13px;
+}
+
+/* Updates card adapts below 1024px — placed after the base rules so it wins */
+@media (max-width: 1024px) {
+    .cy_crm_dashboard .cy-updates-card .notifications-content {
+        height: auto;
+    }
+
+    .cy_crm_dashboard .cy-updates-card .notifications-list {
+        height: auto;
+        max-height: 320px;
     }
 }

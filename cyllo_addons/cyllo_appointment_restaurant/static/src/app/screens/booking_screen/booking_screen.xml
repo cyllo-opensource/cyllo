@@ -34,7 +34,7 @@
             <div class="d-flex flex-grow-1 overflow-hidden">
 
                 <!-- Left: booking list -->
-                <div class="d-flex flex-column flex-grow-1 overflow-y-auto">
+                <div class="booking-list-container d-flex flex-column flex-grow-1 overflow-y-auto">
                     <t t-if="bookings.length === 0">
                         <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
                             <i class="fa fa-calendar-o fa-4x mb-3 opacity-50"/>
@@ -88,11 +88,20 @@
                 <!-- Right: detail panel -->
                 <t t-if="state.selectedBooking">
                     <t t-set="appt" t-value="state.selectedBooking"/>
-                    <div class="booking-detail d-flex flex-column border-start bg-white shadow-sm p-4">
-                        <h5 class="fw-bold border-bottom pb-2 mb-3">
-                            <i class="fa fa-info-circle me-2 text-primary"/>
-                            Booking Detail
-                        </h5>
+                    <div class="booking-detail-modal" t-on-click="onClickDismissDetails">
+                        <div class="booking-detail d-flex flex-column border-start bg-white shadow-sm p-4"
+                             t-on-click.stop="">
+                            <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                                <h5 class="fw-bold m-0">
+                                    <i class="fa fa-info-circle me-2 text-primary"/>
+                                    Booking Detail
+                                </h5>
+                                <button class="booking-detail-close btn btn-light btn-sm"
+                                        t-on-click="onClickDismissDetails"
+                                        aria-label="Close booking details">
+                                    <i class="fa fa-times"/>
+                                </button>
+                            </div>
                         <div class="mb-2">
                             <span class="text-muted small">Table</span>
                             <div class="fw-semibold" t-esc="getTableName(appt)"/>
@@ -123,15 +132,21 @@
                         </div>
                         <div class="d-flex flex-column gap-2 mt-auto">
                             <button t-if="['draft', 'confirmed'].includes(appt.state)"
-                                    class="btn btn-success fw-bold"
+                                    class="btn btn-outline-success"
                                     t-on-click="() => this.onClickCheckIn(appt)">
                                 <i class="fa fa-check me-1"/> Check In
                             </button>
-                            <button t-if="['draft', 'confirmed'].includes(appt.state)"
+                            <button t-if="['confirmed','in_progress'].includes(appt.state)"
+                                    class="btn btn-success fw-bold"
+                                    t-on-click="() => this.onClickDone(appt)">
+                                <i class="fa fa-check-square me-1"/> Done
+                            </button>
+                            <button t-if="['draft', 'confirmed','in_progress'].includes(appt.state)"
                                     class="btn btn-outline-danger"
                                     t-on-click="() => this.onClickCancel(appt)">
                                 <i class="fa fa-times me-1"/> Cancel Booking
                             </button>
+                        </div>
                         </div>
                     </div>
                 </t>

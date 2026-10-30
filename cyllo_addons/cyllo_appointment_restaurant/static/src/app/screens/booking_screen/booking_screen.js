@@ -13,6 +13,8 @@ const DATE_TABS = [
     { key: "tomorrow", label: "Tomorrow",   days: 1 },
     { key: "week",     label: "This Week",  days: 7 },
     { key: "all",      label: "Upcoming",   days: null },
+    { key: "ongoing",  label: "Ongoing" },
+    { key: "cancel",   label: "Cancel" },
 ];
 
 export class BookingScreen extends Component {
@@ -55,6 +57,12 @@ export class BookingScreen extends Component {
         return all
             .filter((a) => {
                 if (this.props.filterResourceId && a.resource_id !== this.props.filterResourceId) return false;
+                if (this.state.activeTab === "ongoing") {
+                    return a.state === "in_progress";
+                }
+                if (this.state.activeTab === "cancel" || this.state.activeTab === "cancelled") {
+                    return a.state === "cancelled";
+                }
                 const ts = this._toTs(a.start_datetime);
                 if (ts < todayStart) return false;
                 if (["cancelled", "no_show", "done"].includes(a.state)) return false;
@@ -62,7 +70,8 @@ export class BookingScreen extends Component {
                     case "today":    return ts < tomorrowStart;
                     case "tomorrow": return ts >= tomorrowStart && ts < now.startOf("day").plus({ days: 2 }).ts;
                     case "week":     return ts < weekEnd;
-                    default:         return true;
+                    case "all":
+                    default:         return a.state !== "in_progress";
                 }
             })
             .sort((a, b) => this._toTs(a.start_datetime) - this._toTs(b.start_datetime));
@@ -76,6 +85,12 @@ export class BookingScreen extends Component {
         const weekEnd       = now.startOf("day").plus({ days: 7 }).ts;
         return all.filter((a) => {
             if (this.props.filterResourceId && a.resource_id !== this.props.filterResourceId) return false;
+            if (tabKey === "ongoing") {
+                return a.state === "in_progress";
+            }
+            if (tabKey === "cancel" || tabKey === "cancelled") {
+                return a.state === "cancelled";
+            }
             const ts = this._toTs(a.start_datetime);
             if (ts < todayStart) return false;
             if (["cancelled", "no_show", "done"].includes(a.state)) return false;
@@ -83,7 +98,8 @@ export class BookingScreen extends Component {
                 case "today":    return ts < tomorrowStart;
                 case "tomorrow": return ts >= tomorrowStart && ts < now.startOf("day").plus({ days: 2 }).ts;
                 case "week":     return ts < weekEnd;
-                default:         return true;
+                case "all":
+                default:         return a.state !== "in_progress";
             }
         }).length;
     }
@@ -144,7 +160,8 @@ export class BookingScreen extends Component {
     }
 
     isPast(booking) {
-        if (["draft","cancelled", "no_show", "done"].includes(booking.state)) return true;
+        if (booking.state === "in_progress") return false;
+        if (["draft", "cancelled", "no_show", "done"].includes(booking.state)) return true;
         const dtNow = DateTime.now();
         const halfDuration = ((booking.duration || 1) / 2) * 3600000;
         const apptTs = this._toTs(booking.start_datetime);
@@ -163,6 +180,10 @@ export class BookingScreen extends Component {
             this.state.selectedBooking?.id === booking.id ? null : booking;
     }
 
+    onClickDismissDetails() {
+        this.state.selectedBooking = null;
+    }
+
     onClickClose() {
         this.pos.closeScreen();
     }
@@ -174,6 +195,16 @@ export class BookingScreen extends Component {
             [[booking.id]],
         );
         booking.state = "in_progress";
+    }
+
+    async onClickDone(booking) {
+        await this.orm.call(
+            "appointment.appointment",
+            "action_done",
+            [[booking.id]],
+        );
+        booking.state = "done";
+        this.state.selectedBooking = null;
     }
 
     async onClickCancel(booking) {

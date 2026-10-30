@@ -116,10 +116,11 @@ class TestAppointmentSlot(TransactionCase):
      
     # _compute_staff_resource_domain
     def test_compute_staff_resource_domain_no_staff(self):
-        """Domain should be empty when no staff is on the appointment type."""
+        """Domain should filter by company when no staff is on the appointment type."""
         self.slot._compute_staff_resource_domain()
-        self.assertEqual(self.slot.staff_domain, '[]')
-        self.assertEqual(self.slot.resource_domain, '[]')
+        company_id = self.slot.company_id.id or self.slot.env.company.id
+        self.assertEqual(self.slot.staff_domain, f"[('company_id', '=', {company_id})]")
+        self.assertEqual(self.slot.resource_domain, f"[('company_id', '=', {company_id})]")
 
     def test_compute_staff_resource_domain_with_staff(self):
         """Domain should include appointment type id when staff is linked."""

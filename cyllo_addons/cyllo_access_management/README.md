@@ -1,7 +1,7 @@
 Cyllo Access Management
 -----------------------
 
-The Cyllo <a href="https://www.cyllo.com/access-management">Access Management</a> app is an all-in-one
+The Cyllo <a href="https://www.cyllo.com/cyllo-apps/access-management">Access Management</a> app is an all-in-one
 access manager that lets you control exactly what each user can see and do. Group users into reusable
 profiles and layer on menu, button, tab, filter, field, model and record-level restrictions from a single
 place, without writing code.

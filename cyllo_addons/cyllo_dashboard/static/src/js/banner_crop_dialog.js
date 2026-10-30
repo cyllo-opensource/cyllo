@@ -88,16 +88,6 @@ export class BannerCropDialog extends Component {
         this.clampPosition();
     }
 
-    onZoomIn() {
-        this.state.scale = Math.min(this.minScale * 4, this.state.scale * 1.2);
-        this.clampPosition();
-    }
-
-    onZoomOut() {
-        this.state.scale = Math.max(this.minScale, this.state.scale / 1.2);
-        this.clampPosition();
-    }
-
     _cancel() {
         this.props.close();
     }

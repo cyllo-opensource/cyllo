@@ -128,8 +128,8 @@ class TestAppointmentCrm(TransactionCase):
         action_opp = appointment.action_view_opportunity()
         self.assertEqual(action_opp['res_id'], appointment.opportunity_id.id)
         self.assertEqual(action_opp['res_model'], 'crm.lead')
-        # Test action_appointment_leads
-        action_leads = self.appt_type_lead.action_appointment_leads()
+        # Test action_appointment_opportunities
+        action_leads = self.appt_type_lead.action_appointment_opportunities()
         self.assertEqual(action_leads['domain'][0][1], 'in')
         self.assertEqual(action_leads['res_model'], 'crm.lead')
 

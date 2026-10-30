@@ -28,6 +28,7 @@ class TestHrEmployee(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.partner = cls.env['res.partner'].create({'name': 'Employee Customer'})
         cls.employee = cls.env['hr.employee'].create({
             'name': 'Test Employee',
         })
@@ -42,16 +43,20 @@ class TestHrEmployee(TransactionCase):
         self.env['appointment.appointment'].create({
             'name': 'Past Appt',
             'appointment_type_id': self.appointment_type.id,
+            'partner_id': self.partner.id,
             'staff_id': self.employee.id,
             'start_datetime': now - timedelta(days=1),
+            'end_datetime': now - timedelta(days=1) + timedelta(hours=1),
             'state': 'done',
         })
         # Upcoming appointment
         self.env['appointment.appointment'].create({
             'name': 'Upcoming Appt',
             'appointment_type_id': self.appointment_type.id,
+            'partner_id': self.partner.id,
             'staff_id': self.employee.id,
             'start_datetime': now + timedelta(days=1),
+            'end_datetime': now + timedelta(days=1, hours=1),
             'state': 'confirmed',
         })
         

@@ -42,8 +42,10 @@ class TestHrApplicant(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         # Minimal job & applicant records shared across tests.
+        cls.partner = cls.env['res.partner'].create({'name': 'Test Partner'})
         cls.job = cls.env['hr.job'].create({'name': 'Software Engineer'})
         cls.applicant = cls.env['hr.applicant'].create({
+            'name': 'Test Candidate Application',
             'partner_name': 'Test Candidate',
             'job_id': cls.job.id,
             'email_from': 'candidate@example.com',
@@ -70,6 +72,7 @@ class TestHrApplicant(TransactionCase):
     def test_invite_code_is_unique_across_applicants(self):
         """Two different applicants must receive different tokens."""
         other = self.env['hr.applicant'].create({
+            'name': 'Another Application',
             'partner_name': 'Another Candidate',
             'job_id': self.job.id,
         })
@@ -102,6 +105,7 @@ class TestHrApplicant(TransactionCase):
     def test_appointment_count_starts_at_zero(self):
         """A brand-new applicant with no linked appointments has count = 0."""
         fresh = self.env['hr.applicant'].create({
+            'name': 'Zero Application',
             'partner_name': 'Zero Appointments',
             'job_id': self.job.id,
         })
@@ -113,6 +117,7 @@ class TestHrApplicant(TransactionCase):
     def test_appointment_count_reflects_linked_records(self):
         """appointment_count must equal len(appointment_ids)."""
         applicant = self.env['hr.applicant'].create({
+            'name': 'Count Application',
             'partner_name': 'Count Test Candidate',
             'job_id': self.job.id,
         })
@@ -120,15 +125,18 @@ class TestHrApplicant(TransactionCase):
         apt_type = self.env['appointment.type'].create({
             'name': 'Interview Type Count Test',
             'category': 'interview',
+            'require_staff': False,
+            'min_booking_notice': 0.0,
         })
         # Create two appointment records linked to this applicant.
         for i in range(2):
             self.env['appointment.appointment'].create({
                 'appointment_type_id': apt_type.id,
                 'applicant_id': applicant.id,
+                'partner_id': self.partner.id,
                 'name': f'Interview {i + 1}',
-                'start': '2026-07-10 09:00:00',
-                'stop': '2026-07-10 10:00:00',
+                'start_datetime': '2026-07-10 09:00:00',
+                'end_datetime': '2026-07-10 10:00:00',
             })
         self.assertEqual(
             applicant.appointment_count, 2,
@@ -138,19 +146,23 @@ class TestHrApplicant(TransactionCase):
     def test_appointment_count_decreases_on_unlink(self):
         """Removing an appointment must decrement appointment_count."""
         applicant = self.env['hr.applicant'].create({
+            'name': 'Decrement Application',
             'partner_name': 'Decrement Test',
             'job_id': self.job.id,
         })
         apt_type = self.env['appointment.type'].create({
             'name': 'Interview Type Decrement Test',
             'category': 'interview',
+            'require_staff': False,
+            'min_booking_notice': 0.0,
         })
         appt = self.env['appointment.appointment'].create({
             'appointment_type_id': apt_type.id,
             'applicant_id': applicant.id,
+            'partner_id': self.partner.id,
             'name': 'Interview to Delete',
-            'start': '2026-07-11 09:00:00',
-            'stop': '2026-07-11 10:00:00',
+            'start_datetime': '2026-07-11 09:00:00',
+            'end_datetime': '2026-07-11 10:00:00',
         })
         self.assertEqual(applicant.appointment_count, 1)
         appt.unlink()
@@ -190,6 +202,7 @@ class TestHrApplicant(TransactionCase):
     def test_action_view_appointments_requires_singleton(self):
         """Calling action_view_appointments on a multi-record set must raise."""
         other = self.env['hr.applicant'].create({
+            'name': 'Another Application 2',
             'partner_name': 'Another',
             'job_id': self.job.id,
         })
@@ -211,6 +224,7 @@ class TestHrApplicant(TransactionCase):
     def test_get_interview_invite_url_requires_singleton(self):
         """_get_interview_invite_url must raise when called on more than one record."""
         other = self.env['hr.applicant'].create({
+            'name': 'Multi Record Application',
             'partner_name': 'Multi Record Test',
             'job_id': self.job.id,
         })

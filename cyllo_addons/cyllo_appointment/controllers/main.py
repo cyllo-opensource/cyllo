@@ -257,8 +257,6 @@ class AppointmentWebsiteController(http.Controller):
             order = request.website.sale_get_order(force_create=True)
             if not order:
                 return request.redirect('/shop/cart')
-            if order.partner_id != partner:
-                order.sudo().write({'partner_id': partner.id})
             appointment.sale_order_id = order.id
             order._cart_update(
                 product_id=appointment_type.product_id.id,
