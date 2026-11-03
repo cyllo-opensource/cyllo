@@ -19,11 +19,12 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import logging
+import uuid
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 from datetime import timedelta
-import logging
-import uuid
+
 
 _logger = logging.getLogger(__name__)
 

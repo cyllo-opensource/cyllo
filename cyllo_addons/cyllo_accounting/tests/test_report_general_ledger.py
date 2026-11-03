@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from datetime import date, timedelta
+
+from dateutil.relativedelta import relativedelta
 from odoo import fields
 from odoo.tests.common import TransactionCase
 
@@ -48,8 +51,10 @@ class TestGeneralLedgerAccountSelection(TransactionCase):
         move.action_post()
 
     def _report_account_sums(self):
+        start_date = date.today().replace(day=1)
+        end_date = start_date + relativedelta(months=1) - timedelta(days=1)
         _data, sums, _pages, _filters, _currency = self.report.get_report(
-            start_date='2025-01-01', end_date='2025-01-31',
+            start_date=start_date, end_date=end_date,
             company_ids=[self.company.id], target_move=['posted'],
         )
         return {
@@ -58,18 +63,20 @@ class TestGeneralLedgerAccountSelection(TransactionCase):
         }
 
     def test_accounts_with_opening_or_zero_net_period_activity_are_kept(self):
+        start_date = date.today().replace(day=1)
+        end_date = start_date + relativedelta(months=1) - timedelta(days=1)
         opening_only = self._account('GLSEL001')
         debit_only = self._account('GLSEL002')
         credit_only = self._account('GLSEL003')
         zero_net = self._account('GLSEL004')
         future_only = self._account('GLSEL005')
 
-        self._post_move('2024-12-31', opening_only, debit=100.0)
-        self._post_move('2025-01-05', debit_only, debit=25.0)
-        self._post_move('2025-01-06', credit_only, credit=30.0)
-        self._post_move('2025-01-07', zero_net, debit=40.0)
-        self._post_move('2025-01-08', zero_net, credit=40.0)
-        self._post_move('2025-02-01', future_only, debit=50.0)
+        self._post_move(start_date - timedelta(days=1), opening_only, debit=100.0)
+        self._post_move(start_date + timedelta(days=4), debit_only, debit=25.0)
+        self._post_move(start_date + timedelta(days=5), credit_only, credit=30.0)
+        self._post_move(start_date + timedelta(days=6), zero_net, debit=40.0)
+        self._post_move(start_date + timedelta(days=7), zero_net, credit=40.0)
+        self._post_move(end_date + timedelta(days=1), future_only, debit=50.0)
 
         account_sums = self._report_account_sums()
 

@@ -21,6 +21,8 @@
 #############################################################################
 from odoo.tests.common import TransactionCase
 from odoo import fields
+from types import SimpleNamespace
+from unittest.mock import patch
 
 
 class TestAccountBankStatementLine(TransactionCase):
@@ -181,3 +183,41 @@ class TestAccountBankStatementLine(TransactionCase):
         """Test cron_reconcile_bank_bank_statement_line runs without error."""
         self.StatementLine.cron_reconcile_bank_bank_statement_line()
         self.assertTrue(True)
+
+    def test_auto_reconciliation_sends_success_notification(self):
+        """Notify the statement creator when auto-reconciliation succeeds."""
+        if not self.bank_journal:
+            return
+        st_line = self.StatementLine.create({
+            'journal_id': self.bank_journal.id,
+            'payment_ref': 'Auto Reconcile Notification Test',
+            'amount': 50.0,
+            'date': fields.Date.today(),
+        })
+        matching_counterpart = {
+            'amount_residual': st_line.amount,
+            'payment_ref': st_line.payment_ref,
+        }
+        reconcile_model = SimpleNamespace(auto_reconcile=True)
+
+        def mark_reconciled(statement_line, *_args):
+            statement_line.write({'is_reconciled': True})
+
+        bus_model = type(self.env['bus.bus'])
+        with patch.object(
+                type(st_line), 'get_match_invoice',
+                return_value=([matching_counterpart], reconcile_model)), \
+                patch.object(
+                    type(st_line), 'validate_transaction',
+                    autospec=True, side_effect=mark_reconciled), \
+                patch.object(bus_model, '_sendone', autospec=True) as sendone:
+            st_line.action_validate_bank_bank_statement_line()
+
+        self.assertTrue(st_line.is_reconciled)
+        sendone.assert_called_once()
+        args = sendone.call_args.args
+        self.assertEqual(args[2], 'simple_notification')
+        self.assertEqual(args[3]['type'], 'success')
+        self.assertEqual(
+            args[3]['message'], 'Reconciliation completed successfully.'
+        )

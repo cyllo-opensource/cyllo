@@ -53,10 +53,10 @@
         'views/asset_assign_views.xml',
         'views/asset_sell_dispose_views.xml',
         'views/asset_asset_insurance_views.xml',
-        'views/maintenance_request.xml',
-        'views/asset_booking.xml',
+        'views/maintenance_request_views.xml',
+        'views/asset_booking_views.xml',
         'wizards/asset_modify_views.xml',
-        'wizards/assset_insurance_wizard_views.xml',
+        'wizards/asset_insurance_wizard_views.xml',
         'report/asset_report_views.xml',
     ],
     'demo': [

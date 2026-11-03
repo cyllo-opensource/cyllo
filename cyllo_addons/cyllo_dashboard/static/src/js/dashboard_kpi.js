@@ -16,7 +16,7 @@ export class DashboardKpi extends Component {
     }
 
     get iconClass() {
-        return `${this.props.icon || ""} cy_user_dashboard_metric_icon`;
+        return `${this.props.icon || ""} cy_dashboard_metric_icon`;
     }
 
     get segments() {
@@ -35,7 +35,11 @@ DashboardKpi.props = {
     titleTip: { type: String, optional: true },
     value: { type: Number, optional: true },
     icon: { type: String, optional: true },
+    image: { type: String, optional: true },
     segments: { type: Array, optional: true },
     legend: { type: Array, optional: true },
+    forecast: { type: Array, optional: true },
+    details: { type: Array, optional: true },
     onSelect: { type: Function, optional: true },
+    suffix: { type: String, optional: true },
 };

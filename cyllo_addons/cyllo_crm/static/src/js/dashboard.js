@@ -57,6 +57,11 @@ export class CRMDashboard extends Component {
             leadNotifications: [],
             unreadVisibleCount: 0,
             showFilters: false,
+            // Body only renders once the first data fetch has finished —
+            // cards don't flash "empty state → real data" on page load
+            hasLoaded: false,
+            // Bumped on every data refresh; drives the post-render chart init
+            dataTick: 0,
             showAllNotifications: false,
             // Staged filter selections — only "Apply" commits these
             // into state.filters and re-renders the dashboard.
@@ -81,11 +86,31 @@ export class CRMDashboard extends Component {
             () => [this.state.leadNotifications.map((n) => n.is_read)]
         );
 
+        // Charts are (re)created AFTER the DOM renders the dashboard body:
+        // the canvas refs only exist once hasLoaded is true, and after every
+        // data refresh (apply filter, refresh button)
+        useEffect(
+            () => {
+                if (this.state.hasLoaded) {
+                    this.initializeCharts();
+                }
+            },
+            () => [this.state.hasLoaded, this.state.dataTick]
+        );
+
         onMounted(() => {
             this.loadInitialData();
             // Close the checkbox dropdowns when clicking outside the popover
             this._onClickOutsideFilters = (ev) => {
                 if (!ev.target.closest(".cy-dropdown")) {
+                    this.state.openDropdown = null;
+                }
+                // Clicking anywhere outside the filter popover (and the
+                // Filter button itself) closes the popover entirely
+                if (this.state.showFilters
+                        && !ev.target.closest(".filters-content")
+                        && !ev.target.closest(".cy-dash-filter-btn")) {
+                    this.state.showFilters = false;
                     this.state.openDropdown = null;
                 }
             };
@@ -154,7 +179,8 @@ export class CRMDashboard extends Component {
             console.warn("Failed to load dashboard data, using sample data:", error);
             this.loadSampleData();
         }
-        this.initializeCharts();
+        // Note: charts are initialized by the useEffect that runs after the
+        // dashboard body renders (see setup()) — refs don't exist before that
     }
 
     async loadCompanyData() {
@@ -247,6 +273,10 @@ export class CRMDashboard extends Component {
 
     updateState(data, isSampleData = false) {
         this.state.isSampleData = isSampleData;
+        // Mark the body ready + bump the tick so the post-render effect
+        // re-creates the charts for this dataset
+        this.state.hasLoaded = true;
+        this.state.dataTick = (this.state.dataTick || 0) + 1;
 
         // Update metrics
         this.state.metrics = [
@@ -298,6 +328,14 @@ export class CRMDashboard extends Component {
         this.state.pipeline = data.pipeline;
         this.state.activities = data.activities;
 
+        // Empty-dataset flags — drive the grey "No data available" overlays
+        // in the chart containers (see .cy-chart-empty in the template)
+        this.state.trendEmpty = !data.revenue_trend
+            || !data.revenue_trend.length
+            || data.revenue_trend.every((d) => !d.leads && !d.revenue);
+        this.state.activitiesEmpty = !data.activities
+            || !data.activities.length;
+
         // HTML legend for the Activities Overview card (mirrors chart datasets)
         const activityTypeNames = Array.from(
             new Set((data.activities || []).map((a) => a.name))
@@ -342,6 +380,16 @@ export class CRMDashboard extends Component {
         const ctx = this.revenueChartRef.el.getContext("2d");
         const data = this.state.revenueData;
 
+        // Greyed-out look when the period has no data at all — an opaque
+        // "No data available" overlay (.cy-chart-empty) sits on top of it.
+        const trendEmpty = this.state.trendEmpty;
+        const revColor = trendEmpty
+            ? this.themeColor("--cy-line-muted", "#B9B7A8")
+            : this.themeColor("--cy-line-dark", "#4C5814");
+        const leadColor = trendEmpty
+            ? this.themeColor("--cy-gray-light", "#BEC0B2")
+            : this.themeColor("--cy-line-lead", "#D3C91F");
+
         this.charts.revenue = new Chart(ctx, {
             type: "line",
             data: {
@@ -350,7 +398,7 @@ export class CRMDashboard extends Component {
                     {
                         label: "Revenue",
                         data: data.map((d) => d.revenue),
-                        borderColor: this.themeColor("--cy-line-dark", "#4C5814"),
+                        borderColor: revColor,
                         backgroundColor: this.themeColor(
                             "--cy-accent-fill",
                             "rgba(126, 140, 47, 0.12)"
@@ -360,16 +408,13 @@ export class CRMDashboard extends Component {
                         tension: 0.4,
                         pointRadius: 2,
                         pointHoverRadius: 4,
-                        pointBackgroundColor: this.themeColor(
-                            "--cy-line-dark",
-                            "#4C5814"
-                        ),
+                        pointBackgroundColor: revColor,
                         yAxisID: "y1",
                     },
                     {
                         label: "Lead",
                         data: data.map((d) => d.leads),
-                        borderColor: this.themeColor("--cy-line-lead", "#D3C91F"),
+                        borderColor: leadColor,
                         backgroundColor: "transparent",
                         borderWidth: 2,
                         borderDash: [],
@@ -377,10 +422,7 @@ export class CRMDashboard extends Component {
                         tension: 0.4,
                         pointRadius: 2,
                         pointHoverRadius: 4,
-                        pointBackgroundColor: this.themeColor(
-                            "--cy-line-lead",
-                            "#D3C91F"
-                        ),
+                        pointBackgroundColor: leadColor,
                         yAxisID: "y",
                     },
                     {
@@ -798,6 +840,8 @@ export class CRMDashboard extends Component {
             salesPersons: d.salesPersons,
         });
         this.state.openDropdown = null;
+        // Committing the draft closes the popover, like the outside click
+        this.state.showFilters = false;
         await this.loadSalespersons();
         this.loadDashboardData();
     }

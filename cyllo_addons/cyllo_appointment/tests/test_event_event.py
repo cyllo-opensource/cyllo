@@ -19,10 +19,11 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import pytz
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
-import pytz
+
 
 class TestEventEvent(TransactionCase):
 

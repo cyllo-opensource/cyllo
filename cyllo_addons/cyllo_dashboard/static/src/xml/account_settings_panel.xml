@@ -1,86 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
-    <!-- "Account Settings" body: rendered inline in the non-admin
-         dashboard rail (the Login History card stays admin-only).
-         Holds the email signature, notification type and the
-         groups / access rights tiles. -->
+
     <t t-name="cyllo_dashboard.AccountSettingsPanel">
-        <div class="cy_account_settings_panel">
-            <div class="cy_user_dashboard_info_grid">
-                <div class="cy_user_dashboard_info_row cy_user_dashboard_info_row--wide">
+        <div class="cy_dashboard_account_panel">
+            <div class="cy_dashboard_account_grid">
+                <div class="cy_dashboard_account_row cy_dashboard_account_row_wide">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="cy_user_dashboard_info_label">Email Signature</span>
+                        <span class="cy_dashboard_account_label">Email Signature</span>
                         <button
                             t-on-click="() => this.editSignature()"
-                            class="btn cyllo-userdashboard-feature-btn"
+                            class="btn cy_dashboard_account_edit_btn"
                             title="Edit signature">
                             <i class="ri-pencil-fill" />
                         </button>
                     </div>
-                    <div class="cy_account_settings_signature">
+                    <div class="cy_dashboard_account_signature">
                         <t t-out="markupSignature" />
                     </div>
                 </div>
-                <div class="cy_user_dashboard_info_row cy_user_dashboard_info_row--wide">
-                    <span class="cy_user_dashboard_info_label pb-1">Notification Type</span>
-                    <div class="cy_user_dashboard_notif_row" role="radiogroup">
-                        <div class="form-check cy_notif_toggle_item">
+                <div class="cy_dashboard_account_row cy_dashboard_account_row_wide">
+                    <span class="cy_dashboard_account_label pb-1">Notification Type</span>
+                    <div class="cy_dashboard_account_notif_row" role="radiogroup">
+                        <div class="form-check cy_dashboard_notif_toggle_item">
                             <input
                                 t-att-checked="props.notifType === 'email' ? 'checked' : ''"
                                 t-on-input="(ev) => this.onInputNotifType(ev)"
                                 t-att-id="notifRadioIds.email"
                                 t-att-name="notifGroupName"
                                 type="radio"
-                                class="form-check-input cy_notif_toggle_input"
+                                class="form-check-input cy_dashboard_notif_toggle_input"
                                 value="email" />
-                            <label class="cy-userdashboard--detail cy_notif_toggle_label" t-att-for="notifRadioIds.email">Handle by Email</label>
+                            <label class="cy_dashboard_notif_toggle_text cy_dashboard_notif_toggle_label" t-att-for="notifRadioIds.email">Handle by Email</label>
                         </div>
-                        <div class="form-check cy_notif_toggle_item">
+                        <div class="form-check cy_dashboard_notif_toggle_item">
                             <input
                                 t-att-checked="props.notifType === 'inbox' ? 'checked' : ''"
                                 t-on-input="(ev) => this.onInputNotifType(ev)"
                                 t-att-id="notifRadioIds.inbox"
                                 t-att-name="notifGroupName"
                                 type="radio"
-                                class="form-check-input cy_notif_toggle_input"
+                                class="form-check-input cy_dashboard_notif_toggle_input"
                                 value="inbox" />
-                            <label class="cy-userdashboard--detail cy_notif_toggle_label" t-att-for="notifRadioIds.inbox">Handle in Cyllo</label>
+                            <label class="cy_dashboard_notif_toggle_text cy_dashboard_notif_toggle_label" t-att-for="notifRadioIds.inbox">Handle in Cyllo</label>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="cy_user_dashboard_access_grid">
+            <div class="cy_dashboard_access_grid">
                 <div
                     t-on-click="onClickGroups"
-                    class="cy-non-admin-box_container cyllo_useradmin-state--btn">
-                    <i class="ri-group-fill cyllo_useradmin--icon" />
+                    class="cy_dashboard_access_tile cy_dashboard_access_tile_btn">
+                    <i class="ri-group-fill cy_dashboard_access_tile_icon" />
                     <span>Groups</span>
                 </div>
                 <div
                     t-on-click="onClickAccessRights"
-                    class="cy-non-admin-box_container cyllo_useradmin-state--btn">
-                    <i class="ri-folders-fill cyllo_useradmin--icon" />
+                    class="cy_dashboard_access_tile cy_dashboard_access_tile_btn">
+                    <i class="ri-folders-fill cy_dashboard_access_tile_icon" />
                     <span>Access Right</span>
                 </div>
                 <div
                     t-on-click="onClickRecordRules"
-                    class="cy-non-admin-box_container cyllo_useradmin-state--btn">
-                    <i class="ri-stack-fill cyllo_useradmin--icon" />
+                    class="cy_dashboard_access_tile cy_dashboard_access_tile_btn">
+                    <i class="ri-stack-fill cy_dashboard_access_tile_icon" />
                     <span>Record Rules</span>
                 </div>
             </div>
         </div>
     </t>
-    <!-- Signature editor: the content component rendered by the dialog
-         service; the service environment carries the dialogData the
-         inner <Dialog> chrome needs. -->
+
     <t t-name="cyllo_dashboard.SignatureEditDialog">
         <Dialog size="'md'" title="'Email Signature'">
             <textarea
                 t-att-value="state.draft"
                 t-on-input="(ev) => this.onSignatureInput(ev)"
                 name="email_signature"
-                class="w-100 cy_signature_dialog_input"
+                class="w-100 cy_dashboard_signature_input"
                 placeholder="--"
                 rows="5"
                 autofocus="autofocus" />

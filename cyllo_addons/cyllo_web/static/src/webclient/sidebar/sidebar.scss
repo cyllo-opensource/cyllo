@@ -377,3 +377,483 @@ body:has(header.o_navbar[style*="display: none"]) .o_action_manager {
         transform: rotate(0deg);
     }
 }
+
+//------------------------------------------------------------------------------
+
+// = Mobile drawer
+// Below the md breakpoint the rail is hidden. The hamburger in front of the
+// app name opens odoo's standard mobile drawer (openMobileDrawer delegates to
+// the systray o_mobile_menu_toggle), so the rail itself is only shown when the
+// body "cy-menu-sidebar-open" class is set. The rail arrow, the backdrop or
+// picking an app closes it again.
+
+.cy-menu-sidebar-mobile-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    order: -1;
+    flex-shrink: 0;
+    height: 32px;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    color: var(--dark-gray, #121212);
+    font-size: 20px;
+    cursor: pointer;
+
+    i {
+        line-height: 1;
+    }
+}
+
+.cy-top-navbar .cy-menu-sidebar-mobile-toggle:hover {
+    background-color: #e9ecef;
+    border-radius: 6px;
+}
+
+[data-darkreader-scheme="dark"] .cy-menu-sidebar-mobile-toggle {
+    color: rgb(209, 205, 199);
+}
+
+.cy-menu-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    background-color: rgba(38, 38, 26, 0.5);
+}
+
+@include media-breakpoint-down(md) {
+
+    // Keep the navbar on one row on small screens. The app name becomes the
+    // flexible/truncating segment between the hamburger and right-side items.
+    .o_navbar .o_main_navbar {
+        flex-wrap: nowrap !important;
+        padding: 8px;
+    }
+
+    body:has(.cy-menu-sidebar) .o_navbar,
+    body:has(.cy-menu-sidebar) .o_action_manager,
+    body.cy-menu-sidebar-open:has(.cy-menu-sidebar) .o_navbar,
+    body.cy-menu-sidebar-open:has(.cy-menu-sidebar) .o_action_manager {
+        padding-left: 0 !important;
+    }
+
+    // Keep the app name right after the hamburger: without this, the
+    // space-between navbar pushes the name to the opposite edge of the row.
+    .o_navbar .o_main_navbar .cy-navbar-app-name {
+        display: block;
+        font-size: 16px;
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-right: auto !important;
+        padding-top: 2px;
+    }
+
+    .cy-menu-sidebar {
+        // The rail is not part of the small-screen layout at rest.
+        display: none !important;
+    }
+
+    body.cy-menu-sidebar-open:has(.cy-menu-sidebar) .cy-menu-sidebar {
+        display: flex !important;
+        width: 240px !important;
+        z-index: 1055; // above the sticky navbar (z-index: 100) and its backdrop
+        box-shadow: 4px 0 24px 0 rgba(38, 38, 26, 0.35);
+        animation: cy-menu-sidebar-slide-in 0.22s ease;
+    }
+
+    body.cy-menu-sidebar-open .cy-menu-sidebar-backdrop {
+        display: block;
+    }
+
+    .cy-menu-sidebar-mobile-toggle {
+        display: inline-flex;
+    }
+
+    // Mobile burger user-menu entries (View Account, Auto Edit, etc.)
+    // should use 14px text instead of Bootstrap fs-4 sizing.
+    .o_burger_menu .o_user_menu_mobile .dropdown-item {
+        font-size: 14px !important;
+    }
+}
+
+@keyframes cy-menu-sidebar-slide-in {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+// = "All Apps" list page in the apps-mode burger drawer (navbar hamburger)
+// Mobile design aligned with Cyllo sidebar look while keeping the same dark bg.
+.o_burger_menu.cy-burger-left {
+    --cy-mobile-drawer-bg: #26261A;
+    --cy-mobile-drawer-text: #BCBBA7;
+    --cy-mobile-drawer-border: #373627;
+}
+
+// Mobile menu toggle (navbar systray): 0 8px paddings, the user's dp.
+.o_main_navbar .o_mobile_menu_toggle.cy-mobile-menu-toggle {
+    padding: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: stretch;
+    margin: auto;
+
+    .cy-mobile-menu-avatar {
+        width: 26px;
+        height: 26px;
+        display: block;
+        object-fit: cover;
+        margin: auto;
+    }
+}
+
+// Apps mode: "All Apps" entry below the app header pill — same row metrics
+// as the All Apps list items.
+.o_burger_menu.cy-burger-left .cy-burger-all-apps-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    border: 0;
+    border-top: 1px solid var(--cy-mobile-drawer-border);
+    margin: auto 0 0;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--cy-mobile-drawer-bg);
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &:focus,
+    &.focus {
+        background-color: var(--cy-mobile-drawer-border);
+    }
+
+    .ri-apps-2-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px !important;
+    }
+
+    .cy-burger-all-apps-nav-name {
+        font-size: 16px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        color: var(--cy-mobile-drawer-text);
+    }
+}
+
+.o_burger_menu.cy-burger-left .o_burger_menu_content .cy-burger-all-apps {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 0;
+    margin-bottom: 0;
+
+    .cy-burger-all-apps-title {
+        display: none;
+    }
+
+    .cy-burger-all-apps-list {
+        list-style: none;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px;
+
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 52px;
+            padding-inline: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-indent: 0;
+            color: var(--cy-mobile-drawer-text);
+
+            &:hover {
+                background-color: var(--cy-mobile-drawer-border);
+            }
+        }
+
+        // Searchbar empty state: plain centered hint, no row chrome.
+        .cy-burger-all-apps-empty {
+            justify-content: center;
+            color: rgba(188, 187, 167, .6);
+            cursor: default;
+
+            &:hover {
+                background-color: transparent;
+            }
+        }
+
+        .cy-image {
+            padding: 4px;
+        }
+
+        .cy-image,
+        .cy-svg-container {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            object-fit: contain;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            filter: grayscale(0.85);
+        }
+
+        .cy-svg-container svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+
+        .cy-icons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            font-size: 28px !important;
+            color: var(--cy-mobile-drawer-text) !important;
+        }
+
+        li.active {
+            background-color: var(--cy-mobile-drawer-border);
+            outline: 2px solid $o-brand-primary;
+            outline-offset: -1px;
+
+            .cy-image,
+            .cy-svg-container {
+                filter: none;
+            }
+
+            .cy-burger-all-apps-name {
+                color: #E7E7D6;
+            }
+        }
+    }
+
+    .cy-burger-all-apps-name {
+        font-size: 16px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        color: var(--cy-mobile-drawer-text);
+    }
+
+    .cy-burger-all-apps-search {
+        display: none;
+    }
+
+    // Searchbar below the cyllo logo / close topbar: narrows the app list.
+    .cy-burger-all-apps-searchbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 16px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        background-color: var(--cy-mobile-drawer-border);
+
+        .ri-search-line {
+            color: var(--cy-mobile-drawer-text);
+            opacity: .7;
+            font-size: 18px !important;
+        }
+
+        input {
+            flex: 1 1 auto;
+            min-width: 0;
+            height: 24px;
+            border: none;
+            outline: none;
+            background: transparent;
+            // 16px keeps iOS Safari from zooming on focus
+            font-size: 16px;
+            color: var(--cy-mobile-drawer-text);
+
+            &::placeholder {
+                color: rgba(188, 187, 167, .6);
+            }
+        }
+    }
+}
+
+.o_burger_menu .o_burger_menu_content.o_burger_menu_app {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.o_burger_menu.cy-burger-left .o_burger_menu_content.o_burger_menu_app {
+    background-color: var(--cy-mobile-drawer-bg);
+    color: var(--cy-mobile-drawer-text);
+    display: flex;
+    flex-direction: column;
+}
+
+// Dark drawer text fixes: the core burger styles hardcode light-theme text
+// colors (.text-900 headings/links + rgba($o-burger-base-color) menu items),
+// which are nearly invisible on --cy-mobile-drawer-bg.
+.o_burger_menu.cy-burger-left .o_burger_menu_content {
+
+    li,
+    button {
+        color: rgba(188, 187, 167, .68);
+
+        &:hover,
+        &:focus,
+        &.focus {
+            color: var(--cy-mobile-drawer-text);
+        }
+    }
+
+    // Section headings ("Documents", "Operations", ...) and top-level links
+    .text-900 {
+        color: var(--cy-mobile-drawer-text) !important;
+    }
+
+    // Section dividers: keep the light-theme gray border from over-brightening
+    // the dark drawer
+    .border-top {
+        border-top-color: var(--cy-mobile-drawer-border) !important;
+    }
+}
+
+.o_burger_menu_topbar.cy-burger-apps-mode {
+    background-color: var(--cy-mobile-drawer-bg);
+    color: var(--cy-mobile-drawer-text);
+    box-shadow: none;
+    padding: 16px !important;
+
+    .cy-burger-all-apps-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55em;
+        height: 44px;
+        min-width: 0;
+        border: none;
+        border-radius: 8px;
+        background-color: transparent;
+        color: var(--cy-mobile-drawer-text);
+
+        .cy-burger-brand-logo {
+            height: 36px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        // icon branches (svg / image / font glyph), sized like the rail rows
+        .cy-image,
+        .cy-svg-container {
+            height: 30px;
+            flex-shrink: 0;
+            object-fit: contain;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cy-svg-container svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .cy-icons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 30px;
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+            font-size: 24px !important;
+        }
+
+        .cy-burger-app-name {
+            font-size: 18px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+            color: var(--cy-mobile-drawer-text);
+        }
+
+        // All Apps list page toggled on
+        &.active {
+            background-color: transparent;
+        }
+    }
+
+    .o_burger_menu_close {
+        color: var(--cy-mobile-drawer-text) !important;
+        padding: 4px;
+    }
+}
+
+.o_burger_menu.cy-burger-left {
+    left: 0 !important;
+    right: auto !important;
+
+    // resting pose: on screen, anchored to the left edge
+    transform: translateX(0);
+
+    // animation pose (enter and leave): hidden past the left edge
+    &.burgerslide-enter,
+    &.burgerslide-leave {
+        transform: translateX(-100%);
+    }
+}
+
+.o_burger_menu.cy-burger-right {
+    right: 0 !important;
+    left: auto !important;
+
+    // resting pose: on screen, anchored to the right edge
+    transform: translateX(0);
+
+    // animation pose (enter and leave): hidden past the right edge, so the
+    // drawer slides in from the right and sweeps out to the right again
+    &.burgerslide-enter,
+    &.burgerslide-leave {
+        transform: translateX(100%);
+    }
+}

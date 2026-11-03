@@ -19,10 +19,11 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from datetime import timedelta
-import logging
+
 
 _logger = logging.getLogger(__name__)
 

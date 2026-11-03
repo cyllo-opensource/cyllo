@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-inherit="web.NavBar" t-inherit-mode="extension" owl="1">
+        <xpath expr="//nav[hasclass('o_main_navbar')]" position="inside">
+            <button t-if="!isWebsiteEditing" class="cy-menu-sidebar-mobile-toggle" title="Toggle menu"
+                aria-label="Toggle menu" t-on-click="openMobileDrawer">
+                <i class="ri-menu-line"/>
+            </button>
+            <div t-if="!isWebsiteEditing and menuSidebarState.isSidebarOpen" class="cy-menu-sidebar-backdrop"
+                t-on-click="toggleMenuSidebar"/>
+        </xpath>
         <xpath expr="//header[hasclass('o_navbar')]" position="inside">
             <nav t-if="!isWebsiteEditing" t-ref="cyMenuSidebar" t-attf-class="cy-menu-sidebar">
                 <div class="cy-menu-sidebar-header">
@@ -18,7 +26,7 @@
 
                 <ul class="cy-menu-sidebar-apps">
                     <t t-foreach="menuService.getApps()" t-as="app" t-key="app.id">
-                        <li t-att-class="menuService.getCurrentApp() === app ? 'active' : ''" t-att-data-tooltip="!menuSidebarState.isSidebarOpen and app.name" data-tooltip-position="right" t-on-click="() => this.menuService.selectMenu(app)">
+                        <li t-att-class="menuService.getCurrentApp() === app ? 'active' : ''" t-att-data-tooltip="!menuSidebarState.isSidebarOpen and app.name" data-tooltip-position="right" t-on-click="() => this.onAppClick(app)">
                             <t t-call="cyllo_base.AppIcon"/>
                             <span class="cy-menu-sidebar-app-name" t-esc="app.name"/>
                         </li>
@@ -35,6 +43,100 @@
                     </div>
                 </div>
             </nav>
+        </xpath>
+    </t>
+    <t t-inherit="web.BurgerMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_burger_menu')]" position="attributes">
+            <attribute name="class" remove="start-100"/>
+            <attribute name="t-att-class">transition.className + ' cy-burger-' + (state.rightOnlyMode ? 'right' : 'left')</attribute>
+        </xpath>
+        <xpath expr="//Transition" position="attributes">
+            <attribute name="onLeave">() => this.resetBurgerState()</attribute>
+        </xpath>
+        <!-- Apps mode (navbar hamburger): the current app's icon + name takes
+             the pill's place in the topbar as a plain header (no click);
+             the All Apps list is reached through the drawer's footer button.
+             The native avatar topbar stays only in user mode (the systray
+             toggle drawer). -->
+        <xpath expr="//div[hasclass('o_burger_menu_topbar')]" position="attributes">
+            <attribute name="t-att-class">'cy-burger-' + (state.rightOnlyMode ? 'user' : 'apps') + '-mode'</attribute>
+        </xpath>
+        <xpath expr="//small[hasclass('o-no-caret')]" position="attributes">
+            <attribute name="t-if">state.rightOnlyMode</attribute>
+        </xpath>
+        <xpath expr="//small[hasclass('o-no-caret')]" position="before">
+            <button t-if="!state.rightOnlyMode and currentApp"
+                class="cy-burger-all-apps-btn"
+                t-att-class="{active: state.showAllApps}">
+                <img t-if="state.showAllApps" src="/cyllo_base/static/src/img/cyllo-logo.svg"
+                     class="cy-burger-brand-logo" alt="Cyllo"/>
+                <t t-else="">
+                    <t t-set="app" t-value="currentApp"/>
+                    <t t-set="iconKey" t-value="'burger-top-' + currentApp.id"/>
+                    <t t-call="cyllo_base.AppIcon"/>
+                    <span class="cy-burger-app-name" t-esc="currentApp.name"/>
+                </t>
+            </button>
+            <button t-if="!state.rightOnlyMode and !currentApp"
+                class="cy-burger-all-apps-btn">
+                <img t-if="state.showAllApps" src="/cyllo_base/static/src/img/cyllo-logo.svg"
+                     class="cy-burger-brand-logo" alt="Cyllo"/>
+                <t t-else="">
+                    <i class="fa fa-th"/>
+                    <span class="cy-burger-app-name">All Apps</span>
+                </t>
+            </button>
+        </xpath>
+        <xpath expr="//ul[hasclass('mb-0')]" position="before">
+            <div class="cy-burger-all-apps" t-if="state.showAllApps">
+                <div class="cy-burger-all-apps-title fw-bold text-900">All Apps</div>
+                <div class="cy-burger-all-apps-searchbar">
+                    <i class="ri-search-line"/>
+                    <input type="search" placeholder="Search..."
+                        aria-label="Search apps" autocomplete="off" spellcheck="false"
+                        t-att-value="state.allAppsSearch"
+                        t-on-input="onAllAppsSearch"/>
+                </div>
+                <ul class="cy-burger-all-apps-list mb-0">
+                    <li t-if="!filteredApps.length" class="cy-burger-all-apps-empty">No apps found</li>
+                    <t t-foreach="filteredApps" t-as="app" t-key="app.id">
+                        <li t-att-class="menuRepo.getCurrentApp() === app ? 'active' : ''"
+                            t-on-click="() => this._onMenuClicked(app)">
+                            <t t-set="iconKey" t-value="'burger-' + app.id"/>
+                            <t t-call="cyllo_base.AppIcon"/>
+                            <span class="cy-burger-all-apps-name" t-esc="app.name"/>
+                        </li>
+                    </t>
+                </ul>
+                <button class="cy-burger-all-apps-search" t-on-click.stop="openSearchPalette">
+                    <span class="cy-burger-all-apps-search-left">
+                        <i class="ri-search-line"/>
+                        <span class="cy-burger-all-apps-search-text">Search...</span>
+                    </span>
+                    <span class="cy-burger-all-apps-search-hotkey"><t t-esc="searchShortcutKey"/> + F</span>
+                </button>
+            </div>
+        </xpath>
+        <!-- Apps mode: explicit "All Apps" entry at the bottom of the drawer
+             (the header pill above is a plain, non-clickable label; this
+             footer button is the only sections <-> list toggle). -->
+        <xpath expr="//nav[hasclass('o_burger_menu_content')]/ul" position="after">
+            <button t-if="!state.rightOnlyMode and !state.showAllApps"
+                class="cy-burger-all-apps-nav" title="All Apps" aria-label="All Apps"
+                t-on-click.stop="_toggleAllApps">
+                <i class="ri-apps-2-line"/>
+                <span class="cy-burger-all-apps-nav-name">All Apps</span>
+            </button>
+        </xpath>
+        <!-- The sections show only while no list page is toggled -->
+        <xpath expr="//nav[hasclass('o_burger_menu_content')]/ul" position="attributes">
+            <attribute name="t-if">!state.rightOnlyMode and !state.showAllApps</attribute>
+        </xpath>
+        <xpath expr="//button[hasclass('o_mobile_menu_toggle')]" position="attributes">
+            <attribute name="class" add="cy-mobile-menu-toggle" remove="pe-3" separator=" "/>
+        </xpath>
+        <xpath expr="//button[hasclass('o_mobile_menu_toggle')]/i[hasclass('oi-panel-right')]" position="replace">
+            <img class="cy-mobile-menu-avatar rounded-circle" t-att-src="'/web/image?model=res.users&amp;field=avatar_128&amp;id=' + user.userId" alt="Menu"/>
         </xpath>
     </t>
 </templates>

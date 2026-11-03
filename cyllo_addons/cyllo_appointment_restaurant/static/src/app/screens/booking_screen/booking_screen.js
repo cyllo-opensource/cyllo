@@ -9,12 +9,12 @@ import { _t } from "@web/core/l10n/translation";
 const { DateTime } = luxon;
 
 const DATE_TABS = [
-    { key: "today",    label: "Today",      days: 0 },
-    { key: "tomorrow", label: "Tomorrow",   days: 1 },
-    { key: "week",     label: "This Week",  days: 7 },
-    { key: "all",      label: "Upcoming",   days: null },
-    { key: "ongoing",  label: "Ongoing" },
-    { key: "cancel",   label: "Cancel" },
+    { key: "today",    label: _t("Today"),      days: 0 },
+    { key: "tomorrow", label: _t("Tomorrow"),   days: 1 },
+    { key: "week",     label: _t("This Week"),  days: 7 },
+    { key: "all",      label: _t("Upcoming"),   days: null },
+    { key: "ongoing",  label: _t("Ongoing") },
+    { key: "cancel",   label: _t("Cancel") },
 ];
 
 export class BookingScreen extends Component {

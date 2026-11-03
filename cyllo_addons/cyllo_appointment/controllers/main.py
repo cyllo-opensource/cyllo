@@ -19,13 +19,14 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import pytz
 from odoo import http
+from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.http import request
-from datetime import datetime, timedelta
-from odoo import fields
-import pytz
 from odoo.addons.website_sale.controllers.main import WebsiteSale
+from odoo.addons.http_routing.models.ir_http import unslug
+from datetime import datetime, timedelta
 
 
 class AppointmentWebsiteController(http.Controller):
@@ -39,10 +40,20 @@ class AppointmentWebsiteController(http.Controller):
             'appointment_types': appointment_types,
         })
 
-    @http.route(['/appointment/<int:appointment_type_id>'],
+    @http.route(['/appointment/<int:appointment_type_id>',
+                 '/appointment/<string:appointment_type_id>'],
                 type='http', auth='public', website=True)
     def appointment_details(self, appointment_type_id, **kw):
         """Show selection form (Staff/Resource, Date, Time) based on scheduling type."""
+        if isinstance(appointment_type_id, str):
+            _, appointment_type_id = unslug(appointment_type_id)
+            if not appointment_type_id:
+                return request.redirect('/appointment')
+            return request.redirect_query(
+                f'/appointment/{appointment_type_id}',
+                request.httprequest.args,
+                code=301,
+            )
         appointment_type = request.env['appointment.type'].sudo().browse(appointment_type_id)
         if not appointment_type.exists():
             return request.redirect('/appointment')

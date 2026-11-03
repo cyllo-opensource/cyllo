@@ -19,8 +19,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from unittest.mock import patch
+
 from odoo.tests.common import TransactionCase
-from unittest.mock import patch, MagicMock
+
 
 class TestAccountJournal(TransactionCase):
 
@@ -37,21 +39,10 @@ class TestAccountJournal(TransactionCase):
     def test_action_new_transaction(self):
         result = self.journal.action_new_transaction()
         self.assertEqual(result.get('context').get('default_journal_id'), self.journal.id)
-        
-    @patch('requests.get')
-    def test_pull_bank_statements(self, mock_get):
-        """Test pulling bank statements using mock for requests."""
-        # Setup mock response
-        mock_response = MagicMock()
-        mock_response.json.return_value = {
-            'data': []
-        }
-        mock_get.return_value = mock_response
-        
-        # It's hard to fully test without the models (online_bank_provider etc)
-        # But we can call it and ensure it passes silently.
-        try:
+
+    def test_pull_bank_statements_skips_unconfigured_journal(self):
+        """Do not fetch statements for journals without a provider account."""
+        with patch.object(type(self.journal), '_create_bank_statements') as create_statements:
             self.journal._pull_bank_statements()
-            self.assertTrue(True)
-        except Exception:
-            self.fail("_pull_bank_statements raised an exception.")
+
+        create_statements.assert_not_called()

@@ -19,9 +19,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from odoo import fields
 from odoo.tests.common import TransactionCase
 from datetime import timedelta
-from odoo import fields
+
 
 class TestHrEmployee(TransactionCase):
 

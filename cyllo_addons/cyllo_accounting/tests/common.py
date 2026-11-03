@@ -19,6 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from datetime import date
+
 from odoo import fields
 from odoo.tests.common import TransactionCase
 
@@ -36,11 +38,12 @@ class TestCylloAccounting(TransactionCase):
         cls.product_tem = cls.env['product.product'].create({
             'name': 'Test 1',
         })
+        cls.today = date.today()
         cls.account_move = cls.env['account.move'].create({
             'partner_id': cls.partner.id,
             'move_type': 'out_invoice',
             'state': 'draft',
-            'invoice_date': '2023-12-05',
+            'invoice_date': cls.today,
             'amount_residual': 1000,
             'amount_total': 1000,
             'line_ids': [fields.Command.create({
@@ -84,7 +87,7 @@ class TestCylloAccounting(TransactionCase):
             'depreciation_move_ids': [fields.Command.create({
                 'move_type': 'out_invoice',
                 'partner_id': cls.partner.id,
-                'invoice_date': '2020-01-10',
+                'invoice_date': cls.today,
                 'asset_amount': 1000,
                 'state': 'draft',
                 'line_ids': [fields.Command.create({
@@ -191,24 +194,25 @@ class TestCylloAccountingFiscalYear(TransactionCase):
         cls.partner = cls.env['res.partner'].create({
             'name': 'Test partner'
         })
+        today = date.today()
         cls.fiscal_year = cls.env['account.fiscal.year'].create({
             'name': 'Year1',
-            'start_date': '2021-01-01',
-            'end_date': '2021-12-31',
+            'start_date': date(today.year - 1, 1, 1),
+            'end_date': date(today.year - 1, 12, 31),
             'company_id': cls.env.company.id,
             'state': 'draft'
         })
         cls.fiscal_year2 = cls.env['account.fiscal.year'].create({
             'name': 'Year2',
-            'start_date': '2026-01-01',
-            'end_date': '2026-12-31',
+            'start_date': date(today.year, 1, 1),
+            'end_date': date(today.year, 12, 31),
             'company_id': cls.env.company.id,
             'state': 'draft',
         })
         cls.fiscal_year3 = cls.env['account.fiscal.year'].create({
-            'name': 'Year2',
-            'start_date': '2022-01-01',
-            'end_date': '2022-12-31',
+            'name': 'Year3',
+            'start_date': date(today.year - 2, 1, 1),
+            'end_date': date(today.year - 2, 12, 31),
             'company_id': cls.env.company.id,
             'state': 'draft',
         })
@@ -216,6 +220,6 @@ class TestCylloAccountingFiscalYear(TransactionCase):
             'partner_id': cls.partner.id,
             'move_type': 'out_invoice',
             'state': 'draft',
-            'invoice_date': '2021-10-05',
+            'invoice_date': today,
             'fiscal_year_id': cls.fiscal_year2.id,
         })

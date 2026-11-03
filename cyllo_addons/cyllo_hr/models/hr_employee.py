@@ -19,6 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import datetime
+
 from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models
 
@@ -44,6 +46,9 @@ class HrEmployee(models.Model):
         if date_filter == 'today':
             start_date = today
             end_date = today
+        elif date_filter == 'week':
+            start_date = today - relativedelta(days=today.weekday())  # Monday
+            end_date = start_date + relativedelta(days=6)  # Sunday
         elif date_filter == 'month':
             start_date = today.replace(day=1)
             end_date = start_date + relativedelta(months=1, days=-1)
@@ -51,28 +56,58 @@ class HrEmployee(models.Model):
             start_date = today.replace(month=1, day=1)
             end_date = start_date + relativedelta(years=1, days=-1)
 
+        # Previous period of the same length, used for the KPI delta badges
+        # (e.g. "12 Last month" / "3 Last week").
+        period_days = max((end_date - start_date).days + 1, 1)
+        prev_start = start_date - relativedelta(days=period_days)
+        prev_end = start_date - relativedelta(days=1)
+
+        prev_labels = {'today': 'Yesterday', 'week': 'Last week',
+                       'month': 'Last month', 'year': 'Last year'}
+        kpi_compare_label = prev_labels.get(date_filter, 'Last period')
+
+        def hr_delta(current, previous):
+            """Returns (previous_value, changed_pct) for a KPI card."""
+            try:
+                current_n = float(current)
+                previous_n = float(previous)
+            except (TypeError, ValueError):
+                return previous, 0
+            if previous_n:
+                changed = round((current_n - previous_n) / previous_n * 100)
+            elif current_n > 0:
+                changed = 100
+            else:
+                changed = 0
+            return previous, changed
+
         # Total Employees (Always total)
         total_employees = self.search_count([('active', '=', True)])
+        # Workforce as it was at the start of the period (for "N Last month")
+        total_employees_prev = self.search_count([
+            ('active', '=', True),
+            ('create_date', '<', datetime.datetime.combine(
+                start_date, datetime.time.min))
+        ]) if 'create_date' in self._fields else total_employees
+        total_employees_compare, total_employees_pct = hr_delta(
+            total_employees, total_employees_prev)
 
         # Attendance Rate (Average for the period)
         attendance_rate = 0
+        attendance_rate_compare, attendance_rate_pct = 0, 0
         if 'hr.attendance' in self.env:
             # For 'today', we look at all unique employees who checked in today
-            if date_filter == 'today':
-                attended_employees = self.env['hr.attendance'].read_group(
-                    [('check_in', '>=', today)], ['employee_id'], ['employee_id']
-                )
-                attendance_rate = (len(attended_employees) / total_employees * 100) if total_employees > 0 else 0
-            else:
-                # For Month/Year, calculate unique employees attended in the period
-                attendance_domain = [
-                    ('check_in', '>=', start_date),
-                    ('check_in', '<=', end_date)
-                ]
-                attended_employees = self.env['hr.attendance'].read_group(
-                    attendance_domain, ['employee_id'], ['employee_id']
-                )
-                attendance_rate = (len(attended_employees) / total_employees * 100) if total_employees > 0 else 0
+            def attendance_rate_for(a_start, a_end):
+                attended = self.env['hr.attendance'].read_group(
+                    [('check_in', '>=', a_start), ('check_in', '<=', a_end)],
+                    ['employee_id'], ['employee_id'])
+                return (len(attended) / total_employees * 100) if total_employees > 0 else 0
+
+            attendance_rate = attendance_rate_for(start_date, end_date)
+            attendance_rate = int(attendance_rate) if float(attendance_rate).is_integer() else round(attendance_rate, 2)
+            attendance_rate_compare, attendance_rate_pct = hr_delta(
+                attendance_rate, round(attendance_rate_for(prev_start, prev_end), 2))
+            attendance_rate_compare = int(attendance_rate_compare) if float(attendance_rate_compare).is_integer() else attendance_rate_compare
 
         # Total Job Applied (Recruitment)
         job_applied_count = 0
@@ -84,6 +119,24 @@ class HrEmployee(models.Model):
                 ])
         except Exception:
             pass
+        job_applied_compare, job_applied_pct = hr_delta(
+            job_applied_count,
+            self.env['hr.applicant'].search_count([
+                ('create_date', '>=', prev_start),
+                ('create_date', '<=', prev_end)
+            ]) if 'hr.applicant' in self.env else 0)
+
+        # Upcoming Time Off (validated leaves starting today or later)
+        upcoming_timeoff_count = self.env['hr.leave'].search_count([
+            ('state', '=', 'validate'), ('request_date_from', '>=', today)
+        ]) if 'hr.leave' in self.env else 0
+        upcoming_timeoff_compare, upcoming_timeoff_pct = hr_delta(
+            upcoming_timeoff_count,
+            self.env['hr.leave'].search_count([
+                ('state', '=', 'validate'),
+                ('request_date_from', '>=', prev_start),
+                ('request_date_from', '<=', prev_end)
+            ]) if 'hr.leave' in self.env else 0)
 
         # Employee Status Breakdown (By Job Position) - Not affected by date filter
         status_data = self.env['hr.job'].search_read([], ['name', 'no_of_employee'])
@@ -127,6 +180,7 @@ class HrEmployee(models.Model):
                 employee = self.browse(payslip['employee_id'][0])
                 pending_payslips_list.append({
                     'id': payslip['id'],
+                    'employee_id': payslip['employee_id'][0],
                     'employee_name': payslip['employee_id'][1],
                     'department': employee.department_id.name or 'N/A',
                     'name': payslip['payslip_name'],
@@ -151,6 +205,7 @@ class HrEmployee(models.Model):
                 employee = self.browse(contract['employee_id'][0])
                 ending_contracts_list.append({
                     'id': contract['id'],
+                    'employee_id': contract['employee_id'][0],
                     'employee_name': contract['employee_id'][1],
                     'job_title': employee.job_id.name or 'N/A',
                     'name': contract['name'],
@@ -160,25 +215,40 @@ class HrEmployee(models.Model):
         # Leaderboard Data (Commissions)
         leaderboard_data = []
         if 'commission.report' in self.env:
+            # Report period overlaps the selected dashboard period
+            # (works even when the plan period spans the whole window).
             commission_domain = [
-                '|',
-                '&', ('date', '>=', start_date), ('date', '<=', end_date),
-                '&', ('date_to', '>=', start_date), ('date_to', '<=', end_date)
+                ('date_from', '<=', end_date),
+                ('date_to', '>=', start_date),
+                ('user_id', '!=', False),
             ]
-            commission_reports = self.env['commission.report'].search(commission_domain)
+            commission_reports = self.env['commission.report'].search_read(
+                commission_domain,
+                ['user_id', 'commission_amount', 'order_ids']
+            )
             user_stats = {}
             for report in commission_reports:
-                uid = report.user_id.id
+                user = report['user_id']
+                uid = user[0] if isinstance(user, (list, tuple)) else False
+                if not uid:
+                    continue
                 if uid not in user_stats:
-                    user_stats[uid] = {'commission': 0.0, 'name': report.user_id.name}
-                user_stats[uid]['commission'] += report.commission_amount
+                    user_stats[uid] = {
+                        'commission': 0.0,
+                        'name': user[1] if isinstance(user, (list, tuple)) else '',
+                        'deals': 0,
+                    }
+                user_stats[uid]['commission'] += report.get('commission_amount') or 0.0
+                user_stats[uid]['deals'] += len(report.get('order_ids') or [])
 
             sorted_stats = sorted(user_stats.values(), key=lambda x: x['commission'], reverse=True)
-            for idx, stat in enumerate(sorted_stats, start=1):
+            for uid, stat in zip(user_stats.keys(), sorted_stats):
                 leaderboard_data.append({
-                    'rank': idx,
+                    'rank': sorted_stats.index(stat) + 1,
+                    'user_id': uid,
                     'name': stat['name'],
-                    'commission': stat['commission']
+                    'commission': stat['commission'],
+                    'deals': stat['deals'],
                 })
 
         # Recruitment Stages Data (Chart) - Affected by date filter
@@ -209,6 +279,14 @@ class HrEmployee(models.Model):
                 if count > 0:
                     contract_type_labels.append(ctype.name)
                     contract_type_counts.append(count)
+            # Running contracts with no Contract Type set must still show up
+            untyped_count = self.env['hr.contract'].search_count([
+                ('contract_type_id', '=', False),
+                ('state', '=', 'open')
+            ])
+            if untyped_count > 0:
+                contract_type_labels.append('Unspecified')
+                contract_type_counts.append(untyped_count)
 
         # Contract Status Data (Chart) - Not affected by date filter
         contract_status_labels = []
@@ -286,7 +364,18 @@ class HrEmployee(models.Model):
             'job_applied_count': job_applied_count,
             'start_date': start_date,
             'end_date': end_date,
-            'attendance_rate': round(attendance_rate, 2),
+            'attendance_rate': attendance_rate,
+            'upcoming_timeoff_count': upcoming_timeoff_count,
+            # Previous-period values + change % for the KPI delta badges
+            'total_employees_compare': total_employees_compare,
+            'total_employees_pct': total_employees_pct,
+            'job_applied_compare': job_applied_compare,
+            'job_applied_pct': job_applied_pct,
+            'attendance_rate_compare': attendance_rate_compare,
+            'attendance_rate_pct': attendance_rate_pct,
+            'upcoming_timeoff_compare': upcoming_timeoff_compare,
+            'upcoming_timeoff_pct': upcoming_timeoff_pct,
+            'kpi_compare_label': kpi_compare_label,
             'employee_status_labels': employee_status_labels,
             'employee_status_counts': employee_status_counts,
             'attendance_trend_labels': attendance_trend_labels,

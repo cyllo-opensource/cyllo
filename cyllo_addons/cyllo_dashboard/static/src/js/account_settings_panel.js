@@ -4,9 +4,6 @@ import { Component, markup, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 
-/**
- * Converts stored email signature HTML into plain text for the editor.
- */
 function htmlToText(html) {
     const doc = new DOMParser().parseFromString(html || '', 'text/html');
     const result = [];
@@ -27,25 +24,13 @@ function htmlToText(html) {
     return result.join('');
 }
 
-/**
- * Stores the edited signature, keeping line breaks as <br> tags.
- */
 function textToHtml(text) {
     return (text || '').replace(/\n/g, '<br>');
 }
 
-/**
- * "Email Signature" editor dialog content. Opened through the dialog
- * service, which provides the environment (dialogData) the core Dialog
- * component's setup requires — rendering <Dialog> directly inside a
- * normal component tree crashes with "Cannot make the given value
- * reactive" (this.env.dialogData is then undefined).
- * Body/Chrome/footer follow the core ConfirmationDialog pattern.
- */
 export class SignatureEditDialog extends Component {
     setup() {
-        // Local edit buffer, seeded with the stored text: saving without
-        // touching rewrites the same signature; clearing saves empty.
+
         this.state = useState({ draft: this.props.draft });
         this.saving = false;
     }
@@ -55,7 +40,7 @@ export class SignatureEditDialog extends Component {
     }
 
     async save() {
-        // Guard against double-click writing twice.
+
         if (this.saving) {
             return;
         }
@@ -76,22 +61,15 @@ SignatureEditDialog.props = {
     onSave: Function,
 };
 
-// Used to scope the Notification Type radio group per panel instance.
 let panelSequence = 0;
 
-/**
- * "Account Settings" panel: editable email signature, notification type
- * and the groups / access rights shortcuts. Rendered inline on the
- * non-admin dashboard (instead of the admin-only Login History card).
- */
 export class AccountSettingsPanel extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
         this.dialogService = useService("dialog");
-        // Several panels could coexist (inline card + dialog host), so the
-        // Notification Type radio group is scoped to this instance.
-        this.notifGroupName = `cy_notif_${++panelSequence}`;
+
+        this.notifGroupName = `cy_dashboard_notif_${++panelSequence}`;
     }
 
     get markupSignature() {
@@ -109,7 +87,6 @@ export class AccountSettingsPanel extends Component {
         };
     }
 
-    /** Opens the signature editor in a service-managed dialog. */
     editSignature() {
         this.dialogService.add(SignatureEditDialog, {
             draft: this.signature,
@@ -120,14 +97,13 @@ export class AccountSettingsPanel extends Component {
     async saveSignature(draft) {
         const signature = textToHtml(draft);
         await this.orm.write("res.users", [this.props.userId], { signature });
-        // props.nonAdmin is the dashboard's reactive state object: writing
-        // it in place re-renders the panel without a full page reload.
+
         this.props.nonAdmin.signature = signature;
     }
 
     onInputNotifType(ev) {
         this.orm.write("res.users", [this.props.userId], { 'notification_type': ev.target.value });
-        // Mail routing depends on the session context: refresh the interface.
+
         this.action.doAction("reload_context");
     }
 

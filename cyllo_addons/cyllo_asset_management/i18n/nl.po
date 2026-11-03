@@ -17,19 +17,26 @@ msgstr ""
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
+#: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
 #, python-format
 msgid "%s: Depreciation"
-msgstr "%S: afschrijving"
+msgstr "%s: afschrijving"
 
 #. module: cyllo_asset_management
 #. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
 #, python-format
 msgid "%s: Dispose"
-msgstr "%s: verwijder"
+msgstr "%s: afstoting"
 
 #. module: cyllo_asset_management
 #. cyllo-python
@@ -39,8 +46,95 @@ msgid "%s: Sell"
 msgstr "%s: verkopen"
 
 #. module: cyllo_asset_management
-#: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_leasing
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__quarterly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__quarterly
+msgid "3 Months"
+msgstr "3 maanden"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__semi_annually
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__semi_annually
+msgid "6 Months"
+msgstr "6 maanden"
+
+#. module: cyllo_asset_management
 #: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_rental
+msgid ""
+"<div style=\"margin: 0px; padding:0px;\">\n"
+"                <div>\n"
+"                    Dear\n"
+"                    <t t-out=\"ctx.get('customer') or not_available\">,</t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    I hope this email finds you well. We are pleased to confirm the Rental arrangement for the\n"
+"                    following asset:\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Asset Name:\n"
+"                    <t t-out=\"ctx.get('asset') or not_available\"></t>\n"
+"                    Rental Start Date:\n"
+"                    <t t-out=\"ctx.get('start_date') or not_available\"></t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Rental End Date:\n"
+"                    <t t-out=\"ctx.get('end_date') or not_available\"></t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    As per the agreement, please ensure timely payment of the lease fees and adhere to the terms\n"
+"                    outlined therein.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Should you have any questions or require further clarification regarding the lease\n"
+"                    agreement, feel free to contact us at your convenience.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    If you have any questions or need further assistance, please don't hesitate to contact us.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Best regards,\n"
+"                    <br>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div style = \"marge: 0px; padding: 0px;\">\n"
+"<div>\n"
+"Beste\n"
+"<t t-out = \"ctx.get ('klant') of niet_available\">, </t>\n"
+"<br>\n"
+"<br>\n"
+"Ik hoop dat deze e -mail je goed vindt.We zijn verheugd om de leasing -regeling voor de\n"
+"volgende activa:\n"
+"<br>\n"
+"<br>\n"
+"Activanaam:\n"
+"<t t-out = \"ctx.get ('activa') of niet_available\"> </t>\n"
+"LEASE START DATUM:\n"
+"<t t-out = \"ctx.get ('start_date') of niet_available\"> </t>\n"
+"<br>\n"
+"<br>\n"
+"Lease -einddatum:\n"
+"<t t-out = \"ctx.get ('end_date') of Not_available\"> </t>\n"
+"<br>\n"
+"<br>\n"
+"Volgens de overeenkomst zorg je voor tijdige betaling van de leasekosten en houd je aan de voorwaarden\n"
+"Daarin geschetst.\n"
+"<br>\n"
+"<br>\n"
+"Mocht u vragen hebben of verdere opheldering nodig hebben met betrekking tot de huurovereenkomst\n"
+"Overeenkomst, neem gerust contact met ons op uw gemak.\n"
+"<br>\n"
+"<br>\n"
+"Als u vragen heeft of verdere hulp nodig hebt, aarzel dan niet om contact met ons op te nemen.\n"
+"<br>\n"
+"<br>\n"
+"Hartelijke groeten,\n"
+"<br>\n"
+"</div>\n"
+"</div>"
+
+#. module: cyllo_asset_management
+#: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_leasing
 msgid ""
 "<div style=\"margin: 0px; padding:0px;\">\n"
 "                <div>\n"
@@ -406,65 +500,98 @@ msgstr ""
 "</div>"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Reservation"
-msgstr "Reservering"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset has insurance"
+msgstr "<i class=\"fa fa-shield\"/>\n                    Actief is verzekerd"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
-msgid "Invoice"
-msgstr "Factuur"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset has warranty"
+msgstr "<i class=\"fa fa-shield\"/>\n                    Actief heeft garantie"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Rental"
-msgstr "Verhuur"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset is under warranty"
+msgstr "<i class=\"fa fa-shield\"/>\n                    Actief valt onder garantie"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Lease"
-msgstr "Verhuren"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-umbrella\"/>\n"
+"                    Asset is under insurance"
+msgstr "<i class=\"fa fa-umbrella\"/>\n                    Actief is verzekerd"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Maintenance"
-msgstr "Onderhoud"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_insurance_form
+msgid ""
+"<i class=\"o_button_icon fa fa-fw fa-briefcase\"/>\n"
+"                            Assets ("
+msgstr "<i class=\"o_button_icon fa fa-fw fa-briefcase\"/>\n                            Activa ("
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Repair"
-msgstr "Reparatie"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Assign"
-msgstr "Toewijzen"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_insurance_form
+msgid ""
+"<i class=\"o_button_icon fa fa-fw fa-pencil-square-o\"/>\n"
+"                            Claims ("
+msgstr "<i class=\"o_button_icon fa fa-fw fa-pencil-square-o\"/>\n                            Schadeclaims ("
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form2
-msgid "/ day"
-msgstr "/ dag"
+msgid "<span class=\"ms-3\">/ day</span>"
+msgstr "<span class=\"ms-3\">/ dag</span>"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid ""
-"<span>You cannot complete this operation, The related asset is already taken for another\n"
-"                        operation.\n"
-"                    </span>\n"
-"                    <br/>\n"
-"                    <span>Are you sure to delete all records ?</span>\n"
-"                    <br/>\n"
-"                    <br/>"
-msgstr ""
-"<span> U kunt deze bewerking niet voltooien, het gerelateerde activum is al voor een ander genomen\n"
-"Bediening.\n"
-"</span>\n"
-"<br/>\n"
-"<span> Weet u zeker alle records? </span>\n"
-"<br/>\n"
-"<br/>"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Assign</span>"
+msgstr "<span class=\"o_stat_text\">Toewijzen</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Bookings</span>"
+msgstr "<span class=\"o_stat_text\">Reserveringen</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
+msgid "<span class=\"o_stat_text\">Invoice</span>"
+msgstr "<span class=\"o_stat_text\">Factuur</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Journal Entries</span>"
+msgstr "<span class=\"o_stat_text\">Boekingen</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Lease</span>"
+msgstr "<span class=\"o_stat_text\">Verhuur</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Maintenance/Repair</span>"
+msgstr "<span class=\"o_stat_text\">Onderhoud/Reparatie</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Modified Assets</span>"
+msgstr "<span class=\"o_stat_text\">Gewijzigd Activa</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Rental</span>"
+msgstr "<span class=\"o_stat_text\">Verhuur</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Reservation</span>"
+msgstr "<span class=\"o_stat_text\">Reservering</span>"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
@@ -479,12 +606,12 @@ msgstr "Compte"
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_asset_brand
 msgid "Account Asset Brands"
-msgstr "Account Asset Brands"
+msgstr "Activamerken"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_account_asset_repair
-msgid "Account Assets Repair"
-msgstr "Accountactiva repareren"
+#: model:ir.model,name:cyllo_asset_management.model_asset_insurance_type
+msgid "Account Asset Insurance Type"
+msgstr "Verzekeringstype van activa"
 
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_asset_item
@@ -494,12 +621,27 @@ msgstr "Accountitem"
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_account_move_reversal
 msgid "Account Move Reversal"
-msgstr "Renversement de l'écriture comptable"
+msgstr "Tegenboeking van de journaalpost"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_scrap
-msgid "Account Scrap"
-msgstr "Accountschroot"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_depreciation_account_id
+msgid "Account used to record accumulated depreciation."
+msgstr "Grootboekrekening voor de cumulatieve afschrijvingen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__loss_account_id
+msgid "Account used to record any loss generated during asset disposal."
+msgstr "Grootboekrekening voor verlies bij afstoting van een actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_loss_account_id
+msgid "Account used to record asset loss or disposal entries."
+msgstr "Grootboekrekening voor verlies op activa of boekingen van afstoting."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__fixed_asset_account_id
+msgid "Account used to record the asset value."
+msgstr "Grootboekrekening voor de waarde van het actief."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
@@ -513,23 +655,23 @@ msgid "Accumulated Depreciation"
 msgstr "Opgebouwde afschrijving"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_depreciation_account_id
+msgid "Accumulated depreciation account used for depreciation entries."
+msgstr "Rekening voor cumulatieve afschrijvingen die wordt gebruikt voor afschrijvingsboekingen."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__asset_action
 msgid "Action"
 msgstr "Actie"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_needaction
 msgid "Action Needed"
 msgstr "Actie nodig"
 
@@ -539,9 +681,29 @@ msgstr "Actie nodig"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__active
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__active
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__active
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__active
 msgid "Active"
 msgstr "Actief"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__activity_count
+msgid "Activity Count"
+msgstr "Aantal activiteiten"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__activity_type
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Activity Type"
+msgstr "Activiteitstype"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__note
+msgid "Additional notes or remarks regarding the asset sale or disposal."
+msgstr "Aanvullende opmerkingen over de verkoop of afstoting van het actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__reservation_note
+msgid "Additional notes related to the reservation."
+msgstr "Aanvullende opmerkingen bij de reservering."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__lease_amount
@@ -550,35 +712,40 @@ msgid "Amount"
 msgstr "Hoeveelheid"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__salvage_value
+msgid "Amount to be depreciated after asset modification."
+msgstr "Afschrijvingsbedrag na wijziging van het actief."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Archived"
 msgstr "Gearchiveerd"
 
 #. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_assent_rental_invoice_due_reminder
 msgid "Assent Rental Invoice Due Reminder"
-msgstr "Instemmingshuurfactuur verschuldigd aan herinnering"
+msgstr "Herinnering voor vervallen verhuurfactuur"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__asset_asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__asset_id
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_categ
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__asset_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -586,10 +753,19 @@ msgstr "Instemmingshuurfactuur verschuldigd aan herinnering"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_modify_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Asset"
-msgstr "Bezit"
+msgstr "Activum"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_asset_report_all
+#: model:ir.model,name:cyllo_asset_management.model_asset_report
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Asset Activity Analysis"
+msgstr "Analyse van activabewerkingen"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__asset_asset_id
@@ -618,29 +794,8 @@ msgid "Asset Automation"
 msgstr "Activaautomatisering"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_brand
-msgid "Asset Brand"
-msgstr "Activamerk"
-
-#. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_cancel_warning
-msgid "Asset Cancel Warning"
-msgstr "Activa annuleren waarschuwing"
-
-#. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_cancel_warning
-msgid "Asset Cancel warning"
-msgstr "Activa annuleren waarschuwing"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Asset Depreciation"
-msgstr "Activa -afschrijving"
-
-#. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_asset_depreciation_line
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__depreciation_line_ids
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Asset Depreciation Line"
 msgstr "Activa -afschrijvingslijn"
 
@@ -652,41 +807,67 @@ msgid "Asset Expense Account"
 msgstr "Activakostenrekening"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__asset_item_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__asset_item_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__asset_id
+msgid "Asset ID"
+msgstr "Actief ID"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_insurance
+#: model:ir.model,name:cyllo_asset_management.model_asset_asset_insurance
+#: model:ir.model,name:cyllo_asset_management.model_asset_insurance
+msgid "Asset Insurance"
+msgstr "Verzekering van activa"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_item_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Asset Item"
-msgstr "Activa -item"
+msgstr "Activatype"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_items
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_items
 msgid "Asset Items"
-msgstr "Activa -items"
+msgstr "Activatypes"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_journal_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_journal_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__asset_journal_id
 msgid "Asset Journal"
-msgstr "Asset Journal"
+msgstr "Activadagboek"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_lease_count
+msgid "Asset Lease Count"
+msgstr "Aantal verhuringen van het actief"
 
 #. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_leasing
 #: model:mail.template,subject:cyllo_asset_management.mail_template_asset_leasing
 msgid "Asset Leasing"
-msgstr "Activa leasing"
+msgstr "Verhuur van activa"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_lost
-msgid "Asset Lost"
-msgstr "Asset verloren"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_loss_account_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_loss_account_id
+msgid "Asset Loss Account"
+msgstr "Verliesrekening van activa"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_account_asset_maintenance
-msgid "Asset Maintenance"
-msgstr "Assetonderhoud"
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_asset_maintenance_request_menu
+msgid "Asset Maintenance / Repair"
+msgstr "Onderhoud/reparatie van activa"
+
+#. module: cyllo_asset_management
+#: model:ir.module.category,name:cyllo_asset_management.module_category_asset_management
+msgid "Asset Management"
+msgstr "Activabeheer"
+
+#. module: cyllo_asset_management
+#: model:res.groups,name:cyllo_asset_management.group_cyllo_asset_admin
+msgid "Asset Manager"
+msgstr "Beheerder van activa"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__asset_model_id
@@ -695,8 +876,20 @@ msgstr "Activamodel"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
-msgid "Asset Model name"
-msgstr "Activa -modelnaam"
+msgid "Asset Model Name"
+msgstr "Naam van het activamodel"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_dispose_list
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_list
+msgid "Asset Name"
+msgstr "Naam van het actief"
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_activity_report
+msgid "Asset Operations"
+msgstr "Activabewerkingen"
 
 #. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_rental
@@ -705,42 +898,18 @@ msgid "Asset Rental"
 msgstr "Activa huur"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Asset Rental Value"
-msgstr "Activa huurwaarde"
-
-#. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_reservation
 #: model:mail.template,subject:cyllo_asset_management.mail_template_asset_reservation
 msgid "Asset Reservation"
 msgstr "Activa -reservering"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_scrap
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_scrap
-msgid "Asset Scrap"
-msgstr "Activa -schroot"
-
-#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__sell_dispose_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__sell_dispose_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__sell_dispose_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__sell_dispose_id
 msgid "Asset Sell"
 msgstr "Activa verkopen"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_type_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_type_id
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
-msgid "Asset Type"
-msgstr "Type activa"
-
-#. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_types
-#: model:ir.model,name:cyllo_asset_management.model_asset_type
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_types
-msgid "Asset Types"
-msgstr "Activatypen"
 
 #. module: cyllo_asset_management
 #: model:res.groups,name:cyllo_asset_management.group_cyllo_asset_users
@@ -748,9 +917,56 @@ msgid "Asset Users"
 msgstr "Vermogensgebruikers"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Asset name"
-msgstr "Activanaam"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__fixed_asset_account_id
+msgid "Asset account used for recording the modified asset value."
+msgstr "Actiefrekening voor het vastleggen van de gewijzigde waarde van het actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__asset_id
+msgid "Asset associated with this booking."
+msgstr "Actief dat bij deze reservering hoort."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__depreciation_id
+msgid "Asset associated with this depreciation line."
+msgstr "Actief dat bij deze afschrijvingsregel hoort."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_booking.py:0
+#, python-format
+msgid "Asset is not available due to cooldown period."
+msgstr "Het actief is niet beschikbaar tijdens de wachttijd."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__asset_id
+msgid "Asset selected for leasing."
+msgstr "Actief geselecteerd voor verhuur."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_asset_id
+msgid "Asset selected for modification or revaluation."
+msgstr "Actief geselecteerd voor wijziging of herwaardering."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__asset_id
+msgid "Asset selected for rental."
+msgstr "Actief geselecteerd voor verhuur."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__asset_id
+msgid "Asset selected for reservation."
+msgstr "Actief geselecteerd voor reservering."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__asset_asset_id
+msgid "Asset selected for sell, disposal, scrap, or lost operations."
+msgstr "Actief geselecteerd voor verkoop, afstoting, buitengebruikstelling of verlies."
+
+#. module: cyllo_asset_management
+#: model:ir.actions.server,name:cyllo_asset_management.ir_cron_asset_generate_maintenance_requests_ir_actions_server
+msgid "Asset: Generate Scheduled Maintenance Requests"
+msgstr "Actief: geplande onderhoudsaanvragen aanmaken"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.ir_cron_asset_reminder_email_for_asset_rental_invoices_ir_actions_server
@@ -760,9 +976,11 @@ msgstr "Activa: herinnering e -mail voor activa -huurfacturen"
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.ir_cron_asset_reminder_email_for_returning_leased_assets_ir_actions_server
 msgid "Asset: Reminder Email For Returning Leased Assets"
-msgstr "Asset: herinnering e -mail voor het retourneren van huuractiva"
+msgstr "Actief: herinnering voor retour van verhuurde activa"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset_insurance.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_assets
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_ids
@@ -770,13 +988,19 @@ msgstr "Asset: herinnering e -mail voor het retourneren van huuractiva"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__asset_asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_count
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__name
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_assets
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_assets_categ
+#, python-format
 msgid "Assets"
 msgstr "Activa"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_assign
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_assign
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__assign
@@ -785,6 +1009,7 @@ msgstr "Activa"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form2
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
+#, python-format
 msgid "Assign"
 msgstr "Toewijzen"
 
@@ -806,23 +1031,17 @@ msgstr "Toegewezen"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Assigned Asset"
 msgstr "Toegewezen activa"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_attachment_count
 msgid "Attachment Count"
 msgstr "Bijlage tellen"
 
@@ -833,9 +1052,37 @@ msgid "Auto Calculate"
 msgstr "Automatisch berekenen"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__automatic_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__automatic_maintenance
+msgid "Automatic Maintenance"
+msgstr "Automatisch onderhoud"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__is_auto_calculate
+msgid "Automatically calculate the depreciation factor."
+msgstr "De afschrijvingsfactor automatisch berekenen."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_account_form
 msgid "Automation"
 msgstr "Automatisering"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__availability_warning
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__availability_warning
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__availability_warning
+msgid "Availability Warning"
+msgstr "Beschikbaarheidswaarschuwing"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__asset_ids
+msgid "Available assets for the selected lease period."
+msgstr "Beschikbare activa voor de geselecteerde verhuurperiode."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__asset_ids
+msgid "Available assets for the selected rental period."
+msgstr "Beschikbare activa voor de geselecteerde verhuurperiode."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_type__complete
@@ -853,17 +1100,58 @@ msgid "Book Value at Year End"
 msgstr "Boekwaarde aan het einde van het jaar"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__booking_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__booking_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__booking_id
+msgid "Booking ID"
+msgstr "Reserverings-ID"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__booking_type
+msgid "Booking Type"
+msgstr "Reserveringstype"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__booking_id
+msgid "Booking record linked to this lease."
+msgstr "Reservering die aan deze verhuur is gekoppeld."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__booking_id
+msgid "Booking record linked to this rental."
+msgstr "Reservering die aan deze verhuur is gekoppeld."
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_booking_search_default_filter
+msgid "Bookings in draft"
+msgstr "Reserveringen in concept"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__brand_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__brand_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__brand_ids
 msgid "Brand"
 msgstr "Merk"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__brand_ids
-msgid "Brands"
-msgstr "Merken"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__brand_id
+msgid "Brand associated with the asset."
+msgstr "Merk dat bij het actief hoort."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_monitor_dispose
+msgid "Broken Monitor - Disposed"
+msgstr "Defecte monitor - afgestoten"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__buffer_period
+msgid "Buffer Period"
+msgstr "Bufferperiode"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__rent_amount
+msgid "Calculated rental amount based on the selected payment terms."
+msgstr "Berekend verhuurbedrag op basis van de geselecteerde betalingsvoorwaarden."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__cancel
@@ -871,30 +1159,109 @@ msgstr "Merken"
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__cancel
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__cancel
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_modify_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 msgid "Cancel"
 msgstr "Annuleren"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__cancel
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__cancelled
 msgid "Cancelled"
 msgstr "Geannuleerd"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__asset_action
+msgid "Choose whether to sell the asset or dispose of it."
+msgstr "Kies of u het actief wilt verkopen of afstoten."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_switch_rental
+msgid "Cisco Switch Catalyst (Rental)"
+msgstr "Cisco Catalyst-switch (verhuur)"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "Claim Insurance"
+msgstr "Verzekeringsclaim indienen"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Claim insurance"
+msgstr "Verzekeringsclaim indienen"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__insurance_amount
+msgid "Claiming amount"
+msgstr "Claimbedrag"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset_insurance.py:0
+#, python-format
+msgid "Claims"
+msgstr "Schadeclaims"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__company_id
 msgid "Company"
 msgstr "Bedrijf"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__company_id
+msgid "Company associated with this asset sale or disposal record."
+msgstr "Bedrijf dat bij deze verkoop- of afstotingsregistratie hoort."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__company_id
+msgid "Company associated with this asset."
+msgstr "Selecteer het bedrijf"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__company_id
+msgid "Company associated with this brand."
+msgstr "Selecteer het bedrijf"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__company_id
+msgid "Company associated with this depreciation line."
+msgstr "Selecteer het bedrijf"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__company_id
+msgid "Company associated with this lease."
+msgstr "Selecteer het bedrijf"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__company_id
+msgid "Company associated with this rental."
+msgstr "Selecteer het bedrijf"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__company_id
+msgid "Company associated with this reservation."
+msgstr "Selecteer het bedrijf"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__company_id
+msgid "Company responsible for this booking."
+msgstr "Bedrijf dat verantwoordelijk is voor deze reservering."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__computation_method
@@ -903,8 +1270,11 @@ msgid "Computation"
 msgstr "Berekening"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__confirm
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__confirm
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_categ
+msgid "Configuration"
+msgstr "Bezit"
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Confirm"
 msgstr "Bevestigen"
@@ -912,13 +1282,30 @@ msgstr "Bevestigen"
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_confirm
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_modify
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__confirmed
 msgid "Confirmed"
 msgstr "Bevestigd"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__computation_method__constant_period
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__computation_method__constant_period
 msgid "Constant Period"
 msgstr "Constante periode"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__buffer_duration
+msgid "Cool Down Duration"
+msgstr "Wachttijd"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Cool down duation"
+msgstr "Wachttijd"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Create Bill"
+msgstr "Inkoopfactuur aanmaken"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
@@ -935,68 +1322,96 @@ msgid "Create Rental"
 msgstr "Maak huur"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__create_uid
 msgid "Created by"
 msgstr "Gemaakt door"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__create_date
 msgid "Created on"
 msgstr "Gemaakt op"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__claiming_currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__currency_id
 msgid "Currency"
 msgstr "Munteenheid"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__currency_id
 msgid "Currency of company"
 msgstr "Valuta van het bedrijf"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__current_depreciated_amount
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__currency_id
+msgid "Currency used by the company."
+msgstr "Valuta van het bedrijf"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__current_depreciated_amount
 msgid "Current Depreciated Amount"
 msgstr "Huidig ​​afgeschreven bedrag"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__current_depreciated_amount
+msgid ""
+"Current depreciation amount considered during the sale or disposal process."
+msgstr "Huidig afschrijvingsbedrag dat wordt meegenomen bij verkoop of afstoting."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__state
+msgid "Current status of the booking."
+msgstr "Huidige status van de reservering."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__status
+msgid "Current status of the lease."
+msgstr "Huidige status van de verhuur."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__status
+msgid "Current status of the rental."
+msgstr "Huidige status van de verhuur."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__status
+msgid "Current status of the reservation."
+msgstr "Huidige status van de reservering."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__customer_id
@@ -1005,6 +1420,26 @@ msgstr "Huidig ​​afgeschreven bedrag"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 msgid "Customer"
 msgstr "Klant"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__invoice_ids
+msgid "Customer invoices related to the asset sale."
+msgstr "Verkoopfacturen die bij het actief horen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__customer_id
+msgid "Customer leasing the asset."
+msgstr "Klant die het actief huurt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__partner_id
+msgid "Customer or contact linked to the booking."
+msgstr "Klant of contactpersoon die aan de reservering is gekoppeld."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__customer_id
+msgid "Customer renting the asset."
+msgstr "Klant die het actief huurt."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
@@ -1017,6 +1452,7 @@ msgid "Daily"
 msgstr "Dagelijks"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__computation_method__daily_compute
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__computation_method__daily_compute
 msgid "Daily Computation"
 msgstr "Dagelijkse berekening"
@@ -1027,13 +1463,47 @@ msgid "Damaged"
 msgstr "Beschadigd"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__date
 msgid "Date"
 msgstr "Datum"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__date_from
+msgid "Date From"
+msgstr "Datum vanaf"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__date_to
+msgid "Date To"
+msgstr "Datum tot"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__depreciation_date
+msgid "Date from which depreciation will be recalculated."
+msgstr "Datum vanaf wanneer de afschrijving opnieuw wordt berekend."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__date
+msgid "Date on which the asset sale or disposal is processed."
+msgstr "Datum waarop de verkoop of afstoting van het actief wordt verwerkt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__date
+msgid "Date on which the depreciation is recorded."
+msgstr "Datum waarop de afschrijving wordt geboekt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__date
+msgid "Date on which the reservation record was created."
+msgstr "Datum waarop de reservering is aangemaakt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__day
+msgid "Day"
+msgstr "Dag"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__day_amount
@@ -1041,26 +1511,68 @@ msgid "Day Amount"
 msgstr "Dagbedrag"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__days
+msgid "Days"
+msgstr "Dagen"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__depreciation_method__declining_balance
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__depreciation_method__declining_balance
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__depreciation_method__declining_balance
 msgid "Declining Balance"
 msgstr "Afnemend saldo"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__depreciation_method__declining_straight_line
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__depreciation_method__declining_straight_line
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__depreciation_method__declining_straight_line
 msgid "Declining and Straight Line"
 msgstr "Dalende en rechte lijn"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid "Delete Records"
-msgstr "Verwijder records"
+#: model:asset.asset,name:cyllo_asset_management.asset_dell_laptop_01
+msgid "Dell Latitude 5420 - Laptop 01"
+msgstr "Dell Latitude 5420 - laptop 01"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_depreciation
+msgid "Demo Accumulated Depreciation Account"
+msgstr "Voorbeeldrekening cumulatieve afschrijving"
+
+#. module: cyllo_asset_management
+#: model:account.journal,name:cyllo_asset_management.journal_demo_asset
+msgid "Demo Asset Journal"
+msgstr "Voorbeeld dagboek activa"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_loss
+msgid "Demo Asset Loss Account"
+msgstr "Voorbeeldrekening verlies op activa"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_expense
+msgid "Demo Depreciation Expense Account"
+msgstr "Voorbeeldrekening afschrijvingskosten"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_fixed_asset
+msgid "Demo Fixed Assets Account"
+msgstr "Voorbeeldrekening vaste activa"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__department_id
 msgid "Department"
 msgstr "Afdeling"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__salvage_value
+msgid "Depreciatable Value"
+msgstr "Berging"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__salvage_value
+msgid "Depreciatable value"
+msgstr "Berging"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_depreciate
@@ -1069,7 +1581,6 @@ msgid "Depreciate"
 msgstr "Afschrijven"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__depreciated_amount
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__depreciated_amount
 msgid "Depreciated Amount"
 msgstr "Afgeschreven bedrag"
@@ -1113,6 +1624,8 @@ msgstr "Afschrijvingskosten"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__depreciation_line_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__depreciation_line_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__depreciation_line_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__depreciation_line_id
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Depreciation Line"
 msgstr "Afschrijvingslijn"
 
@@ -1122,46 +1635,100 @@ msgid "Depreciation Lines"
 msgstr "Afschrijvingslijnen"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "Depreciation and Accounting"
+msgstr "Afschrijving en boekhouding"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__depreciation_date
 msgid "Depreciation date"
 msgstr "Afschrijvingsdatum"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__display_name
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__depreciation_expense
+msgid "Depreciation expense amount for the period."
+msgstr "Afschrijvingskosten voor de periode."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__depreciation_method
+msgid "Depreciation method to be applied for the modified asset."
+msgstr "Afschrijvingsmethode voor het gewijzigde actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__year
+msgid "Depreciation year or period sequence."
+msgstr "Volgnummer van het afschrijvingsjaar of de afschrijvingsperiode."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__active
+msgid "Determines whether the lease record is active."
+msgstr "Geeft aan of de verhuurregistratie actief is."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__active
+msgid "Determines whether the rental record is active."
+msgstr "Geeft aan of de verhuurregistratie actief is."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__active
+msgid "Determines whether the reservation record is active."
+msgstr "Geeft aan of de reservering actief is."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__display_name
 msgid "Display Name"
 msgstr "Weergavenaam"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__availability_warning
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__availability_warning
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__availability_warning
+msgid "Displays asset availability warnings for the selected date range."
+msgstr "Toont waarschuwingen over de beschikbaarheid van activa voor de geselecteerde periode."
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell_dispose
+msgid "Disposal"
+msgstr "Afstoting"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_dispose
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_dispose
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__disposed
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__asset_action__dispose
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__dispose
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_dispose
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Dispose"
-msgstr "Weggooien"
+msgstr "Afstoten"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__disposal_type
+msgid "Dispose Type"
+msgstr "Type afstoting"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Disposed"
-msgstr "Ontgrendeld"
+msgstr "Afgestoten"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__is_done
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__done
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__done
 msgid "Done"
 msgstr "Klaar"
 
@@ -1169,10 +1736,10 @@ msgstr "Klaar"
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_account__asset_creation__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__draft
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_lease__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__draft
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_scrap__status__draft
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Draft"
 msgstr "Voorlopige versie"
@@ -1195,10 +1762,33 @@ msgid "Duration Period"
 msgstr "Duurperiode"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Duration must be greater than zero when Salvage Value is greater than zero."
+msgstr "De duur moet groter zijn dan nul wanneer de restwaarde groter is dan nul."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Duration must be greater than zero when the depreciable value is greater "
+"than zero."
+msgstr "De duur moet groter zijn dan nul wanneer de afschrijfbare waarde groter is dan nul."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__email
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__email
 msgid "Email"
 msgstr "E -mail"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__email
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__email
+msgid "Email address of the customer."
+msgstr "E-mailadres van de klant."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__employee_id
@@ -1209,11 +1799,36 @@ msgid "Employee"
 msgstr "Medewerker"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__employee_id
+msgid "Employee for whom the asset is reserved."
+msgstr "Medewerker voor wie het actief is gereserveerd."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__reimburse_after_invoice
+msgid "Enable if insurance reimbursement happens after invoice creation."
+msgstr "Schakel dit in als de verzekeringsvergoeding na het aanmaken van de factuur plaatsvindt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__is_quality
+msgid "Enable to activate quality check on assets related to this asset item."
+msgstr "Schakel dit in om kwaliteitscontrole uit te voeren op activa die bij dit activatype horen."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__end_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__end_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__end_date
 msgid "End"
 msgstr "Einde"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_end_date
+msgid "End date"
+msgstr "Einddatum"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__date_to
+msgid "End date and time of the booking."
+msgstr "Einddatum en -tijd van de reservering."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_entry
@@ -1227,6 +1842,27 @@ msgid "Entry Count"
 msgstr "Invoertelling"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__expense
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__expense
+msgid "Expense"
+msgstr "Kosten"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_expense_account_id
+msgid "Expense account used for depreciation entries."
+msgstr "Kostenrekening voor afschrijvingsboekingen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_expense_account_id
+msgid "Expense account used to record depreciation expenses."
+msgstr "Kostenrekening voor het boeken van afschrijvingskosten."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__depreciating_factor
+msgid "Factor used for declining depreciation methods."
+msgstr "Factor voor de degressieve afschrijvingsmethoden."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__fixed_asset_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__fixed_asset_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__fixed_asset_account_id
@@ -1234,34 +1870,24 @@ msgid "Fixed Asset Account"
 msgstr "Vaste activa -account"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_follower_ids
 msgid "Followers"
 msgstr "Volgers"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "Volgers (partners)"
 
@@ -1271,9 +1897,24 @@ msgid "For updating the bills"
 msgstr "Voor het bijwerken van de rekeningen"
 
 #. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_forklift_repair
+msgid "Forklift Hyster - Repair"
+msgstr "Hyster-vorkheftruck - reparatie"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__payment_terms
+msgid "Frequency used for rental billing."
+msgstr "Frequentie voor de facturering van verhuur."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Gain Account"
 msgstr "Verwerving"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Group By"
+msgstr "Groeperen op"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -1281,73 +1922,82 @@ msgstr "Verwerving"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Group By..."
 msgstr "Groep door ..."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__has_message
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_billed
+msgid "Has Billed"
+msgstr "Gefactureerd"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__under_insurance
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_insurance
+msgid "Has Insurance"
+msgstr "Has Verzekering"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__has_message
 msgid "Has Message"
 msgstr "Heeft een bericht"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_warranty
+msgid "Has Warranty"
+msgstr "Has Garantie"
+
+#. module: cyllo_asset_management
+#: model:ir.module.category,description:cyllo_asset_management.module_category_asset_management
+msgid "Helps to manage various assets operations"
+msgstr "Helpt bij het beheren van verschillende activabewerkingen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__hour
+msgid "Hour"
+msgstr "Uur"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_number
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__id
 msgid "ID"
 msgstr "Id"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "Indien aangevinkt, vereisen nieuwe berichten uw aandacht."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_has_error
@@ -1356,12 +2006,8 @@ msgstr "Indien aangevinkt, vereisen nieuwe berichten uw aandacht."
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Indien aangevinkt, hebben sommige berichten een leveringsfout."
 
@@ -1375,10 +2021,70 @@ msgstr ""
 "wanneer het journaalitem wordt gepost"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__is_invoice
+msgid "Indicates whether an invoice has been created for this lease."
+msgstr "Geeft aan of er een factuur voor deze verhuur is aangemaakt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__is_invoice
+msgid "Indicates whether invoices have been generated."
+msgstr "Geeft aan of er facturen zijn aangemaakt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__is_return
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__is_return
+msgid "Indicates whether the asset has been returned."
+msgstr "Geeft aan of het actief is teruggebracht."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_done
+msgid ""
+"Indicates whether the asset sale or disposal process has been completed."
+msgstr "Geeft aan of de verkoop of afstoting van het actief is voltooid."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_posted
+msgid "Indicates whether the related accounting entries have been posted."
+msgstr "Geeft aan of de bijbehorende boekingen zijn verwerkt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__is_depreciated
+msgid "Indicates whether this depreciation line has been processed."
+msgstr "Geeft aan of deze afschrijvingsregel is verwerkt."
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_asset_insurance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Insurance"
+msgstr "Verzekering"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__invoiced_amount
+msgid "Insurance Amount"
+msgstr "Verzekeringsbedrag"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_search_claim_only
+msgid "Insurance Claims"
+msgstr "Verzekeringsclaims"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_attachment_ids
+msgid "Insurance Documents"
+msgstr "Verzekeringsdocumenten"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__partner_id
+msgid "Insurance Provider"
+msgstr "Verzekeringsmaatschappij"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__invoice_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__account_move_count
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__invoice_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__invoice_ids
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__transaction_count
 msgid "Invoice"
 msgstr "Factuur"
 
@@ -1387,6 +2093,28 @@ msgstr "Factuur"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__invoice_line_ids
 msgid "Invoice Line"
 msgstr "Factuurlijn"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__invoice_line_ids
+msgid "Invoice lines associated with the selected sale invoices."
+msgstr "Factuurregels die bij de geselecteerde verkoopfacturen horen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__invoiced_amount
+msgid "Invoiced Amount"
+msgstr "Factuurd Bedrag"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
+msgid "Invoices"
+msgstr "Facturen"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "Invoices / Bills"
+msgstr "Facturen"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_decrease_value
@@ -1399,18 +2127,13 @@ msgid "Is Depreciated"
 msgstr "Is afgeschreven"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_is_follower
 msgid "Is Follower"
 msgstr "Is volger"
 
@@ -1418,23 +2141,27 @@ msgstr "Is volger"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__is_invoice
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__is_invoice
 msgid "Is Invoice"
-msgstr "Is factuur"
+msgstr "Factuur"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Is Lease"
-msgstr "Is lease"
+msgstr "Is verhuur"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_lease_asset
 msgid "Is Lease Asset"
-msgstr "Is lease -activa"
+msgstr "Is verhuuractief"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__is_posted
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__is_posted
 msgid "Is Posted"
-msgstr "Is gepost"
+msgstr "Is geboekt"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__is_reimburse
+msgid "Is Reimburse"
+msgstr "Vergoeden"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
@@ -1458,14 +2185,9 @@ msgid "Is Revaluate"
 msgstr "Is herzien"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__is_scrap
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__is_scrap
 msgid "Is Scrap"
 msgstr "Is schroot"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Journal Entries"
-msgstr "Journaalsitems"
 
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_account_move
@@ -1474,56 +2196,75 @@ msgid "Journal Entry"
 msgstr "Pièce comptable"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__write_uid
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_journal_id
+msgid "Journal used for creating depreciation accounting entries."
+msgstr "Dagboek voor het aanmaken van afschrijvingsboekingen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_journal_id
+msgid "Journal used for depreciation and asset accounting entries."
+msgstr "Dagboek voor boekingen van activa en afschrijvingen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__last_maintenance_date
+msgid "Last Maintenance Date"
+msgstr "Laatste onderhoudsdatum"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__write_uid
 msgid "Last Updated by"
 msgstr "Laatst bijgewerkt door"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__write_date
 msgid "Last Updated on"
 msgstr "Laatst bijgewerkt over"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_lease
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_lease
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__lease_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__lease_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__lease_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__lease_id
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__lease
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_lease__status__lease
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__lease
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__lease
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_lease
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form2
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+#, python-format
 msgid "Lease"
 msgstr "Verhuren"
 
@@ -1531,6 +2272,23 @@ msgstr "Verhuren"
 #: model:ir.model,name:cyllo_asset_management.model_asset_lease
 msgid "Lease Assets"
 msgstr "Activa huren"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__lease_amount
+msgid "Lease amount charged to the customer."
+msgstr "Aan de klant berekend verhuurbedrag."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__end_date
+msgid "Lease end date and time. It must be greater than the start date."
+msgstr "Einddatum en -tijd van de verhuur. Deze moeten na de begindatum liggen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__start_date
+msgid ""
+"Lease start date and time. Select an asset before setting the period. The "
+"selected dates must be after the asset purchase date."
+msgstr "Beginmoment van de verhuur. Selecteer eerst een actief. De gekozen datums moeten na de aankoopdatum van het actief liggen."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_lease
@@ -1550,29 +2308,33 @@ msgid "Leased Asset"
 msgstr "Verhuurde bezit"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Leased from %s to %s"
+msgstr "Gehuurd van %s tot %s"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_lost
 msgid "Loss"
 msgstr "Verlies"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__loss_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__loss_account_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Loss Account"
 msgstr "Verliesrekening"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_lost
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__lost
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__lost
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lost_form
+#, python-format
 msgid "Lost"
 msgstr "Kwijt"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__lost_date
-msgid "Lost Date"
-msgstr "Verloren datum"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_lost_missing
@@ -1580,46 +2342,80 @@ msgid "Lost/Missing"
 msgstr "Verloren/ontbreekt"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "MAINTENANCE"
+msgstr "ONDERHOUD"
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_macbook_assign
+msgid "MacBook Pro 16 - Assigned"
+msgstr "MacBook Pro 16 - Toegewezen"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_maintenance
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__maintenance
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__maintenance
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
 msgid "Maintenance"
 msgstr "Onderhoud"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__multiple_asset
-msgid "Multiple Asset"
-msgstr "Beheer activa"
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "Maintenance / Repair"
+msgstr "Onderhoud/reparatie"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_error
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__maintenance_count
+msgid "Maintenance Count"
+msgstr "Aantal onderhoudsbeurten"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/account_move.py:0
+#: model:ir.model,name:cyllo_asset_management.model_maintenance_request
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_form
+#, python-format
+msgid "Maintenance Request"
+msgstr "Onderhoudsopdracht"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__maintenance_state
+msgid "Maintenance State"
+msgstr "Onderhoudsstatus"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: model:ir.actions.server,name:cyllo_asset_management.action_asset_maintenance_request
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_maintenance_repair_request
+#, python-format
+msgid "Maintenance/Repair"
+msgstr "Onderhoud/Reparatie"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_error
 msgid "Message Delivery error"
 msgstr "Berichtbezorgingsfout"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_ids
 msgid "Messages"
 msgstr "Berichten"
 
@@ -1631,14 +2427,24 @@ msgid "Method"
 msgstr "Methode"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__depreciation_method
+msgid "Method used to calculate asset depreciation."
+msgstr "Methode voor het berekenen van de afschrijving van het actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__payment_type
+msgid "Method used to calculate rental charges."
+msgstr "Methode voor het berekenen van verhuurbedragen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__computation_method
+msgid "Method used to compute depreciation amounts."
+msgstr "Methode voor het berekenen van afschrijvingsbedragen."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__modified_asset_ids
 msgid "Modified Asset"
 msgstr "Aangepaste activa"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Modified Assets"
-msgstr "Gemodificeerde activa"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__modified_count
@@ -1646,8 +2452,12 @@ msgid "Modified Count"
 msgstr "Gemodificeerde telling"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_modify
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#, python-format
 msgid "Modify Asset"
 msgstr "Activa wijzigen"
 
@@ -1662,6 +2472,7 @@ msgid "Modify the Asset"
 msgstr "Wijzig het actief"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__duration_period__month
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__duration_period__month
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__duration_period__month
 msgid "Month"
@@ -1673,9 +2484,21 @@ msgid "Month Amount"
 msgstr "Maandbedrag"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__monthly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__monthly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__month
 msgid "Monthly"
 msgstr "Maandelijks"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__months
+msgid "Months"
+msgstr "Maanden"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__multiple_asset
+msgid "Multiple Asset"
+msgstr "Beheer activa"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_account_account__multiple_asset
@@ -1686,10 +2509,24 @@ msgstr ""
 " de factuurlijn"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__new
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__new
-msgid "New"
-msgstr "Nieuw"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__name
+msgid "Name"
+msgstr "Naam"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__name
+msgid "Name of the asset brand."
+msgstr "Naam van het merk van het actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__name
+msgid "Name of the asset."
+msgstr "Naam van het actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__next_maintenance_date
+msgid "Next Maintenance Date"
+msgstr "Volgende onderhoudsdatum"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_account__asset_creation__no
@@ -1697,13 +2534,29 @@ msgid "No"
 msgstr "Nee"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__no
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__no
+msgid "No Maintenance Required"
+msgstr "Geen onderhoud vereist"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__computation_method__no_prorata
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__computation_method__no_prorata
 msgid "No Prorata"
 msgstr "Niet geprijsd"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "No booking found for this rental."
+msgstr "Geen reservering gevonden voor deze verhuur."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__assign_note
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__note
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__note
 msgid "Note"
 msgstr "Opmerking"
@@ -1714,73 +2567,78 @@ msgid "Notes"
 msgstr "Aantekeningen"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_needaction_counter
 msgid "Number of Actions"
 msgstr "Aantal acties"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__buffer_duration
+msgid "Number of days the asset remains unavailable after a booking ends"
+msgstr "Aantal dagen dat het actief na afloop van een reservering niet beschikbaar is."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_error_counter
 msgid "Number of errors"
 msgstr "Aantal fouten"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__invoice_count
+msgid "Number of invoices generated for this rental."
+msgstr "Aantal facturen dat voor deze verhuur is aangemaakt."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr "Aantal berichten dat actie vereist"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Aantal berichten met leveringsfout"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__ongoing
-msgid "Ongoing"
-msgstr "Doorlopend"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__method_duration
+msgid "Number of periods over which the asset is depreciated."
+msgstr "Aantal perioden waarover het actief wordt afgeschreven."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__method_duration
+msgid "Number of periods over which the asset will be depreciated."
+msgstr "Aantal perioden waarover het actief wordt afgeschreven."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_chair_sell
+msgid "Old Office Chair - Sold"
+msgstr "Oude bureaustoel - verkocht"
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_operations
+msgid "Operations"
+msgstr "Bewerkingen"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__original_value
@@ -1793,6 +2651,11 @@ msgid "Parent"
 msgstr "Ouder"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__partner_id
+msgid "Partner"
+msgstr "Contactpersoon"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__payment_terms
 msgid "Payment Terms"
 msgstr "Betalingsvoorwaarden"
@@ -1803,16 +2666,35 @@ msgid "Payment Type"
 msgstr "Betalingstype"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_period_type
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__start_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__start_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__start_date
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Period"
 msgstr "Periode"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__duration_period
+msgid "Period unit used for depreciation duration."
+msgstr "Periode-eenheid voor de afschrijvingsduur."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/wizards/asset_insurance_wizard.py:0
+#, python-format
+msgid "Please enter a valid insurance amount"
+msgstr "Voer een geldig verzekeringsbedrag in."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__pre_salvage_value
 msgid "Pre Salvage Value"
 msgstr "Pre -bergingwaarde"
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_projector_reserve
+msgid "Projector Epson - Conference Room"
+msgstr "Epson-projector - vergaderruimte"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__prorata_date
@@ -1821,14 +2703,42 @@ msgid "Prorata Date"
 msgstr "Prorata -datum"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__purchase_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__date
 msgid "Purchase Date"
 msgstr "Aankoopdatum"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__vendor_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__vendor_id
 msgid "Purchase From"
-msgstr "Aanschaffen bij"
+msgstr "Gekocht van"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__date
+msgid "Purchase or acquisition date of the asset."
+msgstr "Aankoop- of verkrijgingsdatum van het actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__is_quality
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "Quality Check"
+msgstr "Kwaliteitscontrole"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__rating_ids
+msgid "Ratings"
+msgstr "Beoordelingen"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__res_id
+msgid "Record ID of the related document."
+msgstr "ID van het bijbehorende document."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__reference_note
@@ -1839,6 +2749,33 @@ msgstr "Referentie"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__reference_note
 msgid "Reference Note"
 msgstr "Referentienota"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__reference_note
+msgid ""
+"Reference note describing the reason for asset modification or revaluation."
+msgstr "Referentienotitie met de reden voor wijziging of herwaardering van het actief."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__journal_reference
+msgid "Reference of the journal entry created for this depreciation."
+msgstr "Referentie van de boeking die voor deze afschrijving is aangemaakt."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__reimburse_after_invoice
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__reimburse_after_invoice
+msgid "Reimburse After Invoice"
+msgstr "Vergoeden na factuur"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Reimburse insurance"
+msgstr "Verzekering vergoeden"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__salvage_value
+msgid "Remaining book value of the asset after depreciation."
+msgstr "Resterende boekwaarde van het actief na afschrijving."
 
 #. module: cyllo_asset_management
 #: model:mail.template,subject:cyllo_asset_management.mail_template_assent_rental_invoice_due_reminder
@@ -1854,6 +2791,7 @@ msgstr "Herinnering: terugkeer van het gehuurde activum"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__rent_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__rent_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__rent_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__rent_id
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__rent
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__rent
 msgid "Rent"
@@ -1865,12 +2803,19 @@ msgid "Rent Amount"
 msgstr "Huurbedrag"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_rental
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_rental
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_rental
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__rental
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__rent
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_rental
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form2
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+#, python-format
 msgid "Rental"
 msgstr "Verhuur"
 
@@ -1885,26 +2830,86 @@ msgid "Rental Assets"
 msgstr "Huurwoningen"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Rental Value"
+msgstr "Verhuurwaarde"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__end_date
+msgid "Rental end date and time. It must be greater than the start date."
+msgstr "Einddatum en -tijd van de verhuur. Deze moeten na de begindatum liggen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__start_date
+msgid ""
+"Rental start date and time. Select an asset before setting the period. The "
+"selected dates must be after the asset purchase date."
+msgstr "Begindatum en -tijd van de verhuur. Selecteer eerst een actief. De gekozen datums moeten na de aankoopdatum van het actief liggen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__rented
+msgid "Rented"
+msgstr "Verhuurd"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Rented from %s to %s"
+msgstr "Verhuurd van %s tot %s"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__repair_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_repair
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Repair"
 msgstr "Reparatie"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__repaired
-msgid "Repaired"
-msgstr "Gerepareerd"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__repair_id
+msgid "Repair ID"
+msgstr "Reparatie ID"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__repairing
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__repair
-msgid "Repairing"
-msgstr "Herstel"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__partner_id
+msgid "Repair partner"
+msgstr "Reparatiepartner"
 
 #. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_reporting_asset
+msgid "Reporting"
+msgstr "Rapportage"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "Request"
+msgstr "Aanvraag"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__stage_done
+msgid "Request Done"
+msgstr "Aanvraag gereed"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__res_id
+msgid "Res"
+msgstr "Resource"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__res_model
+msgid "Res Model"
+msgstr "Model van de resource"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_reservations
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__reservation_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__reservation_id
@@ -1913,8 +2918,29 @@ msgstr "Herstel"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form1
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form2
+#, python-format
 msgid "Reservation"
 msgstr "Reservering"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__end_date
+msgid "Reservation end date. It must be greater than the start date."
+msgstr "Einddatum van de reservering. Deze moet na de begindatum liggen."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__reservation_id
+msgid "Reservation linked to this lease."
+msgstr "Reservering die aan deze verhuur is gekoppeld."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__reservation_id
+msgid "Reservation linked to this rental."
+msgstr "Reservering die aan deze verhuur is gekoppeld."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__start_date
+msgid "Reservation start date."
+msgstr "Begindatum van de reservering."
 
 #. module: cyllo_asset_management
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_reservations
@@ -1947,17 +2973,21 @@ msgid "Reserved Asset"
 msgstr "Gereserveerd actief"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Reserved from %s to %s"
+msgstr "Gereserveerd van %s tot %s"
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
 msgid "Reset to Draft"
 msgstr "Reset om op te zetten"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
-msgid "Rest to Draft"
-msgstr "Rust om op te stellen"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_lease__status__return
@@ -1977,63 +3007,58 @@ msgid "Revaluate"
 msgstr "Heropnemen"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Reverse the depreciation entries posted in the future in order to modify the"
+" depreciation."
+msgstr "Draai toekomstige afschrijvingsboekingen terug om de afschrijving te wijzigen."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__running
 msgid "Running"
 msgstr "Rennen"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_sms_error
 msgid "SMS Delivery error"
 msgstr "SMS -leveringsfout"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__salvage_value
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__salvage_value
-msgid "Salvage Value"
-msgstr "Berging"
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__scrap
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Scrap"
+msgstr "Afvoeren"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__scrap
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__scrap
-msgid "Scarp"
-msgstr "Litteken"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__automatic_maintenance
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__automatic_maintenance
+msgid "Select frequency for automatic maintenance request generation."
+msgstr "Selecteer hoe vaak automatisch onderhoudsaanvragen worden aangemaakt."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_scrap__status__scraped
-msgid "Scraped"
-msgstr "Geschraapt"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__company_id
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset_insurance__company_id
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_insurance_type__company_id
 msgid "Select the company"
 msgstr "Selecteer het bedrijf"
 
 #. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_sell
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_sell
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__sell
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__asset_action__sell
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Sell"
 msgstr "Verkopen"
@@ -2044,49 +3069,88 @@ msgid "Sell and Dispose the Assets"
 msgstr "Verkoop en vervreemden de activa"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_sell_dispose
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_sell_dispose
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
+#, python-format
 msgid "Sell/Dispose"
-msgstr "Verkopen/verwijderen"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
-msgid "Selled"
-msgstr "Verkocht"
+msgstr "Verkopen/afstoten"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_request
 msgid "Send Mail"
-msgstr "Stuur e -mail"
+msgstr "E-mail verzenden"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__serial_no
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__serial_no
 msgid "Serial No."
-msgstr "Serienr."
+msgstr "Serienummer"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__status
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__status
+#: model:asset.asset,name:cyllo_asset_management.asset_server_maintenance
+msgid "Server Rack 42U - Maintenance"
+msgstr "Serverkast 42U - onderhoud"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
+msgid "Sold"
+msgstr "Verkocht"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__disposal_type
+msgid "Specify the type of asset disposal operation."
+msgstr "Geef het type afstotingsbewerking op."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_start_date
+msgid "Start date"
+msgstr "Begindatum"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__date_from
+msgid "Start date and time of the booking."
+msgstr "Begindatum en -tijd van de reservering."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__prorata_date
+msgid "Starting date used for prorata depreciation calculations."
+msgstr "Begindatum voor de berekening van evenredige afschrijving."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__state
+msgid "State"
+msgstr "Status"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__status
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__status
 msgid "Status"
 msgstr "Status"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__depreciation_method__straight_line
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__depreciation_method__straight_line
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__depreciation_method__straight_line
 msgid "Straight Line"
 msgstr "Rechte lijn"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lost_form
-msgid "Submit"
-msgstr "Indienen"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_entry
+msgid ""
+"Technical field indicating whether depreciation journal entries exist for "
+"the asset."
+msgstr "Technisch veld dat aangeeft of er afschrijvingsboekingen voor het actief bestaan."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__res_model
+msgid "Technical model name of the related document."
+msgstr "Technische modelnaam van het bijbehorende document."
 
 #. module: cyllo_asset_management
 #. cyllo-python
@@ -2114,8 +3178,112 @@ msgstr "De einddatum moet groter zijn dan de startdatum"
 #. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #, python-format
+msgid "The Original Value should be Greater than 0."
+msgstr "De oorspronkelijke waarde moet groter zijn dan 0."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
 msgid "The Salvage Value should not be Greater than the Original Value."
 msgstr "De bergingswaarde mag niet groter zijn dan de oorspronkelijke waarde."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/wizards/asset_insurance_wizard.py:0
+#, python-format
+msgid "The Total invoiced Amount exceeds expense"
+msgstr "Het totaal gefactureerde bedrag is hoger dan de kosten."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The Warranty period should not be a negative Value."
+msgstr "De garantieperiode mag niet negatief zijn."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already leased during the selected period."
+msgstr "Het actief wordt al verhuurd in de geselecteerde periode."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already rented during the selected period."
+msgstr "Het actief wordt al verhuurd in de geselecteerde periode."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already reserved from %s to %s."
+msgstr "Het actief is al gereserveerd van %s tot %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The depreciable value cannot be greater than the original value."
+msgstr "De afschrijfbare waarde mag niet hoger zijn dan de oorspronkelijke waarde."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The depreciable value cannot be negative."
+msgstr "De afschrijfbare waarde mag niet negatief zijn."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "The expense is 0."
+msgstr "De kosten zijn 0."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The value for the rental amount should be an Integer"
+msgstr "Het verhuurbedrag moet een geheel getal zijn."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is leased from %s to %s."
+msgstr "Dit actief wordt verhuurd van %s tot %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is rented from %s to %s."
+msgstr "Dit actief wordt verhuurd van %s tot %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is reserved from %s to %s."
+msgstr "Dit actief is gereserveerd van %s tot %s."
+
+#. module: cyllo_asset_management
+#: model_terms:ir.actions.act_window,help:cyllo_asset_management.action_asset_report_all
+msgid ""
+"This report shows Maintenance, Lease and Rental counts per Asset,\n"
+"                along with Original and Salvage values."
+msgstr "Dit rapport toont per actief het aantal onderhoudsbeurten en verhuurreserveringen,\n                evenals de oorspronkelijke waarde en restwaarde."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__duration_period
+msgid "Time unit used for the depreciation duration."
+msgstr "Tijdseenheid voor de afschrijvingsduur."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__total_depreciation_days
@@ -2123,14 +3291,56 @@ msgid "Total Depreciation Days"
 msgstr "Totale afschrijvingsdagen"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__total_amount
+msgid "Total Repair Cost"
+msgstr "Totaale reparatiekosten"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__accumulative_depreciation
+msgid "Total accumulated depreciation up to this period."
+msgstr "Totale cumulatieve afschrijving tot en met deze periode."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__depreciated_amount
+msgid "Total depreciated amount of the asset."
+msgstr "Totaal afgeschreven bedrag van het actief."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_car_lease
+msgid "Toyota Camry 2023 (Lease)"
+msgstr "Toyota Camry 2023 (verhuur)"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Transactions ("
+msgstr "Transacties ("
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_name_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__type_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__type
 msgid "Type"
 msgstr "Type"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__booking_type
+msgid "Type of booking created for the asset."
+msgstr "Type reservering dat voor het actief is aangemaakt."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
 msgid "Unassign"
 msgstr "Niet -toegewezen"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__maintenance_state__maintenance
+msgid "Under Maintenance"
+msgstr "In onderhoud"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__maintenance_state__repair
+msgid "Under Repair"
+msgstr "In reparatie"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
@@ -2143,36 +3353,66 @@ msgid "Validate"
 msgstr "Bevestigen"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__website_message_ids
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__vendor_id
+msgid "Vendor from whom the asset was purchased."
+msgstr "Leverancier bij wie het actief is gekocht."
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Warranty"
+msgstr "Garantie"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_attachment_ids
+msgid "Warranty Documents"
+msgstr "Garantiedocumenten"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__under_warranty
+msgid "Warranty Included"
+msgstr "Inclusief garantie"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_period
+msgid "Warranty Period"
+msgstr "Garantieperiode"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_end_date
+msgid "Warranty Upto"
+msgstr "Garantie tot"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Warranty and Insurance"
+msgstr "Garantie en verzekering"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__website_message_ids
 msgid "Website Messages"
 msgstr "Website -berichten"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__website_message_ids
 msgid "Website communication history"
 msgstr "Website communicatiegeschiedenis"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__week
+msgid "Week"
+msgstr "Week"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__week_amount
@@ -2180,6 +3420,8 @@ msgid "Week Amount"
 msgstr "Weekbedrag"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__weekly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__weekly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__week
 msgid "Weekly"
 msgstr "Wekelijks"
@@ -2191,7 +3433,14 @@ msgid "Work Email"
 msgstr "Werk -e -mail"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__email
+msgid "Work email address of the employee."
+msgstr "Zakelijk e-mailadres van de medewerker."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__year
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__duration_period__year
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__years
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__duration_period__year
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__duration_period__year
 msgid "Year"
@@ -2203,16 +3452,191 @@ msgid "Year Amount"
 msgstr "Jaarbedrag"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__yearly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__yearly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__year
 msgid "Yearly"
 msgstr "Jaarlijks"
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, The invoice is not paid"
+msgstr "U kunt deze bewerking niet voltooien: de factuur is niet betaald."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already Assigned."
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is al toegewezen."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for a"
+" another operation"
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is al gereserveerd voor een andere bewerking."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for "
+"another operation"
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is al gereserveerd voor een andere bewerking."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for "
+"another operation."
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is al gereserveerd voor een andere bewerking."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is either sold or "
+"disposed"
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is al verkocht of afgestoten."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is either sold or "
+"disposed."
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is al verkocht of afgestoten."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is not a lease asset."
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is niet bestemd voor verhuur."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is not a rental asset."
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is niet bestemd voor verhuur."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, lease amount cannot be zero."
+msgstr "U kunt deze bewerking niet voltooien: het verhuurbedrag mag niet nul zijn."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, please specify the lease amount."
+msgstr "U kunt deze bewerking niet voltooien: geef het verhuurbedrag op."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, the related asset is either sold or "
+"disposed."
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is al verkocht of afgestoten."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, the related asset is not a lease asset."
+msgstr "U kunt deze bewerking niet voltooien: het bijbehorende actief is niet bestemd voor verhuur."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation. The asset is already reserved, leased, "
+"or rented for the selected date range."
+msgstr "U kunt deze bewerking niet voltooien: het actief is al gereserveerd of verhuurd in de geselecteerde periode."
+
+#. module: cyllo_asset_management
+#. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #, python-format
-msgid "The Original Value should be Greater than 0."
-msgstr "De oorspronkelijke waarde moet groter zijn dan 0."
+msgid ""
+"You cannot create an asset from lines containing credit and debit on the "
+"account or with a null amount"
+msgstr "U kunt geen actief aanmaken op basis van regels met zowel debet als credit op de rekening of met een nulbedrag."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid "You cannot delete the record that is in Assign state."
+msgstr "U kunt de registratie met status Toegewezen niet verwijderen."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "You cannot delete the record that is in Rent state."
+msgstr "U kunt de registratie met status Verhuurd niet verwijderen."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "You cannot delete the record that is in Reserved state."
+msgstr "U kunt de registratie met status Gereserveerd niet verwijderen."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "You cannot delete the record that is in Running state."
+msgstr "U kunt de registratie die in behandeling is niet verwijderen."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot delete the record that is in leased state."
+msgstr "U kunt de registratie met status Verhuurd niet verwijderen."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"You cannot delete the record, The related asset is already taken for some "
+"operations"
+msgstr "U kunt de registratie niet verwijderen: het bijbehorende actief is al in gebruik voor bepaalde bewerkingen."
 
 #. module: cyllo_asset_management
 #. cyllo-python
@@ -2224,8 +3648,15 @@ msgstr ""
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid ""
+"You cannot reset to draft, The related rental invoice is already posted"
+msgstr "U kunt de bijbehorende verhuurfactuur niet terugzetten naar concept, omdat deze al is geboekt."
+
+#. module: cyllo_asset_management
+#. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
 #, python-format
 msgid "You cannot select the same account as the Asset Depreciation Account."
 msgstr ""
@@ -2233,113 +3664,12 @@ msgstr ""
 "-afschrijvingsrekening."
 
 #. module: cyllo_asset_management
+#: model:ir.model,name:cyllo_asset_management.model_asset_booking
+msgid "asset.booking"
+msgstr "asset.booking"
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
 msgid "e.g. Laptop Book"
 msgstr "bijv.Laptopboek"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid "warning"
-msgstr "waarschuwing"
-
-#. module: cyllo_asset_management
-#. cyllo-python
-#: code:addons/cyllo_asset_management/models/asset_rental.py:0
-#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
-#, python-format
-msgid "Rented from %s to %s"
-msgstr "Verhuurd van %s tot %s"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_operations
-msgid "Operations"
-msgstr "Bewerkingen"
-
-#. module: cyllo_asset_management
-#. cyllo-python
-#: code:addons/cyllo_asset_management/models/asset_asset.py:0
-#: model:ir.actions.server,name:cyllo_asset_management.action_asset_maintenance_request
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_maintenance_repair_request
-#, python-format
-msgid "Maintenance/Repair"
-msgstr "Onderhoud/Reparatie"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__partner_id
-msgid "Repair partner"
-msgstr "Reparatiepartner"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__expense
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__expense
-msgid "Expense"
-msgstr "Kosten"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__invoiced_amount
-msgid "Insurance Amount"
-msgstr "Verzekeringsbedrag"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__asset_id
-msgid "Asset"
-msgstr "Activum"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell_dispose
-msgid "Disposal"
-msgstr "Afstoting"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell
-msgid "Sell"
-msgstr "Verkopen"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_dispose
-msgid "Dispose"
-msgstr "Verwijderen"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_reporting_asset
-msgid "Reporting"
-msgstr "Rapportage"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_activity_report
-msgid "Asset Operations"
-msgstr "Activabewerkingen"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_loss_account_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_loss_account_id
-msgid "Asset Loss Account"
-msgstr "Verliesrekening activa"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__vendor_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__vendor_id
-msgid "Purchase From"
-msgstr "Gekocht van"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__serial_no
-msgid "Serial No."
-msgstr "Serienummer"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__partner_id
-msgid "Insurance Provider"
-msgstr "Verzekeringsmaatschappij"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__type_id
-msgid "Type"
-msgstr "Type"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_asset_insurance
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Insurance"
-msgstr "Verzekering"

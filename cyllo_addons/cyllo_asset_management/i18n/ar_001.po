@@ -17,8 +17,16 @@ msgstr ""
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
+#: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
 #, python-format
 msgid "%s: Depreciation"
 msgstr "%s: الإهلاك"
@@ -26,7 +34,6 @@ msgstr "%s: الإهلاك"
 #. module: cyllo_asset_management
 #. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
 #, python-format
 msgid "%s: Dispose"
 msgstr "%s: التخلص"
@@ -39,8 +46,93 @@ msgid "%s: Sell"
 msgstr "%s: البيع"
 
 #. module: cyllo_asset_management
-#: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_leasing
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__quarterly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__quarterly
+msgid "3 Months"
+msgstr "3 أشهر"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__semi_annually
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__semi_annually
+msgid "6 Months"
+msgstr "6 أشهر"
+
+#. module: cyllo_asset_management
 #: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_rental
+msgid ""
+"<div style=\"margin: 0px; padding:0px;\">\n"
+"                <div>\n"
+"                    Dear\n"
+"                    <t t-out=\"ctx.get('customer') or not_available\">,</t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    I hope this email finds you well. We are pleased to confirm the Rental arrangement for the\n"
+"                    following asset:\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Asset Name:\n"
+"                    <t t-out=\"ctx.get('asset') or not_available\"></t>\n"
+"                    Rental Start Date:\n"
+"                    <t t-out=\"ctx.get('start_date') or not_available\"></t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Rental End Date:\n"
+"                    <t t-out=\"ctx.get('end_date') or not_available\"></t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    As per the agreement, please ensure timely payment of the lease fees and adhere to the terms\n"
+"                    outlined therein.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Should you have any questions or require further clarification regarding the lease\n"
+"                    agreement, feel free to contact us at your convenience.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    If you have any questions or need further assistance, please don't hesitate to contact us.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Best regards,\n"
+"                    <br>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div style=\"margin: 0px; padding:0px;\">\n"
+"                <div>\n"
+"                    عزيزي\n"
+"                    <t t-out=\"ctx.get('customer') or not_available\">،</t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    نأمل أن يجدك هذا البريد الإلكتروني بصحة جيدة. يسرنا تأكيد ترتيب التأجير للأصل التالي:\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    اسم الأصل:\n"
+"                    <t t-out=\"ctx.get('asset') or not_available\"></t>\n"
+"                    تاريخ بدء التأجير:\n"
+"                    <t t-out=\"ctx.get('start_date') or not_available\"></t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    تاريخ انتهاء التأجير:\n"
+"                    <t t-out=\"ctx.get('end_date') or not_available\"></t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    وفقاً للاتفاقية، يرجى التأكد من دفع رسوم التأجير في الوقت المحدد والالتزام بالشروط المذكورة فيها.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    إذا كان لديك أي أسئلة أو تحتاج إلى توضيح إضافي بشأن اتفاقية التأجير، فلا تتردد في الاتصال بنا في أي وقت.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    إذا كان لديك أي أسئلة أو تحتاج إلى مساعدة إضافية، فلا تتردد في الاتصال بنا.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    مع أطيب التحيات،\n"
+"                    <br>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
+
+#. module: cyllo_asset_management
+#: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_leasing
 msgid ""
 "<div style=\"margin: 0px; padding:0px;\">\n"
 "                <div>\n"
@@ -401,42 +493,46 @@ msgstr ""
 "        "
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "<i class=\"ri-calendar-check-fill\"/>Reservation"
-msgstr "حجز"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
 msgid ""
-"<i class=\"ri-draft-line\"/>\n"
-"                            Invoice"
-msgstr ""
-"فاتورة"
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset has insurance"
+msgstr "<i class=\"fa fa-shield\"/>\n                    الأصل مشمول بالتأمين"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "<i class=\"ri-money-dollar-box-line\"/>Rental"
-msgstr "تأجير"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset has warranty"
+msgstr "<i class=\"fa fa-shield\"/>\n                    الأصل مشمول بالضمان"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "<i class=\"ri-send-plane-2-fill\"/>Lease"
-msgstr "تأجير طويل الأجل"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset is under warranty"
+msgstr "<i class=\"fa fa-shield\"/>\n                    الأصل تحت الضمان"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "<i class=\"ri-settings-4-line\"/>Maintenance"
-msgstr "صيانة"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-umbrella\"/>\n"
+"                    Asset is under insurance"
+msgstr "<i class=\"fa fa-umbrella\"/>\n                    الأصل مؤمّن عليه"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "<i class=\"ri-tools-fill\"/>Repair"
-msgstr "إصلاح"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_insurance_form
+msgid ""
+"<i class=\"o_button_icon fa fa-fw fa-briefcase\"/>\n"
+"                            Assets ("
+msgstr "<i class=\"o_button_icon fa fa-fw fa-briefcase\"/>\n                            الأصول ("
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "<i class=\"ri-user-received-line\"/>Assign"
-msgstr "تخصيص"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_insurance_form
+msgid ""
+"<i class=\"o_button_icon fa fa-fw fa-pencil-square-o\"/>\n"
+"                            Claims ("
+msgstr "<i class=\"o_button_icon fa fa-fw fa-pencil-square-o\"/>\n                            المطالبات ("
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
@@ -446,21 +542,49 @@ msgid "<span class=\"ms-3\">/ day</span>"
 msgstr "/ يوم"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid ""
-"<span>You cannot complete this operation, The related asset is already taken for another\n"
-"                        operation.\n"
-"                    </span>\n"
-"                    <br/>\n"
-"                    <span>Are you sure to delete all records ?</span>\n"
-"                    <br/>\n"
-"                    <br/>"
-msgstr ""
-"لا يمكنك إكمال هذه العملية، الأصل المرتبط مستخدم بالفعل في عملية أخرى.\n"
-"                    <br/>\n"
-"                    هل أنت متأكد من حذف جميع السجلات؟\n"
-"                    <br/>\n"
-"                    <br/>"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Assign</span>"
+msgstr "<span class=\"o_stat_text\">إسناد</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Bookings</span>"
+msgstr "<span class=\"o_stat_text\">الحجوزات</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
+msgid "<span class=\"o_stat_text\">Invoice</span>"
+msgstr "<span class=\"o_stat_text\">الفاتورة</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Journal Entries</span>"
+msgstr "<span class=\"o_stat_text\">القيود اليومية</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Lease</span>"
+msgstr "<span class=\"o_stat_text\">الإيجار</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Maintenance/Repair</span>"
+msgstr "<span class=\"o_stat_text\">الصيانة/الإصلاح</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Modified Assets</span>"
+msgstr "<span class=\"o_stat_text\">الأصول المعدّلة</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Rental</span>"
+msgstr "<span class=\"o_stat_text\">التأجير</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Reservation</span>"
+msgstr "<span class=\"o_stat_text\">الحجز</span>"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
@@ -478,9 +602,9 @@ msgid "Account Asset Brands"
 msgstr "علامات الأصول"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_account_asset_repair
-msgid "Account Assets Repair"
-msgstr "إصلاح الأصول"
+#: model:ir.model,name:cyllo_asset_management.model_asset_insurance_type
+msgid "Account Asset Insurance Type"
+msgstr "نوع تأمين الأصل "
 
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_asset_item
@@ -493,9 +617,24 @@ msgid "Account Move Reversal"
 msgstr "عكس حركة الحساب"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_scrap
-msgid "Account Scrap"
-msgstr "تخريد"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_depreciation_account_id
+msgid "Account used to record accumulated depreciation."
+msgstr "الحساب المستخدم لتسجيل الإهلاك المتراكم."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__loss_account_id
+msgid "Account used to record any loss generated during asset disposal."
+msgstr "الحساب المستخدم لتسجيل أي خسارة ناتجة عن التخلص من الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_loss_account_id
+msgid "Account used to record asset loss or disposal entries."
+msgstr "الحساب المستخدم لتسجيل قيود خسارة الأصل أو التخلص منه."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__fixed_asset_account_id
+msgid "Account used to record the asset value."
+msgstr "الحساب المستخدم لتسجيل قيمة الأصل."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
@@ -509,23 +648,23 @@ msgid "Accumulated Depreciation"
 msgstr "الإهلاك المتراكم"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_depreciation_account_id
+msgid "Accumulated depreciation account used for depreciation entries."
+msgstr "حساب الإهلاك المتراكم المستخدم في قيود الإهلاك."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__asset_action
 msgid "Action"
 msgstr "إجراء"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_needaction
 msgid "Action Needed"
 msgstr "إجراء مطلوب"
 
@@ -535,9 +674,29 @@ msgstr "إجراء مطلوب"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__active
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__active
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__active
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__active
 msgid "Active"
 msgstr "نشط"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__activity_count
+msgid "Activity Count"
+msgstr "عدد الأنشطة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__activity_type
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Activity Type"
+msgstr "نوع النشاط"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__note
+msgid "Additional notes or remarks regarding the asset sale or disposal."
+msgstr "ملاحظات أو تعليقات إضافية بشأن بيع الأصل أو التخلص منه."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__reservation_note
+msgid "Additional notes related to the reservation."
+msgstr "ملاحظات إضافية متعلقة بالحجز."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__lease_amount
@@ -546,12 +705,16 @@ msgid "Amount"
 msgstr "المبلغ"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__salvage_value
+msgid "Amount to be depreciated after asset modification."
+msgstr "المبلغ المراد إهلاكه بعد تعديل الأصل."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Archived"
 msgstr "مؤرشف"
 
@@ -561,20 +724,21 @@ msgid "Assent Rental Invoice Due Reminder"
 msgstr "تذكير استحقاق فاتورة تأجير الأصل"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__asset_asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__asset_id
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_categ
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__asset_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -582,10 +746,19 @@ msgstr "تذكير استحقاق فاتورة تأجير الأصل"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_modify_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Asset"
 msgstr "الأصل"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_asset_report_all
+#: model:ir.model,name:cyllo_asset_management.model_asset_report
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Asset Activity Analysis"
+msgstr "تحليل أنشطة الأصول"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__asset_asset_id
@@ -614,29 +787,8 @@ msgid "Asset Automation"
 msgstr "أتمتة الأصول"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_brand
-msgid "Asset Brand"
-msgstr "علامة الأصل"
-
-#. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_cancel_warning
-msgid "Asset Cancel Warning"
-msgstr "تحذير إلغاء الأصل"
-
-#. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_cancel_warning
-msgid "Asset Cancel warning"
-msgstr "تحذير إلغاء الأصل"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Asset Depreciation"
-msgstr "إهلاك الأصل"
-
-#. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_asset_depreciation_line
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__depreciation_line_ids
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Asset Depreciation Line"
 msgstr "بند إهلاك الأصل"
 
@@ -648,8 +800,18 @@ msgid "Asset Expense Account"
 msgstr "حساب مصروفات الأصل"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__asset_item_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__asset_item_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__asset_id
+msgid "Asset ID"
+msgstr "معرّف الأصل"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_insurance
+#: model:ir.model,name:cyllo_asset_management.model_asset_asset_insurance
+#: model:ir.model,name:cyllo_asset_management.model_asset_insurance
+msgid "Asset Insurance"
+msgstr "تأمين الأصل"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_item_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Asset Item"
@@ -669,20 +831,36 @@ msgid "Asset Journal"
 msgstr "دفتر يومية الأصول"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_lease_count
+msgid "Asset Lease Count"
+msgstr "عدد عقود تأجير الأصل"
+
+#. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_leasing
 #: model:mail.template,subject:cyllo_asset_management.mail_template_asset_leasing
 msgid "Asset Leasing"
 msgstr "تأجير الأصول"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_lost
-msgid "Asset Lost"
-msgstr "أصل مفقود"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_loss_account_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_loss_account_id
+msgid "Asset Loss Account"
+msgstr "حساب خسائر الأصول"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_account_asset_maintenance
-msgid "Asset Maintenance"
-msgstr "صيانة الأصل"
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_asset_maintenance_request_menu
+msgid "Asset Maintenance / Repair"
+msgstr "صيانة الأصل / إصلاحه"
+
+#. module: cyllo_asset_management
+#: model:ir.module.category,name:cyllo_asset_management.module_category_asset_management
+msgid "Asset Management"
+msgstr "إدارة الأصول"
+
+#. module: cyllo_asset_management
+#: model:res.groups,name:cyllo_asset_management.group_cyllo_asset_admin
+msgid "Asset Manager"
+msgstr "مدير الأصول"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__asset_model_id
@@ -696,8 +874,15 @@ msgstr "اسم نموذج الأصل"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_dispose_list
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_list
 msgid "Asset Name"
 msgstr "اسم الأصل"
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_activity_report
+msgid "Asset Operations"
+msgstr "عمليات الأصول"
 
 #. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_rental
@@ -706,47 +891,75 @@ msgid "Asset Rental"
 msgstr "تأجير الأصل"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Asset Rental Value"
-msgstr "قيمة تأجير الأصل"
-
-#. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_reservation
 #: model:mail.template,subject:cyllo_asset_management.mail_template_asset_reservation
 msgid "Asset Reservation"
 msgstr "حجز الأصل"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_scrap
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_scrap
-msgid "Asset Scrap"
-msgstr "تخريد الأصل"
-
-#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__sell_dispose_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__sell_dispose_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__sell_dispose_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__sell_dispose_id
 msgid "Asset Sell"
 msgstr "بيع الأصل"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_type_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_type_id
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
-msgid "Asset Type"
-msgstr "نوع الأصل"
-
-#. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_types
-#: model:ir.model,name:cyllo_asset_management.model_asset_type
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_types
-msgid "Asset Types"
-msgstr "أنواع الأصول"
 
 #. module: cyllo_asset_management
 #: model:res.groups,name:cyllo_asset_management.group_cyllo_asset_users
 msgid "Asset Users"
 msgstr "مستخدمو الأصول"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__fixed_asset_account_id
+msgid "Asset account used for recording the modified asset value."
+msgstr "حساب الأصل المستخدم لتسجيل قيمة الأصل المعدّلة."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__asset_id
+msgid "Asset associated with this booking."
+msgstr "الأصل المرتبط بهذا الحجز."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__depreciation_id
+msgid "Asset associated with this depreciation line."
+msgstr "الأصل المرتبط ببند الإهلاك هذا."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_booking.py:0
+#, python-format
+msgid "Asset is not available due to cooldown period."
+msgstr "الأصل غير متاح بسبب فترة التوقف المؤقت."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__asset_id
+msgid "Asset selected for leasing."
+msgstr "الأصل المحدد للتأجير."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_asset_id
+msgid "Asset selected for modification or revaluation."
+msgstr "الأصل المحدد للتعديل أو إعادة التقييم."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__asset_id
+msgid "Asset selected for rental."
+msgstr "الأصل المحدد للاستئجار."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__asset_id
+msgid "Asset selected for reservation."
+msgstr "الأصل المحدد للحجز."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__asset_asset_id
+msgid "Asset selected for sell, disposal, scrap, or lost operations."
+msgstr "الأصل المحدد للبيع أو التخلص منه أو تخريده أو تسجيله كمفقود."
+
+#. module: cyllo_asset_management
+#: model:ir.actions.server,name:cyllo_asset_management.ir_cron_asset_generate_maintenance_requests_ir_actions_server
+msgid "Asset: Generate Scheduled Maintenance Requests"
+msgstr "الأصل: إنشاء طلبات الصيانة المجدولة"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.ir_cron_asset_reminder_email_for_asset_rental_invoices_ir_actions_server
@@ -759,6 +972,8 @@ msgid "Asset: Reminder Email For Returning Leased Assets"
 msgstr "الأصل: بريد تذكير بإعادة الأصول المؤجرة"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset_insurance.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_assets
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_ids
@@ -766,13 +981,19 @@ msgstr "الأصل: بريد تذكير بإعادة الأصول المؤجرة
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__asset_asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_count
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__name
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_assets
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_assets_categ
+#, python-format
 msgid "Assets"
 msgstr "الأصول"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_assign
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_assign
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__assign
@@ -781,6 +1002,7 @@ msgstr "الأصول"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form2
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
+#, python-format
 msgid "Assign"
 msgstr "تخصيص"
 
@@ -802,23 +1024,17 @@ msgstr "مخصص"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Assigned Asset"
 msgstr "الأصل المخصص"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_attachment_count
 msgid "Attachment Count"
 msgstr "عدد المرفقات"
 
@@ -829,9 +1045,37 @@ msgid "Auto Calculate"
 msgstr "حساب تلقائي"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__automatic_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__automatic_maintenance
+msgid "Automatic Maintenance"
+msgstr "الصيانة التلقائية"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__is_auto_calculate
+msgid "Automatically calculate the depreciation factor."
+msgstr "حساب معامل الإهلاك تلقائيًا."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_account_form
 msgid "Automation"
 msgstr "أتمتة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__availability_warning
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__availability_warning
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__availability_warning
+msgid "Availability Warning"
+msgstr "تحذير بشأن التوفر"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__asset_ids
+msgid "Available assets for the selected lease period."
+msgstr "الأصول المتاحة خلال فترة التأجير المحددة."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__asset_ids
+msgid "Available assets for the selected rental period."
+msgstr "الأصول المتاحة خلال فترة الاستئجار المحددة."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_type__complete
@@ -849,17 +1093,58 @@ msgid "Book Value at Year End"
 msgstr "القيمة الدفترية في نهاية السنة"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__booking_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__booking_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__booking_id
+msgid "Booking ID"
+msgstr "معرّف الحجز"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__booking_type
+msgid "Booking Type"
+msgstr "نوع الحجز"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__booking_id
+msgid "Booking record linked to this lease."
+msgstr "سجل الحجز المرتبط بعقد التأجير هذا."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__booking_id
+msgid "Booking record linked to this rental."
+msgstr "سجل الحجز المرتبط بعملية الاستئجار هذه."
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_booking_search_default_filter
+msgid "Bookings in draft"
+msgstr "الحجوزات في حالة المسودة"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__brand_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__brand_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__brand_ids
 msgid "Brand"
 msgstr "العلامة التجارية"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__brand_ids
-msgid "Brands"
-msgstr "العلامات التجارية"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__brand_id
+msgid "Brand associated with the asset."
+msgstr "العلامة التجارية المرتبطة بالأصل."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_monitor_dispose
+msgid "Broken Monitor - Disposed"
+msgstr "شاشة معطلة - تم التخلص منها"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__buffer_period
+msgid "Buffer Period"
+msgstr "الفترة الاحتياطية"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__rent_amount
+msgid "Calculated rental amount based on the selected payment terms."
+msgstr "مبلغ الاستئجار المحسوب بناءً على شروط الدفع المحددة."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__cancel
@@ -867,30 +1152,109 @@ msgstr "العلامات التجارية"
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__cancel
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__cancel
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_modify_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 msgid "Cancel"
 msgstr "إلغاء"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__cancel
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__cancelled
 msgid "Cancelled"
 msgstr "ملغى"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__asset_action
+msgid "Choose whether to sell the asset or dispose of it."
+msgstr "اختر ما إذا كنت تريد بيع الأصل أو التخلص منه."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_switch_rental
+msgid "Cisco Switch Catalyst (Rental)"
+msgstr "محول سيسكو كاتاليست (تأجير)"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "Claim Insurance"
+msgstr "المطالبة بالتأمين"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Claim insurance"
+msgstr "المطالبة بالتأمين"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__insurance_amount
+msgid "Claiming amount"
+msgstr "مبلغ المطالبة"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset_insurance.py:0
+#, python-format
+msgid "Claims"
+msgstr "المطالبات"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__company_id
 msgid "Company"
 msgstr "الشركة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__company_id
+msgid "Company associated with this asset sale or disposal record."
+msgstr "الشركة المرتبطة بسجل بيع الأصل أو التخلص منه."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__company_id
+msgid "Company associated with this asset."
+msgstr "اختر الشركة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__company_id
+msgid "Company associated with this brand."
+msgstr "اختر الشركة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__company_id
+msgid "Company associated with this depreciation line."
+msgstr "اختر الشركة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__company_id
+msgid "Company associated with this lease."
+msgstr "اختر الشركة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__company_id
+msgid "Company associated with this rental."
+msgstr "اختر الشركة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__company_id
+msgid "Company associated with this reservation."
+msgstr "اختر الشركة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__company_id
+msgid "Company responsible for this booking."
+msgstr "الشركة المسؤولة عن هذا الحجز."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__computation_method
@@ -899,8 +1263,11 @@ msgid "Computation"
 msgstr "الحساب"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__confirm
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__confirm
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_categ
+msgid "Configuration"
+msgstr "الأصل"
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Confirm"
 msgstr "تأكيد"
@@ -908,6 +1275,7 @@ msgstr "تأكيد"
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_confirm
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_modify
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__confirmed
 msgid "Confirmed"
 msgstr "مؤكد"
 
@@ -916,6 +1284,21 @@ msgstr "مؤكد"
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__computation_method__constant_period
 msgid "Constant Period"
 msgstr "فترة ثابتة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__buffer_duration
+msgid "Cool Down Duration"
+msgstr "مدة التوقف المؤقت"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Cool down duation"
+msgstr "مدة التوقف المؤقت"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Create Bill"
+msgstr "إنشاء فاتورة مورد"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
@@ -932,68 +1315,96 @@ msgid "Create Rental"
 msgstr "إنشاء تأجير"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__create_uid
 msgid "Created by"
 msgstr "أنشئ بواسطة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__create_date
 msgid "Created on"
 msgstr "أنشئ في"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__claiming_currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__currency_id
 msgid "Currency"
 msgstr "العملة"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__currency_id
 msgid "Currency of company"
 msgstr "عملة الشركة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__current_depreciated_amount
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__currency_id
+msgid "Currency used by the company."
+msgstr "عملة الشركة"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__current_depreciated_amount
 msgid "Current Depreciated Amount"
 msgstr "المبلغ المُهلك حاليًا"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__current_depreciated_amount
+msgid ""
+"Current depreciation amount considered during the sale or disposal process."
+msgstr "مبلغ الإهلاك الحالي المأخوذ في الاعتبار عند بيع الأصل أو استبعاده."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__state
+msgid "Current status of the booking."
+msgstr "الحالة الحالية للحجز."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__status
+msgid "Current status of the lease."
+msgstr "الحالة الحالية للإيجار."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__status
+msgid "Current status of the rental."
+msgstr "الحالة الحالية للتأجير."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__status
+msgid "Current status of the reservation."
+msgstr "الحالة الحالية للحجز."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__customer_id
@@ -1002,6 +1413,26 @@ msgstr "المبلغ المُهلك حاليًا"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 msgid "Customer"
 msgstr "العميل"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__invoice_ids
+msgid "Customer invoices related to the asset sale."
+msgstr "فواتير العميل المتعلقة ببيع الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__customer_id
+msgid "Customer leasing the asset."
+msgstr "العميل المستأجر للأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__partner_id
+msgid "Customer or contact linked to the booking."
+msgstr "العميل أو جهة الاتصال المرتبطة بالحجز."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__customer_id
+msgid "Customer renting the asset."
+msgstr "العميل المستأجر للأصل."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
@@ -1025,18 +1456,57 @@ msgid "Damaged"
 msgstr "تالف"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__date
 msgid "Date"
 msgstr "التاريخ"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__date_from
+msgid "Date From"
+msgstr "من تاريخ"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__date_to
+msgid "Date To"
+msgstr "إلى تاريخ"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__depreciation_date
+msgid "Date from which depreciation will be recalculated."
+msgstr "التاريخ الذي سيعاد احتساب الإهلاك بدءاً منه."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__date
+msgid "Date on which the asset sale or disposal is processed."
+msgstr "تاريخ تنفيذ بيع الأصل أو استبعاده."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__date
+msgid "Date on which the depreciation is recorded."
+msgstr "تاريخ تسجيل الإهلاك."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__date
+msgid "Date on which the reservation record was created."
+msgstr "تاريخ إنشاء سجل الحجز."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__day
+msgid "Day"
+msgstr "يوم"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__day_amount
 msgid "Day Amount"
 msgstr "المبلغ اليومي"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__days
+msgid "Days"
+msgstr "أيام"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__depreciation_method__declining_balance
@@ -1053,9 +1523,34 @@ msgid "Declining and Straight Line"
 msgstr "متناقص وخط مستقيم"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid "Delete Records"
-msgstr "حذف السجلات"
+#: model:asset.asset,name:cyllo_asset_management.asset_dell_laptop_01
+msgid "Dell Latitude 5420 - Laptop 01"
+msgstr "ديل لاتيتود 5420 - حاسوب محمول 01"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_depreciation
+msgid "Demo Accumulated Depreciation Account"
+msgstr "حساب مجمع الإهلاك التجريبي"
+
+#. module: cyllo_asset_management
+#: model:account.journal,name:cyllo_asset_management.journal_demo_asset
+msgid "Demo Asset Journal"
+msgstr "دفتر يومية الأصول التجريبي"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_loss
+msgid "Demo Asset Loss Account"
+msgstr "حساب خسائر الأصول التجريبي"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_expense
+msgid "Demo Depreciation Expense Account"
+msgstr "حساب مصروف الإهلاك التجريبي"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_fixed_asset
+msgid "Demo Fixed Assets Account"
+msgstr "حساب الأصول الثابتة التجريبي"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__department_id
@@ -1079,7 +1574,6 @@ msgid "Depreciate"
 msgstr "إهلاك"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__depreciated_amount
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__depreciated_amount
 msgid "Depreciated Amount"
 msgstr "المبلغ المُهلك"
@@ -1123,6 +1617,8 @@ msgstr "مصروف الإهلاك"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__depreciation_line_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__depreciation_line_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__depreciation_line_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__depreciation_line_id
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Depreciation Line"
 msgstr "بند الإهلاك"
 
@@ -1132,37 +1628,91 @@ msgid "Depreciation Lines"
 msgstr "بنود الإهلاك"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "Depreciation and Accounting"
+msgstr "الإهلاك والمحاسبة"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__depreciation_date
 msgid "Depreciation date"
 msgstr "تاريخ الإهلاك"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__display_name
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__depreciation_expense
+msgid "Depreciation expense amount for the period."
+msgstr "مبلغ مصروف الإهلاك للفترة."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__depreciation_method
+msgid "Depreciation method to be applied for the modified asset."
+msgstr "طريقة الإهلاك المطبقة على الأصل المعدّل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__year
+msgid "Depreciation year or period sequence."
+msgstr "تسلسل سنة الإهلاك أو فترته."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__active
+msgid "Determines whether the lease record is active."
+msgstr "يحدد ما إذا كان سجل الإيجار نشطاً."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__active
+msgid "Determines whether the rental record is active."
+msgstr "يحدد ما إذا كان سجل التأجير نشطاً."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__active
+msgid "Determines whether the reservation record is active."
+msgstr "يحدد ما إذا كان سجل الحجز نشطاً."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__display_name
 msgid "Display Name"
 msgstr "اسم العرض"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__availability_warning
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__availability_warning
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__availability_warning
+msgid "Displays asset availability warnings for the selected date range."
+msgstr "يعرض تنبيهات توفر الأصل للفترة الزمنية المحددة."
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell_dispose
+msgid "Disposal"
+msgstr "التخلص من الأصول"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_dispose
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_dispose
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__disposed
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__asset_action__dispose
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__dispose
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_dispose
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Dispose"
-msgstr "التخلص"
+msgstr "تخلص"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__disposal_type
+msgid "Dispose Type"
+msgstr "نوع الاستبعاد"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -1171,7 +1721,7 @@ msgstr "تم التخلص منه"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__is_done
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__done
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__done
 msgid "Done"
 msgstr "تم"
 
@@ -1179,10 +1729,10 @@ msgstr "تم"
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_account__asset_creation__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__draft
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_lease__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__draft
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_scrap__status__draft
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Draft"
 msgstr "مسودة"
@@ -1205,10 +1755,33 @@ msgid "Duration Period"
 msgstr "فترة المدة"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Duration must be greater than zero when Salvage Value is greater than zero."
+msgstr "يجب أن تكون المدة أكبر من صفر عندما تكون القيمة التخريدية أكبر من صفر."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Duration must be greater than zero when the depreciable value is greater "
+"than zero."
+msgstr "يجب أن تكون المدة أكبر من صفر عندما تكون القيمة القابلة للإهلاك أكبر من صفر."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__email
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__email
 msgid "Email"
 msgstr "البريد الإلكتروني"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__email
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__email
+msgid "Email address of the customer."
+msgstr "عنوان البريد الإلكتروني للعميل."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__employee_id
@@ -1219,11 +1792,36 @@ msgid "Employee"
 msgstr "الموظف"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__employee_id
+msgid "Employee for whom the asset is reserved."
+msgstr "الموظف المحجوز له الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__reimburse_after_invoice
+msgid "Enable if insurance reimbursement happens after invoice creation."
+msgstr "فعّل هذا الخيار إذا كان تعويض التأمين يتم بعد إنشاء الفاتورة."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__is_quality
+msgid "Enable to activate quality check on assets related to this asset item."
+msgstr "فعّل هذا الخيار لإجراء فحص الجودة على الأصول المرتبطة بهذا الصنف."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__end_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__end_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__end_date
 msgid "End"
 msgstr "النهاية"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_end_date
+msgid "End date"
+msgstr "تاريخ الانتهاء"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__date_to
+msgid "End date and time of the booking."
+msgstr "تاريخ ووقت انتهاء الحجز."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_entry
@@ -1237,6 +1835,27 @@ msgid "Entry Count"
 msgstr "عدد القيود"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__expense
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__expense
+msgid "Expense"
+msgstr "المصروف"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_expense_account_id
+msgid "Expense account used for depreciation entries."
+msgstr "حساب المصروفات المستخدم لقيود الإهلاك."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_expense_account_id
+msgid "Expense account used to record depreciation expenses."
+msgstr "حساب المصروفات المستخدم لتسجيل مصروفات الإهلاك."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__depreciating_factor
+msgid "Factor used for declining depreciation methods."
+msgstr "المعامل المستخدم لطرق الإهلاك المتناقص."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__fixed_asset_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__fixed_asset_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__fixed_asset_account_id
@@ -1244,34 +1863,24 @@ msgid "Fixed Asset Account"
 msgstr "حساب الأصول الثابتة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_follower_ids
 msgid "Followers"
 msgstr "المتابعون"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "المتابعون (الشركاء)"
 
@@ -1281,9 +1890,24 @@ msgid "For updating the bills"
 msgstr "لتحديث الفواتير"
 
 #. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_forklift_repair
+msgid "Forklift Hyster - Repair"
+msgstr "رافعة شوكية هيستر - إصلاح"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__payment_terms
+msgid "Frequency used for rental billing."
+msgstr "وتيرة فوترة التأجير."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Gain Account"
 msgstr "حساب الربح"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Group By"
+msgstr "تجميع حسب"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -1291,73 +1915,82 @@ msgstr "حساب الربح"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Group By..."
 msgstr "تجميع حسب..."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__has_message
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_billed
+msgid "Has Billed"
+msgstr "تمت الفوترة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__under_insurance
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_insurance
+msgid "Has Insurance"
+msgstr "لديه تأمين"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__has_message
 msgid "Has Message"
 msgstr "يحتوي على رسالة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_warranty
+msgid "Has Warranty"
+msgstr "لديه ضمان"
+
+#. module: cyllo_asset_management
+#: model:ir.module.category,description:cyllo_asset_management.module_category_asset_management
+msgid "Helps to manage various assets operations"
+msgstr "يساعد على إدارة عمليات الأصول المختلفة."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__hour
+msgid "Hour"
+msgstr "ساعة"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_number
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__id
 msgid "ID"
 msgstr "المعرف"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "إذا تم تحديده، فإن الرسائل الجديدة تتطلب انتباهك."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_has_error
@@ -1366,25 +1999,83 @@ msgstr "إذا تم تحديده، فإن الرسائل الجديدة تتطل
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "إذا تم تحديده، فإن بعض الرسائل بها خطأ في التسليم."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_account_account__asset_model_id
-msgid "If the field is selected expense/revenue will created automatically when the journal item posted"
+msgid ""
+"If the field is selected expense/revenue will created automatically when the"
+" journal item posted"
 msgstr "إذا تم تحديد الحقل، سيتم إنشاء المصروف/الإيراد تلقائيًا عند ترحيل عنصر اليومية"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__is_invoice
+msgid "Indicates whether an invoice has been created for this lease."
+msgstr "يشير إلى ما إذا تم إنشاء فاتورة لهذا الإيجار."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__is_invoice
+msgid "Indicates whether invoices have been generated."
+msgstr "يشير إلى ما إذا تم إنشاء الفواتير."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__is_return
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__is_return
+msgid "Indicates whether the asset has been returned."
+msgstr "يشير إلى ما إذا تمت إعادة الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_done
+msgid ""
+"Indicates whether the asset sale or disposal process has been completed."
+msgstr "يشير إلى ما إذا اكتملت عملية بيع الأصل أو استبعاده."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_posted
+msgid "Indicates whether the related accounting entries have been posted."
+msgstr "يشير إلى ما إذا تم ترحيل القيود المحاسبية المرتبطة."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__is_depreciated
+msgid "Indicates whether this depreciation line has been processed."
+msgstr "يشير إلى ما إذا تمت معالجة بند الإهلاك هذا."
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_asset_insurance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Insurance"
+msgstr "التأمين"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__invoiced_amount
+msgid "Insurance Amount"
+msgstr "مبلغ التأمين"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_search_claim_only
+msgid "Insurance Claims"
+msgstr "مطالبات التأمين"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_attachment_ids
+msgid "Insurance Documents"
+msgstr "مستندات التأمين"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__partner_id
+msgid "Insurance Provider"
+msgstr "مزود التأمين"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__invoice_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__account_move_count
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__invoice_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__invoice_ids
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__transaction_count
 msgid "Invoice"
 msgstr "الفاتورة"
 
@@ -1393,6 +2084,28 @@ msgstr "الفاتورة"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__invoice_line_ids
 msgid "Invoice Line"
 msgstr "بند الفاتورة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__invoice_line_ids
+msgid "Invoice lines associated with the selected sale invoices."
+msgstr "بنود الفواتير المرتبطة بفواتير البيع المحددة."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__invoiced_amount
+msgid "Invoiced Amount"
+msgstr "الفاتورةd المبلغ"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
+msgid "Invoices"
+msgstr "الفواتير"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "Invoices / Bills"
+msgstr "الفواتير / فواتير الموردين"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_decrease_value
@@ -1405,18 +2118,13 @@ msgid "Is Depreciated"
 msgstr "تم إهلاكه"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_is_follower
 msgid "Is Follower"
 msgstr "هل هو متابع"
 
@@ -1437,10 +2145,14 @@ msgid "Is Lease Asset"
 msgstr "هل هو أصل مؤجر"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__is_posted
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__is_posted
 msgid "Is Posted"
 msgstr "تم الترحيل"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__is_reimburse
+msgid "Is Reimburse"
+msgstr "قابل للتعويض"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
@@ -1464,14 +2176,9 @@ msgid "Is Revaluate"
 msgstr "هل هو إعادة تقييم"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__is_scrap
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__is_scrap
 msgid "Is Scrap"
 msgstr "هل هو تخريد"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Journal Entries"
-msgstr "قيود اليومية"
 
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_account_move
@@ -1480,56 +2187,75 @@ msgid "Journal Entry"
 msgstr "قيد اليومية"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__write_uid
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_journal_id
+msgid "Journal used for creating depreciation accounting entries."
+msgstr "دفتر اليومية المستخدم لإنشاء قيود الإهلاك المحاسبية."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_journal_id
+msgid "Journal used for depreciation and asset accounting entries."
+msgstr "دفتر اليومية المستخدم لقيود الأصول والإهلاك المحاسبية."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__last_maintenance_date
+msgid "Last Maintenance Date"
+msgstr "تاريخ آخر صيانة"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__write_uid
 msgid "Last Updated by"
 msgstr "آخر تحديث بواسطة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__write_date
 msgid "Last Updated on"
 msgstr "آخر تحديث في"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_lease
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_lease
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__lease_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__lease_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__lease_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__lease_id
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__lease
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_lease__status__lease
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__lease
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__lease
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_lease
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form2
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+#, python-format
 msgid "Lease"
 msgstr "تأجير"
 
@@ -1537,6 +2263,25 @@ msgstr "تأجير"
 #: model:ir.model,name:cyllo_asset_management.model_asset_lease
 msgid "Lease Assets"
 msgstr "أصول التأجير"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__lease_amount
+msgid "Lease amount charged to the customer."
+msgstr "مبلغ الإيجار المحمّل على العميل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__end_date
+msgid "Lease end date and time. It must be greater than the start date."
+msgstr "تاريخ ووقت انتهاء الإيجار. يجب أن يكونا بعد تاريخ البدء."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__start_date
+msgid ""
+"Lease start date and time. Select an asset before setting the period. The "
+"selected dates must be after the asset purchase date."
+msgstr ""
+"اختر أصلًا قبل تحديد الفترة. يجب أن يكون تاريخ البدء والانتهاء بعد تاريخ "
+"شراء الأصل، ويجب أن يكون تاريخ الانتهاء بعد تاريخ البدء."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_lease
@@ -1556,12 +2301,19 @@ msgid "Leased Asset"
 msgstr "الأصل المؤجر"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Leased from %s to %s"
+msgstr "مؤجّر من %s إلى %s"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_lost
 msgid "Loss"
 msgstr "خسارة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__loss_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__loss_account_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Loss Account"
@@ -1569,19 +2321,13 @@ msgstr "حساب الخسارة"
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_lost
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__lost
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__lost
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lost_form
 #, python-format
 msgid "Lost"
 msgstr "مفقود"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__lost_date
-msgid "Lost Date"
-msgstr "تاريخ الفقدان"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_lost_missing
@@ -1589,46 +2335,80 @@ msgid "Lost/Missing"
 msgstr "مفقود/مفقود"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "MAINTENANCE"
+msgstr "الصيانة"
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_macbook_assign
+msgid "MacBook Pro 16 - Assigned"
+msgstr "ماك بوك برو 16 - مخصص"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_maintenance
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__maintenance
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__maintenance
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
 msgid "Maintenance"
 msgstr "صيانة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__multiple_asset
-msgid "Multiple Asset"
-msgstr "إدارة الأصل"
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "Maintenance / Repair"
+msgstr "الصيانة / الإصلاح"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_error
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__maintenance_count
+msgid "Maintenance Count"
+msgstr "عدد عمليات الصيانة"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/account_move.py:0
+#: model:ir.model,name:cyllo_asset_management.model_maintenance_request
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_form
+#, python-format
+msgid "Maintenance Request"
+msgstr "الصيانة الطلب"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__maintenance_state
+msgid "Maintenance State"
+msgstr "الصيانة الحالة"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: model:ir.actions.server,name:cyllo_asset_management.action_asset_maintenance_request
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_maintenance_repair_request
+#, python-format
+msgid "Maintenance/Repair"
+msgstr "الصيانة / الإصلاح"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_error
 msgid "Message Delivery error"
 msgstr "خطأ في تسليم الرسالة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_ids
 msgid "Messages"
 msgstr "الرسائل"
 
@@ -1640,14 +2420,24 @@ msgid "Method"
 msgstr "الطريقة"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__depreciation_method
+msgid "Method used to calculate asset depreciation."
+msgstr "الطريقة المستخدمة لحساب إهلاك الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__payment_type
+msgid "Method used to calculate rental charges."
+msgstr "الطريقة المستخدمة لحساب رسوم التأجير."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__computation_method
+msgid "Method used to compute depreciation amounts."
+msgstr "الطريقة المستخدمة لحساب مبالغ الإهلاك."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__modified_asset_ids
 msgid "Modified Asset"
 msgstr "الأصل المعدل"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Modified Assets"
-msgstr "الأصول المعدلة"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__modified_count
@@ -1656,6 +2446,7 @@ msgstr "عدد التعديلات"
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_modify
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
@@ -1674,6 +2465,7 @@ msgid "Modify the Asset"
 msgstr "تعديل الأصل"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__duration_period__month
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__duration_period__month
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__duration_period__month
 msgid "Month"
@@ -1685,25 +2477,58 @@ msgid "Month Amount"
 msgstr "المبلغ الشهري"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__monthly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__monthly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__month
 msgid "Monthly"
 msgstr "شهري"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__months
+msgid "Months"
+msgstr "أشهر"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__multiple_asset
+msgid "Multiple Asset"
+msgstr "إدارة الأصل"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_account_account__multiple_asset
-msgid "Multiple asset item will be generated depending on the bill line quantity"
+msgid ""
+"Multiple asset item will be generated depending on the bill line quantity"
 msgstr "سيتم إنشاء عدة عناصر أصول بناءً على كمية بند الفاتورة"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__new
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__new
-msgid "New"
-msgstr "جديد"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__name
+msgid "Name"
+msgstr "الاسم"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__name
+msgid "Name of the asset brand."
+msgstr "اسم العلامة التجارية للأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__name
+msgid "Name of the asset."
+msgstr "اسم الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__next_maintenance_date
+msgid "Next Maintenance Date"
+msgstr "تاريخ الصيانة القادمة"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_account__asset_creation__no
 msgid "No"
 msgstr "لا"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__no
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__no
+msgid "No Maintenance Required"
+msgstr "لا تتطلب صيانة"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__computation_method__no_prorata
@@ -1712,8 +2537,17 @@ msgid "No Prorata"
 msgstr "بدون توزيع نسبي"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "No booking found for this rental."
+msgstr "لم يتم العثور على حجز لهذا التأجير."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__assign_note
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__note
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__note
 msgid "Note"
 msgstr "ملاحظة"
@@ -1724,73 +2558,78 @@ msgid "Notes"
 msgstr "الملاحظات"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_needaction_counter
 msgid "Number of Actions"
 msgstr "عدد الإجراءات"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__buffer_duration
+msgid "Number of days the asset remains unavailable after a booking ends"
+msgstr "عدد الأيام التي يظل فيها الأصل غير متاح بعد انتهاء الحجز."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_error_counter
 msgid "Number of errors"
 msgstr "عدد الأخطاء"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__invoice_count
+msgid "Number of invoices generated for this rental."
+msgstr "عدد الفواتير التي تم إنشاؤها لهذا التأجير."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr "عدد الرسائل التي تتطلب إجراءً"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "عدد الرسائل التي بها خطأ في التسليم"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__ongoing
-msgid "Ongoing"
-msgstr "جاري"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__method_duration
+msgid "Number of periods over which the asset is depreciated."
+msgstr "عدد الفترات التي يتم خلالها إهلاك الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__method_duration
+msgid "Number of periods over which the asset will be depreciated."
+msgstr "عدد الفترات التي سيتم خلالها إهلاك الأصل."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_chair_sell
+msgid "Old Office Chair - Sold"
+msgstr "كرسي مكتب قديم - تم بيعه"
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_operations
+msgid "Operations"
+msgstr "العمليات"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__original_value
@@ -1803,6 +2642,11 @@ msgid "Parent"
 msgstr "الأصل"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__partner_id
+msgid "Partner"
+msgstr "جهة الاتصال"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__payment_terms
 msgid "Payment Terms"
 msgstr "شروط الدفع"
@@ -1813,16 +2657,35 @@ msgid "Payment Type"
 msgstr "نوع الدفع"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_period_type
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__start_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__start_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__start_date
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Period"
 msgstr "الفترة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__duration_period
+msgid "Period unit used for depreciation duration."
+msgstr "وحدة الفترة المستخدمة لتحديد مدة الإهلاك."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/wizards/asset_insurance_wizard.py:0
+#, python-format
+msgid "Please enter a valid insurance amount"
+msgstr "يرجى إدخال مبلغ تأمين صالح."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__pre_salvage_value
 msgid "Pre Salvage Value"
 msgstr "القيمة قبل الإنقاذ"
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_projector_reserve
+msgid "Projector Epson - Conference Room"
+msgstr "جهاز عرض إبسون - قاعة الاجتماعات"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__prorata_date
@@ -1831,14 +2694,42 @@ msgid "Prorata Date"
 msgstr "تاريخ التوزيع النسبي"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__purchase_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__date
 msgid "Purchase Date"
 msgstr "تاريخ الشراء"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__vendor_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__vendor_id
 msgid "Purchase From"
 msgstr "الشراء من"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__date
+msgid "Purchase or acquisition date of the asset."
+msgstr "تاريخ شراء الأصل أو اقتنائه."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__is_quality
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "Quality Check"
+msgstr "فحص الجودة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__rating_ids
+msgid "Ratings"
+msgstr "التقييمات"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__res_id
+msgid "Record ID of the related document."
+msgstr "معرّف سجل المستند المرتبط."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__reference_note
@@ -1849,6 +2740,33 @@ msgstr "المرجع"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__reference_note
 msgid "Reference Note"
 msgstr "ملاحظة المرجع"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__reference_note
+msgid ""
+"Reference note describing the reason for asset modification or revaluation."
+msgstr "ملاحظة مرجعية توضّح سبب تعديل الأصل أو إعادة تقييمه."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__journal_reference
+msgid "Reference of the journal entry created for this depreciation."
+msgstr "مرجع قيد اليومية المنشأ لهذا الإهلاك."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__reimburse_after_invoice
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__reimburse_after_invoice
+msgid "Reimburse After Invoice"
+msgstr "التعويض بعد الفاتورة"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Reimburse insurance"
+msgstr "تعويض التأمين"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__salvage_value
+msgid "Remaining book value of the asset after depreciation."
+msgstr "القيمة الدفترية المتبقية للأصل بعد الإهلاك."
 
 #. module: cyllo_asset_management
 #: model:mail.template,subject:cyllo_asset_management.mail_template_assent_rental_invoice_due_reminder
@@ -1864,6 +2782,7 @@ msgstr "تذكير: إرجاع الأصل المؤجر"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__rent_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__rent_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__rent_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__rent_id
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__rent
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__rent
 msgid "Rent"
@@ -1875,12 +2794,19 @@ msgid "Rent Amount"
 msgstr "مبلغ التأجير"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_rental
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_rental
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_rental
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__rental
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__rent
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_rental
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form2
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+#, python-format
 msgid "Rental"
 msgstr "تأجير"
 
@@ -1895,27 +2821,87 @@ msgid "Rental Assets"
 msgstr "أصول التأجير"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Rental Value"
+msgstr "قيمة التأجير"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__end_date
+msgid "Rental end date and time. It must be greater than the start date."
+msgstr "تاريخ ووقت انتهاء التأجير. يجب أن يكونا بعد تاريخ البدء."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__start_date
+msgid ""
+"Rental start date and time. Select an asset before setting the period. The "
+"selected dates must be after the asset purchase date."
+msgstr ""
+"اختر أصلًا قبل تحديد الفترة. يجب أن يكون تاريخ البدء والانتهاء بعد تاريخ "
+"شراء الأصل، ويجب أن يكون تاريخ الانتهاء بعد تاريخ البدء."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__rented
+msgid "Rented"
+msgstr "مؤجّر"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Rented from %s to %s"
+msgstr "مؤجر من %s إلى %s"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__repair_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_repair
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Repair"
 msgstr "إصلاح"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__repaired
-msgid "Repaired"
-msgstr "تم إصلاحه"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__repair_id
+msgid "Repair ID"
+msgstr "الإصلاح المعرّف"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__repairing
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__repair
-msgid "Repairing"
-msgstr "جاري الإصلاح"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__partner_id
+msgid "Repair partner"
+msgstr "شريك الإصلاح"
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_reporting_asset
+msgid "Reporting"
+msgstr "التقارير"
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "Request"
+msgstr "الطلب"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__stage_done
+msgid "Request Done"
+msgstr "اكتمل الطلب"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__res_id
+msgid "Res"
+msgstr "السجل"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__res_model
+msgid "Res Model"
+msgstr "نموذج السجل"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_reservations
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__reservation_id
@@ -1928,6 +2914,26 @@ msgstr "جاري الإصلاح"
 #, python-format
 msgid "Reservation"
 msgstr "حجز"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__end_date
+msgid "Reservation end date. It must be greater than the start date."
+msgstr "تاريخ انتهاء الحجز. يجب أن يكون بعد تاريخ البدء."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__reservation_id
+msgid "Reservation linked to this lease."
+msgstr "الحجز المرتبط بهذا الإيجار."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__reservation_id
+msgid "Reservation linked to this rental."
+msgstr "الحجز المرتبط بهذا التأجير."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__start_date
+msgid "Reservation start date."
+msgstr "تاريخ بدء الحجز."
 
 #. module: cyllo_asset_management
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_reservations
@@ -1960,6 +2966,14 @@ msgid "Reserved Asset"
 msgstr "الأصل المحجوز"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Reserved from %s to %s"
+msgstr "محجوز من %s إلى %s"
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
@@ -1986,63 +3000,58 @@ msgid "Revaluate"
 msgstr "إعادة تقييم"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Reverse the depreciation entries posted in the future in order to modify the"
+" depreciation."
+msgstr "اعكس قيود الإهلاك المرحلة في الفترات المستقبلية لتعديل الإهلاك."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__running
 msgid "Running"
 msgstr "نشط"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_sms_error
 msgid "SMS Delivery error"
 msgstr "خطأ في تسليم الرسائل النصية"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__scrap
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__scrap
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__scrap
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
 msgid "Scrap"
 msgstr "تخريد"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_scrap__status__scraped
-msgid "Scraped"
-msgstr "تم تخريده"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__automatic_maintenance
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__automatic_maintenance
+msgid "Select frequency for automatic maintenance request generation."
+msgstr "حدد وتيرة إنشاء طلبات الصيانة تلقائياً."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__start_date
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__start_date
-msgid "Select an Asset before setting the period. Start and End Dates must be after the Asset's Purchase Date, and End Date must be later than Start Date."
-msgstr "اختر أصلًا قبل تحديد الفترة. يجب أن يكون تاريخ البدء والانتهاء بعد تاريخ شراء الأصل، ويجب أن يكون تاريخ الانتهاء بعد تاريخ البدء."
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__company_id
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset_insurance__company_id
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_insurance_type__company_id
 msgid "Select the company"
 msgstr "اختر الشركة"
 
 #. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_sell
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_sell
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__sell
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__asset_action__sell
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Sell"
 msgstr "بيع"
@@ -2054,9 +3063,10 @@ msgstr "بيع وتخلص من الأصول"
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_sell_dispose
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_sell_dispose
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 #, python-format
 msgid "Sell/Dispose"
@@ -2068,9 +3078,14 @@ msgid "Send Mail"
 msgstr "إرسال بريد"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__serial_no
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__serial_no
 msgid "Serial No."
 msgstr "الرقم التسلسلي"
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_server_maintenance
+msgid "Server Rack 42U - Maintenance"
+msgstr "خزانة خوادم 42U - صيانة"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -2078,14 +3093,36 @@ msgid "Sold"
 msgstr "تم بيعه"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__status
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__status
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__disposal_type
+msgid "Specify the type of asset disposal operation."
+msgstr "حدد نوع عملية استبعاد الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_start_date
+msgid "Start date"
+msgstr "تاريخ البدء"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__date_from
+msgid "Start date and time of the booking."
+msgstr "تاريخ ووقت بدء الحجز."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__prorata_date
+msgid "Starting date used for prorata depreciation calculations."
+msgstr "تاريخ البدء المستخدم لحساب الإهلاك النسبي."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__state
+msgid "State"
+msgstr "الحالة"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__status
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__status
 msgid "Status"
 msgstr "الحالة"
 
@@ -2097,9 +3134,16 @@ msgid "Straight Line"
 msgstr "الخط المستقيم"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lost_form
-msgid "Submit"
-msgstr "إرسال"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_entry
+msgid ""
+"Technical field indicating whether depreciation journal entries exist for "
+"the asset."
+msgstr "حقل تقني يحدد ما إذا كانت هناك قيود إهلاك يومية للأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__res_model
+msgid "Technical model name of the related document."
+msgstr "الاسم التقني لنموذج المستند المرتبط."
 
 #. module: cyllo_asset_management
 #. cyllo-python
@@ -2127,8 +3171,112 @@ msgstr "يجب أن يكون تاريخ الانتهاء أكبر من تاري�
 #. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #, python-format
+msgid "The Original Value should be Greater than 0."
+msgstr "يجب أن تكون القيمة الأصلية أكبر من صفر."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
 msgid "The Salvage Value should not be Greater than the Original Value."
 msgstr "يجب ألا تكون قيمة الخردة أكبر من القيمة الأصلية."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/wizards/asset_insurance_wizard.py:0
+#, python-format
+msgid "The Total invoiced Amount exceeds expense"
+msgstr "إجمالي المبلغ المفوتر يتجاوز المصروف."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The Warranty period should not be a negative Value."
+msgstr "يجب ألا تكون مدة الضمان قيمة سالبة."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already leased during the selected period."
+msgstr "الأصل مؤجّر بالفعل خلال الفترة المحددة."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already rented during the selected period."
+msgstr "الأصل مستخدم للتأجير بالفعل خلال الفترة المحددة."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already reserved from %s to %s."
+msgstr "الأصل محجوز بالفعل من %s إلى %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The depreciable value cannot be greater than the original value."
+msgstr "لا يمكن أن تتجاوز القيمة القابلة للإهلاك القيمة الأصلية."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The depreciable value cannot be negative."
+msgstr "لا يمكن أن تكون القيمة القابلة للإهلاك سالبة."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "The expense is 0."
+msgstr "المصروف يساوي صفراً."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The value for the rental amount should be an Integer"
+msgstr "يجب أن تكون قيمة مبلغ التأجير عدداً صحيحاً."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is leased from %s to %s."
+msgstr "هذا الأصل مؤجّر من %s إلى %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is rented from %s to %s."
+msgstr "هذا الأصل مؤجّر من %s إلى %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is reserved from %s to %s."
+msgstr "هذا الأصل محجوز من %s إلى %s."
+
+#. module: cyllo_asset_management
+#: model_terms:ir.actions.act_window,help:cyllo_asset_management.action_asset_report_all
+msgid ""
+"This report shows Maintenance, Lease and Rental counts per Asset,\n"
+"                along with Original and Salvage values."
+msgstr "يعرض هذا التقرير عدد عمليات الصيانة والإيجار والتأجير لكل أصل،\n                بالإضافة إلى القيمتين الأصلية والتخريدية."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__duration_period
+msgid "Time unit used for the depreciation duration."
+msgstr "وحدة الوقت المستخدمة لمدة الإهلاك."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__total_depreciation_days
@@ -2136,14 +3284,56 @@ msgid "Total Depreciation Days"
 msgstr "إجمالي أيام الإهلاك"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__total_amount
+msgid "Total Repair Cost"
+msgstr "إجمالي تكلفة الإصلاح"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__accumulative_depreciation
+msgid "Total accumulated depreciation up to this period."
+msgstr "إجمالي الإهلاك المتراكم حتى هذه الفترة."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__depreciated_amount
+msgid "Total depreciated amount of the asset."
+msgstr "إجمالي المبلغ المستهلك من قيمة الأصل."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_car_lease
+msgid "Toyota Camry 2023 (Lease)"
+msgstr "تويوتا كامري 2023 (إيجار)"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Transactions ("
+msgstr "المعاملات ("
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_name_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__type_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__type
 msgid "Type"
 msgstr "النوع"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__booking_type
+msgid "Type of booking created for the asset."
+msgstr "نوع الحجز المنشأ للأصل."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
 msgid "Unassign"
 msgstr "إلغاء التعيين"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__maintenance_state__maintenance
+msgid "Under Maintenance"
+msgstr "قيد الصيانة"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__maintenance_state__repair
+msgid "Under Repair"
+msgstr "قيد الإصلاح"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
@@ -2156,41 +3346,66 @@ msgid "Validate"
 msgstr "اعتماد"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid "Warning"
-msgstr "تحذير"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__vendor_id
+msgid "Vendor from whom the asset was purchased."
+msgstr "المورّد الذي تم شراء الأصل منه."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__website_message_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Warranty"
+msgstr "الضمان"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_attachment_ids
+msgid "Warranty Documents"
+msgstr "مستندات الضمان"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__under_warranty
+msgid "Warranty Included"
+msgstr "يشمل الضمان"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_period
+msgid "Warranty Period"
+msgstr "مدة الضمان"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_end_date
+msgid "Warranty Upto"
+msgstr "الضمان حتى"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Warranty and Insurance"
+msgstr "الضمان والتأمين"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__website_message_ids
 msgid "Website Messages"
 msgstr "رسائل الموقع الإلكتروني"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__website_message_ids
 msgid "Website communication history"
 msgstr "سجل مراسلات الموقع الإلكتروني"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__week
+msgid "Week"
+msgstr "أسبوع"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__week_amount
@@ -2198,6 +3413,8 @@ msgid "Week Amount"
 msgstr "مبلغ الأسبوع"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__weekly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__weekly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__week
 msgid "Weekly"
 msgstr "أسبوعي"
@@ -2209,7 +3426,14 @@ msgid "Work Email"
 msgstr "بريد العمل الإلكتروني"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__email
+msgid "Work email address of the employee."
+msgstr "عنوان البريد الإلكتروني للعمل للموظف."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__year
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__duration_period__year
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__years
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__duration_period__year
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__duration_period__year
 msgid "Year"
@@ -2221,9 +3445,191 @@ msgid "Year Amount"
 msgstr "مبلغ السنة"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__yearly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__yearly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__year
 msgid "Yearly"
 msgstr "سنوي"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, The invoice is not paid"
+msgstr "لا يمكنك إكمال هذه العملية، فالفاتورة غير مدفوعة."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already Assigned."
+msgstr "لا يمكنك إكمال هذه العملية، فقد تم إسناد الأصل المرتبط بالفعل."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for a"
+" another operation"
+msgstr "لا يمكنك إكمال هذه العملية، فالأصل المرتبط محجوز لعملية أخرى بالفعل."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for "
+"another operation"
+msgstr "لا يمكنك إكمال هذه العملية، فالأصل المرتبط محجوز لعملية أخرى بالفعل."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for "
+"another operation."
+msgstr "لا يمكنك إكمال هذه العملية، فالأصل المرتبط محجوز لعملية أخرى بالفعل."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is either sold or "
+"disposed"
+msgstr "لا يمكنك إكمال هذه العملية، فقد تم بيع الأصل المرتبط أو استبعاده."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is either sold or "
+"disposed."
+msgstr "لا يمكنك إكمال هذه العملية، فقد تم بيع الأصل المرتبط أو استبعاده."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is not a lease asset."
+msgstr "لا يمكنك إكمال هذه العملية، فالأصل المرتبط ليس أصلاً مؤجراً."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is not a rental asset."
+msgstr "لا يمكنك إكمال هذه العملية، فالأصل المرتبط غير مخصص للتأجير."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, lease amount cannot be zero."
+msgstr "لا يمكنك إكمال هذه العملية، لا يمكن أن يكون مبلغ الإيجار صفراً."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, please specify the lease amount."
+msgstr "لا يمكنك إكمال هذه العملية، يرجى تحديد مبلغ الإيجار."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, the related asset is either sold or "
+"disposed."
+msgstr "لا يمكنك إكمال هذه العملية، فقد تم بيع الأصل المرتبط أو استبعاده."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, the related asset is not a lease asset."
+msgstr "لا يمكنك إكمال هذه العملية، فالأصل المرتبط ليس أصلاً مؤجراً."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation. The asset is already reserved, leased, "
+"or rented for the selected date range."
+msgstr "لا يمكنك إكمال هذه العملية، فالأصل محجوز أو مؤجّر أو مستخدم للتأجير خلال الفترة المحددة."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"You cannot create an asset from lines containing credit and debit on the "
+"account or with a null amount"
+msgstr "لا يمكنك إنشاء أصل من بنود تحتوي على مدين ودائن في الحساب أو على مبلغ فارغ."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid "You cannot delete the record that is in Assign state."
+msgstr "لا يمكنك حذف السجل الموجود في حالة الإسناد."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "You cannot delete the record that is in Rent state."
+msgstr "لا يمكنك حذف السجل الموجود في حالة التأجير."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "You cannot delete the record that is in Reserved state."
+msgstr "لا يمكنك حذف السجل الموجود في حالة الحجز."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "You cannot delete the record that is in Running state."
+msgstr "لا يمكنك حذف السجل الجاري."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot delete the record that is in leased state."
+msgstr "لا يمكنك حذف السجل الموجود في حالة الإيجار."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"You cannot delete the record, The related asset is already taken for some "
+"operations"
+msgstr "لا يمكنك حذف السجل، فالأصل المرتبط محجوز لبعض العمليات بالفعل."
 
 #. module: cyllo_asset_management
 #. cyllo-python
@@ -2234,199 +3640,26 @@ msgstr "لا يمكنك إعادة تعيين إلى مسودة، فتم قيد 
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid ""
+"You cannot reset to draft, The related rental invoice is already posted"
+msgstr "لا يمكنك إعادة الفاتورة إلى المسودة، فقد تم ترحيل فاتورة التأجير المرتبطة بالفعل."
+
+#. module: cyllo_asset_management
+#. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
 #, python-format
 msgid "You cannot select the same account as the Asset Depreciation Account."
 msgstr "لا يمكنك تحديد نفس الحساب كحساب إهلاك الأصل."
+
+#. module: cyllo_asset_management
+#: model:ir.model,name:cyllo_asset_management.model_asset_booking
+msgid "asset.booking"
+msgstr "asset.booking"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
 msgid "e.g. Laptop Book"
 msgstr "مثال: دفتر، حاسوب محمول"
-
-
-
-#. module: cyllo_asset_management
-#: model:asset.brand,name:cyllo_asset_management.brand_dell
-msgid "Dell"
-msgstr "ديل"
-
-#. module: cyllo_asset_management
-msgid "Toyota"
-msgstr "تويوتا"
-
-#. module: cyllo_asset_management
-msgid "Cisco"
-msgstr "سيسكو"
-
-#. module: cyllo_asset_management
-msgid "Demo Vendor Ltd"
-msgstr "شركة المورد التجريبية"
-
-#. module: cyllo_asset_management
-msgid "Demo Customer Ltd"
-msgstr "شركة العميل التجريبية"
-
-#. module: cyllo_asset_management
-msgid "Demo Insurance Corp"
-msgstr "شركة التأمين التجريبية"
-
-#. module: cyllo_asset_management
-msgid "Full Coverage"
-msgstr "تغطية شاملة"
-
-#. module: cyllo_asset_management
-msgid "Demo Employee"
-msgstr "موظف تجريبي"
-
-#. module: cyllo_asset_management
-msgid "Demo Fixed Assets Account"
-msgstr "حساب الأصول الثابتة التجريبي"
-
-#. module: cyllo_asset_management
-msgid "Demo Accumulated Depreciation Account"
-msgstr "حساب مجمع الإهلاك التجريبي"
-
-#. module: cyllo_asset_management
-msgid "Demo Depreciation Expense Account"
-msgstr "حساب مصروف الإهلاك التجريبي"
-
-#. module: cyllo_asset_management
-msgid "Demo Asset Loss Account"
-msgstr "حساب خسائر الأصول التجريبي"
-
-#. module: cyllo_asset_management
-msgid "Demo Asset Journal"
-msgstr "دفتر يومية الأصول التجريبي"
-
-#. module: cyllo_asset_management
-msgid "Laptop Dell Latitude"
-msgstr "حاسوب محمول ديل لاتيتود"
-
-#. module: cyllo_asset_management
-msgid "Dell Latitude 5420 - Laptop 01"
-msgstr "ديل لاتيتود 5420 - حاسوب محمول 01"
-
-#. module: cyllo_asset_management
-msgid "Toyota Camry 2023 (Lease)"
-msgstr "تويوتا كامري 2023 (إيجار)"
-
-#. module: cyllo_asset_management
-msgid "Cisco Switch Catalyst (Rental)"
-msgstr "محول سيسكو كاتاليست (تأجير)"
-
-#. module: cyllo_asset_management
-msgid "Projector Epson - Conference Room"
-msgstr "جهاز عرض إبسون - قاعة الاجتماعات"
-
-#. module: cyllo_asset_management
-msgid "MacBook Pro 16 - Assigned"
-msgstr "ماك بوك برو 16 - مخصص"
-
-#. module: cyllo_asset_management
-msgid "Server Rack 42U - Maintenance"
-msgstr "خزانة خوادم 42U - صيانة"
-
-
-#. module: cyllo_asset_management
-#. cyllo-python
-#: code:addons/cyllo_asset_management/models/asset_rental.py:0
-#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
-#, python-format
-msgid "Rented from %s to %s"
-msgstr "مؤجر من %s إلى %s"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_operations
-msgid "Operations"
-msgstr "العمليات"
-
-#. module: cyllo_asset_management
-#. cyllo-python
-#: code:addons/cyllo_asset_management/models/asset_asset.py:0
-#: model:ir.actions.server,name:cyllo_asset_management.action_asset_maintenance_request
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_maintenance_repair_request
-#, python-format
-msgid "Maintenance/Repair"
-msgstr "الصيانة / الإصلاح"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__partner_id
-msgid "Repair partner"
-msgstr "شريك الإصلاح"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__expense
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__expense
-msgid "Expense"
-msgstr "المصروف"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__invoiced_amount
-msgid "Insurance Amount"
-msgstr "مبلغ التأمين"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__asset_id
-msgid "Asset"
-msgstr "الأصل"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell_dispose
-msgid "Disposal"
-msgstr "التخلص من الأصول"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell
-msgid "Sell"
-msgstr "بيع"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_dispose
-msgid "Dispose"
-msgstr "تخلص"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_reporting_asset
-msgid "Reporting"
-msgstr "التقارير"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_activity_report
-msgid "Asset Operations"
-msgstr "عمليات الأصول"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_loss_account_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_loss_account_id
-msgid "Asset Loss Account"
-msgstr "حساب خسائر الأصول"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__vendor_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__vendor_id
-msgid "Purchase From"
-msgstr "الشراء من"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__serial_no
-msgid "Serial No."
-msgstr "الرقم التسلسلي"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__partner_id
-msgid "Insurance Provider"
-msgstr "مزود التأمين"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__type_id
-msgid "Type"
-msgstr "النوع"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_asset_insurance
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Insurance"
-msgstr "التأمين"

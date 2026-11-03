@@ -21,8 +21,8 @@
 #############################################################################
 
 
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 from odoo.tools.safe_eval import safe_eval
 
 
@@ -77,10 +77,14 @@ class AccountReturnValidation(models.Model):
 
         try:
             full_domain = safe_eval(active_domain)
-            if not isinstance(full_domain, list):
-                full_domain = []
-        except Exception:
-            full_domain = []
+        except Exception as error:
+            raise ValidationError(
+                _("The validation condition is invalid.")
+            ) from error
+        if not isinstance(full_domain, list):
+            raise ValidationError(
+                _("The validation condition must be a list.")
+            )
 
         # Add company filter if model has company_id
         if hasattr(self.env[model_name], 'company_id'):
@@ -108,7 +112,10 @@ class AccountReturnValidation(models.Model):
         # Update result
         self.record_count = count
         self.state = 'failed' if records else 'passed'
-        self.result_message = f"Found {count} matching record(s)." if records else "No matching records found."
+        self.result_message = (
+            _("Found %(count)s matching record(s).") % {"count": count}
+            if records else _("No matching records found.")
+        )
 
         notification_type = 'success'
         if records:
@@ -132,7 +139,7 @@ class AccountReturnValidation(models.Model):
         domain = self._get_failing_records_domain()
 
         return {
-            'name': _('Failing Records: %s') % self.name,
+            'name': _('Failing Records: %(name)s') % {'name': self.name},
             'type': 'ir.actions.act_window',
             'res_model': model_name,
             'view_mode': 'tree,form',

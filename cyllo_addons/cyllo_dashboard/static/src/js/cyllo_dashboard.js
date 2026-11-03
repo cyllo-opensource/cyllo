@@ -13,7 +13,10 @@ import { browser } from "@web/core/browser/browser";
 
 const actionRegistry = registry.category("actions");
 
-// Define a new component named 'Cyllo Dashboard'
+const WEATHER_CACHE_KEY = "cyllo_dashboard_weather";
+
+const WEATHER_CACHE_TTL = 48 * 60 * 60 * 1000;
+
 export class UserDashboard extends Component {
     setup() {
         super.setup(...arguments);
@@ -30,22 +33,21 @@ export class UserDashboard extends Component {
         this.cpuChart = useRef('cpuChart');
         this.rootNonAdmin = useRef("root-non-admin");
         this.quickAccessGrid = useRef("quickAccessGrid");
-        // Floating scroll-down affordance for the Quick access card.
+
         this.qaScrollState = useState({ canScrollDown: false });
-        // Dashboard / Quick access split tabs in the page heading.
+
+        this.bannerFileInput = useRef("bannerFileInput");
+
         this.tabBarRef = useRef("tabBar");
         this.tabBtnDashboard = useRef("tabDashboard");
-        this.tabBtnQuickAccess = useRef("tabQuickAccess");
-        // Quick access order via SortableJS (stock useSortable).
-        // clone:false => placeholder is a plain div (no data-shortcut-id),
-        // so it never collides with real tile keys.
+
         useSortable({
             ref: this.quickAccessGrid,
-            elements: ".cy_quick_access_item",
+            elements: ".cy_dashboard_qa_item",
             clone: false,
-            ignore: ".cy_shortcut_add_icon",
+            ignore: ".cy_dashboard_qa_tile_add_icon",
             cursor: "grabbing",
-            placeholderClasses: ["cy_quick_access_placeholder"],
+            placeholderClasses: ["cy_dashboard_qa_placeholder"],
             enable: () => (this.state.shortcuts || []).length > 1 && !(this.state.shortcutSearch || "").trim(),
             onDragStart: () => {
                 this._suppressShortcutClick = true;
@@ -65,7 +67,9 @@ export class UserDashboard extends Component {
             loginUserTotal: 0,
             userProfile: {},
             weatherDetails: {},
-            activities: {},
+
+            activities: [],
+            activityTypeCounts: [],
             performanceInsights: {},
             nonAdmin: {},
             notifType: false,
@@ -83,8 +87,8 @@ export class UserDashboard extends Component {
         this.getActivities();
         onWillStart(async () => {
             this.renderShortcuts();
-            // Login details are admin-only: the non-admin dashboard has no
-            // Login History card (it shows the Account Settings card).
+            this._syncOverviewMenu();
+
             if (session.is_admin) {
                 this.renderLoginUserDetails();
             }
@@ -131,9 +135,7 @@ export class UserDashboard extends Component {
         useEffect(() => {
             this.renderOverviewCharts();
         }, () => [this.state.performanceInsights.ram_percent, this.state.performanceInsights.used_memory, this.state.performanceInsights.total_memory, this.state.performanceInsights.total_ram, this.state.performanceInsights.total_cpu_usage, this.state.activeTab])
-        // Show the scroll-down button + bottom fade while the Quick access
-        // grid has content below the fold. Recomputed on scroll and on any
-        // size change (shortcuts loading, window resize).
+
         useEffect(() => {
             const grid = this.quickAccessGrid.el;
             if (!grid) {
@@ -153,12 +155,11 @@ export class UserDashboard extends Component {
                 observer.disconnect();
             };
         }, () => [this.state.shortcuts.length, this.state.activeTab]);
-        // Slide the ink bar under the active heading tab (re-measured after
-        // each render, so the active button's wider font is accounted for).
+
         useEffect(() => {
             this.updateTabInk();
         }, () => [this.state.activeTab, this.state.shortcuts.length]);
-        // Keep the ink glued to its tab on container resizes.
+
         useEffect(() => {
             const wrap = this.tabBarRef.el;
             if (!wrap) {
@@ -228,16 +229,16 @@ export class UserDashboard extends Component {
 
     renderOverviewCharts() {
         const insights = this.state.performanceInsights || {};
-        // Storage (disk) values from System Monitor
+
         const totalStorage = Number(insights.total_memory) || 0;
         const usedStorage = Number(insights.used_memory) || 0;
         const freeStorage = Math.max(totalStorage - usedStorage, 0);
-        // RAM values from System Monitor
+
         const totalRam = Number(insights.total_ram) || 0;
         const ramPercent = Number(insights.ram_percent) || 0;
         const usedRam = (totalRam * ramPercent) / 100;
         const freeRam = Math.max(totalRam - usedRam, 0);
-        // CPU value from System Monitor
+
         const cpuUsage = Number(insights.total_cpu_usage) || 0;
         const cpuIdle = Math.max(100 - cpuUsage, 0);
 
@@ -250,7 +251,7 @@ export class UserDashboard extends Component {
                 this[oldChartKey].destroy();
                 this[oldChartKey] = null;
             }
-            // Skip rendering when there is no data yet
+
             if (!data.some((v) => Number(v) > 0)) {
                 return;
             }
@@ -310,12 +311,12 @@ export class UserDashboard extends Component {
     }
 
     idleTimer() {
-        // Clear any timer/handlers from a previous mount before starting fresh.
+
         this.cleanupIdleTimer();
         var date = new Date();
         date.setMinutes(date.getMinutes() + this.minutes);
         var updatedTimestamp = date.getTime();
-        /** Running the count down using setInterval function */
+
         this._idleInterval = setInterval(() => {
             var now = new Date().getTime();
             var distance = updatedTimestamp - now;
@@ -331,7 +332,7 @@ export class UserDashboard extends Component {
             } else {
                 $("#idle_timer").append('<span>' + minutes + "m " + seconds + "s " + '</span>')
             }
-            /** if the countdown is zero the link is redirect to the login page*/
+
             if (distance < 0) {
                 this.cleanupIdleTimer();
                 $("#idle_timer").empty();
@@ -339,7 +340,7 @@ export class UserDashboard extends Component {
                 location.replace("/web/session/logout")
             }
         }, 1000);
-        /** Any user activity resets the countdown. */
+
         const resetTimer = () => {
             var d = new Date();
             d.setMinutes(d.getMinutes() + this.minutes);
@@ -353,16 +354,190 @@ export class UserDashboard extends Component {
     }
 
     renderWeatherNotification() {
+
+        try {
+            const cached = JSON.parse(
+                localStorage.getItem(WEATHER_CACHE_KEY + ":" + session.uid) || "null");
+            if (cached && typeof cached.fetchedAt === "number"
+                    && Date.now() - cached.fetchedAt < WEATHER_CACHE_TTL) {
+                this.state.weatherDetails = cached;
+            }
+        } catch (e) {
+
+        }
         jsonrpc('/weather/notification/check').then((data) => {
             if (data['cod'] == 200) {
-                var temp = Math.floor(data.main.temp - 273);
-                this.state.weatherDetails.city = data.name
-                this.state.weatherDetails.temp = temp
-                this.state.weatherDetails.description = data.weather[0].description
-                this.state.weatherDetails.weather = data.weather[0].main
-                this.state.weatherDetails.icon = data.weather[0].icon
+                const temp = Math.floor(data.main.temp - 273);
+
+                const details = {
+                    city: data.name,
+                    temp: temp,
+                    description: data.weather[0].description,
+                    weather: data.weather[0].main,
+                    icon: data.weather[0].icon,
+
+                    feelsLike: Math.round(data.main.feels_like - 273),
+                    humidity: data.main.humidity,
+                    windSpeed: Math.round(data.wind.speed * 10) / 10,
+
+                    windDeg: data.wind.deg,
+
+                    forecast: Array.isArray(data.forecast) ? data.forecast : [],
+                    fetchedAt: Date.now(),
+                };
+                this.state.weatherDetails = details;
+                try {
+                    localStorage.setItem(
+                        WEATHER_CACHE_KEY + ":" + session.uid,
+                        JSON.stringify(details)
+                    );
+                } catch (e) {
+
+                }
             }
-        })
+        }).catch(() => {
+
+        });
+    }
+
+    get weatherKpiIcon() {
+        const group = String(this.state.weatherDetails.weather || "").toLowerCase();
+        if (group === "clear") return "ri-sun-line";
+        if (group === "clouds") return "ri-cloud-line";
+        if (group === "rain") return "ri-rainy-line";
+        if (group === "drizzle") return "ri-drizzle-line";
+        if (group === "thunderstorm") return "ri-thunderstorms-line";
+        if (group === "snow") return "ri-snowy-line";
+        if (["mist", "haze", "fog", "smoke", "dust", "ash", "sand"].includes(group)) {
+            return "ri-haze-2-line";
+        }
+        return "ri-cloudy-2-line";
+    }
+
+    get weatherKpiSegments() {
+        const details = this.state.weatherDetails;
+        if (details.temp === undefined) {
+            return [];
+        }
+        const pos = Math.min(Math.max(((details.temp + 5) / 50) * 100, 0), 100);
+        return [
+            { width: pos, cls: 'bg-warning' },
+            { width: 100 - pos, cls: 'bg-primary' },
+        ];
+    }
+
+    get weatherKpiTitle() {
+        const details = this.state.weatherDetails;
+        const condition = String(details.description || "");
+        const capitalized =
+            condition.charAt(0).toUpperCase() + condition.slice(1);
+        if (capitalized && details.city) {
+            return capitalized + " in " + details.city;
+        }
+        if (capitalized) {
+            return capitalized;
+        }
+        return details.city || "Weather";
+    }
+
+    get weatherKpiDetails() {
+        const details = this.state.weatherDetails;
+        if (details.temp === undefined) {
+            return [];
+        }
+        const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        let windDir = '';
+        if (typeof details.windDeg === 'number') {
+            windDir = ' ' + dirs[Math.round(details.windDeg / 45) % 8];
+        }
+        const wind = typeof details.windSpeed === 'number'
+            ? details.windSpeed + ' m/s' + windDir
+            : '—';
+        const humidity = typeof details.humidity === 'number'
+            ? details.humidity + '%'
+            : '—';
+        return [
+            { icon: 'ri-windy-line', label: 'Wind', value: wind },
+            { icon: 'ri-drop-line', label: 'Humidity', value: humidity },
+        ];
+    }
+
+    get weatherKpiLegend() {
+        const details = this.state.weatherDetails;
+        const palette = ['bg-warning', 'bg-primary', 'bg-danger'];
+        const forecast = Array.isArray(details.forecast) ? details.forecast : [];
+        if (forecast.length) {
+            return forecast.map((step, index) => ({
+                count: step.temp,
+                unit: '°C',
+                label: step.time,
+                cls: palette[index % palette.length],
+                tip: 'Forecast at ' + step.time,
+            }));
+        }
+        if (details.temp === undefined) {
+            return [];
+        }
+        return [
+            {
+                count: details.feelsLike ?? details.temp,
+                label: 'Feels Like (°C)',
+                cls: 'bg-warning',
+                tip: 'Feels like temperature',
+            },
+            {
+                count: details.humidity ?? 0,
+                label: 'Humidity (%)',
+                cls: 'bg-primary',
+                tip: 'Relative humidity',
+            },
+            {
+                count: details.windSpeed ?? 0,
+                label: 'Wind (m/s)',
+                cls: 'bg-danger',
+                tip: 'Wind speed',
+            },
+        ];
+    }
+
+    get profileCompaniesRow() {
+        const service = this.env.services.company;
+        const allowed = (service && service.allowedCompanies) || {};
+        const activeIds = (service && service.activeCompanyIds) || [];
+        const listed = activeIds.slice(0, 2).map((id) => allowed[id]).filter(Boolean);
+        if (!listed.length) {
+            return null;
+        }
+
+        const extra = Math.max(0, activeIds.length - listed.length);
+        return {
+            id: listed[0].id,
+            names: listed.map((c) => c.name).join(', '),
+            countText: extra
+                ? ' + ' + extra + (extra === 1 ? ' company' : ' companies')
+                : '',
+            logos: listed.map((c) => ({
+                id: c.id,
+                src: '/web/image?model=res.company&field=logo&id=' + c.id,
+            })),
+        };
+    }
+
+    async onClickCompany() {
+        const row = this.profileCompaniesRow;
+        const companyId = (row && row.id)
+            || (this.state.userProfile && this.state.userProfile.company_id);
+        if (!companyId) {
+            return;
+        }
+        this.env.services['action'].doAction({
+            name: "Company",
+            type: 'ir.actions.act_window',
+            res_model: 'res.company',
+            res_id: companyId,
+            views: [[false, 'form']],
+            target: 'current',
+        });
     }
 
     async onClickPermissions() {
@@ -376,9 +551,13 @@ export class UserDashboard extends Component {
         });
     }
 
+    editBanner() {
+        this.bannerFileInput.el?.click();
+    }
+
     async uploadBanner(ev) {
         const file = ev.target.files[0];
-        const bannerEl = ev.target.closest(".cy_user_dashboard_profile_banner");
+        const bannerEl = ev.target.closest(".cy_dashboard_profile_banner");
         ev.target.value = "";
         if (!file) return;
         const objectUrl = URL.createObjectURL(file);
@@ -421,14 +600,6 @@ export class UserDashboard extends Component {
         });
     }
 
-    /**
-     * Mobile actions dropdown: run the picked action and close the menu
-     * (Bootstrap 5 doesn't auto-close on item clicks). Closing is done via
-     * DOM classes/aria: the webclient's `window.bootstrap` may not carry the
-     * full BS5 Dropdown (asset bundle order can expose a partial build that
-     * lacks getOrCreateInstance), so the instance route is optional and
-     * never required.
-     */
     onClickMobileAction(action, ev) {
         this.state.mobileMenuOpen = "";
         const dropdownEl = ev.currentTarget.closest(".dropdown");
@@ -449,16 +620,19 @@ export class UserDashboard extends Component {
         }
     }
 
-    /**
-     * Mobile menu: expand/collapse the Language/Timezone sections inside
-     * the Settings dropdown (one section open at a time).
-     */
     toggleMobileMenuSection(section) {
         this.state.mobileMenuOpen = this.state.mobileMenuOpen === section ? "" : section;
     }
 
     renderUserProfile() {
         this.orm.call('res.users', 'get_current_user_details').then((result) => {
+
+            const companyService = this.env.services.company;
+            const activeCompany = companyService && companyService.currentCompany;
+            if (activeCompany && activeCompany.id) {
+                result.company = activeCompany.name || result.company;
+                result.company_id = activeCompany.id;
+            }
             this.state.userProfile = result;
             this.userId = result.id;
         });
@@ -476,7 +650,7 @@ export class UserDashboard extends Component {
             }
             const filtered = (menuItems || []).filter((item) =>
                 item.window_action_id || item.client_action_id || item.server_action_id);
-            // Guard against duplicate ids (would crash t-foreach with duplicate key).
+
             const seen = new Set();
             this.state.shortcuts = filtered.filter((item) => {
                 const key = String(item.id);
@@ -497,8 +671,8 @@ export class UserDashboard extends Component {
                 if (!node || !node.dataset || !node.dataset.shortcutId) {
                     return false;
                 }
-                // Ignore the sortable placeholder even if it carries a cloned id.
-                if (node.classList && node.classList.contains("cy_quick_access_placeholder")) {
+
+                if (node.classList && node.classList.contains("cy_dashboard_qa_placeholder")) {
                     return false;
                 }
                 return node.dataset.shortcutId;
@@ -509,8 +683,7 @@ export class UserDashboard extends Component {
         if (!draggedId) {
             return;
         }
-        // Anchor-based reorder: never trust DOM order (placeholder is a clone
-        // carrying the dragged id, so reading the DOM yields duplicates).
+
         const top = [...(this.state.shortcuts || [])];
         const from = top.findIndex((s) => String(s.id) === draggedId);
         if (from < 0) {
@@ -519,8 +692,7 @@ export class UserDashboard extends Component {
         const [moved] = top.splice(from, 1);
         const prevId = previous ? String(getId(previous) || "") : "";
         const nextId = next ? String(getId(next) || "") : "";
-        // previous/next are placeholder siblings; either may be the dragged
-        // element itself when dropped back near its origin — ignore those.
+
         if (prevId && prevId !== draggedId) {
             const idx = top.findIndex((s) => String(s.id) === prevId);
             if (idx >= 0) {
@@ -536,8 +708,7 @@ export class UserDashboard extends Component {
                 top.push(moved);
             }
         } else if (previous || next) {
-            // Both anchors missing/filtered (start/end edge): decide by which
-            // side exists. previous-only => end, next-only => start.
+
             if (previous && !next) {
                 top.push(moved);
             } else if (next && !previous) {
@@ -548,7 +719,7 @@ export class UserDashboard extends Component {
         } else {
             top.push(moved);
         }
-        // Final safety: drop any accidental duplicate ids before render.
+
         const seen = new Set();
         const deduped = [];
         for (const s of top) {
@@ -559,7 +730,7 @@ export class UserDashboard extends Component {
             seen.add(key);
             deduped.push(s);
         }
-        // Append any state items missing from the move (should not happen).
+
         for (const s of (this.state.shortcuts || [])) {
             if (!seen.has(String(s.id))) {
                 seen.add(String(s.id));
@@ -591,15 +762,13 @@ export class UserDashboard extends Component {
                 return `/web/image/ir.ui.menu/${menu.appID}/web_icon_data`;
             }
         } catch {
-            // fall through to folder icon
+
         }
         return '/cyllo_dashboard/static/src/img/folder.png';
     }
 
     getShortcutPath(shortcut) {
-        // Full menu breadcrumb ("App / Section / Menu") for the tile tooltip.
-        // Walks the parent chain from the loaded menu tree; falls back to the
-        // stored path / name when the menu is missing or the lookup fails.
+
         const fallback = (shortcut && (shortcut.path || shortcut.name)) || "";
         const menuId = shortcut && shortcut.menu_id ? shortcut.menu_id[0] : false;
         if (!menuId) {
@@ -621,16 +790,10 @@ export class UserDashboard extends Component {
         }
     }
 
-    /**
-     * Quick access search: live-filters the shortcut tiles by name.
-     */
     onShortcutSearch(ev) {
         this.state.shortcutSearch = ev.target.value;
     }
 
-    /**
-     * Shortcuts visible in the Quick access grid (search-filtered).
-     */
     get filteredShortcuts() {
         const term = (this.state.shortcutSearch || "").trim().toLowerCase();
         const list = this.state.shortcuts || [];
@@ -641,9 +804,7 @@ export class UserDashboard extends Component {
     }
 
     showShortcutAdd(shortcut) {
-        // + quick-create badge for every shortcut whose model allows record
-        // creation (can_create on shortcut.menu). No app-level exclusion:
-        // top-level apps get the badge too when can_create is set.
+
         return Boolean(shortcut && shortcut.can_create);
     }
 
@@ -663,6 +824,26 @@ export class UserDashboard extends Component {
         return this._openShortcutNow(data);
     }
 
+    async _syncOverviewMenu() {
+        try {
+            if (!this.menuService) {
+                return;
+            }
+            const app = this.menuService
+                .getApps()
+                .find((m) => String(m.xmlid || "").endsWith("menu_cyllo_dashboard_root"));
+            if (!app) {
+                return;
+            }
+            const current = this.menuService.getCurrentApp();
+            if (!current || current.appID !== app.appID) {
+                this.menuService.setCurrentMenu(app);
+            }
+        } catch {
+
+        }
+    }
+
     async _openShortcutNow(data) {
         if (this._suppressShortcutClick) {
             this._suppressShortcutClick = false;
@@ -670,8 +851,10 @@ export class UserDashboard extends Component {
         }
         if (data.menu_id) {
             const menu = this.menuService.getMenu(data.menu_id[0]);
-            if (menu) {
-                await this.menuService.selectMenu(menu);
+            if (menu && menu.actionID) {
+
+                await this.action.doAction(menu.actionID);
+                this.menuService.setCurrentMenu(menu);
                 return;
             }
         }
@@ -683,9 +866,7 @@ export class UserDashboard extends Component {
     }
 
     onClickShortCutAdd(shortcut) {
-        // Open the quick-create form dialog with the exact shortcut name as
-        // its title. Without a `name`, Odoo falls back to its default "Odoo"
-        // dialog title (which Cyllo rebrands to "Cyllo").
+
         const model = shortcut && shortcut.model;
         if (model) {
             this.env.services['action'].doAction({
@@ -810,8 +991,7 @@ export class UserDashboard extends Component {
     }
 
     renderLoginUserDetails() {
-        // Preview the latest logins for the card, but count the whole table
-        // so the header badge reflects the real number of login records.
+
         Promise.all([
             this.orm.call('login.user.detail', 'search_read', [], {
                 fields: ["name", "date_time", "ip_address", "res_user_id"],
@@ -862,6 +1042,23 @@ export class UserDashboard extends Component {
         });
     }
 
+    openUserProfile() {
+        document.body.click();
+        if (!this.userId) {
+            return;
+        }
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            name: this.state.userProfile?.name || "User",
+            res_model: "res.users",
+            res_id: this.userId,
+            views: [[false, "form"]],
+
+            context: { form_view_ref: "base.view_users_form" },
+            target: "current",
+        });
+    }
+
     formatLoginDateTime(dateTime) {
         if (!dateTime) {
             return '';
@@ -879,12 +1076,50 @@ export class UserDashboard extends Component {
     }
 
     async getActivities() {
-        const groups = await this.env.services.orm.call("res.users", "systray_get_activities");
-        let total = 0;
-        for (const group of groups) {
-            total += group.total_count || 0;
-        }
+
+        const userId = this.userId ?? this.userID;
+
+        const [groups, typeRows] = await Promise.all([
+            this.env.services.orm.call("res.users", "systray_get_activities"),
+
+            this.env.services.orm.readGroup(
+                "mail.activity",
+                [["user_id", "=", userId]],
+                ["id"],
+                ["activity_type_id"]
+            ),
+        ]);
         this.state.activities = groups;
+        const typeCounts = typeRows
+            .map((row) => ({
+                id: row.activity_type_id && row.activity_type_id[0],
+                name: (row.activity_type_id && row.activity_type_id[1]) || "Other",
+                count: row.activity_type_id_count || 0,
+            }))
+            .sort((a, b) => b.count - a.count);
+
+        const typeIds = typeCounts.map((row) => row.id).filter((id) => id);
+        let typeRecords = [];
+        try {
+            typeRecords = typeIds.length
+                ? await this.env.services.orm.searchRead(
+                    "mail.activity.type",
+                    [["id", "in", typeIds]],
+
+                    ["icon"]
+                )
+                : [];
+        } catch (error) {
+            typeRecords = [];
+        }
+        const iconById = {};
+        for (const record of typeRecords) {
+            iconById[record.id] = record.icon || "";
+        }
+        this.state.activityTypeCounts = typeCounts.map((row) => ({
+            ...row,
+            icon: iconById[row.id] || "",
+        }));
     }
 
     openActivityGroup(group, filter = "all") {
@@ -912,18 +1147,145 @@ export class UserDashboard extends Component {
             type: "ir.actions.act_window",
             views,
         }, {
-            clearBreadcrumbs: true,
+
             viewType: group.view_type,
         });
     }
 
-    /** Total activity records behind the grouped upcoming lists. */
     get activitiesTotalCount() {
-        const activities = this.state.activities || [];
+        const activities = Array.isArray(this.state.activities) ? this.state.activities : [];
         return activities.reduce((total, group) => total + (group.total_count || 0), 0);
     }
 
-    /** Total login records for the Login History card badge. */
+    get activitiesLateTotal() {
+        return (this.state.activities || []).reduce(
+            (total, group) => total + (group.type === "activity" ? (group.overdue_count || 0) : 0), 0);
+    }
+
+    get activitiesTodayTotal() {
+        return (this.state.activities || []).reduce(
+            (total, group) => total + (group.type === "meeting" ? (group.meetings ? group.meetings.length : 0) : (group.today_count || 0)), 0);
+    }
+
+    get activitiesFutureTotal() {
+        return (this.state.activities || []).reduce((total, group) => total + (group.planned_count || 0), 0);
+    }
+
+    get userKpiLegend() {
+        const kpi = this.state.userKpi || {};
+        const groups = [
+            {
+                filter: 'online',
+                label: 'Online',
+                cls: 'bg-primary',
+                ids: kpi.online_ids,
+                count: kpi.online,
+            },
+            {
+                filter: 'away',
+                label: 'Away',
+                cls: 'bg-warning',
+                ids: kpi.away_ids,
+                count: kpi.away,
+            },
+            {
+                filter: 'offline',
+                label: 'Offline',
+                cls: 'bg-danger',
+                ids: kpi.offline_ids,
+                count: kpi.offline,
+            },
+        ];
+        return groups.map((group) => {
+            const ids = Array.isArray(group.ids) ? group.ids : [];
+
+            return {
+                count: typeof group.count === 'number' ? group.count : ids.length,
+                label: group.label,
+                cls: group.cls,
+                filter: group.filter,
+                tip: 'View ' + group.label + ' users',
+                avatars: group.count ? ids.slice(0, 2).map((id) => this.imageLoader(id)) : [],
+            };
+        });
+    }
+
+    get activityKpiLegend() {
+        const groups = Array.isArray(this.state.activities) ? this.state.activities : [];
+
+        const meetings = groups
+            .filter((g) => g.type === "meeting")
+            .reduce((sum, g) => sum + (g.meetings ? g.meetings.length : 0), 0);
+        const palette = ["bg-primary", "bg-warning", "bg-danger"];
+
+        const iconPalette = {
+            "bg-primary": "cy_kpi_icon_primary",
+            "bg-warning": "cy_kpi_icon_warning",
+            "bg-danger": "cy_kpi_icon_danger",
+        };
+        const legend = [];
+        if (meetings) {
+            legend.push({
+                count: meetings,
+                label: "Meetings",
+                cls: "bg-primary",
+                icon: "ri-calendar-line",
+                iconColor: iconPalette["bg-primary"],
+                filter: "all",
+                tip: "Open all upcoming activities",
+            });
+        }
+        const types = this.state.activityTypeCounts || [];
+
+        const topCount = meetings ? 1 : 2;
+        types.slice(0, topCount).forEach((item, index) => {
+            const cls = palette[(index + 1) % palette.length];
+            legend.push({
+                count: item.count,
+                label: item.name,
+                cls,
+
+                icon: item.icon || "",
+                iconColor: iconPalette[cls],
+                filter: "all",
+                tip: "Open all upcoming activities",
+            });
+        });
+        const rest = types
+            .slice(topCount)
+            .reduce((sum, item) => sum + (item.count || 0), 0);
+        if (rest) {
+
+            const othersCls = meetings ? "bg-danger" : "bg-primary";
+            legend.push({
+                count: rest,
+                label: "Others",
+                cls: othersCls,
+                icon: "ri-time-line",
+                iconColor: iconPalette[othersCls],
+                filter: "all",
+                tip: "Open all upcoming activities",
+            });
+        }
+        return legend;
+    }
+
+    get activityKpiSegments() {
+        const legend = this.activityKpiLegend;
+        const total = this.activitiesTotalCount || 0;
+        let acc = 0;
+        return legend.map((item, index) => {
+            const isLast = index === legend.length - 1;
+            const width = !item.count || !total
+                ? 0
+                : isLast
+                    ? Math.round((100 - acc) * 10) / 10
+                    : Math.round((item.count / total) * 1000) / 10;
+            acc += width;
+            return { width, cls: item.cls, filter: "all", tip: item.tip };
+        });
+    }
+
     get loginHistoryCount() {
         const total = this.state.loginUserTotal;
         if (typeof total === 'number') {
@@ -933,7 +1295,6 @@ export class UserDashboard extends Component {
         return Array.isArray(logins) ? logins.length : 0;
     }
 
-    /** Switch between the Dashboard and Quick access views. */
     selectTab(tab) {
         if (this.state.activeTab === tab) {
             return;
@@ -941,11 +1302,9 @@ export class UserDashboard extends Component {
         this.state.activeTab = tab;
     }
 
-    /** Position the sliding ink bar under the active tab button. */
     updateTabInk() {
         const wrap = this.tabBarRef.el;
-        const btn =
-            this.state.activeTab === "quickaccess" ? this.tabBtnQuickAccess.el : this.tabBtnDashboard.el;
+        const btn = this.tabBtnDashboard.el;
         if (!wrap || !btn) {
             return;
         }
@@ -959,13 +1318,34 @@ export class UserDashboard extends Component {
         }
     }
 
-    /** Row-level click: meetings open the calendar, activities the list. */
     openGroupRow(group) {
         if (group.type === "meeting") {
             this.handleGroupClick(group);
-        } else {
+        } else if (group.model === "mail.activity") {
             this.openActivityGroup(group);
+        } else {
+            this.openActivityView(group);
         }
+    }
+
+    openActivityView(group) {
+        document.body.click();
+        this.action.doAction({
+            context: { force_search_count: 1 },
+            domain: [["activity_ids.user_id", "=", this.userId]],
+            name: group.name,
+            res_model: group.model,
+            search_view_id: [false],
+            type: "ir.actions.act_window",
+            views: [[false, "activity"], [false, "list"], [false, "form"]],
+        }, {
+
+            viewType: "activity",
+        });
+    }
+
+    getUpcomingIcon(group) {
+        return group.type === "meeting" ? "ri-calendar-line" : "ri-calendar-check-line";
     }
 
     handleGroupClick(group) {
@@ -993,13 +1373,11 @@ export class UserDashboard extends Component {
     }
 
     renderPerformanceInsight() {
-        // Lightweight, non-blocking memory stats for the 'Memory' chart -
-        // fetched for every user.
+
         jsonrpc('/performance/memory').then((memoryResult) => {
             Object.assign(this.state.performanceInsights, memoryResult);
         });
-        // The heavy system/config insight is admin-only; skip the request
-        // entirely for regular users so no profiling runs for them.
+
         if (session.is_admin) {
             jsonrpc('/performance').then((performanceResult) => {
                 Object.assign(this.state.performanceInsights, performanceResult);

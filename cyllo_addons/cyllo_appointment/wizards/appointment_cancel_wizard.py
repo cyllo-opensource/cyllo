@@ -19,8 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api, fields, models, _
 import logging
+from odoo import api, fields, models, _
+
 
 _logger = logging.getLogger(__name__)
 

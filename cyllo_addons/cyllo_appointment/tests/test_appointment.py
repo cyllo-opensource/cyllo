@@ -19,10 +19,11 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from odoo import fields
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import ValidationError, UserError
 from datetime import datetime, timedelta
-from odoo import fields
+
 
 
 class TestAppointment(TransactionCase):

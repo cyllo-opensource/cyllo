@@ -210,6 +210,9 @@
                 </div>
             </div>
 
+            <!-- Dashboard body: only rendered after the first data load, so
+                 cards never flash empty-then-filled. Nothing shows until then. -->
+            <div class="cy-dashboard-content" t-if="state.hasLoaded">
             <div class="o_view_nocontent cy-nocontent-wrap" t-if="state.isSampleData">
                 <div class="o_nocontent_help">
                     <p class="o_view_nocontent_smiling_face">
@@ -350,9 +353,14 @@
 
     </t>
     <t t-else="">
-        <div class="no-data-message"
-        >
-            <span>No data found</span>
+        <div class="no-data-message cy-empty-state">
+            <div class="cy-empty-content">
+                <i class="fa fa-trophy cy-empty-icon"/>
+                <h4 class="cy-empty-title">No Sales Yet</h4>
+                <p class="cy-empty-text">Nothing here yet! Top performers will
+                    appear once deals are won.
+                </p>
+            </div>
         </div>
     </t>
                 </div>
@@ -362,7 +370,6 @@
                     <div class="notifications-header">
                         <div class="notifications-title-group">
                             <span class="notifications-title">
-                                <i class="fa fa-bell"/>
                                 Updates
                             </span>
                         </div>
@@ -471,8 +478,13 @@
                             <span class="legend-text">Previous year</span>
                         </div>
                     </div>
-                    <div class="chart-container">
-                        <canvas t-ref="revenueChart" />
+                    <div class="chart-container"
+                         t-att-class="{'cy-empty-container': state.trendEmpty}">
+                        <canvas t-ref="revenueChart"/>
+                        <div class="cy-chart-empty" t-if="state.trendEmpty">
+                            <i class="fa fa-line-chart"/>
+                            <span>No data available</span>
+                        </div>
                     </div>
                 </div>
 
@@ -500,10 +512,16 @@
                             </div>
                         </t>
                     </div>
-                    <div class="chart-container">
+                    <div class="chart-container"
+                         t-att-class="{'cy-empty-container': state.activitiesEmpty}">
                         <canvas t-ref="activitiesChart"/>
+                        <div class="cy-chart-empty" t-if="state.activitiesEmpty">
+                            <i class="fa fa-tasks"/>
+                            <span>No data available</span>
+                        </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </t>

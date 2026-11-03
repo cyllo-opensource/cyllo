@@ -19,9 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from datetime import timedelta
-
 from odoo import api, fields, models
+from datetime import timedelta
 
 
 class Appointment(models.Model):

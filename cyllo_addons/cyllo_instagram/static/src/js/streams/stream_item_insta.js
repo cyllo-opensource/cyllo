@@ -4,6 +4,9 @@ import {
     streamPlatforms,
     openLeadDialogResult,
 } from "@cyllo_social_media_marketing/js/streams/stream_registry";
+import { browser } from "@web/core/browser/browser";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+
 
 
 
@@ -103,3 +106,39 @@ streamItemActions.add("social.insta.account:create_lead", {
         openLeadDialogResult(comp, data, "unique_ig_comment_number", "social.insta.account");
     },
 });
+
+streamItemActions.add("social.insta.account:delete_post", {
+    icon: "ri-user-add-line",
+    label: "Delete Post",
+    itemKind: "post",
+    handler: async (item, column, comp) => {
+       comp.dialog.add(ConfirmationDialog, {
+            title: "Bye-bye, record!",
+            body: "Ready to make your record disappear into thin air? Are you sure?\n" +
+                "It will be gone forever!\n" +
+                "\n" +
+                "Think twice before you click that 'Delete' button!",
+            confirmLabel: "Delete",
+            confirm: async () => {
+                const res = await comp.orm.searchRead('social.insta.account', [["id", "=", column.account_res_id]], ['instagram_base_url','instagram_access_token'])
+                const account = res?.[0]
+                const url = `${account.instagram_base_url}/${item.id}?access_token=${account.instagram_access_token}`;
+                try {
+                    const response = await browser.fetch(url.toString(), {
+                        method: "DELETE",
+                    });
+                    if (response.ok) {
+                        comp.refresh();
+                    } else {
+                        comp.notification.add("Failed to delete.", { type: "danger" });
+                    }
+                } catch(error) {
+                    comp.notification.add("Failed to delete: " + error, { type: "danger" });
+                }
+                return true;
+            },
+            cancel: () => { },
+        });
+    },
+});
+

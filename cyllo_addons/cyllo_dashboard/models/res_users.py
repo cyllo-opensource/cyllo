@@ -250,6 +250,7 @@ class ResUsers(models.Model):
          Retrieves details of currently logged-in users
         """
         current_user = self.env.user
+        company = current_user.company_id
         return {
             'id': current_user.id,
             'name': current_user.name,
@@ -261,7 +262,9 @@ class ResUsers(models.Model):
                 self.env['res.lang'].search([('active', '=', True)])],
             'work_email': current_user.email,
             'phone': current_user.partner_id.phone or '',
-            'company': current_user.company_id.name or '',
+            'company': company.name or '',
+            'company_id': company.id,
+            'has_company_logo': bool(company.logo),
             'job_position': current_user.employee_id.job_id.name
             if hasattr(current_user, 'employee_id') and current_user.employee_id else '',
             'timezone': _tz_get(),

@@ -19,10 +19,11 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import pytz
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from datetime import timedelta
-import pytz
+
 
 
 class AppointmentSlot(models.Model):

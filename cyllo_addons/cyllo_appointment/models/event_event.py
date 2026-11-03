@@ -19,10 +19,11 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import pytz
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from datetime import timedelta, datetime, time
-import pytz
+
 
 class EventEvent(models.Model):
     _inherit = 'event.event'

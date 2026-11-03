@@ -17,8 +17,16 @@ msgstr ""
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
+#: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
 #, python-format
 msgid "%s: Depreciation"
 msgstr "%s: amortizacija"
@@ -26,7 +34,6 @@ msgstr "%s: amortizacija"
 #. module: cyllo_asset_management
 #. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
 #, python-format
 msgid "%s: Dispose"
 msgstr "%s: odlagati"
@@ -39,8 +46,95 @@ msgid "%s: Sell"
 msgstr "%s: Prodaj"
 
 #. module: cyllo_asset_management
-#: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_leasing
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__quarterly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__quarterly
+msgid "3 Months"
+msgstr "3 mjeseca"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__semi_annually
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__semi_annually
+msgid "6 Months"
+msgstr "6 mjeseci"
+
+#. module: cyllo_asset_management
 #: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_rental
+msgid ""
+"<div style=\"margin: 0px; padding:0px;\">\n"
+"                <div>\n"
+"                    Dear\n"
+"                    <t t-out=\"ctx.get('customer') or not_available\">,</t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    I hope this email finds you well. We are pleased to confirm the Rental arrangement for the\n"
+"                    following asset:\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Asset Name:\n"
+"                    <t t-out=\"ctx.get('asset') or not_available\"></t>\n"
+"                    Rental Start Date:\n"
+"                    <t t-out=\"ctx.get('start_date') or not_available\"></t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Rental End Date:\n"
+"                    <t t-out=\"ctx.get('end_date') or not_available\"></t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    As per the agreement, please ensure timely payment of the lease fees and adhere to the terms\n"
+"                    outlined therein.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Should you have any questions or require further clarification regarding the lease\n"
+"                    agreement, feel free to contact us at your convenience.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    If you have any questions or need further assistance, please don't hesitate to contact us.\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    Best regards,\n"
+"                    <br>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div style = \"margin: 0px; padding: 0px;\">\n"
+"<IV>\n"
+"Dragi\n"
+"<t t-out = \"ctx.get ('kupac') ili not_available\">, </t>\n"
+"<br>\n"
+"<br>\n"
+"Nadam se da će vas ova e -pošta dobro pronaći.Zadovoljstvo nam je potvrditi aranžman za zakup za\n"
+"Sljedeća imovina:\n"
+"<br>\n"
+"<br>\n"
+"Ime imovine:\n"
+"<t t-out = \"ctx.get ('imovina') ili not_available\"> </t>\n"
+"Datum početka zakupa:\n"
+"<t t-out = \"ctx.get ('start_date') ili not_available\"> </t>\n"
+"<br>\n"
+"<br>\n"
+"Datum kraja zakupa:\n"
+"<t t-out = \"ctx.get ('end_date') ili not_available\"> </t>\n"
+"<br>\n"
+"<br>\n"
+"Prema sporazumu, molimo osigurajte pravovremeno plaćanje naknada za zakup i pridržavajte se uvjeta\n"
+"opisano u njemu.\n"
+"<br>\n"
+"<br>\n"
+"Ako imate bilo kakvih pitanja ili zahtijevate daljnje pojašnjenje u vezi s najma\n"
+"Sporazum, slobodno nas kontaktirajte na vašu udobnost.\n"
+"<br>\n"
+"<br>\n"
+"Ako imate bilo kakvih pitanja ili trebate daljnju pomoć, ne ustručavajte se kontaktirati nas.\n"
+"<br>\n"
+"<br>\n"
+"Najbolje pozdrav,\n"
+"<br>\n"
+"</IV>\n"
+"</IV>"
+
+#. module: cyllo_asset_management
+#: model:mail.template,body_html:cyllo_asset_management.mail_template_asset_leasing
 msgid ""
 "<div style=\"margin: 0px; padding:0px;\">\n"
 "                <div>\n"
@@ -406,65 +500,98 @@ msgstr ""
 "</IV>"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Reservation"
-msgstr "Rezervacija"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset has insurance"
+msgstr "<i class=\"fa fa-shield\"/>\n                    Imovina je osigurana"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
-msgid "Invoice"
-msgstr "Dostavnica"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset has warranty"
+msgstr "<i class=\"fa fa-shield\"/>\n                    Imovina je pod jamstvom"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Rental"
-msgstr "Iznajmljivanje"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-shield\"/>\n"
+"                    Asset is under warranty"
+msgstr "<i class=\"fa fa-shield\"/>\n                    Imovina je pod jamstvom"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Lease"
-msgstr "Zakup"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid ""
+"<i class=\"fa fa-umbrella\"/>\n"
+"                    Asset is under insurance"
+msgstr "<i class=\"fa fa-umbrella\"/>\n                    Imovina je osigurana"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Maintenance"
-msgstr "Održavanje"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_insurance_form
+msgid ""
+"<i class=\"o_button_icon fa fa-fw fa-briefcase\"/>\n"
+"                            Assets ("
+msgstr "<i class=\"o_button_icon fa fa-fw fa-briefcase\"/>\n                            Imovina ("
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Repair"
-msgstr "Popravak"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Assign"
-msgstr "Attribuer"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_insurance_form
+msgid ""
+"<i class=\"o_button_icon fa fa-fw fa-pencil-square-o\"/>\n"
+"                            Claims ("
+msgstr "<i class=\"o_button_icon fa fa-fw fa-pencil-square-o\"/>\n                            Odštetni zahtjevi ("
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form2
-msgid "/ day"
-msgstr "/ dan"
+msgid "<span class=\"ms-3\">/ dan</span>"
+msgstr "<span class=\"ms-3\">/ dan</span>"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid ""
-"<span>You cannot complete this operation, The related asset is already taken for another\n"
-"                        operation.\n"
-"                    </span>\n"
-"                    <br/>\n"
-"                    <span>Are you sure to delete all records ?</span>\n"
-"                    <br/>\n"
-"                    <br/>"
-msgstr ""
-"<span> Ne možete dovršiti ovu operaciju, srodna imovina već je uzeta za drugo\n"
-"Operacija.\n"
-"</span>\n"
-"<br/>\n"
-"<Spans> Jeste li sigurno izbrisali sve zapise? </span>\n"
-"<br/>\n"
-"<br/>"
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Assign</span>"
+msgstr "<span class=\"o_stat_text\">Dodijeli</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Bookings</span>"
+msgstr "<span class=\"o_stat_text\">Rezervacije</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
+msgid "<span class=\"o_stat_text\">Invoice</span>"
+msgstr "<span class=\"o_stat_text\">Račun</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Journal Entries</span>"
+msgstr "<span class=\"o_stat_text\">Knjiženja</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Lease</span>"
+msgstr "<span class=\"o_stat_text\">Najam</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Maintenance/Repair</span>"
+msgstr "<span class=\"o_stat_text\">Održavanje/Popravak</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Modified Assets</span>"
+msgstr "<span class=\"o_stat_text\">Izmijenjeno Imovina</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Rental</span>"
+msgstr "<span class=\"o_stat_text\">Iznajmljivanje</span>"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "<span class=\"o_stat_text\">Reservation</span>"
+msgstr "<span class=\"o_stat_text\">Rezervacija</span>"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
@@ -482,9 +609,9 @@ msgid "Account Asset Brands"
 msgstr "Brendovi računa"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_account_asset_repair
-msgid "Account Assets Repair"
-msgstr "Popravak imovine računa"
+#: model:ir.model,name:cyllo_asset_management.model_asset_insurance_type
+msgid "Account Asset Insurance Type"
+msgstr "Vrsta osiguranja imovine"
 
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_asset_item
@@ -494,12 +621,27 @@ msgstr "Stavka računa"
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_account_move_reversal
 msgid "Account Move Reversal"
-msgstr "Renversement de l'écriture comptable"
+msgstr "Storno računovodstvenog naloga"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_scrap
-msgid "Account Scrap"
-msgstr "Račun"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_depreciation_account_id
+msgid "Account used to record accumulated depreciation."
+msgstr "Konto za evidentiranje akumulirane amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__loss_account_id
+msgid "Account used to record any loss generated during asset disposal."
+msgstr "Konto za evidentiranje gubitka nastalog pri otuđenju imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_loss_account_id
+msgid "Account used to record asset loss or disposal entries."
+msgstr "Konto za evidentiranje gubitka imovine ili knjiženja otuđenja."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__fixed_asset_account_id
+msgid "Account used to record the asset value."
+msgstr "Konto za evidentiranje vrijednosti imovine."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
@@ -513,23 +655,23 @@ msgid "Accumulated Depreciation"
 msgstr "Akumulirana amortizacija"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_depreciation_account_id
+msgid "Accumulated depreciation account used for depreciation entries."
+msgstr "Konto akumulirane amortizacije za knjiženja amortizacije."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__asset_action
 msgid "Action"
 msgstr "Akcijski"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_needaction
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_needaction
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_needaction
 msgid "Action Needed"
 msgstr "Potrebna radnja"
 
@@ -539,9 +681,29 @@ msgstr "Potrebna radnja"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__active
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__active
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__active
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__active
 msgid "Active"
 msgstr "Aktivan"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__activity_count
+msgid "Activity Count"
+msgstr "Broj aktivnosti"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__activity_type
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Activity Type"
+msgstr "Vrsta aktivnosti"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__note
+msgid "Additional notes or remarks regarding the asset sale or disposal."
+msgstr "Dodatne napomene o prodaji ili otuđenju imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__reservation_note
+msgid "Additional notes related to the reservation."
+msgstr "Dodatne napomene povezane s rezervacijom."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__lease_amount
@@ -550,12 +712,16 @@ msgid "Amount"
 msgstr "Iznositi"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__salvage_value
+msgid "Amount to be depreciated after asset modification."
+msgstr "Iznos amortizacije nakon izmjene imovine."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Archived"
 msgstr "Arhiviran"
 
@@ -565,20 +731,21 @@ msgid "Assent Rental Invoice Due Reminder"
 msgstr "Račun za najamni zastupni podsjetnik"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__asset_asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__asset_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__asset_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__asset_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__asset_id
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_categ
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__asset_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -586,10 +753,19 @@ msgstr "Račun za najamni zastupni podsjetnik"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_modify_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Asset"
 msgstr "Imovina"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_asset_report_all
+#: model:ir.model,name:cyllo_asset_management.model_asset_report
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Asset Activity Analysis"
+msgstr "Analiza aktivnosti imovine"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__asset_asset_id
@@ -618,29 +794,8 @@ msgid "Asset Automation"
 msgstr "Automatizacija imovine"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_brand
-msgid "Asset Brand"
-msgstr "Marka imovine"
-
-#. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_cancel_warning
-msgid "Asset Cancel Warning"
-msgstr "Upozorenje imovina otkaza"
-
-#. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_cancel_warning
-msgid "Asset Cancel warning"
-msgstr "Upozorenje imovina otkaza"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Asset Depreciation"
-msgstr "Amortizacija imovine"
-
-#. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_asset_depreciation_line
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__depreciation_line_ids
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Asset Depreciation Line"
 msgstr "Linija amortizacije imovine"
 
@@ -652,8 +807,18 @@ msgid "Asset Expense Account"
 msgstr "Račun troškova imovine"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__asset_item_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__asset_item_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__asset_id
+msgid "Asset ID"
+msgstr "Imovina ID"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_insurance
+#: model:ir.model,name:cyllo_asset_management.model_asset_asset_insurance
+#: model:ir.model,name:cyllo_asset_management.model_asset_insurance
+msgid "Asset Insurance"
+msgstr "Osiguranje imovine"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_item_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Asset Item"
@@ -673,20 +838,36 @@ msgid "Asset Journal"
 msgstr "Imovina"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_lease_count
+msgid "Asset Lease Count"
+msgstr "Broj najmova imovine"
+
+#. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_leasing
 #: model:mail.template,subject:cyllo_asset_management.mail_template_asset_leasing
 msgid "Asset Leasing"
 msgstr "Zakup imovine"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_asset_lost
-msgid "Asset Lost"
-msgstr "Imovina izgubljena"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_loss_account_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_loss_account_id
+msgid "Asset Loss Account"
+msgstr "Konto gubitka imovine"
 
 #. module: cyllo_asset_management
-#: model:ir.model,name:cyllo_asset_management.model_account_asset_maintenance
-msgid "Asset Maintenance"
-msgstr "Održavanje imovine"
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_asset_maintenance_request_menu
+msgid "Asset Maintenance / Repair"
+msgstr "Održavanje/popravak imovine"
+
+#. module: cyllo_asset_management
+#: model:ir.module.category,name:cyllo_asset_management.module_category_asset_management
+msgid "Asset Management"
+msgstr "Upravljanje imovinom"
+
+#. module: cyllo_asset_management
+#: model:res.groups,name:cyllo_asset_management.group_cyllo_asset_admin
+msgid "Asset Manager"
+msgstr "Voditelj imovine"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__asset_model_id
@@ -695,8 +876,20 @@ msgstr "Model imovine"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
-msgid "Asset Model name"
+msgid "Asset Model Name"
 msgstr "Naziv modela imovine"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_dispose_list
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_list
+msgid "Asset Name"
+msgstr "Naziv imovine"
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_activity_report
+msgid "Asset Operations"
+msgstr "Operacije imovine"
 
 #. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_rental
@@ -705,42 +898,18 @@ msgid "Asset Rental"
 msgstr "Najam imovine"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Asset Rental Value"
-msgstr "Vrijednost najma imovine"
-
-#. module: cyllo_asset_management
 #: model:mail.template,name:cyllo_asset_management.mail_template_asset_reservation
 #: model:mail.template,subject:cyllo_asset_management.mail_template_asset_reservation
 msgid "Asset Reservation"
 msgstr "Rezervacija imovine"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_scrap
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_scrap
-msgid "Asset Scrap"
-msgstr "Imovina"
-
-#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__sell_dispose_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__sell_dispose_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__sell_dispose_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__sell_dispose_id
 msgid "Asset Sell"
 msgstr "Imovina prodati"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_type_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_type_id
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
-msgid "Asset Type"
-msgstr "Vrsta imovine"
-
-#. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_types
-#: model:ir.model,name:cyllo_asset_management.model_asset_type
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_types
-msgid "Asset Types"
-msgstr "Vrste imovine"
 
 #. module: cyllo_asset_management
 #: model:res.groups,name:cyllo_asset_management.group_cyllo_asset_users
@@ -748,9 +917,56 @@ msgid "Asset Users"
 msgstr "Korisnici imovine"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Asset name"
-msgstr "Ime imovine"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__fixed_asset_account_id
+msgid "Asset account used for recording the modified asset value."
+msgstr "Konto imovine za evidentiranje izmijenjene vrijednosti imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__asset_id
+msgid "Asset associated with this booking."
+msgstr "Imovina povezana s ovom rezervacijom."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__depreciation_id
+msgid "Asset associated with this depreciation line."
+msgstr "Imovina povezana s ovom stavkom amortizacije."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_booking.py:0
+#, python-format
+msgid "Asset is not available due to cooldown period."
+msgstr "Imovina nije dostupna tijekom razdoblja čekanja."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__asset_id
+msgid "Asset selected for leasing."
+msgstr "Imovina odabrana za najam."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_asset_id
+msgid "Asset selected for modification or revaluation."
+msgstr "Imovina odabrana za izmjenu ili revalorizaciju."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__asset_id
+msgid "Asset selected for rental."
+msgstr "Imovina odabrana za iznajmljivanje."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__asset_id
+msgid "Asset selected for reservation."
+msgstr "Imovina odabrana za rezervaciju."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__asset_asset_id
+msgid "Asset selected for sell, disposal, scrap, or lost operations."
+msgstr "Imovina odabrana za prodaju, otuđenje, rashodovanje ili evidentiranje gubitka."
+
+#. module: cyllo_asset_management
+#: model:ir.actions.server,name:cyllo_asset_management.ir_cron_asset_generate_maintenance_requests_ir_actions_server
+msgid "Asset: Generate Scheduled Maintenance Requests"
+msgstr "Imovina: izradi planirane zahtjeve za održavanje"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.ir_cron_asset_reminder_email_for_asset_rental_invoices_ir_actions_server
@@ -763,6 +979,8 @@ msgid "Asset: Reminder Email For Returning Leased Assets"
 msgstr "Imovina: Podsjetnik e -pošta za povratak zakupljene imovine"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset_insurance.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_assets
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__asset_asset_ids
@@ -770,13 +988,19 @@ msgstr "Imovina: Podsjetnik e -pošta za povratak zakupljene imovine"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__asset_asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__asset_asset_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_count
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__asset_asset_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__name
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_assets
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_assets_categ
+#, python-format
 msgid "Assets"
 msgstr "Imovina"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_assign
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_assign
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__assign
@@ -785,6 +1009,7 @@ msgstr "Imovina"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form2
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
+#, python-format
 msgid "Assign"
 msgstr "Dodijeliti"
 
@@ -806,23 +1031,17 @@ msgstr "Dodijeljen"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Assigned Asset"
 msgstr "Dodijeljena imovina"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_attachment_count
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_attachment_count
 msgid "Attachment Count"
 msgstr "Brojanje privrženosti"
 
@@ -833,9 +1052,37 @@ msgid "Auto Calculate"
 msgstr "Automatsko izračunavanje"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__automatic_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__automatic_maintenance
+msgid "Automatic Maintenance"
+msgstr "Automatsko održavanje"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__is_auto_calculate
+msgid "Automatically calculate the depreciation factor."
+msgstr "Automatski izračunaj faktor amortizacije."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_account_form
 msgid "Automation"
 msgstr "Automatizacija"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__availability_warning
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__availability_warning
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__availability_warning
+msgid "Availability Warning"
+msgstr "Upozorenje o dostupnosti"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__asset_ids
+msgid "Available assets for the selected lease period."
+msgstr "Dostupna imovina za odabrano razdoblje najma."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__asset_ids
+msgid "Available assets for the selected rental period."
+msgstr "Dostupna imovina za odabrano razdoblje iznajmljivanja."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_type__complete
@@ -853,17 +1100,58 @@ msgid "Book Value at Year End"
 msgstr "Knjigovodstvena vrijednost na kraju godine"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__booking_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__booking_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__booking_id
+msgid "Booking ID"
+msgstr "ID rezervacije"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__booking_type
+msgid "Booking Type"
+msgstr "Vrsta rezervacije"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__booking_id
+msgid "Booking record linked to this lease."
+msgstr "Rezervacija povezana s ovim najmom."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__booking_id
+msgid "Booking record linked to this rental."
+msgstr "Rezervacija povezana s ovim iznajmljivanjem."
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_booking_search_default_filter
+msgid "Bookings in draft"
+msgstr "Rezervacije u nacrtu"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__brand_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__brand_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__brand_ids
 msgid "Brand"
 msgstr "Marka"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__brand_ids
-msgid "Brands"
-msgstr "Brendovi"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__brand_id
+msgid "Brand associated with the asset."
+msgstr "Marka povezana s imovinom."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_monitor_dispose
+msgid "Broken Monitor - Disposed"
+msgstr "Neispravan monitor - otuđen"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__buffer_period
+msgid "Buffer Period"
+msgstr "Razdoblje odgode"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__rent_amount
+msgid "Calculated rental amount based on the selected payment terms."
+msgstr "Iznos najma izračunat prema odabranim uvjetima plaćanja."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__cancel
@@ -871,30 +1159,109 @@ msgstr "Brendovi"
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__cancel
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__cancel
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_modify_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 msgid "Cancel"
 msgstr "Otkazati"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__cancel
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__cancelled
 msgid "Cancelled"
 msgstr "Otkazan"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__asset_action
+msgid "Choose whether to sell the asset or dispose of it."
+msgstr "Odaberite želite li prodati ili otuđiti imovinu."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_switch_rental
+msgid "Cisco Switch Catalyst (Rental)"
+msgstr "Cisco Catalyst preklopnik (iznajmljivanje)"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "Claim Insurance"
+msgstr "Podnesi odštetni zahtjev osiguranju"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Claim insurance"
+msgstr "Podnesi odštetni zahtjev osiguranju"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__insurance_amount
+msgid "Claiming amount"
+msgstr "Iznos odštetnog zahtjeva"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset_insurance.py:0
+#, python-format
+msgid "Claims"
+msgstr "Odštetni zahtjevi"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__company_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__company_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__company_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__company_id
 msgid "Company"
 msgstr "Društvo"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__company_id
+msgid "Company associated with this asset sale or disposal record."
+msgstr "Tvrtka povezana sa zapisom o prodaji ili otuđenju imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__company_id
+msgid "Company associated with this asset."
+msgstr "Odaberite tvrtku"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__company_id
+msgid "Company associated with this brand."
+msgstr "Odaberite tvrtku"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__company_id
+msgid "Company associated with this depreciation line."
+msgstr "Odaberite tvrtku"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__company_id
+msgid "Company associated with this lease."
+msgstr "Odaberite tvrtku"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__company_id
+msgid "Company associated with this rental."
+msgstr "Odaberite tvrtku"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__company_id
+msgid "Company associated with this reservation."
+msgstr "Odaberite tvrtku"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__company_id
+msgid "Company responsible for this booking."
+msgstr "Tvrtka odgovorna za ovu rezervaciju."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__computation_method
@@ -903,8 +1270,11 @@ msgid "Computation"
 msgstr "Računanje"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__confirm
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__confirm
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_categ
+msgid "Configuration"
+msgstr "Imovina"
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Confirm"
 msgstr "Potvrditi"
@@ -912,13 +1282,30 @@ msgstr "Potvrditi"
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_confirm
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_modify
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__confirmed
 msgid "Confirmed"
 msgstr "Potvrđen"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__computation_method__constant_period
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__computation_method__constant_period
 msgid "Constant Period"
 msgstr "Stalno razdoblje"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__buffer_duration
+msgid "Cool Down Duration"
+msgstr "Trajanje čekanja"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Cool down duation"
+msgstr "Razdoblje čekanja"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Create Bill"
+msgstr "Izradi ulazni račun"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
@@ -935,68 +1322,96 @@ msgid "Create Rental"
 msgstr "Stvorite iznajmljivanje"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__create_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__create_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__create_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__create_uid
 msgid "Created by"
 msgstr "Stvorio"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__create_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__create_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__create_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__create_date
 msgid "Created on"
 msgstr "Stvoren na"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__claiming_currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__currency_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__currency_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__currency_id
 msgid "Currency"
 msgstr "Valuta"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__currency_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__currency_id
 msgid "Currency of company"
 msgstr "Valuta tvrtke"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__current_depreciated_amount
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__currency_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__currency_id
+msgid "Currency used by the company."
+msgstr "Valuta tvrtke"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__current_depreciated_amount
 msgid "Current Depreciated Amount"
 msgstr "Trenutni amortizirani iznos"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__current_depreciated_amount
+msgid ""
+"Current depreciation amount considered during the sale or disposal process."
+msgstr "Trenutačni iznos amortizacije koji se uzima u obzir pri prodaji ili otuđenju."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__state
+msgid "Current status of the booking."
+msgstr "Trenutačno stanje rezervacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__status
+msgid "Current status of the lease."
+msgstr "Trenutačno stanje najma."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__status
+msgid "Current status of the rental."
+msgstr "Trenutačno stanje iznajmljivanja."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__status
+msgid "Current status of the reservation."
+msgstr "Trenutačno stanje rezervacije."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__customer_id
@@ -1005,6 +1420,26 @@ msgstr "Trenutni amortizirani iznos"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 msgid "Customer"
 msgstr "Kupac"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__invoice_ids
+msgid "Customer invoices related to the asset sale."
+msgstr "Izlazni računi povezani s prodajom imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__customer_id
+msgid "Customer leasing the asset."
+msgstr "Kupac koji unajmljuje imovinu."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__partner_id
+msgid "Customer or contact linked to the booking."
+msgstr "Kupac ili kontakt povezan s rezervacijom."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__customer_id
+msgid "Customer renting the asset."
+msgstr "Kupac koji iznajmljuje imovinu."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
@@ -1017,6 +1452,7 @@ msgid "Daily"
 msgstr "Dnevno"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__computation_method__daily_compute
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__computation_method__daily_compute
 msgid "Daily Computation"
 msgstr "Dnevno računanje"
@@ -1027,13 +1463,47 @@ msgid "Damaged"
 msgstr "Oštećen"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__date
 msgid "Date"
 msgstr "Datum"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__date_from
+msgid "Date From"
+msgstr "Od datuma"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__date_to
+msgid "Date To"
+msgstr "Do datuma"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__depreciation_date
+msgid "Date from which depreciation will be recalculated."
+msgstr "Datum od kojeg će se amortizacija ponovno izračunati."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__date
+msgid "Date on which the asset sale or disposal is processed."
+msgstr "Datum obrade prodaje ili otuđenja imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__date
+msgid "Date on which the depreciation is recorded."
+msgstr "Datum evidentiranja amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__date
+msgid "Date on which the reservation record was created."
+msgstr "Datum izrade zapisa rezervacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__day
+msgid "Day"
+msgstr "Dan"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__day_amount
@@ -1041,26 +1511,68 @@ msgid "Day Amount"
 msgstr "Dnevna količina"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__days
+msgid "Days"
+msgstr "Dani"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__depreciation_method__declining_balance
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__depreciation_method__declining_balance
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__depreciation_method__declining_balance
 msgid "Declining Balance"
 msgstr "Opadanje ravnoteže"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__depreciation_method__declining_straight_line
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__depreciation_method__declining_straight_line
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__depreciation_method__declining_straight_line
 msgid "Declining and Straight Line"
 msgstr "Opadanje i ravna linija"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid "Delete Records"
-msgstr "Izbriši zapise"
+#: model:asset.asset,name:cyllo_asset_management.asset_dell_laptop_01
+msgid "Dell Latitude 5420 - Laptop 01"
+msgstr "Dell Latitude 5420 - prijenosno računalo 01"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_depreciation
+msgid "Demo Accumulated Depreciation Account"
+msgstr "Probni konto akumulirane amortizacije"
+
+#. module: cyllo_asset_management
+#: model:account.journal,name:cyllo_asset_management.journal_demo_asset
+msgid "Demo Asset Journal"
+msgstr "Probni dnevnik imovine"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_loss
+msgid "Demo Asset Loss Account"
+msgstr "Probni konto gubitka imovine"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_expense
+msgid "Demo Depreciation Expense Account"
+msgstr "Probni konto troška amortizacije"
+
+#. module: cyllo_asset_management
+#: model:account.account,name:cyllo_asset_management.account_demo_fixed_asset
+msgid "Demo Fixed Assets Account"
+msgstr "Probni konto dugotrajne imovine"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__department_id
 msgid "Department"
 msgstr "Odjel"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__salvage_value
+msgid "Depreciatable Value"
+msgstr "Vrijednost spašavanja"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__salvage_value
+msgid "Depreciatable value"
+msgstr "Vrijednost spašavanja"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_depreciate
@@ -1069,7 +1581,6 @@ msgid "Depreciate"
 msgstr "Amortizirati"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__depreciated_amount
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__depreciated_amount
 msgid "Depreciated Amount"
 msgstr "Amortizirani iznos"
@@ -1113,6 +1624,8 @@ msgstr "Trošak"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__depreciation_line_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__depreciation_line_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__depreciation_line_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__depreciation_line_id
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Depreciation Line"
 msgstr "Amortizacija"
 
@@ -1122,37 +1635,91 @@ msgid "Depreciation Lines"
 msgstr "Amortizacijske linije"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "Depreciation and Accounting"
+msgstr "Amortizacija i računovodstvo"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__depreciation_date
 msgid "Depreciation date"
 msgstr "Datum amortizacije"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__display_name
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__depreciation_expense
+msgid "Depreciation expense amount for the period."
+msgstr "Iznos troška amortizacije za razdoblje."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__depreciation_method
+msgid "Depreciation method to be applied for the modified asset."
+msgstr "Metoda amortizacije za izmijenjenu imovinu."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__year
+msgid "Depreciation year or period sequence."
+msgstr "Redoslijed godine ili razdoblja amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__active
+msgid "Determines whether the lease record is active."
+msgstr "Određuje je li zapis najma aktivan."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__active
+msgid "Determines whether the rental record is active."
+msgstr "Određuje je li zapis iznajmljivanja aktivan."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__active
+msgid "Determines whether the reservation record is active."
+msgstr "Određuje je li zapis rezervacije aktivan."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__display_name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__display_name
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__display_name
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__display_name
 msgid "Display Name"
 msgstr "Prikaz ime"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__availability_warning
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__availability_warning
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__availability_warning
+msgid "Displays asset availability warnings for the selected date range."
+msgstr "Prikazuje upozorenja o dostupnosti imovine za odabrano razdoblje."
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell_dispose
+msgid "Disposal"
+msgstr "Rashodovanje"
+
+#. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_dispose
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_dispose
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__disposed
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__asset_action__dispose
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__dispose
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_dispose
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Dispose"
-msgstr "Raspolagati"
+msgstr "Odložiti"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__disposal_type
+msgid "Dispose Type"
+msgstr "Vrsta otuđenja"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -1161,7 +1728,7 @@ msgstr "Raspoložen"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__is_done
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__done
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__done
 msgid "Done"
 msgstr "Završen"
 
@@ -1169,10 +1736,10 @@ msgstr "Završen"
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_account__asset_creation__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_assign__status__draft
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__state__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_lease__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__draft
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__draft
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_scrap__status__draft
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Draft"
 msgstr "Nacrt"
@@ -1195,10 +1762,33 @@ msgid "Duration Period"
 msgstr "Razdoblje trajanja"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Duration must be greater than zero when Salvage Value is greater than zero."
+msgstr "Trajanje mora biti veće od nule ako je ostatna vrijednost veća od nule."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Duration must be greater than zero when the depreciable value is greater "
+"than zero."
+msgstr "Trajanje mora biti veće od nule ako je amortizirajuća vrijednost veća od nule."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__email
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__email
 msgid "Email"
 msgstr "E -pošta"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__email
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__email
+msgid "Email address of the customer."
+msgstr "Adresa e-pošte kupca."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__employee_id
@@ -1209,11 +1799,36 @@ msgid "Employee"
 msgstr "Zaposlenik"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__employee_id
+msgid "Employee for whom the asset is reserved."
+msgstr "Zaposlenik za kojeg je imovina rezervirana."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__reimburse_after_invoice
+msgid "Enable if insurance reimbursement happens after invoice creation."
+msgstr "Omogućite ako se naknada osiguranja isplaćuje nakon izrade računa."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__is_quality
+msgid "Enable to activate quality check on assets related to this asset item."
+msgstr "Omogućite kontrolu kvalitete imovine povezane s ovom stavkom imovine."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__end_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__end_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__end_date
 msgid "End"
 msgstr "Kraj"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_end_date
+msgid "End date"
+msgstr "Datum završetka"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__date_to
+msgid "End date and time of the booking."
+msgstr "Datum i vrijeme završetka rezervacije."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_entry
@@ -1227,6 +1842,27 @@ msgid "Entry Count"
 msgstr "Brojanje unosa"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__expense
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__expense
+msgid "Expense"
+msgstr "Trošak"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_expense_account_id
+msgid "Expense account used for depreciation entries."
+msgstr "Konto troškova za knjiženja amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_expense_account_id
+msgid "Expense account used to record depreciation expenses."
+msgstr "Konto troškova za evidentiranje troškova amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__depreciating_factor
+msgid "Factor used for declining depreciation methods."
+msgstr "Faktor za metode degresivne amortizacije."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__fixed_asset_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__fixed_asset_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__fixed_asset_account_id
@@ -1234,34 +1870,24 @@ msgid "Fixed Asset Account"
 msgstr "Račun fiksne imovine"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_follower_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_follower_ids
 msgid "Followers"
 msgstr "Sljedbenici"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_partner_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "Sljedbenici (partneri)"
 
@@ -1271,9 +1897,24 @@ msgid "For updating the bills"
 msgstr "Za ažuriranje računa"
 
 #. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_forklift_repair
+msgid "Forklift Hyster - Repair"
+msgstr "Viličar Hyster - popravak"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__payment_terms
+msgid "Frequency used for rental billing."
+msgstr "Učestalost obračuna najma."
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Gain Account"
 msgstr "Dobiti račun"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+msgid "Group By"
+msgstr "Grupiraj po"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
@@ -1281,73 +1922,82 @@ msgstr "Dobiti račun"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_search
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_scrap_search
 msgid "Group By..."
 msgstr "Grupa po ..."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__has_message
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_billed
+msgid "Has Billed"
+msgstr "Fakturirano"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__under_insurance
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_insurance
+msgid "Has Insurance"
+msgstr "Has Osiguranje"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__has_message
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__has_message
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__has_message
 msgid "Has Message"
 msgstr "Ima poruku"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__has_warranty
+msgid "Has Warranty"
+msgstr "Has Jamstvo"
+
+#. module: cyllo_asset_management
+#: model:ir.module.category,description:cyllo_asset_management.module_category_asset_management
+msgid "Helps to manage various assets operations"
+msgstr "Pomaže u upravljanju različitim operacijama s imovinom."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__hour
+msgid "Hour"
+msgstr "Sat"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_number
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_report__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__id
 msgid "ID"
 msgstr "Iskaznica"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_needaction
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_needaction
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "Ako se provjeri, nove poruke zahtijevaju vašu pažnju."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_has_error
@@ -1356,12 +2006,8 @@ msgstr "Ako se provjeri, nove poruke zahtijevaju vašu pažnju."
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_error
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_sms_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_error
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Ako se provjeri, neke poruke imaju pogrešku u isporuci."
 
@@ -1375,10 +2021,70 @@ msgstr ""
 "stavka časopisa objavila"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__is_invoice
+msgid "Indicates whether an invoice has been created for this lease."
+msgstr "Označava je li izrađen račun za ovaj najam."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__is_invoice
+msgid "Indicates whether invoices have been generated."
+msgstr "Označava jesu li računi izrađeni."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__is_return
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__is_return
+msgid "Indicates whether the asset has been returned."
+msgstr "Označava je li imovina vraćena."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_done
+msgid ""
+"Indicates whether the asset sale or disposal process has been completed."
+msgstr "Označava je li dovršen postupak prodaje ili otuđenja imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_posted
+msgid "Indicates whether the related accounting entries have been posted."
+msgstr "Označava jesu li povezana računovodstvena knjiženja proknjižena."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__is_depreciated
+msgid "Indicates whether this depreciation line has been processed."
+msgstr "Označava je li ova stavka amortizacije obrađena."
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_asset_insurance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Insurance"
+msgstr "Osiguranje"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__invoiced_amount
+msgid "Insurance Amount"
+msgstr "Iznos osiguranja"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_search_claim_only
+msgid "Insurance Claims"
+msgstr "Odštetni zahtjevi iz osiguranja"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_attachment_ids
+msgid "Insurance Documents"
+msgstr "Dokumenti osiguranja"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__partner_id
+msgid "Insurance Provider"
+msgstr "Pružatelj osiguranja"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__invoice_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__account_move_count
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__asset_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__invoice_count
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__invoice_ids
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__transaction_count
 msgid "Invoice"
 msgstr "Dostavnica"
 
@@ -1387,6 +2093,28 @@ msgstr "Dostavnica"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__invoice_line_ids
 msgid "Invoice Line"
 msgstr "Faktura"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__invoice_line_ids
+msgid "Invoice lines associated with the selected sale invoices."
+msgstr "Stavke računa povezane s odabranim izlaznim računima."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__invoiced_amount
+msgid "Invoiced Amount"
+msgstr "Račund Iznos"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
+msgid "Invoices"
+msgstr "Računi"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "Invoices / Bills"
+msgstr "Računi"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_decrease_value
@@ -1399,18 +2127,13 @@ msgid "Is Depreciated"
 msgstr "Je amortiran"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_is_follower
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_is_follower
 msgid "Is Follower"
 msgstr "Je sljedbenik"
 
@@ -1431,10 +2154,14 @@ msgid "Is Lease Asset"
 msgstr "Je li imovina zakupa"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__is_posted
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__is_posted
 msgid "Is Posted"
 msgstr "Je objavljeno"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__is_reimburse
+msgid "Is Reimburse"
+msgstr "Za nadoknadu"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
@@ -1458,14 +2185,9 @@ msgid "Is Revaluate"
 msgstr "Je revaloate"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__is_scrap
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__is_scrap
 msgid "Is Scrap"
 msgstr "Je li otpad"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Journal Entries"
-msgstr "Unosi u časopise"
 
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_account_move
@@ -1474,56 +2196,75 @@ msgid "Journal Entry"
 msgstr "Pièce comptable"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__write_uid
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__asset_journal_id
+msgid "Journal used for creating depreciation accounting entries."
+msgstr "Dnevnik za izradu računovodstvenih knjiženja amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__asset_journal_id
+msgid "Journal used for depreciation and asset accounting entries."
+msgstr "Dnevnik za računovodstvena knjiženja imovine i amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__last_maintenance_date
+msgid "Last Maintenance Date"
+msgstr "Datum posljednjeg održavanja"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__write_uid
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__write_uid
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__write_uid
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__write_uid
 msgid "Last Updated by"
 msgstr "Zadnji put ažurirao"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_cancel_warning__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__write_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__write_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__write_date
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__write_date
 msgid "Last Updated on"
 msgstr "Zadnji put ažurirano o"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_lease
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_lease
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__lease_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__lease_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__lease_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__lease_id
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__lease
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_lease__status__lease
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__lease
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__lease
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_lease
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form2
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+#, python-format
 msgid "Lease"
 msgstr "Zakup"
 
@@ -1531,6 +2272,23 @@ msgstr "Zakup"
 #: model:ir.model,name:cyllo_asset_management.model_asset_lease
 msgid "Lease Assets"
 msgstr "Imovina zakupa"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__lease_amount
+msgid "Lease amount charged to the customer."
+msgstr "Iznos najma koji se naplaćuje kupcu."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__end_date
+msgid "Lease end date and time. It must be greater than the start date."
+msgstr "Datum i vrijeme završetka najma. Moraju biti nakon datuma početka."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__start_date
+msgid ""
+"Lease start date and time. Select an asset before setting the period. The "
+"selected dates must be after the asset purchase date."
+msgstr "Datum i vrijeme početka najma. Odaberite imovinu prije postavljanja razdoblja. Odabrani datumi moraju biti nakon datuma kupnje imovine."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_lease
@@ -1550,29 +2308,33 @@ msgid "Leased Asset"
 msgstr "Zakupljena imovina"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Leased from %s to %s"
+msgstr "Unajmljeno od %s do %s"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_lost
 msgid "Loss"
 msgstr "Gubitak"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__loss_account_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__loss_account_id
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Loss Account"
 msgstr "Račun gubitka"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_lost
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__lost
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__lost
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lost_form
+#, python-format
 msgid "Lost"
 msgstr "Izgubljen"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__lost_date
-msgid "Lost Date"
-msgstr "Izgubljeni datum"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_lost_missing
@@ -1580,46 +2342,80 @@ msgid "Lost/Missing"
 msgstr "Izgubljeni/nestali"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "MAINTENANCE"
+msgstr "ODRŽAVANJE"
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_macbook_assign
+msgid "MacBook Pro 16 - Assigned"
+msgstr "MacBook Pro 16 - Dodijeljeno"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_maintenance
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__maintenance
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__maintenance
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_insurance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
 msgid "Maintenance"
 msgstr "Održavanje"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__multiple_asset
-msgid "Multiple Asset"
-msgstr "Upravljanje imovinom"
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "Maintenance / Repair"
+msgstr "Održavanje / popravak"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_error
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__maintenance_count
+msgid "Maintenance Count"
+msgstr "Broj održavanja"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/account_move.py:0
+#: model:ir.model,name:cyllo_asset_management.model_maintenance_request
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_account_move_form
+#, python-format
+msgid "Maintenance Request"
+msgstr "Zahtjev za održavanjem"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__maintenance_state
+msgid "Maintenance State"
+msgstr "Stanje održavanja"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: model:ir.actions.server,name:cyllo_asset_management.action_asset_maintenance_request
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_maintenance_repair_request
+#, python-format
+msgid "Maintenance/Repair"
+msgstr "Održavanje/Popravak"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_error
 msgid "Message Delivery error"
 msgstr "Pogreška dostave poruke"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_ids
 msgid "Messages"
 msgstr "Poruke"
 
@@ -1631,13 +2427,23 @@ msgid "Method"
 msgstr "Metoda"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__modified_asset_ids
-msgid "Modified Asset"
-msgstr "Modificirana imovina"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__depreciation_method
+msgid "Method used to calculate asset depreciation."
+msgstr "Metoda izračuna amortizacije imovine."
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Modified Assets"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__payment_type
+msgid "Method used to calculate rental charges."
+msgstr "Metoda izračuna naknada za iznajmljivanje."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__computation_method
+msgid "Method used to compute depreciation amounts."
+msgstr "Metoda izračuna iznosa amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__modified_asset_ids
+msgid "Modified Asset"
 msgstr "Modificirana imovina"
 
 #. module: cyllo_asset_management
@@ -1646,8 +2452,12 @@ msgid "Modified Count"
 msgstr "Izmijenjeni broj"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_modify
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#, python-format
 msgid "Modify Asset"
 msgstr "Izmijenite imovinu"
 
@@ -1662,6 +2472,7 @@ msgid "Modify the Asset"
 msgstr "Izmijenite imovinu"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__duration_period__month
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__duration_period__month
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__duration_period__month
 msgid "Month"
@@ -1673,9 +2484,21 @@ msgid "Month Amount"
 msgstr "Iznos mjeseca"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__monthly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__monthly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__month
 msgid "Monthly"
 msgstr "Mjesečno"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__months
+msgid "Months"
+msgstr "Mjeseci"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_account__multiple_asset
+msgid "Multiple Asset"
+msgstr "Upravljanje imovinom"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_account_account__multiple_asset
@@ -1684,10 +2507,24 @@ msgid ""
 msgstr "Generirat će se više stavki imovine ovisno o količini linije računa"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__new
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__new
-msgid "New"
-msgstr "Novi"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__name
+msgid "Name"
+msgstr "Naziv"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__name
+msgid "Name of the asset brand."
+msgstr "Naziv marke imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__name
+msgid "Name of the asset."
+msgstr "Naziv imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__next_maintenance_date
+msgid "Next Maintenance Date"
+msgstr "Datum sljedećeg održavanja"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_account__asset_creation__no
@@ -1695,13 +2532,29 @@ msgid "No"
 msgstr "Ne"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__no
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__no
+msgid "No Maintenance Required"
+msgstr "Održavanje nije potrebno"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__computation_method__no_prorata
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__computation_method__no_prorata
 msgid "No Prorata"
 msgstr "Nema prona"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "No booking found for this rental."
+msgstr "Nije pronađena rezervacija za ovo iznajmljivanje."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__assign_note
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lost__note
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__note
 msgid "Note"
 msgstr "Bilješka"
@@ -1712,73 +2565,78 @@ msgid "Notes"
 msgstr "Bilješke"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_needaction_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_needaction_counter
 msgid "Number of Actions"
 msgstr "Broj radnji"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__buffer_duration
+msgid "Number of days the asset remains unavailable after a booking ends"
+msgstr "Broj dana tijekom kojih imovina nije dostupna nakon završetka rezervacije."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_error_counter
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_error_counter
 msgid "Number of errors"
 msgstr "Broj pogrešaka"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__invoice_count
+msgid "Number of invoices generated for this rental."
+msgstr "Broj računa izrađenih za ovo iznajmljivanje."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_needaction_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr "Broj poruka koje zahtijevaju radnju"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__message_has_error_counter
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Broj poruka s pogreškom isporuke"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__ongoing
-msgid "Ongoing"
-msgstr "Neprekidan"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__method_duration
+msgid "Number of periods over which the asset is depreciated."
+msgstr "Broj razdoblja tijekom kojih se imovina amortizira."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__method_duration
+msgid "Number of periods over which the asset will be depreciated."
+msgstr "Broj razdoblja tijekom kojih će se imovina amortizirati."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_chair_sell
+msgid "Old Office Chair - Sold"
+msgstr "Stara uredska stolica - prodana"
+
+#. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_operations
+msgid "Operations"
+msgstr "Operacije"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__original_value
@@ -1791,6 +2649,11 @@ msgid "Parent"
 msgstr "Roditelj"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__partner_id
+msgid "Partner"
+msgstr "Kontakt"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__payment_terms
 msgid "Payment Terms"
 msgstr "Uvjeti plaćanja"
@@ -1801,16 +2664,35 @@ msgid "Payment Type"
 msgstr "Vrsta plaćanja"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_period_type
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__start_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__start_date
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__start_date
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 msgid "Period"
 msgstr "Razdoblje"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__duration_period
+msgid "Period unit used for depreciation duration."
+msgstr "Jedinica razdoblja za trajanje amortizacije."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/wizards/asset_insurance_wizard.py:0
+#, python-format
+msgid "Please enter a valid insurance amount"
+msgstr "Unesite valjani iznos osiguranja."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__pre_salvage_value
 msgid "Pre Salvage Value"
 msgstr "Vrijednost prespavanja"
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_projector_reserve
+msgid "Projector Epson - Conference Room"
+msgstr "Projektor Epson - konferencijska soba"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__prorata_date
@@ -1819,14 +2701,42 @@ msgid "Prorata Date"
 msgstr "Datum prorata"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__purchase_date
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__date
 msgid "Purchase Date"
 msgstr "Datum kupnje"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__vendor_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__vendor_id
 msgid "Purchase From"
-msgstr "Kupiti od"
+msgstr "Kupljeno od"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__date
+msgid "Purchase or acquisition date of the asset."
+msgstr "Datum kupnje ili stjecanja imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__is_quality
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
+msgid "Quality Check"
+msgstr "Kontrola kvalitete"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__rating_ids
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__rating_ids
+msgid "Ratings"
+msgstr "Ocjene"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__res_id
+msgid "Record ID of the related document."
+msgstr "ID zapisa povezanog dokumenta."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__reference_note
@@ -1837,6 +2747,33 @@ msgstr "Referenca"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__reference_note
 msgid "Reference Note"
 msgstr "Referentna napomena"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__reference_note
+msgid ""
+"Reference note describing the reason for asset modification or revaluation."
+msgstr "Referentna napomena s razlogom izmjene ili revalorizacije imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__journal_reference
+msgid "Reference of the journal entry created for this depreciation."
+msgstr "Referenca knjiženja izrađenog za ovu amortizaciju."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__reimburse_after_invoice
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__reimburse_after_invoice
+msgid "Reimburse After Invoice"
+msgstr "Nadoknada nakon računa"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Reimburse insurance"
+msgstr "Nadoknadi osiguranje"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__salvage_value
+msgid "Remaining book value of the asset after depreciation."
+msgstr "Preostala knjigovodstvena vrijednost imovine nakon amortizacije."
 
 #. module: cyllo_asset_management
 #: model:mail.template,subject:cyllo_asset_management.mail_template_assent_rental_invoice_due_reminder
@@ -1852,6 +2789,7 @@ msgstr "Podsjetnik: Povratak zakupljenog imovine"
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__rent_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__rent_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__rent_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__rent_id
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__status__rent
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_reservation__status__rent
 msgid "Rent"
@@ -1863,12 +2801,19 @@ msgid "Rent Amount"
 msgstr "Iznos najam"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_rental
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_rental
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_rental
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_booking__booking_type__rental
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_report__activity_type__rent
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_rental
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form2
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_report_search
+#, python-format
 msgid "Rental"
 msgstr "Iznajmljivanje"
 
@@ -1883,26 +2828,86 @@ msgid "Rental Assets"
 msgstr "Imovina za najam"
 
 #. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Rental Value"
+msgstr "Vrijednost iznajmljivanja"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__end_date
+msgid "Rental end date and time. It must be greater than the start date."
+msgstr "Datum i vrijeme završetka iznajmljivanja. Moraju biti nakon datuma početka."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__start_date
+msgid ""
+"Rental start date and time. Select an asset before setting the period. The "
+"selected dates must be after the asset purchase date."
+msgstr "Datum i vrijeme početka iznajmljivanja. Odaberite imovinu prije postavljanja razdoblja. Odabrani datumi moraju biti nakon datuma kupnje imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__rented
+msgid "Rented"
+msgstr "Iznajmljeno"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Rented from %s to %s"
+msgstr "Iznajmljeno od %s do %s"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_bank_statement_line__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_move__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_account_payment__repair_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_pdc_payment__repair_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_repair
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
 msgid "Repair"
 msgstr "Popravak"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__repaired
-msgid "Repaired"
-msgstr "Popravljen"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__repair_id
+msgid "Repair ID"
+msgstr "Popravak ID"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__repairing
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__repair
-msgid "Repairing"
-msgstr "Popravak"
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__partner_id
+msgid "Repair partner"
+msgstr "Partner za popravak"
 
 #. module: cyllo_asset_management
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_reporting_asset
+msgid "Reporting"
+msgstr "Izvještavanje"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "Request"
+msgstr "Zahtjev"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__stage_done
+msgid "Request Done"
+msgstr "Zahtjev dovršen"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__res_id
+msgid "Res"
+msgstr "Zapis"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__res_model
+msgid "Res Model"
+msgstr "Model zapisa"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
 #: model:ir.actions.act_window,name:cyllo_asset_management.action_view_reservations
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__reservation_id
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__reservation_id
@@ -1911,8 +2916,29 @@ msgstr "Popravak"
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form1
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form2
+#, python-format
 msgid "Reservation"
 msgstr "Rezervacija"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__end_date
+msgid "Reservation end date. It must be greater than the start date."
+msgstr "Datum završetka rezervacije mora biti nakon datuma početka."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__reservation_id
+msgid "Reservation linked to this lease."
+msgstr "Rezervacija povezana s ovim najmom."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__reservation_id
+msgid "Reservation linked to this rental."
+msgstr "Rezervacija povezana s ovim iznajmljivanjem."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__start_date
+msgid "Reservation start date."
+msgstr "Datum početka rezervacije."
 
 #. module: cyllo_asset_management
 #: model:ir.ui.menu,name:cyllo_asset_management.menu_reservations
@@ -1945,17 +2971,21 @@ msgid "Reserved Asset"
 msgstr "Rezervirana imovina"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "Reserved from %s to %s"
+msgstr "Rezervirano od %s do %s"
+
+#. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_rental_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
 msgid "Reset to Draft"
 msgstr "Ponovno postavite nacrt"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lease_form
-msgid "Rest to Draft"
-msgstr "Odmor za nacrt"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_lease__status__return
@@ -1975,66 +3005,61 @@ msgid "Revaluate"
 msgstr "Revalirati"
 
 #. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"Reverse the depreciation entries posted in the future in order to modify the"
+" depreciation."
+msgstr "Stornirajte buduća knjiženja amortizacije kako biste mogli izmijeniti amortizaciju."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__running
 msgid "Running"
 msgstr "Trčanje"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__message_has_sms_error
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__message_has_sms_error
 msgid "SMS Delivery error"
 msgstr "Pogreška isporuke SMS -a"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__salvage_value
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_modify__salvage_value
-msgid "Salvage Value"
-msgstr "Vrijednost spašavanja"
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__disposal_type__scrap
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Scrap"
+msgstr "Rashoduj"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_maintenance__status__scrap
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__account_asset_repair__status__scrap
-msgid "Scarp"
-msgstr "Skroz"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__automatic_maintenance
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__automatic_maintenance
+msgid "Select frequency for automatic maintenance request generation."
+msgstr "Odaberite učestalost automatskog stvaranja zahtjeva za održavanje."
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_scrap__status__scraped
-msgid "Scraped"
-msgstr "Izbačen"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__company_id
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset_insurance__company_id
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__company_id
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__company_id
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_insurance_type__company_id
 msgid "Select the company"
 msgstr "Odaberite tvrtku"
 
 #. module: cyllo_asset_management
+#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_sell
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__is_sell
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__status__sell
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_sell_dispose__asset_action__sell
+#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
 msgid "Sell"
-msgstr "Prodavati"
+msgstr "Prodaja"
 
 #. module: cyllo_asset_management
 #: model:ir.model,name:cyllo_asset_management.model_asset_sell_dispose
@@ -2042,16 +3067,15 @@ msgid "Sell and Dispose the Assets"
 msgstr "Prodajte i odložite imovinu"
 
 #. module: cyllo_asset_management
-#: model:ir.actions.act_window,name:cyllo_asset_management.action_view_asset_sell_dispose
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/tests/test_asset_asset.py:0
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_sell_dispose
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_sell_dispose_form
+#, python-format
 msgid "Sell/Dispose"
 msgstr "Prodavati/odlagati"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
-msgid "Selled"
-msgstr "Prodan"
 
 #. module: cyllo_asset_management
 #: model:ir.actions.server,name:cyllo_asset_management.model_asset_asset_request
@@ -2059,32 +3083,72 @@ msgid "Send Mail"
 msgstr "Pošaljite poštu"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__serial_no
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__serial_no
 msgid "Serial No."
-msgstr "Serijski br."
+msgstr "Serijski broj"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__status
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__status
+#: model:asset.asset,name:cyllo_asset_management.asset_server_maintenance
+msgid "Server Rack 42U - Maintenance"
+msgstr "Poslužiteljski ormar 42U - održavanje"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_search
+msgid "Sold"
+msgstr "Prodano"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__disposal_type
+msgid "Specify the type of asset disposal operation."
+msgstr "Odredite vrstu postupka otuđenja imovine."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_start_date
+msgid "Start date"
+msgstr "Datum početka"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__date_from
+msgid "Start date and time of the booking."
+msgstr "Datum i vrijeme početka rezervacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__prorata_date
+msgid "Starting date used for prorata depreciation calculations."
+msgstr "Početni datum za izračun proporcionalne amortizacije."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_booking__state
+msgid "State"
+msgstr "Stanje"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__status
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__status
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__status
 msgid "Status"
 msgstr "Status"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__depreciation_method__straight_line
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__depreciation_method__straight_line
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__depreciation_method__straight_line
 msgid "Straight Line"
 msgstr "Ravna linija"
 
 #. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_lost_form
-msgid "Submit"
-msgstr "Podnijeti"
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__is_entry
+msgid ""
+"Technical field indicating whether depreciation journal entries exist for "
+"the asset."
+msgstr "Tehničko polje koje označava postoje li knjiženja amortizacije za imovinu."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__res_model
+msgid "Technical model name of the related document."
+msgstr "Tehnički naziv modela povezanog dokumenta."
 
 #. module: cyllo_asset_management
 #. cyllo-python
@@ -2112,8 +3176,112 @@ msgstr "Datum završetka trebao bi biti veći od datuma početka"
 #. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_asset.py:0
 #, python-format
+msgid "The Original Value should be Greater than 0."
+msgstr "Izvorna vrijednost bi trebala biti veća od 0."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
 msgid "The Salvage Value should not be Greater than the Original Value."
 msgstr "Vrijednost spašavanja ne bi trebala biti veća od izvorne vrijednosti."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/wizards/asset_insurance_wizard.py:0
+#, python-format
+msgid "The Total invoiced Amount exceeds expense"
+msgstr "Ukupan fakturirani iznos veći je od troška."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The Warranty period should not be a negative Value."
+msgstr "Razdoblje jamstva ne smije biti negativno."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already leased during the selected period."
+msgstr "Imovina je već iznajmljena u odabranom razdoblju."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already rented during the selected period."
+msgstr "Imovina je već rezervirana za iznajmljivanje u odabranom razdoblju."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "The asset is already reserved from %s to %s."
+msgstr "Imovina je već rezervirana od %s do %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The depreciable value cannot be greater than the original value."
+msgstr "Amortizirajuća vrijednost ne može biti veća od izvorne vrijednosti."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The depreciable value cannot be negative."
+msgstr "Amortizirajuća vrijednost ne može biti negativna."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/maintenance_request.py:0
+#, python-format
+msgid "The expense is 0."
+msgstr "Trošak iznosi 0."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "The value for the rental amount should be an Integer"
+msgstr "Iznos naknade za iznajmljivanje mora biti cijeli broj."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is leased from %s to %s."
+msgstr "Ova je imovina unajmljena od %s do %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is rented from %s to %s."
+msgstr "Ova se imovina iznajmljuje od %s do %s."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "This asset is reserved from %s to %s."
+msgstr "Ova je imovina rezervirana od %s do %s."
+
+#. module: cyllo_asset_management
+#: model_terms:ir.actions.act_window,help:cyllo_asset_management.action_asset_report_all
+msgid ""
+"This report shows Maintenance, Lease and Rental counts per Asset,\n"
+"                along with Original and Salvage values."
+msgstr "Ovo izvješće prikazuje broj održavanja, najmova i iznajmljivanja po imovini,\n                zajedno s izvornom i ostatnom vrijednosti."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_modify__duration_period
+msgid "Time unit used for the depreciation duration."
+msgstr "Vremenska jedinica za trajanje amortizacije."
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__total_depreciation_days
@@ -2121,14 +3289,56 @@ msgid "Total Depreciation Days"
 msgstr "Ukupni dani amortizacije"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__name
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__total_amount
+msgid "Total Repair Cost"
+msgstr "Ukupni trošak popravka"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_depreciation_line__accumulative_depreciation
+msgid "Total accumulated depreciation up to this period."
+msgstr "Ukupna akumulirana amortizacija do ovog razdoblja."
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__depreciated_amount
+msgid "Total depreciated amount of the asset."
+msgstr "Ukupan amortizirani iznos imovine."
+
+#. module: cyllo_asset_management
+#: model:asset.asset,name:cyllo_asset_management.asset_car_lease
+msgid "Toyota Camry 2023 (Lease)"
+msgstr "Toyota Camry 2023 (najam)"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_maintenance_request_form
+msgid "Transactions ("
+msgstr "Transakcije ("
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__insurance_name_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__type_id
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance_type__type
 msgid "Type"
-msgstr "Tip"
+msgstr "Vrsta"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_booking__booking_type
+msgid "Type of booking created for the asset."
+msgstr "Vrsta rezervacije izrađene za imovinu."
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_assign_form
 msgid "Unassign"
 msgstr "Nepoznat"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__maintenance_state__maintenance
+msgid "Under Maintenance"
+msgstr "Na održavanju"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__maintenance_state__repair
+msgid "Under Repair"
+msgstr "Na popravku"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_reservation_form
@@ -2141,36 +3351,66 @@ msgid "Validate"
 msgstr "Potvrditi"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_maintenance__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_account_asset_repair__website_message_ids
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__vendor_id
+msgid "Vendor from whom the asset was purchased."
+msgstr "Dobavljač od kojeg je imovina kupljena."
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Warranty"
+msgstr "Jamstvo"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_attachment_ids
+msgid "Warranty Documents"
+msgstr "Dokumenti jamstva"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__under_warranty
+msgid "Warranty Included"
+msgstr "Uključeno jamstvo"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_period
+msgid "Warranty Period"
+msgstr "Razdoblje jamstva"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__warranty_end_date
+msgid "Warranty Upto"
+msgstr "Jamstvo do"
+
+#. module: cyllo_asset_management
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
+msgid "Warranty and Insurance"
+msgstr "Jamstvo i osiguranje"
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_assign__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_brand__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_lease__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_rental__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_reservation__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_scrap__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_sell_dispose__website_message_ids
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_type__website_message_ids
 msgid "Website Messages"
 msgstr "Poruke web stranice"
 
 #. module: cyllo_asset_management
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_maintenance__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_account_asset_repair__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_asset__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_assign__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_brand__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_item__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_lease__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_rental__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_scrap__website_message_ids
 #: model:ir.model.fields,help:cyllo_asset_management.field_asset_sell_dispose__website_message_ids
-#: model:ir.model.fields,help:cyllo_asset_management.field_asset_type__website_message_ids
 msgid "Website communication history"
 msgstr "Povijest komunikacije na web mjestu"
+
+#. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__buffer_period__week
+msgid "Week"
+msgstr "Tjedan"
 
 #. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__week_amount
@@ -2178,6 +3418,8 @@ msgid "Week Amount"
 msgstr "Iznos tjedna"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__weekly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__weekly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__week
 msgid "Weekly"
 msgstr "Tjedni"
@@ -2189,7 +3431,14 @@ msgid "Work Email"
 msgstr "Radna e -pošta"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields,help:cyllo_asset_management.field_asset_reservation__email
+msgid "Work email address of the employee."
+msgstr "Poslovna adresa e-pošte zaposlenika."
+
+#. module: cyllo_asset_management
 #: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_depreciation_line__year
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__duration_period__year
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__warranty_period_type__years
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__duration_period__year
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_modify__duration_period__year
 msgid "Year"
@@ -2201,9 +3450,191 @@ msgid "Year Amount"
 msgstr "Iznos od godine"
 
 #. module: cyllo_asset_management
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_asset__automatic_maintenance__yearly
+#: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_item__automatic_maintenance__yearly
 #: model:ir.model.fields.selection,name:cyllo_asset_management.selection__asset_rental__payment_terms__year
 msgid "Yearly"
 msgstr "Godišnje"
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, The invoice is not paid"
+msgstr "Nije moguće dovršiti ovu operaciju jer račun nije plaćen."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already Assigned."
+msgstr "Nije moguće dovršiti ovu operaciju jer je povezana imovina već dodijeljena."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for a"
+" another operation"
+msgstr "Nije moguće dovršiti ovu operaciju jer je povezana imovina već rezervirana za drugu operaciju."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for "
+"another operation"
+msgstr "Nije moguće dovršiti ovu operaciju jer je povezana imovina već rezervirana za drugu operaciju."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is already taken for "
+"another operation."
+msgstr "Nije moguće dovršiti ovu operaciju jer je povezana imovina već rezervirana za drugu operaciju."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is either sold or "
+"disposed"
+msgstr "Nije moguće dovršiti ovu operaciju jer je povezana imovina već prodana ili otuđena."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is either sold or "
+"disposed."
+msgstr "Nije moguće dovršiti ovu operaciju jer je povezana imovina već prodana ili otuđena."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is not a lease asset."
+msgstr "Nije moguće dovršiti ovu operaciju jer povezana imovina nije namijenjena najmu."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, The related asset is not a rental asset."
+msgstr "Nije moguće dovršiti ovu operaciju jer povezana imovina nije namijenjena iznajmljivanju."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, lease amount cannot be zero."
+msgstr "Nije moguće dovršiti ovu operaciju jer iznos najma ne može biti nula."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot complete this operation, please specify the lease amount."
+msgstr "Nije moguće dovršiti ovu operaciju. Navedite iznos najma."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, the related asset is either sold or "
+"disposed."
+msgstr "Nije moguće dovršiti ovu operaciju jer je povezana imovina već prodana ili otuđena."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation, the related asset is not a lease asset."
+msgstr "Nije moguće dovršiti ovu operaciju jer povezana imovina nije namijenjena najmu."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid ""
+"You cannot complete this operation. The asset is already reserved, leased, "
+"or rented for the selected date range."
+msgstr "Nije moguće dovršiti ovu operaciju jer je imovina već rezervirana ili iznajmljena za odabrano razdoblje."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"You cannot create an asset from lines containing credit and debit on the "
+"account or with a null amount"
+msgstr "Nije moguće stvoriti imovinu iz stavki s dugovnim i potražnim iznosom na kontu ili s nultim iznosom."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_assign.py:0
+#, python-format
+msgid "You cannot delete the record that is in Assign state."
+msgstr "Nije moguće izbrisati zapis sa statusom dodjele."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid "You cannot delete the record that is in Rent state."
+msgstr "Nije moguće izbrisati zapis sa statusom iznajmljivanja."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
+#, python-format
+msgid "You cannot delete the record that is in Reserved state."
+msgstr "Nije moguće izbrisati zapis sa statusom rezervacije."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid "You cannot delete the record that is in Running state."
+msgstr "Nije moguće izbrisati zapis koji je u tijeku."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_lease.py:0
+#, python-format
+msgid "You cannot delete the record that is in leased state."
+msgstr "Nije moguće izbrisati zapis sa statusom najma."
+
+#. module: cyllo_asset_management
+#. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_asset.py:0
+#, python-format
+msgid ""
+"You cannot delete the record, The related asset is already taken for some "
+"operations"
+msgstr "Nije moguće izbrisati zapis jer je povezana imovina već uključena u neke operacije."
 
 #. module: cyllo_asset_management
 #. cyllo-python
@@ -2214,128 +3645,26 @@ msgstr "Ne možete se resetirati na nacrt, srodna imovina je već objavljena"
 
 #. module: cyllo_asset_management
 #. cyllo-python
+#: code:addons/cyllo_asset_management/models/asset_rental.py:0
+#, python-format
+msgid ""
+"You cannot reset to draft, The related rental invoice is already posted"
+msgstr "Nije moguće vratiti račun iznajmljivanja u nacrt jer je već proknjižen."
+
+#. module: cyllo_asset_management
+#. cyllo-python
 #: code:addons/cyllo_asset_management/models/asset_sell_dispose.py:0
-#: code:addons/cyllo_asset_management/wizards/asset_lost.py:0
 #, python-format
 msgid "You cannot select the same account as the Asset Depreciation Account."
 msgstr "Ne možete odabrati isti račun kao i račun amortizacije imovine."
 
 #. module: cyllo_asset_management
-#. cyllo-python
-#: code:addons/cyllo_asset_management/models/asset_asset.py:0
-#, python-format
-msgid "The Original Value should be Greater than 0."
-msgstr "Izvorna vrijednost bi trebala biti veća od 0."
+#: model:ir.model,name:cyllo_asset_management.model_asset_booking
+msgid "asset.booking"
+msgstr "asset.booking"
 
 #. module: cyllo_asset_management
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
 #: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_item_form
 msgid "e.g. Laptop Book"
 msgstr "npr.Knjiga za laptop"
-
-#. module: cyllo_asset_management
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_cancel_warning_form
-msgid "warning"
-msgstr "upozorenje"
-
-
-#. module: cyllo_asset_management
-#. cyllo-python
-#: code:addons/cyllo_asset_management/models/asset_rental.py:0
-#: code:addons/cyllo_asset_management/models/asset_reservation.py:0
-#, python-format
-msgid "Rented from %s to %s"
-msgstr "Iznajmljeno od %s do %s"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_operations
-msgid "Operations"
-msgstr "Operacije"
-
-#. module: cyllo_asset_management
-#. cyllo-python
-#: code:addons/cyllo_asset_management/models/asset_asset.py:0
-#: model:ir.actions.server,name:cyllo_asset_management.action_asset_maintenance_request
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_maintenance_repair_request
-#, python-format
-msgid "Maintenance/Repair"
-msgstr "Održavanje/Popravak"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__partner_id
-msgid "Repair partner"
-msgstr "Partner za popravak"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_insurance__expense
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__expense
-msgid "Expense"
-msgstr "Trošak"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__invoiced_amount
-msgid "Insurance Amount"
-msgstr "Iznos osiguranja"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_maintenance_request__asset_id
-msgid "Asset"
-msgstr "Imovina"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell_dispose
-msgid "Disposal"
-msgstr "Rashodovanje"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_sell
-msgid "Sell"
-msgstr "Prodaja"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_dispose
-msgid "Dispose"
-msgstr "Odložiti"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_reporting_asset
-msgid "Reporting"
-msgstr "Izvještavanje"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_activity_report
-msgid "Asset Operations"
-msgstr "Operacije imovine"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__asset_loss_account_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__asset_loss_account_id
-msgid "Asset Loss Account"
-msgstr "Konto gubitka imovine"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__vendor_id
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_item__vendor_id
-msgid "Purchase From"
-msgstr "Kupljeno od"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset__serial_no
-msgid "Serial No."
-msgstr "Serijski broj"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__partner_id
-msgid "Insurance Provider"
-msgstr "Pružatelj osiguranja"
-
-#. module: cyllo_asset_management
-#: model:ir.model.fields,field_description:cyllo_asset_management.field_asset_asset_insurance__type_id
-msgid "Type"
-msgstr "Vrsta"
-
-#. module: cyllo_asset_management
-#: model:ir.ui.menu,name:cyllo_asset_management.menu_asset_asset_insurance
-#: model_terms:ir.ui.view,arch_db:cyllo_asset_management.view_asset_asset_form
-msgid "Insurance"
-msgstr "Osiguranje"

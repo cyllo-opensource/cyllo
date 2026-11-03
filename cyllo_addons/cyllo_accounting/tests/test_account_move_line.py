@@ -101,10 +101,12 @@ class TestAccountMoveLine(TransactionCase):
             self.assertFalse(line.move_asset_type)
 
     def test_get_js_list_view(self):
-        """Test get_js_list_view returns a view ID or False."""
+        """Test the reconciliation list uses its dedicated list view."""
         result = self.MoveLine.get_js_list_view()
-        # Should return an integer (view ID) or False
-        self.assertTrue(result is False or isinstance(result, int))
+        expected_view = self.env.ref(
+            'cyllo_accounting.view_account_move_line_tree_reconcile'
+        )
+        self.assertEqual(result, expected_view.id)
 
     def test_multi_invoice_payment_field(self):
         """Test multi_invoice_payment default value."""

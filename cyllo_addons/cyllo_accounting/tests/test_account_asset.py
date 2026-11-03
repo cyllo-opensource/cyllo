@@ -19,7 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-import datetime
+import calendar
+from datetime import date
 
 from odoo import fields
 from odoo.exceptions import UserError
@@ -31,10 +32,11 @@ class TestAccountAsset(TestCylloAccounting):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
+        today = date.today()
         self.fiscal_year_id = self.env['account.fiscal.year'].create([{
-            'name': 'Test Fiscal Year 2020',
-            'start_date': '2020-01-01',
-            'end_date': '2020-12-31',
+            'name': 'Test Fiscal Year %s' % today.year,
+            'start_date': date(today.year, 1, 1),
+            'end_date': date(today.year, 12, 31),
             'company_id': self.env.company.id,
             'state': 'draft'
         }])
@@ -69,7 +71,7 @@ class TestAccountAsset(TestCylloAccounting):
                 'depreciation_move_ids': [fields.Command.create({
                     'move_type': 'out_invoice',
                     'partner_id': self.partner.id,
-                    'invoice_date': '2020-01-10',
+                    'invoice_date': fields.Date.today(),
                     'asset_amount': 1000
                 })]
             })
@@ -101,7 +103,7 @@ class TestAccountAsset(TestCylloAccounting):
                 'depreciation_move_ids': [fields.Command.create({
                     'move_type': 'out_invoice',
                     'partner_id': self.partner.id,
-                    'invoice_date': '2020-01-10',
+                    'invoice_date': fields.Date.today(),
                     'asset_amount': 1000
                 })]
             })
@@ -151,7 +153,7 @@ class TestAccountAsset(TestCylloAccounting):
                 'depreciation_move_ids': [fields.Command.create({
                     'move_type': 'out_invoice',
                     'partner_id': self.partner.id,
-                    'invoice_date': '2020-01-10',
+                    'invoice_date': fields.Date.today(),
                     'asset_amount': 1000,
                     'state': 'draft',
                     'line_ids': [fields.Command.create({
@@ -172,7 +174,14 @@ class TestAccountAsset(TestCylloAccounting):
                          'no_prorata')
     
     def test_compute_depreciation_amount(self):
-        depreciation = {'asset_end_date': datetime.date(2024, 2, 29), 'asset_date': datetime.date(2024, 1, 31), 'days': 31}
+        leap_year = date.today().year
+        while not calendar.isleap(leap_year):
+            leap_year += 1
+        depreciation = {
+            'asset_end_date': date(leap_year, 2, 29),
+            'asset_date': date(leap_year, 1, 31),
+            'days': 31,
+        }
         self.assertEqual(self.account_asset_asset.compute_depreciation_amount(depreciation, 180, 6), 1500.0)
         account_asset_asset = self.env['account.asset.asset'].create({
             'name': 'Test Asset',
@@ -199,7 +208,7 @@ class TestAccountAsset(TestCylloAccounting):
             'depreciation_move_ids': [fields.Command.create({
                 'move_type': 'out_invoice',
                 'partner_id': self.partner.id,
-                'invoice_date': '2020-01-10',
+                'invoice_date': fields.Date.today(),
                 'asset_amount': 1000,
                 'state': 'draft',
                 'line_ids': [fields.Command.create({
@@ -248,7 +257,7 @@ class TestAccountAsset(TestCylloAccounting):
             'depreciation_move_ids': [fields.Command.create({
                 'move_type': 'out_invoice',
                 'partner_id': self.partner.id,
-                'invoice_date': '2020-01-10',
+                'invoice_date': fields.Date.today(),
                 'asset_amount': 1000,
                 'state': 'draft',
                 'line_ids': [fields.Command.create({
@@ -291,7 +300,7 @@ class TestAccountAsset(TestCylloAccounting):
         self.account_asset_asset.action_confirm()
         self.assertEqual(self.account_asset_asset.state, 'running')
         self.assertEqual(self.account_asset_asset.depreciation_move_ids.name,
-                         'INV/2020/00001')
+                         'INV/%s/00001' % date.today().year)
 
     def test_button_running(self):
         self.account_asset_asset.action_running()
@@ -363,7 +372,7 @@ class TestAccountAsset(TestCylloAccounting):
                 'depreciation_move_ids': [fields.Command.create({
                     'move_type': 'out_invoice',
                     'partner_id': self.partner.id,
-                    'invoice_date': '2020-01-10',
+                    'invoice_date': fields.Date.today(),
                     'asset_amount': 1000,
                     'state': 'draft',
                     'line_ids': [fields.Command.create({

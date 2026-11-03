@@ -1,217 +1,291 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="cyllo_hr.HrDashboard">
-        <div class="hr-dashboard-navbar hr-pj-dashboard hr-control-panel">
-            <div class="hr-dashbd-info">
-                <div class="hr-heading">
-                    <span class="hr-dashboard-header-title">Overview</span>
+        <div class="cy_hr_dashboard">
+            <div class="cy-hr-dashboard-navbar cy-hr-pj-dashboard cy-hr-control-panel">
+            <div class="cy-hr-dashbd-info">
+                <div class="cy-hr-heading">
+                    <span class="cy-hr-dashboard-header-title">Overview</span>
+                    <p class="cy-hr-dashboard-header-subtitle">Track your performance, manage activities, and stay on top of your goals.</p>
                 </div>
             </div>
-            <div class="hr-date-records">
-                <div class="hr-filter-btn-group">
-                    <button class="hr-filter-btn"
-                            t-att-class="state.date_filter === 'today' ? 'hr-filter-btn--active' : ''"
-                            t-on-click="() => this.onFilterChange('today')">Today</button>
-                    <button class="hr-filter-btn"
-                            t-att-class="state.date_filter === 'month' ? 'hr-filter-btn--active' : ''"
-                            t-on-click="() => this.onFilterChange('month')">Month</button>
-                    <button class="hr-filter-btn"
-                            t-att-class="state.date_filter === 'year' ? 'hr-filter-btn--active' : ''"
-                            t-on-click="() => this.onFilterChange('year')">Year</button>
+            <div class="cy-hr-date-records">
+                <div class="cy-hr-filter-btn-group">
+                    <button class="cy-hr-filter-btn"
+                            t-att-class="state.date_filter === 'today' ? 'cy-hr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('today')">Daily</button>
+                    <button class="cy-hr-filter-btn"
+                            t-att-class="state.date_filter === 'week' ? 'cy-hr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('week')">Weekly</button>
+                    <button class="cy-hr-filter-btn"
+                            t-att-class="state.date_filter === 'month' ? 'cy-hr-filter-btn--active' : ''"
+                            t-on-click="() => this.onFilterChange('month')">Monthly</button>
+<!--                    <div class="cy-hr-filter-dropdown">-->
+<!--                        <button class="cy-hr-filter-toggle" t-on-click="() => this.toggleFilterMenu()" title="More periods">-->
+<!--                            <i t-attf-class="fa fa-chevron-#{state.showFilterMenu ? 'up' : 'down'}"/>-->
+<!--                        </button>-->
+<!--                        <div class="cy-hr-filter-menu" t-if="state.showFilterMenu">-->
+<!--                            <button class="cy-hr-filter-menu-item"-->
+<!--                                    t-att-class="state.date_filter === 'year' ? 'cy-hr-filter-menu-item&#45;&#45;active' : ''"-->
+<!--                                    t-on-click="() => this.onFilterChange('year')">Yearly</button>-->
+<!--                        </div>-->
+<!--                    </div>-->
                 </div>
             </div>
         </div>
-        <div class="hr-dashboard-graph">
-            <div class="hr-dashboard-container">
+        <div class="cy-hr-dashboard-graph">
+            <div class="cy-hr-dashboard-container">
 
                 <!-- KPI Cards Section -->
-                <div class="hr-section-row hr-kpi-row">
+                <div class="cy-hr-section-row cy-hr-kpi-row">
                     <!-- Total Employees -->
-                    <div class="hr-kpi-card" t-on-click="openEmployees">
-                        <div class="hr-kpi-v4">
-                            <div class="hr-kpi-v4-icon-wrap hr-kpi-icon-green">
-                                <i class="fa fa-users"/>
+                    <div class="cy-hr-kpi-card" t-on-click="openEmployees">
+                        <div class="cy-hr-kpi-v5">
+                            <div class="cy-hr-kpi-v5-top">
+                                <div class="cy-hr-kpi-v5-lead">
+                                    <span class="cy-hr-kpi-v5-title">Total Employee</span>
+                                    <span class="cy-hr-kpi-v5-value"><t t-esc="state.total_employees.toLocaleString()"/></span>
+                                </div>
+                                <span class="cy-hr-kpi-v5-icon-chip cy-hr-kpi-icon-olive"><i class="fa fa-user-circle-o"/></span>
                             </div>
-                            <div class="hr-kpi-v4-content">
-                                <div class="hr-kpi-v4-title">Total Employees</div>
-                                <div class="hr-kpi-v4-value"><t t-esc="state.total_employees.toLocaleString()"/></div>
+                            <div class="cy-hr-kpi-v5-foot">
+                                <span t-attf-class="cy-hr-kpi-delta #{state.total_employees_pct &lt; 0 ? 'cy-hr-kpi-delta--down' : 'cy-hr-kpi-delta--up'}">
+                                    <i t-attf-class="fa fa-#{state.total_employees_pct &lt; 0 ? 'arrow-down' : 'arrow-up'}"/>
+                                    <t t-esc="Math.abs(state.total_employees_pct)"/>%
+                                </span>
+                                <span class="cy-hr-kpi-compare"><span class="cy-hr-kpi-compare-value"><t t-esc="state.total_employees_compare.toLocaleString()"/></span> <t t-esc="state.kpi_compare_label"/></span>
                             </div>
                         </div>
                     </div>
                     <!-- Total Job Applied -->
                     <t t-if="state.is_recruitment_installed">
-                    <div class="hr-kpi-card" t-on-click="openRecruitment">
-                        <div class="hr-kpi-v4">
-                            <div class="hr-kpi-v4-icon-wrap hr-kpi-icon-green">
-                                <i class="fa fa-check-circle-o"/>
+                    <div class="cy-hr-kpi-card" t-on-click="openRecruitment">
+                        <div class="cy-hr-kpi-v5">
+                            <div class="cy-hr-kpi-v5-top">
+                                <div class="cy-hr-kpi-v5-lead">
+                                    <span class="cy-hr-kpi-v5-title">Total Job Applied</span>
+                                    <span class="cy-hr-kpi-v5-value"><t t-esc="state.job_applied_count.toLocaleString()"/></span>
+                                </div>
+                                <span class="cy-hr-kpi-v5-icon-chip cy-hr-kpi-icon-olive"><i class="fa fa-briefcase"/></span>
                             </div>
-                            <div class="hr-kpi-v4-content">
-                                <div class="hr-kpi-v4-title">Total Job Applied</div>
-                                <div class="hr-kpi-v4-value"><t t-esc="state.job_applied_count.toLocaleString()"/></div>
+                            <div class="cy-hr-kpi-v5-foot">
+                                <span t-attf-class="cy-hr-kpi-delta #{state.job_applied_pct &lt; 0 ? 'cy-hr-kpi-delta--down' : 'cy-hr-kpi-delta--up'}">
+                                    <i t-attf-class="fa fa-#{state.job_applied_pct &lt; 0 ? 'arrow-down' : 'arrow-up'}"/>
+                                    <t t-esc="Math.abs(state.job_applied_pct)"/>%
+                                </span>
+                                <span class="cy-hr-kpi-compare"><span class="cy-hr-kpi-compare-value"><t t-esc="state.job_applied_compare.toLocaleString()"/></span> <t t-esc="state.kpi_compare_label"/></span>
                             </div>
                         </div>
                     </div>
                     </t>
                     <!-- Attendance Rate -->
-                    <div class="hr-kpi-card" t-on-click="openAttendance">
-                        <div class="hr-kpi-v4">
-                            <div class="hr-kpi-v4-icon-wrap hr-kpi-icon-red">
-                                <i class="ri-user-follow-line"/>
+                    <div class="cy-hr-kpi-card" t-on-click="openAttendance">
+                        <div class="cy-hr-kpi-v5">
+                            <div class="cy-hr-kpi-v5-top">
+                                <div class="cy-hr-kpi-v5-lead">
+                                    <span class="cy-hr-kpi-v5-title">Attendance Rate</span>
+                                    <span class="cy-hr-kpi-v5-value"><t t-esc="state.attendance_rate"/>%</span>
+                                </div>
+                                <span class="cy-hr-kpi-v5-icon-chip cy-hr-kpi-icon-olive"><i class="fa fa-calendar-check-o"/></span>
                             </div>
-                            <div class="hr-kpi-v4-content">
-                                <div class="hr-kpi-v4-title">Attendance Rate</div>
-                                <div class="hr-kpi-v4-value"><t t-esc="state.attendance_rate"/>%</div>
+                            <div class="cy-hr-kpi-v5-foot">
+                                <span t-attf-class="cy-hr-kpi-delta #{state.attendance_rate_pct &lt; 0 ? 'cy-hr-kpi-delta--down' : 'cy-hr-kpi-delta--up'}">
+                                    <i t-attf-class="fa fa-#{state.attendance_rate_pct &lt; 0 ? 'arrow-down' : 'arrow-up'}"/>
+                                    <t t-esc="Math.abs(state.attendance_rate_pct)"/>%
+                                </span>
+                                <span class="cy-hr-kpi-compare"><span class="cy-hr-kpi-compare-value"><t t-esc="state.attendance_rate_compare"/>%</span> <t t-esc="state.kpi_compare_label"/></span>
                             </div>
                         </div>
                     </div>
                     <!-- Upcoming Time Off -->
-                    <div class="hr-kpi-card" t-on-click="() => this.openTimeOff()">
-                        <div class="hr-kpi-v4">
-                            <div class="hr-kpi-v4-icon-wrap hr-kpi-icon-yellow">
-                                <i class="fa fa-calendar"/>
+                    <div class="cy-hr-kpi-card" t-on-click="() => this.openTimeOff()">
+                        <div class="cy-hr-kpi-v5">
+                            <div class="cy-hr-kpi-v5-top">
+                                <div class="cy-hr-kpi-v5-lead">
+                                    <span class="cy-hr-kpi-v5-title">Upcoming time Off</span>
+                                    <span class="cy-hr-kpi-v5-value"><t t-esc="state.upcoming_timeoff_count"/></span>
+                                </div>
+                                <span class="cy-hr-kpi-v5-icon-chip cy-hr-kpi-icon-olive"><i class="fa fa-clock-o"/></span>
                             </div>
-                            <div class="hr-kpi-v4-content">
-                                <div class="hr-kpi-v4-title">Upcoming Time Off</div>
-                                <div class="hr-kpi-v4-value"><t t-esc="state.upcoming_leaves.length"/></div>
+                            <div class="cy-hr-kpi-v5-foot">
+                                <span t-attf-class="cy-hr-kpi-delta #{state.upcoming_timeoff_pct &lt; 0 ? 'cy-hr-kpi-delta--down' : 'cy-hr-kpi-delta--up'}">
+                                    <i t-attf-class="fa fa-#{state.upcoming_timeoff_pct &lt; 0 ? 'arrow-down' : 'arrow-up'}"/>
+                                    <t t-esc="Math.abs(state.upcoming_timeoff_pct)"/>%
+                                </span>
+                                <span class="cy-hr-kpi-compare"><span class="cy-hr-kpi-compare-value"><t t-esc="state.upcoming_timeoff_compare.toLocaleString()"/></span> <t t-esc="state.kpi_compare_label"/></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Charts Section -->
-                <div class="hr-section-row hr-charts-row">
+                <div class="cy-hr-section-row cy-hr-charts-row">
                     <!-- Employee Status Chart -->
-                    <div class="hr-chart-item hr-chart-item--lg">
-                        <div class="hr-card hr-chart-card">
-                            <div class="hr-card-header">
-                                <h5 class="hr-card-title">Employee Status</h5>
-                                <div class="hr-chart-type-group">
-                                    <button t-attf-class="hr-chart-type-btn #{state.employeeStatusChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                    <div class="cy-hr-chart-item cy-hr-chart-item--lg">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <h5 class="cy-hr-card-title">Employee Status</h5>
+                                <div class="cy-hr-chart-type-group">
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.employeeStatusChartType == 'bar' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeEmployeeStatusChartType('bar')"
                                             title="Bar Chart">
                                         <i class="fa fa-bar-chart"/>
                                     </button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.employeeStatusChartType == 'pie' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.employeeStatusChartType == 'pie' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeEmployeeStatusChartType('pie')"
                                             title="Pie Chart">
                                         <i class="fa fa-pie-chart"/>
                                     </button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.employeeStatusChartType == 'doughnut' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.employeeStatusChartType == 'doughnut' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeEmployeeStatusChartType('doughnut')"
                                             title="Doughnut Chart">
                                         <i class="fa fa-circle-o-notch"/>
                                     </button>
                                 </div>
                             </div>
-                            <div class="hr-card-body hr-card-body--chart">
-                                <div class="hr-chart-canvas-wrap">
-                                    <canvas id="employeeStatusChart"/>
+                            <div class="cy-hr-card-body cy-hr-card-body--chart">
+                                <t t-if="state.employee_status_labels.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-users cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Data Yet</h4>
+                                            <p class="cy-hr-empty-text">Employee status distribution will appear here once employee data is available.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                <!-- HTML series legend (outside the grey plot panel) -->
+                                <div class="cy-hr-inline-legend">
+                                    <t t-foreach="state.employee_status_legend" t-as="item" t-key="item_index">
+                                        <div class="cy-hr-legend-item">
+                                            <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                            <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                        </div>
+                                    </t>
+                                    <div class="cy-hr-legend-more">
+                                        <span class="cy-hr-legend-more-label"/>
+                                        <div class="cy-hr-legend-popover">
+                                            <t t-foreach="state.employee_status_legend" t-as="item" t-key="item_index">
+                                                <div class="cy-hr-legend-item">
+                                                    <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                                    <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="cy-hr-chart-canvas-wrap">
+                                    <div class="cy-hr-plot"><canvas id="employeeStatusChart"/></div>
+                                </div>
+                                </t>
                             </div>
                         </div>
                     </div>
                     <!-- Monthly Attendance Trend -->
-                    <div class="hr-chart-item hr-chart-item--xl">
-                        <div class="hr-card hr-chart-card">
-                            <div class="hr-card-header">
-                                <h5 class="hr-card-title">Monthly Attendance Trend</h5>
-                                <div class="hr-chart-type-group">
-                                    <button t-attf-class="hr-chart-type-btn #{state.attendanceTrendChartType == 'line' ? 'hr-chart-type-btn--active' : ''}"
+                    <div class="cy-hr-chart-item cy-hr-chart-item--xl">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <h5 class="cy-hr-card-title">Monthly Attendance Trend</h5>
+                                <div class="cy-hr-chart-type-group">
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.attendanceTrendChartType == 'line' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeAttendanceTrendChartType('line')"
                                             title="Line Chart">
                                         <i class="fa fa-line-chart"/>
                                     </button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.attendanceTrendChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.attendanceTrendChartType == 'bar' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeAttendanceTrendChartType('bar')"
                                             title="Bar Chart">
                                         <i class="fa fa-bar-chart"/>
                                     </button>
                                 </div>
                             </div>
-                            <div class="hr-card-body hr-card-body--chart">
-                                <div class="hr-chart-canvas-wrap hr-chart-canvas-wrap--md">
-                                    <canvas id="attendanceTrendChart"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Commission Leaderboard -->
-                    <div class="hr-chart-item hr-chart-item--sm">
-                        <div class="hr-card hr-chart-card">
-                            <div class="hr-card-header">
-                                <div class="hr-card-header-left">
-                                    <i class="fa fa-line-chart hr-card-header-icon"/>
-                                    <h5 class="hr-card-title">Commission Earned</h5>
-                                </div>
-                            </div>
-                            <div class="hr-card-body hr-card-body--table">
-                                <div class="hr-table-scroll">
-                                    <table class="hr-table">
-                                        <thead class="hr-table-head">
-                                            <tr>
-                                                <th class="hr-th" style="width:80px;">Rank</th>
-                                                <th class="hr-th">Sales Rep</th>
-                                                <th class="hr-th">Commission</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-if="state.leaderboard_data.length == 0">
-                                                <tr>
-                                                    <td colspan="3" class="hr-td hr-td--empty">No commission data found</td>
-                                                </tr>
+                            <div class="cy-hr-card-body cy-hr-card-body--chart">
+                                <t t-if="state.attendance_trend_labels.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-clock-o cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Attendance Data</h4>
+                                            <p class="cy-hr-empty-text">Check-in and check-out records will appear here once they are available.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                <!-- HTML series legend (outside the grey plot panel) -->
+                                <div class="cy-hr-inline-legend">
+                                    <t t-foreach="state.attendance_trend_legend" t-as="item" t-key="item_index">
+                                        <div class="cy-hr-legend-item">
+                                            <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                            <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                        </div>
+                                    </t>
+                                    <div class="cy-hr-legend-more">
+                                        <span class="cy-hr-legend-more-label"/>
+                                        <div class="cy-hr-legend-popover">
+                                            <t t-foreach="state.attendance_trend_legend" t-as="item" t-key="item_index">
+                                                <div class="cy-hr-legend-item">
+                                                    <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                                    <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                                </div>
                                             </t>
-                                            <t t-foreach="state.leaderboard_data" t-as="entry" t-key="entry.rank">
-                                                <tr class="hr-tr" style="cursor:pointer;" t-on-click="() => this.openCommission(entry)">
-                                                    <td class="hr-td">
-                                                        <div t-attf-class="rank-badge rank-#{entry.rank}">
-                                                            <t t-esc="entry.rank"/>
-                                                        </div>
-                                                    </td>
-                                                    <td class="hr-td hr-td--bold"><t t-esc="entry.name"/></td>
-                                                    <td class="hr-td hr-td--bold hr-td--emerald">$<t t-esc="entry.commission.toLocaleString()"/></td>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="cy-hr-chart-canvas-wrap cy-hr-chart-canvas-wrap--md">
+                                    <div class="cy-hr-plot"><canvas id="attendanceTrendChart"/></div>
+                                </div>
+                                </t>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Payslips + Contracts Row -->
-                <div class="hr-section-row hr-tables-row">
+                <div class="cy-hr-section-row cy-hr-tables-row cy-hr-tables-grid">
                     <!-- Pending Payslips -->
-                    <div class="hr-table-item">
-                        <div class="hr-card hr-table-card">
-                            <div class="hr-card-header">
-                                <h5 class="hr-card-title">Pending Payslips</h5>
-                                <button class="hr-view-all-btn">View All</button>
+                    <div class="cy-hr-table-item">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <h5 class="cy-hr-card-title">Pending Payslips</h5>
+                                <button class="cy-hr-chip-btn" t-on-click="() => this.openPayslips()">View All</button>
                             </div>
-                            <div class="hr-card-body hr-card-body--table">
-                                <div class="hr-table-scroll hr-table-scroll--sm">
-                                    <table class="hr-table">
-                                        <thead class="hr-table-head">
+                            <div class="cy-hr-card-body cy-hr-card-body--table">
+                                <t t-if="state.pending_payslips.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-file-text-o cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Payslips Yet</h4>
+                                            <p class="cy-hr-empty-text">Pending payslips will appear here once they are ready for review.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <div class="cy-hr-board-panel" t-else="">
+                                    <table class="cy-hr-board-table">
+                                        <thead>
                                             <tr>
-                                                <th class="hr-th">Employee</th>
-                                                <th class="hr-th">Department</th>
-                                                <th class="hr-th">Period</th>
-                                                <th class="hr-th hr-th--end">Action</th>
+                                                <th class="cy-hr-board-th">Employee</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--end">Period</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--end">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-if="state.pending_payslips.length == 0">
-                                                <tr>
-                                                    <td colspan="4" class="hr-td hr-td--empty">No pending payslips found</td>
-                                                </tr>
-                                            </t>
                                             <t t-foreach="state.pending_payslips" t-as="payslip" t-key="payslip.id">
-                                                <tr class="hr-tr">
-                                                    <td class="hr-td hr-td--bold"><t t-esc="payslip.employee_name"/></td>
-                                                    <td class="hr-td hr-td--muted"><t t-esc="payslip.department"/></td>
-                                                    <td class="hr-td hr-td--muted"><t t-esc="payslip.date_start"/> to <t t-esc="payslip.date_end"/></td>
-                                                    <td class="hr-td hr-td--end">
-                                                        <button class="hr-action-btn hr-action-btn--primary"
+                                                <tr class="cy-hr-leader-row">
+                                                    <td class="cy-hr-leader-td">
+                                                        <div class="cy-hr-leader-user">
+                                                            <img class="cy-hr-leader-avatar"
+                                                                 t-att-src="'/web/image/hr.employee/' + payslip.employee_id + '/image_128'"
+                                                                 alt=""/>
+                                                            <div class="cy-hr-leader-userinfo">
+                                                                <span class="cy-hr-leader-name" t-esc="payslip.employee_name"/>
+                                                                <span class="cy-hr-leader-deals" t-esc="payslip.department"/>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--end cy-hr-leader-muted">
+                                                        <t t-esc="payslip.date_start"/> to <t t-esc="payslip.date_end"/>
+                                                    </td>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--end">
+                                                        <button class="cy-hr-row-action"
                                                                 t-on-click="() => this.openPayslip(payslip.id)">Review</button>
                                                     </td>
                                                 </tr>
@@ -223,39 +297,102 @@
                         </div>
                     </div>
                     <!-- Contract Endings -->
-                    <div class="hr-table-item">
-                        <div class="hr-card hr-table-card">
-                            <div class="hr-card-header">
-                                <h5 class="hr-card-title">Contract Endings Detail</h5>
-                                <button class="hr-view-all-btn">View All</button>
+                    <div class="cy-hr-table-item">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <h5 class="cy-hr-card-title">Contract Ending Trend</h5>
+                                <button class="cy-hr-chip-btn" t-on-click="() => this.openEndContracts()">View All</button>
                             </div>
-                            <div class="hr-card-body hr-card-body--table">
-                                <div class="hr-table-scroll hr-table-scroll--sm">
-                                    <table class="hr-table">
-                                        <thead class="hr-table-head">
+                            <div class="cy-hr-card-body cy-hr-card-body--table">
+                                <t t-if="state.ending_contracts.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-hourglass-end cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Contracts Ending</h4>
+                                            <p class="cy-hr-empty-text">Contracts nearing their end date will appear here for this period.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <div class="cy-hr-board-panel" t-else="">
+                                    <table class="cy-hr-board-table">
+                                        <thead>
                                             <tr>
-                                                <th class="hr-th">Employee</th>
-                                                <th class="hr-th">Role</th>
-                                                <th class="hr-th">Expires</th>
-                                                <th class="hr-th hr-th--end">Action</th>
+                                                <th class="cy-hr-board-th">Employee</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--end">Expires</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--end">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-if="state.ending_contracts.length == 0">
-                                                <tr>
-                                                    <td colspan="4" class="hr-td hr-td--empty">No contracts ending soon</td>
+                                            <t t-foreach="state.ending_contracts" t-as="contract" t-key="contract.id">
+                                                <tr class="cy-hr-leader-row">
+                                                    <td class="cy-hr-leader-td">
+                                                        <div class="cy-hr-leader-user">
+                                                            <img class="cy-hr-leader-avatar"
+                                                                 t-att-src="'/web/image/hr.employee/' + contract.employee_id + '/image_128'"
+                                                                 alt=""/>
+                                                            <div class="cy-hr-leader-userinfo">
+                                                                <span class="cy-hr-leader-name" t-esc="contract.employee_name"/>
+                                                                <span class="cy-hr-leader-deals" t-esc="contract.job_title"/>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--end cy-hr-leader-muted" t-esc="contract.date_end"/>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--end">
+                                                        <button class="cy-hr-row-action"
+                                                                t-on-click="() => this.openContract(contract.id)">Open</button>
+                                                    </td>
                                                 </tr>
                                             </t>
-                                            <t t-foreach="state.ending_contracts" t-as="contract" t-key="contract.id">
-                                                <tr class="hr-tr">
-                                                    <td class="hr-td hr-td--bold"><t t-esc="contract.employee_name"/></td>
-                                                    <td class="hr-td hr-td--muted"><t t-esc="contract.job_title"/></td>
-                                                    <td class="hr-td">
-                                                        <span class="hr-badge hr-badge--danger"><t t-esc="contract.date_end"/></span>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Commission Leaderboard (moved from the charts row) -->
+                    <div class="cy-hr-table-item">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <h5 class="cy-hr-card-title">Commission Earned</h5>
+                            </div>
+                            <div class="cy-hr-card-body cy-hr-card-body--table">
+                                <t t-if="state.leaderboard_data.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-trophy cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Commission Yet</h4>
+                                            <p class="cy-hr-empty-text">Top performers will appear here once commissions are earned.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <div class="cy-hr-board-panel" t-else="">
+                                    <table class="cy-hr-board-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="cy-hr-board-th">Sales Rep</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--center">Commission</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--end">Rank</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.leaderboard_data" t-as="entry" t-key="entry.user_id">
+                                                <tr class="cy-hr-leader-row" t-on-click="() => this.openCommission(entry)">
+                                                    <td class="cy-hr-leader-td">
+                                                        <div class="cy-hr-leader-user">
+                                                            <img class="cy-hr-leader-avatar"
+                                                                 t-att-src="'/web/image/res.users/' + entry.user_id + '/avatar_128'"
+                                                                 alt=""/>
+                                                            <div class="cy-hr-leader-userinfo">
+                                                                <span class="cy-hr-leader-name" t-esc="entry.name"/>
+                                                                <span class="cy-hr-leader-deals"><t t-esc="entry.deals"/> deals</span>
+                                                            </div>
+                                                        </div>
                                                     </td>
-                                                    <td class="hr-td hr-td--end">
-                                                        <button class="hr-action-btn hr-action-btn--success"
-                                                                t-on-click="() => this.openContract(contract.id)">Open</button>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--center cy-hr-leader-commission">
+                                                        $<t t-esc="entry.commission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"/>
+                                                    </td>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--end">
+                                                        <span t-attf-class="cy-hr-leader-rank #{entry.rank &lt;= 3 ? 'cy-hr-leader-rank--top' : ''}">#. <t t-esc="entry.rank"/></span>
                                                     </td>
                                                 </tr>
                                             </t>
@@ -268,146 +405,231 @@
                 </div>
 
                 <!-- Expanded Analytics: Contract Types / Status / Recruitment -->
-                <div class="hr-section-row hr-analytics-row">
+                <div class="cy-hr-section-row cy-hr-analytics-row">
                     <!-- Contract Types -->
-                    <div class="hr-analytics-item">
-                        <div class="hr-card hr-chart-card">
-                            <div class="hr-card-header">
-                                <div class="hr-card-header-left">
-                                    <i class="fa fa-briefcase hr-card-header-icon"/>
-                                    <h5 class="hr-card-title">Contract Types</h5>
+                    <div class="cy-hr-analytics-item">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <div class="cy-hr-card-header-left">
+                                    <i class="fa fa-briefcase cy-hr-card-header-icon"/>
+                                    <h5 class="cy-hr-card-title">Contract Types</h5>
                                 </div>
-                                <div class="hr-chart-type-group">
-                                    <button t-attf-class="hr-chart-type-btn #{state.contractTypeChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                <div class="cy-hr-chart-type-group">
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.contractTypeChartType == 'bar' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeContractTypeChartType('bar')"
-                                            t-att-style="state.contractTypeChartType === 'bar' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Bar Chart"><i class="fa fa-bar-chart"/></button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.contractTypeChartType == 'pie' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.contractTypeChartType == 'pie' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeContractTypeChartType('pie')"
-                                            t-att-style="state.contractTypeChartType === 'pie' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Pie Chart"><i class="fa fa-pie-chart"/></button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.contractTypeChartType == 'doughnut' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.contractTypeChartType == 'doughnut' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeContractTypeChartType('doughnut')"
-                                            t-att-style="state.contractTypeChartType === 'doughnut' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Doughnut Chart"><i class="fa fa-circle-o-notch"/></button>
                                 </div>
                             </div>
-                            <div class="hr-card-body hr-card-body--chart">
-                                <div class="hr-chart-canvas-wrap hr-chart-canvas-wrap--analytics">
-                                    <canvas id="contractTypeChart"/>
+                            <div class="cy-hr-card-body cy-hr-card-body--chart">
+                                <t t-if="state.contract_type_labels.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-briefcase cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Contract Data</h4>
+                                            <p class="cy-hr-empty-text">Contract type distribution will appear here once running contracts are available.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                <!-- HTML series legend (outside the grey plot panel) -->
+                                <div class="cy-hr-inline-legend">
+                                    <t t-foreach="state.contract_type_legend" t-as="item" t-key="item_index">
+                                        <div class="cy-hr-legend-item">
+                                            <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                            <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                        </div>
+                                    </t>
+                                    <div class="cy-hr-legend-more">
+                                        <span class="cy-hr-legend-more-label"/>
+                                        <div class="cy-hr-legend-popover">
+                                            <t t-foreach="state.contract_type_legend" t-as="item" t-key="item_index">
+                                                <div class="cy-hr-legend-item">
+                                                    <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                                    <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="cy-hr-chart-canvas-wrap cy-hr-chart-canvas-wrap--analytics">
+                                    <div class="cy-hr-plot"><canvas id="contractTypeChart"/></div>
+                                </div>
+                                </t>
                             </div>
                         </div>
                     </div>
                     <!-- Contract Status -->
-                    <div class="hr-analytics-item">
-                        <div class="hr-card hr-chart-card">
-                            <div class="hr-card-header">
-                                <div class="hr-card-header-left">
-                                    <i class="fa fa-check-circle hr-card-header-icon"/>
-                                    <h5 class="hr-card-title">Contract Status</h5>
+                    <div class="cy-hr-analytics-item">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <div class="cy-hr-card-header-left">
+                                    <i class="fa fa-check-circle cy-hr-card-header-icon"/>
+                                    <h5 class="cy-hr-card-title">Contract Status</h5>
                                 </div>
-                                <div class="hr-chart-type-group">
-                                    <button t-attf-class="hr-chart-type-btn #{state.contractStatusChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                <div class="cy-hr-chart-type-group">
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.contractStatusChartType == 'bar' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeContractStatusChartType('bar')"
-                                            t-att-style="state.contractStatusChartType === 'bar' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Bar Chart"><i class="fa fa-bar-chart"/></button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.contractStatusChartType == 'pie' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.contractStatusChartType == 'pie' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeContractStatusChartType('pie')"
-                                            t-att-style="state.contractStatusChartType === 'pie' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Pie Chart"><i class="fa fa-pie-chart"/></button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.contractStatusChartType == 'doughnut' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.contractStatusChartType == 'doughnut' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeContractStatusChartType('doughnut')"
-                                            t-att-style="state.contractStatusChartType === 'doughnut' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Doughnut Chart"><i class="fa fa-circle-o-notch"/></button>
                                 </div>
                             </div>
-                            <div class="hr-card-body hr-card-body--chart">
-                                <div class="hr-chart-canvas-wrap hr-chart-canvas-wrap--analytics">
-                                    <canvas id="contractStatusChart"/>
+                            <div class="cy-hr-card-body cy-hr-card-body--chart">
+                                <t t-if="state.contract_status_labels.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-check-circle-o cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Contract Data</h4>
+                                            <p class="cy-hr-empty-text">Contract status distribution will appear here once contracts are available.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                <!-- HTML series legend (outside the grey plot panel) -->
+                                <div class="cy-hr-inline-legend">
+                                    <t t-foreach="state.contract_status_legend" t-as="item" t-key="item_index">
+                                        <div class="cy-hr-legend-item">
+                                            <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                            <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                        </div>
+                                    </t>
+                                    <div class="cy-hr-legend-more">
+                                        <span class="cy-hr-legend-more-label"/>
+                                        <div class="cy-hr-legend-popover">
+                                            <t t-foreach="state.contract_status_legend" t-as="item" t-key="item_index">
+                                                <div class="cy-hr-legend-item">
+                                                    <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                                    <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="cy-hr-chart-canvas-wrap cy-hr-chart-canvas-wrap--analytics">
+                                    <div class="cy-hr-plot"><canvas id="contractStatusChart"/></div>
+                                </div>
+                                </t>
                             </div>
                         </div>
                     </div>
                     <!-- Recruitment Pipeline -->
-                    <div class="hr-analytics-item">
-                        <div class="hr-card hr-chart-card">
-                            <div class="hr-card-header">
-                                <div class="hr-card-header-left">
-                                    <i class="fa fa-users hr-card-header-icon"/>
-                                    <h5 class="hr-card-title">Recruitment Pipeline</h5>
+                    <div class="cy-hr-analytics-item">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <div class="cy-hr-card-header-left">
+                                    <i class="fa fa-users cy-hr-card-header-icon"/>
+                                    <h5 class="cy-hr-card-title">Recruitment Pipeline</h5>
                                 </div>
-                                <div class="hr-chart-type-group">
-                                    <button t-attf-class="hr-chart-type-btn #{state.recruitmentChartType == 'bar' ? 'hr-chart-type-btn--active' : ''}"
+                                <div class="cy-hr-chart-type-group">
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.recruitmentChartType == 'bar' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeRecruitmentChartType('bar')"
-                                            t-att-style="state.recruitmentChartType === 'bar' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Bar Chart"><i class="fa fa-bar-chart"/></button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.recruitmentChartType == 'pie' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.recruitmentChartType == 'pie' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeRecruitmentChartType('pie')"
-                                            t-att-style="state.recruitmentChartType === 'pie' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Pie Chart"><i class="fa fa-pie-chart"/></button>
-                                    <button t-attf-class="hr-chart-type-btn #{state.recruitmentChartType == 'doughnut' ? 'hr-chart-type-btn--active' : ''}"
+                                    <button t-attf-class="cy-hr-chart-type-btn #{state.recruitmentChartType == 'doughnut' ? 'cy-hr-chart-type-btn--active' : ''}"
                                             t-on-click="() => this.changeRecruitmentChartType('doughnut')"
-                                            t-att-style="state.recruitmentChartType === 'doughnut' ? 'background-color:#71717a;color:white;' : ''"
                                             title="Doughnut Chart"><i class="fa fa-circle-o-notch"/></button>
                                 </div>
                             </div>
-                            <div class="hr-card-body hr-card-body--chart">
-                                <div class="hr-chart-canvas-wrap hr-chart-canvas-wrap--analytics">
-                                    <canvas id="recruitmentChart"/>
+                            <div class="cy-hr-card-body cy-hr-card-body--chart">
+                                <t t-if="state.recruitment_stages_labels.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-user-plus cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Applications Yet</h4>
+                                            <p class="cy-hr-empty-text">Recruitment pipeline data will appear here once applicants are added.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                <!-- HTML series legend (outside the grey plot panel) -->
+                                <div class="cy-hr-inline-legend">
+                                    <t t-foreach="state.recruitment_stages_legend" t-as="item" t-key="item_index">
+                                        <div class="cy-hr-legend-item">
+                                            <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                            <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                        </div>
+                                    </t>
+                                    <div class="cy-hr-legend-more">
+                                        <span class="cy-hr-legend-more-label"/>
+                                        <div class="cy-hr-legend-popover">
+                                            <t t-foreach="state.recruitment_stages_legend" t-as="item" t-key="item_index">
+                                                <div class="cy-hr-legend-item">
+                                                    <span class="cy-hr-legend-dot" t-att-style="'background-color: ' + item.color"/>
+                                                    <span class="cy-hr-legend-text" t-esc="item.label"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="cy-hr-chart-canvas-wrap cy-hr-chart-canvas-wrap--analytics">
+                                    <div class="cy-hr-plot"><canvas id="recruitmentChart"/></div>
+                                </div>
+                                </t>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Time Off &amp; Allocations (full width) -->
-                <div class="hr-section-row hr-full-row">
-                    <div class="hr-full-item">
-                        <div class="hr-card hr-table-card">
-                            <div class="hr-card-header">
-                                <div class="hr-card-header-left">
-                                    <i class="fa fa-calendar hr-card-header-icon"/>
-                                    <h5 class="hr-card-title">Time Off &amp; Allocations</h5>
-                                </div>
+                <div class="cy-hr-section-row cy-hr-full-row">
+                    <div class="cy-hr-full-item">
+                        <div class="cy-hr-card cy-hr-chart-card">
+                            <div class="cy-hr-card-header">
+                                <h5 class="cy-hr-card-title">Time Off &amp; Allocations</h5>
+                                <button class="cy-hr-chip-btn" t-on-click="() => this.openTimeOffAll()">View All</button>
                             </div>
-                            <div class="hr-card-body hr-card-body--table">
-                                <div class="hr-table-scroll hr-table-scroll--lg">
-                                    <table class="hr-table">
-                                        <thead class="hr-table-head">
+                            <div class="cy-hr-card-body cy-hr-card-body--table">
+                                <t t-if="state.timeoff_records.length == 0">
+                                    <div class="cy-hr-empty-state">
+                                        <div class="cy-hr-empty-content">
+                                            <i class="fa fa-calendar-o cy-hr-empty-icon"/>
+                                            <h4 class="cy-hr-empty-title">No Time Off Yet</h4>
+                                            <p class="cy-hr-empty-text">Leave and allocation requests for this period will appear here.</p>
+                                        </div>
+                                    </div>
+                                </t>
+                                <div class="cy-hr-board-panel" t-else="">
+                                    <table class="cy-hr-board-table">
+                                        <thead>
                                             <tr>
-                                                <th class="hr-th">Employee</th>
-                                                <th class="hr-th">Leave Type</th>
-                                                <th class="hr-th">Request Type</th>
-                                                <th class="hr-th">From</th>
-                                                <th class="hr-th">To</th>
-                                                <th class="hr-th hr-th--center">Days</th>
-                                                <th class="hr-th hr-th--center">Status</th>
+                                                <th class="cy-hr-board-th">Employee</th>
+                                                <th class="cy-hr-board-th">Leave Type</th>
+                                                <th class="cy-hr-board-th">Request Type</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--center">From</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--center">To</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--center">Days</th>
+                                                <th class="cy-hr-board-th cy-hr-board-th--end">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-if="state.timeoff_records.length == 0">
-                                                <tr>
-                                                    <td colspan="7" class="hr-td hr-td--empty">No time off or allocation requests found</td>
-                                                </tr>
-                                            </t>
                                             <t t-foreach="state.timeoff_records" t-as="record" t-key="record.id + record.request_type">
-                                                <tr class="hr-tr" style="cursor:pointer;" t-on-click="() => this.openTimeOff(record)">
-                                                    <td class="hr-td hr-td--bold"><t t-esc="record.employee_name"/></td>
-                                                    <td class="hr-td hr-td--muted"><t t-esc="record.leave_type"/></td>
-                                                    <td class="hr-td">
-                                                        <span t-attf-class="hr-badge premium-badge rounded-pill #{record.request_type == 'leave' ? 'indigo' : 'emerald'}">
-                                                            <t t-esc="record.request_type"/>
-                                                        </span>
+                                                <tr class="cy-hr-leader-row" t-on-click="() => this.openTimeOff(record)">
+                                                    <td class="cy-hr-leader-td">
+                                                        <div class="cy-hr-leader-user">
+                                                            <img class="cy-hr-leader-avatar"
+                                                                 t-att-src="'/web/image/hr.employee/' + record.employee_id + '/image_128'"
+                                                                 alt=""/>
+                                                            <span class="cy-hr-leader-name" t-esc="record.employee_name"/>
+                                                        </div>
                                                     </td>
-                                                    <td class="hr-td hr-td--muted"><t t-esc="record.date_from"/></td>
-                                                    <td class="hr-td hr-td--muted"><t t-esc="record.date_to"/></td>
-                                                    <td class="hr-td hr-td--center hr-td--bold"><t t-esc="record.days"/></td>
-                                                    <td class="hr-td hr-td--center">
-                                                        <span t-attf-class="hr-badge premium-badge rounded-pill #{record.state == 'validate' ? 'emerald' : record.state == 'refuse' ? 'rose' : 'amber'}">
-                                                            <t t-esc="record.state"/>
-                                                        </span>
-                                                    </td>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-muted" t-esc="record.leave_type"/>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-accent" t-esc="record.request_type == 'leave' ? 'Leave' : 'Allocation'"/>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--center cy-hr-leader-muted" t-esc="record.date_from"/>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--center cy-hr-leader-muted" t-esc="record.date_to"/>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--center cy-hr-leader-commission" t-esc="record.days"/>
+                                                    <td class="cy-hr-leader-td cy-hr-leader-td--end cy-hr-leader-accent" t-esc="({validate: 'Validate', refuse: 'Refused', confirm: 'Confirmed'}[record.state] || record.state)"/>
                                                 </tr>
                                             </t>
                                         </tbody>
@@ -419,6 +641,7 @@
                 </div>
 
             </div>
+        </div>
         </div>
 
     </t>
