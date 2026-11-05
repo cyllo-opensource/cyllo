@@ -230,6 +230,20 @@ patch(CommandPalette.prototype, {
 // Master Search systray dialog, surfaced as a command palette namespace.
 // -----------------------------------------------------------------------
 
+// The controller returns the raw `name` column value, which is not always a
+// plain string: a translatable name field comes back as the JSONB roundtrip
+// dict (e.g. {'en_US': 'Cash Restaurant'}), and a model whose name field
+// isn't text (eg. an Integer name) comes back as a bare scalar. Core's
+// splitCommandName and fuzzyLookup expect a string, so normalize it.
+function masterSearchItemName(item) {
+    const name = item.name;
+    if (name && typeof name === "object") {
+        const value = name.en_US || Object.values(name).find(Boolean);
+        return value == null ? "" : String(value);
+    }
+    return name == null ? "" : String(name);
+}
+
 registry
     .category("command_categories")
     .add("master_search_results", { namespace: ">" }, { sequence: 10, force: true });
@@ -294,7 +308,7 @@ registry.category("command_provider").add(
                         result.push({
                             action: () => openRecord(item),
                             category: "master_search_results",
-                            name: item.name,
+                            name: masterSearchItemName(item),
                         });
                     }
                 }

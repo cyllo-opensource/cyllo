@@ -50,3 +50,17 @@ class ChatbotAgent(models.AbstractModel):
             EditQuickDashboardTool,
             EditLiveDashboardTool,
         ]
+
+
+class ChatbotTools(models.AbstractModel):
+    _inherit = "chatbot.tools"
+
+    def _chart_source(self, source):
+        """Keep the date granularity of the chart's group-by (``date_order:month``
+        -> ``month``) so a chat chart saved to Analytics groups the same way."""
+        res = super()._chart_source(source)
+        if res and isinstance(source, dict):
+            granularity = (source.get("group_by") or "").partition(":")[2]
+            if granularity:
+                res["granularity"] = granularity
+        return res

@@ -1,7 +1,7 @@
 Cyllo Audit Log
 ---------------
 
-The Cyllo <a href="https://www.cyllo.com/auditlog">Audit Log</a> app lets administrators
+The Cyllo <a href="https://www.cyllo.com/cyllo-apps/audit-log">Audit Log</a> app lets administrators
 track create, update, delete, and read activity across any business model with
 configurable, company-aware audit rules. Every event captures who did what,
 when, and from where, giving you full traceability of changes in your Cyllo database.

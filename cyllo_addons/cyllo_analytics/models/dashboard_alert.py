@@ -241,7 +241,7 @@ class DashboardAlert(models.Model):
                 if not query:
                     continue
 
-                self.env.flush_all()
+                # self.env.flush_all()
                 self.env.cr.execute(query)
                 res = self.env.cr.dictfetchall()
 

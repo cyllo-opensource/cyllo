@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="survey_question_form" model="ir.ui.view">
+        <field name="name">survey.question.view.form.inherit.cyllo.survey</field>
+        <field name="model">survey.question</field>
+        <field name="inherit_id" ref="survey.survey_question_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('o_preview_questions')]" position="inside">
+                <div invisible="question_type != 'upload'">
+                    <span>Upload your document</span><br/>
+                    <i class="fa fa-upload fa-4x" role="img" aria-label="Upload File" title="Upload File"/>
+                    <div class="text-muted">Max 100 KB</div>
+                </div>
+            </xpath>
+            <xpath expr="//page[@name='answers']" position="attributes">
+                <attribute name="invisible">is_page or question_type in ['text_box', 'upload'] or scoring_type == 'no_scoring' and question_type in ['numerical_box', 'date', 'datetime']</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

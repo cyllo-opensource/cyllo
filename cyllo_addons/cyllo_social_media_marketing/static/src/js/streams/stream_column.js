@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, useState, onWillUpdateProps } from "@odoo/owl";
+import { Component, useState, onWillUpdateProps, onWillStart } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { session } from "@web/session";
 import { deserializeDateTime } from "@web/core/l10n/dates";
@@ -48,6 +48,10 @@ export class StreamColumn extends Component {
         });
 
         this.load();
+
+        onWillStart(async () => {
+            this.state.isAdmin = await this.user.hasGroup("cyllo_social_media_marketing.group_social_media_administrator");
+        });
 
         onWillUpdateProps((nextProps) => {
             if (JSON.stringify(nextProps.column.config) !== JSON.stringify(this.props.column.config)) {

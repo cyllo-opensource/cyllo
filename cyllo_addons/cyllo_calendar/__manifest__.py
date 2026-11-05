@@ -30,7 +30,8 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'data': [
-        'views/calendar_views.xml'
+        'views/calendar_views.xml',
+        'data/mail_template_data.xml'
     ],
     'depends': ['cyllo_base', 'calendar'],
     'license': 'LGPL-3',

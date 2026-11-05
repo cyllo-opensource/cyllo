@@ -43,7 +43,7 @@
     ],
     'license': 'LGPL-3',
     'installable': True,
-    'auto_install': True,
+    'auto_install': False,
     'application': False,
     'post_init_hook': '_post_init_account',
 }

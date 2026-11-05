@@ -28,7 +28,8 @@ const Icons = {
     'point_of_sale': '/cyllo_base/static/src/icons/pos.svg',
     'general_settings': '/cyllo_base/static/src/icons/settings.svg',
     'cyllo_analytics_settings': '/cyllo_analytics/static/description/cyllo_analytics.svg',
-    'cyllo_appointment': '/cyllo_appointment/static/description/cyllo_appointment.svg'
+    'cyllo_appointment': '/cyllo_appointment/static/description/cyllo_appointment.svg',
+    'repair': '/cyllo_base/static/src/icons/repair.svg'
 } // todo: add icons for cyllo products
 
 patch(SettingsFormCompiler.prototype, {

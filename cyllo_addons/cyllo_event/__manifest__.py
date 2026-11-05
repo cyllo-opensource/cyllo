@@ -31,6 +31,9 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'category': 'Marketing/Events',
+    'data': [
+        'data/mail_template_data.xml',
+    ],
     'depends': ['event', 'website'],
     'license': 'LGPL-3',
     'installable': True,

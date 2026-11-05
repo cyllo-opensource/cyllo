@@ -110,7 +110,7 @@ class HelpDeskTeam(models.Model):
         help="Allow this team to receive tickets from an email alias.",
     )
     use_sale_order = fields.Boolean(
-        string="Enable Sale Order Features",
+        string="Use Sale Orders",
         help="Allow this team to use Sale Order related features.",
     )
     use_confirmation_email = fields.Boolean(
@@ -119,6 +119,14 @@ class HelpDeskTeam(models.Model):
     )
     use_project = fields.Boolean(string="Use Project",
                                  help="Enable project task creation from tickets.")
+    use_subscription = fields.Boolean(
+        string="Use Subscription",
+        help="Allow this team to link and track customer subscriptions from tickets.",
+    )
+    use_purchase=fields.Boolean(
+        string="Use Purchase",
+        help="Allow this team to link and track customer Purchase orders from tickets."
+    )
     assignment_method = fields.Selection([
         ('manual', 'Manual'),
         ('random', 'Random'),
@@ -167,6 +175,8 @@ class HelpDeskTeam(models.Model):
         'use_sale_order': 'cyllo_helpdesk_sale',
         'use_credit_notes': 'cyllo_helpdesk_account',
         'use_project' : 'cyllo_helpdesk_project',
+        'use_subscription':'cyllo_helpdesk_subscription',
+        'use_purchase':'cyllo_helpdesk_purchase',
     }
 
     @api.model_create_multi

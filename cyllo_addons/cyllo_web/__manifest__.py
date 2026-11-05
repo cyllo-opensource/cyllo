@@ -77,6 +77,7 @@
             'cyllo_web/static/src/scss/hr_attendance.scss',
             'cyllo_web/static/src/scss/live_chat.ui.scss',
             'cyllo_web/static/src/scss/main.scss',
+            'cyllo_web/static/src/scss/cyllo_screen_block.scss',
             'cyllo_web/static/src/scss/pos_style.scss',
             'cyllo_web/static/src/scss/sticky_note.scss',
             'cyllo_web/static/src/scss/website.ui.scss',

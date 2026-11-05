@@ -51,6 +51,7 @@ class AccountPdcBounceReason(models.TransientModel):
     def action_bounce(self):
         """ Button: Confirm"""
         if self.pdc_payment_id:
+            self.pdc_payment_id._check_not_accepted()
             if self.pdc_payment_id.reconciled_invoice_ids:
                 exist_move_id = self.pdc_payment_id.reconciled_invoice_ids
             elif self.pdc_payment_id.reconciled_bill_ids:

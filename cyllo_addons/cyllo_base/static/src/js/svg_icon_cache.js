@@ -6,8 +6,15 @@
 // once per component instance.
 const svgIconCache = new Map();
 
+export const FALLBACK_APP_ICON_HTML =
+    '<i class="cy-icons cy-icons-fallback m-0 ri-apps-line"></i>';
+
 export function getCachedSvgText(svgPath) {
-    const iconSvgPath = `${svgPath.split(',')[0]}/${svgPath.split(',')[1]}`;
+    if (!svgPath || !svgPath.includes(',')) {
+        return Promise.resolve(null);
+    }
+    const [module, path] = svgPath.split(',');
+    const iconSvgPath = `/${module.trim()}/${path.trim()}`;
     if (!svgIconCache.has(iconSvgPath)) {
         svgIconCache.set(
             iconSvgPath,

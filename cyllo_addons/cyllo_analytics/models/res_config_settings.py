@@ -33,11 +33,9 @@ MONTH_SELECTION = [('1', 'January'), ('2', 'February'), ('3', 'March'),
 
 
 class ResConfigSettings(models.TransientModel):
-    """ Inherited res.config.settings to add api keys"""
+    """ Inherited res.config.settings to add the analytics settings"""
     _inherit = 'res.config.settings'
 
-    openai_api_key = fields.Char(
-        config_parameter='cyllo_analytics.openai_api_key')
     # A "module_<name>" boolean: ticking it installs cyllo_ai_analytics,
     # unticking it uninstalls it (standard Odoo settings machinery — no custom
     # code needed). It brings the AI assistant's analytics features into the

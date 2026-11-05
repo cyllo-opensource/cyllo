@@ -20,20 +20,20 @@
                                     <span>Upload</span>
                                 </div>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item" t-if="!isSmall">
                                 <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0" data-hotkey="r"
                                      t-on-click="handleCreateRequest">
                                     <i class="ri-file-add-line on_add_request"/>
                                     <span>Create Request</span>
                                 </div>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item" t-if="!isSmall">
                                 <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0" data-hotkey="l" t-on-click="handleAddUrl">
                                     <i class="ri-link on_add_url"/>
                                     <span>Add Url</span>
                                 </div>
                             </li>
-                            <li class="nav-item select_document">
+                            <li class="nav-item select_document" t-if="!isSmall">
                                 <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0"
                                      t-on-click="handleToggleSelection">
                                     <t t-if="!docState.selection">
@@ -46,10 +46,57 @@
                                     </t>
                                 </div>
                             </li>
+                            <!-- Phone fold: below the small-screen breakpoint the
+                                 secondary actions collapse behind one "More ⌄"
+                                 caret — Upload stays inline as the primary
+                                 action. Markup mirrors the cog menu's mobile
+                                 fold (cog_menu_form.xml) so main.scss's
+                                 resp-drop-container / responsive-dropdown
+                                 styles apply as-is. The folded copies carry
+                                 isSmall gates too, so desktop never renders
+                                 them twice. fold_add_url is the anchor the
+                                 spreadsheet module's fold xpath hangs on. -->
+                            <li t-if="isSmall" class="resp-drop-container">
+                                <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0 more-icon-box"
+                                     role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    More
+                                    <i class="fa fa-caret-down"/>
+                                </div>
+                                <ul class="responsive-dropdown cy-doc-fold-menu cy-cogmenu-dropdown dropdown-menu"
+                                    style="width: fit-content">
+                                    <li t-on-click="handleCreateRequest">
+                                        <a href="#" class="dropdown-item">
+                                            <i class="ri-file-add-line me-1 on_add_request"/>
+                                            <span>Create Request</span>
+                                        </a>
+                                    </li>
+                                    <li class="fold_add_url" t-on-click="handleAddUrl">
+                                        <a href="#" class="dropdown-item">
+                                            <i class="ri-link me-1 on_add_url"/>
+                                            <span>Add Url</span>
+                                        </a>
+                                    </li>
+                                    <li t-on-click="handleToggleSelection">
+                                        <a href="#" class="dropdown-item">
+                                            <t t-if="!docState.selection">
+                                                <i class="ri-checkbox-line me-1"/>
+                                                <span>Select</span>
+                                            </t>
+                                            <t t-else="">
+                                                <i class="ri-close-line me-1"/>
+                                                <span>Cancel</span>
+                                            </t>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                     <div t-if="nbSelected">
-                        <div class="cy-cog-menu-spread d-flex gap-1">
+                        <!-- Icons-only shortcut row: desktop-only. Every one of
+                             these actions also lives in the gear dropdown
+                             below, which stays as the phone's single fold. -->
+                        <div t-if="!isSmall" class="cy-cog-menu-spread d-flex gap-1">
                             <button type="button" name="copy"
                                     class="btn btn-secondary fa fa-share-alt btn-sm on_share_button cy_document_right_icons"
                                     title="Share"

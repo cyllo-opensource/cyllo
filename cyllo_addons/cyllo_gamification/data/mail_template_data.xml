@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Overrides the body of gamification.simple_report_template. The record
+         belongs to the gamification module, so the core file is untouched. -->
+    <data noupdate="0">
+        <!-- gamification marks the record noupdate, which makes an update of
+             an already installed database skip it. Unlock it first. -->
+        <function model="ir.model.data" name="write">
+            <value model="ir.model.data"
+                   eval="obj().search([('module', '=', 'gamification'), ('name', '=', 'simple_report_template')]).ids"/>
+            <value eval="{'noupdate': False}"/>
+        </function>
+
+        <record id="gamification.simple_report_template" model="mail.template">
+            <field name="body_html" type="html">
+<div style="margin: 0; padding: 24px 12px; background-color: #F4F6F8; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #3C4043;">
+    <t t-set="object_ctx" t-value="ctx.get('object')"/>
+    <t t-set="company" t-value="object_ctx and object_ctx.company_id or user.company_id"/>
+    <t t-set="challenge_lines" t-value="ctx.get('challenge_lines', [])"/>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: 4px solid #9EA700; border-radius: 8px; border-collapse: separate;">
+        <tr>
+            <td style="padding: 28px 32px 8px 32px;">
+                <span style="font-size: 11px; color: #9EA700; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                    <t t-if="object.visibility_mode == 'ranking'">Challenge Leaderboard</t>
+                    <t t-else="">Challenge Progress</t>
+                </span>
+                <div style="font-size: 22px; font-weight: 700; color: #1F2933; margin-top: 4px;" t-out="object.name or ''">Challenge</div>
+                <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0 0 0;"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 16px 32px 28px 32px; font-size: 14px; line-height: 1.6; color: #3C4043;">
+
+                <!-- Personal progress -->
+                <t t-if="object.visibility_mode == 'personal'">
+                    <p style="margin: 0 0 16px 0;">Here is your current progress in the challenge <strong t-out="object.name or ''"></strong>.</p>
+                    <t t-foreach="challenge_lines" t-as="line">
+                        <div style="margin: 0 0 12px 0; padding: 14px 16px; background-color: #F7F8E6; border-left: 4px solid #9EA700; border-radius: 4px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="font-weight: 600; color: #1F2933;">
+                                        <t t-out="line['name'] or ''"></t>
+                                        <t t-if="line['suffix'] or line['monetary']">(<t t-out="line['full_suffix'] or ''"></t>)</t>
+                                    </td>
+                                    <td align="right" style="font-size: 22px; font-weight: 700; color: #9EA700; white-space: nowrap;">
+                                        <t t-out="int(line['completeness']) or 0"></t>%
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding-top: 8px; font-size: 12px; color: #6B7280;">
+                                        Current: <strong style="color: #1F2933;"><t t-out="'%.2f' % line['current']"></t><t t-if="line['suffix']"> <t t-out="line['suffix'] or ''"></t></t></strong>
+                                        &#160;|&#160;
+                                        Target: <strong style="color: #1F2933;"><t t-out="'%.2f' % line['target']"></t><t t-if="line['suffix']"> <t t-out="line['suffix'] or ''"></t></t></strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding-top: 8px;">
+                                        <div style="height: 6px; background-color: #E5E7EB; border-radius: 3px;">
+                                            <div t-attf-style="height: 6px; width: {{ min(int(line['completeness'] or 0), 100) }}%; background-color: #9EA700; border-radius: 3px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+
+                <!-- Leaderboard -->
+                <t t-else="">
+                    <p style="margin: 0 0 16px 0;">Here are the current standings of the challenge <strong t-out="object.name or ''"></strong>.</p>
+                    <t t-foreach="challenge_lines" t-as="line">
+                        <div style="margin: 20px 0 8px 0; font-size: 15px; font-weight: 700; color: #1F2933;">
+                            Top achievers for <span style="color: #9EA700;" t-out="line['name'] or ''"></span>
+                        </div>
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border: 1px solid #E5E7EB; border-radius: 6px; border-collapse: separate; overflow: hidden;">
+                            <tr style="background-color: #F7F8E6; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280;">
+                                <th align="center" style="padding: 8px 6px; width: 14%;">Rank</th>
+                                <th align="left" style="padding: 8px 6px;">Name</th>
+                                <th align="right" style="padding: 8px 6px; width: 28%;">
+                                    Performance
+                                    <t t-if="line['suffix']">(<t t-out="line['suffix'] or ''"></t>)</t>
+                                    <t t-elif="line['monetary']">(<t t-out="company.currency_id.symbol or ''"></t>)</t>
+                                </th>
+                                <th align="right" style="padding: 8px 10px 8px 6px; width: 20%;">Done</th>
+                            </tr>
+                            <tr t-foreach="line['goals']" t-as="goal" style="border-top: 1px solid #E5E7EB;">
+                                <td align="center" style="padding: 10px 6px; border-top: 1px solid #E5E7EB;">
+                                    <span t-attf-style="display: inline-block; min-width: 24px; padding: 2px 0; border-radius: 12px; font-weight: 700; font-size: 13px; background-color: {{ '#9EA700' if goal['rank'] == 0 else '#F0F1F3' }}; color: {{ '#FFFFFF' if goal['rank'] == 0 else '#3C4043' }};" t-out="goal['rank'] + 1"></span>
+                                </td>
+                                <td align="left" style="padding: 10px 6px; border-top: 1px solid #E5E7EB; font-weight: 600; color: #1F2933;" t-out="goal['name'] or ''"></td>
+                                <td align="right" style="padding: 10px 6px; border-top: 1px solid #E5E7EB;">
+                                    <t t-out="'%.2f' % goal['current']"></t>
+                                    <div style="font-size: 11px; color: #9CA3AF;">of <t t-out="'%.2f' % line['target']"></t></div>
+                                </td>
+                                <td align="right" style="padding: 10px 10px 10px 6px; border-top: 1px solid #E5E7EB; font-size: 16px; font-weight: 700; color: #9EA700;">
+                                    <t t-out="int(goal['completeness'])"></t>%
+                                </td>
+                            </tr>
+                        </table>
+                    </t>
+                </t>
+
+                <p style="margin: 24px 0 0 0;">Best regards,<br/><strong t-out="company.name or ''">Company</strong></p>
+            </td>
+        </tr>
+    </table>
+</div>
+            </field>
+        </record>
+
+        <!-- Lock it again so a gamification upgrade keeps the Cyllo body. -->
+        <function model="ir.model.data" name="write">
+            <value model="ir.model.data"
+                   eval="obj().search([('module', '=', 'gamification'), ('name', '=', 'simple_report_template')]).ids"/>
+            <value eval="{'noupdate': True}"/>
+        </function>
+    </data>
+</odoo>

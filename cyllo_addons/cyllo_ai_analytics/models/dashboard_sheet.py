@@ -52,6 +52,8 @@ _logger = logging.getLogger(__name__)
 MAX_SUGGESTIONS = 6
 # Field kinds treated as time / numeric for chart-type selection.
 _TIME_TYPES = ("date", "datetime")
+# Labels for date dimensions, the same TO_CHAR formats the sheet builder uses.
+_DATE_GROUP_FORMATS = {"Day": "Mon DD, YYYY", "Month": "FMMonth (YYYY)", "Year": "YYYY"}
 _NUMERIC_TYPES = ("integer", "float", "monetary")
 # Field kinds usable as chart dimensions (group-by). Measures are the numeric
 # kinds above; everything else (text, html, binary, x2many, …) isn't chartable.
@@ -158,7 +160,9 @@ class DashboardSheet(models.Model):
             records = IrModel.search(
                 ['|', ('model', '=', term),
                  '|', ('model', 'ilike', term), ('name', 'ilike', term)],
-                limit=10)
+                limit=50)
+            records = records.sorted(
+                lambda rec: self._model_match_rank(rec, term))
             for rec in records:
                 if rec.model in seen or rec.model not in self.env:
                     continue
@@ -171,6 +175,23 @@ class DashboardSheet(models.Model):
                 out.append({"model": rec.model, "name": rec.name})
                 break  # best (first accessible, non-transient) match per term
         return out
+
+    @staticmethod
+    def _model_match_rank(rec, term):
+        """Rank an ir.model match for ``term``: exact technical name, exact
+        label, last name segment, prefix match, then any other match; ties
+        keep search order."""
+        term = term.lower()
+        model, name = rec.model.lower(), (rec.name or "").lower()
+        if model == term:
+            return 0
+        if name == term:
+            return 1
+        if model.rsplit(".", 1)[-1] == term:
+            return 2
+        if model.startswith(term) or name.startswith(term):
+            return 3
+        return 4
 
     def _enumerate_table_fields(self, model):
         """Split a model's *storable* fields into dimension/measure candidates,
@@ -319,6 +340,7 @@ class DashboardSheet(models.Model):
             "measure_column": f"{table}.{source.get('measure')}",
             "title": title or False,
             "chart_type": source.get("chart_type") or "",
+            "granularity": source.get("granularity") or "",
         }
         name = (source.get("dashboard_name") or title or "AI Dashboard").strip()
         return self.create_quick_dashboard(name, [pick])
@@ -349,6 +371,26 @@ class DashboardSheet(models.Model):
         dim_alias = dim_col.replace(".", "_")
         dim_expr = self._ai_col_expr(
             dim_col, dim_type, dim_json, main_table, has_currency, company_id)
+        date_group = (self._ai_date_group(pick.get("granularity"))
+                      if not relational and dim_type in _TIME_TYPES else None)
+        date_axes = []
+        if date_group:
+            grouped = f"TO_CHAR({dim_col}, '{_DATE_GROUP_FORMATS[date_group]}')"
+            dim_alias = f"{dim_alias}_{date_group.lower()}"
+            dim_expr = grouped
+            date_axes = [
+                fields.Command.create({
+                    "type": "group", "value": f'{date_group} — {dim.get("label")}',
+                    "alias": dim_alias, "column": grouped,
+                    "query": f"{grouped} AS {dim_alias}",
+                    "source_column": dim_col, "date_group": date_group,
+                }),
+                fields.Command.create({
+                    "type": "order", "value": dim.get("label"),
+                    "alias": f"{dim_alias}_sort", "column": f"MIN({dim_col})",
+                    "query": f"MIN({dim_col}) AS {dim_alias}_sort",
+                }),
+            ]
 
         meas_col = measure["column"]
         meas_alias = meas_col.replace(".", "_")
@@ -374,7 +416,7 @@ class DashboardSheet(models.Model):
                 "monetaryInBase": (
                     meas_expr if measure.get("field_type") == "monetary" else False),
             }),
-        ]
+        ] + date_axes
 
         table_ids = [fields.Command.create({
             "name": model._description or ir_model.name, "model": model._name,
@@ -404,6 +446,17 @@ class DashboardSheet(models.Model):
             "axis_ids": axis_ids,
             "table_ids": table_ids,
         }
+
+    @staticmethod
+    def _ai_date_group(granularity):
+        """Sheet date grouping (Day / Month / Year, as the sheet builder offers)
+        for a chat granularity; anything else, or none, groups by month."""
+        granularity = (granularity or "").lower()
+        if granularity == "year":
+            return "Year"
+        if granularity in ("day", "hour"):
+            return "Day"
+        return "Month"
 
     def _ai_col_expr(self, column, field_type, is_json, main_table,
                      has_currency, company_id):

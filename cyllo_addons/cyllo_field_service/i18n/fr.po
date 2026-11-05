@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Cyllo Server 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-12-26 07:23+0000\n"
-"PO-Revision-Date: 2024-12-26 07:23+0000\n"
+"PO-Revision-Date: 2026-10-26 03:42+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -70,7 +70,7 @@ msgstr ""
 "</span>"
 
 #. module: cyllo_field_service
-#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_form
 msgid "<span class=\"col-auto ms-2\">days before</span>"
 msgstr "<span class = \"Col-Auto MS-2\"> jours avant </span>"
 
@@ -194,6 +194,34 @@ msgid ""
 msgstr ""
 "<strong> Nom du partenaire </strong>\n"
 "<br/>"
+
+#. module: cyllo_field_service
+#: model:mail.template,body_html:cyllo_field_service.mail_template_field_service_request_creation
+msgid ""
+"<p>Dear <t t-out=\"object.partner_id.name or 'Customer'\"></t>\n"
+"            </p>\n"
+"            <p>Thank you for contacting us. We appreciate your interest in our products/services.\n"
+"                Our team is currently reviewing your inquiry and will respond to your email as soon as possible.\n"
+"                If you have any further questions or concerns in the meantime, please do not hesitate to let us know. We are here to help.\n"
+"                </p>\n"
+"            <p>Thank you for your patience.</p>\n"
+"            <p>Best regards.</p>\n"
+"        "
+msgstr ""
+"<p>Cher/Chère <t t-out=\"object.partner_id.name or 'Client'\"></t>\n"
+"            </p>\n"
+"            <p>Merci de nous avoir contactés. Nous vous remercions de l'intérêt que vous portez à nos produits et services.\n"
+"                Notre équipe examine actuellement votre demande et répondra à votre e-mail dans les meilleurs délais.\n"
+"                Si vous avez d'autres questions ou préoccupations entre-temps, n'hésitez pas à nous en faire part. Nous sommes là pour vous aider.\n"
+"                </p>\n"
+"            <p>Merci de votre patience.</p>\n"
+"            <p>Cordialement.</p>\n"
+"        "
+
+#. module: cyllo_field_service
+#: model:mail.template,subject:cyllo_field_service.mail_template_field_service_request_creation
+msgid "Reception of Field Service Request"
+msgstr "Réception de la demande de service sur site"
 
 #. module: cyllo_field_service
 #: model_terms:ir.ui.view,arch_db:cyllo_field_service.report_field_service_request
@@ -778,8 +806,50 @@ msgstr "Créer une nouvelle catégorie de service sur terrain"
 #. module: cyllo_field_service
 #: model_terms:ir.actions.act_window,help:cyllo_field_service.action_view_all_requests
 #: model_terms:ir.actions.act_window,help:cyllo_field_service.action_view_my_requests
+#: model_terms:ir.actions.act_window,help:cyllo_field_service.action_view_overdue_requests
 msgid "Create New Field Service Request"
 msgstr "Créer une nouvelle demande de service de terrain"
+
+#. module: cyllo_field_service
+#: model:ir.model.fields,field_description:cyllo_field_service.field_field_service_request__is_overdue
+msgid "Is Overdue"
+msgstr "Est en retard"
+
+#. module: cyllo_field_service
+#: model:ir.actions.act_window,name:cyllo_field_service.action_view_overdue_requests
+#: model:ir.ui.menu,name:cyllo_field_service.menu_overdue_requests
+msgid "Overdue Requests"
+msgstr "Demandes en retard"
+
+#. module: cyllo_field_service
+#. cyllo-python
+#: code:addons/cyllo_field_service/models/field_service_request.py:0
+#, python-format
+msgid "Please Add Skill Category."
+msgstr "Veuillez ajouter une catégorie de compétence."
+
+#. module: cyllo_field_service
+#. cyllo-python
+#: code:addons/cyllo_field_service/models/field_service_request.py:0
+#, python-format
+msgid ""
+"An assigned field service request cannot be changed back to the Previous "
+"state."
+msgstr "Une demande de service sur site assignée ne peut pas être ramenée à l’état précédent."
+
+#. module: cyllo_field_service
+#: model:ir.model.constraint,message:cyllo_field_service.constraint_field_service_request_check_date_assigned
+msgid "The Deadline date cannot be earlier than the Assigning date."
+msgstr "La date limite ne peut pas être antérieure à la date d’affectation."
+
+#. module: cyllo_field_service
+#. cyllo-python
+#: code:addons/cyllo_field_service/models/field_service_request.py:0
+#: code:addons/cyllo_field_service/models/field_service_request.py:0
+#: code:addons/cyllo_field_service/models/field_service_request.py:0
+#, python-format
+msgid "New"
+msgstr "Nouveau"
 
 #. module: cyllo_field_service
 #: model_terms:ir.actions.act_window,help:cyllo_field_service.action_view_service_template
@@ -998,7 +1068,7 @@ msgid "Employees"
 msgstr "Employés"
 
 #. module: cyllo_field_service
-#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_form
 msgid ""
 "Enable this field to bring the features of fleet module to field service"
 msgstr ""
@@ -1006,7 +1076,7 @@ msgstr ""
 "service de terrain"
 
 #. module: cyllo_field_service
-#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_form
 msgid ""
 "Enable this field to bring the features of maintenance module to field "
 "service"
@@ -1015,7 +1085,7 @@ msgstr ""
 "au service sur le terrain"
 
 #. module: cyllo_field_service
-#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_form
 msgid ""
 "Enable this field to bring the features of project module to field service"
 msgstr ""
@@ -1049,7 +1119,7 @@ msgstr "Équipements en service sur le terrain"
 #: model_terms:ir.ui.view,arch_db:cyllo_field_service.fs_service_request_form
 #: model_terms:ir.ui.view,arch_db:cyllo_field_service.portal_my_home_menu_fs_request
 #: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_field_service_request_graph
-#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_form
 msgid "Field Service"
 msgstr "Service sur le terrain"
 
@@ -1741,7 +1811,7 @@ msgstr "Jeton de sécurité"
 
 #. module: cyllo_field_service
 #: model:ir.model.fields,help:cyllo_field_service.field_res_config_settings__deadline_reminder
-#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service.view_res_config_settings_form
 msgid "Send a reminder a few days before the deadline."
 msgstr "Envoyez un rappel quelques jours avant la date limite."
 

@@ -2,12 +2,23 @@
 <templates>
     <t t-name="docControllerView" t-inherit="cyllo_documents.docControllerView" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('doc_btn_container')]/div/ul/li[hasclass('select_document')]" position="before">
-            <li class="nav-item create_spreadsheet" t-on-click="handleAddSpreadSheet">
+            <li class="nav-item create_spreadsheet" t-if="!isSmall" t-on-click="handleAddSpreadSheet">
                 <div class="btn btn-outline-secondary nav-link cy-navitem-list border-0"
                      data-hotkey="q">
                     <i class="ri-add-fill"/>
                     <span>Create Spreadsheet</span>
                 </div>
+            </li>
+        </xpath>
+        <xpath expr="//li[hasclass('fold_add_url')]" position="after">
+            <!-- Phone fold: Create Spreadsheet joins the "More ⌄" caret right
+                 after Add Url, keeping the desktop row's order. The handler
+                 is the same patched DocController method. -->
+            <li t-if="isSmall" t-on-click="handleAddSpreadSheet">
+                <a href="#" class="dropdown-item">
+                    <i class="ri-add-fill me-1"/>
+                    <span>Create Spreadsheet</span>
+                </a>
             </li>
         </xpath>
     </t>

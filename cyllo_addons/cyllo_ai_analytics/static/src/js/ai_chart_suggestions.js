@@ -18,6 +18,7 @@
  */
 import { patch } from "@web/core/utils/patch";
 import { useBus } from "@web/core/utils/hooks";
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { CylloSheet } from "@cyllo_analytics/js/cyllo_sheet";
 import { buildAxisEntry } from "@cyllo_analytics/js/drag_n_drop";
@@ -94,6 +95,15 @@ patch(CylloSheet.prototype, {
         // A suggestion card's Apply button was clicked in the chat.
         useBus(this.env.bus, "CY_AI:APPLY_SUGGESTION", (ev) => {
             const suggestion = ev.detail?.suggestion;
+            const sheetId = ev.detail?.sheetId;
+            if (suggestion && sheetId && this.state.id && sheetId !== this.state.id) {
+                this.notification.add(
+                    _t("These charts were suggested for the sheet \"%s\". Open that sheet to apply them.",
+                        ev.detail.sheetName || sheetId),
+                    { type: "warning" },
+                );
+                return;
+            }
             if (suggestion) {
                 this.applyAiSuggestion(suggestion);
             }
@@ -174,10 +184,23 @@ patch(CylloSheet.prototype, {
             this.notification.add("Could not load chart suggestions.", { type: "warning" });
         }
         suggestions = suggestions || [];
-        const html = suggestions.length
-            ? "Based on your fields, the most relevant charts:"
-            : "I couldn't find useful chart pairings — add a few more dimension/measure fields and try again.";
-        this.env.bus.trigger("CY_AI:PUSH_MESSAGE", { html, suggestions });
+        const sheetName = this.state.name || "";
+        const intro = suggestions.length
+            ? (sheetName
+                ? _t("Based on the fields of \"%s\", the most relevant charts:", sheetName)
+                : _t("Based on your fields, the most relevant charts:"))
+            : _t("I couldn't find useful chart pairings — add a few more dimension/measure fields and try again.");
+        this.env.bus.trigger("CY_AI:PUSH_MESSAGE", {
+            persist: true,
+            userText: sheetName
+                ? _t("Generate charts for \"%s\"", sheetName)
+                : _t("Generate charts"),
+            intro,
+            widget: {
+                key: "chart_suggestions",
+                props: { suggestions, sheetId: this.state.id || false, sheetName },
+            },
+        });
     },
 
     /**

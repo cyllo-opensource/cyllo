@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="question_upload" name="Question: file upload">
+        <t t-set="upload_line" t-value="answer_lines.filtered(lambda line: line.answer_type == 'upload')[:1]"/>
+        <div class="o_survey_comment_container p-0">
+            <input type="file" class="form-control o_survey_upload_input"
+                   t-att-name="question.id"
+                   data-question-type="upload"
+                   t-att-data-max-size="question._upload_max_size"
+                   t-att-data-existing-file="upload_line.value_upload_name or None"/>
+            <div t-if="upload_line" class="form-text">
+                Current file: <span class="fw-bold" t-out="upload_line.value_upload_name"/>
+            </div>
+            <div class="form-text text-muted">Maximum file size: 100 KB</div>
+        </div>
+    </template>
+
+    <template id="question_container" inherit_id="survey.question_container" name="Survey: question container upload">
+        <xpath expr="//t[@t-if=&quot;question.question_type == 'matrix'&quot;]" position="after">
+            <t t-if="question.question_type == 'upload'" t-call="cyllo_survey.question_upload"/>
+        </xpath>
+    </template>
+
+    <template id="survey_page_print" inherit_id="survey.survey_page_print" name="Survey: print page upload">
+        <xpath expr="//t[@t-if=&quot;question.question_type == 'matrix'&quot;]" position="after">
+            <t t-if="question.question_type == 'upload'">
+                <t t-set="upload_line" t-value="answer_lines.filtered(lambda line: line.answer_type == 'upload')[:1]"/>
+                <div t-if="upload_line">
+                    <a t-att-href="'/survey/upload/%s/%s/%s' % (survey.access_token, answer.access_token, upload_line.id)">
+                        <i class="fa fa-download me-1"/><span t-out="upload_line.value_upload_name"/>
+                    </a>
+                </div>
+                <div t-elif="answer_lines" class="row g-0">
+                    <div class="col-12 o_survey_choice_question_skipped mt-1">This question was skipped</div>
+                </div>
+                <input t-else="" type="file" class="form-control" disabled="disabled"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="survey_page_statistics_question" inherit_id="survey.survey_page_statistics_question" name="Question: result statistics upload">
+        <xpath expr="//t[@t-elif=&quot;question.question_type in ['matrix']&quot;]" position="after">
+            <t t-elif="question.question_type == 'upload'" t-call="cyllo_survey.question_result_upload"/>
+        </xpath>
+    </template>
+
+    <template id="question_result_upload" name="Question: file upload result">
+        <t t-set="non_skipped_records" t-value="list(filter(lambda record: not record.skipped, table_data))"/>
+        <t t-set="first_page_records_count" t-value="len(non_skipped_records) if len(non_skipped_records) &lt; page_record_limit else page_record_limit"/>
+        <div t-attf-style="height: calc((#{default_line_height}px * #{first_page_records_count}) + #{default_line_height}px + 16px);" class="overflow_auto o_survey_user_responses_table_wrapper">
+            <table class="table table-hover table-sm o_survey_results_table_indexed" t-att-id="'survey_table_question_%d' % question.id">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Uploaded Files</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="non_skipped_records" t-as="input_line">
+                        <tr t-att-class="'d-none' if not input_line in non_skipped_records[:page_record_limit] else ''">
+                            <td>
+                                <t t-if="no_print_url"><t t-esc="input_line_index + 1"/></t>
+                                <t t-else="">
+                                    <a t-att-href="input_line.user_input_id.get_print_url()">
+                                        <t t-esc="input_line_index + 1"/>
+                                    </a>
+                                </t>
+                            </td>
+                            <td>
+                                <a t-att-href="'/survey/upload/%s/%s/%s' % (input_line.survey_id.access_token, input_line.user_input_id.access_token, input_line.id)">
+                                    <i class="fa fa-download me-1"/><t t-esc="input_line.value_upload_name"/>
+                                </a>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+        <t t-call="survey.question_table_pagination"/>
+    </template>
+
+    <template id="layout" inherit_id="survey.layout" name="Survey: layout top bar">
+        <xpath expr="//div[hasclass('o_survey_progress_wrapper')]/.." position="before">
+            <div class="o_survey_top_bar"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_survey_progress_wrapper')]/.." position="attributes">
+            <attribute name="class" add="o_survey_bottom_bar d-flex align-items-center" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_survey_top_bar')]" position="inside">
+            <xpath expr="//div[hasclass('o_survey_progress_wrapper')]" position="move"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_survey_brand_message')]/div[@t-call='web.brand_promotion_message']" position="attributes">
+            <attribute name="class" add="o_survey_powered_by" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_survey_brand_message')]" position="before">
+            <xpath expr="//div[hasclass('o_survey_powered_by')]" position="move"/>
+        </xpath>
+    </template>
+</odoo>

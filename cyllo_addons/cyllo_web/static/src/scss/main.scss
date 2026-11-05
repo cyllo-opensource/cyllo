@@ -1676,6 +1676,17 @@ button.dropdown-toggle::after {
     border-bottom-right-radius: 8px;
 }
 
+/* Mobile kanban: cards read as flat list rows — no border-radius, including
+   the first/last card caps of a grouped column. */
+@media (max-width: 766px) {
+
+    .o_kanban_renderer .o_kanban_record>div:not(.o_dropdown_kanban),
+    .o_kanban_grouped .o_kanban_record:not(.o_kanban_record ~ .o_kanban_record)>div:not(.o_dropdown_kanban),
+    .o_kanban_grouped .o_kanban_record:not(:has(~ .o_kanban_record))>div:not(.o_dropdown_kanban) {
+        border-radius: 0;
+    }
+}
+
 div.o_kanban_view.o_im_livechat\.livechat_channel_kanban_view.o_view_controller.o_action .o_kanban_record {
     padding: 0px !important;
 }
@@ -2404,7 +2415,7 @@ body:has(.menuListFixed) .sidebar-header {
 }
 
 .o_kanban_renderer .o_kanban_group:not(.o_column_folded) .o_kanban_header {
-        top: -19px !important;
+    top: -19px !important;
 }
 
 .cy-left-sidebar .cy-sidebar-nav.cy-menu-home {
@@ -2801,6 +2812,7 @@ body:has(.menuListFixed) .sidebar-header {
     background: #fff;
     padding: 8px 16px;
     gap: 8px;
+    scrollbar-width: none;
 }
 
 .o_action_manager .o_form_view_container .o-setting-container .settings-tab .tab.selected {
@@ -3229,6 +3241,12 @@ select {
 
 .responsive-dropdown.show {
     display: block;
+}
+
+/* Mobile "More ⌄" overflow dropdown (CogMenuList): no ul padding on any
+   side — the items carry their own .dropdown-item spacing. */
+.resp-drop-container .responsive-dropdown {
+    padding: 0;
 }
 
 .more-icon-box {

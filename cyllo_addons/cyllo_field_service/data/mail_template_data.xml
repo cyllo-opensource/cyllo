@@ -6,70 +6,59 @@
         <field name="model_id" ref="cyllo_field_service.model_field_service_request"/>
         <field name="subject">Assigned to {{ object.name }}</field>
         <field name="body_html" type="html">
-            <table border="0" cellpadding="0" cellspacing="0"
-                   style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748;border-collapse:separate;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                   style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: 4px solid #9EA700; border-radius: 8px; border-collapse: separate; font-family: Arial, Helvetica, sans-serif;">
                 <tr>
-                    <td align="center">
-                        <table border="0" cellpadding="0" cellspacing="0" width="100%"
-                               style="max-width: 590px; box-sizing: border-box; padding: 16px; background-color: white; color: #454748; border-collapse:separate;  margin-bottom: 20px;">
-                            <tbody>
-                                <!-- CONTENT -->
-                                <tr>
-                                    <td align="center"
-                                        style="min-width: 0;">
-                                        <table border="0" cellpadding="0"
-                                               cellspacing="0" width="100%"
-                                               style="max-width: 590px; box-sizing: border-box; min-width: 0; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
-                                            <tr>
-                                                <td valign="top"
-                                                    style="font-size: 13px;">
-                                                    <div>
-                                                        Dear
-                                                        <t t-out="ctx.get('name')"/>
-                                                        ,
-                                                        <br/>
-                                                        <br/>
-                                                        Your have been assigned to service request
-                                                        <span>
-                                                            <t t-out="object.name"/>
-                                                        </span>
-                                                        <br/>
-                                                        <br/>
-                                                        Request No :
-                                                        <span>
-                                                            <t t-out="object.name"/>
-                                                        </span>
-                                                        <br/>
-                                                        <br/>
-                                                        Priority:
-                                                        <span>
-                                                            <t t-out="dict(object._fields['priority'].selection).get(object.priority)"/>
-                                                        </span>
-                                                        <br/>
-                                                        <br/>
-                                                        Category :
-                                                        <span>
-                                                            <t t-out="object.skill_category_id.name"/>
-                                                        </span>
-                                                        <br/>
-                                                        <br/>
-                                                        <span t-if="object.description">Description : <t t-out="object.description"/></span>
-                                                        <div style="margin: 16px 0px 16px 0px; text-align: center;">
-                                                            <a t-att-href='object.get_portal_url()'
-                                                               style="display: inline-block; padding: 10px; text-decoration: none; font-size: 12px; background-color: #875A7B; color: #fff; border-radius: 5px;">
-                                                                <strong>
-                                                                    View Request
-                                                                </strong>
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
+                    <td style="padding: 28px 32px 8px 32px;">
+                        <span style="font-size: 11px; color: #9EA700; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                            Field Service Request
+                        </span>
+                        <div style="font-size: 22px; font-weight: 700; color: #1F2933; margin-top: 4px;">
+                            New assignment: <t t-out="object.name or ''">FS00001</t>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0 0 0;"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px 32px 28px 32px; font-size: 14px; line-height: 1.6; color: #3C4043;">
+                        <p style="margin: 0 0 16px 0;">
+                            Dear <strong t-out="ctx.get('name') or ''">Worker</strong>,
+                        </p>
+                        <p style="margin: 0 0 16px 0;">
+                            You have been assigned to the service request
+                            <strong t-out="object.name or ''">FS00001</strong>.
+                        </p>
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                               style="background-color: #F7F8E6; border-left: 4px solid #9EA700; border-radius: 4px; border-collapse: separate;">
+                            <tr>
+                                <td style="padding: 12px 16px; font-size: 12px; color: #6B7280; width: 35%;">Request No</td>
+                                <td style="padding: 12px 16px; font-weight: 600; color: #1F2933;">
+                                    <t t-out="object.name or ''"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0 16px 12px 16px; font-size: 12px; color: #6B7280;">Priority</td>
+                                <td style="padding: 0 16px 12px 16px; font-weight: 600; color: #1F2933;">
+                                    <t t-out="dict(object._fields['priority'].selection).get(object.priority)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0 16px 12px 16px; font-size: 12px; color: #6B7280;">Category</td>
+                                <td style="padding: 0 16px 12px 16px; font-weight: 600; color: #1F2933;">
+                                    <t t-out="object.skill_category_id.name or ''"/>
+                                </td>
+                            </tr>
                         </table>
+                        <t t-if="object.description">
+                            <p style="margin: 16px 0 4px 0; font-size: 12px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px;">Description</p>
+                            <p style="margin: 0;" t-out="object.description"/>
+                        </t>
+                        <div style="margin: 24px 0 0 0; text-align: center;">
+                            <a t-att-href="object.get_portal_url()"
+                               style="display: inline-block; padding: 12px 28px; text-decoration: none; font-size: 14px; font-weight: 600; background-color: #9EA700; color: #FFFFFF; border-radius: 6px;">
+                                View Request
+                            </a>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -85,39 +74,47 @@
         <field name="model_id" ref="cyllo_field_service.model_field_service_request"/>
         <field name="subject">Reminder: Service Request Deadline Approaching</field>
         <field name="body_html" type="html">
-            <table border="0" cellpadding="0" cellspacing="0"
-                   style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748;border-collapse:separate;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                   style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: 4px solid #9EA700; border-radius: 8px; border-collapse: separate; font-family: Arial, Helvetica, sans-serif;">
                 <tr>
-                    <td align="center">
-                        <table border="0" cellpadding="0" cellspacing="0" width="100%"
-                               style="max-width: 590px; box-sizing: border-box; padding: 16px; background-color: white; color: #454748; border-collapse:separate;  margin-bottom: 20px;">
-                            <tbody>
-                                <!-- CONTENT -->
-                                <tr>
-                                    <td align="center"
-                                        style="min-width: 0;">
-                                        <table border="0" cellpadding="0"
-                                               cellspacing="0" width="100%"
-                                               style="max-width: 590px; box-sizing: border-box; min-width: 0; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
-                                            <tr>
-                                                <td valign="top"
-                                                    style="font-size: 13px;">
-                                                    <div>
-                                                        Dear
-                                                        <t t-out="ctx.get('name')"/>
-                                                        ,
-                                                        <br/>
-                                                        <br/>
-                                                        This is a friendly reminder that your service request (Reference: <t t-out="object.name"/>) is nearing its deadline. The service is scheduled to be completed by <t t-out="object.date_deadline.date()"/>,
-                                                        Please ensure that all necessary preparations are in place to facilitate a smooth and timely resolution.
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
+                    <td style="padding: 28px 32px 8px 32px;">
+                        <span style="font-size: 11px; color: #9EA700; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                            Field Service Request
+                        </span>
+                        <div style="font-size: 22px; font-weight: 700; color: #1F2933; margin-top: 4px;">
+                            Deadline reminder: <t t-out="object.name or ''">FS00001</t>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0 0 0;"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px 32px 28px 32px; font-size: 14px; line-height: 1.6; color: #3C4043;">
+                        <p style="margin: 0 0 16px 0;">
+                            Dear <strong t-out="ctx.get('name') or ''">Worker</strong>,
+                        </p>
+                        <p style="margin: 0 0 16px 0;">
+                            This is a friendly reminder that your service request
+                            (Reference: <strong t-out="object.name or ''">FS00001</strong>)
+                            is nearing its deadline.
+                        </p>
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                               style="background-color: #F7F8E6; border-left: 4px solid #9EA700; border-radius: 4px; border-collapse: separate;">
+                            <tr>
+                                <td style="padding: 12px 16px; font-size: 12px; color: #6B7280; width: 35%;">Reference</td>
+                                <td style="padding: 12px 16px; font-weight: 600; color: #1F2933;">
+                                    <t t-out="object.name or ''"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0 16px 12px 16px; font-size: 12px; color: #6B7280;">Scheduled to be completed by</td>
+                                <td style="padding: 0 16px 12px 16px; font-weight: 600; color: #1F2933;">
+                                    <t t-out="object.date_deadline.date()"/>
+                                </td>
+                            </tr>
                         </table>
+                        <p style="margin: 16px 0 0 0;">
+                            Please ensure that all necessary preparations are in place to facilitate a smooth and timely resolution.
+                        </p>
                     </td>
                 </tr>
             </table>
@@ -130,14 +127,34 @@
         <field name="subject">Reception of Field Service Request</field>
         <field name="email_to">{{ object.partner_id.email }}</field>
         <field name="body_html" type="html">
-            <p>Dear <t t-out="object.partner_id.name or 'Customer'"/>
-            </p>
-            <p>Thank you for contacting us. We appreciate your interest in our products/services.
-                Our team is currently reviewing your inquiry and will respond to your email as soon as possible.
-                If you have any further questions or concerns in the meantime, please do not hesitate to let us know. We are here to help.
-                </p>
-            <p>Thank you for your patience.</p>
-            <p>Best regards.</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                   style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: 4px solid #9EA700; border-radius: 8px; border-collapse: separate; font-family: Arial, Helvetica, sans-serif;">
+                <tr>
+                    <td style="padding: 28px 32px 8px 32px;">
+                        <span style="font-size: 11px; color: #9EA700; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                            Field Service Request
+                        </span>
+                        <div style="font-size: 22px; font-weight: 700; color: #1F2933; margin-top: 4px;">
+                            Request received
+                        </div>
+                        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 16px 0 0 0;"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 16px 32px 28px 32px; font-size: 14px; line-height: 1.6; color: #3C4043;">
+                        <p style="margin: 0 0 16px 0;">
+                            Dear <strong t-out="object.partner_id.name or 'Customer'">Customer</strong>,
+                        </p>
+                        <p style="margin: 0 0 16px 0;">
+                            Thank you for contacting us. We appreciate your interest in our products/services.
+                            Our team is currently reviewing your inquiry and will respond to your email as soon as possible.
+                            If you have any further questions or concerns in the meantime, please do not hesitate to let us know. We are here to help.
+                        </p>
+                        <p style="margin: 0 0 16px 0;">Thank you for your patience.</p>
+                        <p style="margin: 0;">Best regards.</p>
+                    </td>
+                </tr>
+            </table>
         </field>
     </record>
 

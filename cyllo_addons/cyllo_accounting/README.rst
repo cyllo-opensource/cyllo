@@ -49,3 +49,13 @@ Tools That Power Your Finances
 From Anglo-Saxon accounting, deferred revenue and expenses, and multi-currency support to
 fiscal positions, budget management, tax returns, post-dated cheques, and analytic
 accounting, Cyllo gives you every tool your finance team needs in one place.
+
+Installation
+------------
+
+Install the Python dependencies declared by this repository before installing
+this addon:
+
+.. code-block:: console
+
+    pip install -r requirements.txt

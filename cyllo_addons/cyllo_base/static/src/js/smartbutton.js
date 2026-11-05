@@ -3,6 +3,7 @@
 import { onWillRender } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
+import { SIZES } from "@web/core/ui/ui_service";
 import { ButtonBox } from "@web/views/form/button_box/button_box";
 
 patch(ButtonBox.prototype, {
@@ -15,6 +16,11 @@ patch(ButtonBox.prototype, {
             let maxVisibleButtons;
             if (this.props.slots.slot_0.__ctx.__comp__.this.splitView) {
                 maxVisibleButtons = 1;
+            } else if (ui.size <= SIZES.SM) {
+                // Phones (Cyllo mobile): one smart button inline next to
+                // "+ New"; with more than two buttons the second box becomes
+                // the "More" dropdown holding every remaining button.
+                maxVisibleButtons = 2;
             } else {
                 maxVisibleButtons = [3, 4, 5, 7, 4, 5, 8][ui.size] || 8;
             }

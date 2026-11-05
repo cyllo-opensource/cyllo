@@ -37,9 +37,8 @@ class Aggregation:
     def to_sql(self):
         if not self.filters:
             return f"{self.aggregate}({self.column})"
-        # Combine filters with OR to include all records from merged periods
         combined_filter = " OR ".join(f"({f})" for f in self.filters)
-        return f"{self.aggregate}({self.column}) FILTER (WHERE {combined_filter})"
+        return f"COALESCE({self.aggregate}({self.column}) FILTER (WHERE {combined_filter}), 0)"
 
     def __str__(self):
         return self.to_sql()
@@ -86,7 +85,6 @@ def _to_sql(node, bindings):
             return f"'{node.value}'"
         return str(node.value)
     elif isinstance(node, ast.Name):
-        # Placeholders are handled via bindings
         if node.id in bindings:
             return bindings[node.id]
         raise UserError(f"Unbound variable: {node.id}")
@@ -97,15 +95,6 @@ def _to_sql(node, bindings):
         left = _to_sql(node.left, bindings)
         right = _to_sql(node.right, bindings)
 
-        # Optimization: Merge compatible aggregations in additions (e.g., Sum(X) f1 + Sum(X) f2)
-        if isinstance(node.op, ast.Add):
-            if isinstance(left, Aggregation) and isinstance(right, Aggregation):
-                if left.aggregate == right.aggregate and left.column == right.column:
-                    # Only merge SUM and COUNT as a single aggregation with OR condition
-                    if left.aggregate in ('SUM', 'COUNT'):
-                        return Aggregation(left.aggregate, left.column, left.filters + right.filters)
-
-        # Convert Aggregation objects to SQL strings if not merged
         left_sql = left.to_sql() if isinstance(left, Aggregation) else str(left)
         right_sql = right.to_sql() if isinstance(right, Aggregation) else str(right)
 
@@ -161,6 +150,8 @@ def _to_sql(node, bindings):
         # Special handling for min/max: if multiple args, use LEAST/GREATEST
         if func_id in ('min', 'max') and len(args_sql) > 1:
             template = 'LEAST' if func_id == 'min' else 'GREATEST'
+        if func_id == 'round' and len(args_sql) == 2:
+            args_sql = [f"({args_sql[0]})::numeric", args_sql[1]]
 
         if '{0}' in template:
             return template.format(*args_sql)

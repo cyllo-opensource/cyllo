@@ -27,7 +27,9 @@ from odoo import api, fields, models
 class AddToShortcut(models.Model):
     _name = 'shortcut.menu'
     _description = 'Shortcut Menus'
+    _order = 'sequence, id'
 
+    sequence = fields.Integer('Sequence', default=10, index=True)
     name = fields.Char('Name')
     res_model = fields.Many2one('ir.model', 'Model')
     window_action_id = fields.Many2one('ir.actions.act_window')

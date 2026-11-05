@@ -60,10 +60,6 @@ class TestAccountPdcPayment(TestCylloAccountingPdc):
     def test_action_post(self):
         self.pdc_payment.action_post()
         self.assertEqual(self.pdc_payment.payment_status, 'registered')
-    
-    def test_action_done(self):
-        self.pdc_payment.action_done()
-        self.assertEqual(self.pdc_payment.payment_status, 'posted')
 
     def test_action_deposit(self):
         self.pdc_payment.action_post()

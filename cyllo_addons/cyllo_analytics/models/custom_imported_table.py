@@ -21,6 +21,10 @@
 #############################################################################
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import SQL
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class CustomImportedTable(models.Model):
     _name = 'custom.imported.table'
@@ -58,39 +62,33 @@ class CustomImportedTable(models.Model):
     def action_drop_table(self):
         self.ensure_one()
 
-        action_to_delete = self.action_id
-        model_to_delete = self.model_id
-
-        # 1. Delete dependent stuff FIRST
-        if model_to_delete:
-            accesses = self.env['ir.model.access'].sudo().search([
-                ('model_id', '=', model_to_delete.id)
-            ])
-            accesses.unlink()
-
-            fields_to_del = self.env['ir.model.fields'].sudo().search([
-                ('model_id', '=', model_to_delete.id),
-                ('state', '=', 'manual')
-            ])
-            fields_to_del.unlink()
-
-            if model_to_delete.state == 'manual':
-                model_to_delete.sudo().unlink()
-
+        cr = self.env.cr
+        record_id = self.id
+        action_id = self.action_id.id
+        model_id = self.model_id.id
+        model_name = self.model_id.model
+        model_state = self.model_id.state
+        table_name = self.env[model_name]._table if model_name in self.env else (model_name or '').replace('.', '_')
         self.env.flush_all()
 
-        # 2. DELETE SELF FIRST
-        self.unlink()
+        cr.execute("DELETE FROM custom_imported_table WHERE id = %s", (record_id,))
+        if action_id:
+            cr.execute("DELETE FROM ir_ui_menu WHERE action = %s", (f'ir.actions.act_window,{action_id}',))
+            cr.execute("DELETE FROM ir_act_window WHERE id = %s", (action_id,))
+        if model_id and model_state == 'manual':
+            cr.execute("DELETE FROM ir_model_access WHERE model_id = %s", (model_id,))
+            cr.execute("DELETE FROM ir_model_fields WHERE model_id = %s OR relation = %s", (model_id, model_name))
+            cr.execute("DELETE FROM ir_model WHERE id = %s", (model_id,))
+            cr.execute(SQL("DROP TABLE IF EXISTS %s CASCADE", SQL.identifier(table_name)))
 
-        # 3. RETURN ACTION (trigger basic client reload)
+        self.env.invalidate_all()
+        self.env.registry.clear_cache()
+        if model_id and model_state == 'manual':
+            self.env.registry.setup_models(cr)
+
         result = {
             'type': 'ir.actions.client',
             'tag': 'reload',
         }
-
-        # 4. DELETE ACTION LAST (very important)
-        if action_to_delete:
-            action_to_delete.sudo().unlink()
-
         return result
 

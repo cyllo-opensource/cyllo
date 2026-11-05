@@ -28,6 +28,15 @@ export class DocController extends KanbanController {
         }, () => [this.workSpaceId])
     }
 
+    // Reactive viewport flag from the ui service: reading it while rendering
+    // (the t-if gates in docControllerView) subscribes the component to the
+    // ui service's resize broadcast, so the toolbar re-folds on its own when
+    // the window crosses the small-screen breakpoint. Same pattern as the
+    // cog menu fold in cyllo_base/cog_menu_form.js.
+    get isSmall() {
+        return this.env.isSmall;
+    }
+
     handleOnChangeUpload(ev) {
         const selectedFile = ev.target.files[0];
         const reader = new FileReader();

@@ -1,0 +1,201 @@
+// ============================================================================
+//  Cyllo - Screen blocker utility
+//  ================================
+//  Marks a client action (or any block) as unusable on small screens.
+//
+//  Add one of the following classes to the action's ROOT div, nothing else:
+//
+//      .cy_hide_mobile_screen   -> blocks on phones        (<= 767.98px)
+//                                 matches Odoo's env.isSmall (< 768px)
+//      .cy_hide_small_screen    -> blocks on phones + tablets (<= 991.98px)
+//
+//  Example
+//  -------
+//      <div class="cy_analytics cy_hide_mobile_screen">
+//          ...dashboard content...
+//      </div>
+//
+//  On small screens the action is covered by an absolutely positioned veil
+//  (::before) that carries a device icon, and (::after) carries the notice.
+//  The underlying content keeps rendering (so it is instantly usable on a
+//  larger screen) but becomes inert: taps, clicks and drag are dropped on the
+//  veil instead of reaching the blocked controls.
+//
+//  Per-action customisation (inline style or any ancestor, plain CSS vars):
+//
+//      <div class="cy_analytics cy_hide_mobile_screen"
+//           style="--cy_screen_block_message: 'Desktop only dashboard';
+//                  --cy_screen_block_icon: '\f15a';"><!-- ri-smartphone-line -->
+//      </div>
+//
+//      --cy_screen_block_message : notice text            (default below)
+//      --cy_screen_block_icon    : any remixicon glyph    (default \ebca)
+//  ============================================================================
+
+// Phone cutoff: everything below Odoo's `md` breakpoint => env.isSmall is true.
+$cy-screen-block-mobile-max: 767.98px;
+// Tablet cutoff: everything below Odoo's `lg` breakpoint (tablets included).
+$cy-screen-block-small-max: 991.98px;
+
+@mixin cy-screen-block-overlay {
+    // Anchor for the absolutely positioned overlay, and keep the descendants
+    // confined so no stray z-index can poke the notice or leak outside.
+    position: relative;
+    isolation: isolate;
+    // Fill the action area even when the carrying div has no content of
+    // its own; resolves to 0 (no-op) when no ancestor gives a height floor.
+    min-height: 100%;
+    // Nothing behind the veil stays interactive.
+    > * {
+        pointer-events: none !important;
+    }
+
+    // ------------------------------------------------------------------
+    // Veil + device icon
+    // ------------------------------------------------------------------
+    &::before {
+        content: var(--cy_screen_block_icon, '\ebca');
+        position: absolute;
+        inset: 0;
+        z-index: 1055;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // Lifts the icon a few pixels above the visual middle so it does not
+        // collide with the notice rendered by ::after.
+        padding-bottom: 4.5rem;
+        font-family: 'remixicon' !important;
+        font-style: normal;
+        font-size: 3.25rem;
+        line-height: 1;
+        color: var(--cy_screen_block_icon-color, var(--blue, #242E5F));
+        background-color: var(--cy_screen_block_veil, rgba(247, 248, 250, 0.62));
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    // ------------------------------------------------------------------
+    // Notice
+    // ------------------------------------------------------------------
+    &::after {
+        content: var(
+            --cy_screen_block_message,
+            'Screen too small - this action is available on larger devices only.'
+        );
+        position: absolute;
+        inset: 0;
+        z-index: 1056;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 2rem 0;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.95rem;
+        line-height: 1.4;
+        color: var(--cy_screen_block_message-color, var(--text, #121212));
+        hyphens: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    // Browsers without backdrop-filter get an opaque calm veil instead.
+    @supports not (
+        (backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))
+    ) {
+        &::before {
+            background-color: rgba(250, 251, 252, 0.97);
+        }
+    }
+
+    html[data-bs-theme='dark'] &,
+    [data-darkreader-scheme='dark'] & {
+        &::before {
+            --cy_screen_block_veil: rgba(14, 14, 13, 0.68);
+            --cy_screen_block_icon-color: #BCBBA7;
+        }
+        &::after {
+            --cy_screen_block_message-color: #e6e5da;
+        }
+        @supports not (
+            (backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))
+        ) {
+            &::before {
+                background-color: rgba(22, 22, 20, 0.97);
+            }
+        }
+    }
+}
+
+.cy_hide_mobile_screen {
+    @media (max-width: $cy-screen-block-mobile-max) {
+        @include cy-screen-block-overlay;
+    }
+}
+
+.cy_hide_small_screen {
+    @media (max-width: $cy-screen-block-small-max) {
+        @include cy-screen-block-overlay;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Back pill — injected by the cy_screen_block_service ONLY for fullscreen
+// blocked actions (navbar/breadcrumbs are gone there, so the veil would be a
+// lock with no key). Display is gated by the same media range as the veil, so
+// the button simply cannot appear while the blocker isn't covering anything.
+// ---------------------------------------------------------------------------
+.cy_screen_block_back {
+    display: none;
+}
+
+@media (max-width: $cy-screen-block-small-max) {
+    .cy_screen_block_back {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1057; // veil (1055) and notice (1056) stay underneath
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 50%;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background-color: rgba(255, 255, 255, 0.95);
+        color: var(--blue, #242E5F);
+        -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+        cursor: pointer;
+        // The blocker kills pointer events on its direct children; the pill is
+        // the one element on the veil that must stay clickable.
+        pointer-events: auto !important;
+        user-select: none;
+        -webkit-user-select: none;
+
+        &::before {
+            content: '\ea60'; // ri-arrow-left-line
+            font-family: 'remixicon' !important;
+            font-style: normal;
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+    }
+
+    .cy_screen_block_back:hover {
+        color: #9ea700;
+    }
+
+    html[data-bs-theme='dark'] .cy_screen_block_back,
+    [data-darkreader-scheme='dark'] .cy_screen_block_back {
+        border-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(38, 38, 36, 0.95);
+        color: #bcbba7;
+
+        &:hover {
+            color: #9ea700;
+        }
+    }
+}

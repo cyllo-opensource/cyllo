@@ -36,13 +36,18 @@
     "assets": {
         "web.assets_backend": [
             "cyllo_ai_analytics/static/src/js/ai_chart_suggestions.js",
+            "cyllo_ai_analytics/static/src/js/ai_chart_suggestions_card.js",
+            "cyllo_ai_analytics/static/src/xml/ai_chart_suggestions_card.xml",
             "cyllo_ai_analytics/static/src/js/ai_chart_tile.js",
             "cyllo_ai_analytics/static/src/js/ai_add_to_analytics.js",
             "cyllo_ai_analytics/static/src/js/ai_quick_dashboard.js",
             "cyllo_ai_analytics/static/src/js/dashboard_insight.js",
             "cyllo_ai_analytics/static/src/xml/ai_quick_dashboard.xml",
+            "cyllo_ai_analytics/static/src/xml/ai_chat_sidebar.xml",
+            "cyllo_ai_analytics/static/src/xml/ai_chat_offer.xml",
             "cyllo_ai_analytics/static/src/css/ai_chart_suggestions.css",
             "cyllo_ai_analytics/static/src/css/ai_quick_dashboard.css",
+            "cyllo_ai_analytics/static/src/css/ai_chat_sidebar.css",
         ],
     },
     'license': 'LGPL-3',

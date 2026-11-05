@@ -2,6 +2,7 @@
 import { Component, useEffect, useState, onMounted, onWillStart, onWillUpdateProps, onWillDestroy, useExternalListener } from "@odoo/owl";
 import { ReconcileLines } from "./components/reconcile_lines";
 import { useService } from "@web/core/utils/hooks";
+import { _t } from "@web/core/l10n/translation";
 import { Notebook } from "@web/core/notebook/notebook";
 import { ViewWrapper } from "@cyllo_accounting/views/reconcile/components/view_wrapper/view_wrapper";
 import { ManualOperation } from "./components/manual_operation";
@@ -700,7 +701,7 @@ export class ReconcileRenderer extends Component {
 
         // Trigger UI updates
         this.env.bus.trigger("validate-lines");
-        this.notificationService.add("Reconciliation completed successfully.", { type: "success" });
+        this.notificationService.add(_t("Reconciliation completed successfully."), { type: "success" });
     }
 
     getCurrentDate() {
@@ -912,7 +913,7 @@ export class ReconcileRenderer extends Component {
     async onReset() {
         await this.orm.call('account.bank.statement.line', 'action_undo_reconciliation', [[this.state.selectedRecord.resId]]).then(() => {
             this.env.searchModel._notify()
-            this.notificationService.add("Record has been reset to unreconciled ", { type: "success" });
+            this.notificationService.add(_t("Record has been reset to unreconciled"), { type: "success" });
             this.env.bus.trigger("validate-lines");
         });
     }

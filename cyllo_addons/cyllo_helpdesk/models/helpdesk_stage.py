@@ -25,6 +25,7 @@ from odoo import fields, models
 class HelpDeskStage(models.Model):
     _name = "helpdesk.stage"
     _description = "HelpDesk Stage"
+    _order = "sequence, id"
 
     name = fields.Char(string="Stage", ondelete='restrict',
                        help="Add more stages")

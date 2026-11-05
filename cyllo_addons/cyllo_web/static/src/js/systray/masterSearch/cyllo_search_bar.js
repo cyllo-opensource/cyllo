@@ -2,16 +2,19 @@
 import { registry } from "@web/core/registry";
 import { Component } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { MasterSearchDialog } from "./MasterSearchDialog"
 
 export class SearchBarSystray extends Component {
   // Component for the search bar in the systray.
   setup() {
-    this.dialogService = useService("dialog")
+    this.commandService = useService("command")
   }
   onSearchIconClick() {
-    // Handle clicks on the search icon.
-    this.dialogService.add(MasterSearchDialog)
+    // Click (or the icon's data-hotkey="m") on the magnifier: open the
+    // command palette straight into the master-search namespace — the
+    // ">" prefix makes the palette render "Search for a record..." with
+    // the model-grouped results (see the master_search provider in
+    // core/commands/command_palette.js).
+    this.commandService.openMainPalette({ searchValue: ">" });
   }
 }
 SearchBarSystray.template = "cyllo_web.SearchBarSystray";

@@ -139,27 +139,29 @@ class TestSignGenerate(TransactionCase):
         Validate the behavior of `_compute_is_active()` method.
 
         Ensures:
-            - Existing signers are cleared before regeneration.
             - `is_active` flag is correctly set when valid roles exist.
-            - New signer records are linked with correct roles.
+            - `is_active` flag is False when no valid roles exist or template is unset.
         """
-        old_signer = self.env['sign.signers'].create({
-            'role_id': self.role.id,
-            'sign_generate_id': self.sign_generate.id,
-        })
-        self.sign_generate.signer_ids = [old_signer.id]
-        self.assertEqual(len(self.sign_generate.signer_ids), 1)
         self.sign_generate._compute_is_active()
         self.assertTrue(self.sign_generate.is_active)
-        self.assertGreater(len(self.sign_generate.signer_ids), 0)
-        self.assertNotIn(old_signer.id, self.sign_generate.signer_ids.ids)
-        new_signer = self.sign_generate.signer_ids[0]
-        self.assertEqual(new_signer.role_id.id, self.role.id)
-        created_signers = self.env['sign.signers'].search([('sign_generate_id', '=', self.sign_generate.id)])
-        self.assertTrue(created_signers)
-        self.assertEqual(created_signers[0].role_id.id, self.role.id)
 
+        empty_template = self.env['sign.template'].create({'name': 'Empty Template'})
+        wizard_empty = self.env['sign.generate'].create({
+            'template_id': empty_template.id,
+        })
+        wizard_empty._compute_is_active()
+        self.assertFalse(wizard_empty.is_active)
 
+        wizard_no_template = self.env['sign.generate'].create({})
+        wizard_no_template._compute_is_active()
+        self.assertFalse(wizard_no_template.is_active)
 
-
-
+    def test_create_auto_signers(self):
+        """
+        Validate that `create()` automatically creates signers based on template item roles.
+        """
+        new_wizard = self.env['sign.generate'].create({
+            'template_id': self.template.id,
+        })
+        self.assertTrue(new_wizard.signer_ids)
+        self.assertIn(self.role.id, new_wizard.signer_ids.mapped('role_id').ids)

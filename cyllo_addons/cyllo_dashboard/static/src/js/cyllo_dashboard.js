@@ -366,7 +366,7 @@ export class UserDashboard extends Component {
 
         }
         jsonrpc('/weather/notification/check').then((data) => {
-            if (data['cod'] == 200) {
+            if (data && data['cod'] == 200) {
                 const temp = Math.floor(data.main.temp - 273);
 
                 const details = {

@@ -26,7 +26,6 @@ class TestResCompany(TransactionCase):
 
     def setUp(self):
         super(TestResCompany, self).setUp()
-        self.env.cr.execute("ALTER TABLE res_company ALTER COLUMN security_lead SET DEFAULT 0.0")
         self.company = self.env['res.company'].create({
             'name': 'Test Company',
             'currency_id': self.env.ref('base.USD').id,

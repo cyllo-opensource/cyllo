@@ -67,4 +67,43 @@
             </Dropdown>
         </xpath>
     </t>
+    <t t-inherit="web.BurgerUserMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-foreach='getElements()']" position="before">
+            <a class="dropdown-item py-2 fs-4">
+                <i class="fa fa-database oi-small me-1"/>
+                <t t-esc="user.db.name"/>
+            </a>
+            <div role="separator" class="dropdown-divider"/>
+            <a class="dropdown-item py-2 fs-4" href="#" t-on-click.stop.prevent="profile">
+                View Account
+            </a>
+            <a class="dropdown-item d-flex justify-content-between align-items-center py-2 fs-4"
+               href="#" t-on-click.stop.prevent="handleEdit">
+                Auto Edit
+                <label for="cy_auto_edit_mobile"
+                       class="cy-auto-edit-label text-muted"
+                       title="Enable this to auto-edit the field.">
+                    <div>
+                        <label class="switch switch-auto-edit">
+                            <input type="checkbox"
+                                   id="cy_auto_edit_mobile"
+                                   name="cy_auto_edit_mobile"
+                                   class="auto-edit-checkbox"
+                                   t-att-checked="state.autoEdit"
+                                   t-model="state.autoEdit"/>
+                            <span class="slider round slider-auto-edit"/>
+                        </label>
+                    </div>
+                </label>
+            </a>
+        </xpath>
+        <xpath expr="//a[@t-if=&quot;element.type == 'item'&quot;]" position="replace">
+            <a t-if="element.type == 'item'"
+               class="dropdown-item py-2 fs-4"
+               t-att-href="element.href or ''"
+               t-on-click.stop.prevent="() => this._onItemClicked(element.callback)">
+                <t t-out="element.description"/>
+            </a>
+        </xpath>
+    </t>
 </templates>

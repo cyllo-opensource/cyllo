@@ -239,6 +239,17 @@ class TestSuggestCharts(TransactionCase):
         for m in out:
             self.assertFalse(self.env[m["model"]]._transient)
 
+    def test_resolve_analytics_models_prefers_exact_name(self):
+        self.assertEqual(
+            self.Sheet.resolve_analytics_models(["res.partner"])[0]["model"],
+            "res.partner")
+        self.assertEqual(
+            self.Sheet.resolve_analytics_models(["RES.PARTNER"])[0]["model"],
+            "res.partner")
+        self.assertEqual(
+            self.Sheet.resolve_analytics_models(["partner"])[0]["model"],
+            "res.partner")
+
     def test_resolve_analytics_models_skips_unknown(self):
         self.assertEqual(
             self.Sheet.resolve_analytics_models(["no.such.model.xyz", ""]), [])
@@ -255,6 +266,43 @@ class TestSuggestCharts(TransactionCase):
         self.assertEqual(res["chart_count"], 2)
         config = self.env["dashboard.config"].browse(res["dashboard_id"])
         self.assertEqual(len(config.sheet_ids), 2)
+
+    def _date_sheet(self, granularity=""):
+        pick = {"model": "res.partner", "dimension_column": "res_partner.date",
+                "measure_column": "res_partner.partner_latitude",
+                "title": "Latitude by date", "granularity": granularity}
+        res = self.Sheet.create_quick_dashboard("Date DB", [pick])
+        return self.env["dashboard.config"].browse(res["dashboard_id"]).sheet_ids[0]
+
+    def test_create_quick_dashboard_groups_dates_by_month(self):
+        Partner = self.env["res.partner"]
+        Partner.create({"name": "M1", "date": "1901-03-03", "partner_latitude": 4})
+        Partner.create({"name": "J1", "date": "1901-01-15", "partner_latitude": 1})
+        Partner.create({"name": "J2", "date": "1901-01-20", "partner_latitude": 2})
+        sheet = self._date_sheet()
+        group = sheet.axis_ids.filtered(lambda a: a.type == "group")
+        self.assertEqual(group.date_group, "Month")
+        self.assertEqual(group.source_column, "res_partner.date")
+        self.env.cr.execute(sheet.query)
+        rows = [r for r in self.env.cr.fetchall() if r[0] and r[0].endswith("(1901)")]
+        self.assertEqual(rows, [("January (1901)", 3.0), ("March (1901)", 4.0)])
+
+    def test_create_quick_dashboard_date_granularity_year(self):
+        sheet = self._date_sheet("year")
+        group = sheet.axis_ids.filtered(lambda a: a.type == "group")
+        self.assertEqual(group.date_group, "Year")
+        self.assertIn("TO_CHAR(res_partner.date, 'YYYY')", sheet.query)
+
+    def test_chat_chart_source_keeps_granularity(self):
+        source = self.env["chatbot.tools"]._chart_source({
+            "model": "res.partner", "group_by": "date:year",
+            "measure": "partner_latitude"})
+        self.assertEqual(source["group_by"], "date")
+        self.assertEqual(source["granularity"], "year")
+        res = self.Sheet.add_chat_chart_to_analytics(source, "Latitude per year")
+        sheet = self.env["dashboard.config"].browse(res["dashboard_id"]).sheet_ids[0]
+        group = sheet.axis_ids.filtered(lambda a: a.type == "group")
+        self.assertEqual(group.date_group, "Year")
 
     def test_create_quick_dashboard_rejects_inaccessible_columns(self):
         # A tampered pick pointing outside the accessible field set (password is

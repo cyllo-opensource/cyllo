@@ -37,9 +37,17 @@ class TestSocialMediaPost(TransactionCase):
 
     def test_initial_state(self):
         self.assertEqual(self.post.state, 'draft')
-        self.assertEqual(self.post.mode, 'url')
+        self.assertEqual(self.post.mode, 'photo')
 
     def test_action_post(self):
+        # Without any platform selected, action_post warns and stays in draft
+        res = self.post.action_post()
+        self.assertIsInstance(res, dict)
+        self.assertEqual(res.get('tag'), 'display_notification')
+        self.assertEqual(self.post.state, 'draft')
+
+        # With a platform selected, action_post publishes successfully
+        self.post.posted_on_linkedin = True
         self.post.action_post()
         self.assertEqual(self.post.state, 'post')
         self.assertTrue(self.post.posted_date)

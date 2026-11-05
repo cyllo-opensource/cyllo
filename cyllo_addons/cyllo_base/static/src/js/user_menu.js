@@ -164,7 +164,6 @@ function shortCutsItem(env) {
     return {
         type: "item",
         id: "shortcuts",
-        hide: env.isSmall,
         description: markup(
             `<span>${escape(translatedText)}
                     <span class="badge badge-secondary ms-4">${isMacOS() ? "CMD" : "CTRL"}+K</span>
@@ -216,7 +215,7 @@ function logOutItem(env) {
     return {
         type: "item",
         id: "logout",
-        description: markup(`<span><i class="ri-logout-box-r-line me-1"></i>Logout</span>`),
+        description: markup(`<span><i class="ri-logout-box-r-line me-1"></i>${escape(_t("Logout"))}</span>`),
         href: `${browser.location.origin}${route}`,
         callback: () => {
             browser.location.href = route;

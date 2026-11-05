@@ -54,7 +54,7 @@ class AccountPdcPayment(models.Model):
     payment_status = fields.Selection(
         selection=[('draft', 'Draft'), ('registered', 'Registered'),
                    ('bounced', 'Bounced'), ('posted', 'Accepted'),
-                   ('cancelled', 'cancelled'), ], default='draft',copy=False)
+                   ('cancelled', 'cancelled'), ], default='draft',copy=False, tracking=True)
     partner_id = fields.Many2one(comodel_name='res.partner',
                                  string="Customer/Vendor", ondelete='restrict',
                                  domain="['|', ('parent_id','=', False), ('is_company','=', True)]",
@@ -119,6 +119,44 @@ class AccountPdcPayment(models.Model):
         currency_field='currency_id', compute='_compute_amount_signed',
         tracking=True,
         help='Negative value of amount field if payment_type is outbound')
+    is_matched = fields.Boolean(
+        string="Is Matched With a Bank Statement",
+        compute='_compute_is_matched', store=True,
+        help="True once the PDC account line of this cheque is fully "
+             "reconciled, i.e. the bank has cleared the cheque. Used to move "
+             "the invoice from 'In Payment' to 'Paid' and the cheque to "
+             "'Accepted'.")
+
+    @api.depends('move_id.line_ids.reconciled', 'move_id.line_ids.account_id',
+                 'move_id.state', 'pdc_account_id')
+    def _compute_is_matched(self):
+        """A cheque is matched when its PDC account line(s) are fully
+        reconciled (normally against a bank statement line)."""
+        for pay in self:
+            pdc_lines = pay.move_id.line_ids.filtered(
+                lambda line: line.account_id == pay.pdc_account_id)
+            pay.is_matched = bool(
+                pay.move_id.state == 'posted' and pdc_lines
+                and all(line.reconciled for line in pdc_lines))
+
+    def _sync_payment_status_with_reconciliation(self):
+        """Registered -> Accepted when the bank clears the cheque,
+        Accepted -> Registered when that reconciliation is undone."""
+        for pay in self:
+            if pay.payment_status == 'registered' and pay.is_matched:
+                pay.payment_status = 'posted'
+            elif pay.payment_status == 'posted' and not pay.is_matched:
+                pay.payment_status = 'registered'
+
+    def _check_not_accepted(self):
+        """An accepted cheque has been cleared by the bank, so it can no
+        longer be bounced, cancelled or reset to draft."""
+        for pay in self:
+            if pay.payment_status == 'posted':
+                raise UserError(_(
+                    "Cheque %s has already been cleared by the bank "
+                    "(Accepted). Unreconcile the bank statement line first.",
+                    pay.cheque_reference))
 
     @api.depends('amount', 'payment_type')
     def _compute_amount_signed(self):
