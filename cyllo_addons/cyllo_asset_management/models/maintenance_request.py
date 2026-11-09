@@ -34,7 +34,7 @@ class MaintenanceRequest(models.Model):
                                   default=lambda self: self.env.company.currency_id)
     expense = fields.Monetary(string="Expense")
     partner_id = fields.Many2one('res.partner', string="Repair partner")
-    has_billed = fields.Boolean(default=False)
+    has_billed = fields.Boolean(default=False, copy=False)
     stage_done = fields.Boolean(related='stage_id.done', store=True)
     has_warranty = fields.Boolean(default=False, compute="_compute_has_warranty")
     has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
@@ -97,7 +97,7 @@ class MaintenanceRequest(models.Model):
             self.is_reimburse = False
 
     @api.onchange('stage_id')
-    def _onchahange_stage_id(self):
+    def _onchange_stage_id(self):
         """Function for changing maintenance state"""
         if self.asset_id and self.stage_done == True:
             if self.maintenance_type == 'preventive':
@@ -253,6 +253,7 @@ class MaintenanceRequest(models.Model):
             action_scrap.action_dispose()
 
     def action_claim_insurance_wizard(self):
+        """Open the claim wizard with the unreimbursed repair balance prefilled."""
         balance = self.expense - self.invoiced_amount
         return {
             'name': _('Claim Insurance'),

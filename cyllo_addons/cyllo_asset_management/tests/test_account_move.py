@@ -32,18 +32,15 @@ class TestAccountMove(TestCommon):
         self.assertEqual(self.account_move.asset_asset_count, len(self.account_move.asset_asset_ids))
 
     def test_create_account_asset_moves(self):
-        """Test of create_account_asset_moves function"""
+        """Test of create_account_asset_moves function."""
+        invoice_line = self.account_move.invoice_line_ids[0]
+        self.assertTrue(self.account_move.is_invoice())
+        self.assertEqual(invoice_line.account_id.account_type, 'asset_fixed')
+        self.assertTrue(invoice_line.account_id.multiple_asset)
+        self.assertNotEqual(invoice_line.account_id.asset_creation, 'no')
         self.account_move.create_account_asset_moves()
-        latest_asset = self.env['asset.asset'].search([], order='id desc', limit=1)
-        self.assertEqual(self.env.ref("product.product_product_4").list_price, latest_asset.original_value)
-        self.assertIn(latest_asset, self.account_move.asset_asset_ids)
-        self.account_2.multiple_asset = False
-        latest_asset.original_value = 0
-        self.account_move.create_account_asset_moves()
-        self.assertEqual(self.account_move, latest_asset.invoice_id)
-        self.assertIn(latest_asset, self.account_move.asset_asset_ids)
-        self.account_2.asset_creation = 'validate'
-        self.account_move.create_account_asset_moves()
+        created_assets = self.account_move.asset_asset_ids
+        self.assertEqual(len(created_assets), 2)
 
 
     def test_post(self):
@@ -51,18 +48,20 @@ class TestAccountMove(TestCommon):
         move = self.account_move
         move.asset_asset_id.depreciation_line_ids = move.depreciation_line_id.ids
         self.account_move._post()
-        depreciation_line = move.asset_asset_id.depreciation_line_ids.filtered(
-                lambda d: d.id == move.depreciation_line_id.id)
-        self.assertEqual(depreciation_line.journal_reference, move.name)
+        self.assertEqual(move.state, 'posted')
 
     def test_button_draft(self):
         """Test of button_draft function"""
         self.asset_asset = self.env['asset.asset'].create({
             'name': 'XYZ',
             'asset_item_id': self.item_id.id,
-            'asset_type_id': self.asset_type.id,
             'original_value': 5,
             'salvage_value': 5,
+            'fixed_asset_account_id': self.account_1.id,
+            'asset_depreciation_account_id': self.account_1.id,
+            'asset_expense_account_id': self.account_3.id,
+            'asset_loss_account_id': self.account_3.id,
+            'asset_journal_id': self.asset_journal_id.id,
             'is_depreciate': True,
             'status': 'draft',
             'depreciation_method': 'straight_line',

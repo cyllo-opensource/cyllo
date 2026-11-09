@@ -19,6 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from datetime import timedelta
+
+from odoo import fields
 from odoo.exceptions import UserError
 from odoo.addons.cyllo_asset_management.tests.common import TestCommon
 
@@ -37,7 +40,10 @@ class TestAssetReservation(TestCommon):
         reservation.start_date, reservation.end_date = '7000-05-10', '7000-05-05'
         with self.assertRaises(UserError):
             reservation._onchange_reservation_date()
-        reservation.start_date, reservation.end_date = '4000-05-02', '7000-05-09'
+        reservation.start_date = fields.Date.to_string(
+            reservation.asset_id.date - timedelta(days=1))
+        reservation.end_date = fields.Date.to_string(
+            reservation.asset_id.date + timedelta(days=1))
         with self.assertRaises(UserError):
             reservation._onchange_reservation_date()
         reservation.start_date, reservation.end_date = '7000-05-07', '7000-05-09'
@@ -96,7 +102,7 @@ class TestAssetReservation(TestCommon):
         self.assertEqual(context.get('default_asset_id'), reservation.asset_id.id)
         self.assertEqual(context.get('default_customer_id'), reservation.employee_id.work_contact_id.id)
         self.assertEqual(context.get('default_reservation_id'), reservation.id)
-        view = self.env.ref('cyllo_asset_management.view_asset_rental_form')
+        view = self.env.ref('cyllo_asset_management.view_asset_rental_form2')
         self.assertEqual(action['view_id'], view.id)
 
     def test_action_unreserve(self):
@@ -126,7 +132,7 @@ class TestAssetReservation(TestCommon):
         """Test for action_reset_to_draft function"""
         reservation = self.reserved_asset
         asset = reservation.asset_id
-        restricted_states = ['sell', 'disposed', 'cancel', 'lost']
+        restricted_states = ['sell', 'disposed', 'cancel', 'rented']
         for state in restricted_states:
             asset.status = state
             with self.assertRaises(UserError):
@@ -135,4 +141,4 @@ class TestAssetReservation(TestCommon):
         reservation.status = 'reserve'
         reservation.action_reset_to_draft()
         self.assertEqual(reservation.status, 'draft')
-        self.assertNotIn(asset.status, ['sell', 'disposed', 'cancel', 'lost'])
+        self.assertNotIn(asset.status, ['sell', 'disposed', 'cancel', 'rented'])

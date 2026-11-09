@@ -65,6 +65,9 @@
             'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
         ],
     },
+    'demo': [
+        'data/mail_template_demo.xml',
+    ],
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': True,

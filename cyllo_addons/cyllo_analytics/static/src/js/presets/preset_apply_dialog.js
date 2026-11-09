@@ -4,10 +4,13 @@ import { useService } from "@web/core/utils/hooks";
 import { SheetFilterDomain } from "@cyllo_analytics/js/sheet_filter/sheetFilterDomain";
 import { generateSqlAlias } from "@cyllo_analytics/js/utils";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { _t } from "@web/core/l10n/translation";
 
 const { Component, useState, onWillStart, useRef, useEffect } = owl;
 
 const AGG_OPTIONS = ['', 'SUM', 'COUNT', 'AVG', 'MIN', 'MAX'];
+// What an Aggregated calculation uses when the user has not picked a function.
+const DEFAULT_AGGREGATE = 'SUM';
 
 export class PresetApplyDialog extends Component {
     static template = "PresetApplyDialog";
@@ -145,7 +148,9 @@ export class PresetApplyDialog extends Component {
                         savedConfigs[v.name] = {
                             name: v.name,
                             column: v.selection || '',
-                            aggregate: '',
+                            // Legacy measures stored no per-variable function.
+                            aggregate: this.state.calculationType === 'aggregate'
+                                ? DEFAULT_AGGREGATE : '',
                             filter_domain: '',
                             filter_domain_py: [],
                             filter_name: '',
@@ -181,7 +186,12 @@ export class PresetApplyDialog extends Component {
             }
         }
         this.state.variables = vars;
-        for (const v of vars) {
+        this._ensureVarConfigs();
+    }
+
+    /** Give every variable currently on show a config, defaults included. */
+    _ensureVarConfigs() {
+        for (const v of this.state.variables) {
             if (!this.state.variableConfigs[v.name]) {
                 this.state.variableConfigs[v.name] = this._emptyVarConfig(v.name);
             }
@@ -192,7 +202,10 @@ export class PresetApplyDialog extends Component {
         return {
             name,
             column: '',
-            aggregate: '',
+            // An Aggregated calculation needs a function per variable, so it
+            // starts on SUM. Leaving it empty is what put the dialog in the
+            // contradictory state of "Aggregated" with every variable on None.
+            aggregate: this.state.calculationType === 'aggregate' ? DEFAULT_AGGREGATE : '',
             filter_domain: '',         // SQL WHERE string
             filter_domain_py: [],      // structured domain expressions
             filter_name: '',           // display name for the filter
@@ -233,8 +246,13 @@ export class PresetApplyDialog extends Component {
                         name: pv.name,
                         label: pv.label || pv.name,
                     }));
+                    // This list can differ from the one parsed out of the
+                    // formula, so the configs are topped up against it.
+                    this._ensureVarConfigs();
                 }
             } catch (_) { /* ignore */ }
+
+            this.setCalculationType(this.state.calculationType);
         }
     }
 
@@ -271,9 +289,37 @@ export class PresetApplyDialog extends Component {
         this.state.variableConfigs[varName].column = ev.target.value;
     }
 
+    /**
+     * Switch between Row-level and Aggregated, keeping the variable rows
+     * consistent with the card that is selected.
+     */
+    setCalculationType(type) {
+        this.state.calculationType = type;
+        if (type === 'aggregate') {
+            for (const v of this.state.variables) {
+                const cfg = this.state.variableConfigs[v.name];
+                if (cfg && !cfg.aggregate) {
+                    cfg.aggregate = DEFAULT_AGGREGATE;
+                }
+            }
+        } else {
+            for (const v of this.state.variables) {
+                const cfg = this.state.variableConfigs[v.name];
+                if (cfg) {
+                    cfg.aggregate = '';
+                }
+            }
+            this.state.missingAggs = [];
+        }
+    }
+
     setVarAggregate(varName, agg) {
+        if (!agg) {
+            this.setCalculationType('row');
+            return;
+        }
         this.state.variableConfigs[varName].aggregate = agg;
-        if (agg && this.state.missingAggs) {
+        if (this.state.missingAggs) {
             this.state.missingAggs = this.state.missingAggs.filter(name => name !== varName);
         }
     }
@@ -544,7 +590,7 @@ export class PresetApplyDialog extends Component {
                 this.state.selectedPresetLabel = '';
             }
 
-            this.notification.add("Preset saved successfully!", { type: "success" });
+            this.notification.add(_t("Preset saved successfully!"), { type: "success" });
             this.env.bus.trigger("CY:PRESET_SAVED");
         } catch (e) {
             this.state.error = e.data?.message || e.message || 'Failed to save preset.';

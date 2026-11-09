@@ -137,11 +137,12 @@ class BudgetBudget(models.Model):
                                     'budget.lines.configuration'].search(
                                     [('budget_line_id', '=', line.id),
                                      ('analytic_account_id', '=', record.id)])
+                                child_plan_field = (child_analytic_line.analytic_account_id.plan_id._column_name())
                                 child_analytic_line_moves = self.env[
                                     'account.analytic.line'].search(
                                     [('date', '>=', line.start_date),
                                      ('date', '<=', line.end_date),
-                                     ('account_id', '=',
+                                     (child_plan_field, '=',
                                       child_analytic_line.analytic_account_id.id)])
                                 if line.account_ids:
                                     child_analytic_line.practical_amount = sum(
@@ -170,10 +171,12 @@ class BudgetBudget(models.Model):
                                     if child_analytic_line_theoretical_amount else False
                     else:
                         analytic_accounts = [line.analytic_account_id.id]
+                    plan_field = line.analytic_account_id.plan_id._column_name()
+
                     line_moves = self.env['account.analytic.line'].search(
                         [('date', '>=', line.start_date),
                          ('date', '<=', line.end_date),
-                         ('account_id', 'in', analytic_accounts)])
+                         (plan_field, 'in', analytic_accounts)])
                     if line.account_ids:
                         line.practical_amount = sum(line_moves.filtered(
                             lambda
@@ -247,21 +250,22 @@ class BudgetBudget(models.Model):
                 'Due date should be Greater than or Equal to End Date')
 
     def pdf_as_mail_attachment(self, res_id):
-        """This method creates pdf attachment"""
-        budget_report_template_id = self.env[
-            'ir.actions.report']._render_qweb_pdf(
-            report_ref='cyllo_budget_management.report_budget_pdf',
-            data=None, res_ids=res_id)
-        data_record = base64.b64encode(budget_report_template_id[0])
-        ir_values = {
-            'name': "Budget Report",
+        """Generate a budget PDF and create an attachment."""
+
+        report = self.env['ir.actions.report']._render_qweb_pdf(
+            'cyllo_budget_management.report_budget_pdf',
+            res_ids=[res_id]
+        )
+        pdf_content = report[0]
+        attachment = self.env['ir.attachment'].create({
+            'name': 'Budget Report.pdf',
             'type': 'binary',
-            'datas': data_record,
-            'store_fname': data_record,
+            'datas': base64.b64encode(pdf_content),
             'mimetype': 'application/pdf',
-        }
-        data_id = self.env['ir.attachment'].create(ir_values)
-        return data_id
+            'res_model': self._name,
+            'res_id': res_id,
+        })
+        return attachment
 
     def budget_delay_mail(self):
         """Scheduled action for sending mail reminding the low rate of budget

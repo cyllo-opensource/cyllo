@@ -47,6 +47,32 @@ class StockPicking(models.Model):
             return True
         return super(StockPicking, normal_pickings).action_assign()
 
+    def _create_backorder(self):
+        """
+        Carry the pending intercompany quantity over to the backorder when a
+        partially synchronized receipt is validated, so later deliveries can
+        still be synchronized with the remaining receipt.
+        """
+        backorders = super()._create_backorder()
+        for backorder in backorders.filtered(
+                lambda b: b.picking_type_code == 'incoming'
+                and b.backorder_id.intercompany_waiting):
+            parent_moves = backorder.backorder_id.move_ids
+            for move in backorder.move_ids:
+                parent = parent_moves.filtered(
+                    lambda m: m.product_id == move.product_id)[:1]
+                pending = parent.intercompany_original_qty if parent else 0.0
+                move.write({
+                    'intercompany_original_qty': min(pending, move.product_uom_qty),
+                    'quantity': 0.0,
+                    'state': 'confirmed',
+                })
+                parent.intercompany_original_qty = 0.0
+            backorder.backorder_id.intercompany_waiting = False
+            backorder.intercompany_waiting = any(
+                m.intercompany_original_qty > 0 for m in backorder.move_ids)
+        return backorders
+
     def button_validate(self):
         """
         Override button_validate to trigger intercompany receipt synchronization
@@ -95,36 +121,31 @@ class StockPicking(models.Model):
                 ('intercompany_waiting', '=', True)
             ])
 
-            for receipt in receipts:
-                qty_map = {}
-                for move in delivery.move_ids:
-                    for line in move.move_line_ids:
-                        # qty = getattr(line, 'qty_done', getattr(line, 'quantity', 0.0))
-                        qty = line.quantity or 0.0
-                        if qty > 0:
-                            qty_map[move.product_id.id] = qty_map.get(
-                                move.product_id.id, 0.0
-                            ) + qty
-                if not qty_map:
-                    continue
-                for receipt_move in receipt.move_ids:
-                    qty = qty_map.get(receipt_move.product_id.id, 0.0)
+            qty_map = {}
+            for move in delivery.move_ids:
+                for line in move.move_line_ids:
+                    qty = line.quantity or 0.0
                     if qty > 0:
-                        if receipt_move.intercompany_original_qty > qty:
-                            receipt_move.write({
-                                'quantity': qty,
-                                'intercompany_original_qty': receipt_move.intercompany_original_qty - qty
-                            })
-                        else:
-                            receipt_move.write({
-                                'product_uom_qty': receipt_move.intercompany_original_qty,
-                                'quantity' : qty,
-                                'intercompany_original_qty': 0.0
-                            })
-
-                receipt.write({
-                    'intercompany_waiting': False
-                })
+                        qty_map[move.product_id.id] = qty_map.get(
+                            move.product_id.id, 0.0
+                        ) + qty
+            if not qty_map:
+                continue
+            for receipt in receipts:
+                for receipt_move in receipt.move_ids:
+                    pending = receipt_move.intercompany_original_qty
+                    available = qty_map.get(receipt_move.product_id.id, 0.0)
+                    take = min(pending, available)
+                    if take <= 0:
+                        continue
+                    qty_map[receipt_move.product_id.id] = available - take
+                    receipt_move.write({
+                        'quantity': receipt_move.quantity + take,
+                        'intercompany_original_qty': pending - take,
+                        'state': 'assigned',
+                    })
+                if not any(m.intercompany_original_qty > 0 for m in receipt.move_ids):
+                    receipt.write({'intercompany_waiting': False})
                 receipt._message_log(
-                    body="Intercompany delivery validated. Receipt updated and ready."
+                    body="Intercompany delivery %s validated. Receipt updated and ready." % delivery.name
                 )

@@ -31,6 +31,44 @@ translate.JAVASCRIPT_TRANSLATION_COMMENT = 'cyllo-javascript'
 _original_translation_file_writer = translate.TranslationFileWriter
 _original_po_file_writer = translate.PoFileWriter
 
+_original_load_web_translations = translate.CodeTranslations._load_web_translations
+_original_load_python_translations = translate.CodeTranslations._load_python_translations
+
+def _cyllo_load_web_translations(self, module_name, lang):
+    def filter_func(row):
+        comments = row.get('comments', ())
+        return row.get('value') and (
+            'cyllo-javascript' in comments
+            or 'odoo-javascript' in comments
+            or translate.JAVASCRIPT_TRANSLATION_COMMENT in comments
+            or translate.WEB_TRANSLATION_COMMENT in comments
+        )
+    translations = translate.CodeTranslations._get_code_translations(module_name, lang, filter_func)
+    self.web_translations[(module_name, lang)] = {
+        "messages": [{"id": src, "string": value} for src, value in translations.items()]
+    }
+
+def _cyllo_load_python_translations(self, module_name, lang):
+    def filter_func(row):
+        comments = row.get('comments', ())
+        is_js = (
+            'cyllo-javascript' in comments
+            or 'odoo-javascript' in comments
+            or translate.JAVASCRIPT_TRANSLATION_COMMENT in comments
+        )
+        is_python = (
+            'cyllo-python' in comments
+            or 'odoo-python' in comments
+            or translate.PYTHON_TRANSLATION_COMMENT in comments
+        )
+        return row.get('value') and (is_python or not is_js)
+    translations = translate.CodeTranslations._get_code_translations(module_name, lang, filter_func)
+    self.python_translations[(module_name, lang)] = translations
+
+translate.CodeTranslations._load_web_translations = _cyllo_load_web_translations
+translate.CodeTranslations._load_python_translations = _cyllo_load_python_translations
+
+
 icons = {
     'Sales': '/cyllo_base/static/src/icons/sales.svg',
     'Restaurant': '/cyllo_base/static/src/icons/restaurant.svg',

@@ -108,8 +108,7 @@ class AssetBooking(models.Model):
     @api.model
     def create_or_update_booking(self, *, asset, date_from, date_to,
                                  booking_type, partner=None, res_model=None, res_id=None):
-        """Create a new booking or update an existing booking linked
-        to the provided business document."""
+        """Keep the booking synchronized with its source document and check availability."""
         booking = self.search([('res_model', '=', res_model), ('res_id', '=', res_id), ], limit=1)
         self._check_overlap(
             asset.id, date_from, date_to,

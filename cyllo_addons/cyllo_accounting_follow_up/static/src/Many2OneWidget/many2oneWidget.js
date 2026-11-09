@@ -13,7 +13,7 @@ export class Many2OneButton extends Component {
     async onClickFollowupAction(){
         if (this.canClick){
             const followup_id = this.props.record.data[this.props.name][0];
-            await this.orm.call(this.props.record.resModel, 'many2one_action', [this.props.record.resId])
+            await this.orm.call(this.props.record.resModel, 'action_change_followup', [this.props.record.resId])
             this.env.searchModel._notify();
         }
     }

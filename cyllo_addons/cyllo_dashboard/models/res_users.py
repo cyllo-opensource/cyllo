@@ -24,8 +24,8 @@ import logging
 
 from datetime import timedelta
 
-from odoo import api, fields, models, SUPERUSER_ID
-from odoo.exceptions import AccessDenied,ValidationError
+from odoo import api, fields, models, SUPERUSER_ID, _
+from odoo.exceptions import AccessDenied,ValidationError, UserError
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -432,3 +432,61 @@ class ChangePasswordOwn(models.TransientModel):
         self.env.user._change_password(self.new_password)
         self.unlink()
         return {'type': 'ir.actions.client', 'tag': 'reload'}
+
+
+class WeatherSetupWizard(models.TransientModel):
+    """
+        Model for the dashboard's "Connect to OpenWeather API" setup
+        dialog — the same transient-model pattern as the Change Password
+        dialog above: form view in a target=new window, footer buttons,
+        prefill via default_get, save through an object button.
+    """
+    _name = "weather.setup.wizard"
+    _description = "Weather Settings Wizard"
+
+    api_key = fields.Char()
+    location_set = fields.Selection(
+        selection=[('auto', 'Use Browser Location'),
+                   ('manual', 'Manual Location')],
+        default='auto')
+    city = fields.Char()
+
+    @api.model
+    def get_wizard_form_view_id(self):
+        """
+            View id for the setup tile's doAction call, the same prefetch
+            pattern as res.users.get_change_pwd_view_id.
+        """
+        return self.env.ref(
+            'cyllo_dashboard.view_weather_settings_wizard_form').id
+
+    @api.model
+    def default_get(self, fields_list):
+        """Prefill with the user's current weather settings. The API key
+        intentionally stays blank — secrets don't round-trip to the
+        client."""
+        res = super().default_get(fields_list)
+        user = self.env.user
+        if 'location_set' in fields_list:
+            res['location_set'] = user.location_set or 'auto'
+        if 'city' in fields_list:
+            res['city'] = user.city or ''
+        return res
+
+    def action_save_weather(self):
+        """
+            Write the setup to the calling user. sudo() follows the
+            toggle_auto_edit self-service pattern: the fields are not in
+            res.users' SELF_WRITEABLE_FIELDS whitelist.
+        """
+        self.ensure_one()
+        if not self.api_key:
+            raise UserError(_("The OpenWeather API key is required."))
+        if self.location_set == 'manual' and not self.city:
+            raise UserError(_("Set a city for manual location."))
+        self.env.user.sudo().write({
+            'api_key': self.api_key,
+            'location_set': self.location_set,
+            'city': self.location_set == 'manual' and self.city or False,
+        })
+        return {'type': 'ir.actions.act_window_close'}

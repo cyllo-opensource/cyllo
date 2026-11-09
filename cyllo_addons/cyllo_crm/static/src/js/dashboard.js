@@ -361,10 +361,23 @@ export class CRMDashboard extends Component {
     initializeCharts() {
         // Destroy existing charts
         Object.values(this.charts).forEach((chart) => chart?.destroy());
+        this.charts = {};
 
-        this.createRevenueChart();
-        this.createPipelineChart();
-        this.createActivitiesChart();
+        try {
+            this.createRevenueChart();
+        } catch (error) {
+            console.warn("Failed to create revenue chart:", error);
+        }
+        try {
+            this.createPipelineChart();
+        } catch (error) {
+            console.warn("Failed to create pipeline chart:", error);
+        }
+        try {
+            this.createActivitiesChart();
+        } catch (error) {
+            console.warn("Failed to create activities chart:", error);
+        }
     }
 
     themeColor(name, fallback) {

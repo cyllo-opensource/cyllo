@@ -33,7 +33,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['base_setup', 'cyllo_base', 'sale', 'crm', 'calendar'],
+    'depends': ['base_setup', 'cyllo_base', 'crm', 'calendar'],
     'data': [
         'data/ir_cron_data.xml',
         'views/res_config_settings_view.xml',

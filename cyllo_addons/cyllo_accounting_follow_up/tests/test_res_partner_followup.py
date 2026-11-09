@@ -108,35 +108,25 @@ class TestResPartnerFollowUp(TransactionCase):
     # ---------------------------------------------------------
 
     def test_compute_check_followups_assigns_next_followup(self):
-        """
-        When an invoice is exactly `due_date` days overdue and the move has no
-        existing next_follow_up_id, _compute_check_followups should discover the
-        matching followup line and assign it.
-
-        The One2many `move_ids` field carries a domain whose `date.today()` is
-        evaluated once at class-load time (module import) and frozen as a static
-        date object.  In test transactions, payment-term recomputation on
-        action_post() may override invoice_date_due regardless of what we write
-        -- even via raw SQL the ORM may re-flush the compute chain before the
-        next read.  `move_ids` therefore returns an empty recordset consistently
-        in the test environment, making calls to action_post() + domain patching
-        unreliable.
-
-        Patching `move_ids` with PropertyMock sidesteps the domain entirely and
-        tests only what this test is really about: the compute body logic
-        (due-day calculation, followup-line lookup, and write guard conditions).
-        """
+        """Test that the matching follow-up line is assigned to an overdue invoice."""
         move = self._create_overdue_move(days_overdue=5)
-        self.assertFalse(move.next_follow_up_id,
-                         "next_follow_up_id should be empty before compute")
 
-        with patch.object(type(self.partner), 'move_ids',
-                          new_callable=PropertyMock, return_value=move):
+        self.assertFalse(move.next_follow_up_id,"next_follow_up_id should be empty before compute")
+        original_search = self.env['accounting.followup.line'].search
+
+        def mock_search(domain, *args, **kwargs):
+            """Return the test follow-up line for the matching due date."""
+            if domain == [('due_date', '=', 5)]:
+                return self.followup_5days
+            return original_search(domain, *args, **kwargs)
+
+        with patch.object(type(self.partner), 'move_ids',new_callable=PropertyMock, return_value=move), patch.object(
+            type(self.env['accounting.followup.line']), 'search', side_effect=mock_search):
             self.partner._compute_check_followups()
-
-        move.invalidate_recordset()  # flush local cache before asserting
+        move.invalidate_recordset()
         self.assertEqual(
-            move.next_follow_up_id.id, self.followup_5days.id,
+            move.next_follow_up_id.id,
+            self.followup_5days.id,
             "5-day follow-up line should be assigned to the move"
         )
         self.assertTrue(self.partner.check_followups)

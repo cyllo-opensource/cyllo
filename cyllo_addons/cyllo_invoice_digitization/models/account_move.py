@@ -161,7 +161,7 @@ class AccountMove(models.Model):
             self.ocr_digitize_failed = True
             self.ocr_digitize_completed = False
             self.write({
-                'ocr_digitize_message': 'Digitization now works only on PDF documents'
+                'ocr_digitize_message': _('Digitization now works only on PDF documents')
             })
             return
         file_path = file_attachment._full_path(file_attachment.store_fname)
@@ -211,7 +211,7 @@ class AccountMove(models.Model):
             self.ocr_digitize_completed = False
             _logger.error(f"Error during digitization: {e}")
             self.write({
-                'ocr_digitize_message': "Data cannot be read, digitization failed."
+                'ocr_digitize_message': _("Data cannot be read, digitization failed.")
             })
 
     def _process_digitization_manually(self, file_path, text):

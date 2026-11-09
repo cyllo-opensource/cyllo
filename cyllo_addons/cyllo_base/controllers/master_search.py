@@ -118,7 +118,8 @@ class MasterSearch(http.Controller):
                                         'id': val['id'],
                                         'isChild': True,
                                         'isParent': False,
-                                        'model': rec.model
+                                        'model': rec.model,
+                                        'isJson': st_filed.translate
                                     })
                                 data.append(temp_data)
                             request.env.cr.commit()

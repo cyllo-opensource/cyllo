@@ -61,8 +61,18 @@ class AccountMove(models.Model):
                 ], limit=1)
                 if existing_bills:
                     continue
+                if not purchase_order.order_line.filtered(
+                        lambda l: not l.display_type and l.qty_to_invoice):
+                    purchase_order.sudo()._message_log(
+                        body=_("Vendor bill for %s was not created automatically "
+                               "because there is nothing to invoice yet "
+                               "(goods not received).", invoice.name)
+                    )
+                    continue
                 purchase_order.with_company(
                     purchase_order.company_id
+                ).with_context(
+                    default_move_type='in_invoice'
                 ).sudo().action_create_invoice()
             else:
                 target_company = self.env['res.company'].sudo().search([('partner_id', '=', invoice.partner_id.id)], limit=1)

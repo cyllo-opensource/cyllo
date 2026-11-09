@@ -39,6 +39,9 @@
         'views/account_move_views.xml',
         'views/res_partner_views.xml',
     ],
+    'demo' : [
+        'demo/follow_ups_demo.xml'
+    ],
     'assets': {
         'web.assets_backend': [
             'cyllo_accounting_follow_up/static/src/css/*',

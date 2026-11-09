@@ -90,7 +90,7 @@ class DebtManagement(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'debt.payback.wizard',
-            'name': 'Payment Confirmation',
+            'name': _('Payment Confirmation'),
             'context': self.env.context,
             'views': [[self.env.ref(
                 'cyllo_budget_management.view_debt_payback_wizard_confirm_form').id,

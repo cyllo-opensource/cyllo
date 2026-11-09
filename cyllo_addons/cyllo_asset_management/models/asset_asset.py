@@ -228,7 +228,7 @@ class AssetAsset(models.Model):
     )
     last_maintenance_date = fields.Date(string="Last Maintenance Date")
     next_maintenance_date = fields.Date(string="Next Maintenance Date",
-                                        compute="compute_next_maintenance_date", store=True)
+                                        compute="_compute_next_maintenance_date", store=True)
     asset_lease_count = fields.Integer(string="Asset Lease Count", compute="_compute_asset_lease_count")
 
     def _compute_maintenance_state(self):
@@ -241,6 +241,29 @@ class AssetAsset(models.Model):
             else:
                 rec.maintenance_state = False
 
+    @api.onchange('automatic_maintenance')
+    def _onchange_automatic_maintenance(self):
+        """Initialize the maintenance schedule when a frequency is selected."""
+        if self.automatic_maintenance != 'no':
+            self.last_maintenance_date = fields.Date.today()
+
+    @api.depends('last_maintenance_date', 'automatic_maintenance')
+    def _compute_next_maintenance_date(self):
+        """Calculate each asset's next scheduled maintenance date."""
+        for rec in self:
+            if not rec.last_maintenance_date or rec.automatic_maintenance == 'no':
+                rec.next_maintenance_date = False
+            elif rec.automatic_maintenance == 'weekly':
+                rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(weeks=1)
+            elif rec.automatic_maintenance == 'monthly':
+                rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(months=1)
+            elif rec.automatic_maintenance == 'quarterly':
+                rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(months=3)
+            elif rec.automatic_maintenance == 'semi_annually':
+                rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(months=6)
+            elif rec.automatic_maintenance == 'yearly':
+                rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(years=1)
+
     @api.depends('modified_asset_ids')
     def _compute_modified_count(self):
         """Compute linked modified assets"""
@@ -249,6 +272,7 @@ class AssetAsset(models.Model):
 
     @api.depends('warranty_period', 'warranty_period_type')
     def _compute_warranty_end_date(self):
+        """Calculate warranty expiry from the purchase date and warranty period."""
         for record in self:
             if record.warranty_period and record.warranty_period_type:
                 if record.warranty_period_type == 'days':
@@ -283,9 +307,9 @@ class AssetAsset(models.Model):
 
     @api.depends("is_lease")
     def _compute_asset_lease_count(self):
+        """Count lease records linked to each asset."""
         for rec in self:
             leased_rec = self.env['asset.lease'].search([('asset_id', '=', rec.id)])
-            print(leased_rec)
             rec.asset_lease_count = len(leased_rec)
 
     @api.constrains('original_value')
@@ -384,6 +408,7 @@ class AssetAsset(models.Model):
 
     @api.onchange('asset_item_id')
     def _onchange_asset_item(self):
+        """Copy the selected asset template's accounting and depreciation settings."""
         if self.asset_item_id:
             for record in self:
                 if record.asset_item_id:
@@ -917,7 +942,7 @@ class AssetAsset(models.Model):
         }
 
     def _get_depreciating_factor(self, calculate_value):
-        """Depreciating factor"""
+        """Return the declining-balance rate, calculating it when auto mode is enabled."""
         depreciating_factor = 0
         if self.is_auto_calculate:
             declining_factor = round(calculate_value / self.method_duration, 2)
@@ -1320,33 +1345,14 @@ class AssetAsset(models.Model):
                 'salvage_value'))
         self.salvage_value = total_value
 
-    @api.onchange('automatic_maintenance')
-    def on_automatic_maintenance(self):
-        today = fields.date.today()
-        if self.automatic_maintenance != 'no':
-            self.last_maintenance_date = today
-
-    @api.depends("last_maintenance_date", "automatic_maintenance")
-    def compute_next_maintenance_date(self):
-        for rec in self:
-            if rec.last_maintenance_date and self.automatic_maintenance != 'no':
-                if rec.automatic_maintenance == 'weekly':
-                    rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(weeks=1)
-                elif rec.automatic_maintenance == 'monthly':
-                    rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(months=1)
-                elif rec.automatic_maintenance == 'quarterly':
-                    rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(months=3)
-                elif rec.automatic_maintenance == 'semi_annually':
-                    rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(months=6)
-                elif rec.automatic_maintenance == 'yearly':
-                    rec.next_maintenance_date = rec.last_maintenance_date + relativedelta(years=1)
-
     @api.model
     def _cron_generate_maintenance_requests(self):
         """Cron job to automatically generate maintenance requests based on frequency."""
         today = fields.date.today()
-        assets = self.search([('automatic_maintenance', '!=', 'no')])
-        assets.filtered(lambda asset: asset.next_maintenance_date == today)
+        assets = self.search([
+            ('automatic_maintenance', '!=', 'no'),
+            ('next_maintenance_date', '=', today),
+        ])
 
         for asset in assets:
             self.env['maintenance.request'].create({

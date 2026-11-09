@@ -19,6 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from datetime import timedelta
+
 from odoo.exceptions import UserError
 from odoo.addons.cyllo_asset_management.tests.common import TestCommon
 
@@ -32,14 +34,14 @@ class TestAssetAssign(TestCommon):
         cls.assign = cls.env['asset.assign'].create({
             'asset_id': cls.asset.id,
             'employee_id': cls.employee.id,
-            'assign_date': '2000-4-5',
+            'assign_date': cls.asset.date + timedelta(days=1),
             'department_id': cls.employee.department_id.id,
         })
 
     def test_onchange_assign_date(self):
-        """Test for _onchange_assign_date"""
+        """Test the assignment date constraint."""
         with self.assertRaises(UserError):
-            self.assign._onchange_assign_date()
+            self.assign.write({'assign_date': self.asset.date - timedelta(days=1)})
 
     def test_action_assign(self):
         """Test for action_assign function"""
@@ -51,6 +53,7 @@ class TestAssetAssign(TestCommon):
     def test_action_unassign(self):
         """Test for action_unassign function"""
         self.reserved_asset.asset_id, self.reserved_asset.status = self.assign.asset_id.id, 'assign'
+        self.assign.reservation_id = self.reserved_asset
         reserved_asset = self.env['asset.reservation'].search(
             [('asset_id', '=', self.assign.asset_id.id), ('status', '=', 'assign')])
         self.assign.action_unassign()
@@ -59,7 +62,7 @@ class TestAssetAssign(TestCommon):
         self.assertEqual(reserved_asset.status, 'cancel')
 
     def test_action_reset_to_draft(self):
-        self.assign.asset_id.status = 'lost'
+        self.assign.asset_id.status = 'disposed'
         with self.assertRaises(UserError):
             self.assign.action_reset_to_draft()
         self.assertEqual(self.assign.status, 'draft'  )
@@ -72,7 +75,7 @@ class TestAssetAssign(TestCommon):
             'asset_id': self.asset.id,
             'status': 'assign',
             'employee_id': self.employee.id,
-            'assign_date': '2000-4-5',
+            'assign_date': self.asset.date + timedelta(days=1),
             'department_id': self.employee.department_id.id,
         })
         with self.assertRaises(UserError):

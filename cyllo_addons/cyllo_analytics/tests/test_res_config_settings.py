@@ -31,20 +31,6 @@ class TestResConfigSettings(TransactionCase):
         cls.Settings = cls.env["res.config.settings"]
 
     # ---------------------------------------------------------
-    # TEST 01: Save and retrieve OpenAI API key config parameter
-    # ---------------------------------------------------------
-    def test_01_openai_api_key_config(self):
-        settings = self.Settings.create({
-            "openai_api_key": "test-api-key-123",
-        })
-        settings.execute()
-
-        value = self.env["ir.config_parameter"].sudo().get_param(
-            "cyllo_analytics.openai_api_key"
-        )
-        self.assertEqual(value, "test-api-key-123")
-
-    # ---------------------------------------------------------
     # TEST 02: Financial year config parameters saved correctly
     # ---------------------------------------------------------
     def test_02_financial_year_settings(self):

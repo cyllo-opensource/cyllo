@@ -25,16 +25,14 @@ from odoo.addons.cyllo_asset_management.tests.common import TestCommon
 
 class TestAssetItem(TestCommon):
 
-    def test_onchange_method_duration(self):
-        """Test for _onchange_method_duration"""
+    def test_check_method_duration(self):
+        """Test the method duration constraint."""
         with self.assertRaises(UserError):
             self.item_id.method_duration = -5
 
-    def test_compute_brand_ids(self):
-        """Test for _compute_brand_ids function"""
-        item_id = self.item_id
-        self.asset_type.brand_ids = self.brand.ids
-        item_id.asset_type_id = self.asset_type.id
-        item_id._compute_brand_ids()
-        self.assertEqual(item_id.brand_ids.ids, item_id.asset_type_id.brand_ids.ids)
+    def test_asset_item_brand_is_copied_to_asset(self):
+        """The asset template's brand is copied to the asset on onchange."""
+        self.asset.asset_item_id = self.item_id
+        self.asset._onchange_asset_item()
+        self.assertEqual(self.asset.brand_id, self.item_id.brand_id)
 

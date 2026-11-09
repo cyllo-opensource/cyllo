@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Follow-up levels -->
+    <record id="followup_level_1" model="accounting.followup.line">
+        <field name="title">1 Day Overdue - Gentle Reminder</field>
+        <field name="due_date">1</field>
+        <field name="send_mail" eval="True"/>
+        <field name="mail_template_id" ref="cyllo_accounting_follow_up.mail_template_payment_reminder"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+    <record id="followup_level_7" model="accounting.followup.line">
+        <field name="title">1 Week Follow Up Email</field>
+        <field name="due_date">7</field>
+        <field name="send_mail" eval="True"/>
+        <field name="mail_template_id" ref="cyllo_accounting_follow_up.mail_template_payment_reminder"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+    <record id="followup_level_15" model="accounting.followup.line">
+        <field name="title">15 Days - Second Notice</field>
+        <field name="due_date">15</field>
+        <field name="send_mail" eval="True"/>
+        <field name="mail_template_id" ref="cyllo_accounting_follow_up.mail_template_payment_reminder"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+    <record id="followup_level_30" model="accounting.followup.line">
+        <field name="title">30 Days - Final Warning</field>
+        <field name="due_date">30</field>
+        <field name="send_mail" eval="True"/>
+        <field name="mail_template_id" ref="cyllo_accounting_follow_up.mail_template_payment_reminder"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+    <record id="followup_level_60" model="accounting.followup.line">
+        <field name="title">60 Days - Escalate (Call Customer)</field>
+        <field name="due_date">60</field>
+        <field name="send_mail" eval="False"/>
+        <field name="company_id" ref="base.main_company"/>
+    </record>
+
+    <!-- Customers -->
+    <record id="demo_partner_harbor" model="res.partner">
+        <field name="name">Bright Harbor Construction</field>
+        <field name="is_company" eval="True"/>
+        <field name="company_type">company</field>
+        <field name="email">finance@brightharbor-construction.example.com</field>
+        <field name="phone">+1 212 555 0143</field>
+        <field name="street">245 Park Avenue</field>
+        <field name="city">New York</field>
+        <field name="zip">10167</field>
+        <field name="country_id" ref="base.us"/>
+    </record>
+    <record id="demo_partner_nordlicht" model="res.partner">
+        <field name="name">Nordlicht Elektronik GmbH</field>
+        <field name="is_company" eval="True"/>
+        <field name="company_type">company</field>
+        <field name="email">buchhaltung@nordlicht-elektronik.example.com</field>
+        <field name="phone">+49 40 555 0175</field>
+        <field name="street">Hafenstrasse 12</field>
+        <field name="city">Hamburg</field>
+        <field name="zip">20457</field>
+        <field name="country_id" ref="base.de"/>
+    </record>
+
+    <!-- Customer invoices -->
+    <record id="demo_inv_harbor_1" model="account.move">
+        <field name="move_type">out_invoice</field>
+        <field name="partner_id" ref="demo_partner_harbor"/>
+        <field name="invoice_date" eval="(DateTime.today() - relativedelta(days=45)).strftime('%Y-%m-%d')"/>
+        <field name="invoice_date_due" eval="(DateTime.today() - relativedelta(days=15)).strftime('%Y-%m-%d')"/>
+        <field name="invoice_line_ids" eval="[
+            Command.create({
+                'name': 'Site equipment rental - Phase 1',
+                'quantity': 1,
+                'price_unit': 96000.0,
+            }),
+        ]"/>
+    </record>
+    <record id="demo_inv_harbor_2" model="account.move">
+        <field name="move_type">out_invoice</field>
+        <field name="partner_id" ref="demo_partner_harbor"/>
+        <field name="invoice_date" eval="(DateTime.today() - relativedelta(days=60)).strftime('%Y-%m-%d')"/>
+        <field name="invoice_date_due" eval="(DateTime.today() - relativedelta(days=30)).strftime('%Y-%m-%d')"/>
+        <field name="invoice_line_ids" eval="[
+            Command.create({
+                'name': 'Site equipment rental - Phase 2',
+                'quantity': 1,
+                'price_unit': 128400.0,
+            }),
+        ]"/>
+    </record>
+    <record id="demo_inv_nordlicht_1" model="account.move">
+        <field name="move_type">out_invoice</field>
+        <field name="partner_id" ref="demo_partner_nordlicht"/>
+        <field name="invoice_date" eval="(DateTime.today() - relativedelta(days=90)).strftime('%Y-%m-%d')"/>
+        <field name="invoice_date_due" eval="(DateTime.today() - relativedelta(days=60)).strftime('%Y-%m-%d')"/>
+        <field name="next_follow_up_id" ref="followup_level_60"/>
+        <field name="last_follow_up_id" ref="followup_level_30"/>
+        <field name="invoice_line_ids" eval="[
+            Command.create({
+                'name': 'Bulk electronics order #NL-2210',
+                'quantity': 1,
+                'price_unit': 215000.0,
+            }),
+        ]"/>
+    </record>
+    <record id="demo_inv_nordlicht_2" model="account.move">
+        <field name="move_type">out_invoice</field>
+        <field name="partner_id" ref="demo_partner_nordlicht"/>
+        <field name="invoice_date" eval="(DateTime.today() - relativedelta(days=18)).strftime('%Y-%m-%d')"/>
+        <field name="invoice_date_due" eval="(DateTime.today() - relativedelta(days=-12)).strftime('%Y-%m-%d')"/>
+        <field name="invoice_line_ids" eval="[
+            Command.create({
+                'name': 'Accessories order #NL-2288',
+                'quantity': 1,
+                'price_unit': 31500.0,
+            }),
+        ]"/>
+    </record>
+
+    <!-- Post the invoices (the draft one is left unposted on purpose:
+         drafts must never appear in the follow-up list) -->
+    <function model="account.move" name="action_post"
+              eval="[[ref('demo_inv_harbor_1'), ref('demo_inv_harbor_2'), ref('demo_inv_nordlicht_1'), ref('demo_inv_nordlicht_2')]]"/>
+</odoo>

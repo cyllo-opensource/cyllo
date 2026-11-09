@@ -180,7 +180,7 @@ class AccountPdcPayment(models.Model):
             return
 
         self.env['account.pdc.payment'].flush_model(
-            fnames=['move_id', 'outstanding_account_id'])
+            fnames=['move_id', 'pdc_account_id'])
         self.env['account.move'].flush_model(
             fnames=['move_type', 'payment_id', 'statement_line_id'])
         self.env['account.move.line'].flush_model(
@@ -245,7 +245,7 @@ class AccountPdcPayment(models.Model):
                     part.debit_move_id = counterpart_line.id
                     OR
                     part.credit_move_id = counterpart_line.id
-                WHERE account.id = payment.outstanding_account_id
+                WHERE account.id = payment.pdc_account_id
                     AND payment.id IN %(payment_ids)s
                     AND line.id != counterpart_line.id
                     AND counterpart_line.statement_line_id IS NOT NULL
@@ -269,6 +269,19 @@ class AccountPdcPayment(models.Model):
             else:
                 pay.reconciled_invoices_type = 'invoice'
 
+    def _get_related_moves(self):
+        """Journal entries of this cheque: the registered entry plus the
+        entries created when the PDC line is reconciled (the bank statement
+        line entry, Dr Bank / Cr PDC)."""
+        self.ensure_one()
+        pdc_lines = self.move_id.line_ids.filtered(
+            lambda line: line.account_id == self.pdc_account_id)
+        cleared_by = (pdc_lines.matched_debit_ids.debit_move_id
+                      | pdc_lines.matched_credit_ids.credit_move_id)
+        return (self.env['account.move'].search(
+            [('pdc_payment_id', '=', self.id)]) | cleared_by.move_id)
+
+    @api.depends('is_matched', 'move_id.line_ids.matched_debit_ids', 'move_id.line_ids.matched_credit_ids')
     def _compute_pdc_move_count(self):
         """Compute PDC move count"""
         for rec in self:

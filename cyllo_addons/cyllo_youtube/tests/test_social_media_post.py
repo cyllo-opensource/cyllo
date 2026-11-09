@@ -105,7 +105,7 @@ class TestSocialMediaPost(common.TransactionCase):
             'name': 'Test Post 2',
             'description': 'Test',
         })
-        self.assertIn(post.mode, ['url', 'video'])
+        self.assertIn(post.mode, ['photo', 'url', 'video'])
 
     def test_onchange_post_on_youtube(self):
         """

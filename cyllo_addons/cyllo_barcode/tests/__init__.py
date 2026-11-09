@@ -27,3 +27,5 @@ from . import test_stock_move_line
 from . import test_stock_picking_batch
 from . import test_stock_quant
 from . import test_res_config_settings
+from . import test_barcode_flows
+from . import test_barcode_controller

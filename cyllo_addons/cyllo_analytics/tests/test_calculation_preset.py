@@ -112,36 +112,78 @@ class TestCalculationPreset(TransactionCase):
 
 
 
-    def test_translate_to_sql_advanced_merging(self):
-        """Test that compatible aggregations are merged in additions."""
+    def test_translate_to_sql_advanced_no_unsound_merge(self):
+        """Aggregates added together must stay separate terms.
+
+        SUM(x) FILTER (f1) + SUM(x) FILTER (f2) is only equal to
+        SUM(x) FILTER (f1 OR f2) when f1 and f2 are disjoint, and with no
+        filters at all the merge collapsed SUM(x) + SUM(x) to SUM(x),
+        silently dropping an operand.
+        """
         configs = [
             {'name': 'this_month', 'column': 'amount', 'aggregate': 'SUM', 'filter_domain': 'date >= "2024-01-01"'},
             {'name': 'last_month', 'column': 'amount', 'aggregate': 'SUM', 'filter_domain': 'date >= "2023-12-01" AND date < "2024-01-01"'},
             {'name': 'other_col', 'column': 'qty', 'aggregate': 'SUM', 'filter_domain': '1=1'},
+            {'name': 'plain_a', 'column': 'amount', 'aggregate': 'SUM', 'filter_domain': ''},
+            {'name': 'plain_b', 'column': 'amount', 'aggregate': 'SUM', 'filter_domain': ''},
         ]
-        
-        # 1. Simple addition - Should merge
-        formula = "{this_month} + {last_month}"
-        sql = self.Preset.translate_to_sql_advanced(formula, configs)
-        self.assertIn('SUM(amount) FILTER (WHERE (date >= "2024-01-01") OR (date >= "2023-12-01" AND date < "2024-01-01"))', sql)
-        self.assertEqual(sql.count('SUM(amount)'), 1)
 
-        # 2. Subtraction - Should NOT merge
-        formula_sub = "{this_month} - {last_month}"
-        sql_sub = self.Preset.translate_to_sql_advanced(formula_sub, configs)
-        self.assertIn('SUM(amount) FILTER (WHERE (date >= "2024-01-01"))', sql_sub)
-        self.assertIn('SUM(amount) FILTER (WHERE (date >= "2023-12-01" AND date < "2024-01-01"))', sql_sub)
+        # 1. Same column, same aggregate, no filters: must NOT collapse to one term.
+        sql_plain = self.Preset.translate_to_sql_advanced("{plain_a} + {plain_b}", configs)
+        self.assertEqual(sql_plain.count('SUM(amount)'), 2)
+        self.assertIn(' + ', sql_plain)
+
+        # 2. Same column, different filters: two FILTER terms, not one OR'd filter.
+        sql = self.Preset.translate_to_sql_advanced("{this_month} + {last_month}", configs)
+        self.assertEqual(sql.count('SUM(amount)'), 2)
+        self.assertIn('SUM(amount) FILTER (WHERE (date >= "2024-01-01"))', sql)
+        self.assertIn('SUM(amount) FILTER (WHERE (date >= "2023-12-01" AND date < "2024-01-01"))', sql)
+        self.assertNotIn(') OR (', sql)
+
+        # 3. Subtraction — unchanged, still two terms.
+        sql_sub = self.Preset.translate_to_sql_advanced("{this_month} - {last_month}", configs)
+        self.assertEqual(sql_sub.count('SUM(amount)'), 2)
         self.assertIn(' - ', sql_sub)
 
-        # 3. Different columns - Should NOT merge
-        formula_diff = "{this_month} + {other_col}"
-        sql_diff = self.Preset.translate_to_sql_advanced(formula_diff, configs)
+        # 4. Different columns — unchanged.
+        sql_diff = self.Preset.translate_to_sql_advanced("{this_month} + {other_col}", configs)
         self.assertIn('SUM(amount)', sql_diff)
         self.assertIn('SUM(qty)', sql_diff)
         self.assertIn(' + ', sql_diff)
 
-        # 4. Triple addition - Should merge all
-        formula_triple = "{this_month} + {last_month} + {this_month}"
-        sql_triple = self.Preset.translate_to_sql_advanced(formula_triple, configs)
-        self.assertIn('SUM(amount) FILTER (WHERE (date >= "2024-01-01") OR (date >= "2023-12-01" AND date < "2024-01-01") OR (date >= "2024-01-01"))', sql_triple)
-        self.assertEqual(sql_triple.count('SUM(amount)'), 1)
+        # 5. Repeating the same variable must count it twice, not once.
+        sql_triple = self.Preset.translate_to_sql_advanced(
+            "{this_month} + {last_month} + {this_month}", configs)
+        self.assertEqual(sql_triple.count('SUM(amount)'), 3)
+
+    def test_round_two_args_casts_to_numeric(self):
+        """round(x, n) must work when x came out of a division.
+
+        Division casts to ::float and PostgreSQL has no
+        round(double precision, integer), so the value is cast back to numeric.
+        """
+        sql = self.Preset.translate_to_sql("round({a} / {b} * 100, 2)", {'a': 'col_a', 'b': 'col_b'})
+        self.assertIn('::numeric', sql)
+        self.assertTrue(sql.startswith('ROUND('))
+
+        # Single-argument round is left alone.
+        sql_one = self.Preset.translate_to_sql("round({a})", {'a': 'col_a'})
+        self.assertEqual(sql_one, 'ROUND(col_a)')
+
+    def test_row_level_never_aggregates(self):
+        """Row-level presets must emit bare columns, not SUM()."""
+        configs = [
+            {'name': 'a', 'column': 'amount', 'aggregate': 'SUM', 'filter_domain': ''},
+            {'name': 'b', 'column': 'amount', 'aggregate': 'SUM', 'filter_domain': ''},
+        ]
+        sql = self.Preset.translate_to_sql_advanced("{a} + {b}", configs, None, 'row')
+        self.assertNotIn('SUM(', sql)
+        self.assertEqual(sql, '(amount + amount)')
+
+    def test_row_level_filter_becomes_case_when(self):
+        """A row-level filter is a CASE WHEN, not a FILTER clause."""
+        configs = [{'name': 'a', 'column': 'amount', 'aggregate': 'SUM',
+                    'filter_domain': "state = 'draft'"}]
+        sql = self.Preset.translate_to_sql_advanced("{a}", configs, None, 'row')
+        self.assertIn('CASE WHEN', sql)
+        self.assertNotIn('FILTER', sql)

@@ -106,15 +106,15 @@ class AccountMove(models.Model):
             'domain': [('id', 'in', self.asset_asset_ids.ids), ('invoice_id', '=', self.id)]
         }
 
-    def action_view_maintenace_request(self):
+    def action_view_maintenance_request(self):
         """Function for viewing the maintenance request model from account move"""
-        maintenace_request_id = self.env['maintenance.request'].search(
+        maintenance_request = self.env['maintenance.request'].search(
             [('id', '=', self.repair_id.id)])
         return {
             'name': _('Maintenance Request'),
             'type': 'ir.actions.act_window',
             'res_model': 'maintenance.request',
-            'res_id': maintenace_request_id.id,
+            'res_id': maintenance_request.id,
             'view_mode': 'form',
             'domain': [('id', '=', self.repair_id.id)],
         }

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <template xml:space="preserve">
+    <!-- Singleton container mounted once at root level in WebClient main_components -->
+    <t t-name="StickyNotesContainer" owl="1">
+        <StickyNotes isPanelOpen="this.state.isOpen"/>
+    </t>
+
     <!-- Create sticky note template from systray -->
     <t t-name="StickyNotesSystray" owl="1">
         <div data-tooltip="Sticky Notes" class="o_sticky_icon cy-systray-parent-class" t-on-click="sticky_note">
@@ -10,13 +15,5 @@
                 Sticky Notes
             </span>
         </div>
-        <!-- Portaled to body: this component can now mount inside the
-             systray "more" dropdown (cy-tray__menu ul/li), and StickyNotes
-             is a full page panel, not a dropdown-item — it must not live in
-             DOM that a Bootstrap dropdown can hide/unmount out from under
-             it. -->
-        <t t-if="this.state.isOpen" t-portal="'body'">
-            <StickyNotes/>
-        </t>
     </t>
 </template>

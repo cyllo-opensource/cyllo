@@ -1,76 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="cyllo_green_metrics.GreenDashboard">
-        <div class="overflow-auto h-100">
-            <div class="container-fluid pb-4 bg-light">
-                
+        <div class="cy_gm_page">
+
+                <!-- DASHBOARD BOX: HEADER + CARBON -->
+                <div class="mb-3">
+
                 <!-- TOP HEADER & FILTERS BANNER -->
-                <div class="row mb-4 align-items-center bg-white p-3 rounded-3 shadow-sm">
-                    <div class="col-lg-6 col-12 d-flex align-items-center gap-2">
-                        <div>
-                            <h2 class="fw-bold mb-0">Environment Metrics Overview</h2>
-                            <p class="text-muted mb-0 font-size-sm">Real-time tracking of carbon, water, and sound pollution footprint.</p>
-                        </div>
+                <div class="row mb-3 align-items-center g-2">
+                    <div class="col-lg-5 col-12">
+                        <h2 class="gm-page-title fw-bold mb-1">Environment Metrics Overview</h2>
+                        <p class="gm-page-subtitle mb-0">Real-time tracking of carbon, water, and sound pollution footprint.</p>
                     </div>
-                    
-                    <div class="col-lg-6 col-12 d-flex justify-content-lg-end justify-content-start gap-2 mt-lg-0 mt-3 flex-wrap align-items-center" t-if="state.dashboardData">
-                        <span class="text-muted fw-bold"><i class="fa fa-filter me-1"></i>Filters:</span>
-                        
-                        <!-- Date Filter Selection -->
-                        <select class="form-select fs-6 w-auto fw-bold border-secondary-subtle shadow-sm" t-on-change="onWaterDateFilterChange" t-att-value="state.waterDateFilter">
-                            <option value="today">Today</option>
-                            <option value="monthly">This Month</option>
-                            <option value="quarterly">This Quarter</option>
-                            <option value="yearly">This Year</option>
-                            <option value="range">Date Range</option>
-                        </select>
-                        
+
+                    <div class="col-lg-7 col-12 d-flex justify-content-lg-end justify-content-start mt-lg-0 mt-2 flex-wrap align-items-center gm-filter-toolbar" t-if="state.dashboardData">
+                        <!-- Date Filter Segmented Control (with more-periods chevron inside) -->
+                        <div class="gm-segmented d-inline-flex align-items-center" role="group" aria-label="Date filter">
+                            <button t-attf-class="gm-seg-btn {{ state.waterDateFilter == 'today' ? 'active' : '' }}" t-on-click="() => this.setDateFilter('today')">Daily</button>
+                            <button t-attf-class="gm-seg-btn {{ state.waterDateFilter == 'weekly' ? 'active' : '' }}" t-on-click="() => this.setDateFilter('weekly')">Weekly</button>
+                            <button t-attf-class="gm-seg-btn {{ state.waterDateFilter == 'monthly' ? 'active' : '' }}" t-on-click="() => this.setDateFilter('monthly')">Monthly</button>
+
+                            <!-- More Periods Dropdown (chevron) -->
+                            <div class="dropdown gm-more-dropdown">
+                                <button t-attf-class="btn gm-seg-chevron {{ ['quarterly', 'yearly', 'range'].includes(state.waterDateFilter) ? 'active' : '' }}" type="button" id="periodMoreDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                    <i class="fa fa-chevron-down"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end gm-scope-menu" aria-labelledby="periodMoreDropdown">
+                                    <li>
+                                        <button type="button" class="gm-scope-item" t-on-click="() => this.setDateFilter('quarterly')">
+                                            <span t-attf-class="gm-check {{ state.waterDateFilter == 'quarterly' ? 'checked' : '' }}"><i class="fa fa-check"></i></span>
+                                            <span class="flex-grow-1">This Quarter</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="gm-scope-item" t-on-click="() => this.setDateFilter('yearly')">
+                                            <span t-attf-class="gm-check {{ state.waterDateFilter == 'yearly' ? 'checked' : '' }}"><i class="fa fa-check"></i></span>
+                                            <span class="flex-grow-1">This Year</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="gm-scope-item" t-on-click="() => this.setDateFilter('range')">
+                                            <span t-attf-class="gm-check {{ state.waterDateFilter == 'range' ? 'checked' : '' }}"><i class="fa fa-check"></i></span>
+                                            <span class="flex-grow-1">Date Range</span>
+                                        </button>
+                                    </li>
+                                    <!-- Date range fields live inside the menu -->
+                                    <li t-if="state.waterDateFilter == 'range'">
+                                        <div class="gm-range-panel">
+                                            <div class="gm-range-inputs d-flex gap-2 align-items-center">
+                                                <input type="date" class="form-control form-control-sm" t-model="state.waterStartDate" t-att-max="state.waterEndDate" t-on-change="onWaterDateRangeChange"/>
+                                                <span class="gm-range-to">to</span>
+                                                <input type="date" class="form-control form-control-sm" t-model="state.waterEndDate" t-att-min="state.waterStartDate" t-on-change="onWaterDateRangeChange"/>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
                         <!-- Multi-select Scope Dropdown -->
                         <div class="dropdown custom-scope-dropdown">
-                            <button class="btn btn-white dropdown-toggle fs-6 fw-bold border border-secondary-subtle shadow-sm" type="button" id="scopeDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                                <t t-esc="getSelectedScopesText()"/>
+                            <button class="btn gm-scope-btn" type="button" id="scopeDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                <i class="fa fa-filter me-2"></i><t t-esc="getSelectedScopesText()"/><i class="fa fa-chevron-down gm-scope-caret"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-lg p-2" aria-labelledby="scopeDropdown" style="min-width: 220px;">
+                            <ul class="dropdown-menu dropdown-menu-end gm-scope-menu" aria-labelledby="scopeDropdown">
                                 <li>
-                                    <div class="dropdown-item d-flex align-items-center gap-2 rounded">
+                                    <div class="gm-scope-item">
                                         <input type="checkbox" id="scope_all" class="form-check-input" t-att-checked="isAllSelected()" t-on-change="toggleScopeAll"/>
-                                        <label class="mb-0 fw-bold flex-grow-1 cursor-pointer" for="scope_all">Select All</label>
+                                        <label class="mb-0 flex-grow-1 cursor-pointer" for="scope_all">Select All</label>
                                     </div>
                                 </li>
-                                <li><hr class="dropdown-divider"/></li>
                                 <t t-foreach="state.dashboardData.scopes or []" t-as="scope" t-key="scope.id">
                                     <li>
-                                        <div t-attf-class="dropdown-item d-flex align-items-center gap-2 rounded {{ isScopeSelected(scope.id) ? 'selected-item' : '' }}">
+                                        <div class="gm-scope-item">
                                             <input type="checkbox" t-att-id="'scope_' + scope.id" class="form-check-input" t-att-checked="isScopeSelected(scope.id)" t-on-change="(ev) => this.toggleScope(scope.id, ev)"/>
                                             <label class="mb-0 flex-grow-1 cursor-pointer" t-att-for="'scope_' + scope.id"><t t-esc="scope.name"/></label>
                                         </div>
                                     </li>
                                 </t>
                                 <li>
-                                    <div t-attf-class="dropdown-item d-flex align-items-center gap-2 rounded {{ isScopeSelected('no_scope') ? 'selected-item' : '' }}">
+                                    <div class="gm-scope-item">
                                         <input type="checkbox" id="scope_none" class="form-check-input" t-att-checked="isScopeSelected('no_scope')" t-on-change="(ev) => this.toggleScope('no_scope', ev)"/>
                                         <label class="mb-0 flex-grow-1 cursor-pointer" for="scope_none">No Scope</label>
                                     </div>
                                 </li>
                             </ul>
                         </div>
-
-                        <!-- Date Range Selection Inputs -->
-                        <div t-if="state.waterDateFilter == 'range'" class="d-flex gap-2 align-items-center">
-                            <input type="date" class="form-control fs-6 w-auto fw-bold border-secondary-subtle shadow-sm" t-model="state.waterStartDate" t-on-change="onWaterDateRangeChange"/>
-                            <span class="text-muted fw-bold fs-6">to</span>
-                            <input type="date" class="form-control fs-6 w-auto fw-bold border-secondary-subtle shadow-sm" t-model="state.waterEndDate" t-on-change="onWaterDateRangeChange"/>
-                        </div>
                     </div>
                 </div>
 
-                <!-- METRIC CARDS ROW -->
-                <div class="row mb-4 g-3" t-if="state.dashboardData">
-                    
-                    <!-- Carbon Cards Section -->
-                    <div class="col-12" t-if="state.dashboardData.cap_data">
+                <!-- Carbon Cards Section -->
+                    <div t-if="state.dashboardData.cap_data">
                         <t t-if="state.dashboardData.cap_data.used > state.dashboardData.cap_data.cap">
-                            <div class="alert alert-danger mb-3 p-3 d-flex align-items-center justify-content-between mt-1 mx-1 shadow-sm rounded-3 border-start border-danger" style="border-left-width: 5px !important; background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%);">
+                            <div class="alert alert-danger mb-3 p-3 d-flex align-items-center justify-content-between mx-1 shadow-sm rounded-3 border-start border-danger" style="border-left-width: 5px !important; background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%);">
                                 <div class="d-flex align-items-center">
                                     <i class="fa fa-exclamation-triangle fs-4 me-3 text-danger"></i>
                                     <div>
@@ -86,130 +108,129 @@
                                 </button>
                             </div>
                         </t>
-                        <div class="px-2 py-1 mb-2">
-                            <h5 class="fw-bold mb-0">Carbon Emissions Stats (<t t-esc="state.dashboardData.cap_data.duration" />)</h5>
-                        </div>
                         <div class="row g-3">
                             <!-- Allocated Cap -->
                             <div class="col-lg-3 col-md-6 col-sm-6">
-                                <div class="card border-0 shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden" style="border-left: 4px solid #0d6efd !important;">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="text-muted uppercase fw-semibold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Allocated Cap</h6>
-                                            <i class="fa fa-sliders text-primary fs-5 opacity-75"></i>
+                                <div class="gm-card h-100 d-flex justify-content-between">
+                                    <div class="gm-card-info">
+                                        <h6 class="gm-card-title mb-0">Monthly Allocated Carbon</h6>
+                                        <div class="gm-value-row d-flex align-items-baseline">
+                                            <span class="gm-value"><t t-esc="state.dashboardData.cap_data.cap" /></span>
+                                            <span class="gm-unit"><t t-esc="state.dashboardData.cap_data.unit" /></span>
                                         </div>
-                                        <h3 class="fw-bold mb-0">
-                                            <t t-esc="state.dashboardData.cap_data.cap" />
-                                            <span class="fs-6 text-muted ms-1"><t t-esc="state.dashboardData.cap_data.unit" /></span>
-                                        </h3>
+                                        <div class="gm-pill-row">
+                                            <span class="gm-pill gm-pill-success"><t t-esc="getCapRemainingPct()"/>%</span>
+                                        </div>
                                     </div>
+                                    <span class="gm-icon-badge"><i class="fa fa-user"></i></span>
                                 </div>
                             </div>
-                            
+
                             <!-- Used Amount -->
                             <div class="col-lg-3 col-md-6 col-sm-6">
-                                <div t-attf-class="card border-0 shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden" t-attf-style="border-left: 4px solid {{ state.dashboardData.cap_data.used > state.dashboardData.cap_data.cap ? '#dc3545' : '#198754' }} !important;">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="text-muted uppercase fw-semibold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Used Amount</h6>
-                                            <i t-attf-class="fa {{ state.dashboardData.cap_data.used > state.dashboardData.cap_data.cap ? 'fa-exclamation-triangle text-danger' : 'fa-leaf text-success' }} fs-5 opacity-75"></i>
+                                <div class="gm-card h-100 d-flex justify-content-between">
+                                    <div class="gm-card-info">
+                                        <h6 class="gm-card-title mb-0">Carbon Used This month</h6>
+                                        <div class="gm-value-row d-flex align-items-baseline">
+                                            <span t-attf-class="gm-value {{ getCapUsedPct() > 100 ? 'text-danger' : '' }}"><t t-esc="state.dashboardData.cap_data.used" /></span>
+                                            <span class="gm-unit"><t t-esc="state.dashboardData.cap_data.unit" /></span>
                                         </div>
-                                        <h3 t-attf-class="fw-bold mb-0 {{ state.dashboardData.cap_data.used > state.dashboardData.cap_data.cap ? 'text-danger' : 'text-success' }}">
-                                            <t t-esc="state.dashboardData.cap_data.used" />
-                                            <span class="fs-6 text-muted ms-1"><t t-esc="state.dashboardData.cap_data.unit" /></span>
-                                        </h3>
+                                        <div class="gm-pill-row">
+                                            <span t-attf-class="gm-pill {{ getCapUsedPct() > 100 ? 'gm-pill-danger' : 'gm-pill-success' }}"><t t-esc="getCapUsedPct()"/>%</span>
+                                        </div>
                                     </div>
+                                    <span t-attf-class="gm-icon-badge {{ getCapUsedPct() >100 ? 'gm-icon-badge-danger' : '' }}"><i t-attf-class="fa {{ getCapUsedPct() > 100 ? 'fa-exclamation-triangle' : 'fa-leaf' }}"></i></span>
                                 </div>
                             </div>
-                            
+
                             <!-- Previous Year Target -->
                             <div class="col-lg-3 col-md-6 col-sm-6">
-                                <div class="card border-0 shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden" style="border-left: 4px solid #0dcaf0 !important;">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="text-muted uppercase fw-semibold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Previous Year Target</h6>
-                                            <i class="fa fa-history text-info fs-5 opacity-75"></i>
+                                <div class="gm-card h-100 d-flex justify-content-between">
+                                    <div class="gm-card-info">
+                                        <h6 class="gm-card-title mb-0">Previous Year Target</h6>
+                                        <div class="gm-value-row d-flex align-items-baseline">
+                                            <span class="gm-value"><t t-esc="state.dashboardData.cap_data.previous_year_achieved" /></span>
+                                            <span class="gm-unit"><t t-esc="state.dashboardData.cap_data.unit" /></span>
                                         </div>
-                                        <h3 class="fw-bold text-info mb-0">
-                                            <t t-esc="state.dashboardData.cap_data.previous_year_achieved" />
-                                            <span class="fs-6 text-muted ms-1"><t t-esc="state.dashboardData.cap_data.unit" /></span>
-                                        </h3>
+                                        <div class="gm-pill-row">
+                                            <span t-if="state.dashboardData.cap_data.targeted_achievement > 0" class="gm-pill gm-pill-success"><t t-esc="getPreviousYearPct()"/>%</span>
+                                            <span t-else="" class="gm-pill gm-pill-danger">Target not configured</span>
+                                        </div>
                                     </div>
+                                    <span class="gm-icon-badge"><i class="fa fa-crosshairs"></i></span>
                                 </div>
                             </div>
-                            
-                            <!-- Targeted Achievement -->
+
+                            <!-- Monthly Carbon Progress -->
                             <div class="col-lg-3 col-md-6 col-sm-6">
-                                <div class="card border-0 shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden" style="border-left: 4px solid #6f42c1 !important;">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="text-muted uppercase fw-semibold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Targeted Achievement</h6>
-                                            <i class="fa fa-bullseye fs-5 opacity-75" style="color: #6f42c1;"></i>
+                                <div class="gm-card h-100 d-flex justify-content-between">
+                                    <div class="gm-card-info">
+                                        <h6 class="gm-card-title mb-0">Monthly Carbon Progress</h6>
+                                        <div class="gm-value-row d-flex align-items-baseline">
+                                            <span class="gm-value"><t t-esc="getCapRemaining()"/></span>
+                                            <span class="gm-unit"><t t-esc="state.dashboardData.cap_data.unit" /></span>
                                         </div>
-                                        <h3 class="fw-bold mb-0" style="color: #6f42c1;">
-                                            <t t-esc="state.dashboardData.cap_data.targeted_achievement" />
-                                            <span class="fs-6 text-muted ms-1"><t t-esc="state.dashboardData.cap_data.unit" /></span>
-                                        </h3>
+                                        <div class="gm-pill-row">
+                                            <span t-attf-class="gm-pill {{ getCapUsedPct() > 100 ? 'gm-pill-danger' : 'gm-pill-success' }}"><t t-esc="getCapUsedPct()"/>%</span>
+                                        </div>
                                     </div>
+                                    <span t-attf-class="gm-icon-badge {{ getCapUsedPct() >100 ? 'gm-icon-badge-danger' : '' }}"><i class="fa fa-line-chart"></i></span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Water Cards Section -->
-                    <div class="col-12 mt-2" t-if="state.dashboardData.water_cap_data">
-                        <div class="px-2 py-1 mb-2">
-                            <h5 class="fw-bold mb-0">Water Usage Stats (<t t-esc="state.dashboardData.water_cap_data.duration" />)</h5>
+                </div>
+
+                <!-- WATER SECTION BOX -->
+                <div class="gm-box mb-3" t-if="state.dashboardData.water_cap_data">
+                    <div>
+                        <div class="px-1 mb-3">
+                            <h5 class="gm-section-title fw-bold mb-0">Water Usage Stats (<t t-esc="state.dashboardData.water_cap_data.duration" />)</h5>
                         </div>
                         <div class="row g-3">
                             <!-- Allocated Water -->
                             <div class="col-md-4 col-sm-6">
-                                <div class="card border-0 shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden" style="border-left: 4px solid #0d6efd !important;">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="text-muted uppercase fw-semibold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Allocated Water</h6>
-                                            <i class="fa fa-tint text-primary fs-5 opacity-75"></i>
+                                <div class="gm-card gm-card-soft h-100 d-flex justify-content-between">
+                                    <div class="gm-card-info">
+                                        <h6 class="gm-card-title mb-0">Allocated Water</h6>
+                                        <div class="gm-value-row d-flex align-items-baseline">
+                                            <span class="gm-value"><t t-esc="state.dashboardData.water_cap_data.cap" /></span>
+                                            <span class="gm-unit"><t t-esc="state.dashboardData.water_cap_data.unit" /></span>
                                         </div>
-                                        <h3 class="fw-bold mb-0">
-                                            <t t-esc="state.dashboardData.water_cap_data.cap" />
-                                            <span class="fs-6 text-muted ms-1"><t t-esc="state.dashboardData.water_cap_data.unit" /></span>
-                                        </h3>
                                     </div>
+                                    <span class="gm-icon-badge gm-icon-badge-outline"><i class="fa fa-tint"></i></span>
                                 </div>
                             </div>
                             <!-- Used Water -->
                             <div class="col-md-4 col-sm-6">
-                                <div t-attf-class="card border-0 shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden" t-attf-style="border-left: 4px solid {{ state.dashboardData.water_cap_data.used > state.dashboardData.water_cap_data.cap ? '#dc3545' : '#0d6efd' }} !important;">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="text-muted uppercase fw-semibold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Used Water</h6>
-                                            <i t-attf-class="fa {{ state.dashboardData.water_cap_data.used > state.dashboardData.water_cap_data.cap ? 'fa-exclamation-triangle text-danger' : 'fa-shower text-primary' }} fs-5 opacity-75"></i>
+                                <div class="gm-card gm-card-soft h-100 d-flex justify-content-between">
+                                    <div class="gm-card-info">
+                                        <h6 class="gm-card-title mb-0">Used Water</h6>
+                                        <div class="gm-value-row d-flex align-items-baseline">
+                                            <span t-attf-class="gm-value {{ getWaterUsedPct() > 100 ? 'text-danger' : '' }}"><t t-esc="state.dashboardData.water_cap_data.used" /></span>
+                                            <span class="gm-unit"><t t-esc="state.dashboardData.water_cap_data.unit" /></span>
                                         </div>
-                                        <h3 t-attf-class="fw-bold mb-0 {{ state.dashboardData.water_cap_data.used > state.dashboardData.water_cap_data.cap ? 'text-danger' : 'text-primary' }}">
-                                            <t t-esc="state.dashboardData.water_cap_data.used" />
-                                            <span class="fs-6 text-muted ms-1"><t t-esc="state.dashboardData.water_cap_data.unit" /></span>
-                                        </h3>
                                     </div>
+                                    <span t-attf-class="gm-icon-badge gm-icon-badge-outline {{ getWaterUsedPct() > 100 ? 'gm-icon-badge-danger' : '' }}"><i t-attf-class="fa {{ getWaterUsedPct() > 100 ? 'fa-exclamation-triangle' : 'fa-shower' }}"></i></span>
                                 </div>
                             </div>
                             <!-- Recovered/Net Water -->
-                            <div class="col-md-4 col-sm-12" t-if="state.dashboardData.water_cap_data.show_available_credit">
-                                <div class="card border-0 shadow-sm rounded-3 bg-white h-100 position-relative overflow-hidden" style="border-left: 4px solid #198754 !important;">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="text-muted uppercase fw-semibold mb-0" style="font-size: 0.8rem; letter-spacing: 0.5px;">Net Recovered Water</h6>
-                                            <i class="fa fa-recycle text-success fs-5 opacity-75"></i>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="gm-card gm-card-soft h-100 d-flex justify-content-between">
+                                    <div class="gm-card-info">
+                                        <h6 class="gm-card-title mb-0">Net Recovered Water</h6>
+                                        <div class="gm-value-row d-flex align-items-baseline">
+                                            <span class="gm-value"><t t-esc="state.dashboardData.water_cap_data.recycled_water" /></span>
+                                            <span class="gm-unit"><t t-esc="state.dashboardData.water_cap_data.unit" /></span>
                                         </div>
-                                        <h3 class="fw-bold text-success mb-0">
-                                            <t t-esc="state.dashboardData.water_cap_data.available_credit" />
-                                            <span class="fs-6 text-muted ms-1"><t t-esc="state.dashboardData.water_cap_data.unit" /></span>
-                                        </h3>
                                     </div>
+                                    <span class="gm-icon-badge gm-icon-badge-outline"><i class="fa fa-recycle"></i></span>
                                 </div>
                             </div>
                         </div>
                         <t t-if="state.dashboardData.water_cap_data.used > state.dashboardData.water_cap_data.cap">
-                            <div class="alert alert-danger mb-0 p-2 d-flex align-items-center mt-2 mx-1 shadow-sm rounded-3">
+                            <div class="alert alert-danger mb-0 p-2 d-flex align-items-center mt-3 mx-1 shadow-sm rounded-3">
                                 <i class="fa fa-exclamation-triangle fs-5 me-2"></i>
                                 <strong>Warning:</strong> Water usage exceeds allocated amount!
                             </div>
@@ -218,140 +239,177 @@
                 </div>
 
                 <!-- BREAKDOWN & TARGET ACHIEVEMENT ROW -->
-                <div class="row g-4 mb-4" t-if="state.dashboardData">
-                    <!-- Scope Breakdown (Doughnut) -->
+                <div class="row g-4 mb-3" t-if="state.dashboardData">
+                    <!-- Scope Breakdown (Doughnut — same design as Overall Gas Emissions) -->
                     <div class="col-lg-4 col-md-6">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
-                            <div class="card-header bg-white border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
+                        <div class="card gm-card h-100">
+                            <div class="card-header border-bottom-0 pb-0">
                                 <h5 class="card-title mb-0 fw-bold">Scope Breakdown</h5>
-                                <span class="badge bg-light text-muted fw-bold">t CO2e</span>
                             </div>
-                            <div class="card-body d-flex flex-column justify-content-between">
-                                <div class="chart-container my-3" style="position: relative; height:180px; width:100%">
-                                    <canvas t-ref="scopeChart"></canvas>
-                                </div>
-                                <div class="scope-legend-list d-flex flex-column gap-2 mt-2">
-                                    <t t-foreach="state.dashboardData.scope_breakdown or []" t-as="scope" t-key="scope.id">
-                                        <div class="d-flex align-items-center justify-content-between py-1 border-bottom border-light">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="rounded-circle" t-attf-style="width: 10px; height: 10px; display: inline-block; background-color: {{ scope.color }};"></span>
-                                                <span class="fw-semibold" style="font-size: 0.85rem;"><t t-esc="scope.name"/></span>
-                                            </div>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <span class="text-muted" style="font-size: 0.85rem;"><t t-esc="scope.percentage"/>%</span>
-                                                <span class="fw-bold" style="font-size: 0.85rem;"><t t-esc="scope.value"/> t</span>
-                                            </div>
+                            <div class="card-body">
+                                <t t-if="!isEmptyChart('scope_breakdown')">
+                                    <div class="gm-chart-panel">
+                                        <div class="chart-container" style="position: relative; height:250px; width:100%">
+                                            <canvas t-ref="scopeChart"></canvas>
                                         </div>
-                                    </t>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Overall Gas Emissions (Doughnut) -->
-                    <div class="col-lg-4 col-md-6">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
-                            <div class="card-header bg-white border-bottom-0 pb-0">
-                                <h5 class="card-title mb-0 fw-bold">Overall Gas Emissions</h5>
-                            </div>
-                            <div class="card-body d-flex flex-column justify-content-center">
-                                <div class="chart-container" style="position: relative; height:280px; width:100%">
-                                    <canvas t-ref="gasChart"></canvas>
-                                </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="gm-chart-panel gm-panel-empty d-flex align-items-center justify-content-center">
+                                        <div class="gm-no-data text-center">
+                                            <i class="fa fa-bar-chart fa-2x d-block mb-2"></i>
+                                            No data in that range or scope
+                                        </div>
+                                    </div>
+                                </t>
                             </div>
                         </div>
                     </div>
 
                     <!-- Target vs Actual Achievement (Gauge Chart) -->
                     <div class="col-lg-4 col-md-12">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
-                            <div class="card-header bg-white border-bottom-0 pb-0">
+                        <div class="card gm-card h-100">
+                            <div class="card-header pb-0">
                                 <h5 class="card-title mb-0 fw-bold">Target Achievement Status</h5>
                             </div>
-                            <div class="card-body d-flex flex-column justify-content-between align-items-center">
-                                <div class="chart-container my-3" style="position: relative; height:160px; width:100%">
-                                    <canvas t-ref="targetChart"></canvas>
-                                </div>
-                                
-                                <div class="text-center w-100 pt-2 border-top border-light mt-auto">
-                                    <t t-set="capData" t-value="state.dashboardData.cap_data"/>
-                                    <t t-if="capData.targeted_achievement > 0">
-                                        <div class="d-flex justify-content-around mb-2">
-                                            <div>
-                                                <span class="text-muted font-size-sm">Target Limit</span>
-                                                <h5 class="fw-bold text-info"><t t-esc="capData.targeted_achievement"/> <t t-esc="capData.unit"/></h5>
-                                            </div>
-                                            <div>
-                                                <span class="text-muted font-size-sm">Actual Emission</span>
-                                                <h5 class="fw-bold"><t t-esc="capData.filtered_used"/> <t t-esc="capData.unit"/></h5>
-                                            </div>
-                                        </div>
-                                        <t t-if="capData.filtered_used &lt;= capData.targeted_achievement">
-                                            <div class="badge bg-success-subtle text-success p-2 fs-6 rounded-pill border border-success-subtle w-100">
-                                                <i class="fa fa-trophy me-1"></i> Target Reached
+                            <div class="card-body">
+                                <div class="gm-chart-panel">
+                                    <div class="chart-container" style="position: relative; height:200px; width:100%">
+                                        <canvas t-ref="targetChart"></canvas>
+                                    </div>
+
+                                    <div class="pt-2">
+                                        <t t-set="capData" t-value="state.dashboardData.cap_data"/>
+                                        <t t-if="capData.targeted_achievement > 0">
+                                            <div class="gm-stat-box d-flex align-items-center">
+                                                <div class="gm-stat-col text-center flex-fill">
+                                                    <div class="gm-stat-label">Target Limit</div>
+                                                    <div class="gm-stat-value"><t t-esc="capData.targeted_achievement"/> <span class="gm-stat-unit"><t t-esc="capData.unit"/></span></div>
+                                                </div>
+                                                <div class="gm-stat-divider"></div>
+                                                <div class="gm-stat-col text-center flex-fill">
+                                                    <div class="gm-stat-label">Actual Emission</div>
+                                                    <div class="gm-stat-value"><t t-esc="capData.filtered_used"/> <span class="gm-stat-unit"><t t-esc="capData.unit"/></span></div>
+                                                </div>
                                             </div>
                                         </t>
                                         <t t-else="">
-                                            <div class="badge bg-danger-subtle text-danger p-2 fs-6 rounded-pill border border-danger-subtle w-100">
-                                                <i class="fa fa-exclamation-triangle me-1"></i> Target Exceeded by <t t-esc="Math.round((capData.filtered_used - capData.targeted_achievement)*1000)/1000"/> <t t-esc="capData.unit"/>
+                                            <div class="text-muted py-2 text-center">
+                                                <i class="fa fa-info-circle me-1"></i> Targeted achievement limit is not configured in settings.
                                             </div>
                                         </t>
-                                    </t>
-                                    <t t-else="">
-                                        <div class="text-muted py-2">
-                                            <i class="fa fa-info-circle me-1"></i> Targeted achievement limit is not configured in settings.
-                                        </div>
-                                    </t>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>                    <!-- Overall Gas Emissions (Doughnut) -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card gm-card h-100">
+                            <div class="card-header pb-0">
+                                <h5 class="card-title mb-0 fw-bold">Overall Gas Emissions</h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="!isEmptyChart('gas')">
+                                    <div class="gm-chart-panel">
+                                        <div class="chart-container" style="position: relative; height:250px; width:100%">
+                                            <canvas t-ref="gasChart"></canvas>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="gm-chart-panel gm-panel-empty d-flex align-items-center justify-content-center">
+                                        <div class="gm-no-data text-center">
+                                            <i class="fa fa-area-chart fa-2x d-block mb-2"></i>
+                                            No data in that range or scope
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
                     </div>
+
+
                 </div>
 
                 <!-- MONTHLY TRENDS ROW (5 MONTHS) -->
-                <div class="row g-4 mb-4" t-if="state.dashboardData">
-                    <div class="col-12 px-3">
-                        <h4 class="fw-bold mb-0">Performance Trends</h4>
-                    </div>
-
+                <div class="row g-4 mb-3" t-if="state.dashboardData">
                     <!-- Air Emissions Trend -->
                     <div class="col-lg-4 col-md-6">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
-                            <div class="card-header bg-white border-bottom-0 pb-0">
-                                <h5 class="card-title mb-0 fw-bold">Air Emissions Trend</h5>
+                        <div class="card gm-card h-100">
+                            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0 fw-bold">Air Emission Trend</h5>
+                                <span class="gm-trend-badge"><span class="gm-trend-badge-value"><t t-esc="getTrendTotal('air_trend')"/> t</span><span class="gm-trend-badge-sub">This month</span></span>
                             </div>
                             <div class="card-body">
-                                <div class="chart-container" style="position: relative; height:250px; width:100%">
-                                    <canvas t-ref="airTrendChart"></canvas>
-                                </div>
+                                <t t-if="!isEmptyChart('air_trend')">
+                                    <div class="gm-chart-panel">
+                                        <div class="chart-container" style="position: relative; height:250px; width:100%">
+                                            <canvas t-ref="airTrendChart"></canvas>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="gm-chart-panel gm-panel-empty d-flex align-items-center justify-content-center">
+                                        <div class="gm-no-data text-center">
+                                            <i class="fa fa-line-chart fa-2x d-block mb-2"></i>
+                                            No data in that range or scope
+                                        </div>
+                                    </div>
+                                </t>
                             </div>
                         </div>
                     </div>
 
                     <!-- Water Pollution Trend -->
                     <div class="col-lg-4 col-md-6">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
-                            <div class="card-header bg-white border-bottom-0 pb-0">
+                        <div class="card gm-card h-100">
+                            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0 fw-bold">Water Usage Trend</h5>
+                                <span class="gm-trend-badge"><span class="gm-trend-badge-value"><t t-esc="getTrendTotal('water')"/> <t t-esc="state.dashboardData.water_cap_data.unit"/></span><span class="gm-trend-badge-sub">This month</span></span>
                             </div>
                             <div class="card-body">
-                                <div class="chart-container" style="position: relative; height:250px; width:100%">
-                                    <canvas t-ref="waterChart"></canvas>
-                                </div>
+                                <t t-if="!isEmptyChart('water')">
+                                    <div class="gm-chart-panel">
+                                        <div class="chart-container" style="position: relative; height:250px; width:100%">
+                                            <canvas t-ref="waterChart"></canvas>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="gm-chart-panel gm-panel-empty d-flex align-items-center justify-content-center">
+                                        <div class="gm-no-data text-center">
+                                            <i class="fa fa-line-chart fa-2x d-block mb-2"></i>
+                                            No data in that range or scope
+                                        </div>
+                                    </div>
+                                </t>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Sound Level Trend -->
+                    <!-- Sound Usage Trend -->
                     <div class="col-lg-4 col-md-12">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
-                            <div class="card-header bg-white border-bottom-0 pb-0">
-                                <h5 class="card-title mb-0 fw-bold">Sound Level Trend</h5>
+                        <div class="card gm-card h-100">
+                            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0 fw-bold">Sound Usage Trend</h5>
+                                <span class="gm-trend-badge"><span class="gm-trend-badge-value"><t t-esc="getTrendTotal('sound')"/> dB</span><span class="gm-trend-badge-sub">This month</span></span>
                             </div>
                             <div class="card-body">
-                                <div class="chart-container" style="position: relative; height:250px; width:100%">
-                                    <canvas t-ref="soundChart"></canvas>
-                                </div>
+                                <t t-if="!isEmptyChart('sound')">
+                                    <div class="gm-chart-panel">
+                                        <div class="chart-container" style="position: relative; height:250px; width:100%">
+                                            <canvas t-ref="soundChart"></canvas>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="gm-chart-panel gm-panel-empty d-flex align-items-center justify-content-center">
+                                        <div class="gm-no-data text-center">
+                                            <i class="fa fa-line-chart fa-2x d-block mb-2"></i>
+                                            No data in that range or scope
+                                        </div>
+                                    </div>
+                                </t>
                             </div>
                         </div>
                     </div>
@@ -359,14 +417,14 @@
 
                 <!-- INITIATIVES ROW -->
                 <div class="row g-4" t-if="state.dashboardData and state.dashboardData.show_initiatives">
-                    <div class="col-12 px-3">
-                        <h4 class=" fw-bold mb-0">Sustainability Initiatives &amp; Projects</h4>
+                    <div class="col-12 px-1">
+                        <h4 class="gm-section-title fw-bold mb-0">Sustainability Initiatives &amp; Projects</h4>
                     </div>
 
                     <!-- Green Initiatives Card -->
                     <div class="col-lg-4 col-md-12 mb-4">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
-                            <div class="card-header bg-white border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
+                        <div class="card gm-card h-100">
+                            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0 fw-bold">Green Projects</h5>
                                 <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold" t-if="state.canCreateProject" t-on-click="() => this.createInitiative('green')">
                                     <i class="fa fa-plus me-1"></i>New Task
@@ -397,8 +455,8 @@
 
                     <!-- Water Initiatives Card -->
                     <div class="col-lg-4 col-md-12 mb-4">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
-                            <div class="card-header bg-white border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
+                        <div class="card gm-card h-100">
+                            <div class="card-header pb-0 d-flex justify-content-between align-items-center">
                                 <h5 class="card-title text-dark mb-0 fw-bold">Water Initiatives</h5>
                                 <button class="btn btn-sm btn-info text-white rounded-pill px-3 fw-bold" t-if="state.canCreateProject" t-on-click="() => this.createInitiative('water')">
                                     <i class="fa fa-plus me-1"></i>New Task
@@ -429,7 +487,7 @@
 
                     <!-- Sound Initiatives Card -->
                     <div class="col-lg-4 col-md-12 mb-4">
-                        <div class="card shadow-sm border-0 rounded-3 h-100">
+                        <div class="card gm-card h-100">
                             <div class="card-header bg-white border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0 fw-bold">Sound Initiatives</h5>
                                 <button class="btn btn-sm btn-warning text-white rounded-pill px-3 fw-bold" t-if="state.canCreateProject" t-on-click="() => this.createInitiative('sound')">
@@ -459,7 +517,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
     </t>
 </templates>

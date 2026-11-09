@@ -48,6 +48,11 @@ class TestPlanAllocation(TestCyPlanning):
         plan._compute_name()
         self.assertEqual(plan.name, 'New', msg='Error in _compute_name')
 
+        # Restore
+        plan.employee_id = self.hr_employee
+        plan.allocation_type_id = self.allocation_type
+        plan._compute_name()
+
         _logger.info('Ends test_compute_name')
 
     def test_get_duration(self):
@@ -59,13 +64,18 @@ class TestPlanAllocation(TestCyPlanning):
         self.assertEqual(result, 0)
 
         # No end date
-        plan.start_datetime = '2025-01-01 09:33:43'
+        plan.start_datetime = '2025-01-01 08:00:00'
         plan.end_datetime = False
         result = plan._get_duration(plan.start_datetime, plan.end_datetime)
         self.assertEqual(result, 0)
 
-        # Valid range
-        plan.end_datetime = '2025-01-01 12:33:43'
+        # End date before start date
+        plan.end_datetime = '2025-01-01 07:00:00'
+        result = plan._get_duration(plan.start_datetime, plan.end_datetime)
+        self.assertEqual(result, 0)
+
+        # Valid range within working hours (08:00 to 11:00 UTC = 3 hours)
+        plan.end_datetime = '2025-01-01 11:00:00'
         result = plan._get_duration(plan.start_datetime, plan.end_datetime)
 
         from odoo.fields import Datetime
@@ -74,6 +84,19 @@ class TestPlanAllocation(TestCyPlanning):
 
         expected = round((end - start).total_seconds() / 3600, 2)
         self.assertEqual(result, expected)
+
+        # Range spanning lunch break (11:00 to 12:00 UTC): 3 elapsed hours, 2 working hours
+        result_with_lunch = plan._get_duration(
+            Datetime.to_datetime('2025-01-01 09:33:43'),
+            Datetime.to_datetime('2025-01-01 12:33:43')
+        )
+        self.assertEqual(result_with_lunch, 2.0)
+
+        # Restore
+        plan.start_datetime = '2025-01-01 09:33:43'
+        plan.end_datetime = '2025-01-01 12:33:43'
+
+        _logger.info('Ends test_get_duration')
 
     def test_compute_duration(self):
         plan = self.plan_allocation

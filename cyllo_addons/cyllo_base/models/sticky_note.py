@@ -35,10 +35,38 @@ class StickyNote(models.Model):
     company_id = fields.Many2one(
         'res.company', default=lambda self: self.env.company,
         help="Current Company")
+    is_pinned = fields.Boolean(string="Pinned", default=False)
+    pin_scope = fields.Selection(
+        [('view', 'View'), ('record', 'Record')], string="Pin Scope",
+        help="Whether this note is bound to a general view (e.g. a list "
+             "or dashboard) or to one specific record's form view. Empty "
+             "means the note is not context-bound and is always visible.")
+    pinned_action_key = fields.Char(
+        string="Pinned Action",
+        help="Identifier (action id or client action tag) of the action "
+             "this note is pinned to, used when pin_scope is 'view'")
+    pinned_view_type = fields.Char(
+        string="Pinned View Type",
+        help="View type (list, kanban, dashboard, etc.) this note is "
+             "pinned to, used when pin_scope is 'view'")
+    pinned_res_model = fields.Char(
+        string="Pinned Model",
+        help="Model of the record this note is bound to, used when "
+             "pin_scope is 'record'")
+    pinned_res_id = fields.Integer(
+        string="Pinned Record ID",
+        help="ID of the record this note is bound to, used when "
+             "pin_scope is 'record'")
+    checklist = fields.Text(string="Checklist", help="JSON list of checklist items")
+    drawing = fields.Text(string="Drawing Data", help="Base64 PNG image or canvas drawing data")
+    images = fields.Text(string="Attached Images",
+                          help="JSON list of images attached to the note, "
+                               "each entry as {'name': <filename>, 'data': <base64 data URL>}")
 
     @api.model
     def edit_note(self, args):
         """Edit an existing Sticky Note with the provided arguments"""
         note_id = args['id']
         records = self.env['sticky.note'].browse(note_id)
-        records.write(args)
+        write_vals = {k: v for k, v in args.items() if k != 'id'}
+        records.write(write_vals)

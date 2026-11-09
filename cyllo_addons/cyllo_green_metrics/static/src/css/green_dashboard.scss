@@ -1,9 +1,37 @@
-.o_action_manager {
-    .bg-light {
-        background-color: #f8f9fa !important;
-    }
+// =========================================================================
+// Green (Environment) Metrics dashboard — page & component styles
+// Root class: .cy_gm_page (applied to the dashboard action container)
+// =========================================================================
+
+// ---- Palette ----
+$gm-green: #7c9a1e;
+$gm-green-dark: #68821a;
+$gm-green-pale: #f2f7e8;
+$gm-pill-green-bg: #e7f3d7;
+$gm-pill-green-text: #5c7d15;
+$gm-pill-blue-bg: #e5effc;
+$gm-pill-blue-text: #2f6fdb;
+$gm-pill-danger-bg: #fde5e5;
+$gm-pill-danger-text: #c0392b;
+$gm-ink: #171b26;
+$gm-muted: #6b7280;
+$gm-card-border: #eef0f2;
+
+.cy_gm_page {
+    // ---- Page shell ----
+    font-family: 'Roboto', sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+    padding: 24px;
+    background: #FAFAFA;
+
+    // ---- Generic tweaks (scoped to the dashboard only) ----
     .shadow-sm {
-        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+        box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075) !important;
     }
     .rounded-3 {
         border-radius: .5rem !important;
@@ -15,7 +43,7 @@
     .text-purple {
         color: #6f42c1 !important;
     }
-    
+
     // Custom 5-column grid layout for Bootstrap
     @media (min-width: 992px) {
         .col-lg-2-4 {
@@ -24,7 +52,464 @@
         }
     }
 
-    // Badge styling
+    // ---- Page header -----------------------------------------------------------------------
+    .gm-page-title {
+        font-size: 1.45rem;
+        color: $gm-ink;
+        letter-spacing: -0.2px;
+    }
+    .gm-page-subtitle {
+        color: $gm-muted;
+        font-size: 0.9rem;
+    }
+    .gm-section-title {
+        font-size: 1.05rem;
+        color: $gm-ink;
+    }
+
+    // ---- Filter toolbar (segmented control + scope button) ----
+    .gm-filter-toolbar {
+        gap: 20px;
+    }
+
+    // ---- Filters: segmented period control (363.6 x 34 group, gap 20) ----
+    .gm-segmented {
+        background-color: #fff;
+        border: 1px solid $gm-card-border;
+        border-radius: 8px;
+        padding: 3px !important;
+        height: 34px;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+        .gm-seg-btn {
+            border: 0;
+            background: transparent;
+            color: #374151;
+            font-size: 0.8rem;
+            font-weight: 500;
+            height: 100%;
+            padding: 0 0.85rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            transition: background-color 0.15s ease, color 0.15s ease;
+
+            &:hover {
+                background-color: #f3f4f6;
+                color: #374151;
+            }
+            &.active {
+                background-color: $gm-green;
+                color: #fff;
+                font-weight: 600;
+                box-shadow: 0 1px 2px rgba(124, 154, 30, 0.35);
+            }
+        }
+
+        .gm-more-dropdown {
+            height: 100%;
+        }
+
+        // Chevron sits inside the same white container
+        .gm-seg-chevron {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            color: #6b7280;
+            font-size: 0.75rem;
+            height: 100%;
+            padding: 0 0.55rem;
+            margin-left: 0.25rem;
+            line-height: 1;
+            box-shadow: none;
+
+            &::after {
+                display: none; // hide bootstrap caret
+            }
+            &:hover,
+            &:focus {
+                background-color: #f9fafb;
+                color: #374151;
+            }
+            &.active {
+                border-color: $gm-green;
+                color: $gm-green;
+            }
+        }
+    }
+
+    // ---- Filters: scope button (green, ~128 x 34) ----
+    .gm-scope-btn {
+        background-color: $gm-green;
+        border: 1px solid $gm-green;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 0.82rem;
+        font-weight: 600;
+        height: 34px;
+        padding: 0 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(124, 154, 30, 0.3);
+
+        .gm-scope-caret {
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+        }
+
+        &:hover,
+        &:focus {
+            background-color: $gm-green-dark;
+            border-color: $gm-green-dark;
+            color: #fff;
+        }
+    }
+
+    // ---- Dropdown menus ----------------------------------------------------------------------
+    .gm-dropdown-menu {
+        border-radius: 12px;
+        border: 1px solid $gm-card-border;
+
+        .dropdown-item {
+            font-size: 0.875rem;
+            padding: 0.45rem 0.75rem;
+            border-radius: 8px;
+            color: #374151;
+            cursor: pointer;
+            background-color: transparent;
+            border: 0;
+            width: 100%;
+            text-align: left;
+
+            &:hover {
+                background-color: rgba(124, 154, 30, 0.1);
+            }
+            &.active,
+            &.selected-item {
+                background-color: rgba(124, 154, 30, 0.15);
+                color: $gm-green-dark;
+                font-weight: 600;
+            }
+        }
+    }
+
+    // ---- Scope dropdown (Figma: large rounded panel, rounded-square checkboxes) ----
+    .gm-scope-menu {
+        border: 0;
+        border-radius: 22px;
+        padding: 1px !important;
+        min-width: 270px;
+        box-shadow: 0 14px 34px rgba(23, 27, 38, 0.14);
+
+        .gm-scope-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 11px 12px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: $gm-ink;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #f7f7f5;
+            }
+
+            .form-check-input {
+                width: 24px;
+                height: 24px;
+                flex: 0 0 auto;
+                margin: 0;
+                border: 1.5px solid #d8dadf;
+                border-radius: 7px;
+                background-color: #fff;
+                cursor: pointer;
+
+                &:checked {
+                    background-color: $gm-green;
+                    border-color: $gm-green;
+                }
+                &:focus {
+                    border-color: #d8dadf;
+                    box-shadow: none;
+                }
+            }
+
+            label {
+                color: inherit;
+                font: inherit;
+            }
+        }
+
+        // Square fake checkbox (period dropdown buttons can't use real inputs)
+        .gm-check {
+            width: 24px;
+            height: 24px;
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid #d8dadf;
+            border-radius: 7px;
+            background-color: #fff;
+            color: #fff;
+            font-size: 0.72rem;
+
+            i { display: none; }
+
+            &.checked {
+                background-color: $gm-green;
+                border-color: $gm-green;
+
+                i { display: inline; }
+            }
+        }
+
+        // Reset button rows so they sit flush, full-width and borderless like the reference
+        button.gm-scope-item {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            width: 100%;
+            text-align: left;
+        }
+    }
+
+    // ---- Mobile: segmented control spans full width --------------------------
+    @media (max-width: 767.98px) {
+        .gm-segmented {
+            width: 100%;
+
+            .gm-seg-btn {
+                flex: 1 1 0;
+                padding: 0 0.4rem;
+            }
+            .gm-seg-chevron {
+                flex: 0 0 38px;
+            }
+        }
+    }
+
+    // ---- Dashboard white box wrapper (Figma: radius 12, padding 20, gap 20) ---------------------
+    .gm-box {
+        background-color: #fff;
+        border-radius: 7px;
+        padding: 20px;
+        border: 0.6px solid #eef0f2;
+
+        .row {
+            --bs-gutter-x: 12px;
+            --bs-gutter-y: 12px;
+        }
+    }
+
+    // ---- Tighter spacing between the dashboard card rows ------------------------
+    // The top-level rows use g-3/g-4; pull every gutter down to 12px
+    .row.g-3,
+    .row.g-4 {
+        --bs-gutter-x: 12px;
+        --bs-gutter-y: 12px;
+    }
+
+    // ---- Metric cards (reference: 317 x 104, pad 14, radius 8, border 0.6) ----
+    .gm-card {
+        background-color: #fff;
+        border: 0.6px solid $gm-card-border;
+        border-radius: 12px;
+        box-shadow: none;
+        padding: 14px;
+
+        // LEFT column (title + value + pill), icon vertically centered on the right
+        .gm-card-info {
+            display: flex;
+            flex-direction: column;
+
+            .gm-card-title {
+                margin-bottom: 10px;
+            }
+        }
+
+        &.card {
+            padding: 0;
+            .card-header {
+                background-color: transparent;
+                // No divider under the card title
+                border-bottom: 0;
+            }
+            // The body takes the parent card's color (no Bootstrap bg)
+            .card-body {
+                background-color: transparent !important;
+            }
+        }
+    }
+    // Water section cards: soft warm-gray background, no border (reference style)
+    .gm-card-soft {
+        background-color: #f2f2ee;
+        border-color: transparent;
+    }
+    .gm-card-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $gm-ink;
+        line-height: 1.2;
+        white-space: nowrap;    // keep the name on one line like the reference
+    }
+    // square icon badge (42.97px per reference), top-right
+    .gm-icon-badge {
+        flex: 0 0 auto;
+        width: 43px;
+        height: 43px;
+        border-radius: 10px;
+        background-color: #f3f7ec;
+        color: $gm-green;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+
+        &.gm-icon-badge-blue {
+            background-color: #e5effc;
+            color: #2f6fdb;
+        }
+        &.gm-icon-badge-outline {
+            // water cards: white square with thin border + olive-green glyph (reference style)
+            background-color: #fff;
+            border: 0.6px solid #e2e5e9;
+            color: $gm-green;
+        }
+        &.gm-icon-badge-danger {
+            background-color: $gm-pill-danger-bg;
+            color: $gm-pill-danger-text;
+        }
+    }
+    // --- Chart panels & badges (reference chart style) ---
+    .gm-chart-panel {
+        background-color: #f6f7f3;
+        border-radius: 12px;
+        padding: 16px 12px;
+        height: 100%;
+    }
+    // Empty state: no data for the selected range/scope (white background per reference)
+    .gm-panel-empty {
+        background-color: #fff;
+        border: 0.6px solid $gm-card-border;
+        min-height: 250px;
+    }
+    .gm-no-data {
+        color: $gm-muted;
+        font-size: 0.9rem;
+
+        i {
+            color: #d3d7dd;
+        }
+    }
+    .gm-trend-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background-color: #f3f5cf;
+        border-radius: 8px;
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+
+        .gm-trend-badge-value {
+            color: #4d5a10;
+            font-weight: 700;
+        }
+        .gm-trend-badge-sub {
+            color: #97906b;
+            font-weight: 500;
+            font-size: 0.72rem;
+        }
+    }
+    .gm-stat-box {
+        border: 1px solid #eef0f2;
+        border-radius: 10px;
+        padding: 12px 14px;
+    }
+    .gm-stat-label {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: $gm-muted;
+        margin-bottom: 2px;
+    }
+    .gm-stat-value {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: $gm-green-dark;
+        line-height: 1.2;
+    }
+    .gm-stat-unit {
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: $gm-muted;
+    }
+    .gm-stat-divider {
+        width: 1px;
+        align-self: stretch;
+        background-color: #eef0f2;
+    }
+    .gm-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $gm-ink;
+        line-height: 1;
+    }
+    .gm-unit {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: $gm-muted;
+        margin-left: 0.4rem;
+    }
+    .gm-pill-row {
+        margin-top: 10px;
+    }
+    .gm-pill {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.22rem 0.6rem;
+        border-radius: 6px;
+        line-height: 1.4;
+
+        &.gm-pill-success {
+            background-color: $gm-pill-green-bg;
+            color: $gm-pill-green-text;
+        }
+        &.gm-pill-blue {
+            background-color: $gm-pill-blue-bg;
+            color: $gm-pill-blue-text;
+        }
+        &.gm-pill-danger {
+            background-color: $gm-pill-danger-bg;
+            color: $gm-pill-danger-text;
+        }
+    }
+    .gm-range-inputs .form-control {
+        border-radius: 8px;
+        border-color: #e2e5e9;
+    }
+
+    // Date-range fields shown inside the "More periods" dropdown
+    .gm-range-panel {
+        padding: 8px 12px 6px;
+        margin-top: 2px;
+        border-top: 1px solid #f1f2f4;
+
+        .gm-range-to {
+            color: $gm-muted;
+            font-size: 0.85rem;
+        }
+        input[type="date"] {
+            min-width: 0;
+            width: 118px;
+        }
+    }
+
+    // ---- Badge styling ----
     .bg-success-subtle {
         background-color: #d1e7dd !important;
         color: #0f5132 !important;
@@ -38,39 +523,37 @@
         color: #087990 !important;
     }
 
-    // Legend line styles
+    // ---- Legend line styles ----
     .scope-legend-list {
         .border-bottom {
             border-bottom: 1px solid #f1f2f4 !important;
         }
     }
 
-    // custom-scope-dropdown styling
+    // ---- Scope multi-select dropdown ----
     .custom-scope-dropdown {
-        .btn-white {
-            background-color: #fff;
-            border-color: #dee2e6;
-            &:hover {
-                background-color: #f8f9fa;
-            }
-        }
         .dropdown-item {
             padding: 0.5rem 1rem;
             transition: background-color 0.2s;
             cursor: pointer;
-            
+
             &:hover {
-                background-color: rgba(13, 110, 253, 0.1) !important;
+                background-color: rgba(124, 154, 30, 0.1) !important;
             }
-            
+
             &.selected-item {
-                background-color: rgba(13, 110, 253, 0.2);
+                background-color: rgba(124, 154, 30, 0.18);
                 font-weight: 600;
             }
-            
-            .form-check-input, label {
+
+            .form-check-input,
+            label {
                 cursor: pointer;
             }
+        }
+        .form-check-input:checked {
+            background-color: $gm-green;
+            border-color: $gm-green;
         }
     }
 }

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="cyllo_analytics.PresentationMaker">
-		<div class="cy_presentation cy_presentation_view w-100">
-			<div t-if="!state.warning" class="position-absolute top-0 w-100 d-flex justify-content-between align-items-center p-2 gap-2" style="z-index: 10;">
+		<div class="cy_presentation cy_presentation_view w-100"
+             t-att-class="{ 'cy-has-controls': state.exit and !state.warning }">
+			<div t-if="!state.warning" class="cy-presentation-controls position-absolute top-0 w-100 d-flex justify-content-between align-items-center p-2 gap-2" style="z-index: 10;">
 				<button class="btn btn-secondary cursor-pointer"
                         t-if="state.exit"
                         t-on-click="exitPresentation"
@@ -21,10 +22,78 @@
 						<h2><t t-esc="heading"/></h2>
                         <p><t t-esc="subheading"/></p>
 					</section>
-                    <section t-foreach="chartData.data" t-as="data"
-                             t-key="data_index">
+                    <!-- A saved deck plays the slides it was arranged
+                         into. The quick presentation below plays the
+                         dashboard's charts; only one of the two is
+                         ever populated. -->
+                    <t t-foreach="state.deckSlides" t-as="slide" t-key="slide.id">
+                        <section class="cy-deck-slide">
+                            <div class="cy-deck-heading"
+                                 t-if="slide.heading or slide.subheading"
+                                 t-attf-style="text-align: {{ slide.heading_align or 'left' }};">
+                                <h2 t-if="slide.heading" t-esc="slide.heading"
+                                    t-attf-style="color: {{ slide.heading_color or 'inherit' }};"/>
+                                <p t-if="slide.subheading" t-esc="slide.subheading"
+                                   t-attf-style="color: {{ slide.subheading_color or 'inherit' }};"/>
+                            </div>
+                            <!-- The stage takes whatever height is left under the
+                                 heading; the board inside keeps its fixed 16:9
+                                 shape and is scaled down to fit it. -->
+                            <div class="cy-deck-stage">
+                                <div class="cy-deck-grid">
+                                    <div t-foreach="slide.items" t-as="item"
+                                         t-key="item.id"
+                                         class="cy-deck-box"
+                                         t-att-style="deckItemStyle(item)">
+                                        <t t-if="item.item_type === 'chart' and item.chart">
+                                            <!-- A KPI is a number with a target, not a
+                                                 plottable series: sending it to GraphTile
+                                                 drew an empty axis of "undefined" labels. -->
+                                            <KpiSheetChart t-if="item.chart.type === 'kpi'"
+                                                           query="item.chart"
+                                                           kpi="item.chart.kpi"
+                                                           name="item.chart.name"
+                                                           theme="chartData.themeData"
+                                                           editSheet="true"/>
+                                            <GraphTile t-elif="item.chart.type !== 'table'"
+                                                       value="item.chart"
+                                                       theme="chartData.theme"
+                                                       style="chartData.style"
+                                                       themeColor="chartData.themeData.theme_color_ids"
+                                                       isDarkMode="state.darkMode"
+                                                       toggleClass="'cy_db_presentation_select'"/>
+                                            <Table t-else=""
+                                                   data="item.chart"
+                                                   style="chartData.style"
+                                                   toggleClass="'cy_db_presentation_select'"/>
+                                        </t>
+                                        <img t-elif="item.item_type === 'image'"
+                                             class="cy-deck-image"
+                                             t-attf-style="object-fit: {{ item.image_fit or 'contain' }};"
+                                             t-attf-src="/web/image/dashboard.presentation.item/{{ item.id }}/image"
+                                             alt=""/>
+                                        <div t-else="" class="cy-deck-text"
+                                             t-attf-style="text-align: {{ item.text_align or 'left' }}; color: {{ item.text_color or 'inherit' }};"
+                                             t-out="noteMarkup({note_html: item.html})"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+                    <t t-foreach="chartData.data" t-as="data" t-key="data_index">
+                    <section>
 						<div class="present-main-div">
-							<GraphTile t-if="data.type !== 'table'"
+							<!-- Same reason as the deck slides above: a KPI is a number
+							     against a target, and GraphTile plotted it as a series
+							     with an axis of "undefined" labels. presentationCharts()
+							     already attaches .kpi to these entries. -->
+							<KpiSheetChart t-if="data.type === 'kpi'"
+							               query="data"
+							               kpi="data.kpi"
+							               name="data.name"
+							               theme="chartData.themeData"
+							               editSheet="true"/>
+							<GraphTile t-elif="data.type !== 'table'"
                                        value="data"
                                        theme="chartData.theme"
                                        style="chartData.style"
@@ -37,6 +106,34 @@
                                    toggleClass="'cy_db_presentation_select'"/>
 						</div>
 					</section>
+                    <!-- A chart with a note gets a second slide: the same
+                         chart on the left, the note beside it, the divider
+                         between them draggable. Emitted only when there is a
+                         note, so charts without one present exactly as
+                         before. -->
+                    <section t-if="data.note_html" class="cy-note-slide">
+                        <div class="cy-note-split"
+                             t-attf-style="grid-template-columns: {{ noteRatio(data) }}% 10px 1fr;">
+                            <div class="present-main-div cy-note-chart">
+                                <GraphTile t-if="data.type !== 'table'"
+                                           value="data"
+                                           theme="chartData.theme"
+                                           style="noteChartStyle(data)"
+                                           themeColor="chartData.themeData.theme_color_ids"
+                                           isDarkMode="state.darkMode"
+                                           toggleClass="'cy_db_presentation_select'"/>
+                                <Table t-else=""
+                                       data="data"
+                                       style="noteChartStyle(data)"
+                                       toggleClass="'cy_db_presentation_select'"/>
+                            </div>
+                            <div class="cy-note-divider"
+                                 t-on-pointerdown="(ev) => this.startNoteDrag(ev, data)"
+                                 title="Drag to resize"/>
+                            <div class="cy-note-body" t-out="noteMarkup(data)"/>
+                        </div>
+                    </section>
+                    </t>
                     <section t-if="state.warning">
 						<h2>Attention <img
                                 src="/cyllo_analytics/static/src/img/warning_logo.png"

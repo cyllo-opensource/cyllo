@@ -297,14 +297,39 @@ class CarbonActivity(models.Model):
             
             if scope_filter == 'available':
                 domain.append(('scope_id', '!=', False))
-            elif scope_filter == 'no_scope':
-                domain.append(('scope_id', '=', False))
             elif scope_filter and scope_filter != 'all':
-                try:
-                    scope_id = int(scope_filter)
-                    domain.append(('scope_id', '=', scope_id))
-                except (ValueError, TypeError):
-                    pass
+                # Support multi-select scope filters (comma separated string or list)
+                scope_filters = []
+                if isinstance(scope_filter, list):
+                    scope_filters = scope_filter
+                elif isinstance(scope_filter, str):
+                    scope_filters = scope_filter.split(',')
+
+                scope_ids = []
+                include_no_scope = False
+                for f in scope_filters:
+                    f = (f or '').strip()
+                    if not f or f == 'all':
+                        continue
+                    if f == 'no_scope':
+                        include_no_scope = True
+                    else:
+                        try:
+                            scope_ids.append(int(f))
+                        except (ValueError, TypeError):
+                            pass
+
+                if scope_ids and include_no_scope:
+                    domain.append('|')
+                    domain.append(('scope_id', 'in', scope_ids))
+                    domain.append(('scope_id', '=', False))
+                elif scope_ids:
+                    domain.append(('scope_id', 'in', scope_ids))
+                elif include_no_scope:
+                    domain.append(('scope_id', '=', False))
+                else:
+                    # Nothing selected: no tasks match
+                    domain.append(('id', '=', 0))
 
             tasks_aggr = self.env['project.task'].read_group(domain, ['stage_id', 'reduced_emissions:sum', 'recycled_water:sum'], ['stage_id'])
             for t_grp in tasks_aggr:
@@ -345,6 +370,9 @@ class CarbonActivity(models.Model):
         def get_duration_dates(duration):
             if duration == 'today':
                 return today, today
+            elif duration == 'weekly':
+                start = today - relativedelta(days=today.weekday())
+                return start, start + relativedelta(days=6)
             elif duration == 'monthly':
                 import calendar
                 start = today.replace(day=1)
@@ -378,6 +406,9 @@ class CarbonActivity(models.Model):
         if water_date_filter == 'today':
             start_date = today
             end_date = today
+        elif water_date_filter == 'weekly':
+            start_date = today - relativedelta(days=today.weekday())
+            end_date = start_date + relativedelta(days=6)
         elif water_date_filter == 'monthly':
             import calendar
             start_date = today.replace(day=1)
@@ -739,12 +770,22 @@ class CarbonActivity(models.Model):
         if abs(water_cap_amount - water_used_amount) < 0.0001 and abs(recycled_water) < 0.0001:
             show_water_credit = False
 
+        # Net Recovered Water = sum of the Water Initiatives project tasks'
+        # "Recycled Water" field, computed with the dashboard date + scope filters
+        # (water_stats is built from start_date/end_date/water_scope_filter).
+        recycled_kl_filtered = water_stats['total_recycled_water']
+        if water_unit == 'L':
+            recycled_water_filtered = recycled_kl_filtered * 1000.0
+        else:
+            recycled_water_filtered = recycled_kl_filtered
+
         water_cap_data = {
             'cap': float(water_cap_amount),
             'used': round(float(water_used_amount), 3),
             'duration': water_duration_label,
             'unit': water_unit,
             'available_credit': round(float(water_credit), 3),
+            'recycled_water': round(float(recycled_water_filtered), 3),
             'show_available_credit': show_water_credit
         }
 

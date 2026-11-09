@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="PresentationSelectionMode">
-        <div class="cy_presentation w-100"
+        <div class="cy_presentation cy_presentation_preview w-100"
              t-ref="rootRef"
              t-att-style="isNoData ? 'overflow: hidden;': ''"
              style="position: relative;">
@@ -75,25 +75,28 @@
                                             type="number"
                                             min="3"
                                             name="slideDuration"
-                                            t-model="state.autoSlideTime"/>
+                                            t-att-value="state.autoSlideTime"
+                                            t-on-change="onSlideDurationChange"/>
                                 </div>
                                 <br t-if="state.autoSlide"/>
                                 <div class="form-group mt-1">
-                                    <label class="form-check-label  cy-modal-form_label presentation-label"
-                                            style="color: unset !important;">Title Page</label>
                                     <div id="titlePageDetails"
                                             class="titlePageDetails mt-2">
-                                        <label for="heading">Heading</label>
+                                        <label for="heading"
+                                                title="Heading shown on the title page of the presentation">Heading</label>
                                         <input class="px-1 mt-1 cy-sidebar-input"
                                                 type="text"
                                                 name="heading"
+                                                title="Heading shown on the title page of the presentation"
                                                 t-model="state.heading"
                                                 t-on-blur="addHeading"/>
                                         <label for="subheading"
-                                                class="mt-2">Subheading</label>
+                                                class="mt-2"
+                                                title="Subheading shown below the heading on the title page of the presentation">Subheading</label>
                                         <input class="px-1 mt-1 cy-sidebar-input"
                                                 type="text"
                                                 name="subheading"
+                                                title="Subheading shown below the heading on the title page of the presentation"
                                                 t-model="state.subheading"/>
                                     </div>
                                 </div>
@@ -104,7 +107,7 @@
                 </div>
             </div>
             <t t-set="dataVal"
-               t-value="ChartData.data.filter(item => item.type !== 'kpi').length"/>
+               t-value="ChartData.data.filter(item => item.data.length).length"/>
             <div t-ref="containerRef"
                  t-attf-class="{{dataVal lt 6 ? 'h-100' : ''}}"
                  class="chart-container-div d-flex justify-content-center">
@@ -115,8 +118,19 @@
                                t-as="data"
                                t-key="data_index"
                                t-if="data.data.length">
+                                <div t-if="data.type == 'kpi'"
+                                     t-attf-id="elem_{{ data.id }}"
+                                     class="card cp mr-1 mt-1 cy_tile cy_db_presentation_select"
+                                     t-attf-style="width: {{ style.width }} height: {{ style.height }}"
+                                     t-on-click.prevent.stop="(ev) => this.onClickChart(ev, true, false)">
+                                    <KpiSheetChart query="data"
+                                                   kpi="this.kpiFor(data)"
+                                                   name="data.name"
+                                                   theme="themeState.currentTheme"
+                                                   editSheet="true"/>
+                                </div>
                                 <GraphTile
-                                        t-if="data.type != 'kpi' and data.type != 'table'"
+                                        t-elif="data.type != 'kpi' and data.type != 'table'"
                                         value="data"
                                         theme="themeState.currentTheme"
                                         themeColor="themeState.theme.theme_color_ids"

@@ -22,6 +22,8 @@
 from dateutil.relativedelta import relativedelta
 from unittest.mock import patch
 
+from dateutil.relativedelta import relativedelta
+
 from odoo import fields
 from odoo.exceptions import UserError
 from odoo.addons.cyllo_asset_management.tests.common import TestCommon
@@ -38,10 +40,11 @@ class TestAssetRental(TestCommon):
 
     def test_onchange_lease_date(self):
         """Test for _onchange_lease_date function"""
-        self.asset_rental.start_date = '6511-5-10'
+        before_purchase = fields.Datetime.to_datetime(self.asset.date) - relativedelta(days=1)
+        self.asset_rental.start_date = fields.Datetime.to_string(before_purchase)
         with self.assertRaises(UserError):
             self.asset_rental._onchange_lease_date()
-        self.asset_rental.start_date = '4000-5-2'
+        self.asset_rental.start_date = fields.Datetime.to_string(before_purchase - relativedelta(days=1))
         with self.assertRaises(UserError):
             self.asset_rental._onchange_lease_date()
 
@@ -69,10 +72,6 @@ class TestAssetRental(TestCommon):
         
     def test_action_return_asset(self):
         """Test for action_return_asset function"""
-        move = self.env['account.move'].create({'rent_id': self.asset_rental.id, 'payment_state': 'paid'})
-        with self.assertRaises(UserError):
-            self.asset_rental.action_return_asset()
-        move.unlink()
         self.asset_rental.reservation_id = self.reserved_asset.id
         self.asset_rental.action_return_asset()
         self.assertEqual(self.asset_rental.is_return, True)

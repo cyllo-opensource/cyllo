@@ -65,11 +65,11 @@ class TestAccountMoveFollowUp(TransactionCase):
         self.assertEqual(self.move.next_follow_up_id, self.followup_line)
         self.assertEqual(self.move.last_follow_up_id, self.followup_line)
 
-    def test_many2one_action_calls_partner_method(self):
-        """Test many2one_action delegates to partner.change_followup_action"""
+    def test_action_change_followup_calls_partner_method(self):
+        """Test action_change_followup delegates to partner.change_followup_action"""
         with patch.object(
             type(self.partner),
             'change_followup_action'
         ) as mocked_method:
-            self.move.many2one_action()
+            self.move.action_change_followup()
             mocked_method.assert_called_once_with(self.move)

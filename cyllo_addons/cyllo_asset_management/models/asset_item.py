@@ -160,6 +160,22 @@ class AssetItem(models.Model):
         help='Enable to activate quality check on assets related to this asset item.'
     )
 
+    @api.constrains('method_duration')
+    def _check_method_duration(self):
+        """Function for checking method duration"""
+        if self.method_duration <= 0:
+            raise UserError(_('The Duration period should be greater than 0'))
+
+    @api.onchange('fixed_asset_account_id')
+    def _onchange_fixed_asset_account_id(self):
+        """Function for setting the depreciation account based on fixed asset account"""
+        self.asset_depreciation_account_id=self.fixed_asset_account_id
+
+    @api.onchange('asset_expense_account_id')
+    def _onchange_asset_expense_account_id(self):
+        """Function for setting the loss account based on expense account"""
+        self.asset_loss_account_id=self.asset_expense_account_id
+
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
@@ -177,19 +193,3 @@ class AssetItem(models.Model):
             if module and module.state != 'installed':
                 module.button_immediate_install()
         return res
-
-    @api.constrains('method_duration')
-    def _onchange_method_duration(self):
-        """Function for checking method duration"""
-        if self.method_duration <= 0:
-            raise UserError(_('The Duration period should be greater than 0'))
-
-    @api.onchange('fixed_asset_account_id')
-    def _onchange_fixed_asset_account_id(self):
-        """Function for setting the depreciation account based on fixed asset account"""
-        self.asset_depreciation_account_id=self.fixed_asset_account_id
-
-    @api.onchange('asset_expense_account_id')
-    def _onchange_asset_expense_account_id(self):
-        """Function for setting the loss account based on expense account"""
-        self.asset_loss_account_id=self.asset_expense_account_id

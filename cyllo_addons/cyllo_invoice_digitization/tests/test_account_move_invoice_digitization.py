@@ -140,7 +140,7 @@ class TestAccountMoveInvoiceDigitization(TransactionCase):
         Expected outcomes:
             - Successful runs trigger digitization action.
             - Failures record proper error state.
-            - NO action when automation is disabled or attachment missing.
+            - No action when automation is disabled or attachment is missing.
         """
         config = self.Digitization.create({
             'name': 'Auto Digitization Config',
@@ -155,30 +155,52 @@ class TestAccountMoveInvoiceDigitization(TransactionCase):
             'mimetype': 'application/pdf',
         })
         self.invoice.message_main_attachment_id = attachment.id
-        with patch.object(self.invoice.__class__, 'action_send_digitization', return_value=True) as mock_success:
+
+        def mock_success():
+            self.invoice.ocr_digitize_completed = True
+            self.invoice.ocr_digitize_failed = False
+
+        with patch.object(self.invoice.__class__,'action_send_digitization',side_effect=mock_success) as mock_action:
             self.invoice.process_auto_digitization()
-            mock_success.assert_called_once()
+            mock_action.assert_called_once()
             self.assertTrue(self.invoice.ocr_digitize_completed)
             self.assertFalse(self.invoice.ocr_digitize_failed)
+
         self.invoice.ocr_digitize_completed = False
         self.invoice.ocr_digitize_failed = False
-        with patch.object(self.invoice.__class__, 'action_send_digitization', side_effect=Exception("OCR Failed")) as mock_failure:
+
+        with patch.object(
+                self.invoice.__class__,
+                'action_send_digitization',
+                side_effect=Exception("OCR Failed")
+        ) as mock_action:
             self.invoice.process_auto_digitization()
-            mock_failure.assert_called_once()
+            mock_action.assert_called_once()
             self.assertTrue(self.invoice.ocr_digitize_failed)
             self.assertFalse(self.invoice.ocr_digitize_completed)
+
         self.invoice.ocr_digitize_failed = False
         self.invoice.ocr_digitize_completed = False
+
         config.write({'automation_type': 'not_digitize'})
-        with patch.object(self.invoice.__class__, 'action_send_digitization') as mock_no_call:
+
+        with patch.object(
+                self.invoice.__class__,
+                'action_send_digitization'
+        ) as mock_action:
             self.invoice.process_auto_digitization()
-            mock_no_call.assert_not_called()
+            mock_action.assert_not_called()
             self.assertFalse(self.invoice.ocr_digitize_completed)
+
         config.write({'automation_type': 'auto_digitize'})
         self.invoice.message_main_attachment_id = False
-        with patch.object(self.invoice.__class__, 'action_send_digitization') as mock_no_attachment:
+
+        with patch.object(
+                self.invoice.__class__,
+                'action_send_digitization'
+        ) as mock_action:
             self.invoice.process_auto_digitization()
-            mock_no_attachment.assert_not_called()
+            mock_action.assert_not_called()
             self.assertFalse(self.invoice.ocr_digitize_completed)
 
     def test_action_send_digitization(self):
@@ -233,122 +255,192 @@ class TestAccountMoveInvoiceDigitization(TransactionCase):
             self.assertIn("failed", self.invoice.ocr_digitize_message.lower())
 
     def test_process_digitization_manually(self):
-        """
-        Validate workflow execution for manual digitization including:
-
-            - Partner and field extraction
-            - Product parsing and list processing
-            - Failure and exception behavior
-        """
+        """Test manual digitization with parsed lines, fallback, and exceptions."""
         file_path = "/fake/path.pdf"
         text = "Sample OCR extracted text"
-        with patch.object(self.invoice.__class__, "find_partner") as p1, \
-             patch.object(self.invoice.__class__, "action_find_field_values") as p2, \
-             patch.object(self.invoice.__class__, "_extract_product_info", return_value=[]) as p3:
+
+        partner = self.env['res.partner'].create({
+            'name': 'Test Customer'
+        })
+
+        # Test successful digitization when product lines are parsed.
+        def set_partner(*args, **kwargs):
+            self.invoice.partner_id = partner
+
+        with patch.object(
+                self.invoice.__class__, 'find_partner',
+                side_effect=set_partner
+        ) as mock_partner, patch.object(
+            self.invoice.__class__, 'action_find_field_values'
+        ) as mock_fields, patch.object(
+            self.invoice.__class__,
+            '_extract_lines_from_pdf_text',
+            return_value=[{
+                'name': 'Test Product',
+                'quantity': 2.0,
+                'price_unit': 50.0,
+                'tax': None,
+            }]
+        ) as mock_extract, patch.object(
+            self.invoice.__class__, '_create_invoice_lines_from_parsed'
+        ) as mock_create, patch.object(
+            self.invoice.__class__, '_extract_lines_from_table'
+        ) as mock_fallback:
             self.invoice._process_digitization_manually(file_path, text)
-            p1.assert_called_once()
-            p2.assert_called_once()
-            p3.assert_called_once()
-            self.assertTrue(self.invoice.ocr_digitize_failed)
-        self.invoice.ocr_digitize_failed = False
-        self.invoice.ocr_digitize_completed = False
-        with patch.object(self.invoice.__class__, "find_partner") as p1, \
-             patch.object(self.invoice.__class__, "action_find_field_values") as p2, \
-             patch.object(self.invoice.__class__, "_extract_product_info", return_value=[{"name": "Test Product"}]) as p3, \
-             patch.object(self.invoice.__class__, "_process_product_list") as p4:
-            self.invoice._process_digitization_manually(file_path, text)
-            p1.assert_called_once()
-            p2.assert_called_once()
-            p3.assert_called_once()
-            p4.assert_called_once()
+
+            mock_partner.assert_called_once_with(text)
+            mock_fields.assert_called_once_with(text)
+            mock_extract.assert_called_once_with(file_path)
+            mock_create.assert_called_once()
+            mock_fallback.assert_not_called()
+
             self.assertTrue(self.invoice.ocr_digitize_completed)
-        self.invoice.ocr_digitize_failed = False
+            self.assertFalse(self.invoice.ocr_digitize_failed)
+
+        # Test fallback when no product lines are extracted.
+        self.invoice.partner_id = False
         self.invoice.ocr_digitize_completed = False
-        with patch.object(self.invoice.__class__, "find_partner", side_effect=Exception("boom")):
+        self.invoice.ocr_digitize_failed = False
+
+        with patch.object(
+                self.invoice.__class__, 'find_partner'
+        ), patch.object(
+            self.invoice.__class__, 'action_find_field_values'
+        ), patch.object(
+            self.invoice.__class__,
+            '_extract_lines_from_pdf_text',
+            return_value=[]
+        ), patch.object(
+            self.invoice.__class__, '_extract_lines_from_table'
+        ) as mock_fallback:
             self.invoice._process_digitization_manually(file_path, text)
+
+            mock_fallback.assert_called_once_with(file_path, text)
+
+        # Test exception handling.
+        self.invoice.ocr_digitize_completed = False
+        self.invoice.ocr_digitize_failed = False
+
+        with patch.object(
+                self.invoice.__class__,
+                'find_partner',
+                side_effect=Exception("Test error")
+        ):
+            self.invoice._process_digitization_manually(file_path, text)
+
             self.assertTrue(self.invoice.ocr_digitize_failed)
+            self.assertFalse(self.invoice.ocr_digitize_completed)
 
-    def test_extract_product_info(self):
-        """
-        Validate PDF line parsing and dictionary mapping for product extraction in:
+    def test_extract_lines_from_pdf_text(self):
+        """Test extraction of product lines from PDF text."""
 
-            - No match cases
-            - No-discount patterns
-            - Discount line parsing
-        """
         fake_path = "/fake/path.pdf"
-        mock_no_product = MagicMock()
-        mock_no_product.extract_text.return_value = "Random\nNot a product line"
-        with patch("odoo.addons.cyllo_invoice_digitization.models.account_move.pdfplumber.open") as mock_open:
-            mock_open.return_value.__enter__.return_value.pages = [mock_no_product]
-            result = self.invoice._extract_product_info(fake_path)
-            self.assertEqual(result, [])
 
         mock_page = MagicMock()
         mock_page.extract_text.return_value = (
-            "Item  Qty  Price  Taxes  Total\n"
-            "Milk Powder   2.00 kg   120.00   GST 18%   ₹ 240.00"
+            "Description Quantity Unit Price Discount Tax Amount\n"
+            "Milk Powder 2 120.00 0 18% ₹ 240.00"
         )
-        with patch("odoo.addons.cyllo_invoice_digitization.models.account_move.pdfplumber.open") as mock_open:
+
+        with patch(
+                "odoo.addons.cyllo_invoice_digitization.models.account_move.pdfplumber.open"
+        ) as mock_open:
             mock_open.return_value.__enter__.return_value.pages = [mock_page]
-            result = self.invoice._extract_product_info(fake_path)
+
+            result = self.invoice._extract_lines_from_pdf_text(fake_path)
+
             self.assertEqual(len(result), 1)
-            item = result[0]
-            self.assertEqual(item["product_name"], "Milk Powder")
-        mock_page_disc = MagicMock()
-        mock_page_disc.extract_text.return_value = (
-            "Item  Qty  Price  Disc.%  Taxes  Total\n"
-            "Bread   1.00 pc   50.00   10   GST 5%   ₹ 45.00"
+            self.assertEqual(result[0]['name'], 'Milk Powder')
+            self.assertEqual(result[0]['quantity'], 2.0)
+            self.assertEqual(result[0]['price_unit'], 120.0)
+            self.assertEqual(result[0]['tax'], '18')
+
+        # Test when no product table is available.
+        mock_page.extract_text.return_value = (
+            "Random invoice text\n"
+            "No product information available"
         )
-        with patch("odoo.addons.cyllo_invoice_digitization.models.account_move.pdfplumber.open") as mock_open:
-            mock_open.return_value.__enter__.return_value.pages = [mock_page_disc]
-            result = self.invoice._extract_product_info(fake_path)
-            self.assertEqual(len(result), 1)
 
-    def test_process_product_list(self):
-        """
-        Validate product mapping and account line creation using mock product data.
-        """
-        product_list = [
-            {"product_name": "Milk Powder"},
-            {"product_name": "Bread"},
-        ]
+        with patch(
+                "odoo.addons.cyllo_invoice_digitization.models.account_move.pdfplumber.open"
+        ) as mock_open:
+            mock_open.return_value.__enter__.return_value.pages = [mock_page]
 
-        with patch.object(self.invoice.__class__, "_split_product_name", return_value=("Milk Powder", None)) as mock_split, \
-             patch.object(self.invoice.__class__, "_find_or_create_product", return_value="PRODUCT") as mock_find, \
-             patch.object(self.invoice.__class__, "_create_account_move_line") as mock_line:
-            self.invoice._process_product_list(product_list)
-            self.assertEqual(mock_split.call_count, 2)
-            self.assertEqual(mock_find.call_count, 2)
-            self.assertEqual(mock_line.call_count, 2)
+            result = self.invoice._extract_lines_from_pdf_text(fake_path)
 
-        with patch.object(self.invoice.__class__, "_split_product_name") as m1, \
-             patch.object(self.invoice.__class__, "_find_or_create_product") as m2, \
-             patch.object(self.invoice.__class__, "_create_account_move_line") as m3:
-            self.invoice._process_product_list([])
-            m1.assert_not_called()
-            m2.assert_not_called()
-            m3.assert_not_called()
+            self.assertEqual(result, [])
+
+        # Test PDF reading exception.
+        with patch(
+                "odoo.addons.cyllo_invoice_digitization.models.account_move.pdfplumber.open",
+                side_effect=Exception("PDF reading error")
+        ):
+            result = self.invoice._extract_lines_from_pdf_text(fake_path)
+
+            self.assertEqual(result, [])
+
+    def test_create_invoice_lines_from_parsed(self):
+        """Test invoice line creation from parsed product information."""
+
+        product = self.Product.create({
+            'name': 'Test Product',
+            'default_code': 'TP001',
+        })
+
+        parsed_lines = [{
+            'name': 'Test Product',
+            'quantity': 2.0,
+            'price_unit': 50.0,
+            'tax': None,
+        }]
+
+        with patch.object(
+                self.invoice.__class__,
+                '_find_or_create_product',
+                return_value=product
+        ) as mock_product, patch.object(
+            self.invoice.__class__,
+            '_match_percentage_tax',
+            return_value=self.env['account.tax']
+        ) as mock_tax:
+            self.invoice._create_invoice_lines_from_parsed(parsed_lines)
+
+            mock_product.assert_called_once_with('Test Product', None)
+            mock_tax.assert_called_once_with(None, 'sale')
+
+        invoice_line = self.invoice.invoice_line_ids.filtered(
+            lambda line: line.product_id == product
+        )
+
+        self.assertEqual(len(invoice_line), 1)
+        self.assertEqual(invoice_line.quantity, 2.0)
+        self.assertEqual(invoice_line.price_unit, 50.0)
+
+        # Test that no invoice line is created when the product is not found.
+        previous_count = len(self.invoice.invoice_line_ids)
+
+        with patch.object(
+                self.invoice.__class__,
+                '_find_or_create_product',
+                return_value=self.Product
+        ):
+            self.invoice._create_invoice_lines_from_parsed(parsed_lines)
+
+        self.assertEqual(
+            len(self.invoice.invoice_line_ids),
+            previous_count
+        )
 
     def test_split_product_name(self):
-        """
-        Validate internal reference parsing logic for different product naming formats.
-        """
+        """Test product name and internal reference separation."""
+
         result = self.invoice._split_product_name("[ABC123] Laptop")
         self.assertEqual(result, ("Laptop", "ABC123"))
+
         result = self.invoice._split_product_name("Charger")
         self.assertEqual(result, ("Charger", None))
 
-    def test_get_regex_pattern(self):
-        """
-        Validate regex output format for discount and non-discount scenarios.
-        """
-        pattern_with_discount = self.invoice._get_regex_pattern(True).pattern
-        self.assertIn(r"([\d.]+)?", pattern_with_discount)
-        pattern_without_discount = self.invoice._get_regex_pattern(False).pattern
-        self.assertNotIn(r"([\d.]+)?", pattern_without_discount)
-        self.assertIn(r"[₹\$]", pattern_with_discount)
-        self.assertIn(r"[₹\$]", pattern_without_discount)
+
 
     def test_find_or_create_product(self):
         """
@@ -374,37 +466,6 @@ class TestAccountMoveInvoiceDigitization(TransactionCase):
         result_none = self.invoice._find_or_create_product('Keyboard', 'KB001')
         self.assertFalse(result_none.exists())
 
-    def test_create_account_move_line(self):
-        """
-        Validate account move line creation behavior when product exists or not.
-        """
-
-        product_data = {
-            "product_name": "Test Product",
-            "quantity": "2.00",
-            "unit_price": "50.00",
-            "taxes": ["GST 18%"],
-            "discount": 10.0
-        }
-        product_record = self.Product.create({
-            "name": "Test Product",
-            "default_code": "TP001"
-        })
-        with patch.object(self.invoice.__class__, "_get_tax_ids", return_value=[1, 2]) as mock_tax, \
-                patch("odoo.addons.account.models.account_move_line.AccountMoveLine.create") as mock_create:
-            self.invoice._create_account_move_line(product_data, product_record)
-            mock_tax.assert_called_once_with(product_data["taxes"])
-            mock_create.assert_called_once()
-            created_vals = mock_create.call_args[0][0]
-            self.assertEqual(created_vals["move_id"], self.invoice.id)
-            self.assertEqual(created_vals["product_id"], product_record.id)
-            self.assertEqual(created_vals["quantity"], 2.00)
-            self.assertEqual(created_vals["price_unit"], 50.00)
-            self.assertEqual(created_vals["discount"], 10.0)
-
-        with patch("odoo.addons.account.models.account_move_line.AccountMoveLine.create") as mock_no_create:
-            self.invoice._create_account_move_line(product_data, None)
-            mock_no_create.assert_not_called()
 
     def test_get_tax_ids(self):
         """

@@ -99,7 +99,7 @@ class AssetSellDispose(models.Model):
     )
 
     @api.constrains('date')
-    def _constrains_date(self):
+    def _check_date(self):
         """Function for checking the selling date"""
         for record in self:
             purchase_date = record.asset_asset_id.date

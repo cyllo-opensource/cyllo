@@ -220,10 +220,12 @@ class BudgetLines(models.Model):
                 analytic_accounts.append(self.analytic_account_id.id)
             else:
                 analytic_accounts = [self.analytic_account_id.id]
+            plan_field = self.analytic_account_id.plan_id._column_name()
+
             moves = self.env['account.analytic.line'].search(
                 [('date', '>=', self.start_date),
                  ('date', '<=', self.end_date),
-                 ('account_id', 'in', analytic_accounts)])
+                 (plan_field, 'in', analytic_accounts)])
             if self.account_ids:
                 moves = moves.filtered(lambda
                                            rec: rec.general_account_id.id in self.account_ids.ids)

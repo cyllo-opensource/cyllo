@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="cyllo_analytics.CylloDashboard" owl="1">
-        <t t-if="ui.size > 1">
-            <div t-ref="dashboard" class="scroll" style="width: 100%;">
+        <t t-if="ui.size > 2">
+            <div t-ref="dashboard" class="scroll cy_hide_mobile_screen" style="width: 100%;">
                 <t t-if="state.isPrinting">
                     <div class="cy-print-loading-overlay">
                         <div class="cy-print-loading-card">
@@ -381,6 +381,13 @@
                                                     <i class="ri-edit-circle-line"></i>
                                                     Edit</DropdownItem>
                                                 <DropdownItem
+                                                        t-if="!is_subAction"
+                                                        onSelected.bind="() => this.onEditNote(item)">
+                                                    <i class="ri-sticky-note-line"></i>
+                                                    <t t-if="item.note_html">Edit Note</t>
+                                                    <t t-else="">Add a Note</t>
+                                                </DropdownItem>
+                                                <DropdownItem
                                                         t-if="kpi.redirect"
                                                         onSelected.bind="() => this.openRecord(kpi, item)">
                                                     <i class="ri-arrow-go-forward-line"></i>
@@ -394,7 +401,7 @@
                                                         t-if="!is_subAction"
                                                         onSelected.bind="() => this.onHideSheet(item)">
                                                     <i class="ri-rest-time-line"></i>
-                                                    Hide</DropdownItem>
+                                                    Remove From Dashboard</DropdownItem>
                                                 <DropdownItem
                                                         t-if="!is_subAction"
                                                         onSelected.bind="() => this.onSetAlert(item)">
@@ -438,6 +445,13 @@
                                                      Edit</DropdownItem>
                                                  <DropdownItem
                                                          t-if="!is_subAction"
+                                                         onSelected.bind="() => this.onEditNote(item)">
+                                                    <i class="ri-sticky-note-line"></i>
+                                                    <t t-if="item.note_html">Edit Note</t>
+                                                    <t t-else="">Add a Note</t>
+                                                 </DropdownItem>
+                                                 <DropdownItem
+                                                         t-if="!is_subAction"
                                                          onSelected.bind="() => this.onDeleteSheet(item)">
                                                     <i class="ri-delete-bin-4-line"></i>
                                                      Delete</DropdownItem>
@@ -445,7 +459,7 @@
                                                          t-if="!is_subAction"
                                                          onSelected.bind="() => this.onHideSheet(item)">
                                                     <i class="ri-rest-time-line"></i>
-                                                     Hide</DropdownItem>
+                                                     Remove From Dashboard</DropdownItem>
                                                  <DropdownItem
                                                          t-if="!is_subAction"
                                                          onSelected.bind="() => this.onSetAlert(item)">
@@ -495,6 +509,13 @@
                                                     Edit</DropdownItem>
                                                 <DropdownItem
                                                         t-if="hasAccess and !is_subAction"
+                                                        onSelected.bind="() => this.onEditNote(item)">
+                                                    <i class="ri-sticky-note-line"></i>
+                                                    <t t-if="item.note_html">Edit Note</t>
+                                                    <t t-else="">Add a Note</t>
+                                                </DropdownItem>
+                                                <DropdownItem
+                                                        t-if="hasAccess and !is_subAction"
                                                         onSelected.bind="() => this.onDeleteSheet(item)">
                                                     <i class="ri-delete-bin-4-line"></i>
                                                     Delete</DropdownItem>
@@ -502,7 +523,7 @@
                                                         t-if="hasAccess and !is_subAction"
                                                         onSelected.bind="() => this.onHideSheet(item)">
                                                     <i class="ri-rest-time-line"></i>
-                                                    Hide</DropdownItem>
+                                                    Remove From Dashboard</DropdownItem>
                                                 <DropdownItem
                                                         t-if="hasAccess and !is_subAction"
                                                         onSelected.bind="() => this.onSetAlert(item)">
@@ -538,12 +559,98 @@
             </div>
         </t>
         <t t-else="">
-            <div t-ref="dashboard"
-                 class="d-flex justify-content-center align-items-center">
-                <h3>
-                    The dashboard is not supported in smaller devices yet.
-                </h3>
-            </div>
+            <div t-ref="dashboard" class="cy_hide_mobile_screen"/>
         </t>
+    </t>
+
+    <!-- The note dialog lives here rather than in a file of its own:
+         a new name in the manifest is only read when the server
+         restarts, and this file is already listed. -->
+    <t t-name="cyllo_analytics.NoteDialog" owl="1">
+        <Dialog title="props.sheetName ? props.sheetName + ' — Note' : 'Note'"
+                size="'lg'"
+                contentClass="'cy-note-dialog'">
+            <!-- The wrapper carries resize:both in CSS, so the author can make
+                 the editor as tall as the note needs. -->
+            <!-- Naming the context on the dialog itself: a note only makes
+                 sense against the filters it was written under, and without
+                 this the author cannot tell which one they are editing. -->
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div class="text-muted small cy-note-context">
+                    <i class="fa fa-filter me-1"/><t t-esc="filterSummary"/>
+                    <t t-if="state.savedOn">
+                        &#183; last saved <t t-esc="state.savedOn"/>
+                    </t>
+                </div>
+                <!-- Only when there is something behind it. A link that opens
+                     an empty list is worse than no link. -->
+                <button t-if="state.history.length"
+                        class="btn btn-link btn-sm p-0 text-nowrap cy-note-history-toggle"
+                        t-on-click="toggleHistory">
+                    <i class="fa fa-history me-1"/>
+                    <t t-if="state.showHistory">Hide all notes</t>
+                    <t t-else="">See all notes (<t t-esc="state.history.length"/>)</t>
+                </button>
+            </div>
+            <t t-if="state.showHistory">
+                <div class="cy-note-history mb-2">
+                    <t t-foreach="state.history" t-as="entry" t-key="entry.id">
+                        <div class="cy-note-history-item"
+                             t-att-class="{'cy-note-history-item-current': entry.is_current}">
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div class="small text-muted cy-note-history-context">
+                                    <i class="fa fa-filter me-1"/><t t-esc="entry.filter_summary"/>
+                                    <t t-if="entry.dashboard">
+                                        &#183; <t t-esc="entry.dashboard"/>
+                                    </t>
+                                    <span t-if="entry.is_current"
+                                          class="badge text-bg-secondary ms-1">editing</span>
+                                </div>
+                                <!-- When it was written, top right of the note
+                                     it belongs to, so a reader scanning the
+                                     list runs their eye down one column. -->
+                                <div class="small text-muted text-end text-nowrap cy-note-history-time">
+                                    <div>added <t t-esc="entry.added_on"/></div>
+                                    <div t-if="entry.edited_on">edited <t t-esc="entry.edited_on"/></div>
+                                </div>
+                            </div>
+                            <div class="cy-note-history-body" t-out="entry.markup"/>
+                        </div>
+                    </t>
+                </div>
+            </t>
+            <div class="cy-note-editor-wrap">
+                <!-- Bold, italic, bullets: the whole of what a note needs.
+                     Buttons use mousedown so the click never steals the
+                     selection the command is about to act on. -->
+                <div class="cy-note-toolbar">
+                    <button type="button" title="Bold"
+                            t-on-mousedown.prevent="() => this.format('bold')">
+                        <i class="fa fa-bold"/>
+                    </button>
+                    <button type="button" title="Italic"
+                            t-on-mousedown.prevent="() => this.format('italic')">
+                        <i class="fa fa-italic"/>
+                    </button>
+                    <button type="button" title="Bullet list"
+                            t-on-mousedown.prevent="() => this.format('insertUnorderedList')">
+                        <i class="fa fa-list-ul"/>
+                    </button>
+                </div>
+                <div class="cy-note-editor-content" t-ref="editor"
+                     contenteditable="true" placeholder="Write your note…"/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary"
+                        t-att-disabled="state.saving"
+                        t-on-click="onSave">
+                    <t t-if="state.saving">Saving…</t>
+                    <t t-else="">Save</t>
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => props.close()">
+                    Discard
+                </button>
+            </t>
+        </Dialog>
     </t>
 </templates>

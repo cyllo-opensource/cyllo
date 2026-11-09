@@ -20,6 +20,7 @@
 #
 #############################################################################
 from odoo.tests.common import TransactionCase
+from odoo.tools import mute_logger
 from psycopg2 import IntegrityError
 
 
@@ -90,5 +91,5 @@ class TestIrActionsActWindowView(TransactionCase):
         })
 
         # Copy should FAIL due to unique constraint
-        with self.assertRaises(IntegrityError):
+        with mute_logger('odoo.sql_db'), self.assertRaises(IntegrityError):
             act_view.copy()

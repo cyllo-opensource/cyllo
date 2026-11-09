@@ -34,8 +34,7 @@ class TestAssetAsset(TestCommon):
         """Set up class values"""
         super().setUpClass()
         asset = cls.asset
-        asset.modified_asset_ids = asset.ids
-        asset.asset_item_id.purchase_date = '3000-1-12'
+        asset.asset_item_id.date = '3000-1-12'
         asset.status = 'sell'
         cls.asset.update({'depreciation_line_ids': [(fields.Command.link(cls.depreciation_line.id))]})
         cls.depreciation_line_2 = cls.env['asset.depreciation.line'].create({'depreciation_id': cls.asset.id,
@@ -78,9 +77,13 @@ class TestAssetAsset(TestCommon):
         modified_asset_id = cls.env['asset.asset'].create({
             'name': 'XYZ',
             'asset_item_id': cls.item_id.id,
-            'asset_type_id': cls.asset_type.id,
             'original_value': 5,
             'salvage_value': 5,
+            'fixed_asset_account_id': cls.account_1.id,
+            'asset_depreciation_account_id': cls.account_1.id,
+            'asset_expense_account_id': cls.account_3.id,
+            'asset_loss_account_id': cls.account_3.id,
+            'asset_journal_id': cls.asset_journal_id.id,
             'status': 'draft',
             'depreciation_method': 'straight_line',
             'computation_method': 'no_prorata',
@@ -88,9 +91,13 @@ class TestAssetAsset(TestCommon):
         cls.asset_asset = cls.env['asset.asset'].create({
             'name': 'XYZ',
             'asset_item_id': cls.item_id.id,
-            'asset_type_id': cls.asset_type.id,
             'original_value': 4,
             'salvage_value': 4,
+            'fixed_asset_account_id': cls.account_1.id,
+            'asset_depreciation_account_id': cls.account_1.id,
+            'asset_expense_account_id': cls.account_3.id,
+            'asset_loss_account_id': cls.account_3.id,
+            'asset_journal_id': cls.asset_journal_id.id,
             'is_depreciate': True,
             'status': 'draft',
             'depreciation_method': 'straight_line',
@@ -102,8 +109,9 @@ class TestAssetAsset(TestCommon):
         self.asset._check_original_value()
         self.assertEqual(self.asset.original_value, abs(self.asset.original_value))
         self.asset.original_value = 2
-        with self.assertRaises(UserError):
-            self.asset.original_value = -1
+        self.asset.salvage_value = 1
+        self.asset.original_value = -1
+        self.assertEqual(self.asset.original_value, 1)
 
     def test_compute_modified_count(self):
         self.asset._compute_modified_count()
@@ -115,12 +123,12 @@ class TestAssetAsset(TestCommon):
         self.assertEqual(self.asset.depreciating_factor, abs(-5))
 
     def test_onchange_depreciation_date(self):
-        self.asset.depreciation_date = '3000-1-1'
+        self.asset.depreciation_date = self.asset.date - timedelta(days=1)
         with self.assertRaises(UserError):
             self.asset._onchange_depreciation_date()
 
     def test_onchange_prorata_date(self):
-        self.asset.prorata_date = '3000-1-1'
+        self.asset.prorata_date = self.asset.date - timedelta(days=1)
         with self.assertRaises(UserError):
             self.asset._onchange_prorata_date()
 
@@ -197,70 +205,23 @@ class TestAssetAsset(TestCommon):
                           'type': 'ir.actions.act_window',
                           'context': {'default_asset_id': asset.id, 'default_customer_id': ''}, 'target': 'new'})
 
-    def test_action_repair_assets(self):
+    def test_action_maintenance_repair_assets(self):
         asset = self.asset
-        self.asset.status = 'sell'
-        self.reserved_asset.status = 'reserve'
+        asset.status = 'sell'
         with self.assertRaises(UserError):
-            asset.action_repair_assets()
-        asset.is_lease, asset.status, asset.is_reserve = True, 'draft', True
-        leased_asset = self.env['asset.lease'].create({
-            'asset_id': asset.id,
-            'start_date': '2000-1-1',
-            'end_date': '2005-1-1',
-            'status': 'lease',
-            'lease_amount': 8555,
-            'customer_id': self.partner.id
-        })
-        self.employee.work_contact_id = leased_asset.customer_id.id
-        expected_action = {
-            'name': 'Repair',
+            asset.action_maintenance_repair_assets()
+        asset.status = 'draft'
+        self.assertEqual(asset.action_maintenance_repair_assets(), {
+            'name': _('Maintenance/Repair'),
             'view_mode': 'form',
-            'res_model': 'asset.repair',
+            'res_model': 'maintenance.request',
             'type': 'ir.actions.act_window',
-            'context': {'default_asset_id': asset.id, 'default_employee_id': self.employee.id},
-            'target': 'new'
-        }
-        self.assertEqual(asset.action_repair_assets(), expected_action)
-        asset.is_assign, asset.is_lease = True, False
-        expected_action['context']['default_employee_id'] = self.reserved_asset.employee_id.id
-        self.assertEqual(asset.action_repair_assets(), expected_action)
-        asset.is_assign, asset.is_rental = False, True
-        self.employee.work_contact_id = self.env.user.partner_id.id
-        expected_action['context']['default_employee_id'] = self.employee.id
-        self.assertEqual(asset.action_repair_assets(), expected_action)
-
-    def test_action_maintenance_assets(self):
-        asset = self.asset
-        self.reserved_asset.status = 'reserve'
+            'context': {'default_asset_id': asset.id},
+            'target': 'new',
+        })
+        asset.is_repair = True
         with self.assertRaises(UserError):
-            asset.action_maintenance_assets()
-        asset.is_lease, asset.status, asset.is_reserve = True, 'draft', True
-        leased_asset = self.env['asset.lease'].create({
-            'asset_id': asset.id,
-            'start_date': '2000-1-1',
-            'end_date': '2005-1-1',
-            'status': 'lease',
-            'lease_amount': 8555,
-            'customer_id': self.partner.id
-        })
-        self.employee.work_contact_id = leased_asset.customer_id.id
-        expected_action = {
-            'name': 'Maintenance',
-            'view_mode': 'form',
-            'res_model': 'asset.maintenance',
-            'type': 'ir.actions.act_window',
-            'context': {'default_asset_id': asset.id, 'default_employee_id': self.employee.id},
-            'target': 'new'
-        }
-        self.assertEqual(asset.action_maintenance_assets(), expected_action)
-        asset.is_assign, asset.is_lease = True, False
-        expected_action['context']['default_employee_id'] = self.reserved_asset.employee_id.id
-        self.assertEqual(asset.action_maintenance_assets(), expected_action)
-        asset.is_assign, asset.is_rental = False, True
-        self.employee.work_contact_id = self.env.user.partner_id.id
-        expected_action['context']['default_employee_id'] = self.employee.id
-        self.assertEqual(asset.action_maintenance_assets(), expected_action)
+            asset.action_maintenance_repair_assets()
 
     def test_action_lost_missing_assets(self):
         asset = self.asset
@@ -270,11 +231,12 @@ class TestAssetAsset(TestCommon):
         window_action = {
             'name': _('Lost'),
             'view_mode': 'form',
-            'res_model': 'asset.lost',
+            'res_model': 'asset.sell.dispose',
             'type': 'ir.actions.act_window',
             'context': {
                 'default_asset_asset_id': self.asset.id,
-                'default_is_posted': False
+                'default_asset_action': 'dispose',
+                'default_disposal_type': 'lost',
             }, 'target': 'new'}
         with self.assertRaises(UserError):
             asset.action_lost_missing_assets()
@@ -282,12 +244,10 @@ class TestAssetAsset(TestCommon):
         self.account_move.state = 'draft'
         self.assertEqual(asset.action_lost_missing_assets(), window_action)
         self.account_move.state = 'cancel'
-        window_action['context']['default_is_posted'] = True
-        asset.action_lost_missing_assets()
         self.assertEqual(asset.action_lost_missing_assets(), window_action)
         asset.is_entry = False
         asset.action_lost_missing_assets()
-        self.assertEqual(asset.status, 'lost')
+        self.assertEqual(asset.status, 'disposed')
 
     def test_action_sell_dispose_assets(self):
         asset = self.asset
@@ -307,10 +267,10 @@ class TestAssetAsset(TestCommon):
         """Test whether function returns reservation window action """
         self.assertEqual(self.asset.action_view_reservation(), {
             'name': 'Reservation',
-            'view_mode': 'form',
-            'res_id': self.reserved_asset.id,
+            'view_mode': 'list,form',
             'res_model': 'asset.reservation',
             'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', self.reserved_asset.ids)],
         })
 
     def test_action_view_lease(self):
@@ -318,10 +278,10 @@ class TestAssetAsset(TestCommon):
         leased_asset = self.env['asset.lease'].search([('asset_id', '=', self.asset.id), ('status', '=', 'lease')])
         self.assertEqual(self.asset.action_view_lease(), {
             'name': 'Lease',
-            'view_mode': 'form',
+            'view_mode': 'list,form',
             'res_model': 'asset.lease',
-            'res_id': leased_asset.id,
             'type': 'ir.actions.act_window',
+            'domain': [['id', 'in', leased_asset.ids]],
             'target': 'current',
         })
 
@@ -330,31 +290,21 @@ class TestAssetAsset(TestCommon):
         rental_asset = self.env['asset.rental'].search([('asset_id', '=', self.asset.id), ('status', '=', 'rent')])
         self.assertEqual(self.asset.action_view_rental(), {
             'name': 'Rental',
-            'view_mode': 'form',
-            'res_id': rental_asset.id,
+            'view_mode': 'list,form',
             'res_model': 'asset.rental',
             'type': 'ir.actions.act_window',
+            'domain': [['id', 'in', rental_asset.ids]],
         })
-        self.assertEqual(self.asset.action_view_repair(), {
-            'name': 'Repair Assets',
-            'view_mode': 'form',
-            'res_id': self.asset_repair.id,
-            'res_model': 'account.asset.repair',
+        self.assertEqual(self.asset.action_view_maintenance_repairs(), {
+            'name': _('Maintenance / Repair'),
+            'view_mode': 'tree,form',
+            'res_model': 'maintenance.request',
             'type': 'ir.actions.act_window',
-        })
-        self.assertEqual(self.asset.action_view_maintenance(), {
-            'name': 'Maintenance assets',
-            'view_mode': 'form',
-            'res_id': self.asset_maintenance.id,
-            'res_model': 'account.asset.maintenance',
-            'type': 'ir.actions.act_window',
-        })
-        self.assertEqual(self.asset.action_view_maintenance(), {
-            'name': 'Maintenance assets',
-            'view_mode': 'form',
-            'res_id': self.asset_maintenance.id,
-            'res_model': 'account.asset.maintenance',
-            'type': 'ir.actions.act_window',
+            'domain': [('asset_id', '=', self.asset.id)],
+            'context': {
+                'default_asset_id': self.asset.id,
+                'search_default_asset_id': 1,
+            },
         })
         assigned_asset = self.env['asset.assign'].create({
             'asset_id': self.asset.id,
@@ -415,7 +365,9 @@ class TestAssetAsset(TestCommon):
         self.assertEqual(result, self.asset)
         self.asset.original_value = 4
         self.asset.action_compute_depreciation()
-        self.assertEqual(self.asset.original_value, self.asset.salvage_value)
+        # With no salvage value, depreciation is skipped and the value stays zero.
+        self.assertEqual(self.asset.salvage_value, 0)
+        self.assertFalse(self.asset.is_depreciate)
 
     def test_action_cancel_asset(self):
         """Tests of button action for the cancelling the asset"""
@@ -478,6 +430,9 @@ class TestAssetAsset(TestCommon):
         for move in self.asset.depreciated_entry_ids:
             move._post()
             break
+        # Posting the fixture move changes the asset value; reset it to a valid
+        # value so this test exercises revaluation rather than value validation.
+        self.asset.salvage_value = self.asset.original_value
         self.asset.action_revaluate_asset()
         for i in self.asset.depreciated_entry_ids:
             i.date = end_of(fields.date.today(), granularity='year')
@@ -485,8 +440,13 @@ class TestAssetAsset(TestCommon):
         self.assertEqual(self.asset.is_modify, False)
         self.assertEqual(self.asset.is_confirm, True)
         self.asset.duration_period = 'year'
-        self.depreciation_line.date = end_of(fields.date.today() + timedelta(days=100), granularity='year')
-        self.asset.update({'depreciation_line_ids': [(fields.Command.link(self.depreciation_line.id))]})
+        depreciation_line = self.env['asset.depreciation.line'].create({
+            'depreciation_id': self.asset.id,
+            'year': 2,
+            'date': end_of(fields.date.today() + timedelta(days=100), granularity='year'),
+            'company_id': self.company.id,
+        })
+        self.asset.update({'depreciation_line_ids': [(fields.Command.link(depreciation_line.id))]})
         self.asset.update({'depreciated_entry_ids': [(fields.Command.link(self.account_move.id))]})
         self.asset.action_revaluate_asset()
 

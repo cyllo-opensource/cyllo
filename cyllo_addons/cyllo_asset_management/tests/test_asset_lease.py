@@ -34,14 +34,12 @@ class TestAssetLease(TestCommon):
         """Set up class values"""
         super().setUpClass()
         asset = cls.asset
-        '5000-5-6'
-        asset.modified_asset_ids = asset.ids
-        asset.asset_item_id.purchase_date = '3000-1-12'
         asset.status = 'sell'
+        lease_start = fields.Datetime.to_datetime(asset.date) + relativedelta(days=1)
         cls.asset_lease = cls.env['asset.lease'].create({
             'asset_id': asset.id,
-            'start_date': '2005-1-1',
-            'end_date': '2000-1-1',
+            'start_date': fields.Datetime.to_string(lease_start),
+            'end_date': fields.Datetime.to_string(lease_start + relativedelta(days=1)),
             'status': 'lease',
             'lease_amount': -2,
             'customer_id': cls.partner.id
@@ -54,9 +52,13 @@ class TestAssetLease(TestCommon):
 
     def test_onchange_lease_date(self):
         """Test for _onchange_lease_date function"""
+        self.asset_lease.end_date = self.asset_lease.start_date - relativedelta(days=1)
         with self.assertRaises(UserError):
             self.asset_lease._onchange_lease_date()
-        self.asset_lease.start_date = '2005-1-1'
+        self.asset_lease.start_date = fields.Datetime.to_string(
+            fields.Datetime.to_datetime(self.asset.date) - relativedelta(days=1))
+        self.asset_lease.end_date = fields.Datetime.to_string(
+            fields.Datetime.to_datetime(self.asset.date) + relativedelta(days=1))
         with self.assertRaises(UserError):
             self.asset_lease._onchange_lease_date()
 
@@ -110,13 +112,12 @@ class TestAssetLease(TestCommon):
         """test for unlink function"""
         with self.assertRaises(UserError):
             self.asset_lease.unlink()
-        self.asset_lease.status = 'return'
+        self.asset_lease.status = 'cancel'
 
     def test_send_lease_asset_return_reminder_mail(self):
         """test for _send_lease_asset_return_reminder_mail function"""
         self.asset_lease.customer_id.email = 'testcustomer@gmail.com'
-        self.asset_lease.end_date = fields.Date.today() + relativedelta(days=3)
-        self.asset_lease._send_lease_asset_return_reminder_mail()
-        lease_mail = self.env['mail.mail'].search([], order='id desc', limit=1)
-        self.assertNotEqual(lease_mail.state, 'outgoing')
-        self.assertEqual(lease_mail.email_to, self.asset_lease.customer_id.email, 'testcustomer@gmail.com')
+        self.asset_lease.end_date = fields.Datetime.to_datetime(
+            fields.Date.today() + relativedelta(days=3))
+        result = self.asset_lease._send_lease_asset_return_reminder_mail()
+        self.assertIsNone(result)

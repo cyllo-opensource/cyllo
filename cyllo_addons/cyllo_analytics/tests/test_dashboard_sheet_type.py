@@ -20,6 +20,7 @@
 #
 #############################################################################
 from odoo.tests.common import TransactionCase
+from odoo.tools import mute_logger
 
 
 class TestDashboardSheetType(TransactionCase):
@@ -46,7 +47,7 @@ class TestDashboardSheetType(TransactionCase):
     # TEST 02: Required field ttype
     # ---------------------------------------------------------
     def test_02_ttype_required(self):
-        with self.assertRaises(Exception):
+        with mute_logger('odoo.sql_db'), self.assertRaises(Exception):
             self.DashboardSheetType.create({
                 "name": "Invalid Type",
             })

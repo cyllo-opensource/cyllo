@@ -55,8 +55,8 @@ class PurchaseOrder(models.Model):
         if not create_so:
             return res
 
-        if self._is_intercompany_purchase():
-            for po in self:
+        for po in self:
+            if po._is_intercompany_purchase():
 
                 receipts = po.picking_ids.filtered(
                     lambda p: p.picking_type_code == 'incoming'
@@ -71,6 +71,7 @@ class PurchaseOrder(models.Model):
                         move.write({
                             'intercompany_original_qty': move.product_uom_qty,
                             'quantity': 0.0,
+                            'state': 'confirmed',
                         })
                 if po.intercompany_generated or po.intercompany_sale_order_id:
                     continue

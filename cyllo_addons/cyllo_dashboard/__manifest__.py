@@ -42,6 +42,7 @@
         'security/ir.model.access.csv',
         'views/login_user_detail_views.xml',
         'views/change_password_own_views.xml',
+        'views/weather_settings_wizard_views.xml',
         'views/res_users_views.xml',
         'views/shortcut_menu_views.xml',
         'views/cyllo_dashboard_menus.xml',

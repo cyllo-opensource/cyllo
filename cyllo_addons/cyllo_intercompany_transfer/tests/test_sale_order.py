@@ -19,38 +19,77 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo.tests import common
 
-class TestSaleOrder(common.TransactionCase):
-    def setUp(self):
-        super(TestSaleOrder, self).setUp()
-        self.company_a = self.env.user.company_id
-        self.company_b = self.env['res.company'].create({
-            'name': 'Company B',
-        })
-        self.partner_b = self.company_b.partner_id
-        
-        self.product = self.env['product.product'].create({
-            'name': 'Test Product',
-            'type': 'product',
-        })
-        
+from odoo.tests import tagged
 
-        self.env['ir.config_parameter'].sudo().set_param('cyllo_intercompany_transfer.create_purchase_orders', True)
+from .common import IntercompanyCommon
 
-    def test_intercompany_sale(self):
-        """Test intercompany SO confirmation"""
-        so = self.env['sale.order'].create({
-            'partner_id': self.partner_b.id,
-            'order_line': [(0, 0, {
-                'product_id': self.product.id,
-                'product_uom_qty': 5,
-                'price_unit': 200,
-            })]
-        })
-        
+
+@tagged('post_install', '-at_install')
+class TestSaleOrder(IntercompanyCommon):
+
+    def test_confirm_creates_intercompany_purchase_order(self):
+        self._set_params(create_purchase_orders=True)
+        so = self._create_so(self.partner_b, qty=5, price=200)
         so.action_confirm()
-        
-        self.assertTrue(so.intercompany_purchase_order_id)
-        self.assertEqual(so.intercompany_purchase_order_id.company_id.id, self.company_b.id)
-        self.assertEqual(so.intercompany_purchase_order_id.intercompany_sale_order_id.id, so.id)
+
+        po = so.intercompany_purchase_order_id
+        self.assertTrue(po)
+        self.assertEqual(po.company_id, self.company_b)
+        self.assertEqual(po.partner_id, self.partner_a)
+        self.assertEqual(po.origin, so.name)
+        self.assertTrue(po.intercompany_generated)
+        self.assertEqual(po.intercompany_sale_order_id, so)
+
+    def test_purchase_order_lines_mirror_sale_lines(self):
+        self._set_params(create_purchase_orders=True)
+        so = self._create_so(self.partner_b, qty=7, price=123.0)
+        so.action_confirm()
+        line = so.intercompany_purchase_order_id.order_line
+        self.assertEqual(len(line), 1)
+        self.assertEqual(line.product_id, self.storable)
+        self.assertEqual(line.product_qty, 7)
+        self.assertEqual(line.price_unit, 123.0)
+
+    def test_setting_disabled_creates_nothing(self):
+        self._set_params(create_purchase_orders=False)
+        so = self._create_so(self.partner_b)
+        so.action_confirm()
+        self.assertFalse(so.intercompany_purchase_order_id)
+
+    def test_non_intercompany_customer_creates_nothing(self):
+        self._set_params(create_purchase_orders=True)
+        so = self._create_so(self.external_partner)
+        so.action_confirm()
+        self.assertFalse(so.intercompany_purchase_order_id)
+
+    def test_generated_sale_order_is_skipped(self):
+        self._set_params(create_purchase_orders=True)
+        so = self._create_so(self.partner_b)
+        so.intercompany_generated = True
+        so.action_confirm()
+        self.assertFalse(so.intercompany_purchase_order_id)
+
+    def test_no_duplicate_purchase_order(self):
+        self._set_params(create_purchase_orders=True)
+        so = self._create_so(self.partner_b)
+        so.action_confirm()
+        po = so.intercompany_purchase_order_id
+        so.state = 'draft'
+        so.action_confirm()
+        self.assertEqual(so.intercompany_purchase_order_id, po)
+        count = self.env['purchase.order'].sudo().search_count([
+            ('origin', '=', so.name), ('company_id', '=', self.company_b.id)])
+        self.assertEqual(count, 1)
+
+    def test_create_returns_false_without_company_partner(self):
+        so = self._create_so(self.external_partner)
+        self.assertFalse(so._create_intercompany_purchase_order())
+
+    def test_links_not_copied(self):
+        self._set_params(create_purchase_orders=True)
+        so = self._create_so(self.partner_b)
+        so.action_confirm()
+        copy = so.copy()
+        self.assertFalse(copy.intercompany_purchase_order_id)
+        self.assertFalse(copy.intercompany_generated)

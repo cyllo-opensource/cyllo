@@ -2,42 +2,228 @@
 <template xml:space="preserve">
     <!-- Create sticky note template from systray-->
     <t t-name="StickyNotesItem" owl="1">
-        <div class="sticky" id="sticky_note"
-             t-att-style="'position: relative;padding: 25px; border-radius: 10px; min-height: 160px; word-wrap: break-word; background-color: ' + this.state.edit_color">
+        <div class="sticky d-flex flex-column"
+             draggable="false"
+             t-on-dragstart.prevent="() => {}"
+             t-att-class="(props.is_pinned ? 'is_pinned ' : '') + (props.pin_scope ? 'is_context_pinned ' : '') + (!props.is_edit ? 'note-draggable' : '')"
+             t-att-data-note-id="props.id"
+             t-att-style="'position: relative; padding: 28px 15px 10px 15px; border-radius: 10px; min-height: ' + (props.is_edit ? '260px' : '90px') + '; height: auto !important; word-wrap: break-word; background-color: ' + this.state.edit_color">
+            <!-- Inline Delete Confirmation Overlay -->
+            <div t-if="this.state.confirmDelete"
+                 class="d-flex flex-column align-items-center justify-content-center p-3 text-center"
+                 style="position: absolute; inset: 0; background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); border-radius: 10px; z-index: 20; border: 2px solid #9ea600; box-shadow: 0 4px 14px rgba(158, 166, 0, 0.25);">
+                <div style="font-size: 13.5px; font-weight: 700; color: #111; margin-bottom: 10px; text-shadow: 0 1px 3px rgba(255, 255, 255, 0.95);">
+                    Delete this note?
+                </div>
+                <div class="d-flex justify-content-center" style="gap: 8px;">
+                    <button class="btn btn-sm btn-secondary" style="font-size: 12px; padding: 4px 12px;" t-on-click.stop="_cancelDelete" type="button">
+                        Cancel
+                    </button>
+                    <button class="btn btn-sm" style="background-color: #9ea600; color: #ffffff; font-size: 12px; padding: 4px 12px; font-weight: 600; border: none;" t-on-click.stop="() => this._confirmDelete(props.id)" type="button">
+                        Delete
+                    </button>
+                </div>
+            </div>
             <div class="note-date"
                  style="position: absolute; top: 8px; left: 10px; cursor: pointer;">
-                <p style="float: right;padding-top:3px;">
-                    <span t-esc="props.create_date"/>
-                </p>
+                <span class="note-date-text" t-esc="this._formatDate(props.create_date)"/>
             </div>
-            <div t-if="props.show_remove" class="o_remove"
-                 t-on-click="() => this._remove(props.id)"
-                 style="position: absolute; top: 8px; right: 10px; cursor: pointer;">
-                <i class="fa fa-times"/>
+            <!-- Return to Panel (x icon) – Floating notes ONLY -->
+            <div t-if="props.is_floating and !props.is_edit" class="o_redock_icon"
+                 t-on-click.stop="() => this._redock(props.id)"
+                 title="Return to panel"
+                 style="position: absolute; top: 8px; right: 10px; cursor: pointer; opacity: 0.75;">
+                <i class="fa fa-times" style="font-size: 13.5px;"/>
+            </div>
+
+            <!-- Delete Trash Icon – Both panel and floating notes -->
+            <div t-if="props.show_remove and !props.is_edit" class="o_remove"
+                 t-on-click.stop="() => this._remove(props.id)"
+                 title="Delete Note"
+                 t-att-style="'position: absolute; top: 8px; right: ' + (props.is_floating ? '30px' : '10px') + '; cursor: pointer; opacity: 0.75;'">
+                <i class="fa fa-trash-o" style="font-size: 13.5px;"/>
+            </div>
+
+            <!-- Pin to View/Record Icon – binds the note to the current screen: the exact
+                 record if a saved record's form is open, otherwise the current view.
+                 Uses a map-marker (location-style pin) rather than the thumb-tack below
+                 so it's not confused with "pin to top of list", which is a different,
+                 unrelated kind of pin. -->
+            <div t-if="!props.is_edit" class="o_pin_view"
+                 t-on-click.stop="() => this._togglePinContext(props.id)"
+                 t-att-title="props.pin_scope === 'record' ? 'Pinned to this record — click to unpin' : (props.pin_scope === 'view' ? 'Pinned to this view — click to unpin' : 'Pin to this view or record')"
+                 style="position: absolute; top: 8px; right: 50px; cursor: pointer;">
+                <i class="fa fa-map-marker" t-att-style="props.pin_scope ? 'color: #9ea600;' : 'opacity: 0.5;'" />
+            </div>
+
+            <!-- Pin Icon – Panel notes ONLY (hidden on floating notes): pins the note
+                 to the top of the notes list, unrelated to the view/record pin above -->
+            <div t-if="!props.is_floating and (props.show_remove || props.is_pinned) and !props.is_edit" class="o_pin"
+                 t-on-click.stop="() => this._pin(props.id)"
+                 t-att-title="props.is_pinned ? 'Pinned to top — click to unpin' : 'Pin to top of list'"
+                 style="position: absolute; top: 8px; right: 30px; cursor: pointer;">
+                <i class="fa fa-thumb-tack" t-att-style="props.is_pinned ? 'color: #9ea600;' : 'opacity: 0.6; transform: rotate(-45deg);'" />
             </div>
             <div t-if="props.is_edit" class="o_cancel_edit"
                  t-on-click="() => this._cancel_edit(props.id)"
                  style="position: absolute; top: 8px; right: 10px; cursor: pointer;">
-                <i class="fa fa-times-circle"
-                   style="color: red; font-size: 18px;"/>
+                <i class="fa fa-times"/>
             </div>
-            <h2 class="note-heading mt-3">
+
+            <!-- Title -->
+            <h2 t-if="props.is_edit" class="note-heading mt-1 mb-2">
                 <input type="text" t-ref="titleRef"
                        t-att-value="this.state.title"
                        t-on-input="(ev) => this.state.title = ev.target.value"
-                       t-att-readonly="props.is_edit ? null : 'readonly'"
+                       placeholder="Title"
                        class="form-control"
-                       t-att-style="'background-color: ' + this.state.edit_color + ';border: ' + (props.is_edit ? '1px solid #fff' : 'none') + ';'"/>
+                       t-att-style="'background-color: ' + this.state.edit_color + '; border: 1px solid #fff;'"/>
             </h2>
-            <p class="note-description">
-                <textarea t-ref="descRef" class="form-control"
-                          t-att-readonly="props.is_edit ? null : 'readonly'"
-                          t-att-style="'background-color: ' + this.state.edit_color + ';border: ' + (props.is_edit ? '1px solid #fff' : 'none') + ';'">
-                    <t t-esc="props.description"/>
-                </textarea>
-            </p>
+            <h2 t-elif="props.title and props.title.trim() !== ''"
+                class="note-heading mt-1 mb-2"
+                style="font-size: 15px; font-weight: 700; word-break: break-word; line-height: 1.3;">
+                <t t-esc="props.title"/>
+            </h2>
+
+            <div class="note-description flex-grow-1">
+                <!-- Drawing preview / view section (read-only — only editable in edit mode) -->
+                <div t-if="!props.is_edit and (props.drawing or this.state.drawing)"
+                     class="note-drawing-view mb-2"
+                     style="background: #ffffff; border-radius: 6px; padding: 4px; border: 1px dashed rgba(0,0,0,0.12);">
+                    <img t-att-src="props.drawing || this.state.drawing"
+                         style="width: 100%; max-height: 180px; object-fit: contain; border-radius: 4px; display: block; cursor: pointer;"
+                         t-on-click="openDrawingViewer"
+                         title="Click to view"/>
+                </div>
+
+                <!-- Drawing edit section (only shown in edit mode) -->
+                <div t-if="props.is_edit and this.state.drawing"
+                     class="note-drawing-edit mb-2 position-relative"
+                     style="background: #ffffff; border-radius: 6px; padding: 4px; border: 1px dashed rgba(0,0,0,0.15);">
+                    <img t-att-src="this.state.drawing"
+                         style="width: 100%; max-height: 180px; object-fit: contain; border-radius: 4px; cursor: pointer; display: block;"
+                         t-on-click="openDrawingDialog"
+                         title="Click to edit drawing"/>
+                    <button class="btn-close position-absolute"
+                            style="top: 6px; right: 6px; width: 18px; height: 18px; font-size: 9px; opacity: 0.65;"
+                            t-on-click="removeDrawing" type="button" aria-label="Remove drawing"/>
+                </div>
+                <div t-if="props.is_edit and !this.state.drawing" class="mb-2">
+                    <div t-on-click="openDrawingDialog"
+                         class="note-add-drawing-btn"
+                         style="display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 10px 12px; border: 1.5px dashed rgba(0,0,0,0.18); border-radius: 8px; background: rgba(255,255,255,0.55); cursor: pointer; transition: background 0.15s, border-color 0.15s; user-select: none;"
+                         onmouseenter="this.style.background='rgba(255,255,255,0.85)'; this.style.borderColor='rgba(124,123,173,0.55)';"
+                         onmouseleave="this.style.background='rgba(255,255,255,0.55)'; this.style.borderColor='rgba(0,0,0,0.18)';">
+                        <i class="fa fa-paint-brush" style="font-size: 13px; color: #7c7bad; opacity: 0.85;"/>
+                        <span style="font-size: 12.5px; font-weight: 500; color: #555; letter-spacing: 0.01em;">Add a drawing</span>
+                    </div>
+                </div>
+
+                <!-- Attached images: VIEW mode (read-only gallery, click to open lightbox) -->
+                <div t-if="!props.is_edit and this.state.images.length"
+                     class="note-images-grid mb-2 d-flex flex-wrap" style="gap: 6px;">
+                    <t t-foreach="this.state.images" t-as="img" t-key="img_index">
+                        <div class="note-image-thumb" style="width: 52px; height: 52px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(0,0,0,0.12); cursor: pointer;">
+                            <img t-att-src="img.data" t-on-click="() => this.openImageViewer(img_index)"
+                                 style="width: 100%; height: 100%; object-fit: cover; display: block;"/>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Attached images: EDIT mode (add / remove) -->
+                <div t-if="props.is_edit and this.state.images.length"
+                     class="note-images-grid mb-2 d-flex flex-wrap" style="gap: 6px;">
+                    <t t-foreach="this.state.images" t-as="img" t-key="img_index">
+                        <div class="note-image-thumb position-relative" style="width: 56px; height: 56px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(0,0,0,0.15); cursor: pointer;">
+                            <img t-att-src="img.data" t-on-click="() => this.openImageViewer(img_index)"
+                                 style="width: 100%; height: 100%; object-fit: cover; display: block;"/>
+                            <button class="btn-close position-absolute"
+                                    style="top: 1px; right: 1px; width: 15px; height: 15px; font-size: 6px; background-color: rgba(255,255,255,0.85); border-radius: 50%; padding: 0;"
+                                    t-on-click.stop="() => this.removeImage(img_index)" type="button" aria-label="Remove image"/>
+                        </div>
+                    </t>
+                </div>
+                <div t-if="props.is_edit" class="mb-2">
+                    <div t-on-click="triggerImagePicker"
+                         class="note-add-image-btn"
+                         style="display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; padding: 10px 12px; border: 1.5px dashed rgba(0,0,0,0.18); border-radius: 8px; background: rgba(255,255,255,0.55); cursor: pointer; transition: background 0.15s, border-color 0.15s; user-select: none;"
+                         onmouseenter="this.style.background='rgba(255,255,255,0.85)'; this.style.borderColor='rgba(124,123,173,0.55)';"
+                         onmouseleave="this.style.background='rgba(255,255,255,0.55)'; this.style.borderColor='rgba(0,0,0,0.18)';">
+                        <i class="fa fa-image" style="font-size: 13px; color: #7c7bad; opacity: 0.85;"/>
+                        <span style="font-size: 12.5px; font-weight: 500; color: #555; letter-spacing: 0.01em;">Add images</span>
+                    </div>
+                    <input type="file" t-ref="imageInputRef" accept="image/*" multiple="multiple"
+                           style="display: none;" t-on-change="onImagesSelected"/>
+                </div>
+
+                <!-- Textarea (hidden if checklist mode) -->
+                <t t-if="!this.state.showChecklist">
+                    <textarea t-if="props.is_edit" t-ref="descRef" class="form-control"
+                              placeholder="Write your note here..."
+                              rows="3"
+                              style="resize: none;"
+                              t-att-style="'background-color: ' + this.state.edit_color + '; border: 1px solid #fff; width: 100%;'">
+                        <t t-esc="props.description"/>
+                    </textarea>
+                    <div t-elif="props.description and props.description.trim() !== ''"
+                         style="white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.4; color: inherit;">
+                        <t t-esc="props.description"/>
+                    </div>
+                </t>
+
+                <!-- Checklist: VIEW mode (read-only interactive checkboxes) -->
+                <div t-if="!props.is_edit and this.state.checklistItems.length > 0"
+                     class="note-checklist-view" style="margin-top: 4px;">
+                    <t t-foreach="this.state.checklistItems" t-as="item" t-key="item_index">
+                        <div class="d-flex align-items-center" style="gap: 8px; margin-bottom: 5px;">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   t-att-checked="item.done"
+                                   t-on-change="(ev) => this._viewToggleCheck(item_index, ev.target.checked)"/>
+                            <span t-att-style="'font-size:13px; cursor:pointer; flex-grow: 1; word-break: break-word; ' + (item.done ? 'text-decoration:line-through;opacity:0.55;' : '')"
+                                  t-on-click="() => this._viewToggleCheck(item_index, !item.done)"
+                                  t-esc="item.text"/>
+                        </div>
+                    </t>
+                    <!-- Progress bar -->
+                    <div style="margin-top: 8px; background: rgba(0,0,0,0.1); border-radius: 4px; height: 4px; overflow: hidden;">
+                        <div t-att-style="'height:4px;border-radius:4px;background:#9ea600;width:' + this._checklistProgress() + '%;transition:width 0.3s ease;'"/>
+                    </div>
+                </div>
+
+                <!-- Checklist: EDIT mode (editable items) -->
+                <div t-if="props.is_edit and this.state.showChecklist"
+                     class="note-checklist-section" style="margin-top: 4px;">
+                    <t t-foreach="this.state.checklistItems" t-as="item" t-key="item_index">
+                        <div class="checklist-item-row d-flex align-items-center" style="gap: 8px; margin-bottom: 5px;">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   t-att-checked="item.done"
+                                   t-on-change="(ev) => this._toggleCheckItem(item_index, ev.target.checked)"/>
+                            <input type="text"
+                                   class="checklist-input"
+                                   t-att-value="item.text"
+                                   t-on-input="(ev) => this._updateCheckItem(item_index, ev.target.value)"
+                                   t-on-keydown="(ev) => this._checklistKeydown(ev, item_index)"
+                                   placeholder="List item..."
+                                   t-att-style="item.done ? 'text-decoration:line-through;opacity:0.55;' : ''"/>
+                            <span class="checklist-remove-btn"
+                                  t-on-click="() => this._removeCheckItem(item_index)"
+                                  title="Delete item">
+                                <i class="fa fa-times"/>
+                            </span>
+                        </div>
+                    </t>
+                    <div class="checklist-add-btn" t-on-click="_addCheckItem">
+                        <i class="fa fa-plus me-1" style="font-size: 10px;"/> Add item
+                    </div>
+                </div>
+            </div>
+
+            <!-- Color palette (edit mode only) -->
             <div t-if="props.is_edit" t-ref="colorRef"
-                 class="d-flex p-3 text-white color_pallets">
+                 class="d-flex p-2 text-white color_pallets mt-auto"
+                 style="margin-top: 15px; margin-bottom: 8px;">
                 <div class="p-2 o_pallet_block" role="button"
                      style="background-color: #fddcb4;"
                      t-on-click="(ev) => this.click_pallet(ev)"/>
@@ -60,22 +246,40 @@
                      style="background-color: #bc7bf5;"
                      t-on-click="(ev) => this.click_pallet(ev)"/>
             </div>
-            <div style="display:flex;margin-top:40px;">
-                <div t-if="!props.is_edit"
-                     class="o_edit border bg-white sticky"
+
+            <!-- Save / Cancel buttons in edit mode -->
+            <div t-if="props.is_edit" class="note-save-update d-flex"
+                 style="margin-bottom: 4px;">
+                <button class="btn btn-secondary btn-save"
+                        t-on-click="() => this._cancel_edit(props.id)" type="button">Cancel</button>
+                <button class="btn btn-primary btn-save" type="button"
+                        data-update="0" t-on-click="() => this._item_save(props.id)">Save</button>
+            </div>
+
+            <!-- Bottom action bar (view mode only) -->
+            <div t-if="!props.is_edit" class="d-flex justify-content-end mt-auto" style="padding-top: 6px;">
+                <div class="o_edit border bg-white sticky"
                      t-on-click="() => this._item_edit(props.id)"
-                     style="width:35px;height:35px;position: absolute; bottom: 10px; right: 0px; cursor: pointer;padding:5px;border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                     style="width:35px;height:35px;cursor: pointer;padding:5px;border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0;">
                     <i class="ri-pencil-line"
-                       t-att-style="'font-weight: bold;color:red;font-size:15px;color: ' + this.state.edit_color + ';'"/>
-                </div>
-                <div t-else="" class="o_edit border bg-white sticky"
-                     t-on-click="() => this._item_save(props.id)"
-                     style="width:35px;height:35px;position: absolute; bottom: 10px; right: 0px; cursor: pointer;padding:5px;border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                    <i class="fa fa-cloud-upload fa-fw"
-                       t-att-style="'font-weight: bold;color:red;font-size:15px;color: #080808;'"/>
+                       t-att-style="'font-weight: bold;font-size:15px;color: ' + this.state.edit_color + ';'"/>
                 </div>
             </div>
+
+            <StickyNoteDrawingDialog t-if="this.state.showDrawingDialog"
+                                     drawing="this.state.drawing || props.drawing"
+                                     onSave="onSaveDrawing"
+                                     close="closeDrawingDialog"/>
+
+            <StickyNoteImageViewer t-if="this.state.showImageViewer"
+                                    images="this.state.images"
+                                    startIndex="this.state.viewerIndex"
+                                    close="closeImageViewer"/>
+
+            <StickyNoteImageViewer t-if="this.state.showDrawingViewer"
+                                    images="[{name: 'Drawing', data: props.drawing || this.state.drawing}]"
+                                    startIndex="0"
+                                    close="closeDrawingViewer"/>
         </div>
-        <br/>
     </t>
 </template>

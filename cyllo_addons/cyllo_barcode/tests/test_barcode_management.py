@@ -179,3 +179,59 @@ class TestBarcodeManagement(TransactionCase):
         self.BarcodeManagement._handle_barcode_scan(self.picking, "SN001", self.product_serial)
         with self.assertRaises(UserError):
              self.BarcodeManagement._handle_barcode_scan(self.picking, "SN001", self.product_serial)
+
+    def test_add_stock_location_internal(self):
+        """
+        Test that scanning locations on an internal transfer sets the source
+        first and then the destination of the scanned line.
+        """
+        picking_type_internal = self.PickingType.with_context(active_test=False).search(
+            [('code', '=', 'internal')], limit=1)
+        picking_type_internal.active = True
+        picking = self.StockPicking.create({
+            'picking_type_id': picking_type_internal.id,
+            'location_id': self.location_1.id,
+            'location_dest_id': self.location_1.id,
+        })
+        self.BarcodeManagement.add_stock_move_line(
+            picking_id=picking.id,
+            res_model='product.product',
+            data=[{'id': self.product_no_tracking.id}],
+            barcode='1234567890'
+        )
+        # The scanned location arrives as the list returned by ``read()``.
+        self.BarcodeManagement.add_stock_location(
+            picking_id=picking.id,
+            picking_type='internal',
+            data=[{'id': self.location_1.id}],
+            res_model='stock.location'
+        )
+        line = picking.move_line_ids.filtered('is_barcode_scanned')
+        self.assertEqual(line.location_id, self.location_1)
+        self.assertTrue(line.had_location_by_barcode)
+        self.assertFalse(line.had_location_by_barcode_dest)
+        self.BarcodeManagement.add_stock_location(
+            picking_id=picking.id,
+            picking_type='internal',
+            data=[{'id': self.location_2.id}],
+            res_model='stock.location'
+        )
+        self.assertEqual(line.location_dest_id, self.location_2)
+        self.assertTrue(line.had_location_by_barcode_dest)
+
+    def test_assign_lot_number_duplicate_serial(self):
+        """
+        Test that the same serial number cannot be assigned to two lines of
+        the same transfer.
+        """
+        self.BarcodeManagement._handle_barcode_scan(self.picking, "", self.product_serial)
+        self.BarcodeManagement._handle_barcode_scan(self.picking, "", self.product_serial)
+        serial = self.env['stock.lot'].create({
+            'name': 'SN-DUP',
+            'product_id': self.product_serial.id,
+        })
+        self.BarcodeManagement.assign_lot_number(self.picking, serial, self.product_serial.id)
+        with self.assertRaises(UserError):
+            self.BarcodeManagement.assign_lot_number(self.picking, serial, self.product_serial.id)
+        lines = self.picking.move_line_ids.filtered(lambda l: l.lot_id == serial)
+        self.assertEqual(len(lines), 1)

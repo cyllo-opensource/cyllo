@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import Command, api, models
+from odoo import Command, _, api, models
 from odoo.exceptions import UserError
 
 
@@ -207,7 +207,7 @@ class BarcodeManagement(models.AbstractModel):
                         line_ids_with_same_barcode.quantity = 1
                         line_ids_with_same_barcode.is_barcode_scanned = True
                     else:
-                        raise UserError("There appear to have too many product with the same serial number")
+                        raise UserError(_("There appear to have too many product with the same serial number"))
                 else:
                     move_id = move_ids[-1]  # assumes the last line as the default move
                     self._create_move_line(product, picking_id, move_id, barcode)
@@ -348,15 +348,17 @@ class BarcodeManagement(models.AbstractModel):
                 lambda l: not l.had_location_by_barcode or not l.had_location_by_barcode_dest)
 
             if not move_line_ids_without_location:
-                raise UserError("Please scan a product or serial number first.")
+                raise UserError(_("Please scan a product or serial number first."))
 
+            # The scanned location arrives as the list returned by ``read()``.
+            location_id = (data[0] if isinstance(data, (list, tuple)) else data).get('id')
             for line in move_line_ids_without_location:
                 if not line.had_location_by_barcode:
-                    line.location_id = data['id']
+                    line.location_id = location_id
                     line.had_location_by_barcode = True
                     break
                 elif not line.had_location_by_barcode_dest:
-                    line.location_dest_id = data['id']
+                    line.location_dest_id = location_id
                     line.had_location_by_barcode_dest = True
                     break
 
@@ -380,6 +382,13 @@ class BarcodeManagement(models.AbstractModel):
         move_ids_without_package = picking_id.move_ids_without_package.filtered(lambda p: p.product_id.id == product_id)
         line_ids = move_ids_without_package.mapped("move_line_ids").filtered(
             lambda l: l.is_barcode_scanned and not l.lot_id)
+        if line_ids and lot_id.product_id.tracking == 'serial':
+            # A serial number can be used only once in the transfer.
+            used_lines = move_ids_without_package.mapped("move_line_ids").filtered(
+                lambda l: l.lot_id == lot_id and l.quantity)
+            if used_lines:
+                raise UserError(_("The serial number %s has already been scanned in this transfer.",
+                                  lot_id.name))
         if line_ids:
             line_id = line_ids[-1]
             line_id.write({
@@ -423,14 +432,14 @@ class BarcodeManagement(models.AbstractModel):
                 lot_id = self.create_lot(barcode, product_id)
         elif picking_type_id.use_create_lots and not picking_type_id.use_existing_lots:
             if existing_lots:
-                raise UserError("Existing Serial/lots cannot be assigned.")
+                raise UserError(_("Existing Serial/lots cannot be assigned."))
             else:
                 lot_id = self.create_lot(barcode, product_id)
         elif not picking_type_id.use_create_lots and picking_type_id.use_existing_lots:
             if not existing_lots:
-                raise UserError("New Serial/lots cannot be assigned.")
+                raise UserError(_("New Serial/lots cannot be assigned."))
         else:
-            raise UserError("Please enable Use Create Lots or use existing lots before assigning Barcodes.")
+            raise UserError(_("Please enable Use Create Lots or use existing lots before assigning Barcodes."))
         if lot_id:
             self.assign_lot_number(picking_id, lot_id, product_id)
 
@@ -481,11 +490,11 @@ class BarcodeManagement(models.AbstractModel):
         elif picking_id.picking_type_id.code == "outgoing":
             line_ids = line_ids
         if line_ids.filtered(lambda l: l.result_package_id.id == data.get('id')):
-            raise UserError("Can't Reuse the package.")
+            raise UserError(_("Can't Reuse the package."))
         else:
             line_ids = line_ids.filtered(lambda l: not l.result_package_id)
             if not line_ids:
-                raise UserError("Please Scan at least one new product before scanning package.")
+                raise UserError(_("Please Scan at least one new product before scanning package."))
             else:
                 for line in line_ids:
                     line.result_package_id = data.get("id")

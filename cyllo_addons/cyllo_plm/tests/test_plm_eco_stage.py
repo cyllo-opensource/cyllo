@@ -30,6 +30,7 @@ class TestPlmEcoStage(TransactionCase):
     def setUpClass(cls):
         """Clean up any existing stages created by XML data to ensure a clean test state"""
         super().setUpClass()
+        cls.env['plm.eco'].search([]).unlink()
         cls.env['plm.eco.stage'].search([]).unlink()
 
         cls.stage_draft = cls.env['plm.eco.stage'].create({

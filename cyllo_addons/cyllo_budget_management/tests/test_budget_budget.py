@@ -106,49 +106,51 @@ class TestBudgetBudget(TestBudgetManagement):
             self.budget09._check_start_date()
 
     def test_onchange_end_date(self):
-        # end date changes where period_type = 'month'
+        """Test onchange behavior when the budget end date changes."""
+
+        # End date changes where period_type = 'month'
         self.budget03.period_type = 'month'
         self.budget03.end_date = fields.Date.today()
         self.budget03._onchange_end_date()
-        self.assertEqual(self.budget03.start_date,
-                         self.budget03.end_date - timedelta(
-                             calendar.monthrange(self.budget03.end_date.year,
-                                                 self.budget03.end_date.month)[
-                                 1] - 1))
-        # end date changes where period_type = 'day'
+
+        end_date_month = calendar.monthrange(self.budget03.end_date.year,self.budget03.end_date.month)[1]
+
+        if self.budget03.end_date.day < end_date_month:
+            end_date_previous_month = (self.budget03.end_date.replace(day=1) - timedelta(1)).month
+            expected_start_date = self.budget03.end_date - timedelta(
+                calendar.monthrange(self.budget03.end_date.year,end_date_previous_month)[1] - 1)
+        else:
+            expected_start_date = self.budget03.end_date - timedelta(end_date_month - 1)
+
+        self.assertEqual(self.budget03.start_date, expected_start_date)
+        # End date changes where period_type = 'day'
         self.budget01.period_type = 'day'
         self.budget01.end_date = fields.Date.today()
         self.budget01._onchange_end_date()
-        self.assertEqual(self.budget01.start_date, self.budget01.end_date)
-        # end date changes where period_type = 'false'
+        self.assertEqual(self.budget01.start_date,self.budget01.end_date)
+
+        # End date changes where period_type = False
         self.budget01.period_type = False
         self.budget01.end_date = fields.Date.today()
         self.budget01._onchange_end_date()
-        self.assertEqual(self.budget01.start_date, self.budget01.end_date)
-        # end date changes where period_type = 'week'
+        self.assertEqual(self.budget01.start_date,self.budget01.end_date)
+        # End date changes where period_type = 'week'
         self.budget01.period_type = 'week'
         self.budget01.end_date = fields.Date.today()
         self.budget01._onchange_end_date()
-        self.assertEqual(self.budget01.start_date,
-                         self.budget01.end_date - timedelta(6))
-        # end date changes where period_type = 'month'
+        self.assertEqual(self.budget01.start_date,self.budget01.end_date - timedelta(6))
+        # End date changes where period_type = 'month'
         self.budget03.period_type = 'month'
         self.budget03.end_date = fields.Date.today()
         self.budget03._onchange_end_date()
-        end_date_month = timedelta(
-            calendar.monthrange(self.budget03.end_date.year,
-                                self.budget03.end_date.month)[1])
-        if timedelta(self.budget03.end_date.day) < end_date_month:
-            end_date_previous_month = (
-                        self.budget03.end_date.replace(day=1) - timedelta(
-                    1)).month
+        end_date_month = calendar.monthrange(self.budget03.end_date.year,self.budget03.end_date.month)[1]
+        if self.budget03.end_date.day < end_date_month:
+            end_date_previous_month = (self.budget03.end_date.replace(day=1) - timedelta(1)).month
+
             expected_start_date = self.budget03.end_date - timedelta(
-                calendar.monthrange(self.budget03.end_date.year,
-                                    end_date_previous_month)[1] - 1)
+                calendar.monthrange(self.budget03.end_date.year,end_date_previous_month)[1] - 1)
         else:
-            expected_start_date = self.budget03.end_date - timedelta(
-                calendar.monthrange(self.budget03.end_date.year,
-                                    self.budget03.end_date.month)[1] - 1)
+            expected_start_date = self.budget03.end_date - timedelta(end_date_month - 1)
         self.assertEqual(self.budget03.start_date, expected_start_date)
 
     def test_onchange_start_date(self):

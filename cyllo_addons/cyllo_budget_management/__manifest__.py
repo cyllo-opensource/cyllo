@@ -51,6 +51,10 @@
         'views/debt_management.xml',
         'views/budget_management_menu.xml',
     ],
+    'demo': [
+        'demo/budget_budget_demo.xml',
+        'demo/debt_management_demo.xml',
+    ],
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,

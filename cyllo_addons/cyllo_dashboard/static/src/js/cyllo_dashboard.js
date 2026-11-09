@@ -67,7 +67,7 @@ export class UserDashboard extends Component {
             loginUserTotal: 0,
             userProfile: {},
             weatherDetails: {},
-
+            weatherSetup: false,
             activities: [],
             activityTypeCounts: [],
             performanceInsights: {},
@@ -386,6 +386,7 @@ export class UserDashboard extends Component {
                     fetchedAt: Date.now(),
                 };
                 this.state.weatherDetails = details;
+                this.state.weatherSetup = false;
                 try {
                     localStorage.setItem(
                         WEATHER_CACHE_KEY + ":" + session.uid,
@@ -394,10 +395,39 @@ export class UserDashboard extends Component {
                 } catch (e) {
 
                 }
+            } else {
+                this.clearWeatherDetails();
             }
         }).catch(() => {
-
+            this.clearWeatherDetails();
         });
+    }
+
+    clearWeatherDetails() {
+        this.state.weatherDetails = {};
+        try {
+            localStorage.removeItem(WEATHER_CACHE_KEY + ":" + session.uid);
+        } catch (e) {}
+        this.state.weatherSetup = true;
+    }
+
+    async onWeatherSetupClick() {
+        const viewId = await this.orm.call(
+            'weather.setup.wizard', 'get_wizard_form_view_id', []);
+        await this.action.doAction({
+            name: "Weather Settings",
+            type: 'ir.actions.act_window',
+            res_model: 'weather.setup.wizard',
+            views: [[viewId, 'form']],
+            target: 'new',
+        }, { onClose: () => this.renderWeatherNotification() });
+    }
+
+    onWeatherSetupKeydown(ev) {
+        if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            this.onWeatherSetupClick();
+        }
     }
 
     get weatherKpiIcon() {

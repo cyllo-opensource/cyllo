@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="demo_budget_management_plan" model="account.analytic.plan">
+        <field name="name">Demo Budget Plan</field>
+    </record>
+
+    <record id="demo_budget_management_analytic_account" model="account.analytic.account">
+        <field name="name">Office Operations</field>
+        <field name="plan_id" ref="demo_budget_management_plan"/>
+        <field name="company_id" ref    ="base.main_company"/>
+    </record>
+
+    <record id="demo_budget_management_monthly" model="budget.budget">
+        <field name="name">Demo Monthly Operating Budget</field>
+        <field name="period_type">month</field>
+        <field name="start_date" eval="DateTime.now().strftime('%Y-%m-01')"/>
+        <field name="end_date" eval="(DateTime.now() + relativedelta(day=31)).strftime('%Y-%m-%d')"/>
+        <field name="success_rate">0.8</field>
+        <field name="responsible_id" ref="base.user_admin"/>
+        <field name="budget_line_ids" eval="[Command.create({
+            'display_name': 'Office operations spending',
+            'analytic_account_id': ref('demo_budget_management_analytic_account'),
+            'budget_type': 'spend',
+            'start_date': DateTime.now().strftime('%Y-%m-01'),
+            'end_date': (DateTime.now() + relativedelta(day=31)).strftime('%Y-%m-%d'),
+            'planned_amount': -5000.0,
+        })]"/>
+    </record>
+
+    <record id="demo_budget_management_annual" model="budget.budget">
+        <field name="name">Demo Annual Facilities Budget</field>
+        <field name="period_type">year</field>
+        <field name="start_date" eval="DateTime.now().strftime('%Y-01-01')"/>
+        <field name="end_date" eval="(DateTime.now() + relativedelta(month=12, day=31)).strftime('%Y-%m-%d')"/>
+        <field name="success_rate">0.9</field>
+        <field name="responsible_id" ref="base.user_admin"/>
+        <field name="budget_line_ids" eval="[Command.create({
+            'display_name': 'Facilities operating costs',
+            'analytic_account_id': ref('demo_budget_management_analytic_account'),
+            'budget_type': 'spend',
+            'start_date': DateTime.now().strftime('%Y-01-01'),
+            'end_date': (DateTime.now() + relativedelta(month=12, day=31)).strftime('%Y-%m-%d'),
+            'planned_amount': -60000.0,
+        })]"/>
+    </record>
+</odoo>

@@ -2,21 +2,99 @@
 <template xml:space="preserve">
     <!-- Create sticky note template from systray-->
     <t t-name="StickyNotes" owl="1">
-        <body class="menu cy-sticky_notes" t-ref="menuRef">
-            <div class="header cy-note-header d-flex m-2 justify-content-between">
-                <h1 class="m-0">Notes</h1>
-                <button type="button" class="btn-close" id="close_to_do_sidebar" t-on-click="_close_note"  aria-label="close"/>
+        <!-- ── Main sidebar panel ── -->
+        <div t-if="props.isPanelOpen" class="menu cy-sticky_notes" t-ref="menuRef">
+            <div class="header cy-note-header d-flex align-items-center justify-content-between px-3 py-2 m-0">
+                <h5 class="m-0" style="font-size: 16px; font-weight: 600; color: #333;">Notes</h5>
+                <div class="d-flex align-items-center" style="gap: 12px;">
+                    <div class="o_note_search_btn" t-on-click="_toggleSearch"
+                         role="button" title="Search Notes"
+                         t-att-style="'cursor: pointer; display: flex; align-items: center; color: ' + (this.state.showSearch ? '#9ea600' : '#555') + ';'">
+                        <i class="fa fa-search" style="font-size: 14px;"/>
+                    </div>
+                    <button type="button" class="btn-close" id="close_to_do_sidebar" t-on-click="_close_note" aria-label="close" style="font-size: 10px; padding: 0; margin: 0;"/>
+                </div>
             </div>
-            <hr class="o_sticky_line"/>
+
+            <!-- Search bar (shown when search icon is clicked) -->
+            <div t-if="this.state.showSearch" class="note-search-bar px-3 py-2" style="background-color: #f7f7f8; border-bottom: 1px solid #e9ecef;">
+                <div class="d-flex align-items-center position-relative" style="background: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 4px 8px;">
+                    <i class="fa fa-search text-muted me-2" style="font-size: 12px;"/>
+                    <input type="text"
+                           class="border-0 p-0 flex-grow-1"
+                           placeholder="Search title, description..."
+                           t-att-value="this.state.searchQuery"
+                           t-on-input="_onSearchInput"
+                           t-ref="searchInputRef"
+                           style="outline: none; box-shadow: none; font-size: 12.5px; background: transparent;"/>
+                    <i t-if="this.state.searchQuery"
+                       class="fa fa-times text-muted"
+                       role="button"
+                       t-on-click="_clearSearch"
+                       style="cursor: pointer; font-size: 12px; margin-left: 4px;"/>
+                </div>
+            </div>
+
+            <hr class="o_sticky_line m-0"/>
+
             <div class="content cyllo-notes-content" style="height: 90vh; padding: 10px; overflow: auto;">
-                <StickyNoteAdd t-if="!this.state.edit_note_id" mode="this.state.isEdit" t-on-click="() => (this.state.isEdit = !this.state.isEdit)"/>
-                <br/>
-                <StickyNoteCreate t-if="this.state.isEdit"/>
-                <t t-foreach="this.state.notes" t-as="notes" t-key="notes.id">
-                    <StickyNoteItem id="notes.id" title="notes.title" description="notes.description"
-                                    create_date="notes.create_date" colour="notes.colour" is_edit="this.state.edit_note_id === notes.id" show_remove="!state.edit_note_id"/>
+                <StickyNoteAdd t-if="!this.state.edit_note_id and !this.state.searchQuery" mode="this.state.isEdit"
+                               onAddText="() => { this.state.isEdit = true; this.state.startWithChecklist = false; this.state.startWithDrawing = false; }"
+                               onAddList="() => { this.state.isEdit = true; this.state.startWithChecklist = true; this.state.startWithDrawing = false; }"
+                               onAddDrawing="() => { this.state.isEdit = true; this.state.startWithChecklist = false; this.state.startWithDrawing = true; }"/>
+                <br t-if="!this.state.edit_note_id and !this.state.searchQuery"/>
+                <StickyNoteCreate t-if="this.state.isEdit" startWithChecklist="this.state.startWithChecklist" startWithDrawing="this.state.startWithDrawing"/>
+
+                <!-- Re-dock drop zone – appears when dragging a floating note over the panel -->
+                <div t-if="this.state.showRedockZone" class="o_sticky_redock_zone">
+                    <i class="fa fa-inbox me-2"/>Return to panel
+                </div>
+
+                <!-- Panel note list (draggable for reorder / detach) -->
+                <t t-if="this.filteredNotes.length > 0">
+                    <div class="o_sticky_notes_list" t-ref="notesListRef"
+                         t-on-pointerdown="onNotePointerDown"
+                         t-on-dragstart.prevent="() => {}">
+                        <t t-foreach="this.filteredNotes" t-as="notes" t-key="notes.id">
+                            <div class="o_sticky_note_wrapper" t-att-data-id="notes.id" t-on-dragstart.prevent="() => {}">
+                                <StickyNoteItem id="notes.id" title="notes.title" description="notes.description"
+                                                create_date="notes.create_date" colour="notes.colour"
+                                                checklist="notes.checklist" drawing="notes.drawing"
+                                                images="notes.images"
+                                                is_pinned="notes.is_pinned" pin_scope="notes.pin_scope"
+                                                is_edit="this.state.edit_note_id === notes.id" show_remove="!state.edit_note_id"/>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+                <t t-elif="this.state.searchQuery">
+                    <div class="text-center text-muted mt-4" style="font-size: 13px;">
+                        <i class="fa fa-search fa-2x mb-2 d-block opacity-50"/>
+                        No notes found matching "<t t-esc="this.state.searchQuery"/>"
+                    </div>
                 </t>
             </div>
-        </body>
+        </div>
+
+        <!-- ── Floating notes portal (rendered directly on body) ── -->
+        <t t-portal="'body'">
+            <t t-foreach="this.visibleFloatingNotes" t-as="fn" t-key="fn.id">
+                <div class="o_sticky_floating_wrapper"
+                     t-att-data-note-id="fn.id"
+                     t-att-style="'left:' + fn.x + 'px; top:' + fn.y + 'px;'"
+                     t-on-pointerdown="(ev) => this.onFloatingNotePointerDown(ev, fn.id)"
+                     t-on-dragstart.prevent="() => {}">
+                    <StickyNoteItem id="fn.id" title="fn.title" description="fn.description"
+                                    create_date="fn.create_date" colour="fn.colour"
+                                    checklist="fn.checklist" drawing="fn.drawing"
+                                    images="fn.images"
+                                    is_pinned="fn.is_pinned"
+                                    is_floating="true"
+                                    pin_scope="fn.pin_scope"
+                                    is_edit="this.state.edit_note_id === fn.id"
+                                    show_remove="true"/>
+                </div>
+            </t>
+        </t>
     </t>
 </template>

@@ -155,6 +155,14 @@
 .cy_crm_dashboard .dashboard-header {
     display: flex;
     align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+/* The no-content overlay positions itself inside the dashboard CONTENT area
+   only (below the header) instead of covering the whole dashboard root */
+.cy_crm_dashboard .cy-dashboard-content {
+    position: relative;
 }
 
 .header-content {
@@ -1066,8 +1074,9 @@
     }
 
     .cy_crm_dashboard .chart-legend:not(.pipeline-legend) {
-        flex-direction: column;
-        gap: 8px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px 16px;
     }
 
     .cy_crm_dashboard .pipeline-legend {
@@ -2454,5 +2463,25 @@
     .cy_crm_dashboard .cy-updates-card .notifications-list {
         height: auto;
         max-height: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    .cy_crm_dashboard .cy-nocontent-wrap {
+        position: sticky;
+        inset: auto;
+        top: 0;
+        z-index: 2;
+        padding: 8px 12px 0;
+    }
+
+    /* Odoo's help box is transparent by design — on mobile it floated over
+       the dimmed cards, so give it its own solid card background */
+    .cy_crm_dashboard .cy-nocontent-wrap .o_nocontent_help {
+        background: var(--cy-card-bg, #FFFFFF);
+        border: 1px solid var(--cy-card-border, #ECEDF0);
+        border-radius: 12px;
+        box-shadow: 0 4px 14px var(--cy-card-shadow, rgba(36, 36, 28, 0.08));
+        padding: 16px 20px;
     }
 }

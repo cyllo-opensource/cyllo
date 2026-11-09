@@ -31,13 +31,15 @@ class AccountMove(models.Model):
 
     next_follow_up_id = fields.Many2one('accounting.followup.line',
                                         'Next Follow Up',
-                                        help='References the next follow-up action for this account move.')
+                                        help='References the next follow-up action for this account move.',
+                                        copy=False)
     last_follow_up_id = fields.Many2one('accounting.followup.line',
                                         'Last Follow-Up Taken',
-                                        help='References the last follow-up action taken for this account move.'
+                                        help='References the last follow-up action taken for this account move.',
+                                        copy=False
                                         )
 
-    def many2one_action(self):
+    def action_change_followup(self):
         """
                 Triggers the follow-up action change for the partner associated with this account move.
 

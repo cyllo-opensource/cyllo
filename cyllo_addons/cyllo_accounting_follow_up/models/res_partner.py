@@ -34,8 +34,7 @@ class ResPartner(models.Model):
         string="Invoice Details",
         domain=([('payment_state', '!=', 'paid'),
                  ('state', '=', 'posted'),
-                 ('invoice_date_due', '<',
-                  date.today())]),
+                 ('invoice_date_due', '<', fields.Date.today())]),
         readonly=True,
         help="List of unpaid and posted invoices with due dates earlier than today."
     )
@@ -77,12 +76,13 @@ class ResPartner(models.Model):
                 mail_template = follow_up.mail_template_id
                 mail_template.sudo().with_context({'move_id': move}).send_mail(
                     self.id, force_send=True)
-                move.write({
-                    'next_follow_up_id': False,
-                    'last_follow_up_id': follow_up.id
-                })
+            move.write({
+                'next_follow_up_id': False,
+                'last_follow_up_id': follow_up.id
+            })
 
     def _execute_followup(self):
-        """Execute this function-based cron job"""
+        """Execute follow-up actions for all pending invoices."""
         lines = self.env['account.move'].search([('next_follow_up_id', '!=', False)])
-        self.change_followup_action(lines)
+        for move in lines:
+            move.partner_id.change_followup_action(move)

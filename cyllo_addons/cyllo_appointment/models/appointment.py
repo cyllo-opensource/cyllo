@@ -285,12 +285,21 @@ class Appointment(models.Model):
     def write(self, vals):
         res = super().write(vals)
         for rec in self:
-            if rec.calendar_event_id:
-                rec.calendar_event_id.write({
+            event = rec.calendar_event_id
+            if event:
+                # Sync only real changes; writing 'start' on the event makes the
+                # calendar send a "Date updated" mail to attendees every time.
+                new_vals = {
                     'name': rec.display_name,
                     'start': rec.start_datetime,
                     'stop': rec.end_datetime,
-                })
+                }
+                changed = {k: v for k, v in new_vals.items() if event[k] != v}
+                if changed:
+                    if 'start' in changed or 'stop' in changed:
+                        changed['start'] = new_vals['start']
+                        changed['stop'] = new_vals['stop']
+                    event.write(changed)
         if 'state' in vals and vals['state'] == 'cancelled':
             for record in self:
                 if record.calendar_event_id:
