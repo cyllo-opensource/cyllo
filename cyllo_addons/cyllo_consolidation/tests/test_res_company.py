@@ -20,7 +20,6 @@
 #
 #############################################################################
 from . common import TestCommon
-from odoo.exceptions import ValidationError
 
 
 class TestConsolidationPeriod(TestCommon):

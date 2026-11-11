@@ -46,7 +46,7 @@ class DomainAccess(models.Model):
         help="Technical name of the target Cyllo model."
     )
 
-    domain = fields.Text(
+    domain = fields.Char(
         default='[]',
         string='Domain',
         help="Python/domain expression to filter records (e.g. [('state', '=', 'draft')])."

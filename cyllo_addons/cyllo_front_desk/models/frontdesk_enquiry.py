@@ -128,14 +128,11 @@ class FrontdeskEnquiry(models.Model):
             rec.visitor_id = visitor.id
             visitor.enquiry_id = rec.id
             rec._message_log(
-                body=_(
-                    "Visitor record auto-created: <a href='#' data-oe-model='frontdesk.visitor' data-oe-id='%d'>%s</a>") % (
-                         visitor.id, visitor.name)
+                body=_("A visitor record (%s) was automatically created for this enquiry.")
+                     % visitor.name
             )
             visitor._message_log(
-                body=_(
-                    "Linked to enquiry: <a href='#' data-oe-model='frontdesk.enquiry' data-oe-id='%d'>%s</a>") % (
-                         rec.id, rec.name)
+                body=_("This visitor was linked to enquiry (%s).") % rec.name
             )
         return records
 

@@ -31,6 +31,7 @@ class SaleOrderLine(models.Model):
         string="Sales Warranty Expiration Date",
         compute='_compute_sale_warranty_expiration_date',
         store=True,
+        readonly=False,
     )
     warranty_extension_days = fields.Integer(
         string="Warranty Extension (Days)",

@@ -358,10 +358,11 @@ class HrAdvanceSalary(models.Model):
     def _check_monthly_deduction_less_than_amount(self):
         for rec in self:
             if rec.deduction_type == 'fixed':
-                if rec.deduction_amount > rec.amount:
+                if rec.deduction_amount >= rec.amount:
                     raise UserError(_(
                         "Monthly deduction amount must be less than the requested advance amount."
                     ))
+
 
     line_ids = fields.One2many(
         'hr.advance.salary.line',

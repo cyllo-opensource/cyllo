@@ -20,47 +20,43 @@
 #
 #############################################################################
 
-from datetime import date, timedelta
-from odoo.tests import tagged, TransactionCase
-from odoo.exceptions import UserError
+from datetime import timedelta
+
+from dateutil.relativedelta import relativedelta
+
 from odoo import fields
+from odoo.exceptions import UserError
+from odoo.tests import TransactionCase, tagged
+
+EXTEND_PARAM = 'cyllo_purchase.is_extend_warranty_purchase'
 
 
 @tagged('post_install', '-at_install')
 class TestPurchaseWarranty(TransactionCase):
-    """Tests for Warranty Purchase module: purchase orders, lines, stock moves, and wizard."""
+    """Tests for Warranty Purchase: purchase lines, receipts and the wizard."""
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
-        # Create partner/vendor
         cls.vendor = cls.env['res.partner'].create({
             'name': 'Test Vendor',
             'email': 'vendor@test.com',
         })
-
-        # Create product category with warranty
         cls.category_warranty = cls.env['product.category'].create({
             'name': 'Category with Warranty',
             'warranty_period': 12,
             'warranty_period_unit': 'month',
         })
-
-        # Create product category without warranty
         cls.category_no_warranty = cls.env['product.category'].create({
             'name': 'Category no Warranty',
             'warranty_period': 0,
             'warranty_period_unit': 'month',
         })
-
-        # Create products
         cls.product_warranty = cls.env['product.product'].create({
             'name': 'Product with Warranty',
             'type': 'product',
             'categ_id': cls.category_warranty.id,
         })
-
         cls.product_no_warranty = cls.env['product.product'].create({
             'name': 'Product no Warranty',
             'type': 'product',
@@ -69,226 +65,186 @@ class TestPurchaseWarranty(TransactionCase):
 
     def setUp(self):
         super().setUp()
+        self.now = fields.Datetime.now()
         self.today = fields.Date.today()
 
-    def test_purchase_order_line_warranty_expiration_date(self):
-        """Test calculation of warranty expiration date on purchase order lines."""
-        # Create a PO with draft status
+    # ------------------------------------------------------------------
+    # helpers
+    # ------------------------------------------------------------------
+    def _create_po(self, products=None, **po_vals):
+        """Create a draft PO with one line (qty 1) per given product."""
+        products = products or [self.product_warranty]
         po = self.env['purchase.order'].create({
             'partner_id': self.vendor.id,
-            'date_order': self.today,
+            'date_order': self.now,
+            **po_vals,
         })
+        lines = self.env['purchase.order.line']
+        for product in products:
+            lines |= self.env['purchase.order.line'].create({
+                'order_id': po.id,
+                'product_id': product.id,
+                'product_qty': 1,
+                'price_unit': 100.0,
+            })
+        return po, lines
 
-        po_line_warranty = self.env['purchase.order.line'].create({
-            'order_id': po.id,
-            'product_id': self.product_warranty.id,
-            'product_qty': 1,
-            'price_unit': 100.0,
-        })
+    def _base_expiration(self, date):
+        """Warranty expiration of the warranty product, without extension."""
+        return fields.Date.to_date(
+            self.product_warranty._get_warranty_expiration_date(date))
 
-        po_line_no_warranty = self.env['purchase.order.line'].create({
-            'order_id': po.id,
-            'product_id': self.product_no_warranty.id,
-            'product_qty': 1,
-            'price_unit': 50.0,
-        })
+    # ------------------------------------------------------------------
+    # purchase order line
+    # ------------------------------------------------------------------
+    def test_purchase_order_line_warranty_expiration_date(self):
+        """Draft uses date_order, confirmed/approved uses date_approve."""
+        po, lines = self._create_po(
+            [self.product_warranty, self.product_no_warranty])
+        line_warranty, line_no_warranty = lines
 
-        # When draft, expiration date is computed using date_order as date_approve is False
+        # Draft: date_approve is empty, so date_order is used.
         self.assertFalse(po.date_approve)
-        self.assertEqual(po_line_warranty.purchase_warranty_expiration_date, self.today + timedelta(days=365))  # approximate, 12 months later
-        self.assertFalse(po_line_no_warranty.purchase_warranty_expiration_date)
+        self.assertEqual(
+            line_warranty.purchase_warranty_expiration_date,
+            self._base_expiration(po.date_order))
+        self.assertFalse(line_no_warranty.purchase_warranty_expiration_date)
 
-        # Test date_approve is preferred when set
-        approve_date = self.today - timedelta(days=10)
-        po.write({
-            'date_approve': approve_date,
-            'state': 'purchase',
-        })
-        po_line_warranty._compute_purchase_warranty_expiration_date()
-        
-        expected_exp = self.product_warranty._get_warranty_expiration_date(approve_date)
-        self.assertEqual(po_line_warranty.purchase_warranty_expiration_date, expected_exp)
+        # date_approve takes precedence once set.
+        approve_date = self.now - timedelta(days=10)
+        po.write({'date_approve': approve_date, 'state': 'purchase'})
+        self.assertEqual(
+            line_warranty.purchase_warranty_expiration_date,
+            self._base_expiration(approve_date))
+        self.assertFalse(line_no_warranty.purchase_warranty_expiration_date)
 
     def test_purchase_order_line_warranty_extension(self):
-        """Test how manual extension values affect expiration date."""
-        po = self.env['purchase.order'].create({
-            'partner_id': self.vendor.id,
-            'date_order': self.today,
-        })
+        """Extension days are added on top of the base warranty."""
+        po, lines = self._create_po()
+        line = lines
+        base_exp = self._base_expiration(po.date_order)
+        self.assertEqual(line.purchase_warranty_expiration_date, base_exp)
 
-        po_line = self.env['purchase.order.line'].create({
-            'order_id': po.id,
-            'product_id': self.product_warranty.id,
-            'product_qty': 1,
-            'price_unit': 100.0,
-            'warranty_extension_days': 182, # ≈ 6 months
-        })
+        # The extension is stored in days and added with relativedelta(days=N).
+        for extension_days in (182, 182 + 730, 182 + 730 + 15):
+            line.warranty_extension_days = extension_days
+            self.assertEqual(
+                line.purchase_warranty_expiration_date,
+                base_exp + relativedelta(days=extension_days))
 
-        # Base warranty is 12 months (from category) + 6 months extension = 18 months
-        base_exp = self.product_warranty._get_warranty_expiration_date(self.today)
-        expected_exp = base_exp + timedelta(days=182)  # relativedelta adds 6 months, we assert correct computation
-        
-        # Verify it computed correctly
-        from dateutil.relativedelta import relativedelta
-        correct_calculation = base_exp + relativedelta(months=6)
-        self.assertEqual(po_line.purchase_warranty_expiration_date, correct_calculation)
+        # No extension -> back to the base date.
+        line.warranty_extension_days = 0
+        self.assertEqual(line.purchase_warranty_expiration_date, base_exp)
 
-        # Test year extension unit
-            'warranty_extension_days': 182 + 730, # add 2 years ≈ 730 days
-        })
-        self.assertEqual(po_line.purchase_warranty_expiration_date, base_exp + relativedelta(years=2))
-
-        # Test day extension unit
-            'warranty_extension_days': 182 + 730 + 15,
-        })
-        self.assertEqual(po_line.purchase_warranty_expiration_date, base_exp + relativedelta(days=15))
+    def test_purchase_order_line_no_warranty_ignores_extension(self):
+        """A product without warranty never gets an expiration date."""
+        _po, lines = self._create_po([self.product_no_warranty])
+        lines.warranty_extension_days = 90
+        self.assertFalse(lines.purchase_warranty_expiration_date)
+        self.assertFalse(lines.is_under_warranty)
 
     def test_purchase_order_line_is_under_warranty_and_search(self):
-        """Test calculation of is_under_warranty and the custom search method."""
-        po = self.env['purchase.order'].create({
-            'partner_id': self.vendor.id,
-            'date_order': self.today,
-        })
+        """is_under_warranty compute and its custom search method."""
+        po, lines = self._create_po()
+        line = lines
 
-        po_line = self.env['purchase.order.line'].create({
-            'order_id': po.id,
-            'product_id': self.product_warranty.id,
-            'product_qty': 1,
-        })
+        # Expires in ~12 months -> under warranty.
+        self.assertTrue(line.is_under_warranty)
+        self.assertIn(line, self.env['purchase.order.line'].search([
+            ('id', '=', line.id), ('is_under_warranty', '=', True)]))
 
-        # Expiry is in 12 months, so it should be under warranty
-        self.assertTrue(po_line.is_under_warranty)
-
-        # Set expiration date in the past
-            'warranty_extension_days': -395, # This should decrease/nullify/move it back (if allowed) or we can manipulate manually
-        })
-        # Wait, let's look at how _compute_warranty_expiration_date is defined:
-        # If line.warranty_extension_days > 0: it adds. Let's force a past date_order / date_approve instead.
-        past_date = self.today - timedelta(days=500)
+        # 500 days ago + 12 months expired about 135 days ago.
         po.write({
-            'date_approve': past_date,
+            'date_approve': self.now - timedelta(days=500),
             'state': 'purchase',
         })
-        # Recalculate
-        po_line._compute_purchase_warranty_expiration_date()
-        po_line._compute_is_under_warranty()
-        # 500 days ago + 12 months (~365 days) = expired about 135 days ago
-        self.assertFalse(po_line.is_under_warranty)
+        self.assertFalse(line.is_under_warranty)
+        self.assertNotIn(line, self.env['purchase.order.line'].search([
+            ('id', '=', line.id), ('is_under_warranty', '=', True)]))
+        self.assertIn(line, self.env['purchase.order.line'].search([
+            ('id', '=', line.id), ('is_under_warranty', '=', False)]))
 
-        # Test search method
-        lines_under_warranty = self.env['purchase.order.line'].search([
-            ('id', '=', po_line.id),
-            ('is_under_warranty', '=', True),
-        ])
-        self.assertNotIn(po_line, lines_under_warranty)
+        # An extension long enough brings it back under warranty.
+        line.warranty_extension_days = 400
+        self.assertTrue(line.is_under_warranty)
 
-        lines_not_under_warranty = self.env['purchase.order.line'].search([
-            ('id', '=', po_line.id),
-            ('is_under_warranty', '=', False),
-        ])
-        self.assertIn(po_line, lines_not_under_warranty)
-
+    # ------------------------------------------------------------------
+    # purchase order
+    # ------------------------------------------------------------------
     def test_purchase_order_display_extend_warranty(self):
-        """Test display_extend_warranty compute field."""
-        # Deactivate config parameter
-        self.env['ir.config_parameter'].sudo().set_param(
-            'cyllo_product_warranty.is_extend_warranty_purchase', False
-        )
+        """The button flag depends on the setting and on warranty lines."""
+        params = self.env['ir.config_parameter'].sudo()
+        po, _lines = self._create_po()
 
-        po = self.env['purchase.order'].create({
-            'partner_id': self.vendor.id,
-            'date_order': self.today,
-        })
-
-        po_line = self.env['purchase.order.line'].create({
-            'order_id': po.id,
-            'product_id': self.product_warranty.id,
-            'product_qty': 1,
-        })
-
+        params.set_param(EXTEND_PARAM, False)
         po._compute_display_extend_warranty()
         self.assertFalse(po.display_extend_warranty)
 
-        # Activate config parameter
-        self.env['ir.config_parameter'].sudo().set_param(
-            'cyllo_product_warranty.is_extend_warranty_purchase', True
-        )
+        params.set_param(EXTEND_PARAM, True)
         po._compute_display_extend_warranty()
         self.assertTrue(po.display_extend_warranty)
 
-    def test_purchase_order_action_extend_warranty_and_wizard(self):
-        """Test the action to extend warranty and the wizard logic."""
-        po_no_war = self.env['purchase.order'].create({
-            'partner_id': self.vendor.id,
-            'date_order': self.today,
-        })
-        self.env['purchase.order.line'].create({
-            'order_id': po_no_war.id,
-            'product_id': self.product_no_warranty.id,
-            'product_qty': 1,
-        })
+        # Setting on, but no line under warranty -> no button.
+        po_no_war, _l = self._create_po([self.product_no_warranty])
+        po_no_war._compute_display_extend_warranty()
+        self.assertFalse(po_no_war.display_extend_warranty)
 
-        # Should raise error if no warranty product
+    def test_purchase_order_action_extend_warranty_and_wizard(self):
+        """Action guards and the wizard adding extension days."""
+        po_no_war, _l = self._create_po([self.product_no_warranty])
         with self.assertRaises(UserError):
             po_no_war.action_extend_warranty()
 
-        # Should return action if warranty product is present
-        po_war = self.env['purchase.order'].create({
-            'partner_id': self.vendor.id,
-            'date_order': self.today,
-        })
-        po_line = self.env['purchase.order.line'].create({
-            'order_id': po_war.id,
-            'product_id': self.product_warranty.id,
-            'product_qty': 1,
-        })
-
+        po_war, lines = self._create_po()
+        po_line = lines
         action = po_war.action_extend_warranty()
         self.assertEqual(action.get('res_model'), 'warranty.extension.wizard')
+        # A single warranty line is preselected.
+        self.assertEqual(
+            action['context'].get('default_purchase_line_ids'),
+            [(6, 0, po_line.ids)])
 
-        # Test wizard confirm
         wizard = self.env['warranty.extension.wizard'].with_context(
-            action.get('context')
-        ).create({
-            'purchase_order_id': po_war.id,
-            'purchase_line_ids': [(6, 0, [po_line.id])],
+            action.get('context')).create({
+                'purchase_order_id': po_war.id,
+                'purchase_line_ids': [(6, 0, po_line.ids)],
+                'extension_period': 3,
+                'extension_unit': 'month',
+            })
+        initial_extension = po_line.warranty_extension_days
+        wizard.action_confirm()
+        # 3 months are converted to 90 days by cyllo_warranty_base.
+        self.assertEqual(po_line.warranty_extension_days, initial_extension + 90)
+
+        # Extending again accumulates.
+        wizard.action_confirm()
+        self.assertEqual(po_line.warranty_extension_days, initial_extension + 180)
+
+    def test_wizard_only_changes_selected_lines(self):
+        """Lines not selected in the wizard keep their extension."""
+        po, lines = self._create_po(
+            [self.product_warranty, self.product_warranty])
+        line_a, line_b = lines
+        wizard = self.env['warranty.extension.wizard'].create({
+            'purchase_order_id': po.id,
+            'purchase_line_ids': [(6, 0, line_a.ids)],
             'extension_period': 3,
             'extension_unit': 'month',
         })
-
-        initial_extension = po_line.warranty_extension_days
         wizard.action_confirm()
+        self.assertEqual(line_a.warranty_extension_days, 90)
+        self.assertEqual(line_b.warranty_extension_days, 0)
 
-        self.assertEqual(po_line.warranty_extension_days, initial_extension + 90)
-
-    def test_stock_move_line_warranty_propagation(self):
-        """Test that the warranty expiration date propagates to stock.move.line."""
-        # Create a PO with a warranty product
-        po = self.env['purchase.order'].create({
-            'partner_id': self.vendor.id,
-            'date_order': self.today,
-        })
-
-        po_line = self.env['purchase.order.line'].create({
-            'order_id': po.id,
-            'product_id': self.product_warranty.id,
-            'product_qty': 1,
-            'price_unit': 100.0,
-        })
-
-        # Confirm the PO to create a picking / receipt
+    # ------------------------------------------------------------------
+    # stock move line
+    # ------------------------------------------------------------------
+    def _get_receipt_move_line(self, po, po_line):
         po.button_confirm()
-
-        # Find the stock move and line associated with this PO line
         picking = po.picking_ids
         self.assertTrue(picking)
-        
         move = picking.move_ids.filtered(lambda m: m.purchase_line_id == po_line)
         self.assertTrue(move)
-
-        # In Odoo, stock.move.line records are created during picking preparation or validation
-        # Let's ensure the move line has the correct purchase_warranty_expiration_date
-        move_line = self.env['stock.move.line'].create({
+        move_line = move.move_line_ids[:1] or self.env['stock.move.line'].create({
             'move_id': move.id,
             'product_id': self.product_warranty.id,
             'product_uom_id': self.product_warranty.uom_id.id,
@@ -296,6 +252,29 @@ class TestPurchaseWarranty(TransactionCase):
             'location_dest_id': move.location_dest_id.id,
             'quantity': 1.0,
         })
+        return move_line
 
-        move_line._compute_purchase_warranty_expiration_date()
-        self.assertEqual(move_line.purchase_warranty_expiration_date, po_line.purchase_warranty_expiration_date)
+    def test_stock_move_line_warranty_propagation(self):
+        """The PO line expiration date is copied to the receipt move line."""
+        po, lines = self._create_po()
+        po_line = lines
+        move_line = self._get_receipt_move_line(po, po_line)
+        self.assertTrue(po_line.purchase_warranty_expiration_date)
+        self.assertEqual(
+            move_line.purchase_warranty_expiration_date,
+            po_line.purchase_warranty_expiration_date)
+
+    def test_stock_move_line_follows_extension(self):
+        """Extending the warranty updates the already created move line."""
+        po, lines = self._create_po()
+        po_line = lines
+        move_line = self._get_receipt_move_line(po, po_line)
+        before = move_line.purchase_warranty_expiration_date
+
+        po_line.warranty_extension_days = 30
+        self.assertEqual(
+            move_line.purchase_warranty_expiration_date,
+            before + relativedelta(days=30))
+        self.assertEqual(
+            move_line.purchase_warranty_expiration_date,
+            po_line.purchase_warranty_expiration_date)

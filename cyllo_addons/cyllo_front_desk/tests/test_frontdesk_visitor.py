@@ -21,7 +21,6 @@
 #############################################################################
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import UserError
-from odoo.fields import Datetime
 
 
 class TestFrontdeskVisitor(TransactionCase):

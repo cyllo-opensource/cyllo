@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_issue_report_tree" model="ir.ui.view">
+        <field name="name">issue.report.tree</field>
+        <field name="model">issue.report</field>
+        <field name="arch" type="xml">
+            <tree string="Issue Reports" decoration-danger="priority == '3'" decoration-muted="state == 'resolved'">
+                <field name="issue_ref"/>
+                <field name="name"/>
+                <field name="error_type" widget="badge"
+                       decoration-info="error_type in ('warning','frontend','backend')"/>
+                <field name="module_name" widget="badge"/>
+                <field name="file_location"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="assigned_to_id" widget="many2one_avatar_user"/>
+                <field name="priority" widget="priority"/>
+                <field name="create_date" string="Reported On" widget="date"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state in ('in_progress', 'transferred')"
+                       decoration-success="state == 'resolved'"
+                       decoration-danger="state == 'cancelled'"/>
+                <field name="company_id" options="{'no_create': True}"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Kanban View (Grouped by State) -->
+    <record id="view_issue_report_kanban" model="ir.ui.view">
+        <field name="name">issue.report.kanban</field>
+        <field name="model">issue.report</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" default_order="priority desc, create_date desc" records_draggable="0">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="issue_ref"/>
+                <field name="error_type"/>
+                <field name="module_name"/>
+                <field name="file_location"/>
+                <field name="user_id"/>
+                <field name="assigned_to_id"/>
+                <field name="priority"/>
+                <field name="state"/>
+                <field name="activity_ids"/>
+                <field name="activity_state"/>
+                <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click oe_kanban_card d-flex flex-column justify-content-between p-3">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold text-primary">
+                                        <field name="issue_ref"/>
+                                    </span>
+                                    <field name="priority" widget="priority"/>
+                                </div>
+                                <div class="fw-bold text-truncate mb-1" t-att-title="record.name.value">
+                                    <field name="name"/>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <span t-if="record.module_name.raw_value" class="badge text-bg-info">
+                                        <field name="module_name"/>
+                                    </span>
+                                    <span t-if="record.error_type.raw_value" 
+                                          t-attf-class="badge #{record.error_type.raw_value == 'backend' ? 'text-bg-info' : (record.error_type.raw_value == 'frontend' ? 'text-bg-info' : 'text-bg-info')}">
+                                        <field name="error_type"/>
+                                    </span>
+                                </div>
+                                <div style="min-height:5px;">
+    <t></t>
+</div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <div class="text-muted small">
+                                     <i class="fa fa-calendar me-1" title="Reported Date" aria-label="Reported Date"/> <field name="create_date" widget="date"/>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                    <field name="assigned_to_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Graph View (Status, Module, Error Type, and Date Analysis) -->
+    <record id="view_issue_report_graph" model="ir.ui.view">
+        <field name="name">issue.report.graph</field>
+        <field name="model">issue.report</field>
+        <field name="arch" type="xml">
+            <graph string="Issue Reports Analysis" type="bar">
+                <field name="module_name"/>
+                <field name="state"/>
+                <field name="error_type"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot View (Multi-dimensional Analysis) -->
+    <record id="view_issue_report_pivot" model="ir.ui.view">
+        <field name="name">issue.report.pivot</field>
+        <field name="model">issue.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Issue Reports Matrix" >
+                <field name="module_name" type="row"/>
+                <field name="error_type" type="row"/>
+                <field name="state" type="col"/>
+                <field name="create_date" interval="month" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_issue_report_form" model="ir.ui.view">
+        <field name="name">issue.report.form</field>
+        <field name="model">issue.report</field>
+        <field name="arch" type="xml">
+            <form string="Issue Report">
+                <header>
+                    <button name="action_set_in_progress" string="Start" type="object"
+                            class="btn-primary" invisible="state != 'draft'" groups="cyllo_issue_reporting.group_error_reporting_manager"/>
+                    <button name="action_set_resolved" string="Mark as Resolved" type="object"
+                            class="btn-primary" invisible="state not in ('transferred', 'in_progress')" groups="cyllo_issue_reporting.group_error_reporting_manager"/>
+                    <button name="action_partner_transfer" string="Partner Transfer" type="object"
+                            class="btn-primary" invisible="state != 'draft'" groups="cyllo_issue_reporting.group_error_reporting_manager"/>
+                    <button name="action_set_cancelled" string="Cancel" type="object"
+                            invisible="state == 'cancelled'" groups="cyllo_issue_reporting.group_error_reporting_manager"/>
+                    <button name="action_set_draft" string="Reset to New" type="object"
+                            invisible="state == 'draft'" groups="cyllo_issue_reporting.group_error_reporting_manager"/>
+                    <button name="action_ticket_redirect" string="View Ticket" type="object" readonly="True"
+                            class="btn-primary" invisible="state != 'transferred' or not ticket_url"/>
+                     <button name="action_login_redirect" string="Login to Support" type="object"
+                            class="btn-secondary" invisible="not login_redirect_url or state == 'transferred'" groups="cyllo_issue_reporting.group_error_reporting_manager"/>
+                    <!-- User group: visible only in new state -->
+<button name="action_set_cancelled"
+        string="Cancel"
+        type="object"
+        groups="cyllo_issue_reporting.group_error_reporting_user"
+        invisible="state != 'draft' or is_manager"/>
+
+                <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,transferred,resolved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. ValidationError / RPC Error"/></h1>
+                    </div>
+                    <group>
+                        <group string="Error Context">
+                            <field name="error_type" readonly="is_readonly"/>
+                            <field name="module_name" class="fw-bold text-danger" readonly="is_readonly"/>
+                            <field name="file_location" class="text-break" readonly="is_readonly"/>
+                            <field name="url" class="text-break font-monospace small" readonly="is_readonly"/>
+                            <field name="error_message" class="text-break" readonly="is_readonly"/>
+                            <field name="is_readonly" invisible="1"/>
+                            <field name="is_manager" invisible="1"/>
+                        </group>
+                        <group string="Management">
+                            <field name="issue_ref"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="assigned_to_id" widget="many2one_avatar_user"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="create_date" readonly="1"/>
+                            <field name="ticket_url" widget="url" readonly="1" invisible="not ticket_url"/>
+                            <field name="login_redirect_url" widget="url" readonly="1" invisible="1"/>
+                            <field name="company_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="User Feedback" name="user_feedback">
+                            <field name="user_notes" placeholder="Notes submitted by the user..."/>
+                        </page>
+                        <page string="Detailed Traceback" name="traceback_page">
+                            <field name="traceback" widget="text" class="text-monospace font-monospace bg-light p-3 text-break" readonly="1"/>
+                        </page>
+                        <page string="Resolution Notes" name="resolution_page">
+                            <field name="resolution_notes" placeholder="Add diagnosis, steps taken, or fix details here..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_issue_report_search" model="ir.ui.view">
+        <field name="name">issue.report.search</field>
+        <field name="model">issue.report</field>
+        <field name="arch" type="xml">
+            <search string="Search Issues">
+
+                <field name="name"/>
+                <field name="issue_ref"/>
+                <field name="module_name"/>
+                <field name="file_location"/>
+                <field name="user_id"/>
+                <field name="assigned_to_id"/>
+                <field name="company_id" options="{'no_create': True}"/>
+
+                <!-- Status Filters -->
+                <filter string="New" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="In Progress" name="filter_in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Transferred" name="filter_transferred" domain="[('state', '=', 'transferred')]"/>
+                <filter string="Resolved" name="filter_resolved" domain="[('state', '=', 'resolved')]"/>
+                <separator/>
+
+                <!-- Error Type Filters -->
+                <filter string="Python / Backend" name="filter_backend" domain="[('error_type', '=', 'backend')]"/>
+                <filter string="JavaScript / Frontend" name="filter_frontend" domain="[('error_type', '=', 'frontend')]"/>
+                <filter string="Warning / Validation" name="filter_warning" domain="[('error_type', '=', 'warning')]"/>
+                <separator/>
+
+                <!-- Assignment & Priority Filters -->
+                <filter string="My Assigned" name="filter_my_assigned" domain="[('assigned_to_id', '=', uid)]"/>
+                <filter string="High Priority" name="filter_high_priority" domain="[('priority', 'in', ('2', '3'))]"/>
+                <separator/>
+
+                <!-- Date Filter -->
+                <filter string="Creation Date" name="filter_create_date" date="create_date"/>
+
+                <!-- Group By Options -->
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Originating Module" name="group_module" context="{'group_by': 'module_name'}"/>
+                    <filter string="Error Type" name="group_error_type" context="{'group_by': 'error_type'}"/>
+                    <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
+                    <filter string="Assigned Developer" name="group_assigned" context="{'group_by': 'assigned_to_id'}"/>
+                    <filter string="Reported By" name="group_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Creation Month" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_issue_report" model="ir.actions.act_window">
+        <field name="name">Error Reports</field>
+        <field name="res_model">issue.report</field>
+        <field name="view_mode">kanban,tree,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_issue_report_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No issue reports found!
+            </p>
+            <p>
+                Issues and errors reported by users will be listed here automatically.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menuitem under Issue Reporting root -->
+    <menuitem id="menu_cyllo_issue_report_records"
+              name="Issue Reporting"
+              sequence="5"
+              web_icon="cyllo_issue_reporting,static/description/issues.svg"/>
+
+    <menuitem id="menu_issue_report_records"
+              name="All Issues"
+              parent="menu_cyllo_issue_report_records"
+              action="action_issue_report"
+              sequence="5"/>
+
+</odoo>

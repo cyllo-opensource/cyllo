@@ -1,7 +1,7 @@
 Cyllo Front Desk
 ----------------
 
-The Cyllo <a href="https://www.cyllo.com/front-desk">Front Desk</a> app manages your
+The Cyllo <a href="https://www.cyllo.com/cyllo-apps/frontdesk">Front Desk</a> app manages your
 reception operations end to end, letting you run multiple front desk stations, register
 and track visitors, notify hosts automatically, and handle enquiries, refreshments and
 emergency situations from a single place.

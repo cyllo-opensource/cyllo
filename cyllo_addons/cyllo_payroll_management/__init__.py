@@ -22,12 +22,4 @@
 from . import models
 from . import wizards
 
-def post_init_hook(env):
-    menu = env.ref('cyllo_hr.menu_hr_dashboard_root', raise_if_not_found=False)
-    if menu:
-        menu.active = True
 
-def uninstall_hook(env):
-    menu = env.ref('cyllo_hr.menu_hr_dashboard_root', raise_if_not_found=False)
-    if menu:
-        menu.active = False

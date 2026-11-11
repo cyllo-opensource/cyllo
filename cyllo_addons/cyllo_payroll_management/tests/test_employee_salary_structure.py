@@ -66,9 +66,13 @@ class TestSalaryStructure(TestPayrollManagementBase):
             'type_id': self.structure_type.id,
         })
         all_rules = structure._get_all_rules()
+        # _get_all_rules() returns a list of (id, sequence) tuples
+        # as produced by _recursive_search_of_rules()
+        self.assertIsInstance(all_rules, list)
         self.assertTrue(all(
-            isinstance(rule, self.env['employee.salary.rule']) for rule in
-            all_rules))
+            isinstance(rule, tuple) and len(rule) == 2
+            for rule in all_rules
+        ))
         _logger.info('Test success for check all the rules')
 
     def test_get_parent_structure(self):

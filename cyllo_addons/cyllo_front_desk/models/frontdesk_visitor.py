@@ -19,12 +19,15 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError
 import uuid
 import pytz
 
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
+
 class FrontdeskVisitor(models.Model):
+    """Manage front desk visitors, meeting approvals, check-ins, and notifications."""
     _name = 'frontdesk.visitor'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Frontdesk Visitor'
@@ -70,8 +73,8 @@ class FrontdeskVisitor(models.Model):
         compute='_compute_host_domain_ids',
         string='Available Hosts',
     )
-    check_in = fields.Datetime(string='Check-In Time', readonly=True, tracking=True)
-    check_out = fields.Datetime(string='Check-Out Time', readonly=True, tracking=True)
+    check_in = fields.Datetime(string='Check-In Time', readonly=True, tracking=True, copy=False)
+    check_out = fields.Datetime(string='Check-Out Time', readonly=True, tracking=True, copy=False)
     drink_id = fields.Many2one('frontdesk.drink', string='Drink Requested', tracking=True)
     drink_served = fields.Boolean(string='Drink Served', default=False, tracking=True)
     state = fields.Selection([
@@ -96,6 +99,7 @@ class FrontdeskVisitor(models.Model):
 
     @api.depends('station_id', 'station_id.responsible_ids')
     def _compute_host_domain_ids(self):
+        """Compute the available hosts based on the selected front desk station."""
         for visitor in self:
             if visitor.station_id:
                 visitor.host_domain_ids = visitor.station_id.responsible_ids
@@ -104,6 +108,7 @@ class FrontdeskVisitor(models.Model):
 
     @api.depends_context('uid')
     def _compute_is_frontdesk_manager(self):
+        """Determine whether the current user belongs to the Front Desk Manager group."""
         is_manager = self.env.user.has_group(
             'cyllo_front_desk.group_frontdesk_admin'
         )
@@ -112,6 +117,7 @@ class FrontdeskVisitor(models.Model):
 
     @api.depends('check_in', 'check_out')
     def _compute_duration(self):
+        """Compute the visitor's duration in hours using check-in and check-out times."""
         for visitor in self:
             if visitor.check_in and visitor.check_out:
                 diff = visitor.check_out - visitor.check_in
@@ -124,6 +130,7 @@ class FrontdeskVisitor(models.Model):
 
     @api.onchange('station_id')
     def _onchange_station_id(self):
+        """Reset host and drink selections when they are unavailable at the selected station."""
         if self.station_id:
             if not self.station_id.is_host:
                 self.host_id = False
@@ -132,6 +139,7 @@ class FrontdeskVisitor(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
+        """Populate visitor contact information from the selected partner."""
         if self.partner_id:
             self.visitor_name = self.partner_id.name
             self.phone = self.partner_id.phone or self.partner_id.mobile
@@ -142,6 +150,7 @@ class FrontdeskVisitor(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        """Create visitor records with generated references and visitor-type-specific defaults."""
         is_manager = self.env.user.has_group('cyllo_front_desk.group_frontdesk_admin')
         for vals in vals_list:
             if 'user_id' in vals and vals.get('user_id') != self.env.user.id and not is_manager:
@@ -171,6 +180,7 @@ class FrontdeskVisitor(models.Model):
         return records
 
     def write(self, vals):
+        """Update visitor records while enforcing user assignment and station selection rules."""
         if 'user_id' in vals and not self.env.user.has_group('cyllo_front_desk.group_frontdesk_admin'):
             raise UserError(_("Only a Front Desk Manager can modify the assigned user."))
 
@@ -209,6 +219,7 @@ class FrontdeskVisitor(models.Model):
             visitor._message_log(body=_("Meeting approval request sent to %s.") % visitor.host_id.name)
 
     def action_check_in(self):
+        """Check in visitors, record the check-in time, and send notifications."""
         for visitor in self:
             visitor.write({
                 'state': 'checked_in',
@@ -218,6 +229,7 @@ class FrontdeskVisitor(models.Model):
             visitor._send_notifications()
 
     def action_check_out(self):
+        """Check out visitors and record their check-out time and visit duration."""
         for visitor in self:
             if visitor.state != 'checked_in':
                 raise UserError(_('Only checked in visits can be checked out.'))
@@ -228,6 +240,7 @@ class FrontdeskVisitor(models.Model):
             visitor._message_log(body=_("Visitor checked out. Duration: %s hours.") % round(visitor.duration, 2))
 
     def action_cancel(self):
+        """Cancel visitor visits that have not already been checked out."""
         for visitor in self:
             if visitor.state == 'checked_out':
                 raise UserError(_('You cannot cancel a visit that is already checked out.'))
@@ -237,11 +250,13 @@ class FrontdeskVisitor(models.Model):
             visitor._message_log(body=_("Visit cancelled."))
 
     def action_drink_served(self):
+        """Mark the requested drink as served and log the action in the visitor chatter."""
         for visitor in self:
             visitor.write({'drink_served': True})
             visitor._message_log(body=_("Drink served: %s") % (visitor.drink_id.name or _("N/A")))
 
     def action_create_enquiry(self):
+        """Open the enquiry creation wizard for a visitor registered with the enquiry type."""
         self.ensure_one()
         if self.visitor_type != 'enquiry':
             raise UserError(_("Only enquiry visitors can create an enquiry."))
@@ -265,6 +280,7 @@ class FrontdeskVisitor(models.Model):
         }
 
     def _format_datetime(self, dt):
+        """Convert a datetime to the appropriate timezone and format it for display."""
         if not dt:
             return ""
         tz = self.env.user.tz or self.host_id.user_id.tz or 'UTC'
@@ -282,6 +298,7 @@ class FrontdeskVisitor(models.Model):
         return local_dt.strftime('%d-%b-%Y %I:%M %p')
 
     def send_approval_request_email(self):
+        """Send meeting approval emails to assigned hosts who have not received a request."""
         for visitor in self:
             if not visitor.host_id or not visitor.host_id.work_email or visitor.is_approval_email_sent:
                 continue

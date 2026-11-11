@@ -31,6 +31,7 @@ class PurchaseOrderLine(models.Model):
         string="Purchase Warranty Expiration Date",
         compute='_compute_purchase_warranty_expiration_date',
         store=True,
+        readonly=False,
     )
     warranty_extension_days = fields.Integer(
         string="Warranty Extension (Days)",

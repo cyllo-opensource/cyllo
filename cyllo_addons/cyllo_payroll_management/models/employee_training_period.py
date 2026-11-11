@@ -19,9 +19,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import datetime
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-import datetime
 
 
 class EmployeeTrainingPeriod(models.Model):

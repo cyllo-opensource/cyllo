@@ -23,7 +23,6 @@ from unittest.mock import Mock
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import UserError
 from odoo.fields import Datetime
-from odoo import _
 from odoo.http import _request_stack
 from odoo.addons.cyllo_front_desk.controllers.main import FrontdeskMeetingController
 

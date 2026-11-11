@@ -83,7 +83,6 @@
         'wizards/employee_payslip_batch_list.xml',
         'wizards/hr_advance_salary_close.xml',
         'reports/report_employee_payslip.xml',
-        'views/hr_payroll_dashboard_views.xml',
         'views/hr_advance_salary_views.xml',
         'views/salary_calculator_views.xml',
         'views/hr_employee_payroll_view.xml',
@@ -93,17 +92,9 @@
         'views/commission_report_views.xml',
 
     ],
-    'assets': {
-        'web.assets_backend': [
-            'cyllo_payroll_management/static/src/css/payroll_dashboard.css',
-            'cyllo_payroll_management/static/src/js/payroll_dashboard.js',
-            'cyllo_payroll_management/static/src/xml/payroll_dashboard.xml',
-        ],
-    },
+
     'license': 'LGPL-3',
     'installable': True,
     'application': True,
     'auto_install': False,
-    'post_init_hook': 'post_init_hook',
-    'uninstall_hook': 'uninstall_hook',
 }

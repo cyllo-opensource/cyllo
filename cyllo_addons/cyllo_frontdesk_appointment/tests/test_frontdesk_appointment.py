@@ -19,6 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from datetime import timedelta
+
+from odoo import fields
 from odoo.tests.common import TransactionCase
 
 class TestFrontdeskAppointment(TransactionCase):
@@ -44,16 +47,22 @@ class TestFrontdeskAppointment(TransactionCase):
             'name': 'Test App Type',
             'station_id': cls.station.id,
             'duration': 1.0,
+            # These workflow tests use fixed appointment dates, so disable
+            # booking notice validation for this test-only appointment type.
+            'min_booking_notice': 0.0,
         })
 
     def test_01_appointment_creates_visitor(self):
         """Test that confirming an appointment creates a visitor at the linked station."""
+        start_datetime = fields.Datetime.now() + timedelta(hours=2)
+        end_datetime = start_datetime + timedelta(hours=1)
+
         appointment = self.env['appointment.appointment'].create({
             'partner_id': self.partner.id,
             'appointment_type_id': self.app_type.id,
-            'start_datetime': '2026-07-01 10:00:00',
-            'end_datetime': '2026-07-01 11:00:00',
-            'staff_id' : self.employee.id
+            'start_datetime': start_datetime,
+            'end_datetime': end_datetime,
+            'staff_id': self.employee.id,
         })
         appointment.write({'state': 'confirmed'})
         visitor = self.env['frontdesk.visitor'].search([('appointment_id', '=', appointment.id)])
@@ -63,11 +72,14 @@ class TestFrontdeskAppointment(TransactionCase):
 
     def test_02_visitor_checkin_starts_appointment(self):
         """Test that checking in a visitor moves the appointment to 'in_progress'."""
+        start_datetime = fields.Datetime.now() + timedelta(hours=2)
+        end_datetime = start_datetime + timedelta(hours=1)
+
         appointment = self.env['appointment.appointment'].create({
             'partner_id': self.partner.id,
             'appointment_type_id': self.app_type.id,
-            'start_datetime': '2026-07-01 10:00:00',
-            'end_datetime': '2026-07-01 11:00:00',
+            'start_datetime': start_datetime,
+            'end_datetime': end_datetime,
             'staff_id': self.employee.id,
         })
         appointment.write({'state': 'confirmed'})
@@ -80,13 +92,16 @@ class TestFrontdeskAppointment(TransactionCase):
 
     def test_03_visitor_checkout_completes_appointment(self):
         """Test that checking out a visitor moves the appointment to 'done'."""
+        start_datetime = fields.Datetime.now() + timedelta(hours=2)
+        end_datetime = start_datetime + timedelta(hours=1)
+
         appointment = self.env['appointment.appointment'].create({
             'partner_id': self.partner.id,
             'appointment_type_id': self.app_type.id,
-            'start_datetime': '2026-07-01 10:00:00',
-            'end_datetime': '2026-07-01 11:00:00',
+            'start_datetime': start_datetime,
+            'end_datetime': end_datetime,
             'staff_id': self.employee.id,
-            'state': 'confirmed'
+            'state' : 'confirmed'
         })
         
         visitor = self.env['frontdesk.visitor'].search([('appointment_id', '=', appointment.id)])
@@ -98,13 +113,16 @@ class TestFrontdeskAppointment(TransactionCase):
 
     def test_04_visitor_cancel_cancels_appointment(self):
         """Test that canceling a visitor cancels the linked appointment."""
+        start_datetime = fields.Datetime.now() + timedelta(hours=2)
+        end_datetime = start_datetime + timedelta(hours=1)
+
         appointment = self.env['appointment.appointment'].create({
             'partner_id': self.partner.id,
             'appointment_type_id': self.app_type.id,
-            'start_datetime': '2026-07-01 10:00:00',
-            'end_datetime': '2026-07-01 11:00:00',
+            'start_datetime': start_datetime,
+            'end_datetime': end_datetime,
             'staff_id': self.employee.id,
-            'state': 'confirmed'
+            'state' : 'confirmed'
         })
         visitor = self.env['frontdesk.visitor'].search([('appointment_id', '=', appointment.id)])
         visitor.action_cancel()
@@ -133,12 +151,15 @@ class TestFrontdeskAppointment(TransactionCase):
 
     def test_06_appointment_state_changes_visitor(self):
         """Test that appointment state changes affect the visitor."""
+        start_datetime = fields.Datetime.now() + timedelta(hours=2)
+        end_datetime = start_datetime + timedelta(hours=1)
+
         appointment = self.env['appointment.appointment'].create({
             'partner_id': self.partner.id,
             'appointment_type_id': self.app_type.id,
-            'start_datetime': '2026-07-01 10:00:00',
-            'end_datetime': '2026-07-01 11:00:00',
-            'staff_id': self.employee.id
+            'start_datetime': start_datetime,
+            'end_datetime': end_datetime,
+            'staff_id': self.employee.id,
         })
         appointment.write({'state': 'confirmed'})
         visitor = self.env['frontdesk.visitor'].search([('appointment_id', '=', appointment.id)])
