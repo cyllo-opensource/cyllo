@@ -30,12 +30,12 @@ export class SheetTreeEditor extends TreeEditor {
             return {
                 component: Select,
                 extractProps: ({ value, update }) => ({
-                    value: value || "this_month",
+                    value: PERIOD_OPTIONS.some(([v]) => v === value) ? value : "this_month",
                     update,
                     options: PERIOD_OPTIONS.map(([v, l]) => [v, _t(l)]),
                 }),
                 defaultValue: () => "this_month",
-                isSupported: (value) => typeof value === "string",
+                isSupported: (value) => PERIOD_OPTIONS.some(([v]) => v === value),
                 message: "",
                 stringify: (value) => {
                     const opt = PERIOD_OPTIONS.find(([v]) => v === value);

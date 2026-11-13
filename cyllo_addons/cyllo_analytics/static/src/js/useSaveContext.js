@@ -36,14 +36,17 @@ export function useSaveContext() {
     const context = component.props.action?.context
     var key = false;
     if (context) {
-        var id = context?.rec_id
+        var id = context?.rec_id;
         id = (id === undefined) ? context.id : id;
-        key = `${session.db}_${component.props.action.tag}`
+        var deck_id = context?.deck_id;
+        key = `${session.db}_${component.props.action.tag}`;
         if (context.is_new_sheet) {
-            removeFromSessionStorage(key)
-            id = false
+            removeFromSessionStorage(key);
+            id = false;
+        } else if (deck_id) {
+            saveToSessionStorage(key, { deck_id, id: false, mode: "deck" });
         } else if (id) {
-            saveToSessionStorage(key, {id})
+            saveToSessionStorage(key, { id, deck_id: false, mode: "quick" });
         }
     }
     const saveManually = (value, keyWord="id") => saveToSessionStorage(key, {[keyWord]: value})
@@ -59,6 +62,6 @@ export function useSaveContext() {
         key = useDB ? `${session.db}_${key}`: key
         return getFromSessionStorage(key)
     }
-    var returnValue = key ? getFromSessionStorage(key) : { id: false }
-    return { ...returnValue, saveManually, removeManually, getKeyValue, saveToSession }
+    var returnValue = key ? getFromSessionStorage(key) : { id: false, deck_id: false }
+    return { id: false, deck_id: false, ...returnValue, saveManually, removeManually, getKeyValue, saveToSession }
 }

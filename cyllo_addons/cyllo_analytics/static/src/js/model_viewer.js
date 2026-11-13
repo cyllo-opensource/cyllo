@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { LinkSelectDialog } from "./LinkSelectDialog";
 import { convertToTitleCase } from "./chart_maker"
+import { _t } from "@web/core/l10n/translation";
 
 const { Component, useState, onWillStart, useEffect, onWillUpdateProps } = owl
 
@@ -64,17 +65,15 @@ export class ModelViewer extends Component {
         }
     }
     constructErrorMessage(data) {
-        var message = `
-            Can't delete the model because of the dependencies shown below
-            Please remove them first to delete the model
-        `
+        var message = _t("Can't delete the model because of the dependencies shown below. Please remove them first to delete the model.")
+        const modelLabel = _t("Model")
         data.fields.forEach(field => {
             message += '\n'
             message += `${convertToTitleCase(field.type)}: ${field.value}`
         })
         data.models.forEach(model => {
             message += '\n'
-            message += `Model: ${model.name}`
+            message += `${modelLabel}: ${model.name}`
         })
         this.showMessage(message, 'danger')
     }
@@ -142,7 +141,7 @@ export class ModelViewer extends Component {
                 this.state.can_select = this.state.models.length < this.limit
             }
             else if ((inverse_field_list.length + field_list.length) == 0) {
-                this.showMessage('No link field found', 'danger')
+                this.showMessage(_t("No link field found"), 'danger')
                 return
             } else {
                 this.dialog.add(LinkSelectDialog, {

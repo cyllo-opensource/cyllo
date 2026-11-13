@@ -7,6 +7,7 @@ import { CharField } from "@web/views/fields/char/char_field";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
+import { _t } from "@web/core/l10n/translation";
 
 
 export class MenuTreeNode extends Component {
@@ -50,7 +51,7 @@ export class MenuDialog extends Component {
         try {
             this.state.apps = await this.orm.call("dashboard.config", "get_app_menus", [null]);
         } catch (e) {
-            this.notification.add('Failed to load apps.', { type: 'danger' });
+            this.notification.add(_t("Failed to load apps."), { type: 'danger' });
         }
     }
     async onAppChange(ev) {
@@ -96,7 +97,7 @@ export class MenuDialog extends Component {
                 this.state.isDropped = true;
                 this.addTempNodeToTree(this.state.targetParentId, newSeq);
             } catch (e) {
-                this.notification.add('Failed to load menu structure.', { type: 'danger' });
+                this.notification.add(_t("Failed to load menu structure."), { type: 'danger' });
             }
         }
     }
@@ -259,7 +260,7 @@ export class MenuDialog extends Component {
         this.state.targetSequence = 999; // Append at the end of the chosen parent
         this.state.isDropped = true;
         this.addTempNodeToTree(parentId, 999);
-        this.notification.add('Target set!', { type: 'success' });
+        this.notification.add(_t("Target set!"), { type: 'success' });
     }
     resetDrop(ev) {
         if (ev) ev.stopPropagation();
@@ -327,11 +328,11 @@ export class MenuDialog extends Component {
     }
     async handleConfirm() {
         if (!this.data.name) {
-            this.notification.add('Please provide a name', { type: 'danger' })
+            this.notification.add(_t("Please provide a name"), { type: 'danger' })
             return
         }
         if (!this.state.targetParentId) {
-            this.notification.add('Please select a parent menu by dragging the item.', { type: 'danger' })
+            this.notification.add(_t("Please select a parent menu by dragging the item."), { type: 'danger' })
             return
         }
         const action = await this.createAction();

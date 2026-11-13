@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- The editor itself. Opened with a deck_id to edit a saved deck, or a
+         dashboard_id to start a new one for that dashboard. -->
+    <record id="action_presentation_editor" model="ir.actions.client">
+        <field name="name">Presentation Editor</field>
+        <field name="tag">cy_presentation_editor</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- The list of saved decks, so a deck can be found again without
+         remembering which dashboard it came from. -->
+    <record id="view_presentation_deck_list" model="ir.ui.view">
+        <field name="name">dashboard.presentation.deck.list</field>
+        <field name="model">dashboard.presentation.deck</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="dashboard_config_ids" widget="many2many_tags"/>
+                <button name="action_open_editor" type="object"
+                        string="Edit Slides" icon="fa-pencil-square-o"/>
+                <button name="action_present" type="object"
+                        string="Present" icon="fa-play"/>
+                <field name="slide_count" string="Slides"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="write_date" string="Last Edited"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_presentation_deck_form" model="ir.ui.view">
+        <field name="name">dashboard.presentation.deck.form</field>
+        <field name="model">dashboard.presentation.deck</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_editor" type="object"
+                            string="Open Editor" class="btn-primary"
+                            invisible="not id"/>
+                    <button name="action_present" type="object"
+                            string="Present" invisible="not id"/>
+</header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Presentation name"/></h1>
+                    </div>
+                    <group>
+                        <!-- Several, because a monthly pack rarely comes from
+                             one dashboard. Every chart and note on any of
+                             them is offered in the editor. -->
+                        <field name="dashboard_config_ids"
+                               widget="many2many_tags"
+                               options="{'no_create': True}"
+                               placeholder="Dashboards to draw charts from leave it blank to access all sheets"/>
+                        <field name="user_id"/>
+                        <field name="slide_count"/>
+                    </group>
+                    <notebook>
+                        <page string="Slides">
+                            <field name="slide_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_presentation_deck" model="ir.actions.act_window">
+        <field name="name">Presentations</field>
+        <field name="res_model">dashboard.presentation.deck</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No presentations yet</p>
+            <p>A presentation is a set of slides you arrange yourself — drag
+            charts and notes where you want them, resize them, and reopen the
+            deck later exactly as you left it.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_presentation_deck"
+              name="Presentations"
+              parent="cyllo_analytics.menu_configuration"
+              action="action_presentation_deck"
+              groups="cyllo_analytics.group_cyllo_analytics_user"
+              sequence="40"/>
+
+</odoo>

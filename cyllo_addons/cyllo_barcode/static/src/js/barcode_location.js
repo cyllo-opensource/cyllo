@@ -5,6 +5,7 @@ import {Component, onWillStart, useEffect, useRef, useState} from "@odoo/owl";
 import {useBus, useService} from "@web/core/utils/hooks";
 import {CylloBarcodeLocationLines} from "./barcode_location_lines"
 import {jsonrpc} from "@web/core/network/rpc_service";
+import { _t } from "@web/core/l10n/translation";
 
 const DEFAULT_FUNCTIONS = [
     'action_main_menu', 'action_validate',
@@ -94,7 +95,10 @@ export class CylloBarcodeLocation extends Component {
 
     async action_put_in_pack() {
         await this.doActionButton("action_put_in_pack", {}, false)
-        this.showNotification("Pack is assigned to the scanned products", "success")
+        this.showNotification(
+            _t("Pack is assigned to the scanned products"),
+            "success"
+        );
         await this.notify()
     }
 
@@ -271,7 +275,7 @@ export class CylloBarcodeLocation extends Component {
                 await this.assignBarcode(response)
                 await this.notify()
                 this.assignRecent("stock.lot", "")
-            } else this.showNotification("Nothing has been found for this barcode")
+            } else this.showNotification(_t("Nothing has been found for this barcode"))
         }
     }
 
@@ -299,10 +303,10 @@ export class CylloBarcodeLocation extends Component {
         switch (response.res_model) {
             case "product.product":
                 if (this.barcodeState.lastScanTracking === "lot" && this.barcodeState.lastScannedProduct[0] !== response.data[0].id) {
-                    return this.showNotification("Please scan a Lot number before scanning new products")
+                    return this.showNotification(_t("Please scan a Lot number before scanning new products"))
                 }
                 if (this.barcodeState.lastScanTracking === "serial") {
-                    return this.showNotification("Please scan a serial number before scanning new products")
+                    return this.showNotification(_t("Please scan a serial number before scanning new products"))
                 } else if (["lot", "none"].includes(this.barcodeState.lastScanTracking)) {
                     await this.addMoveLine(response)
                 }
@@ -310,10 +314,10 @@ export class CylloBarcodeLocation extends Component {
                 break;
             case "stock.location":
                 if (this.barcodeState.lastScanTracking === "lot") {
-                    return this.showNotification("Please scan a Lot number before scanning new products")
+                    return this.showNotification(_t("Please scan a Lot number before scanning new products"))
                 }
                 if (["serial", "lot"].includes(this.barcodeState.lastScanTracking)) {
-                    return this.showNotification("Please scan a serial/lot number for the previous scanned product(s) before scanning the location")
+                    return this.showNotification(_t("Please scan a serial/lot number for the previous scanned product(s) before scanning the location"))
                 }
                 await this.addLocationToLines(response)
                 this.assignRecent("", "")
@@ -326,7 +330,7 @@ export class CylloBarcodeLocation extends Component {
                 break;
             case "stock.quant.package":
                 if (["serial", "lot"].includes(this.barcodeState.lastScanTracking)) {
-                    return this.showNotification("Please scan a serial/lot number for the previous scanned product(s) before scanning the package")
+                    return this.showNotification(_t("Please scan a serial/lot number for the previous scanned product(s) before scanning the package"))
                 } else await this.assignPackage(response)
                 this.assignRecent(response.res_model, "")
                 break;
@@ -338,8 +342,8 @@ export class CylloBarcodeLocation extends Component {
     async _processPackageScan(response) {
         switch (response.res_model) {
             case "stock.quant.package":
-                return this.showNotification("You can't Reassign package, " +
-                    "Please scan a location for the package or scan a product.")
+                return this.showNotification(_t("You can't Reassign package, " +
+                    "Please scan a location for the package or scan a product."))
             case "stock.location":
                 await this.addLocationToLines(response)
                 break;
@@ -365,7 +369,7 @@ export class CylloBarcodeLocation extends Component {
                 if (["outgoing", "internal"].includes(response.picking_type)) {
                     await this.assignPackage(response);
                 } else if (response.picking_type === "incoming") {
-                    this.showNotification("You can't reassign a package to a moved products.")
+                    this.showNotification(_t("You can't reassign a package to a moved products."))
                 }
                 break;
             default:
@@ -377,7 +381,7 @@ export class CylloBarcodeLocation extends Component {
     async _processSerialNLotScan(response) {
         switch (response.res_model) {
             case "stock.lot":
-                await this.showNotification("You can't reassign Serial/Lot.")
+                await this.showNotification(_t("You can't reassign Serial/Lot."))
                 break;
             case "product.product":
                 await this.addMoveLine(response)
@@ -395,7 +399,7 @@ export class CylloBarcodeLocation extends Component {
     }
 
     get nextInstruction() {
-        let instruction = "Scan Product or Serial/Lot."
+        let instruction = _t("Scan Product or Serial/Lot.")
         if (this.barcodeState.recentScan === "product.product") {
             switch (this.barcodeState.lastScanTracking) {
                 case "serial":
@@ -415,7 +419,7 @@ export class CylloBarcodeLocation extends Component {
             }
             else return "Scan Product or Serial/Lot or package or destination location."
         } else if (this.barcodeState.recentScan === "stock.location") {
-            return this.barcodeState.pickingType in ["incoming", "outgoing"] ? "Scan Product or Serial/Lot or Package." : "Scan Product or Serial/Lot"
+            return ["incoming", "outgoing"].includes(this.barcodeState.pickingType) ? "Scan Product or Serial/Lot or Package." : "Scan Product or Serial/Lot"
         } else if (this.barcodeState.recentScan === "stock.quant.package") {
             if (this.barcodeState.pickingType == 'internal'){
                 return "Scan Product or Serial/Lot or package or source location."
@@ -430,7 +434,7 @@ export class CylloBarcodeLocation extends Component {
             await this.addMoveLine(response)
             let product = response.res_model === "product.product" ? [response.data[0].id] : false
             this.assignRecent(response.res_model, response.data[0].tracking, product)
-        } else return this.showNotification("Scan Products or Serial number first")
+        } else return this.showNotification(_t("Scan Products or Serial number first"))
     }
 
     async processPicking(response) {
@@ -444,7 +448,7 @@ export class CylloBarcodeLocation extends Component {
             await this._processSerialNLotScan(response)
         } else {
             await this._processDefaultScan(response)
-            this.barcodeState.message = "You can scan a new product"
+            this.barcodeState.message = _t("You can scan a new product")
         }
     }
 
@@ -459,7 +463,7 @@ export class CylloBarcodeLocation extends Component {
     async addLocationToLines(data) {
         await this._callBackend(data, "add_stock_location");
         if (this.barcodeState.recentScan !== "stock.location" && this.barcodeState.pickingType === "internal") {
-            this.showNotification("Source location has been applied to scanned products/package, now you can scan destination location if you want to.", 'success')
+            this.showNotification(_t("Source location has been applied to scanned products/package, now you can scan destination location if you want to."), 'success')
         }
         this.getData()
     }

@@ -20,6 +20,7 @@
 #
 #############################################################################
 from odoo.tests.common import TransactionCase
+from odoo.tools import mute_logger
 
 
 class TestDashboardTheme(TransactionCase):
@@ -53,7 +54,7 @@ class TestDashboardTheme(TransactionCase):
     # TEST 02: Required field name
     # ---------------------------------------------------------
     def test_02_name_required(self):
-        with self.assertRaises(Exception):
+        with mute_logger('odoo.sql_db'), self.assertRaises(Exception):
             self.DashboardTheme.create({
                 "background": "#ffffff",
             })

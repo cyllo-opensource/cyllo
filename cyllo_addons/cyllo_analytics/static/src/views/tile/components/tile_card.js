@@ -1,6 +1,8 @@
 /* @odoo-module */
 import { useService } from "@web/core/utils/hooks";
+import { _t } from "@web/core/l10n/translation";
 import { SheetDeleteDialog } from "@cyllo_analytics/js/cyllo_sheet";
+import { TileRenameDialog } from "./tile_rename_dialog";
 import { Component } from "@odoo/owl";
 import { getImageSrcFromRecordInfo } from "@web/views/kanban/kanban_record";
 
@@ -40,6 +42,15 @@ export class TileCard extends Component {
                 }
             })
         }
+    }
+    /** Rename in place, so the name can be fixed without opening the record. */
+    onClickRename() {
+        const { value: { data } } = this.props
+        this.dialogService.add(TileRenameDialog, {
+            name: data.name,
+            title: _t("Rename"),
+            onConfirm: (name) => this.props.onRename(this.props, name),
+        })
     }
     onClickDelete() {
         const { value: { data } } = this.props

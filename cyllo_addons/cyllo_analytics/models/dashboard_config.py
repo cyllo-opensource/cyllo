@@ -353,7 +353,7 @@ class DashboardConfig(models.Model):
         """Get the dashboard data for json export"""
         return {
             "sheets": self.get_data(
-                ["name", "query", "dimension", "measure", "type",
+                ["name", "query", "query_gen", "dimension", "measure", "type",
                  "dimension_axis", "image_1920", "kpi_name",
                  "kpi_target", "is_enabled", "kpi_redirect",
                  "kpi_view", "kpi_description", "kpi_target_perc",
@@ -363,6 +363,27 @@ class DashboardConfig(models.Model):
             "image_1920": self.image_1920,
             "limit": self.limit,
         }
+
+    def _resolve_preset(self, preset_value):
+        """Map an exported preset reference onto a preset in *this* database.
+
+        read() serialises a Many2one as [id, display_name]. Only the name is
+        portable across databases, so the id is used purely as a fallback for
+        same-database imports and dropped when it does not resolve.
+        """
+        if not preset_value:
+            return False
+        if isinstance(preset_value, (list, tuple)):
+            preset_id, preset_name = (list(preset_value) + [None, None])[:2]
+            if preset_name:
+                preset = self.env['calculation.preset'].search(
+                    [('name', '=', preset_name)], limit=1)
+                if preset:
+                    return preset.id
+        else:
+            preset_id = preset_value
+        return preset_id if preset_id and self.env[
+            'calculation.preset'].browse(preset_id).exists() else False
 
     @api.model
     def import_data(self, data):
@@ -384,16 +405,30 @@ class DashboardConfig(models.Model):
                     "limit": sheet["limit"] or 0,
                     "kpi_target": sheet.get("kpi_target", False),
                     "kpi_view": sheet.get("kpi_view", False),
-                    "kpi_redirect": sheet.get("kpi_target", False),
+                    "kpi_redirect": sheet.get("kpi_redirect", False),
                     "kpi_icon": sheet.get("kpi_icon", False),
+                    "kpi_name": sheet.get("kpi_name", False),
+                    "kpi_target_perc": sheet.get("kpi_target_perc", False),
                     "kpi_description": sheet.get("kpi_description", False),
+                    "query_gen": sheet.get("query_gen", False),
                     "is_enabled": sheet["is_enabled"],
                     "axis_ids": [fields.Command.create({
                         "value": rec['value'],
                         "alias": rec['alias'],
                         "query": rec['query'],
+                        "monetaryInBase": rec.get('monetaryInBase', False),
                         "column": rec['column'],
+                        "source_column": rec.get('source_column', False),
+                        "date_group": rec.get('date_group', False),
                         "type": rec['type'],
+                        "sort_desc": rec.get('sort_desc', False),
+                        "is_preset": rec.get('is_preset', False),
+                        "raw_formula": rec.get('raw_formula', False),
+                        "variables": rec.get('variables', False),
+                        "calculation_type": rec.get('calculation_type', False),
+                        "aggregate_func": rec.get('aggregate_func', False),
+                        "variable_configs": rec.get('variable_configs', False),
+                        "preset_id": self._resolve_preset(rec.get('preset_id')),
                     }) for rec in sheet["axis_ids"]],
                     "dashboard_sheet_option_ids": [fields.Command.create({
                         "attributes": rec["attributes"],
@@ -413,6 +448,19 @@ class DashboardConfig(models.Model):
                         "domain": filter_data.get("domain", False),
                         "is_active": filter_data.get("is_active", False),
                     }) for filter_data in sheet["filter_ids"]],
+                    "color_mapping_ids": [fields.Command.create({
+                        "measure_alias": cm.get("measure_alias", False),
+                        "min_value": cm.get("min_value", 0.0),
+                        "max_value": cm.get("max_value", False),
+                        "color": cm.get("color", False),
+                        "indicator": cm.get("indicator", False),
+                        "notes": cm.get("notes", False),
+                    }) for cm in sheet.get("color_mappings", [])],
+                    "annotation_ids": [fields.Command.create({
+                        "measure_alias": an.get("measure_alias", False),
+                        "dimension_label": an.get("dimension_label", False),
+                        "notes": an.get("notes", False),
+                    }) for an in sheet.get("annotations", [])],
                 }) for sheet in data["sheets"]]
             })
             return True, ""

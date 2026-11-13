@@ -22,6 +22,7 @@ import { SheetFilterDomain } from "./sheet_filter/sheetFilterDomain";
 import { PresetApplyDialog } from "@cyllo_analytics/js/presets/preset_apply_dialog";
 import { FieldTraversalDialog } from "./FieldTraversalDialog";
 import { generateSqlAlias } from "@cyllo_analytics/js/utils";
+import { NO_COLOR_MAPPING_TYPES } from "@cyllo_analytics/js/chart_maker";
 const { Component, useState, onWillStart, useEffect, onWillDestroy, onMounted, useRef } = owl
 
 
@@ -139,7 +140,6 @@ export class CylloSheet extends Component {
             is_enable: false,
             limit: 0
         }
-        this.filterOptions = {}
         this.state = useState({
             name: '',
             models: [],
@@ -153,6 +153,7 @@ export class CylloSheet extends Component {
             selectedType: [1, 'line'],
             configs: [],
             globalFilters: [],
+            filterOptions: {},
             activeFilterGroup: null,
             filterModalPos: { top: 100, left: 300 },
             image: "",
@@ -190,6 +191,7 @@ export class CylloSheet extends Component {
             recordValue: 1
         })
         this._configLoaded = false
+        this.hiddenFields = this._emptyHiddenFields()
         useBus(this.env.bus, "CY:UPDATE_UNLINKS", (ev) => {
             var { type, id } = ev.detail
             this.unlinkList[type].push(id)
@@ -546,7 +548,7 @@ export class CylloSheet extends Component {
 
             this.env.bus.trigger("CY:SYNC_CHILDREN", { targetType: type, children: this.query_data[type] });
             this.genQuery();
-            this.showMessage(`Formula for "${measureObj.value}" updated`, "success");
+            this.showMessage(_t('Formula for "%s" updated', measureObj.value), "success");
             this.orm.call("calculation.preset", "get_all_presets", [this.id || false]).then(presets => {
                 this.state.allDbPresets = presets || [];
             });
@@ -714,18 +716,33 @@ export class CylloSheet extends Component {
 
             this.genQuery();
             this.env.bus.trigger("CY:SYNC_CHILDREN", { targetType, children: this.query_data[targetType] });
-            this.showMessage(`Preset "${value}" re-initialized`, "success");
+            this.showMessage(_t('Preset "%s" re-initialized', value), "success");
         } catch (e) {
-            this.showMessage(`Failed to re-initialize preset: ${e.message || 'Check logs'}`, "danger");
+            this.showMessage(_t("Failed to re-initialize preset: %s", e.message || _t("Check logs")), "danger");
             console.error(e);
         }
     }
 
-    get yZoneInfo() {
-        return {
-            condition: this.state.selectedType[1] === "pictorialBar" && this.query_data.measure.length < 2,
-            message: "Two Measures are required.",
-            className: "dropzone-warning-panel"
+    /**
+     * Whether the selected chart type draws Color Mapping rules.
+     */
+    get supportsColorMapping() {
+        return !NO_COLOR_MAPPING_TYPES.includes(this.state.selectedType[1]);
+    }
+
+    /**
+     * Warn once, as a notification, when a Pictorial Bar has fewer than the
+     * two measures it needs, naming the axis that holds the measures.
+     */
+    _warnPictorialBarMeasures() {
+        if (this.state.selectedType[1] !== "pictorialBar" || this.query_data.measure.length >= 2) {
+            this.pictorialBarWarned = false;
+            return;
+        }
+        if (!this.pictorialBarWarned) {
+            const axis = this.query_data.dimension_axis === "x" ? "Y" : "X";
+            this.showMessage(_t("Pictorial Bar needs two measures. Add another measure to the %s axis.", axis), "warning");
+            this.pictorialBarWarned = true;
         }
     }
 
@@ -920,7 +937,7 @@ export class CylloSheet extends Component {
                     this.state.previousLimit = this.state.limit;
                 }
                 this.state.limit = 30;
-                let message = `Maximum count of data can be shown in a ${this.state.selectedType[1]} chart is 30`;
+                let message = _t("A %s chart can show at most 30 records.", this.state.selectedType[1]);
                 this.showMessage(message, "warning");
             }
         } else {
@@ -936,6 +953,7 @@ export class CylloSheet extends Component {
             return;
         }
         this.calculateLimit();
+        this._warnPictorialBarMeasures();
         const query_data = this.query_data;
         this.hasMonetary = false;
 
@@ -958,7 +976,7 @@ export class CylloSheet extends Component {
             const hasNoneMeasure = columns.some(item => item.type === 'measure' && (item.aggregate_func === 'NONE' || item.AGG === 'NONE'));
             if (hasNoneMeasure) {
                 if (!this.noneAggregateWarned) {
-                    this.notification.add("Please apply an aggregate function to all measures when using dimensions.", { type: "warning" });
+                    this.notification.add(_t("Please apply an aggregate function to all measures when using dimensions."), { type: "warning" });
                     this.noneAggregateWarned = true;
                 }
                 this.state.query = '';
@@ -1141,9 +1159,7 @@ export class CylloSheet extends Component {
             : ` LIMIT ${this.previewLimit.limit}`;
 
         if (this.state.limit > parseInt(this.previewLimit.limit) || !this.state.limit) {
-            let message = `The data shown in the preview graph is not accurate.
-                The data is limited to ${this.previewLimit.limit} rows or groups. If
-                you want more data to be shown please change the limit in settings`;
+            let message = _t("The data shown in the preview graph is not accurate. The data is limited to %s rows or groups. If you want more data to be shown, please change the limit in settings.", this.previewLimit.limit);
             this.showMessage(message, "warning");
         }
         this.state.previewQuery = `SELECT ${columnStr} FROM ${join} ${where} ${groupBy} ${orderBy}${previewLimit}`;
@@ -1339,36 +1355,7 @@ export class CylloSheet extends Component {
      */
     get getAxisData() {
         const getLimit = (yAxisType) => {
-            let xLimit, yLimit;
-            switch (this.state.selectedType[1].toLowerCase()) {
-                case "gauge":
-                    xLimit = 0;
-                    yLimit = 1;
-                    break;
-                case "kpi":
-                    xLimit = 0;
-                    yLimit = 1;
-                    break;
-                case "heatmap":
-                    xLimit = 1;
-                    yLimit = 2;
-                    break;
-                case "map":
-                    xLimit = 1;
-                    yLimit = 1;
-                    break;
-                case "pictorialbar":
-                    xLimit = 1;
-                    yLimit = 2;
-                    break;
-                case "funnel":
-                    xLimit = 1;
-                    yLimit = 1;
-                    break;
-                default:
-                    xLimit = 1;
-                    yLimit = 5;
-            }
+            const { dimension: xLimit, measure: yLimit } = this._fieldLimits(this.state.selectedType[1]);
             if (yAxisType === "measure") {
                 return { xLimit, yLimit };
             } else {
@@ -1377,12 +1364,6 @@ export class CylloSheet extends Component {
         };
 
         if (this.state.selectedType[1].toLowerCase() === "kpi") {
-            // Force clear the X axis if anything is there
-            if (this.query_data.dimension?.length) {
-                this.query_data.dimension = [];
-            }
-
-            // This object is the return value
             return {
                 x: [],
                 xType: "dimension",
@@ -1393,11 +1374,6 @@ export class CylloSheet extends Component {
             };
         }
         if (this.state.selectedType[1].toLowerCase() === "gauge") {
-            // Force clear dimensions
-            if (this.query_data.dimension?.length) {
-                this.query_data.dimension = [];
-            }
-
             return {
                 x: [],
                 xType: "dimension",
@@ -1465,7 +1441,7 @@ export class CylloSheet extends Component {
         }
         if (this.state.saveClicked) return
         if (!this.state.name) {
-            this.showMessage('Please provide a name first', 'danger')
+            this.showMessage(_t("Please provide a name first"), 'danger')
             return
         }
         this.state.saveClicked = true
@@ -1525,13 +1501,13 @@ export class CylloSheet extends Component {
             this.id = data.rec_id
             this.state.id = data.rec_id
             this.saveManually(this.id)
-            this.showMessage("Saved", "success")
+            this.showMessage(_t("Saved"), "success")
             this.state.need_save = false
             // Just-saved config becomes the clean baseline → hide Save/Discard.
             this._markSaved()
             const { show_position_warning } = data
             if (show_position_warning) {
-                this.showMessage(`As the chart shifted from being a KPI to ${this.state.selectedType[1]}, it required removing the previous positions.`, "warning")
+                this.showMessage(_t("As the chart shifted from being a KPI to %s, it required removing the previous positions.", this.state.selectedType[1]), "warning")
             }
             this.isNewSheet = data.is_new_sheet;
             data.sheet_filter.forEach(item => {
@@ -1541,7 +1517,7 @@ export class CylloSheet extends Component {
             // Refresh axis state from DB so every item has the correct DB id.
             // Without this, groupBy/dimension/measure items stay id-less and
             // the backend creates duplicate records on the next save.
-            await this.updateData()
+            await this.updateData(true)
             // Re-populate globalFilters after reload so filterOptions stays
             // accurate (important for the next Save click).
             await this.globalFilters()
@@ -1552,7 +1528,7 @@ export class CylloSheet extends Component {
         catch (error) {
 
             console.error("Sheet save failed:", error)
-            this.showMessage(`There was an error while saving the record`, "warning")
+            this.showMessage(_t("There was an error while saving the record"), "warning")
         }
         finally {
             this.state.saveClicked = false
@@ -1581,12 +1557,10 @@ export class CylloSheet extends Component {
             }
         });
         this.state.globalFilters = filteredDict
-
-        // Auto-populate default filters so that saving without opening the
-        // modal still persists the defaults to the database.
         if (Array.isArray(this.filterOptions) || !this.filterOptions) {
             this.filterOptions = {};
         }
+        const wasDirty = this.isDirty;
         for (const group of Object.values(this.state.globalFilters)) {
             for (const filter of group) {
                 if (!this.filterOptions[filter.id]) {
@@ -1594,6 +1568,9 @@ export class CylloSheet extends Component {
                     this.getDefaultOption(options, filter);
                 }
             }
+        }
+        if (!wasDirty) {
+            this._markSaved();
         }
     }
 
@@ -1605,9 +1582,10 @@ export class CylloSheet extends Component {
         this.state.image = image
     }
 
-    async updateData() {
+    async updateData(keepHiddenFields = false) {
         if (!this.id) return
         const data = await this.orm.call(this.model, 'get_sheet_data', [this.state.id])
+        this.hiddenFields = keepHiddenFields ? this._unsavedHiddenFields() : this._emptyHiddenFields()
         if (data.has_error.error) {
             const model = data.has_error.value.length > 1 ? "models" : "model"
             this.notification.add(_t(`The sheet cannot display the graph because it is missing some information. It cannot access the ${model}: ${data.has_error.value.join(", ")}.`), { type: "warning" });
@@ -1627,16 +1605,14 @@ export class CylloSheet extends Component {
         this.query_data.join = data.join
         this.query_data.joinData = data.joinData
         // Restore field_type and date grouping state so options and tags persist
-        this.query_data.dimension = data.dimension.map(dim => {
-            if (!dim.field_type && dim.column) {
-                const [tableName, fieldName] = dim.column.split('.')
-                for (const model of data.models) {
-                    if (model.table === tableName && model.fields && model.fields[fieldName]) {
-                        dim.field_type = model.fields[fieldName].type
-                        break
-                    }
-                }
+        const restoreFieldType = (item) => {
+            if (!item.field_type && item.column) {
+                item.field_type = this._fieldTypeOf(item.column, data.models)
             }
+            return item
+        }
+        this.query_data.dimension = data.dimension.map(dim => {
+            restoreFieldType(dim)
             // If there's a matching date groupBy, restore the markers
             const dateGroup = data.groupBy.find(g => g.source_column === dim.column && g.date_group)
             if (dateGroup) {
@@ -1648,14 +1624,21 @@ export class CylloSheet extends Component {
             dim.rawFormula = dim.raw_formula;
             return dim
         })
+        const isGrouping = data.groupBy.length > 0 || data.measure.some(
+            msr => msr.aggregate_func && msr.aggregate_func !== 'NONE'
+        );
         this.query_data.measure = data.measure.map(msr => {
             // Map backend snake_case to frontend camelCase for presets
             msr.isPreset = msr.is_preset;
             msr.rawFormula = msr.raw_formula;
+            if (!msr.isPreset && !msr.rawFormula && (!msr.aggregate_func || msr.aggregate_func === 'NONE')) {
+                msr.original_label = this._plainMeasureLabel(msr.value);
+                msr.value = isGrouping ? `SUM(${msr.original_label})` : msr.original_label;
+            }
             return msr;
         });
-        this.query_data.groupBy = data.groupBy
-        this.query_data.orderBy = data.orderBy
+        this.query_data.groupBy = data.groupBy.map(restoreFieldType)
+        this.query_data.orderBy = data.orderBy.map(restoreFieldType)
         this.query_data.dimension_axis = data.dimension_axis
         this.query_data.where = data.where
         this.filterOptions = Array.isArray(data.options) ? {} : (data.options || {})
@@ -1669,8 +1652,57 @@ export class CylloSheet extends Component {
         // Reload DB presets using the confirmed sheet ID
         const dbPresets = await this.orm.call("calculation.preset", "get_all_presets", [this.state.id || false]);
         this.state.allDbPresets = dbPresets || [];
+        this._applyFieldLimits(!keepHiddenFields);
         // Loaded config is the clean baseline — hide Save/Discard until edited.
         this._markSaved();
+    }
+
+    /**
+     * Return the field type of a "table.field" column from the sheet's models,
+     * so saved image fields are grouped by record id again after a reload.
+     */
+    _fieldTypeOf(column, models) {
+        const [tableName, fieldName] = column.split('.')
+        const model = models.find(m => m.table === tableName && m.fields && m.fields[fieldName])
+        return model ? model.fields[fieldName].type : undefined
+    }
+
+    /**
+     * Return a saved measure label without the SUM(...) wrappers the builder
+     * adds while grouping; each save and reload used to add one more.
+     */
+    _plainMeasureLabel(label) {
+        let plain = label || ''
+        while (/^SUM\((.*)\)$/.test(plain)) {
+            plain = plain.replace(/^SUM\((.*)\)$/, '$1')
+        }
+        return plain
+    }
+
+    /**
+     * Return the hidden builder fields without their record ids: saving a
+     * chart removes the fields it does not show, so they are created again
+     * when a chart that shows them is saved.
+     */
+    _unsavedHiddenFields() {
+        const hidden = this._emptyHiddenFields();
+        for (const zone of Object.keys(hidden)) {
+            hidden[zone] = this.hiddenFields[zone].map(field => ({ ...field, id: false }));
+        }
+        return hidden;
+    }
+
+    /**
+     * Global-filter field selections, keyed by global filter id. Backed by
+     * `state.filterOptions` so mutating an entry re-renders the sheet — that is
+     * what makes the Save button appear when a global filter value changes.
+     */
+    get filterOptions() {
+        return this.state.filterOptions;
+    }
+
+    set filterOptions(value) {
+        this.state.filterOptions = value || {};
     }
 
     _canonicalKpi(kpi) {
@@ -1685,6 +1717,23 @@ export class CylloSheet extends Component {
             name: kpi.name || this.state.name,
             icon: kpi.icon || 'ri-time-line',
         };
+    }
+
+    /**
+     * Global-filter selections in a stable, comparable shape: sorted by filter
+     * id and stripped of the `id` that only loaded (already-saved) records
+     * carry, so re-picking the same field does not read as a change.
+     */
+    _canonicalFilterOptions() {
+        const opts = this.filterOptions || {};
+        return Object.keys(opts).sort().map(key => {
+            const option = opts[key] || {};
+            return {
+                global_filter_id: option.global_filter_id ?? key,
+                field: option.field || false,
+                name: option.name || false,
+            };
+        });
     }
 
     /**
@@ -1703,6 +1752,7 @@ export class CylloSheet extends Component {
                 configs: s.configs,
                 kpi: this._canonicalKpi(s.kpiValue),
                 currency: s.currency?.id,
+                options: this._canonicalFilterOptions(),
                 dimension: qd.dimension,
                 measure: qd.measure,
                 groupBy: qd.groupBy,
@@ -1770,18 +1820,60 @@ export class CylloSheet extends Component {
     onClickSheetType(type) {
         // set the new type
         this.state.selectedType = type;
-
-        // if KPI is selected -> clear X-axis related fields
-        if (type && type[1] && String(type[1]).toLowerCase() === 'kpi') {
-            // clear X axis related arrays so KPI has no X-axis
-            this.query_data.dimension = [];
-            this.query_data.groupBy = [];
-            this.query_data.orderBy = [];
-        }
+        this._applyFieldLimits();
 
         // regenerate chart preview
         this.genQuery();
         this.generateChart();
+    }
+
+    /**
+     * Return an empty store for the builder fields a chart type cannot show.
+     */
+    _emptyHiddenFields() {
+        return { dimension: [], measure: [], groupBy: [], orderBy: [] };
+    }
+
+    /**
+     * Return how many dimensions, measures, group by and order by fields
+     * a chart type can hold.
+     */
+    _fieldLimits(type) {
+        switch (String(type || '').toLowerCase()) {
+            case "gauge":
+                return { dimension: 0, measure: 1, groupBy: 5, orderBy: 1 };
+            case "kpi":
+                return { dimension: 0, measure: 1, groupBy: 0, orderBy: 0 };
+            case "pictorialbar":
+                return { dimension: 1, measure: 2, groupBy: 5, orderBy: 1 };
+            case "map":
+            case "funnel":
+            case "heatmap":
+            case "regressionlinescatter":
+                return { dimension: 1, measure: 1, groupBy: 5, orderBy: 1 };
+            default:
+                return { dimension: 1, measure: 5, groupBy: 5, orderBy: 1 };
+        }
+    }
+
+    /**
+     * Fit the builder fields to the selected chart type. Fields the chart
+     * cannot show are kept in hiddenFields and come back when a chart that
+     * can show them is selected; a field the user set since then wins over
+     * the remembered one. With onlyEmptyZones, only zones the chart has no
+     * room for at all are emptied.
+     */
+    _applyFieldLimits(onlyEmptyZones = false) {
+        const limits = this._fieldLimits(this.state.selectedType[1]);
+        const fieldKey = (field) => field.query || field.column || field.alias;
+        for (const zone of Object.keys(limits)) {
+            const visible = this.query_data[zone] || [];
+            const visibleKeys = new Set(visible.map(fieldKey));
+            const fields = [...visible, ...this.hiddenFields[zone].filter(field => !visibleKeys.has(fieldKey(field)))];
+            const limit = onlyEmptyZones && limits[zone] ? fields.length : limits[zone];
+            this.query_data[zone] = fields.slice(0, limit);
+            this.hiddenFields[zone] = fields.slice(limit);
+        }
     }
 
     async onDashboardSelect(config) {
@@ -1818,7 +1910,7 @@ export class CylloSheet extends Component {
             id: this.id,
             removeManually: this.removeManually.bind(),
             model: this.model,
-            body: `Are you sure you want to delete ${this.state.name}?`,
+            body: _t("Are you sure you want to delete %s?", this.state.name),
             onConfirm: () => {
                 // Cover the sheet while it is torn down and the list reloads.
                 this.state.savingMode = false
@@ -1933,7 +2025,8 @@ export class CylloSheet extends Component {
     }
 
     setContentEmpty() {
-        var axis = [...this.query_data.groupBy, ...this.query_data.orderBy, ...this.query_data.measure, ...this.query_data.dimension]
+        var axis = [...this.query_data.groupBy, ...this.query_data.orderBy, ...this.query_data.measure, ...this.query_data.dimension, ...Object.values(this.hiddenFields).flat()]
+        this.hiddenFields = this._emptyHiddenFields()
         axis.forEach(item => {
             if (item.id) {
                 this.unlinkList.axis.push(item.id)
@@ -2176,7 +2269,7 @@ export class CylloSheet extends Component {
             return;
         }
         this.dialog.add(FieldTraversalDialog, {
-            title: `Select field from ${field.label}`,
+            title: _t("Select field from %s", field.label),
             model_id: model[0].id,
             base_label: field.label,
             targetType: type,
@@ -2228,7 +2321,7 @@ export class CylloSheet extends Component {
             const existingModel = this.state.models.find(m => m.table === step.toTable);
             if (existingModel) {
                 if (existingModel.linked_by?.join && this._normalizeJoin(existingModel.linked_by.join) !== this._normalizeJoin(joinStr)) {
-                    this.showMessage(`"${existingModel.name}" is already linked via a different path.`, "warning");
+                    this.showMessage(_t('"%s" is already linked via a different path.', existingModel.name), "warning");
                 }
                 continue;
             }

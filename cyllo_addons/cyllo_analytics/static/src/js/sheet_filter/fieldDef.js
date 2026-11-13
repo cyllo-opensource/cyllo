@@ -15,7 +15,7 @@ function _getPeriodSql(operator) {
         "this_year": `>= DATE_TRUNC('year', CURRENT_DATE) AND {field} < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'`,
         "last_year": `>= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '1 year' AND {field} < DATE_TRUNC('year', CURRENT_DATE)`,
     };
-    return periodMap[operator] || '= CURRENT_DATE';
+    return periodMap[operator] || periodMap.this_month;
 }
 
 export function getPsqlOperatorsAndValues(fieldDef) {

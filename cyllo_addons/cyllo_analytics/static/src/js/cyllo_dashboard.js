@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { registry } from "@web/core/registry";
+import { NoteDialog } from "./note_dialog"
 import { useService, useBus } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -44,7 +45,7 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         useBus(this.env.bus, "SIDEBAR_MENU_TOGGLE", ({ detail: { isSidebarOn } }) => {
             /*
             * To Resize the charts when the menu is toggled
-            * */
+            */
             if (!this.state.originalWidth) {
                 this.state.originalWidth = this.state.width
             }
@@ -663,32 +664,12 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         this.env.bus.removeEventListener('CHART_PRINT_READY', onChartReady);
         await Promise.all(chartReadyPromises);
 
-        const cutoffImage = (image, rowsToCut, pageHeight) => {
-            var imagePieces = [];
-            var widthOfOnePiece = image.width;
-            var heightOfOnePiece = pageHeight || image.height / rowsToCut;
-            for (var x = 0; x < 1; ++x) {
-                for (var y = 0; y < rowsToCut; ++y) {
-                    var canvas = document.createElement('canvas');
-                    canvas.width = widthOfOnePiece;
-                    canvas.height = heightOfOnePiece;
-                    var context = canvas.getContext('2d');
-                    context.drawImage(
-                        image,
-                        x * widthOfOnePiece,
-                        y * heightOfOnePiece,
-                        widthOfOnePiece,
-                        heightOfOnePiece,
-                        0,
-                        0,
-                        canvas.width,
-                        canvas.height
-                    );
-                    imagePieces.push(canvas.toDataURL('image/png'));
-                }
-            }
-
-            return imagePieces;
+        const cutoffImage = (image, top, height) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(image, 0, top, image.width, height, 0, 0, image.width, height);
+            return canvas.toDataURL('image/png');
         };
         var element = this.graph.el.querySelector('.stack-item');
         element.querySelectorAll('.chart-container-absolute').forEach((item) => {
@@ -696,8 +677,12 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         })
         this.hideDropdown();
         let pdf = new jsPDF(type, 'mm', 'a4');
+        const scale = 1.2;
+        const elementTop = element.getBoundingClientRect().top;
+        const cardsBottom = Math.max(0, ...[...element.querySelectorAll('.chart-container-absolute')]
+            .map((card) => card.getBoundingClientRect().bottom - elementTop));
         html2canvas(element, {
-            scale: 1.2,
+            scale,
             allowTaint: true,
             useCORS: true,
             logging: false,
@@ -705,37 +690,32 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             windowHeight: element.scrollHeight + 1000,
             ignoreElements: (node) => node.classList.contains('ai-btn-class')
         }).then((canvas) => {
-            let imgData = canvas.toDataURL('image/png');
-            let pageWidth = pdf.internal.pageSize.getWidth();
-            let pageHeight = pdf.internal.pageSize.getHeight();
-            let imageWidth = pageWidth - 25;
-            let imageHeight = (imageWidth / canvas.width) * canvas.height;
-            let offsetX = 12;
-            let offsetY = 15;
-            var pdfPages = Math.ceil(imageHeight / pageHeight);
-            var value = 2850
-            if (type === 'l') {
-                imageWidth = pageWidth - 100
-                offsetX = 50;
-                pdfPages = Math.ceil(imageHeight / 250);
-                value = 2000
-            }
-            const canvasData = cutoffImage(canvas, pdfPages, value)
-            for (let i = 0; i < pdfPages; i++) {
-                const pieceOffsetY = i * pageHeight;
-                var pieceHeight = 250;
-                const pieceImgData = canvasData[i];
-                if (i === 0) {
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const imageWidth = type === 'l' ? pageWidth - 100 : pageWidth - 25;
+            const offsetX = type === 'l' ? 50 : 12;
+            const mmPerPx = imageWidth / canvas.width;
+            const contentHeight = cardsBottom
+                ? Math.min(canvas.height, Math.ceil((cardsBottom + 16) * scale))
+                : canvas.height;
+            let sliceTop = 0;
+            let page = 0;
+            while (sliceTop < contentHeight) {
+                const offsetY = page === 0 ? 15 : 5;
+                const sliceHeight = Math.min(
+                    Math.floor((pageHeight - offsetY - 5) / mmPerPx), contentHeight - sliceTop);
+                if (page === 0) {
                     pdf.setFont("helvetica");
                     pdf.setFontType("bold");
                     pdf.setFontSize(9);
                     pdf.text(`${this.name} - This Dashboard Shows Information From ${this.filterData.date_0} To ${this.filterData.date_1}.`, offsetX, 10);
-                }
-                if (i > 0) {
-                    offsetY = 2;
+                } else {
                     pdf.addPage();
                 }
-                pdf.addImage(pieceImgData, 'PNG', offsetX, offsetY, imageWidth, -pieceHeight);
+                pdf.addImage(cutoffImage(canvas, sliceTop, sliceHeight), 'PNG',
+                    offsetX, offsetY, imageWidth, sliceHeight * mmPerPx);
+                sliceTop += sliceHeight;
+                page++;
             }
             this.hideDropdown();
             pdf.save(this.name);
@@ -780,7 +760,7 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
      */
     onDelete() {
         this.dialogService.add(DeleteDialog, {
-            body: `Are You Sure you Want To Delete, ${this.state.name} Dashboard?`,
+            body: _t("Are you sure you want to delete the dashboard %s?", this.state.name),
             id: this.id,
             removeManually: this.removeManually.bind(),
             model: 'dashboard.config'
@@ -831,8 +811,21 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
      * Present the dashboard.
      * @returns {Promise} - A promise for performing the action.
      */
-    onPresent() {
-        if (this.state.showInfo) return;
+    async onPresent() {
+        if (this.state.showInfo) {
+            this.notification.add(
+                _t("Add some charts to this dashboard before presenting it."),
+                { title: _t("Nothing to present"), type: "warning" }
+            );
+            return;
+        }
+        if (!(await this._dashboardHasData())) {
+            this.notification.add(
+                _t("There is no data to show in this dashboard. Change the filter, or add data to the sheets, so they show some data before presenting."),
+                { title: _t("No data to present"), type: "warning" }
+            );
+            return;
+        }
         return this.actionService.doAction({
             target: "current",
             tag: "present_selection",
@@ -841,6 +834,24 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
                 rec_id: this.id
             }
         })
+    }
+
+    /**
+     * Whether at least one sheet on the dashboard returns rows with the current
+     * filters, running the same queries the tiles run. Dashboards whose items
+     * have no query (e.g. text blocks only) are treated as having content.
+     * @returns {Promise<boolean>}
+     */
+    async _dashboardHasData() {
+        const items = (this.state.sortedItems || []).filter((item) => item.query);
+        if (!items.length) {
+            return true;
+        }
+        const results = await Promise.all(items.map((item) =>
+            this.orm.call("dashboard.config", "sql_execute", [item.query.replace(/\n/g, " ")])
+                .catch(() => null)
+        ));
+        return results.some((res) => Array.isArray(res) && res.length > 0);
     }
 
     /**
@@ -903,11 +914,50 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         })
     }
 
-    onDeleteSheet(sheet) {
+    /**
+     * Write or edit the note attached to a sheet.
+     *
+     * The saved value is written back onto the in-memory sheet as well as
+     * the database, so the menu label flips to "Edit Note" and the
+     * presentation picks the note up without re-fetching the dashboard.
+     */
+    onEditNote(sheet) {
+        const filters = sheet.active_filters || this.filters || {};
+        this.dialogService.add(NoteDialog, {
+            sheetId: sheet.id,
+            configId: this.id,
+            filters: {...filters},
+            sheetName: sheet.name,
+            onSaved: (note) => {
+                sheet.note_html = note;
+                this.render(true);
+            },
+        })
+    }
+
+    async presentationsUsing(sheet) {
+        let decks = [];
+        try {
+            decks = await this.orm.call(
+                "dashboard.presentation.deck", "decks_using_sheet", [sheet.id]);
+        } catch (err) {
+            return "";
+        }
+        if (!decks || !decks.length) {
+            return "";
+        }
+        const where = decks.join(', ');
+        return decks.length > 1
+            ? " " + _t("This sheet is used in the presentations %s and will be missing from them.", where)
+            : " " + _t("This sheet is used in the presentation %s and will be missing from it.", where);
+    }
+
+    async onDeleteSheet(sheet) {
+        const usedIn = await this.presentationsUsing(sheet);
         this.dialogService.add(SheetDeleteDialog, {
             id: sheet.id,
             model: "dashboard.sheet",
-            body: `Are You Sure you Want To Delete ${sheet.name} ?`,
+            body: _t("Are you sure you want to delete %s?", sheet.name) + usedIn,
             removeManually: () => {
                 var index = this.state.sortedItems.indexOf(sheet)
                 this.state.sortedItems.splice(index, 1)
@@ -989,10 +1039,11 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         })
     }
 
-    onHideSheet(sheet) {
+    async onHideSheet(sheet) {
+        const usedIn = await this.presentationsUsing(sheet);
         this.dialogService.add(SheetDeleteDialog, {
-            title: 'Hide',
-            body: `Are You Sure you Want To Hide ${sheet.name} From Dashboard ${this.name} ?`,
+            title: _t("Hide"),
+            body: _t("Are you sure you want to hide %(sheet)s from the dashboard %(dashboard)s?", { sheet: sheet.name, dashboard: this.name }) + usedIn,
             callBackAction: () => {
                 var index = this.state.sortedItems.indexOf(sheet)
                 this.state.sortedItems.splice(index, 1)
@@ -1053,24 +1104,16 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
     _armReveal() {
         if (this._revealArmed) return;
         this._revealArmed = true;
-        // Only echart tiles (GraphTile) have the deferred init + async 'finished'
-        // paint. KPIs and tables paint synchronously, so a dashboard without charts
-        // needs no chart-settle wait.
         this._hasCharts = (this.state.sortedItems || []).some(
             i => i.type !== 'kpi' && i.type !== 'table'
         );
         this._chartsSettled = !this._hasCharts;
-        // Hard cap: never let the overlay hang. Off-screen-only charts (lazy-rendered
-        // on scroll), a chart error, or a missing 'finished' event would otherwise
-        // block reveal forever. Force it after 4s.
         clearTimeout(this._revealCapTimer);
         this._revealCapTimer = setTimeout(() => {
             if (status(this) === 'destroyed') return;
             this._chartsSettled = true;
             this.state.gridRevealed = true;
         }, 4000);
-        // Let the freshly-mounted cards lay out for a couple of frames, then attempt
-        // the first reveal (handles the no-charts / no-KPI case immediately).
         requestAnimationFrame(() => requestAnimationFrame(() => this._tryReveal()));
     }
 

@@ -6,6 +6,7 @@ import {Component, useState, useRef, useEffect} from "@odoo/owl";
 import {useService, useBus} from "@web/core/utils/hooks";
 import {CylloBarcodeAdjustmentLines} from "./barcode_adjustment_lines"
 import {jsonrpc} from "@web/core/network/rpc_service";
+import { _t } from "@web/core/l10n/translation";
 
 export const scrollToView = (selector, args = {}) => {
     const element = document.querySelector(selector);
@@ -82,7 +83,7 @@ export class CylloBarcodeAdjustment extends Component {
             })
         } else {
             self.sound.Danger.play()
-            self.notification.add('Please select minimum one product ', {
+            self.notification.add(_t('Please select minimum one product '), {
                 type: "warning",
                 sticky: false,
             })
@@ -105,7 +106,7 @@ export class CylloBarcodeAdjustment extends Component {
      */
     _onClickScanProduct() {
         this.dialog.add(BarcodeDialog, {
-            title: 'Barcode Scanner',
+            title: _t('Barcode Scanner'),
             ReadBarcode: (result) => {
                 this.ReadBarcode(result)
             }
@@ -134,11 +135,11 @@ export class CylloBarcodeAdjustment extends Component {
             }).then(function (response) {
 
                 if (response.type === 'location') {
-                    self.root.el.querySelector('.adjustment_location_header').innerHTML = '<span class="marquee-text">Scan product from the location ' + response.name + ' <i class="fa fa-barcode"/> </span>'
+                    self.root.el.querySelector('.adjustment_location_header').innerHTML = _t('<span class="marquee-text">Scan product from the location %s <i class="fa fa-barcode"/> </span>', response.name)
                     self.location = response.id
                 } else if (response.type === 'not_storable') {
                     self.sound.Alert.play()
-                    self.notification.add('The product ' + response.name + ' is not a storable product please scan a storable product', {
+                    self.notification.add(_t('The product %s is not a storable product please scan a storable product', response.name), {
                         type: "warning",
                         sticky: false,
                     })
@@ -148,7 +149,7 @@ export class CylloBarcodeAdjustment extends Component {
                 } else if (response.type === 'exist_product') {
                     const taskIndex = self.state.adjust_stock.findIndex(task => task['id'] === response.id);
                     if (response.error){
-                        self.notification.add('The Serial Number ' + response.lot_id + ' is already used in these location(s): ' + response.location_id +'., try again', {
+                        self.notification.add(_t('The Serial Number %s is already used in these location(s): %s., try again', response.lot_id, response.location_id), {
                             type: "warning",
                             sticky: false,
                         })
@@ -164,7 +165,7 @@ export class CylloBarcodeAdjustment extends Component {
                     }
                 } else {
                     self.sound.Alert.play()
-                    self.notification.add('Product or Location is not found, try again', {
+                    self.notification.add(_t('Product or Location is not found, try again'), {
                         type: "warning",
                         sticky: false,
                     })

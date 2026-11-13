@@ -4,6 +4,7 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { useService } from "@web/core/utils/hooks";
 import { MultiRecordSelector } from "@web/core/record_selectors/multi_record_selector";
+import { _t } from "@web/core/l10n/translation";
 
 export class SelectUser extends Component {
     setup() {
@@ -39,11 +40,11 @@ export class SelectUser extends Component {
     sendChart(ev){
         if (this.state.currentValue.length > 0){
             this.props.handleSendToUser({ currentValue: this.state.currentValue })
-            this.notification.add("Message has been sent successfully",{type: "success"})
+            this.notification.add(_t("Message has been sent successfully"),{type: "success"})
             this.props.close();
         }
         else{
-            this.notification.add("Please add a user",{type: "warning"})
+            this.notification.add(_t("Please add a user"),{type: "warning"})
         }
     }
 }

@@ -1588,11 +1588,6 @@ body.cy-presentation-active .o_action_manager> :nth-child(n) {
     color: var(--dashboard-primary-color);
 }
 
-.explain-ai-modal.modal-content {
-    width: 95% !important;
-    left: 5% !important;
-}
-
 .cy-sheet_progress-card.edit_elem {
     background: var(--dashboard-background-color);
 }
@@ -1859,9 +1854,25 @@ body.cy-presentation-active .o_action_manager> :nth-child(n) {
 }
 
 .tooltip-content.presentation-tooltip-info {
+    /* Anchored under the header row instead of being left where it happened to
+       land in flow. The shared .tooltip-content below pulls itself up with
+       margin-top:-2%, and this panel carries a ~270px tall help image, so it
+       opened partly inside the header row and its first rows were cut off.
+       top:100% of the positioned header block puts it just underneath.
+
+       The width is set here too: 130% of a column that is itself 25% of the
+       window left the panel narrow and its position tied to the window size. */
     margin-left: unset;
-    left: 56%;
-    width: 130%;
+    margin-top: 0;
+    left: 0;
+    top: 100%;
+    width: 520px;
+    max-width: 90vw;
+    /* On a short window the panel scrolls rather than losing its top again. */
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+    /* The base rule's z-index of 1 is below the chart cards it opens over. */
+    z-index: 1050;
 }
 
 .tooltip-content {
@@ -2743,8 +2754,8 @@ body.cy-presentation-active .o_action_manager> :nth-child(n) {
 }
 
 @media (max-width: 1480px) {
-    .ai-chat-mode-text {
-        height: 65vh;
+    .explain-ai-child-container .ai-chat-panel {
+        height: 60vh;
     }
 }
 

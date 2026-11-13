@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { registry } from "@web/core/registry";
-import { Component, useRef, useEffect, onWillStart, useState, onMounted } from "@odoo/owl";
+import { Component, useRef, onWillStart, useState, onMounted } from "@odoo/owl";
 import { CyAnalyticMixin } from "@cyllo_analytics/js/mixin/cy_dashboard_mixin"
 import { GraphTile } from "./components/graph_tile"
 import { browser } from "@web/core/browser/browser";
@@ -9,6 +9,8 @@ import { Table } from "@cyllo_analytics/js/table/table";
 import { useResize } from "@cyllo_base/js/hooks"
 import { FilterDropdown } from "@cyllo_analytics/js/filterDropdown"
 import { _t } from "@web/core/l10n/translation";
+
+const MIN_SLIDE_SECONDS = 3;
 
 /**
  * PresentationSelectionMode class for managing presentation preview mode in a dashboard view.
@@ -32,24 +34,71 @@ export class PresentationSelectionMode extends CyAnalyticMixin(Component) {
         this.selectedStacks = {};
         this.selectedStacksList = [];
         this.collectionRef = useRef('collection')
+        const saved = this._loadSettings();
         this.state = useState({
-            autoSlide: false,
-            autoSlideTime: 3,
-            titlePage: true,
-            heading: '',
-            subheading: '',
+            autoSlide: Boolean(saved.autoSlide),
+            autoSlideTime: Math.max(MIN_SLIDE_SECONDS, parseInt(saved.autoSlideTime, 10) || MIN_SLIDE_SECONDS),
+            titlePage: saved.titlePage ?? true,
+            heading: saved.heading || '',
+            subheading: saved.subheading || '',
             width: 0,
             darkMode: false,
         })
         onMounted(async () => {
-            this.state.heading = this.name
+            this.state.heading = this.state.heading || this.name
             requestAnimationFrame(() => {
                 this.env.bus.trigger('onclickMenuBar', { isCollapse: true });
             });
         });
-        useEffect(() => {
-            this.state.autoSlideTime = this.state.autoSlideTime < 3 ? 3 : this.state.autoSlideTime
-        }, () => [this.state.autoSlideTime])
+    }
+
+    /**
+     * Check the slide duration when the field is left, not as it is typed.
+     *
+     * Clamping on every keystroke meant the value sprang back to the minimum
+     * the instant the field was emptied, so backspace looked broken — and a
+     * number that passes through something smaller on the way (the "1" of
+     * "12") could never be typed at all. Anything below the minimum, blank or
+     * not a number settles at the minimum once the user clicks away.
+     */
+    /** Browser-storage key for this dashboard's presentation settings. */
+    get _settingsKey() {
+        return `cyllo_analytics.presentation_settings.${this.id || "default"}`;
+    }
+
+    /** The settings last used to present this dashboard, or {} when none are
+     *  stored or browser storage is unavailable. */
+    _loadSettings() {
+        try {
+            return JSON.parse(browser.localStorage.getItem(this._settingsKey) || "{}") || {};
+        } catch {
+            return {};
+        }
+    }
+
+    /** Remember auto slide, its duration and the title page for this dashboard,
+     *  so they survive leaving and re-opening the preview. */
+    _saveSettings() {
+        try {
+            browser.localStorage.setItem(this._settingsKey, JSON.stringify({
+                autoSlide: this.state.autoSlide,
+                autoSlideTime: this.state.autoSlideTime,
+                titlePage: this.state.titlePage,
+                heading: this.state.heading,
+                subheading: this.state.subheading,
+            }));
+        } catch {
+            return;
+        }
+    }
+
+    onSlideDurationChange(ev) {
+        const typed = parseInt(ev.target.value, 10);
+        const seconds = Number.isFinite(typed) && typed >= MIN_SLIDE_SECONDS
+            ? typed
+            : MIN_SLIDE_SECONDS;
+        this.state.autoSlideTime = seconds;
+        ev.target.value = seconds;
     }
     addHeading() {
         this.state.heading = this.state.heading.length ? this.state.heading : this.name
@@ -135,6 +184,7 @@ export class PresentationSelectionMode extends CyAnalyticMixin(Component) {
         if (this.isNoData) {
             return this.notification.add(_t("There is no data to be shown in the presentation"), { type: "warning" });
         }
+        this._saveSettings();
         const rec_id = await this.createPresentation(type)
         document.documentElement.requestFullscreen();
         return this.actionService.doAction({
@@ -151,6 +201,35 @@ export class PresentationSelectionMode extends CyAnalyticMixin(Component) {
      * @returns {Object} - The presentation data.
      * @function
      */
+    /**
+     * The KPI object a chart needs, built from the sheet record rather than
+     * the chart payload: ChartData.data carries no table_ids, so getKpi()
+     * cannot be handed one of these directly.
+     */
+    kpiFor(chart) {
+        const item = (this.items || []).find(rec => rec.id === chart.id) || chart;
+        return {
+            description: item.kpi_description,
+            redirect: item.kpi_redirect,
+            target: item.kpi_target,
+            measureView: item.kpi_view,
+            icon: item.kpi_icon,
+            model: item.table_ids?.[0]?.model,
+        };
+    }
+    /**
+     * The charts to present: the picked ones in the order they were picked,
+     * otherwise everything with data. KPIs carry the object the player reads
+     * as chart.kpi.
+     */
+    presentationCharts() {
+        const charts = this.selectedStacksList.length > 0
+            ? this.selectedStacksList
+            : this.ChartData.data.filter(item => item.data.length);
+        return charts.map(item => item.type === "kpi"
+            ? { ...item, kpi: this.kpiFor(item) }
+            : item);
+    }
     presentationData(type, rec_id) {
         return {
             rec_id,
@@ -160,7 +239,7 @@ export class PresentationSelectionMode extends CyAnalyticMixin(Component) {
             title_page: this.state.titlePage,
             title_page_heading: this.state.heading,
             title_page_subheading: this.state.subheading,
-            chart_data: this.selectedStacksList.length > 0 ? this.selectedStacksList : this.ChartData.data.filter(item => item.type !== "kpi" && item.data.length),
+            chart_data: this.presentationCharts(),
             style_json: {
                 height: '85vh',
                 width: '100dvw',

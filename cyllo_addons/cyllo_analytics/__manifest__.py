@@ -55,6 +55,7 @@
         'wizard/import_xlsx_wizard_views.xml',
         'views/dashboard_config_views.xml',
         'views/custom_imported_table_views.xml',
+        'views/presentation_editor_views.xml',
         'views/calculation_preset_views.xml',
         'views/dashboard_sheet.xml',
         'views/cyllo_dashboard_templates.xml',
@@ -64,7 +65,7 @@
     'uninstall_hook': 'cyllo_d_uninstall_hook',
     'post_init_hook': 'cyllo_d_post_init_hook',
     "external_dependencies": {
-        'python': ['openai', 'tiktoken', 'openpyxl']
+        'python': ['tiktoken', 'openpyxl']
     },
     'assets': {
         'web.assets_backend': [
@@ -77,15 +78,13 @@
             'cyllo_analytics/static/src/lib/*',
             'https://cdn.jsdelivr.net/npm/echarts-stat@1.2.0/dist/ecStat.min.js',
             'cyllo_analytics/static/src/lib/eChart/*',
-            # CSS load order is explicit (was a css/* glob) to preserve the cascade
-            # after splitting style.css per-template: base scss, then the common
-            # style.css, then per-template files (which may override the common base).
             'cyllo_analytics/static/src/css/ai.scss',
             'cyllo_analytics/static/src/css/kpi.scss',
             'cyllo_analytics/static/src/css/style.css',
             'cyllo_analytics/static/src/css/FieldTraversalDialog.css',
             'cyllo_analytics/static/src/css/alert_configuration_dialog.css',
             'cyllo_analytics/static/src/css/cyllo_dashboard.css',
+            'cyllo_analytics/static/src/css/presentation_editor.css',
             'cyllo_analytics/static/src/css/cyllo_sheet.css',
             'cyllo_analytics/static/src/css/drag_n_drop.css',
             'cyllo_analytics/static/src/css/edit_dashboard.css',
@@ -113,6 +112,7 @@
             'cyllo_analytics/static/src/xml/delete_dialog_templates.xml',
             'cyllo_analytics/static/src/xml/edit_dashboard.xml',
             'cyllo_analytics/static/src/xml/presentation_maker.xml',
+            'cyllo_analytics/static/src/xml/presentation_editor.xml',
             'cyllo_analytics/static/src/xml/cyllo_sheet.xml',
             'cyllo_analytics/static/src/xml/import_dialog.xml',
             'cyllo_analytics/static/src/xml/drag_n_drop.xml',

@@ -171,10 +171,10 @@ export class AlertConfigurationDialog extends Component {
 
             if (this.state.alertId) {
                 await this.orm.write("dashboard.alert", [this.state.alertId], vals);
-                this.notification.add("Alert updated successfully", { type: "success" });
+                this.notification.add(_t("Alert updated successfully"), { type: "success" });
             } else {
                 await this.orm.create("dashboard.alert", [vals]);
-                this.notification.add("Alert created successfully", { type: "success" });
+                this.notification.add(_t("Alert created successfully"), { type: "success" });
             }
             this.props.close();
         } catch (error) {
@@ -189,7 +189,7 @@ export class AlertConfigurationDialog extends Component {
     async onDelete() {
         if (this.state.alertId) {
             await this.orm.unlink("dashboard.alert", [this.state.alertId]);
-            this.notification.add("Alert deleted successfully", { type: "success" });
+            this.notification.add(_t("Alert deleted successfully"), { type: "success" });
             this.props.close();
         }
     }

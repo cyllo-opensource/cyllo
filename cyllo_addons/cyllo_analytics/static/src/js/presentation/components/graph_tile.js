@@ -282,21 +282,24 @@ export class GraphTile extends Component {
         if (!opt) return;
         const series = opt.series || [];
         const xAxisData = (opt.xAxis && opt.xAxis[0] && opt.xAxis[0].data) || [];
+        const yAxisData = (opt.yAxis && opt.yAxis[0] && opt.yAxis[0].data) || [];
+        const categoryData = xAxisData.length ? xAxisData : yAxisData;
+        const categoryDim = xAxisData.length ? 0 : 1;
 
         for (let si = 0; si < series.length; si++) {
             const ser = series[si];
             const rawData = ser.data || [];
-            if (xAxisData.length) {
+            if (categoryData.length) {
                 try {
                     const res = this.eChart.convertFromPixel({ seriesIndex: si }, [mx, my]);
-                    const di = Array.isArray(res) ? Math.round(res[0]) : null;
-                    if (di !== null && di >= 0 && di < xAxisData.length) {
+                    const di = Array.isArray(res) ? Math.round(res[categoryDim]) : null;
+                    if (di !== null && di >= 0 && di < categoryData.length) {
                         const val = rawData[di];
                         this._fireAnnotation({
                             seriesIndex: si,
                             seriesName: ser.name,
                             dataIndex: di,
-                            name: xAxisData[di],
+                            name: categoryData[di],
                             value: typeof val === 'object' ? (val && val.value !== undefined ? val.value : val) : val
                         });
                         return;

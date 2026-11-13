@@ -3,6 +3,7 @@ import { worldMapChart } from "./charts/world_map";
 import { loadingChart } from "./charts/loadingChart"
 import { _t } from "@web/core/l10n/translation";
 
+export const NO_COLOR_MAPPING_TYPES = ['kpi', 'gauge', 'radar', 'map', 'table', 'pictorialBar', 'funnel', 'heatmap'];
 
 /**
  * Converts a string to title case.
@@ -31,11 +32,8 @@ export const getChartZoom = (chart) => {
     }
 }
 
-// Category axis labels: characters kept before the "..." and the number of
-// categories below which every single label is still drawn.
 const MAX_LABEL_LENGTH = 12;
 const MAX_FULL_LABELS = 12;
-// Categories the initial (un-scrolled) view opens with at most.
 const MAX_VISIBLE_CATEGORIES = 20;
 
 export class ChartMaker {
@@ -393,7 +391,9 @@ export class ChartMaker {
         const defaultPalette = _defaultPalette;
         var legendData = this.measures.map((key, index) => {
             const label = this.params.measureNames && this.params.measureNames[key] ? this.params.measureNames[key] : convertToTitleCase(key);
-            const mappedColors = this.color_mappings ? this.color_mappings.filter(m => m.measure_alias === key).map(m => m.color) : [];
+            const mappedColors = this.color_mappings && !NO_COLOR_MAPPING_TYPES.includes(this.type)
+                ? this.color_mappings.filter(m => m.measure_alias === key).map(m => m.color)
+                : [];
 
             if (mappedColors.length > 0) {
                 // Use the SAME baseColor as the series so legend and bars match.
@@ -490,12 +490,10 @@ export class ChartMaker {
 
         const radiusScale = this.pieLegendBottom ? 0.8 : 1;
         const pct = (value) => `${Math.round(value * radiusScale)}%`;
-
-        // For multi-measure pie, spread series across concentric rings so they don't overlap.
-        // Single-measure keeps the original radius.
+        const singleOuter = this.hidePieSliceLabels && this.type !== 'doughnut' ? 72 : 60;
         const getRadius = (si) => {
             if (!multiMeasure) {
-                return this.type === 'doughnut' ? [pct(40), pct(70)] : pct(50);
+                return this.type === 'doughnut' ? [pct(46), pct(80)] : pct(singleOuter);
             }
             const total = this.measures.length;
             const outerMax = 70;
@@ -586,9 +584,13 @@ export class ChartMaker {
                 ? raw.substring(0, MAX_LABEL_LENGTH).trimEnd() + '...'
                 : raw;
         };
+        const legendData = multiMeasure
+            ? val.legend.data
+            : (this.data || []).map((item) => String(item[this.dimension] ?? ''));
 
         val.legend = this.pieLegendBottom ? {
             ...val.legend,
+            data: legendData,
             orient: 'horizontal',
             left: 'center',
             bottom: 10,
@@ -599,6 +601,7 @@ export class ChartMaker {
             tooltip: { show: true },
         } : {
             ...val.legend,
+            data: legendData,
             orient: 'vertical',
             right: '5%',
             top: 'middle',
@@ -660,11 +663,12 @@ export class ChartMaker {
         var dataZoom = this.getDefaultZoom()
         const axisData = this.data.map(item => item[this.dimension]);
         var series = this.measures.map(measure => {
-            const data = this.data.map(item => {
+            const data = this.data.map((item, index) => {
                 const val = item[measure];
                 const customColor = this.getPointColor(measure, val);
                 const res = {
-                    value: [axisData.findIndex(axis => axis === item[this.dimension]), val]
+                    name: item[this.dimension],
+                    value: [index, val]
                 };
                 if (customColor) {
                     res.itemStyle = { color: customColor };
@@ -676,6 +680,7 @@ export class ChartMaker {
                 type: "scatter",
                 name: convertToTitleCase(measure),
                 symbolSize: 20,
+                encode: this.pointAxisEncode(),
             }
         })
         if (this.dimension_axis === "x") {
@@ -685,7 +690,19 @@ export class ChartMaker {
         }
         val.series = series
         val.dataZoom = dataZoom
+        val.tooltip = {
+            ...val.tooltip,
+            formatter: (params) => this.chartOptions.formatter({ ...params, value: params.value[1] }),
+        }
         return val
+    }
+
+    /**
+     * Map a [category position, measure value] point onto the chart axes:
+     * the position goes on the axis holding the dimension.
+     */
+    pointAxisEncode() {
+        return this.dimension_axis === "x" ? { x: 0, y: 1 } : { x: 1, y: 0 };
     }
 
     radarChart(val) {
@@ -894,19 +911,15 @@ export class ChartMaker {
         echarts.registerTransform(ecStat.transform.regression);
         const axisData = [...new Set(this.data.map(item => item[this.dimension]))]
         var dataZoom = this.getDefaultZoom()
-        var data = this.measures.map(measure => {
-            const source = this.data.map(item => {
-                return [axisData.findIndex(data => data == item[this.dimension]), item[measure]]
-            })
-            return { source }
-        })
-        if (!data.length) {
-            data = [{ source: [[0, 0]] }]
-        }
+        const measure = this.measures[0]
+        const source = measure
+            ? this.data.map(item => [axisData.findIndex(data => data == item[this.dimension]), item[measure]])
+            : [[0, 0]]
         var option = {
             dataset: [
-                ...data,
+                { source },
                 {
+                    fromDatasetIndex: 0,
                     transform: {
                         type: 'ecStat:regression',
                         config: {
@@ -917,11 +930,16 @@ export class ChartMaker {
             ],
             title: val.title,
             tooltip: {
-                trigger: 'axis',
-                axisPointer: {
-                    type: 'cross'
+                trigger: 'item',
+                formatter: (params) => {
+                    const [position, value] = params.value || [];
+                    const name = axisData[Math.round(position)];
+                    if (params.seriesIndex === 0) {
+                        return this.chartOptions.formatter({ ...params, name, value });
+                    }
+                    const trend = _t("Trend");
+                    return `${name} · ${trend} : ${Math.round(value * 100) / 100}`;
                 },
-                formatter: this.chartOptions.formatter
             },
             xAxis: {
                 axisLabel: { color: this.params.isDarkMode ? '#cccccc' : '#333333' },
@@ -944,9 +962,13 @@ export class ChartMaker {
                 }
             },
             series: [{
-                name: 'scatter',
+                name: measure ? convertToTitleCase(measure) : 'scatter',
                 type: 'scatter',
-                datasetIndex: 0
+                datasetIndex: 0,
+                encode: this.pointAxisEncode(),
+                itemStyle: {
+                    color: (params) => this.getPointColor(measure, params.value[1]) || params.color,
+                },
             },
             {
                 name: 'line',
@@ -963,6 +985,7 @@ export class ChartMaker {
                     dx: -20
                 },
                 encode: {
+                    ...this.pointAxisEncode(),
                     label: 2,
                     tooltip: 1
                 }
@@ -972,11 +995,15 @@ export class ChartMaker {
             graphic: val.graphic,
         };
         if (this.dimension_axis === "x") {
+            option.xAxis.type = 'category'
             option.xAxis.data = axisData
             option.xAxis.axisLabel = val.xAxis?.axisLabel
+            option.yAxis.type = 'value'
         } else {
+            option.yAxis.type = 'category'
             option.yAxis.data = axisData
             option.yAxis.axisLabel = val.yAxis?.axisLabel
+            option.xAxis.type = 'value'
         }
         return option
     }
@@ -1202,4 +1229,30 @@ export class ChartMaker {
         this.params = { ...this.params, ...params };
         return this.makeGraphOptions()
     }
+}
+
+/**
+ * Which series a chart actually has, for a sheet that splits.
+ *
+ * Brought over with the presentation editor, which asks this to
+ * render a chart onto a slide the same way the dashboard renders it.
+ */
+export function resolveMeasures(rows, dimension, declared, seriesDimension, seriesLabels) {
+    if (seriesLabels) {
+        try {
+            const labels = JSON.parse(seriesLabels);
+            if (Array.isArray(labels) && labels.length) {
+                return labels;
+            }
+        } catch {
+            // Fall through to the row-key reading below.
+        }
+    }
+    if (!seriesDimension || !rows?.length) {
+        return declared;
+    }
+    const keys = Object.keys(rows[0]).filter((k) => k !== dimension);
+    // Falling back to `declared` keeps a misconfigured split rendering the
+    // ordinary chart rather than an empty one.
+    return keys.length ? keys : declared;
 }

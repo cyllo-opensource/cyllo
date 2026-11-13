@@ -368,3 +368,193 @@
 .apply-filter-btn {
     text-align: center;
 }
+
+/* --- Sheet notes --- */
+
+/* The editor box in the note dialog. resize:both lets the author grow it to
+   whatever the note needs; min-height keeps it usable when first opened. */
+.cy-note-editor-wrap {
+    resize: both;
+    overflow: auto;
+    min-height: 240px;
+    min-width: 280px;
+    width: 100%;
+    border: 1px solid var(--border-color, #dfdfdf);
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: #fff;
+}
+
+/* The list of every note on this chart, opened from "See all notes". Capped
+   and scrolling: the point is to glance over what has been said before, not to
+   push the editor off the bottom of the dialog. */
+.cy-note-history {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color, #dfdfdf);
+    border-radius: 6px;
+    background: #fbfbfb;
+}
+
+.cy-note-history-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-color, #ededed);
+}
+
+.cy-note-history-item:last-child {
+    border-bottom: none;
+}
+
+/* The one open in the editor above, marked so the reader is not left matching
+   the list against their own memory. */
+.cy-note-history-item-current {
+    background: #fff8e1;
+}
+
+.cy-note-history-body {
+    margin-top: 4px;
+    font-size: 13px;
+    /* A note can be long; the list shows enough to recognise it by. */
+    max-height: 96px;
+    overflow: hidden;
+}
+
+.cy-note-history-body > *:last-child {
+    margin-bottom: 0;
+}
+
+.cy-note-history-toggle {
+    text-decoration: none;
+}
+
+.cy-note-editor-content {
+    min-height: 200px;
+    outline: none;
+}
+
+/* Reveal centres and shrink-wraps a slide's contents; a note slide is a
+   two-pane layout that has to fill the stage instead. */
+.cy-note-slide {
+    display: block !important;
+    width: 100%;
+    height: 100%;
+    top: 0 !important;
+    padding: 0 !important;
+}
+
+/* The presentation slide: chart, divider, note. The column track is set
+   inline from note_ratio so the divider can move it without a re-render.
+   Both panes are full height by way of the stretch default. */
+.cy-note-split {
+    display: grid;
+    /* THREE tracks, because there are three children: chart, divider, note.
+       With two, the divider took the second column and the note wrapped onto
+       a second row underneath the chart. */
+    grid-template-columns: 60% 10px 1fr;
+    align-items: stretch;
+    gap: 0;
+    height: 100%;
+    width: 100%;
+}
+
+/* The chart pane scrolls sideways when the chart is wider than its column -
+   which noteChartStyle arranges when there are more categories than fit. The
+   bar is hidden on purpose: wheel, trackpad, touch and keyboard all still
+   scroll it, but a visible bar under a slide would be noise on a projector. */
+.cy-note-chart {
+    min-width: 0;   /* a grid child defaults to min-content, which would let
+                       the chart refuse to shrink and overflow the slide */
+    min-height: 0;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* legacy Edge */
+}
+
+.cy-note-chart::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.cy-note-divider {
+    width: 10px;
+    cursor: col-resize;
+    align-self: stretch;
+    background: transparent;
+    border-left: 1px solid var(--border-color, #e3e3e3);
+    transition: border-color 0.15s;
+}
+
+.cy-note-divider:hover,
+.cy-note-divider:active {
+    border-left-color: var(--dashboard-primary-color, #9ea700);
+}
+
+.cy-note-body {
+    min-width: 0;
+    height: 100%;
+    overflow: auto;
+    padding: 8px 4px 8px 18px;
+    text-align: left;
+    font-size: 16px;
+    line-height: 1.55;
+}
+
+/* Reveal.js centres and scales slide text; notes read as a document, so the
+   inherited display rules are reset for the note pane only. */
+.cy-note-body h1,
+.cy-note-body h2,
+.cy-note-body h3 {
+    text-align: left;
+    text-transform: none;
+    margin: 0 0 8px;
+}
+
+.cy-note-body ul,
+.cy-note-body ol {
+    display: block;
+    margin: 0 0 8px 1.1em;
+}
+
+.cy-note-body img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* The little toolbar above the note editor. This version has no rich editor
+   an OWL dialog can host, so the note is a contenteditable with three
+   commands; the styling keeps it looking like part of the box rather than a
+   browser default. */
+.cy-note-toolbar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border-color, #ededed);
+    padding-bottom: 6px;
+}
+
+.cy-note-toolbar button {
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 4px;
+    width: 26px;
+    height: 26px;
+    color: #555;
+}
+
+.cy-note-toolbar button:hover {
+    background: #f1f1f1;
+    border-color: var(--border-color, #dfdfdf);
+}
+
+.cy-note-editor-content {
+    min-height: 180px;
+    outline: none;
+}
+
+.cy-note-editor-content:empty:before {
+    content: attr(placeholder);
+    color: #b0b0b0;
+}

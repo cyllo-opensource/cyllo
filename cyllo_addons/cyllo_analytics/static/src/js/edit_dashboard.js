@@ -205,7 +205,7 @@ class EditDashboard extends CylloDashboard {
         });
 
         this.stack.disable();
-        this.vals = this.stack.save(false, true);
+        this.vals = this._layoutSnapshot();
 
         await Promise.allSettled(
             Object.values(this.stackItems).map(item => item.ready || Promise.resolve())
@@ -243,16 +243,10 @@ class EditDashboard extends CylloDashboard {
             if (stackItem) stackItem.reRender(false, h, w);
         });
     }
-
-    onSave() {
+    _layoutSnapshot() {
         const vals = this.stack.save(false, true);
-        // GridStack's save() omits w/h when they equal its default (1), so a KPI
-        // resized to h=1 loses its height and the backend can't tell it apart from
-        // "unset". Backfill explicit x/y/w/h from the live grid nodes so every
-        // item's real size is persisted.
         (vals.children || []).forEach(child => {
-            const el = this.ref.el.querySelector(`#elem_${child.id}`);
-            const node = el?.gridstackNode;
+            const node = this.ref.el?.querySelector(`#elem_${child.id}`)?.gridstackNode;
             if (node) {
                 child.x = node.x;
                 child.y = node.y;
@@ -260,6 +254,11 @@ class EditDashboard extends CylloDashboard {
                 child.h = node.h;
             }
         });
+        return vals;
+    }
+
+    onSave() {
+        const vals = this._layoutSnapshot();
         this.orm.call("dashboard.config", "save_position", [this.id, vals]);
         this.disableChange();
         this.vals = vals;
@@ -269,12 +268,25 @@ class EditDashboard extends CylloDashboard {
         this.stack.batchUpdate();
         for (const val of this.vals.children) {
             const el = this.ref.el.querySelector(`#elem_${val.id}`);
-            if (el) this.stack.update(el, {x: val.x, y: val.y, w: val.w, h: val.h});
+            if (!el) {
+                continue;
+            }
+            const pos = {};
+            for (const key of ["x", "y", "w", "h"]) {
+                if (val[key] !== undefined) {
+                    pos[key] = val[key];
+                }
+            }
+            this.stack.update(el, pos);
         }
         this.stack.batchUpdate(false);
         for (const val of this.vals.children) {
             const stackItem = this.stackItems[`elem_${val.id}`];
-            if (stackItem) stackItem.reRender(false, val.h, val.w);
+            if (!stackItem) {
+                continue;
+            }
+            const node = this.ref.el.querySelector(`#elem_${val.id}`)?.gridstackNode;
+            stackItem.reRender(false, node?.h ?? val.h, node?.w ?? val.w);
         }
         this.disableChange();
     }
@@ -339,7 +351,7 @@ class EditDashboard extends CylloDashboard {
         document.dispatchEvent(ev('mouseup', x + 4, y + 4, 0));
         setTimeout(() => {
             this.state.change = false;
-            this.vals = this.stack.save(false, true);
+            this.vals = this._layoutSnapshot();
             this.stack.on('change', this.onChange.bind(this));
         }, 100);
     }

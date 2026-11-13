@@ -1,0 +1,758 @@
+/* Presentation editor.
+   Fills the space the action is given rather than the viewport - the same
+   lesson the sheet editor learned the hard way, where 100dvh maths put the
+   bottom of the page under the test-database banner and out of reach. */
+.cy-pe-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    background: var(--cy-bg, #f7f8fa);
+    /* The picker is positioned against this. Without it the picker escapes to
+       the nearest positioned ancestor and lands over the navbar. */
+    position: relative;
+}
+
+.cy-pe-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    flex: 0 0 auto;
+}
+
+.cy-pe-title {
+    font-size: 16px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px 8px;
+    min-width: 260px;
+    background: transparent;
+}
+
+.cy-pe-title:hover,
+.cy-pe-title:focus {
+    border-color: rgba(0, 0, 0, 0.15);
+    outline: none;
+}
+
+.cy-pe-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.cy-pe-saved {
+    font-size: 12px;
+    color: #6b7280;
+    min-width: 56px;
+    text-align: right;
+}
+
+.cy-pe-saving {
+    color: #b45309;
+}
+
+.cy-pe-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Slide rail */
+.cy-pe-rail {
+    width: 210px;
+    flex: 0 0 auto;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.cy-pe-rail-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+}
+
+.cy-pe-rail-add {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    color: #374151;
+}
+
+.cy-pe-slide {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    font-size: 13px;
+}
+
+.cy-pe-slide:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.cy-pe-slide-active {
+    background: rgba(52, 75, 210, 0.07);
+    border-left-color: #344bd2;
+}
+
+/* The grip appears on hover like the row tools do, so the rail stays a
+   list of slides rather than a column of handles. It is only an
+   affordance: the whole row is draggable. */
+.cy-pe-slide-grip {
+    color: #c4c8d0;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    visibility: hidden;
+}
+
+.cy-pe-slide:hover .cy-pe-slide-grip {
+    visibility: visible;
+}
+
+/* Where the slide will land, drawn in the gap the drag opens up. */
+.cy-pe-slide-ghost {
+    border: 1px dashed #344bd2;
+    background: rgba(52, 75, 210, 0.06);
+    border-radius: 4px;
+    min-height: 34px;
+}
+
+.cy-pe-slide-no {
+    color: #9ca3af;
+    font-variant-numeric: tabular-nums;
+    min-width: 16px;
+}
+
+.cy-pe-slide-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Row tools stay out of the way until the row is pointed at, so the rail
+   reads as a list of slides rather than a wall of buttons. */
+.cy-pe-slide-tools {
+    display: none;
+    gap: 2px;
+}
+
+.cy-pe-slide:hover .cy-pe-slide-tools {
+    display: flex;
+}
+
+.cy-pe-slide-tools button {
+    border: none;
+    background: transparent;
+    padding: 0 2px;
+    cursor: pointer;
+    color: #6b7280;
+}
+
+.cy-pe-slide-tools button:hover {
+    color: #111827;
+}
+
+/* Stage */
+.cy-pe-stage {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px;
+    position: relative;
+}
+
+.cy-pe-canvas {
+    background-image: radial-gradient(rgba(0, 0, 0, 0.10) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: -4px -4px;
+    border-radius: 6px;
+}
+
+.cy-pe-item .grid-stack-item-content {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.cy-pe-remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 5;
+    border: none;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #6b7280;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 5px;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+.cy-pe-item:hover .cy-pe-remove {
+    opacity: 1;
+}
+
+.cy-pe-remove:hover {
+    color: #b91c1c;
+}
+
+.cy-pe-text {
+    padding: 12px 14px;
+    overflow: auto;
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.cy-pe-editable:focus {
+    outline: 2px solid rgba(52, 75, 210, 0.35);
+    outline-offset: -2px;
+}
+
+/* A saved note is read-only here, and says so quietly rather than looking
+   like a text box that refuses to take typing. */
+.cy-pe-note {
+    background: #fffdf3;
+    border-left: 3px solid #e2c044;
+}
+
+.cy-pe-missing {
+    padding: 16px;
+    color: #b91c1c;
+    font-size: 13px;
+}
+
+.cy-pe-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #9ca3af;
+    font-size: 14px;
+    text-align: center;
+    max-width: 380px;
+    pointer-events: none;
+}
+
+.cy-pe-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #9ca3af;
+    z-index: 10;
+}
+
+.cy-pe-loading i {
+    animation: cy-pe-spin 1s linear infinite;
+}
+
+@keyframes cy-pe-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Picker */
+.cy-pe-picker {
+    position: absolute;
+    top: 52px;
+    right: 16px;
+    z-index: 20;
+    width: 320px;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 8px;
+}
+
+.cy-pe-picker-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+    padding: 6px 8px;
+}
+
+.cy-pe-picker-empty {
+    padding: 10px 8px;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.cy-pe-picker-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    padding: 7px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.cy-pe-picker-row:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Which dashboard a chart came from. Pushed right, ahead of the type, and
+   quieter than the chart's own name: it answers "which one is this?" for
+   a deck drawing on several dashboards, without competing with the name. */
+.cy-pe-picker-source {
+    margin-left: auto;
+    color: #9ca3af;
+    font-size: 11px;
+    max-width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cy-pe-picker-source + .cy-pe-picker-type {
+    margin-left: 10px;
+}
+
+.cy-pe-picker-type {
+    margin-left: auto;
+    color: #9ca3af;
+    font-size: 11px;
+}
+
+/* ------------------------------------------------------------------
+   A saved deck, playing.
+   The grid matches the editor's: 12 columns, and rows sized so a slide
+   fills the screen rather than scrolling - a presentation that scrolls is
+   not a presentation.
+   ------------------------------------------------------------------ */
+.cy-deck-slide {
+    height: 100%;
+    width: 100%;
+}
+
+.cy-deck-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(0, 1fr);
+    gap: 12px;
+    height: 100%;
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.cy-deck-box {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.cy-deck-box > * {
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.cy-deck-text {
+    overflow: auto;
+    padding: 8px 12px;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    text-align: left;
+}
+
+/* Drag handle. The box is grabbed here rather than anywhere, because a text
+   box is contentEditable and a chart canvas takes its own pointer events -
+   "drag anywhere" meant notes and text could not be moved at all. */
+.cy-pe-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px 4px 10px;
+    background: rgba(0, 0, 0, 0.035);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    cursor: move;
+    flex: 0 0 auto;
+    min-height: 26px;
+}
+
+.cy-pe-head-label {
+    font-size: 11px;
+    color: #6b7280;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    user-select: none;
+}
+
+/* The remove button now lives in the handle, so it no longer floats over the
+   chart it belongs to. */
+.cy-pe-item .cy-pe-remove {
+    position: static;
+    opacity: 0;
+    flex: 0 0 auto;
+}
+
+.cy-pe-item:hover .cy-pe-remove {
+    opacity: 1;
+}
+
+.cy-pe-body-box {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cy-pe-image,
+.cy-deck-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    /* Contained, not cropped: a slide picture that silently loses its edges
+       is worse than one with space around it. */
+    object-fit: contain;
+    display: block;
+}
+
+.cy-pe-back {
+    flex: 0 0 auto;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    line-height: 1;
+    padding: 5px 9px;
+}
+
+/* The toolbar wraps rather than pushing the title off screen: four buttons and
+   a long presentation name do not fit a narrow window side by side. */
+.cy-pe-topbar {
+    flex-wrap: wrap;
+    row-gap: 6px;
+}
+
+.cy-pe-title {
+    flex: 1 1 220px;
+    min-width: 160px;
+}
+
+/* Placeholder for an empty text box. Shown by CSS rather than written into
+   the box, so it never has to be deleted before writing and never reaches
+   the presented slide. */
+.cy-pe-editable:empty::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+/* The image is taken out of the layout entirely: it fills its box by
+   absolute position, so its own size can never feed back into the size of
+   the box that contains it. A picture that participates in flex sizing is
+   what let a resize turn into a loop. */
+.cy-pe-body-box {
+    position: relative;
+}
+
+.cy-pe-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Slide heading, edited where it appears rather than in a side panel. */
+.cy-pe-slide-head {
+    margin-bottom: 10px;
+}
+
+.cy-pe-heading,
+.cy-pe-subheading {
+    display: block;
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    padding: 2px 6px;
+}
+
+.cy-pe-heading {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.cy-pe-subheading {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.cy-pe-heading:hover, .cy-pe-heading:focus,
+.cy-pe-subheading:hover, .cy-pe-subheading:focus {
+    border-color: rgba(0, 0, 0, 0.15);
+    outline: none;
+    background: #fff;
+}
+
+/* Formatting buttons live in the drag handle, shown on hover so the box is a
+   slide first and an editor second. */
+.cy-pe-fmt {
+    display: none;
+    gap: 1px;
+}
+
+.cy-pe-item:hover .cy-pe-fmt {
+    display: inline-flex;
+}
+
+.cy-pe-fmt-btn {
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    font-size: 13px;
+}
+
+.cy-pe-fmt-btn:hover {
+    color: #111827;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 3px;
+}
+
+/* Written HTML must look the same on the slide as it did in the box. */
+.cy-pe-text ul,
+.cy-deck-text ul {
+    padding-left: 1.2em;
+    margin: 0.3em 0;
+    list-style: disc;
+}
+
+.cy-pe-text p,
+.cy-deck-text p {
+    margin: 0 0 0.5em;
+}
+
+/* Slide heading, as the audience sees it. */
+.cy-deck-heading {
+    padding: 8px 14px 0;
+    text-align: left;
+    flex: 0 0 auto;
+}
+
+.cy-deck-heading h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    line-height: 1.2;
+}
+
+.cy-deck-heading p {
+    margin: 2px 0 0;
+    font-size: 0.95rem;
+    opacity: 0.75;
+}
+
+/* With a heading above it the grid takes the rest, not the whole slide. */
+.cy-deck-slide {
+    display: flex;
+    flex-direction: column;
+}
+
+.cy-deck-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* The fit control carries a word rather than an icon: "Fit" and "Fill" differ
+   by what gets lost, and no glyph says that. */
+.cy-pe-fit-btn {
+    font-size: 11px;
+    padding: 1px 6px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 3px;
+}
+
+.cy-pe-source-btn {
+    font-size: 11px;
+    padding: 1px 6px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+.cy-pe-source-btn.active {
+    background: #344bd2;
+    border-color: #344bd2;
+    color: #fff;
+}
+
+.cy-pe-source-btn.active:hover {
+    background: #2a3ead;
+    color: #fff;
+}
+
+.cy-pe-source-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.cy-pe-source-btn:disabled:hover {
+    background: transparent;
+    color: #6b7280;
+}
+
+.cy-pe-slide-head {
+    position: relative;
+}
+
+.cy-pe-head-remove {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 4px;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+.cy-pe-slide-head:hover .cy-pe-head-remove {
+    opacity: 1;
+}
+
+.cy-pe-head-remove:hover {
+    color: #b91c1c;
+}
+
+.cy_presentation .reveal .slides > section.cy-deck-slide {
+    padding: 0;
+}
+
+.cy-deck-grid {
+    padding: 0;
+    gap: 10px;
+}
+
+.cy-deck-heading {
+    padding: 10px 16px 6px;
+}
+
+.cy-pe-head-tools {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    position: absolute;
+    top: 2px;
+    right: 26px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 1px 3px;
+    z-index: 2;
+}
+
+.cy-pe-slide-head:hover .cy-pe-head-tools {
+    display: flex;
+}
+
+.cy-pe-colour {
+    width: 20px;
+    height: 18px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+    background: none;
+    cursor: pointer;
+}
+
+.cy-pe-colour::-webkit-color-swatch-wrapper { padding: 1px; }
+.cy-pe-colour::-webkit-color-swatch { border: none; border-radius: 2px; }
+
+
+.cy-pe-canvas {
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.cy-pe-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.cy-pe-canvas-wrap {
+    width: 100%;
+    max-width: calc((100vh - 260px) * 16 / 9);
+    margin: 0 auto;
+    min-height: 0;
+}
+
+
+.cy-deck-grid {
+    grid-template-rows: repeat(12, 1fr);
+    grid-auto-rows: 0;
+}
+
+.cy-deck-slide {
+    align-items: center;
+    justify-content: center;
+}
+
+.cy-deck-grid {
+    aspect-ratio: 16 / 9;
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.cy-deck-heading {
+    align-self: stretch;
+    width: 100%;
+}
+
+.cy-deck-grid {
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+}

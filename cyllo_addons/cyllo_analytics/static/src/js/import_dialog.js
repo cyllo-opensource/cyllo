@@ -23,7 +23,7 @@ export class ImportDialog extends Component {
             this.file = files[0]
         }
         else {
-            this.showMessage('Error reading the file: Not a valid JSON file', 'danger')
+            this.showMessage(_t("Error reading the file: Not a valid JSON file"), 'danger')
         }
     }
     async onFileUpload(ev) {
@@ -41,7 +41,7 @@ export class ImportDialog extends Component {
                     this.actionService.doAction("soft_reload")
                 }
                 catch {
-                    return this.showMessage('Error reading the file: Not a valid JSON file', 'danger')
+                    return this.showMessage(_t("Error reading the file: Not a valid JSON file"), 'danger')
                 }
             }
         }

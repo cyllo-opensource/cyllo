@@ -9,7 +9,6 @@ import { markup } from "@odoo/owl";
 export const analyticsNotificationService = {
     dependencies: ["bus_service", "notification", "action"],
     start(env, { bus_service, notification, action }) {
-        // Inject premium styles for notifications
         const style = document.createElement('style');
         style.textContent = `
             .cyllo-dash-link {

@@ -37,3 +37,5 @@ from . import calculation_preset
 from . import custom_imported_table
 from . import dashboard_alert
 from . import dashboard_share_link
+from . import dashboard_sheet_note
+from . import presentation_deck

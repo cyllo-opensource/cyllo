@@ -20,6 +20,14 @@ export class TileRenderer extends Component {
             this.state.records = this.props.list.records
         }, () => [this.props.list])
     }
+    /**
+     * Persist a card's new name. Going through the record (rather than a raw
+     * orm.write) keeps the loaded list in sync, so the card relabels itself
+     * without a full view reload.
+     */
+    async onRename(props, name) {
+        await props.value.update({ name }, { save: true })
+    }
     async onDelete(props) {
         for (const record of props){
             await this._onDelete(record)

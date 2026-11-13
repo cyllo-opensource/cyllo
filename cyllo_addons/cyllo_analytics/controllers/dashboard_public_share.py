@@ -192,16 +192,19 @@ def _dashboard_html(dashboard_name, token):
     }});
   }}
 
+  // The one number a KPI sheet stands for. Shared with the xlsx export so the
+  // spreadsheet cannot disagree with the tile.
+  function kpiTotal(res) {{
+    res = res || [];
+    if (!res.length || !res[0]) return 0;
+    var keys = Object.keys(res[0]);
+    var mKey = keys.find(function(k) {{ return typeof res[0][k] === 'number' && !k.endsWith('_id'); }});
+    if (!mKey) return 0;
+    return res.reduce(function(acc, r) {{ return acc + (parseFloat(r[mKey]) || 0); }}, 0);
+  }}
+
   function renderKPI(container, sheet, color) {{
-    var res = sheet.result || [];
-    var val = 0;
-    if (res.length && res[0]) {{
-      var keys = Object.keys(res[0]);
-      var mKey = keys.find(function(k) {{ return typeof res[0][k] === 'number' && !k.endsWith('_id'); }});
-      if (mKey) {{
-        val = res.reduce(function(acc, r) {{ return acc + (parseFloat(r[mKey]) || 0); }}, 0);
-      }}
-    }}
+    var val = kpiTotal(sheet.result);
 
     function formatNumber(value) {{
       if (!value) return '0';
@@ -276,6 +279,10 @@ def _dashboard_html(dashboard_name, token):
     var isRadar = type === 'radar';
     var isHeatmap = type === 'heatmap';
     var isRegression = type === 'regressionlinescatter';
+    // type is lower-cased above, so the camel-cased echarts name has to be put
+    // back. Left as 'pictorialbar' echarts does not know the series and drew
+    // the axes with nothing on them.
+    var isPictorial = type === 'pictorialbar';
 
     var option = {{
       color: colors,
@@ -359,6 +366,52 @@ def _dashboard_html(dashboard_name, token):
       option.xAxis = isPie || isGauge ? undefined : {{ type: 'category', data: results.map(function (r) {{ return String(r[dimKey] || ''); }}), axisLabel: {{ interval: 0, rotate: results.length > 8 ? 30 : 0, overflow: 'truncate', width: 90 }} }};
       option.yAxis = isPie || isGauge ? undefined : {{ type: 'value' }};
       
+      // A pictorial bar sheet is a composite, not one series per measure. The
+      // app draws the second measure three times - a smooth line, a translucent
+      // bar and a striped overlay - over a solid bar for the first, so making
+      // every measure a pictorialBar turned the whole tile into stripes. With
+      // only one measure there is no overlay to draw and the app falls back to
+      // a plain bar, which is what the map below now produces.
+      if (isPictorial && measureKeys.length > 1) {{
+        var titleise = function (k) {{
+          return k.replace(/_/g, ' ').replace(/\\b\\w/g, function (c) {{ return c.toUpperCase(); }});
+        }};
+        var barData = results.map(function (r) {{ return r[measureKeys[0]] || 0; }});
+        var lineData = results.map(function (r) {{ return r[measureKeys[1]] || 0; }});
+        option.series = [
+          {{
+            name: titleise(measureKeys[1]), type: 'line', smooth: true,
+            showAllSymbol: true, symbol: 'emptyCircle', symbolSize: 15, data: lineData
+          }},
+          {{
+            name: titleise(measureKeys[0]), type: 'bar', barWidth: 10,
+            itemStyle: {{
+              borderRadius: 5,
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                {{ offset: 0, color: colors[1] || '#14c8d4' }},
+                {{ offset: 1, color: colors[2] || '#43eec6' }}
+              ])
+            }},
+            data: barData
+          }},
+          {{
+            name: titleise(measureKeys[1]), type: 'bar', barGap: '-100%', barWidth: 10,
+            itemStyle: {{
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                {{ offset: 0, color: 'rgba(20,200,212,0.5)' }},
+                {{ offset: 0.2, color: 'rgba(20,200,212,0.2)' }},
+                {{ offset: 1, color: 'rgba(20,200,212,0)' }}
+              ])
+            }},
+            z: -12, data: lineData
+          }},
+          {{
+            name: titleise(measureKeys[1]), type: 'pictorialBar', symbol: 'rect',
+            itemStyle: {{ color: '#0f375f' }}, symbolRepeat: true,
+            symbolSize: [12, 4], symbolMargin: 1, z: -10, data: lineData
+          }}
+        ];
+      }} else {{
       option.series = measureKeys.map(function (mKey) {{
         var name = mKey.replace(/_/g, ' ').replace(/\\b\\w/g, function (c) {{ return c.toUpperCase(); }});
         if (isGauge) {{
@@ -373,11 +426,12 @@ def _dashboard_html(dashboard_name, token):
           }};
         }}
         return {{
-          name: name, type: isPie ? 'pie' : type,
+          name: name, type: isPie ? 'pie' : (isPictorial ? 'bar' : type),
           radius: type === 'doughnut' ? ['40%','70%'] : (type === 'pie' ? '65%' : undefined),
           data: results.map(function (r) {{ return {{ name: String(r[dimKey] || ''), value: r[mKey] || 0 }}; }})
         }};
       }});
+      }}
     }}
 
     chart.setOption(option);
@@ -386,6 +440,65 @@ def _dashboard_html(dashboard_name, token):
   }}
 
   // ── Exports ──────────────────────────────────────────────────────
+  // A KPI and a table have no echarts instance to screenshot, so their sheets
+  // came out holding nothing but a title. Both are written as cells instead,
+  // which is what a spreadsheet wants anyway. Returns false for a sheet that
+  // should still be exported as a chart image.
+  function writeSheetBody(ws, s) {{
+    var res = s.result || [];
+    var type = (s.type || '').toLowerCase();
+    if (type === 'kpi' || type === 'financial_kpi') {{
+      var val = kpiTotal(res);
+      ws.getCell('A3').value = 'Value';
+      ws.getCell('A3').font = {{ bold: true }};
+      ws.getCell('B3').value = Number(val.toFixed(2));
+      var target = parseFloat(s.kpi_target);
+      if (target) {{
+        ws.getCell('A4').value = 'Target';
+        ws.getCell('A4').font = {{ bold: true }};
+        ws.getCell('B4').value = Number(target.toFixed(2));
+        ws.getCell('A5').value = 'Achieved';
+        ws.getCell('A5').font = {{ bold: true }};
+        ws.getCell('B5').value = Number(((val / target) * 100).toFixed(2)) / 100;
+        ws.getCell('B5').numFmt = '0.00%';
+      }}
+      return true;
+    }}
+    if (type === 'table') {{
+      if (!res.length) return true;
+      var keys = Object.keys(res[0]).filter(function (k) {{ return !k.endsWith('_id'); }});
+      var head = ws.getRow(3);
+      head.values = keys.map(function (k) {{
+        return k.replace(/_/g, ' ').replace(/\\b\\w/g, function (c) {{ return c.toUpperCase(); }});
+      }});
+      head.font = {{ bold: true }};
+      res.forEach(function (row, i) {{
+        ws.getRow(4 + i).values = keys.map(function (k) {{
+          var v = row[k];
+          return (v === null || v === undefined) ? '' : v;
+        }});
+      }});
+      keys.forEach(function (k, i) {{ ws.getColumn(i + 1).width = 24; }});
+      return true;
+    }}
+    return false;
+  }}
+
+  // A KPI has no echarts instance, so its picture has to come from the tile
+  // itself. The figures above it stay: the number is what a spreadsheet is
+  // for, the picture is what makes the sheet look like the others.
+  async function addTileImage(wb, ws, s) {{
+    var type = (s.type || '').toLowerCase();
+    if (type !== 'kpi' && type !== 'financial_kpi') return;
+    var box = document.getElementById('box-' + s.id);
+    if (!box || typeof html2canvas === 'undefined') return;
+    try {{
+      var canvas = await html2canvas(box, {{ backgroundColor: '#ffffff', scale: 2 }});
+      var imgId = wb.addImage({{ base64: canvas.toDataURL('image/png'), extension: 'png' }});
+      ws.addImage(imgId, {{ tl: {{ col: 0.2, row: 6.5 }}, ext: {{ width: 520, height: 200 }} }});
+    }} catch (e) {{ console.error('KPI image failed', e); }}
+  }}
+
   window.exportToExcel = async function () {{
     var btn = document.getElementById('btn-xlsx');
     var orig = btn.innerHTML;
@@ -398,6 +511,10 @@ def _dashboard_html(dashboard_name, token):
         var title = ws.getCell('A1');
         title.value = s.name; title.font = {{ bold: true, size: 14, color: {{ argb: 'FF344BD2' }} }};
         ws.getColumn(1).width = 28; ws.getColumn(2).width = 16; ws.getColumn(3).width = 16;
+        if (writeSheetBody(ws, s)) {{
+          await addTileImage(wb, ws, s);
+          continue;
+        }}
         var chart = chartInstances[s.id];
         if (chart) {{
           var b64 = chart.getDataURL({{ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' }});
@@ -424,7 +541,9 @@ def _dashboard_html(dashboard_name, token):
       ws.getCell('A1').value = sheet.name;
       ws.getCell('A1').font = {{ bold: true, size: 14, color: {{ argb: 'FF344BD2' }} }};
       ws.getColumn(1).width = 28;
-      var chart = chartInstances[sheetId];
+      var wroteBody = writeSheetBody(ws, sheet);
+      if (wroteBody) await addTileImage(wb, ws, sheet);
+      var chart = wroteBody ? null : chartInstances[sheetId];
       if (chart) {{
         var b64 = chart.getDataURL({{ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' }});
         var imgId = wb.addImage({{ base64: b64, extension: 'png' }});

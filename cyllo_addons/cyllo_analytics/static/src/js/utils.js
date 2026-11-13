@@ -8,8 +8,6 @@
  */
 export function generateSqlAlias(base, isPreset = false) {
     if (!base) return "expr_" + Math.random().toString(36).substring(2, 7);
-
-    // For regular columns (table.field), replace dot with underscore
     if (!isPreset && base.includes('.')) {
         return base.replace('.', '_');
     }
@@ -52,4 +50,48 @@ export function getMonetaryExpression(column, modelName, companyId) {
     ), 1))`;
 
     return `ROUND(${column} / ${currency_rate}, 2)`;
+}
+
+/**
+ * The dashboard.sheet fields a KPI needs, and the shape KpiSheetChart wants
+ * them in.
+ *
+ * The deck editor and the player both mount that component and both read
+ * their sheet config with their own orm.read, so the field list and the
+ * mapping live here rather than being written out twice and drifting.
+ */
+export const KPI_SHEET_FIELDS = [
+    "kpi_target", "kpi_view", "kpi_description", "kpi_redirect",
+    "kpi_icon", "kpi_model",
+];
+
+/**
+ * @param {Object} config - a dashboard.sheet read with KPI_SHEET_FIELDS.
+ * @returns {Object} the `kpi` prop for KpiSheetChart, matching what the
+ *                   dashboard builds in getKpi().
+ */
+export function kpiSettingsFromSheet(config) {
+    return {
+        description: config.kpi_description,
+        redirect: config.kpi_redirect,
+        target: config.kpi_target,
+        measureView: config.kpi_view,
+        icon: config.kpi_icon,
+        model: config.kpi_model,
+    };
+}
+
+export async function fetchSheetStyling(orm, sheetIds) {
+    const bySheet = {};
+    if (!sheetIds.length) return bySheet;
+    const [mappings, annotations] = await Promise.all([
+        orm.searchRead("dashboard.sheet.color.mapping", [["sheet_id", "in", sheetIds]],
+            ["measure_alias", "min_value", "max_value", "color", "indicator", "notes", "sheet_id"]),
+        orm.searchRead("dashboard.sheet.annotation", [["sheet_id", "in", sheetIds]],
+            ["measure_alias", "dimension_label", "notes", "sheet_id"]),
+    ]);
+    const entry = (id) => (bySheet[id] ||= { color_mappings: [], annotations: [] });
+    mappings.forEach((m) => entry(m.sheet_id[0]).color_mappings.push(m));
+    annotations.forEach((a) => entry(a.sheet_id[0]).annotations.push(a));
+    return bySheet;
 }

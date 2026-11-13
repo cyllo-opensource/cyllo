@@ -15,8 +15,14 @@ export class ThemeMaker {
      */
     initTheme() {
         var theme = this.theme
+        // Guard: if there is no real theme data, bail out early so callers
+        // with an empty themeData ({}) do not crash on undefined[1].
+        if (!theme || !theme.name) {
+            return {};
+        }
         var root = document.querySelector(':root');
-        var primary_color = theme.theme_color_ids ? theme.theme_color_ids[0] : "#000"
+        var colorIds = Array.isArray(theme.theme_color_ids) ? theme.theme_color_ids : [];
+        var primary_color = colorIds[0] || "#000"
         root.style.setProperty('--dashboard-text-color', theme.title || "#000");
         root.style.setProperty('--dashboard-primary-color', primary_color);
         root.style.setProperty('--dashboard-background-color', theme.background || "#fff");
@@ -24,8 +30,8 @@ export class ThemeMaker {
         root.style.setProperty('--dashboard-modal-background-color', modalColor || "#fff");
         root.style.setProperty('--dashboard--body-header-background-color', theme.body_header_background);
         root.style.setProperty('--dashboard-header-title-color', theme.header_title_color);
-        root.style.setProperty('--dashboard-theme-color-2', theme.theme_color_ids[1]);
-        root.style.setProperty('--dashboard-theme-color-3', theme.theme_color_ids[2]);
+        if (colorIds[1] !== undefined) root.style.setProperty('--dashboard-theme-color-2', colorIds[1]);
+        if (colorIds[2] !== undefined) root.style.setProperty('--dashboard-theme-color-3', colorIds[2]);
 
         return {
             "themeName": theme.name,
@@ -42,9 +48,9 @@ export class ThemeMaker {
             "textColorShow": false,
             "textColor": theme.label_text,
             "markTextColor": "#eee",
-            "color": theme.theme_color_ids,
+            "color": colorIds,
             graph: {
-                color: theme.theme_color_ids,
+                color: colorIds,
                 "itemStyle": {
                     "borderWidth": theme.border_width,
                     "borderColor": theme.border_color

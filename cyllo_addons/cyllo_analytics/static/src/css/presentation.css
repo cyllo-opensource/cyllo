@@ -61,9 +61,12 @@
 }
 
 img.presentation_helper {
+    /* 3840x2160 on disk, so height:auto is what keeps its shape at whatever
+       width the panel has. It used to be nudged down 15px by position/top,
+       which pushed its lower edge past the panel it sits in. */
+    display: block;
     width: 100%;
-    top: 15px;
-    position: relative;
+    height: auto;
     border-radius: 5px;
 }
 
@@ -74,4 +77,59 @@ img.presentation_helper {
 .slide-tools-extra {
     width: 15vw;
     border-radius: 10px;
+}
+
+/* .o_action_manager is overflow:hidden, so a client action scrolls itself or
+   not at all. Scoped to the preview: the player and editor share
+   .cy_presentation and must not scroll. */
+.cy_presentation_preview {
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* The header carries the only way out (back), the only way to start, and the
+   help panel, so it stays put while the charts scroll under it. The rule above
+   makes the preview root the scrolling box, which is what sticky resolves
+   against. Scoped to the preview for that reason: the player and editor do not
+   scroll, so there is nothing for it to stick to there. */
+.cy_presentation_preview > .control-panel {
+    position: sticky;
+    top: 0;
+    /* .cy_presentation .card is position:relative, so the cards would show
+       through a transparent bar as they pass beneath it. */
+    background-color: var(--dashboard-modal-background-color);
+    border-bottom: 1px solid var(--border-color);
+    /* Above the cards and the count badges they carry, which sit at 6. */
+    z-index: 20;
+}
+
+.cy_presentation .card {
+    position: relative;
+}
+
+.cy_presentation .card .fa-stack,
+.cy_presentation .card .fa-stack.fa-3x {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+    line-height: 26px;
+    z-index: 6;
+}
+
+.cy_presentation .card .fa-stack::after {
+    content: attr(data-count);
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--dashboard-primary-color, #344bd2);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 26px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }

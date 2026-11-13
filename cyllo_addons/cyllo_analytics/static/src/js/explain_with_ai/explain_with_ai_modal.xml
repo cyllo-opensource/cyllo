@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="ExplainAIModal" owl="1">
-        <Dialog size="'fs'" footer="false" contentClass="'explain-ai-modal'">
+        <Dialog size="'xl'" footer="false" contentClass="'explain-ai-modal'">
             <t t-set-slot="header">
                 <t t-if="fullscreen">
                     <button class="btn oi text oi-arrow-left"
@@ -23,9 +23,9 @@
                             t-on-click="dismiss"/>
                 </t>
             </t>
-            <div class="d-flex p-2 explain-ai-child-container col-lg-12"
+            <div class="d-flex flex-column flex-lg-row p-2 explain-ai-child-container"
                  t-ref="root">
-                  <div class="col-lg-6 ai-analytics-graph-container">
+                  <div class="col-12 col-lg-5 ai-analytics-graph-container">
                     <GraphTile t-if="state.data"
                                value="chartProps"
                                theme="props.currentTheme"
@@ -35,11 +35,11 @@
                                style="style"
                                isDarkMode="props.isDarkMode"/>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-12 col-lg-7 ai-chat-panel">
                     <div class="text-area ai-chat-mode-text">
                         <t t-if="state.chatMode">
                             <div class="d-flex flex-column justify-content-between w-100 h-100">
-                                <div class="pb-3">
+                                <div class="ai-chat-thread">
                                     <ChatThread
                                             t-foreach="chatHistory.activeChats"
                                             t-as="chat"
@@ -61,7 +61,7 @@
                                 </div>
                                 <p class="text px-3"
                                    t-out="parseExplain(state.explainByLetter)"/>
-                                <div t-if="state.apiError"
+                                <div t-if="state.apiError and state.settingsAction"
                                      class="d-flex justify-content-start align-items-center px-3">
                                     <button class="btn btn-primary"
                                             type="button"
@@ -104,7 +104,7 @@
                         </div>
                     </div>
                     <div t-if="state.chatMode" class="chat-container">
-                        <div class="w-95 d-flex justify-content-between ai-chat-text-area-container">
+                        <div class="d-flex align-items-end ai-chat-text-area-container">
                             <textarea placeholder="Type here..."
                                       t-model="state.chat"
                                       t-on-keydown="handleChatKeydown"
@@ -112,7 +112,7 @@
                             <div class="d-flex justify-content-center align-items-center ai-send-button-div"
                                  title="Send"
                                  t-on-click="makeResponse">
-                                <i class="ri-send-plane-2-line ms-1"/>
+                                <i class="ri-send-plane-2-line"/>
                             </div>
                         </div>
                     </div>

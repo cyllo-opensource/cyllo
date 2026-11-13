@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="cyllo_analytics.PresentationEditor" owl="1">
+        <div class="cy-pe-root">
+            <div class="cy-pe-topbar">
+                <button class="btn btn-sm btn-light cy-pe-back"
+                        t-on-click="goBack" title="Back to presentations">
+                    <i class="ri-arrow-left-line"/>
+                </button>
+                <input type="text" class="cy-pe-title"
+                       t-att-value="state.deckName"
+                       t-on-change="renameDeck"
+                       placeholder="Untitled Presentation"/>
+                <div class="cy-pe-actions">
+                    <button class="btn btn-sm btn-secondary"
+                            t-on-click="() => this.togglePicker('chart')">
+                        <i class="ri-bar-chart-2-line me-1"/>Add Chart
+                    </button>
+                    <button class="btn btn-sm btn-secondary"
+                            t-on-click="() => this.togglePicker('note')">
+                        <i class="ri-sticky-note-line me-1"/>Add Note
+                    </button>
+                    <button class="btn btn-sm btn-secondary" t-on-click="addHeading">
+                        <i class="ri-heading me-1"/>Add Heading
+                    </button>
+                    <button class="btn btn-sm btn-secondary" t-on-click="addText">
+                        <i class="ri-text me-1"/>Add Text
+                    </button>
+                    <button class="btn btn-sm btn-secondary" t-on-click="addImage">
+                        <i class="ri-image-line me-1"/>Add Image
+                    </button>
+                    <span class="cy-pe-saved" t-if="!state.dirty">Saved</span>
+                    <span class="cy-pe-saved cy-pe-saving" t-else="">Saving…</span>
+                </div>
+            </div>
+
+            <!-- The picker sits over the canvas rather than in a dialog: the
+                 slide stays visible, so it is obvious what the chart is being
+                 added to. -->
+            <div class="cy-pe-picker" t-if="state.picker">
+                <t t-if="state.picker === 'chart'">
+                    <div class="cy-pe-picker-title">
+                        <t t-if="state.sourceCount > 1">Charts you can use</t>
+                        <t t-else="">Charts on this dashboard</t>
+                    </div>
+                    <div class="cy-pe-picker-empty" t-if="!state.sheets.length">
+                        This dashboard has no charts yet.
+                    </div>
+                    <button class="cy-pe-picker-row" t-foreach="state.sheets"
+                            t-as="sheet" t-key="sheet.id"
+                            t-on-click="() => this.addChart(sheet.id, sheet.dashboard_id)">
+                        <i class="ri-bar-chart-2-line me-2"/>
+                        <t t-esc="sheet.name"/>
+                        <!-- Only worth saying when there is more than one
+                             dashboard behind the list. -->
+                        <span class="cy-pe-picker-source"
+                              t-if="state.sourceCount > 1"
+                              t-esc="sheet.dashboard"/>
+                        <span class="cy-pe-picker-type" t-esc="sheet.type"/>
+                    </button>
+                </t>
+                <t t-if="state.picker === 'note'">
+                    <div class="cy-pe-picker-title">
+                        <t t-if="state.sourceCount > 1">Notes you can use</t>
+                        <t t-else="">Notes written on this dashboard</t>
+                    </div>
+                    <div class="cy-pe-picker-empty" t-if="!state.notes.length">
+                        No notes have been written on this dashboard yet.
+                    </div>
+                    <button class="cy-pe-picker-row" t-foreach="state.notes"
+                            t-as="note" t-key="note.id"
+                            t-on-click="() => this.addNote(note.id)">
+                        <i class="ri-sticky-note-line me-2"/>
+                        <t t-esc="noteLabel(note)"/>
+                    </button>
+                </t>
+            </div>
+
+            <div class="cy-pe-body">
+                <div class="cy-pe-rail" t-ref="rail">
+                    <div class="cy-pe-rail-head">
+                        <span>Slides</span>
+                        <button class="cy-pe-rail-add" t-on-click="addSlide"
+                                title="Add a slide">
+                            <i class="ri-add-line"/>
+                        </button>
+                    </div>
+                    <div class="cy-pe-slide"
+                         t-foreach="state.slides" t-as="slide" t-key="slide.id"
+                         t-att-data-slide-id="slide.id"
+                         t-att-class="{'cy-pe-slide-active': slide.id === state.activeSlideId}"
+                         t-on-click="() => this.selectSlide(slide.id)">
+                        <span class="cy-pe-slide-grip" title="Drag to reorder">
+                            <i class="ri-draggable"/>
+                        </span>
+                        <span class="cy-pe-slide-no" t-esc="slide_index + 1"/>
+                        <span class="cy-pe-slide-name" t-esc="slide.name"/>
+                        <span class="cy-pe-slide-tools">
+                            <!-- Reordering is the drag; the arrows that used
+                                 to sit here said the same thing twice. -->
+                            <button t-on-click.stop="() => this.deleteSlide(slide.id)"
+                                    title="Delete slide"><i class="ri-delete-bin-line"/></button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="cy-pe-stage">
+                    <div class="cy-pe-loading" t-if="state.loading">
+                        <i class="ri-loader-4-line"/>
+                    </div>
+                    <div class="cy-pe-slide-head" t-if="showHeading">
+                        <button class="cy-pe-head-remove" t-on-click="removeHeading"
+                                title="Remove the heading from this slide">
+                            <i class="ri-close-line"/>
+                        </button>
+                        <div class="cy-pe-head-tools">
+                            <button class="cy-pe-fmt-btn" t-on-click="cycleHeadingAlign"
+                                    title="Alignment">
+                                <i t-att-class="headingAlignIcon()"/>
+                            </button>
+                            <input type="color" class="cy-pe-colour"
+                                   title="Heading colour"
+                                   t-att-value="activeSlide.heading_color || '#000000'"
+                                   t-on-change="(ev) => this.setHeadingColor('heading_color', ev)"/>
+                            <input type="color" class="cy-pe-colour"
+                                   title="Sub-heading colour"
+                                   t-att-value="activeSlide.subheading_color || '#6b7280'"
+                                   t-on-change="(ev) => this.setHeadingColor('subheading_color', ev)"/>
+                        </div>
+                        <input type="text" class="cy-pe-heading"
+                               t-att-value="activeSlide.heading || ''"
+                               t-attf-style="text-align: {{ activeSlide.heading_align or 'left' }}; color: {{ activeSlide.heading_color or 'inherit' }};"
+                               t-on-change="(ev) => this.saveSlideField('heading', ev)"
+                               placeholder="Slide heading"/>
+                        <input type="text" class="cy-pe-subheading"
+                               t-att-value="activeSlide.subheading || ''"
+                               t-attf-style="text-align: {{ activeSlide.heading_align or 'left' }}; color: {{ activeSlide.subheading_color or 'inherit' }};"
+                               t-on-change="(ev) => this.saveSlideField('subheading', ev)"
+                               placeholder="Sub-heading"/>
+                    </div>
+                    <div class="cy-pe-canvas-wrap">
+                        <div class="cy-pe-canvas grid-stack" t-ref="canvas"/>
+                    </div>
+                    <div class="cy-pe-hint" t-if="!state.loading and !state.items.length">
+                        This slide is empty. Add a chart, a note, or some text —
+                        then drag to move and pull an edge to resize.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

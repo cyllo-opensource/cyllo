@@ -106,6 +106,9 @@ export function CyAnalyticMixin(CyComponent) {
             }, () => [this.ChartData.items])
             this._darkModeSyncing = false
             useBus(this.env.bus, "DARK_MODE_UPDATED", (event) => {
+                if (this.state.darkMode === event.detail) {
+                    return
+                }
                 this._darkModeSyncing = true
                 this.state.darkMode = event.detail
             })
@@ -229,7 +232,26 @@ export function CyAnalyticMixin(CyComponent) {
         async fetchData() {
             var itemLength = this.items.length
             this.ChartData.loading = Boolean(itemLength)
+            // Notes, matched to this dashboard AND the filters in force. The
+            // dialog saves a note under the filters it was written through,
+            // so looking it up with anything else finds nothing: a note
+            // written while a date range was applied simply never appeared.
+            // One call for the whole dashboard rather than one per chart.
+            let notesBySheet = {}
+            try {
+                notesBySheet = await this.orm.call(
+                    "dashboard.sheet.note", "notes_for",
+                    [this.items.map((item) => item.id), this.id,
+                     {...(this.filters || {})}])
+            } catch (err) {
+                console.error("dashboard: notes could not be loaded", err)
+            }
             this.items.forEach((item, i) => {
+                // Held on the sheet too, so the tile menu says "Edit Note"
+                // for a chart that has one under these filters.
+                const note = notesBySheet[item.id] || {}
+                item.note_html = note.note_html || ""
+                item.note_ratio = note.note_ratio || 60
                 var sql = item.query.replace(/\n/g, ' ');
                 this.orm.call("dashboard.config", "sql_execute", [sql]).then((res) => {
                     const measuresList = eval(item.measure);
@@ -250,7 +272,14 @@ export function CyAnalyticMixin(CyComponent) {
                         dimension_axis: item.dimension_axis,
                         type: item.type,
                         id: item.id,
-                        color_mappings: item.color_mappings || []
+                        color_mappings: item.color_mappings || [],
+                        // The presentation is rendered from a stored snapshot
+                        // of this object, not from a live read of the sheet,
+                        // so anything the slides need has to be carried here.
+                        // Leaving the note out is why it never reached the
+                        // presentation: the sheet had one, this object did not.
+                        note_html: item.note_html || "",
+                        note_ratio: item.note_ratio || 60,
                     }
                     this.ChartData.data.push(props)
                     itemLength--;

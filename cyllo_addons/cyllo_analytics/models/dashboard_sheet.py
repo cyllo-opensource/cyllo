@@ -19,13 +19,33 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from openai import AuthenticationError, OpenAI
-from odoo import api, fields, models
-from odoo.http import request
+import logging
+import re
+
+from odoo import _, api, fields, models
 from odoo.exceptions import AccessError
 from odoo.addons.iap.tools import iap_tools
 
 import tiktoken
+
+_logger = logging.getLogger(__name__)
+
+AGGREGATE_RE = re.compile(r'\b(SUM|AVG|MIN|MAX|COUNT)\s*\(', re.IGNORECASE)
+
+
+def _has_aggregate(expression):
+    """Return True if the SQL expression already contains an aggregate call."""
+    return bool(AGGREGATE_RE.search(expression or ''))
+
+
+GLOBAL_FILTER_OPERATORS = {'=': '=', '>=': '>=', '<=': '<=', 'in': 'IN'}
+
+
+SQL_IDENTIFIER_RE = re.compile(
+    r'^[a-z_][a-z0-9_]*(\.[a-z_][a-z0-9_]*)?$', re.IGNORECASE)
+
+TRAILING_CLAUSE_RE = re.compile(
+    r'\b(GROUP\s+BY|ORDER\s+BY|LIMIT|OFFSET)\b', re.IGNORECASE)
 
 GPT_MODEL = "gpt-3.5-turbo"
 GPT_TOKN_LMT = 16385
@@ -154,8 +174,10 @@ class DashboardSheet(models.Model):
             rec.measure = str(measure)
 
     @api.depends(
-        "axis_ids.alias", "table_ids.join", "limit", "filter_ids.is_active",
-        "query_gen"
+        "axis_ids.alias", "axis_ids.column", "axis_ids.type",
+        "axis_ids.aggregate_func", "axis_ids.sort_desc",
+        "table_ids.join", "table_ids.linked", "limit",
+        "filter_ids.is_active", "filter_ids.domain", "query_gen"
     )
     def _compute_query(self):
         """Generate the query from the given data"""
@@ -163,9 +185,6 @@ class DashboardSheet(models.Model):
             if rec.query_gen:
                 rec.query = rec.query_gen
                 continue
-            # Resolve {selectedCurrency} placeholder with the company currency ID.
-            # The JS frontend replaces this before storing axis queries, but ORDER BY
-            # columns and any cached values may still carry the raw placeholder.
             company_currency_id = str(self.env.company.currency_id.id)
 
             columns = rec.axis_ids.filtered(
@@ -174,23 +193,20 @@ class DashboardSheet(models.Model):
             joins = rec.table_ids.sorted(lambda x: bool(x.linked)).mapped(
                 "join")
             where = rec.filter_ids.filtered(lambda x: x.is_active)
-            # Detect columns that carry an aggregate function (i.e. query contains parentheses)
             measure_with_agg = columns.filtered(
-                lambda x: x.type == 'measure' and x.query and '(' in x.query
+                lambda x: x.type == 'measure' and _has_aggregate(x.query)
             )
             group_by = rec.axis_ids.filtered(lambda x: x.type == "group")
-            # When GROUP BY is active, auto-wrap unaggregated measures with SUM()
             if group_by or measure_with_agg:
                 for col in columns:
-                    if col.type == 'measure' and '(' not in (col.query or ''):
+                    if col.type == 'measure' and not _has_aggregate(col.query):
                         raw_expr = col.query.split(' AS ')[0].strip() if ' AS ' in (col.query or '') else col.column
-                        col.query = f"SUM({raw_expr}) AS {col.alias}"
-            # Resolve placeholder in SELECT column queries (safety net)
+                        agg = (col.aggregate_func or 'SUM').upper()
+                        col.query = f"{agg}({raw_expr}) AS {col.alias}"
             col_queries = [
                 (q or '').replace('{selectedCurrency}', company_currency_id)
                 for q in columns.mapped('query')
             ]
-            # Build SELECT after auto-wrapping so SUM() is included
             query = f"""SELECT {', '.join(col_queries)} FROM {' '.join(joins)}"""
             if where:
                 # Resolve placeholder in WHERE domain clauses (safety net)
@@ -199,10 +215,8 @@ class DashboardSheet(models.Model):
                     for d in where.mapped('domain')
                 ]
                 query += f" WHERE {' AND '.join(where_clauses)}"
-            # Columns without an aggregate function – candidates for GROUP BY list
-            not_columns_group = columns.filtered(lambda x: '(' not in (x.query or ''))
+            not_columns_group = columns.filtered(lambda x: not _has_aggregate(x.query))
             if group_by:
-                # Explicit Group By always triggers GROUP BY
                 valid_group_by = group_by.filtered(lambda x: not any(agg in (x.column or '').upper() for agg in ['SUM(', 'AVG(', 'COUNT(', 'MIN(', 'MAX(']))
                 
                 group_by_clauses = []
@@ -214,7 +228,6 @@ class DashboardSheet(models.Model):
                 if group_by_clauses:
                     query += f" GROUP BY {', '.join(group_by_clauses)}"
             elif measure_with_agg:
-                # Aggregated measures require GROUP BY over all non-aggregated columns
                 group_targets = not_columns_group.mapped('alias')
                 if group_targets:
                     query += f" GROUP BY {', '.join(group_targets)}"
@@ -316,7 +329,6 @@ class DashboardSheet(models.Model):
         if data.get("dimension_axis"):
             vals["dimension_axis"] = data["dimension_axis"]
         if data.get("annotations"):
-            # Placeholder for processing annotations if needed in this block
             pass
         if data.get("kpi"):
             kpi = data["kpi"]
@@ -367,10 +379,8 @@ class DashboardSheet(models.Model):
             if rec.id not in config.sheet_ids.ids:
                 config.write({"sheet_ids": [fields.Command.link(rec.id)]})
 
-        # Commands for related records
         batch_vals = {}
-        
-        # filter_ids
+
         filter_commands = []
         sheet_filter = []
         for where in data.get("where", []):
@@ -406,9 +416,6 @@ class DashboardSheet(models.Model):
                 table_commands.append(fields.Command.update(join["id"], j_vals))
         if table_commands: batch_vals["table_ids"] = table_commands
 
-        # axis_ids
-        # Collect the axis IDs present in the current save payload so we can
-        # unlink any dimension/measure records that were removed from the UI.
         axis_commands = []
         incoming_axis_ids = set()
         dim = data.get("dimension")
@@ -417,7 +424,6 @@ class DashboardSheet(models.Model):
         for msr in data.get("measure", []):
             if msr.get("id"):
                 incoming_axis_ids.add(msr["id"])
-        # Unlink any dimension/measure axis records not present in this save
         existing_dim_measure = rec.axis_ids.filtered(lambda x: x.type in ('dimension', 'measure'))
         orphaned = existing_dim_measure.filtered(lambda x: x.id not in incoming_axis_ids)
         if orphaned:
@@ -449,9 +455,6 @@ class DashboardSheet(models.Model):
             if not msr.get("id"): axis_commands.append(fields.Command.create(m_vals))
             else: axis_commands.append(fields.Command.update(msr["id"], m_vals))
 
-        # Always clear existing group-type axis records before recreating.
-        # The frontend never receives DB IDs for groupBy items after a save,
-        # so the id-based update path would silently create duplicate records.
         rec.axis_ids.filtered(lambda x: x.type == 'group').unlink()
         for grp in data.get("group_by", []):
             g_vals = {k: grp[k] for k in ["value", "alias", "query", "column"] if k in grp}
@@ -617,39 +620,73 @@ class DashboardSheet(models.Model):
     @api.model
     def explain_with_ai(self, prompt_data, regenerate=False):
         """Generate an explanation using AI for the given graph data."""
-        IrConfigParameter = request.env["ir.config_parameter"].sudo()
-        api_key = IrConfigParameter.get_param("cyllo_analytics.openai_api_key",
-                                              False)
         prompt, cut, token_count = self.base_prompt_generator(prompt_data,
                                                               regenerate)
-        conversation_history = []
         is_error = not bool(prompt_data)
-        if not api_key:
-            return {
-                **self.make_response_with_default(api_key, prompt, is_error,
-                                                  conversation_history, cut),
-                "request_token": token_count
-            }
-        else:
-            return {
-                **self.make_response_with_gpt(api_key, prompt, is_error,
-                                              conversation_history, cut),
-                "request_token": token_count
-            }
+        return {
+            **self._make_ai_response(prompt, is_error, [], cut),
+            "request_token": token_count
+        }
 
     @api.model
     def chat_with_ai(self, prompt, conversation_history):
-        IrConfigParameter = request.env["ir.config_parameter"].sudo()
-        api_key = IrConfigParameter.get_param("cyllo_analytics.openai_api_key",
-                                              False)
         request_token = self.count_gpt_tokens(prompt)
-        return {**self.make_response_with_default(api_key, prompt, False,
-                                                  conversation_history, 1),
+        return {**self._make_ai_response(prompt, False,
+                                         conversation_history, 1),
                 "request_token": request_token}
 
-    def make_response_with_default(self, api_key, prompt, is_error,
+    def _ai_error(self, message):
+        """Response of a failed AI request, shown in place of the answer."""
+        return {
+            "is_error": True,
+            "api_error": False,
+            "explanation": message,
+            "cut": 1,
+            "response_token": self.count_gpt_tokens(message),
+        }
+
+    def _cyllo_ai_client(self):
+        """LLM client of the Cyllo AI configuration marked "Use For AI", or None
+        when Cyllo AI is not installed or has no complete configuration."""
+        if 'cyllo.ai.config' not in self.env:
+            return None
+        from odoo.addons.cyllo_ai.core.llm_client import LLMClient
+        client = LLMClient(self.env)
+        return client if client.is_configured() else None
+
+    def _make_ai_response(self, prompt, is_error, conversation_history, cut):
+        """Answer through Cyllo AI when it is configured, else through the Odoo AI service."""
+        client = self._cyllo_ai_client()
+        if client:
+            return self.make_response_with_cyllo_ai(client, prompt, is_error,
+                                                    conversation_history, cut)
+        return self.make_response_with_default(prompt, is_error,
+                                               conversation_history, cut)
+
+    def make_response_with_cyllo_ai(self, client, prompt, is_error,
+                                    conversation_history, cut):
+        """Answer with the Cyllo AI configuration marked "Use For AI"."""
+        messages = list(conversation_history or []) + [
+            {"role": "user", "content": prompt}]
+        try:
+            explanation = client.complete(messages)
+        except Exception as error:
+            _logger.warning("AI Insights request failed: %s", error)
+            return self._ai_error(_(
+                "Sorry, we could not generate a response. Please try again later.\n\n%s",
+                error))
+        return {
+            "is_error": is_error,
+            "api_error": False,
+            "explanation": explanation,
+            "cut": cut,
+            "response_token": self.count_gpt_tokens(explanation),
+        }
+
+    def make_response_with_default(self, prompt, is_error,
                                    conversation_history, cut):
-        IrConfigParameter = request.env["ir.config_parameter"].sudo()
+        """Answer with the Odoo AI service (IAP)."""
+        IrConfigParameter = self.env["ir.config_parameter"].sudo()
         database_id = IrConfigParameter.get_param("database.uuid")
         try:
             response = iap_tools.iap_jsonrpc(
@@ -661,113 +698,206 @@ class DashboardSheet(models.Model):
                 },
                 timeout=30,
             )
-            if response["status"] == "success":
-                return {
-                    "is_error": is_error,
-                    "api_error": False,
-                    "explanation": response["content"],
-                    "cut": cut,
-                    "response_token": self.count_gpt_tokens(response["content"])
-                }
-            elif response["status"] == "error_prompt_too_long":
-                error_response = "It looks like there's a lot of information to process, The AI model won't be able to process the request at this time!!"
-                return {
-                    "is_error": True,
-                    "api_error": False,
-                    "explanation": error_response,
-                    "cut": 1,
-                    "response_token": self.count_gpt_tokens(error_response),
-                }
-            elif response["status"] == "limit_call_reached":
-                error_response = "You've reached the maximum number of requests for now. Please take a short break and try again later!"
-                response = self.make_response_with_gpt(api_key, prompt,
-                                                       is_error,
-                                                       conversation_history,
-                                                       cut)
-                if response.get('is_error', False):
-                    return {
-                        "is_error": True,
-                        "api_error": False,
-                        "explanation": error_response,
-                        "cut": 1,
-                        "response_token": self.count_gpt_tokens(error_response),
-                    }
-                else:
-                    return response
-            else:
-                error_response = "Sorry, we could not generate a response. Please try again later."
-                response = self.make_response_with_gpt(api_key, prompt,
-                                                       is_error,
-                                                       conversation_history,
-                                                       cut)
-                if response.get('is_error', False):
-                    return {
-                        "is_error": True,
-                        "api_error": False,
-                        "explanation": error_response,
-                        "cut": 1,
-                        "response_token": self.count_gpt_tokens(error_response),
-                    }
-                else:
-                    return response
         except AccessError:
-            error_response = "Oops, it looks like our AI is unreachable!"
-            response = self.make_response_with_gpt(api_key, prompt, is_error,
-                                                   conversation_history, cut)
-            if response.get('is_error', False):
-                return {
-                    "is_error": True,
-                    "api_error": False,
-                    "explanation": error_response,
-                    "cut": 1,
-                    "response_token": self.count_gpt_tokens(error_response),
-                }
-            else:
-                return response
+            return self._ai_error(_("Oops, it looks like our AI is unreachable!"))
         except Exception:
-            return self.make_response_with_gpt(api_key, prompt, is_error,
-                                               conversation_history, cut)
-
-    def make_response_with_gpt(self, api_key, prompt, is_error,
-                               conversation_history, cut):
-        try:
-            client = OpenAI(api_key=api_key)
-            messages = conversation_history + [
-                {"role": "user", "content": prompt}]
-            response = client.chat.completions.create(
-                model=GPT_MODEL,
-                messages=messages,
-                temperature=0,
-            )
+            return self._ai_error(_(
+                "Sorry, we could not generate a response. Please try again later."))
+        if response["status"] == "success":
             return {
                 "is_error": is_error,
                 "api_error": False,
-                "explanation": response.choices[0].message.content,
+                "explanation": response["content"],
                 "cut": cut,
-                "response_token": self.count_gpt_tokens(
-                    response.choices[0].message.content),
+                "response_token": self.count_gpt_tokens(response["content"])
             }
-        except AuthenticationError:
-            error_response = (
-                "Please go to the settings and try adding a valid OpenAI API key. To get an API key, "
-                "please visit the link [https://platform.openai.com/account/api-keys]("
-                "https://platform.openai.com/account/api-keys).")
-            return {
-                "is_error": True,
-                "api_error": True,
-                "explanation": error_response,
-                "cut": 1,
-                "response_token": self.count_gpt_tokens(error_response),
-            }
-        except Exception as error:
-            error_str = str(error)
-            return {
-                "is_error": True,
-                "api_error": False,
-                "explanation": error_str,
-                "cut": 1,
-                "response_token": self.count_gpt_tokens(error_str),
-            }
+        if response["status"] == "error_prompt_too_long":
+            return self._ai_error(_(
+                "It looks like there's a lot of information to process, The AI "
+                "model won't be able to process the request at this time!!"))
+        if response["status"] == "limit_call_reached":
+            return self._ai_error(_(
+                "You've reached the maximum number of requests for now. "
+                "Please take a short break and try again later!"))
+        return self._ai_error(_(
+            "Sorry, we could not generate a response. Please try again later."))
+
+    @staticmethod
+    def _tables_in_query(query):
+        """The tables a query actually reads, upper-cased.
+
+        A dashboard's global filter is mapped to one field, and a sheet on
+        that dashboard may not read the table that field lives on. The
+        dashboard skips such a filter rather than producing SQL that cannot
+        run; this is the same test, server side.
+        """
+        upper = (query or '').upper()
+        start = upper.find('FROM')
+        if start == -1:
+            return set()
+        return {
+            match.group(1)
+            for match in re.finditer(
+                r'(?:FROM|JOIN)\s+"?([A-Z_][A-Z0-9_]*)"?', upper[start:])
+        }
+
+    def _global_filter_where(self, config_id, values):
+        """The WHERE fragment a dashboard's global filters add to this sheet.
+
+        Returns "" when nothing applies, which leaves the sheet's own query
+        untouched.
+        """
+        self.ensure_one()
+        if not config_id or not values:
+            return ''
+        links = self.env['dashboard.sheet.global'].search([
+            ('sheet_id', '=', self.id),
+            ('global_filter_id.dashboard_config_id', '=', int(config_id)),
+        ])
+        tables = self._tables_in_query(self.query)
+        clauses = []
+        for link in links:
+            global_filter = link.global_filter_id
+            value = (values or {}).get(global_filter.code)
+            if value is None or value == '' or value == []:
+                continue
+            field = (link.field or '').strip()
+            if not SQL_IDENTIFIER_RE.match(field):
+                _logger.warning(
+                    "Skipping global filter %s on sheet %s: %r is not a plain "
+                    "column reference", global_filter.code, self.id, field)
+                continue
+            if '.' in field and field.split('.')[0].upper() not in tables:
+                continue
+            operator = GLOBAL_FILTER_OPERATORS.get(global_filter.operator)
+            if not operator:
+                continue
+            if operator == 'IN':
+                value = tuple(value) if isinstance(value, (list, tuple)) else (value,)
+                if not value:
+                    continue
+            literal = self.env.cr.mogrify('%s', (value,)).decode()
+            clauses.append(f"{field} {operator} {literal}")
+        return ' AND '.join(clauses)
+
+    @staticmethod
+    def _inject_where(query, condition):
+        """Add ``condition`` to ``query``, extending any WHERE already there.
+
+        Mirrors applyFilters() in cy_dashboard_mixin.js so a chart filtered
+        through a presentation matches the same chart on the dashboard.
+        """
+        if not condition:
+            return query
+        start = (query or '').upper().rfind('FROM')
+        if start == -1:
+            return query
+        head, tail = query[:start], query[start:]
+        existing = re.search(
+            r'\bWHERE\b\s+(.+?)(?=\bGROUP\s+BY\b|\bORDER\s+BY\b|\bLIMIT\b|$)',
+            tail, re.IGNORECASE | re.DOTALL)
+        if existing:
+            # Trailing space matters: the match ends flush against GROUP BY.
+            merged = f"WHERE ({existing.group(1).strip()}) AND ({condition}) "
+            tail = tail[:existing.start()] + merged + tail[existing.end():]
+            return head + tail
+        trailing = TRAILING_CLAUSE_RE.search(tail)
+        cut = trailing.start() if trailing else len(tail)
+        return f"{head}{tail[:cut]} WHERE {condition} {tail[cut:]}".rstrip()
+
+    @api.model
+    def fetch_sheet_data(self, sheet_ids, filters=None):
+        """Run each sheet's stored query and return ``{sheet_id: rows}``.
+
+        Added for the presentation editor, which draws several charts on one
+        slide and would otherwise make a round trip per chart. The SQL is
+        read from the sheet record here rather than accepted from the
+        caller, so a client can only ask for a sheet *by id* - it cannot
+        choose what SQL runs.
+
+        Access is limited to sheets reachable through a dashboard.config the
+        user may read, which is what the record rules on that model already
+        express.
+
+        ``filters`` carries the presentation's "as shown on dashboard"
+        boxes::
+
+            {"<sheet_id>": {"config_id": 7, "values": {"date_0": "2025-01-01"}}}
+
+        Sheets absent from it are run unfiltered, which is the default and
+        what every existing caller gets by passing nothing. Only the *values*
+        come from the client; the field and operator each value is applied
+        through are read from the dashboard's own global filter records, so
+        a caller cannot choose what SQL is built.
+        """
+        if isinstance(sheet_ids, int):
+            sheet_ids = [sheet_ids]
+        try:
+            requested = {int(sheet_id) for sheet_id in (sheet_ids or [])}
+        except (TypeError, ValueError):
+            return {}
+        if not requested:
+            return {}
+
+        configs = self.env['dashboard.config'].search(
+            [('sheet_ids', 'in', list(requested))])
+        allowed = set(configs.sheet_ids.ids) & requested
+        unreachable = requested - allowed
+        if unreachable:
+            # A deck may draw from sheets that sit on no dashboard at all -
+            # one hidden from its dashboard, or built straight from Sheets.
+            # Those have no dashboard whose rules could grant them, so they
+            # fall back to this model's own access. A sheet that IS on a
+            # dashboard the user may not read stays refused.
+            on_a_dashboard = set(self.env['dashboard.config'].sudo().search(
+                [('sheet_ids', 'in', list(unreachable))]).sheet_ids.ids)
+            orphans = unreachable - on_a_dashboard
+            if orphans:
+                allowed |= set(self.search([('id', 'in', list(orphans))]).ids)
+        if allowed != requested:
+            _logger.warning(
+                "fetch_sheet_data: dropping sheet ids not reachable by user "
+                "%s: %s", self.env.user.login, sorted(requested - allowed))
+
+        executor = self.env['dashboard.config']
+        result = {}
+        for sheet in self.browse(sorted(allowed)):
+            query = (sheet.query or '').strip()
+            if not query:
+                result[str(sheet.id)] = []
+                continue
+            # A query saved by the sheet editor is deliberately the *base*
+            # query: "Base query MUST NOT include dynamic sheet filters so the
+            # dashboard can toggle them properly". The dashboard puts them back
+            # as it renders and the editor previews with them, so a consumer
+            # that runs the bare query shows an unfiltered total nobody else
+            # shows. Only query_gen is built that way; a query this model
+            # computed already carries them.
+            if sheet.query_gen:
+                active = sheet.filter_ids.filtered(lambda f: f.is_active)
+                domains = [d for d in active.mapped('domain') if d]
+                if domains:
+                    query = sheet._inject_where(
+                        query, ' AND '.join('(%s)' % d for d in domains))
+            wanted = (filters or {}).get(str(sheet.id)) or (
+                filters or {}).get(sheet.id)
+            if wanted:
+                try:
+                    condition = sheet._global_filter_where(
+                        wanted.get('config_id'), wanted.get('values'))
+                    query = sheet._inject_where(query, condition)
+                except Exception:
+                    _logger.exception(
+                        "Global filters for sheet %s could not be applied",
+                        sheet.id)
+            try:
+                rows = executor.sql_execute(query)
+            except Exception:
+                _logger.exception("Query for dashboard sheet %s failed", sheet.id)
+                result[str(sheet.id)] = []
+                continue
+            result[str(sheet.id)] = rows if isinstance(rows, list) else []
+        return result
 
     def get_sheet_data(self):
         """Method to retrieve data related to the sheet."""

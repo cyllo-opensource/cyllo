@@ -5,9 +5,9 @@ import {GraphTile} from "@cyllo_analytics/js/presentation/components/graph_tile"
 import {ThemeMaker} from "../theme_maker";
 import {SelectUser} from "./components/select_user";
 import {useService} from "@web/core/utils/hooks";
-import {_t} from "@web/core/l10n/translation";
 import {chatHistory} from "./chatHistory";
 import {ChatThread, scrollToView, setStringByLetter} from "./components/chatThread"
+import { _t } from "@web/core/l10n/translation";
 
 /**
  * Converts a data URL to a Blob.
@@ -49,6 +49,7 @@ export class ExplainAIModal extends Component {
             error: true,
             data: false,
             apiError: false,
+            settingsAction: false,
             cut: 100,
             chatMode: false,
             chat: "",
@@ -66,17 +67,7 @@ export class ExplainAIModal extends Component {
         })
     }
     goToSettings() {
-        this.actionService.doAction({
-            name: _t("Settings"),
-            type: "ir.actions.act_window",
-            res_model: "res.config.settings",
-            views: [[false, "form"]],
-            view_mode: "form",
-            target: "main",
-            context: {
-                module: 'cyllo_analytics_settings'
-            },
-        })
+        this.actionService.doAction(this.state.settingsAction)
         this.dismiss()
     }
     get chartProps() {
@@ -181,12 +172,13 @@ export class ExplainAIModal extends Component {
 
         const requestId = this.chatHistory.addInitialMessage(promptData, 0)
         const chatId = this.chatHistory.addMessage({role: "assistant", content: ""}, 0)
-        const {is_error, api_error, cut, explanation, request_token, response_token} = await this.orm.call("dashboard.sheet", "explain_with_ai", [promptData, retry])
+        const {is_error, api_error, settings_action, cut, explanation, request_token, response_token} = await this.orm.call("dashboard.sheet", "explain_with_ai", [promptData, retry])
         this.chatHistory.updateToken(request_token, requestId)
         this.chatHistory.updateMessageNToken(explanation, response_token, chatId)
         this.state.error = is_error
         this.state.cut = Math.ceil(cut * 100)
         this.state.apiError = api_error
+        this.state.settingsAction = settings_action || false
         this.state.explanation = ""
         this.state.explainByLetter = ""
         setStringByLetter(this.state, 'explainByLetter', explanation, '.explain-footer')
@@ -214,7 +206,7 @@ export class ExplainAIModal extends Component {
 
     async copyToClip() {
         if (this.state.error) return;
-        const message = "Copied to Clipboard!"
+        const message = _t("Copied to Clipboard!")
         this.showActionMessage(message)
         var textArea = document.createElement("textarea");
         textArea.value = htmlToText(this.explain);
@@ -381,7 +373,7 @@ export class ExplainAIModal extends Component {
 
     get style() {
         return {
-            height: `55vh;`,
+            height: `40vh;`,
             width: `100%;`,
         }
     }

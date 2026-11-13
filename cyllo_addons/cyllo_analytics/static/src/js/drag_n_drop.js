@@ -247,7 +247,6 @@ export class DropZone extends Component {
      */
     onDragOver(e) {
         e.preventDefault();
-        // Do not highlight the zone if it is already at its limit
         if (this.state.children.length >= this.state.limit) {
             return;
         }
@@ -267,8 +266,6 @@ export class DropZone extends Component {
     async onItemDrop(e) {
         e.preventDefault();
         this.ref.el.classList.remove('can-drop');
-
-        // Handle cross-zone chip move
         const placedItemStr = e.dataTransfer.getData("placed_item");
         if (placedItemStr) {
             const placed = JSON.parse(placedItemStr);
@@ -284,14 +281,14 @@ export class DropZone extends Component {
             }
 
             if (this.state.type === 'groupBy' && (placed.type === 'measure' || _sourceType === 'measure')) {
-                this.notification.add("Measures and presets cannot be used for grouping.", { type: "warning" });
+                this.notification.add(_t("Measures and presets cannot be used for grouping."), { type: "warning" });
                 return;
             }
 
             // Prevent duplicate: same column already in this zone
             const dupKey = placed.column || placed.alias;
             if (dupKey && this.state.children.some(c => (c.column || c.alias) === dupKey)) {
-                this.notification.add("This field is already added to this zone.", { type: "warning" });
+                this.notification.add(_t("This field is already added to this zone."), { type: "warning" });
                 return;
             }
 
@@ -387,13 +384,13 @@ export class DropZone extends Component {
             const item = document.querySelector('.dragging');
 
             if (this.state.type === 'orderBy' && field_type === 'binary') {
-                this.notification.add("Binary fields cannot be used for ordering.", { type: "warning" });
+                this.notification.add(_t("Binary fields cannot be used for ordering."), { type: "warning" });
                 this.ref.el.classList.remove('can-drop');
                 return;
             }
 
             if (this.state.type === 'groupBy' && type === 'measure') {
-                this.notification.add("Measures and presets cannot be used for grouping.", { type: "warning" });
+                this.notification.add(_t("Measures and presets cannot be used for grouping."), { type: "warning" });
                 this.ref.el.classList.remove('can-drop');
                 return;
             }
@@ -404,7 +401,7 @@ export class DropZone extends Component {
 
                 // Prevent duplicate: same column already in this zone
                 if (column && this.state.children.some(c => (c.column || c.raw_column) === column)) {
-                    this.notification.add("This field is already added to this zone.", { type: "warning" });
+                    this.notification.add(_t("This field is already added to this zone."), { type: "warning" });
                     this.ref.el.classList.remove('can-drop');
                     return;
                 }
