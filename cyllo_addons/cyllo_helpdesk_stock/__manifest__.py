@@ -32,7 +32,7 @@
     'depends': ['cyllo_helpdesk', 'cyllo_helpdesk_sale', 'stock', 'sale_stock'],
     'data': [
         'security/ir.model.access.csv',
-        'wizard/helpdesk_ticket_return_wizard_views.xml',
+        'wizards/helpdesk_ticket_return_wizard_views.xml',
         'views/helpdesk_ticket_views.xml',
         'views/helpdesk_team_views.xml',
     ],

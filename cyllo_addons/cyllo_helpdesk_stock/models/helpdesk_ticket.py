@@ -27,7 +27,7 @@ class HelpDeskTicket(models.Model):
     _inherit = 'helpdesk.ticket'
 
     picking_ids = fields.Many2many('stock.picking',
-                                   string='Returns/Replacements')
+                                   string='Returns/Replacements',copy=False)
     picking_count = fields.Integer(compute='_compute_picking_count')
 
     @api.depends('picking_ids')
@@ -36,6 +36,7 @@ class HelpDeskTicket(models.Model):
             ticket.picking_count = len(ticket.picking_ids)
 
     def action_create_return(self):
+        """Function for creating a new product return from helpdesk ticket."""
         self.ensure_one()
         if not self.sale_order_id:
             raise UserError(_("Please select a Sale Order first."))

@@ -34,11 +34,16 @@ class TestCrmLeadHelpdesk(TransactionCase):
             'email': 'crm_partner@test.com',
         })
 
+        # Team is required on tickets (team_id is NOT NULL on helpdesk.ticket)
+        cls.team = cls.env['helpdesk.team'].create({
+            'name': 'CRM Integration Team',
+        })
+
         cls.ticket = cls.env['helpdesk.ticket'].create({
             'name': 'CRM Integration Ticket',
             'customer_id': cls.partner.id,
+            'team_id': cls.team.id,
         })
-
     # ─────────────────────────────────────────────
     # Field existence & defaults
     # ─────────────────────────────────────────────
@@ -142,3 +147,47 @@ class TestCrmLeadHelpdesk(TransactionCase):
         lead.unlink()
         ticket_still_exists = self.env['helpdesk.ticket'].browse(lead_ticket_id).exists()
         self.assertTrue(ticket_still_exists, "Ticket should survive lead deletion.")
+
+    # ─────────────────────────────────────────────
+    # Reassignment between tickets
+    # ─────────────────────────────────────────────
+
+    def test_helpdesk_ticket_id_can_be_reassigned(self):
+        """A lead can be moved from one ticket to another."""
+        other_ticket = self.env['helpdesk.ticket'].create({
+            'name': 'Target Ticket',
+            'customer_id': self.partner.id,
+            'team_id': self.team.id,
+        })
+        lead = self.env['crm.lead'].create({
+            'name': 'Reassigned Lead',
+            'helpdesk_ticket_id': self.ticket.id,
+        })
+        lead.helpdesk_ticket_id = other_ticket
+
+        self.assertNotIn(lead, self.ticket.crm_lead_ids)
+        self.assertEqual(self.ticket.crm_lead_count, 0)
+        self.assertIn(lead, other_ticket.crm_lead_ids)
+        self.assertEqual(other_ticket.crm_lead_count, 1)
+
+    def test_lead_survives_ticket_deletion_with_link_cleared(self):
+        """Deleting a ticket must keep the lead and clear its link
+        (Many2one 'set null' default)."""
+        ticket = self.env['helpdesk.ticket'].create({
+            'name': 'Ticket to delete',
+            'customer_id': self.partner.id,
+            'team_id': self.team.id,
+        })
+        lead = self.env['crm.lead'].create({
+            'name': 'Orphan-to-be Lead',
+            'helpdesk_ticket_id': ticket.id,
+        })
+        lead_id = lead.id
+        ticket.unlink()
+
+        lead = self.env['crm.lead'].browse(lead_id)
+        self.assertTrue(lead.exists(), "Lead must survive ticket deletion.")
+        self.assertFalse(
+            lead.helpdesk_ticket_id,
+            "Lead's ticket link must be cleared when the ticket is deleted.",
+        )

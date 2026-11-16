@@ -32,7 +32,7 @@
     'depends': ['cyllo_helpdesk', 'cyllo_accounting'],
     'data': [
         'security/ir.model.access.csv',
-        'wizard/helpdesk_refund_wizard_views.xml',
+        'wizards/helpdesk_refund_wizard_views.xml',
         'views/helpdesk_ticket_views.xml',
     ],
     'license': 'LGPL-3',

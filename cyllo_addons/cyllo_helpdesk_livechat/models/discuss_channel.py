@@ -19,9 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from markupsafe import Markup
 from odoo import _, models
 from odoo.tools import html2plaintext, html_escape
-from markupsafe import Markup
 
 
 class DiscussChannel(models.Model):

@@ -83,8 +83,9 @@ class TestHelpdeskWarranty(TransactionCase):
     # ── Helpers ──────────────────────────────────────────────────────────
 
     def _make_order_line(self, expiration_date=None):
-        """Create a sale.order.line and optionally set warranty_expiration_date
-        directly (bypasses compute for deterministic testing)."""
+        """Create a sale.order.line and optionally set
+        sale_warranty_expiration_date directly (bypasses compute for
+        deterministic testing)."""
         line = self.env['sale.order.line'].create({
             'order_id': self.sale_order.id,
             'product_id': self.product.id,
@@ -93,7 +94,7 @@ class TestHelpdeskWarranty(TransactionCase):
         })
         if expiration_date is not None:
             # Write directly so tests are date-deterministic
-            line.write({'warranty_expiration_date': expiration_date})
+            line.write({'sale_warranty_expiration_date': expiration_date})
         return line
 
     def _make_ticket(self, team, sale_order_line=None):

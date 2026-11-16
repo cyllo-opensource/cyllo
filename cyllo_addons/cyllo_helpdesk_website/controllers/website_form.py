@@ -24,8 +24,6 @@ from odoo import _, tools
 from odoo.addons.website.controllers import form
 from odoo.exceptions import ValidationError
 from odoo.http import request
-from odoo.tools import plaintext2html
-
 
 class WebsiteForm(form.WebsiteForm):
 

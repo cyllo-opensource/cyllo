@@ -38,14 +38,18 @@ class HelpDeskTicket(models.Model):
         help="Shows if the selected product is currently under warranty."
     )
 
-    @api.depends('sale_order_line_id', 'use_product_warranty')
+    @api.depends(
+        'sale_order_line_id',
+        'use_product_warranty',
+        'sale_order_line_id.sale_warranty_expiration_date',
+    )
     def _compute_warranty_status(self):
         today = fields.Date.today()
         for ticket in self:
             if not ticket.use_product_warranty or not ticket.sudo().sale_order_line_id:
                 ticket.warranty_status = False
                 continue
-            expiration_date = ticket.sudo().sale_order_line_id.warranty_expiration_date
+            expiration_date = ticket.sudo().sale_order_line_id.sale_warranty_expiration_date
             if not expiration_date:
                 ticket.warranty_status = 'none'
             elif expiration_date > today:

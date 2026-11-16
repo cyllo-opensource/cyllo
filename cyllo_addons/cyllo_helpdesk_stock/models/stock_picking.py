@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields, models
+from odoo import fields, models,api
 
 
 class StockPicking(models.Model):
@@ -27,6 +27,7 @@ class StockPicking(models.Model):
 
     helpdesk_ticket_id = fields.Many2one('helpdesk.ticket', string='Helpdesk Ticket', index=True)
 
+    @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
         for record in records.filtered('helpdesk_ticket_id'):

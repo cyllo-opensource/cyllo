@@ -32,7 +32,7 @@ class TestSaleOrderEnhancements(HelpdeskSaleTestCommon):
             'partner_id': self.customer.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -53,7 +53,7 @@ class TestSaleOrderEnhancements(HelpdeskSaleTestCommon):
             'helpdesk_ticket_id': ticket.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -77,7 +77,7 @@ class TestSaleOrderEnhancements(HelpdeskSaleTestCommon):
                 'helpdesk_ticket_id': ticket.id,
                 'order_line': [(0, 0, {
                     'product_id': self.product.id,
-                    'product_qty': 1,
+                    'product_uom_qty': 1,
                     'price_unit': 100.0,
                 })]
             })
@@ -97,7 +97,7 @@ class TestSaleOrderEnhancements(HelpdeskSaleTestCommon):
             'partner_id': self.customer.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -124,7 +124,7 @@ class TestSaleOrderEnhancements(HelpdeskSaleTestCommon):
             'helpdesk_ticket_id': ticket1.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -153,7 +153,7 @@ class TestSaleOrderEnhancements(HelpdeskSaleTestCommon):
             'helpdesk_ticket_id': ticket.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -184,7 +184,7 @@ class TestSaleOrderSearchAndFilter(HelpdeskSaleTestCommon):
             'helpdesk_ticket_id': ticket.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -194,7 +194,7 @@ class TestSaleOrderSearchAndFilter(HelpdeskSaleTestCommon):
             'helpdesk_ticket_id': ticket.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -203,7 +203,7 @@ class TestSaleOrderSearchAndFilter(HelpdeskSaleTestCommon):
             'partner_id': self.customer.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -231,7 +231,7 @@ class TestSaleOrderSearchAndFilter(HelpdeskSaleTestCommon):
             'helpdesk_ticket_id': ticket.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -240,7 +240,7 @@ class TestSaleOrderSearchAndFilter(HelpdeskSaleTestCommon):
             'partner_id': self.customer.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -272,7 +272,7 @@ class TestSaleOrderDataIntegrity(HelpdeskSaleTestCommon):
                 'helpdesk_ticket_id': ticket.id,
                 'order_line': [(0, 0, {
                     'product_id': self.product.id,
-                    'product_qty': 1,
+                    'product_uom_qty': 1,
                     'price_unit': 100.0,
                 })]
             })
@@ -305,7 +305,7 @@ class TestSaleOrderDataIntegrity(HelpdeskSaleTestCommon):
             'helpdesk_ticket_id': ticket.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -315,7 +315,7 @@ class TestSaleOrderDataIntegrity(HelpdeskSaleTestCommon):
             'helpdesk_ticket_id': ticket.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -349,7 +349,7 @@ class TestSaleOrderStateFiltering(HelpdeskSaleTestCommon):
             'partner_id': self.customer.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })
@@ -359,7 +359,7 @@ class TestSaleOrderStateFiltering(HelpdeskSaleTestCommon):
             'partner_id': self.customer.id,
             'order_line': [(0, 0, {
                 'product_id': self.product.id,
-                'product_qty': 1,
+                'product_uom_qty': 1,
                 'price_unit': 100.0,
             })]
         })

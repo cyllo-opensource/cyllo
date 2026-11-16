@@ -88,8 +88,10 @@ class TestHelpdeskPurchase(TransactionCase):
 
         action = ticket.action_view_customer_purchase_orders()
 
-        self.assertEqual(action.get('view_mode'), 'tree')
+        self.assertEqual(action.get('view_mode'), 'tree,form')
         self.assertEqual(action.get('views')[0][1], 'tree')
+        self.assertEqual(action.get('views')[1][1], 'form')
 
-        expected_domain = [('partner_id', 'child_of', self.customer.commercial_partner_id.id)]
+        expected_domain = [('partner_id', 'child_of',
+                            self.customer.commercial_partner_id.id)]
         self.assertEqual(action.get('domain'), expected_domain)

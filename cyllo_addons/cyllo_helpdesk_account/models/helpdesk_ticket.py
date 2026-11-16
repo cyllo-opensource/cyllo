@@ -42,6 +42,7 @@ class HelpDeskTicket(models.Model):
             ticket.refund_count = len(ticket.refund_ids)
 
     def action_view_refunds(self):
+        """Function for displaying refund records"""
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
@@ -56,6 +57,7 @@ class HelpDeskTicket(models.Model):
         }
 
     def action_create_refund(self):
+        """Function for creating refunds"""
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',

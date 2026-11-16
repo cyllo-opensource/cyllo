@@ -33,6 +33,8 @@ class HelpDeskTicket(models.Model):
         string='Sale Order',
         help='Sale order associated with this helpdesk ticket',
     )
+    customer_id = fields.Many2one('res.partner', string="Customer",
+                                  help="Customer of the ticket", required=False)
     sale_order_line_id = fields.Many2one(
         'sale.order.line',
         string='Sale Order Line',

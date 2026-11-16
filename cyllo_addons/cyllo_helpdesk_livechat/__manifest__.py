@@ -30,8 +30,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['cyllo_helpdesk', 'im_livechat'],
-    'data': [],
-'assets': {
+    'assets': {
         'web.assets_backend': [
             'cyllo_helpdesk_livechat/static/src/core/common/channel_commands.js'
         ],

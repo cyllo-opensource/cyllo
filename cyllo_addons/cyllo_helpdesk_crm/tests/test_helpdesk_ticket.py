@@ -36,10 +36,21 @@ class TestHelpDeskTicketCRM(TransactionCase):
             'email': 'customer@test.com',
         })
 
+        # Teams are needed for the team/use_crm-scoped tests below
+        cls.team_crm = cls.env['helpdesk.team'].create({
+            'name': 'CRM Team',
+            'use_crm': True,
+        })
+        cls.team_no_crm = cls.env['helpdesk.team'].create({
+            'name': 'No CRM Team',
+            'use_crm': False,
+        })
+
         # Create a base helpdesk ticket
         cls.ticket = cls.env['helpdesk.ticket'].create({
             'name': 'Test Ticket #1',
             'customer_id': cls.partner.id,
+            'team_id': cls.team_crm.id,
         })
 
     # ─────────────────────────────────────────────
@@ -87,12 +98,122 @@ class TestHelpDeskTicketCRM(TransactionCase):
         other_ticket = self.env['helpdesk.ticket'].create({
             'name': 'Other Ticket',
             'customer_id': self.partner.id,
+            'team_id': self.team_crm.id,
         })
         self.env['crm.lead'].create({
             'name': 'Lead for Other Ticket',
             'helpdesk_ticket_id': other_ticket.id,
         })
         self.assertEqual(self.ticket.crm_lead_count, 0)
+
+    # ─────────────────────────────────────────────
+    # Field wiring / compute metadata
+    # ─────────────────────────────────────────────
+
+    def test_crm_lead_ids_field_wiring(self):
+        """crm_lead_ids must target crm.lead through helpdesk_ticket_id."""
+        field = self.env['helpdesk.ticket']._fields['crm_lead_ids']
+        self.assertEqual(field.comodel_name, 'crm.lead')
+        self.assertEqual(field.inverse_name, 'helpdesk_ticket_id')
+
+    def test_crm_lead_ids_field_label(self):
+        """The One2many field label should be 'CRM Leads'."""
+        field = self.env['helpdesk.ticket']._fields['crm_lead_ids']
+        self.assertEqual(field.string, 'CRM Leads')
+
+    def test_crm_lead_count_is_realtime_compute(self):
+        """crm_lead_count should be non-stored and computed on the fly."""
+        field = self.env['helpdesk.ticket']._fields['crm_lead_count']
+        self.assertFalse(field.store, "crm_lead_count must be a realtime field.")
+        self.assertEqual(field.compute, '_compute_crm_lead_count')
+
+    # ─────────────────────────────────────────────
+    # Computed count — batch reads & One2many side
+    # ─────────────────────────────────────────────
+
+    def test_lead_count_batch_computed_across_tickets(self):
+        """The compute loop must keep per-ticket values in a batch read."""
+        self.env['crm.lead'].create({
+            'name': 'Lead A', 'helpdesk_ticket_id': self.ticket.id,
+        })
+        other = self.env['helpdesk.ticket'].create({
+            'name': 'Batch Ticket',
+            'customer_id': self.partner.id,
+            'team_id': self.team_crm.id,
+        })
+        self.env['crm.lead'].create({
+            'name': 'Lead B', 'helpdesk_ticket_id': other.id,
+        })
+        counts = {t.id: t.crm_lead_count for t in self.ticket | other}
+        self.assertEqual(counts[self.ticket.id], 1)
+        self.assertEqual(counts[other.id], 1)
+
+    def test_lead_created_via_one2many_command_bumps_count(self):
+        """Creating a lead through the One2many side must update the count."""
+        self.assertEqual(self.ticket.crm_lead_count, 0)
+        self.ticket.write({
+            'crm_lead_ids': [(0, 0, {'name': 'O2M-created Lead'})],
+        })
+        self.assertEqual(self.ticket.crm_lead_count, 1)
+
+    # ─────────────────────────────────────────────
+    # sudo() compute: user without CRM access
+    # ─────────────────────────────────────────────
+
+    def test_lead_count_readable_by_user_without_crm_access(self):
+        """A helpdesk user with no sales groups can still see crm_lead_count.
+
+        _compute_crm_lead_count uses sudo(), so the stat button keeps
+        working for users forbidden to read crm.lead directly.
+        """
+        user = self.env['res.users'].create({
+            'name': 'Helpdesk Only User',
+            'login': 'hd_only_count_user',  # unique login: avoid demo clashes
+            'email': 'hd_only@test.com',
+            'groups_id': [(6, 0, [
+                self.env.ref('cyllo_helpdesk.cyllo_helpdesk_user').id,
+            ])],
+        })
+        # Ticket visibility for this group is member-only (ir.rule in
+        # the base module), so the user must belong to the team.
+        self.team_crm.write({'member_ids': [(4, user.id)]})
+        ticket = self.env['helpdesk.ticket'].create({
+            'name': 'Auth Ticket',
+            'customer_id': self.partner.id,
+            'team_id': self.team_crm.id,
+        })
+        lead = self.env['crm.lead'].create({
+            'name': 'Lead for restricted user',
+            'helpdesk_ticket_id': ticket.id,
+        })
+
+        # Sanity: without CRM groups the user gets an AccessError ...
+        with self.assertRaises(AccessError):
+            self.env['crm.lead'].with_user(user).browse(lead.id).name
+
+        # ... yet the computed count still works thanks to sudo().
+        self.assertEqual(
+            ticket.with_user(user).crm_lead_count, 1,
+            "crm_lead_count must remain readable without CRM access.",
+        )
+
+    # ─────────────────────────────────────────────
+    # Team use_crm toggle (UI-only gate)
+    # ─────────────────────────────────────────────
+
+    def test_lead_linking_ignores_use_crm_flag(self):
+        """use_crm gates the UI buttons only; the relation must still work."""
+        ticket = self.env['helpdesk.ticket'].create({
+            'name': 'No-CRM-team Ticket',
+            'customer_id': self.partner.id,
+            'team_id': self.team_no_crm.id,
+        })
+        lead = self.env['crm.lead'].create({
+            'name': 'Lead on non-CRM team ticket',
+            'helpdesk_ticket_id': ticket.id,
+        })
+        self.assertIn(lead, ticket.crm_lead_ids)
+        self.assertEqual(ticket.crm_lead_count, 1)
 
     # ─────────────────────────────────────────────
     # action_view_crm_leads tests
@@ -121,6 +242,15 @@ class TestHelpDeskTicketCRM(TransactionCase):
         action = self.ticket.action_view_crm_leads()
         self.assertIn('list', action['view_mode'])
         self.assertIn('form', action['view_mode'])
+
+    def test_action_view_crm_leads_res_model_and_xmlid(self):
+        """The stat-button action must resolve to the CRM pipeline action."""
+        action = self.ticket.action_view_crm_leads()
+        self.assertEqual(action['res_model'], 'crm.lead')
+        self.assertEqual(
+            action['id'],
+            self.env.ref('crm.crm_lead_action_pipeline').id,
+        )
 
     # ─────────────────────────────────────────────
     # action_create_crm_lead tests
@@ -172,26 +302,47 @@ class TestHelpDeskTicketCRM(TransactionCase):
             new_messages[0].body,
         )
 
+    def test_action_create_crm_lead_res_model_and_target(self):
+        """The action must open crm.lead in the current window."""
+        action = self.ticket.action_create_crm_lead()
+        self.assertEqual(action['res_model'], 'crm.lead')
+        self.assertEqual(action['target'], 'current')
+
+    def test_action_create_crm_lead_form_view_xmlid(self):
+        """The action must open the standard CRM lead form view."""
+        action = self.ticket.action_create_crm_lead()
+        self.assertEqual(action['views'], [
+            (self.env.ref('crm.crm_lead_view_form').id, 'form'),
+        ])
+
+
     # ─────────────────────────────────────────────
-    # ensure_one guard
+    # Action context defaults applied at ORM level
     # ─────────────────────────────────────────────
 
-    def test_action_view_crm_leads_requires_single_record(self):
-        """action_view_crm_leads must raise if called on a multi-record set."""
+    def test_crm_lead_create_with_action_context_applies_defaults(self):
+        """Creating a lead with the action context pre-fills the defaults."""
+        action = self.ticket.action_create_crm_lead()
+        lead = self.env['crm.lead'].with_context(
+            **action['context']).create({})
+        self.assertEqual(lead.name, self.ticket.name)
+        self.assertEqual(lead.partner_id, self.partner)
+        self.assertEqual(lead.helpdesk_ticket_id, self.ticket)
+        self.assertEqual(self.ticket.crm_lead_count, 1)
+
+    # ─────────────────────────────────────────────
+    # ensure_one guard — exact exception type
+    # ─────────────────────────────────────────────
+
+    def test_actions_raise_valueerror_on_multi_recordsets(self):
+        """ensure_one raises ValueError (not AccessError) on multi sets."""
         second_ticket = self.env['helpdesk.ticket'].create({
-            'name': 'Second Ticket',
+            'name': 'Fourth Ticket',
             'customer_id': self.partner.id,
+            'team_id': self.team_crm.id,
         })
         multi = self.ticket | second_ticket
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             multi.action_view_crm_leads()
-
-    def test_action_create_crm_lead_requires_single_record(self):
-        """action_create_crm_lead must raise if called on a multi-record set."""
-        second_ticket = self.env['helpdesk.ticket'].create({
-            'name': 'Third Ticket',
-            'customer_id': self.partner.id,
-        })
-        multi = self.ticket | second_ticket
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             multi.action_create_crm_lead()

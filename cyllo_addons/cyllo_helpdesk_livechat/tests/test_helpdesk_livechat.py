@@ -36,6 +36,9 @@ class TestHelpdeskLivechat(TransactionCase):
             'email': 'visitor@test.com',
             'phone': '5551234567',
         })
+        cls.env['helpdesk.team'].search([]).write({
+            'use_livechat_ticket_creation': False,
+        })
 
         # Create helpdesk team with livechat ticket creation enabled
         cls.team = cls.env['helpdesk.team'].create({

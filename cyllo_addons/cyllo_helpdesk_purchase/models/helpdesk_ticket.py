@@ -48,7 +48,9 @@ class HelpDeskTicket(models.Model):
         action['domain'] = [('partner_id', 'child_of',
                              self.customer_id.commercial_partner_id.id)]
         action['context'] = {'create': False, 'edit': False, 'delete': False}
-        action['view_mode'] = 'tree'
+        action['view_mode'] = 'tree,form'
         action['views'] = [
-            (self.env.ref('purchase.purchase_order_view_tree').id, 'tree')]
+            (self.env.ref('purchase.purchase_order_view_tree').id, 'tree'),
+            (self.env.ref('purchase.purchase_order_form').id, 'form'),
+        ]
         return action

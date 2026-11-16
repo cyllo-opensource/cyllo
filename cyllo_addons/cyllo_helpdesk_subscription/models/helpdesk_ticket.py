@@ -52,7 +52,7 @@ class HelpDeskTicket(models.Model):
         # Assuming the action exists in cyllo_subscription or similar
         try:
             action = self.env["ir.actions.actions"]._for_xml_id(
-                "cyllo_subscription.subscription_order_action")
+                "cyllo_subscription.action_view_customer_subscriptions")
         except ValueError:
             action = {
                 'type': 'ir.actions.act_window',

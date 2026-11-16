@@ -12,9 +12,6 @@
                 <button name="action_view_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="not use_sale_order or sale_order_count == 0" groups="sales_team.group_sale_salesman,sales_team.group_sale_manager">
                     <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
                 </button>
-                <button name="action_view_customer_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="not use_sale_order or customer_sale_order_count == 0" groups="sales_team.group_sale_salesman,sales_team.group_sale_manager">
-                    <field name="customer_sale_order_count" widget="statinfo" string="Customer Sales"/>
-                </button>
             </xpath>
             <xpath expr="//field[@name='company_id']" position="after">
                  <field name="sale_order_id" domain="[('partner_id', 'child_of', customer_id), ('state', 'in', ['sale', 'done'])]" invisible="not use_sale_order and not use_returns" groups="sales_team.group_sale_salesman,sales_team.group_sale_manager"/>
@@ -22,6 +19,11 @@
             </xpath>
             <xpath expr="//group[@invisible='1']" position="inside">
                 <field name="sale_order_ids" invisible="1" groups="sales_team.group_sale_salesman,sales_team.group_sale_manager"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Customer Sales">
+                    <field name="customer_sale_order_ids" options="{'no_create': True}"/>
+                </page>
             </xpath>
         </field>
     </record>

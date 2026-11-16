@@ -31,6 +31,8 @@ class HelpDeskTicket(models.Model):
         'project.project', string='Project',
         related='team_id.project_id', readonly=False, store=True,
         help="Project associated with this ticket's team.")
+    customer_id = fields.Many2one('res.partner', string="Customer",
+                                  help="Customer of the ticket", required=False)
     task_ids = fields.One2many(
         'project.task', 'helpdesk_ticket_id', string='Tasks')
     task_count = fields.Integer(compute='_compute_task_count')
