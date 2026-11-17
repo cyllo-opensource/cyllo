@@ -11,201 +11,7 @@
     <t t-name="UserDashboardAdminContent" owl="1">
         <div class="cy_dashboard_content">
             <div class="cy_dashboard_tab">
-                <div class="cy_dashboard_top_band">
 
-                    <div class="cy_dashboard_header">
-                        <div class="cy_dashboard_page_title_wrap">
-                            <span class="cy_dashboard_page_title">Dashboard</span>
-                            <div class="cy_dashboard_page_title_ink" />
-                        </div>
-                    </div>
-                    <div class="cy_dashboard_header_actions">
-                        <button
-                            t-on-click="onClickPermissions"
-                            type="button"
-                            class="btn btn-primary btn-sm cy_dashboard_header_desktop_btn">
-                            <i class="ri-shield-line me-1" />
-                            Permissions
-                        </button>
-                        <button
-                            t-on-click="onClickChangePassword"
-                            type="button"
-                            class="btn btn-primary btn-sm cy_dashboard_header_desktop_btn">
-                            <i class="ri-key-line me-1" />
-                            Change Password
-                        </button>
-                        <div
-                            t-if="this.state.userProfile.active_lang and this.state.userProfile.active_lang.length > 0"
-                            class="nav-item dropdown d-flex cy_dashboard_header_desktop_btn">
-                            <button
-                                id="languageDropdown"
-                                type="button"
-                                aria-expanded="false"
-                                class="btn btn-secondary btn-sm dropdown-toggle"
-                                data-bs-offset="0,0"
-                                data-bs-toggle="dropdown"
-                                data-tooltip="Select Language"
-                                role="button">
-                                <i class="ri-translate-2 me-1" />
-                                <t
-                                    t-set="current_lang"
-                                    t-value="this.state.userProfile.active_lang.find(l => l.id == this.state.userProfile.language)" />
-                                <span t-out="current_lang ? current_lang.name : 'Language'" class="flex-1" />
-                            </button>
-                            <ul
-                                aria-labelledby="languageDropdown"
-                                class="dropdown-menu cy_dashboard_selection_dropdown"
-                                style="cursor: pointer;">
-                                <t t-foreach="this.state.userProfile.active_lang" t-as="lang" t-key="lang_index">
-                                    <li>
-                                        <a
-                                            t-att-value="lang.code"
-                                            t-on-click="()=> this.onChangeLang(lang.code)"
-                                            class="dropdown-item">
-                                            <t t-out="lang.name" />
-                                        </a>
-                                    </li>
-                                </t>
-                            </ul>
-                        </div>
-                        <div
-                            t-if="this.state.userProfile.timezone and this.state.userProfile.timezone.length > 0"
-                            class="nav-item dropdown d-flex cy_dashboard_header_desktop_btn">
-                            <button
-                                id="timezoneDropdown"
-                                type="button"
-                                aria-expanded="false"
-                                class="btn btn-secondary btn-sm dropdown-toggle"
-                                data-bs-offset="0,0"
-                                data-bs-toggle="dropdown"
-                                data-tooltip="Select Timezone"
-                                role="button">
-                                <i class="ri-time-line me-1" />
-                                <t
-                                    t-set="current_tz"
-                                    t-value="this.state.userProfile.timezone.find(t => t[0] == this.tz)" />
-                                <span t-out="current_tz ? current_tz[1] : 'Timezone'" class="flex-1" />
-                            </button>
-                            <ul
-                                aria-labelledby="timezoneDropdown"
-                                class="dropdown-menu cy_dashboard_selection_dropdown"
-                                style="cursor: pointer; max-height: 300px; overflow-y: auto;">
-                                <t t-foreach="this.state.userProfile.timezone" t-as="tz" t-key="tz_index">
-                                    <li>
-                                        <a
-                                            t-att-value="tz[0]"
-                                            t-on-click="()=> this.onChangeTimezone(tz[0])"
-                                            class="dropdown-item">
-                                            <t t-out="tz[1]" />
-                                        </a>
-                                    </li>
-                                </t>
-                            </ul>
-                        </div>
-
-                        <div class="dropdown cy_dashboard_header_mobile_actions">
-                            <button
-                                type="button"
-                                aria-expanded="false"
-                                aria-label="Actions"
-                                class="btn btn-secondary btn-sm cy_dashboard_header_more_btn"
-                                data-bs-auto-close="outside"
-                                data-bs-display="static"
-                                data-bs-toggle="dropdown"
-                                role="button">
-                                <i class="ri-more-2-fill" />
-                            </button>
-                            <ul
-                                class="dropdown-menu dropdown-menu-end cy_dashboard_selection_dropdown cy_dashboard_header_mobile_menu"
-                                style="cursor: pointer;">
-                                <li>
-                                    <a
-                                        t-on-click="(ev) => this.onClickMobileAction('permissions', ev)"
-                                        class="dropdown-item">
-                                        <i class="ri-shield-line me-2" />
-                                        Permissions
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        t-on-click="(ev) => this.onClickMobileAction('password', ev)"
-                                        class="dropdown-item">
-                                        <i class="ri-key-line me-2" />
-                                        Change Password
-                                    </a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider" />
-                                </li>
-                                <li t-if="this.state.userProfile.active_lang and this.state.userProfile.active_lang.length > 0">
-                                    <a
-                                        t-on-click="() => this.toggleMobileMenuSection('lang')"
-                                        class="dropdown-item cy_dashboard_mobile_menu_section"
-                                        role="button">
-                                        <i class="ri-translate-2 me-2" />
-                                        <t
-                                            t-set="current_lang"
-                                            t-value="this.state.userProfile.active_lang.find(l => l.id == this.state.userProfile.language)" />
-                                        <span class="cy_dashboard_mobile_menu_label">
-                                            Language
-                                            <t t-if="current_lang" t-out="' — ' + current_lang.name" />
-                                        </span>
-                                        <i
-                                            t-att-class="{open: this.state.mobileMenuOpen === 'lang'}"
-                                            class="ri-arrow-down-s-line cy_dashboard_mobile_menu_chevron ms-auto" />
-                                    </a>
-                                    <ul t-if="this.state.mobileMenuOpen === 'lang'" class="cy_dashboard_mobile_submenu">
-                                        <t
-                                            t-foreach="this.state.userProfile.active_lang"
-                                            t-as="lang"
-                                            t-key="lang_index">
-                                            <li>
-                                                <a
-                                                    t-att-value="lang.code"
-                                                    t-att-class="{active: lang.id == this.state.userProfile.language}"
-                                                    t-on-click="() => this.onChangeLang(lang.code)"
-                                                    class="dropdown-item">
-                                                    <t t-out="lang.name" />
-                                                </a>
-                                            </li>
-                                        </t>
-                                    </ul>
-                                </li>
-                                <li t-if="this.state.userProfile.timezone and this.state.userProfile.timezone.length > 0">
-                                    <a
-                                        t-on-click="() => this.toggleMobileMenuSection('tz')"
-                                        class="dropdown-item cy_dashboard_mobile_menu_section"
-                                        role="button">
-                                        <i class="ri-time-line me-2" />
-                                        <t
-                                            t-set="current_tz"
-                                            t-value="this.state.userProfile.timezone.find(t => t[0] == this.tz)" />
-                                        <span class="cy_dashboard_mobile_menu_label">
-                                            Timezone
-                                            <t t-if="current_tz" t-out="' — ' + current_tz[1]" />
-                                        </span>
-                                        <i
-                                            t-att-class="{open: this.state.mobileMenuOpen === 'tz'}"
-                                            class="ri-arrow-down-s-line cy_dashboard_mobile_menu_chevron ms-auto" />
-                                    </a>
-                                    <ul t-if="this.state.mobileMenuOpen === 'tz'" class="cy_dashboard_mobile_submenu">
-                                        <t t-foreach="this.state.userProfile.timezone" t-as="tz" t-key="tz_index">
-                                            <li>
-                                                <a
-                                                    t-att-value="tz[0]"
-                                                    t-att-class="{active: tz[0] == this.tz}"
-                                                    t-on-click="() => this.onChangeTimezone(tz[0])"
-                                                    class="dropdown-item">
-                                                    <t t-out="tz[1]" />
-                                                </a>
-                                            </li>
-                                        </t>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
                 <div t-if="this.state.activeTab === 'dashboard'" class="cy_dashboard_layout_grid">
                     <div class="cy_dashboard_profile_qa_grid">
                         <div class="cy_dashboard_card cy_dashboard_profile_card">
@@ -276,6 +82,94 @@
                                     <b t-if="profileCompaniesRow.countText" t-esc="profileCompaniesRow.countText" />
                                 </span>
                             </div>
+                              <div class="cy_dashboard_profile_actions">
+                                <button
+                                    t-on-click="onClickPermissions"
+                                    type="button"
+                                    class="cy_dashboard_profile_action_chip"
+                                    title="Manage permissions">
+                                    <i class="ri-shield-keyhole-line" />
+                                    <span>Permissions</span>
+                                </button>
+                                <button
+                                    t-on-click="onClickChangePassword"
+                                    type="button"
+                                    class="cy_dashboard_profile_action_chip"
+                                    title="Change your password">
+                                    <i class="ri-key-2-line" />
+                                    <span>Password</span>
+                                </button>
+                                <div
+                                    t-if="this.state.userProfile.active_lang and this.state.userProfile.active_lang.length > 0"
+                                    class="dropdown cy_dashboard_profile_action_chip cy_dashboard_profile_action_dropdown">
+                                    <button
+                                        id="profileLanguageDropdown"
+                                        type="button"
+                                        aria-expanded="false"
+                                        data-bs-offset="0,0"
+                                        data-bs-toggle="dropdown"
+                                        data-tooltip="Select Language"
+                                        role="button"
+                                        title="Select Language">
+                                        <i class="ri-global-line" />
+                                        <t
+                                            t-set="current_lang"
+                                            t-value="this.state.userProfile.active_lang.find(l => l.id == this.state.userProfile.language)" />
+                                        <span t-out="current_lang ? current_lang.name : 'Language'" />
+                                        <i class="ri-arrow-down-s-line cy_dashboard_profile_action_chevron" />
+                                    </button>
+                                    <ul
+                                        aria-labelledby="profileLanguageDropdown"
+                                        class="dropdown-menu cy_dashboard_selection_dropdown"
+                                        style="cursor: pointer;">
+                                        <t t-foreach="this.state.userProfile.active_lang" t-as="lang" t-key="lang_index">
+                                            <li>
+                                                <a
+                                                    t-att-value="lang.code"
+                                                    t-on-click="() => this.onChangeLang(lang.code)"
+                                                    class="dropdown-item">
+                                                    <t t-out="lang.name" />
+                                                </a>
+                                            </li>
+                                        </t>
+                                    </ul>
+                                </div>
+                                <div
+                                    t-if="this.state.userProfile.timezone and this.state.userProfile.timezone.length > 0"
+                                    class="dropdown cy_dashboard_profile_action_chip cy_dashboard_profile_action_dropdown">
+                                    <button
+                                        id="profileTimezoneDropdown"
+                                        type="button"
+                                        aria-expanded="false"
+                                        data-bs-offset="0,0"
+                                        data-bs-toggle="dropdown"
+                                        data-tooltip="Select Timezone"
+                                        role="button"
+                                        title="Select Timezone">
+                                        <i class="ri-time-line" />
+                                        <t
+                                            t-set="current_tz"
+                                            t-value="this.state.userProfile.timezone.find(t => t[0] == this.tz)" />
+                                        <span t-out="current_tz ? current_tz[1] : 'Timezone'" />
+                                        <i class="ri-arrow-down-s-line cy_dashboard_profile_action_chevron" />
+                                    </button>
+                                    <ul
+                                        aria-labelledby="profileTimezoneDropdown"
+                                        class="dropdown-menu cy_dashboard_selection_dropdown"
+                                        style="cursor: pointer; max-height: 300px; overflow-y: auto;">
+                                        <t t-foreach="this.state.userProfile.timezone" t-as="tz" t-key="tz_index">
+                                            <li>
+                                                <a
+                                                    t-att-value="tz[0]"
+                                                    t-on-click="() => this.onChangeTimezone(tz[0])"
+                                                    class="dropdown-item">
+                                                    <t t-out="tz[1]" />
+                                                </a>
+                                            </li>
+                                        </t>
+                                    </ul>
+                                </div>
+                            </div>
                             <button
                                 t-on-click="() => this.openUserProfile()"
                                 class="cy_dashboard_profile_view_all"
@@ -344,8 +238,42 @@
                                     <i class="ri-arrow-down-line" />
                                 </button>
                             </div>
+                            </div>
+                            <div class="cy_dashboard_card cy_dashboard_chat_card">
+                                <div class="cy_dashboard_card_header">
+                                    <h6 class="cy_dashboard_card_title">Latest Chats</h6>
+                                </div>
+                                <div class="cy_dashboard_chat_list">
+                                    <t t-foreach="state.chats" t-as="chat" t-key="'chat-' + chat.id">
+                                        <button
+                                            t-on-click="() => this.openChat(chat)"
+                                            class="cy_dashboard_chat_item"
+                                            title="Open conversation">
+                                            <span class="cy_dashboard_chat_avatar">
+                                                <img
+                                                    t-if="chat.avatarUrl"
+                                                    t-att-src="chat.avatarUrl"
+                                                    alt=""
+                                                    onerror="this.style.display='none'" />
+                                                <span t-else="" t-out="chat.initial" />
+                                            </span>
+                                            <span class="cy_dashboard_chat_body">
+                                                <span class="cy_dashboard_chat_top">
+                                                    <span class="cy_dashboard_chat_author" t-out="chat.author" />
+                                                    <span class="cy_dashboard_chat_time" t-out="chat.timeLabel" />
+                                                </span>
+                                                <span class="cy_dashboard_chat_preview" t-esc="chat.preview" />
+                                            </span>
+                                        </button>
+                                    </t>
+                                    <div t-if="!state.chats.length" class="cy_dashboard_chat_empty">
+                                        <i class="ri-chat-3-line" />
+                                        <p>No chats yet.</p>
+                                        <span>Messages from Discuss will appear here.</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
                     <div class="cy_dashboard_kpi_stack">
                         <div class="cy_dashboard_kpi_pair">
                             <DashboardKpi

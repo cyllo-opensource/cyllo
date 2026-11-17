@@ -498,6 +498,8 @@ export class ChatBot extends Component {
             // Keep a dragged launcher on-screen when the window is resized.
             if (this.state.minimized && this.iconPos) this._applyIconStyle();
         };
+        this._onKeyDownBound = this.onKeyDown.bind(this);
+        this._onClickOutsideBound = this.handleClickOutside.bind(this);
         onMounted(() => {
             window.addEventListener('keydown', this.onKeyDown.bind(this));
             document.addEventListener("mousedown", this.handleClickOutside.bind(this));
@@ -510,8 +512,8 @@ export class ChatBot extends Component {
             this.scrollToBottom();
         });
         onWillUnmount(() => {
-            window.removeEventListener('keydown', this.onKeyDown);
-            document.removeEventListener("mousedown", this.handleClickOutside);
+            window.removeEventListener('keydown', this._onKeyDownBound);
+            document.removeEventListener("mousedown", this._onClickOutsideBound);
             window.removeEventListener("resize", this._onIconResize);
             this.busService.removeEventListener("notification", this.onMessageBound);
             this.stopSpeaking();   // never leave speech playing after teardown
@@ -870,7 +872,8 @@ export class ChatBot extends Component {
         // exists only as a safety net for those, not to react to typing
         // anywhere else in the backend, so it must bail out immediately for
         // any keydown that didn't originate inside the chatbot itself.
-        if (this.chatbotDiv.el && !this.chatbotDiv.el.contains(ev.target)) {
+        const root = this.chatbotDiv.el || document.querySelector('.cy-ai-screen');
+        if (!root || !root.contains(ev.target)) {
             return;
         }
         // While a menu (slash or picker) is open, the keyboard drives it — in

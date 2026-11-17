@@ -28,6 +28,92 @@ function htmlToText(html) {
     return doc.body.textContent || "";
 }
 
+function getPdfBlocks(html) {
+    const doc = new DOMParser().parseFromString(html || "", "text/html");
+    const blocks = [];
+    const textOf = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) return node.nodeValue;
+        if (node.nodeType !== Node.ELEMENT_NODE) return "";
+        if (node.tagName === "A" && node.href) return `${node.textContent} (${node.href})`;
+        return [...node.childNodes].map(textOf).join("");
+    };
+    const add = (node, type = "paragraph") => {
+        const text = textOf(node).replace(/\s+/g, " ").trim();
+        if (text) blocks.push({text, type});
+    };
+    const visit = (node) => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        const tag = node.tagName.toLowerCase();
+        if (/^h[1-6]$/.test(tag)) {
+            add(node, `heading${tag[1]}`);
+        } else if (tag === "p") {
+            add(node);
+        } else if (tag === "ul" || tag === "ol") {
+            [...node.children].filter((child) => child.tagName.toLowerCase() === "li").forEach((item, index) => {
+                const prefix = tag === "ol" ? `${index + 1}. ` : "• ";
+                blocks.push({text: `${prefix}${textOf(item).replace(/\s+/g, " ").trim()}`, type: "list"});
+            });
+        } else if (tag === "pre") {
+            add(node, "code");
+        } else if (tag === "blockquote") {
+            add(node, "quote");
+        } else if (tag === "hr") {
+            blocks.push({type: "separator"});
+        } else if (tag === "table") {
+            [...node.querySelectorAll("tr")].forEach((row) => {
+                blocks.push({text: [...row.children].map((cell) => textOf(cell).trim()).join(" | "), type: "table"});
+            });
+        } else {
+            [...node.children].forEach(visit);
+        }
+    };
+    [...doc.body.children].forEach(visit);
+    return blocks;
+}
+
+function addPdfText(pdf, blocks, margin, startY) {
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const bottom = pageHeight - margin - 8;
+    let y = startY;
+    const nextPageIfNeeded = (height) => {
+        if (y + height > bottom) {
+            pdf.addPage();
+            y = margin;
+        }
+    };
+
+    for (const block of blocks) {
+        if (block.type === "separator") {
+            nextPageIfNeeded(8);
+            pdf.setDrawColor(220);
+            pdf.line(margin, y + 2, pageWidth - margin, y + 2);
+            y += 8;
+            continue;
+        }
+
+        const heading = block.type.startsWith("heading");
+        const headingLevel = heading ? Number(block.type.slice(-1)) : 0;
+        const fontSize = heading ? Math.max(12, 20 - headingLevel * 1.5) : 10.5;
+        const fontStyle = heading || block.type === "table" ? "bold" : "normal";
+        const indent = block.type === "list" ? 5 : block.type === "quote" ? 4 : 0;
+        const lineHeight = fontSize * 1.25 / 2.8346;
+        const gapBefore = heading ? 3 : 1;
+        const gapAfter = heading ? 2 : 3;
+        pdf.setFont("helvetica", fontStyle);
+        pdf.setFontSize(fontSize);
+        const lines = pdf.splitTextToSize(block.text, pageWidth - margin * 2 - indent);
+        y += gapBefore;
+        for (const line of lines) {
+            nextPageIfNeeded(lineHeight);
+            pdf.text(line, margin + indent, y);
+            y += lineHeight;
+        }
+        y += gapAfter;
+    }
+    return y;
+}
+
 /**
  * @class
  * @extends {Component}
@@ -54,6 +140,7 @@ export class ExplainAIModal extends Component {
             chatMode: false,
             chat: "",
             isResponding: false,
+            downloading: false,
         })
         this.chatHistory = useState(new chatHistory())
         var theme_maker = new ThemeMaker(this.props.theme)
@@ -217,133 +304,73 @@ export class ExplainAIModal extends Component {
         return successful;
     }
 
-    download() {
-        if (this.state.error) return;
+    async download() {
+        if (this.state.error || this.state.downloading) return;
+        this.state.downloading = true;
+        try {
+            // Let Owl paint the blocking overlay before synchronous PDF layout starts.
+            await new Promise((resolve) => requestAnimationFrame(resolve));
 
-        // 1. Create the global print wrapper
-        var printDiv = document.createElement('div');
-        printDiv.style.position = 'absolute';
-        printDiv.style.left = '-9999px';
-        printDiv.style.top = '0';
-        printDiv.style.width = '1000px';
-        printDiv.style.backgroundColor = '#ffffff';
-        printDiv.style.color = '#333';
-        printDiv.style.fontFamily = 'Arial, sans-serif';
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 15;
 
-        // 2. Build the Purple Header (Matches your image exactly)
-       var header = document.createElement('div');
-        // Fetch the primary theme color from the dashboard's current theme properties
-        header.style.backgroundColor = this.props.theme.theme_color_ids ? this.props.theme.theme_color_ids[0] : '#6a0dad';
-        header.style.color = 'white';
-        header.style.padding = '20px 40px';
-        header.style.display = 'flex';
-        header.style.justifyContent = 'space-between';
-        header.style.alignItems = 'center';
+            // Draw the report heading as vector shapes and selectable PDF text.
+            const themeColor = this.props.theme.theme_color_ids?.[0] || '#6a0dad';
+            pdf.setFillColor(themeColor);
+            pdf.rect(0, 0, pageWidth, 30, 'F');
+            pdf.setTextColor('#ffffff');
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(17);
+            pdf.text('AI Insights', margin, 13);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(10);
+            pdf.text(this.state.name || 'AI Insight', margin, 22);
+            pdf.setTextColor('#222222');
 
-        var leftHeader = document.createElement('div');
-        leftHeader.innerHTML = '<span style="font-size:20px; margin-right:8px;">❖</span><b style="font-size: 20px; letter-spacing: 2px;">AI Insights</b>';
+            let y = 38;
+            if (this.state.imgSrc) {
+                const chart = new Image();
+                chart.src = this.state.imgSrc;
+                await chart.decode();
+                const maxChartWidth = pageWidth - margin * 2;
+                const maxChartHeight = 105;
+                const chartScale = Math.min(
+                    1,
+                    maxChartHeight / (maxChartWidth * chart.naturalHeight / chart.naturalWidth)
+                );
+                const chartWidth = maxChartWidth * chartScale;
+                const chartHeight = maxChartWidth * chart.naturalHeight / chart.naturalWidth * chartScale;
+                if (y + chartHeight > pageHeight - margin - 8) {
+                    pdf.addPage();
+                    y = margin;
+                }
+                pdf.addImage(this.state.imgSrc, 'PNG', (pageWidth - chartWidth) / 2, y, chartWidth, chartHeight);
+                y += chartHeight + 8;
+            }
 
-        var rightHeader = document.createElement('div');
-        rightHeader.innerText = this.state.name || 'AI Insight';
-        rightHeader.style.fontSize = '14px';
+            const explanationHtml = this.rootRef.el.querySelector('.explain-text-container .text')?.innerHTML || '';
+            const blocks = getPdfBlocks(explanationHtml);
+            addPdfText(pdf, blocks, margin, y);
 
-        header.appendChild(leftHeader);
-        header.appendChild(rightHeader);
-        printDiv.appendChild(header);
-
-        // 3. Create a wrapper for the body content purely for padding
-        var contentWrapper = document.createElement('div');
-        contentWrapper.style.padding = '10px 40px 40px 40px';
-        printDiv.appendChild(contentWrapper);
-
-        // 4. Insert the Chart Image cleanly at the top
-        if (this.state.imgSrc) {
-            var img = document.createElement('img');
-            img.src = this.state.imgSrc;
-            img.style.width = '100%';
-            img.style.height = 'auto';
-            img.style.display = 'block';
-            img.style.marginBottom = '20px';
-            contentWrapper.appendChild(img);
-        }
-
-        // 5. Add the Horizontal Separator Line below the chart
-        var hr = document.createElement('hr');
-        hr.style.border = 'none';
-        hr.style.borderTop = '2px solid #e0e0e0'; // Light grey line
-        hr.style.marginBottom = '30px';
-        contentWrapper.appendChild(hr);
-
-        // 6. Clone the styled AI Explanation Text below the line
-        var textContainer = this.rootRef.el.querySelector('.explain-text-container');
-        if (textContainer) {
-            var clonedText = textContainer.cloneNode(true);
-
-            // Remove the interactive button tools
-            var footerTools = clonedText.querySelector('.explain-footer');
-            if (footerTools) footerTools.remove();
-
-            // Ensure no scrollbars cut off bullets
-            clonedText.style.height = 'max-content';
-            clonedText.style.overflow = 'visible';
-            clonedText.style.fontSize = '15px';
-            clonedText.style.lineHeight = '1.8';
-            clonedText.style.color = '#000000';
-            clonedText.querySelectorAll('*').forEach(el => {el.style.color = '#000000';});
-            contentWrapper.appendChild(clonedText);
-        }
-
-        document.body.appendChild(printDiv);
-
-        // 7. Capture the assembled beauty with html2canvas
-        html2canvas(printDiv, { scale: 2 }).then(async (canvas) => {
-
-            document.body.removeChild(printDiv);
-
-            var imgData = canvas.toDataURL('image/png');
-            var pdf = new jsPDF('p', 'mm', 'a4');
-
-            var pageWidth = pdf.internal.pageSize.getWidth();
-            var pageHeight = pdf.internal.pageSize.getHeight();
-
-            var imgWidth = pageWidth;
-            var imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            // Calculate exact total pages realistically for the footer
-            var totalPages = Math.ceil(imgHeight / pageHeight);
-            var currentPage = 1;
-
-            var heightLeft = imgHeight;
-            var position = 0;
-
-            // Stamp Page 1
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-
-            // Add native "Page 1 of X" text to the absolute bottom of PDF Page 1
-            pdf.setFontSize(9);
-            pdf.setTextColor(150); // Muted grey
-            pdf.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
-
-            heightLeft -= pageHeight;
-
-            // Mathematically slice remaining pages in loop
-            while (heightLeft > 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-
-                currentPage++;
-
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-
-                // Add "Page X of Y" to subsequent pages
-                pdf.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
-
-                heightLeft -= pageHeight;
+            const pageCount = pdf.internal.getNumberOfPages();
+            for (let page = 1; page <= pageCount; page++) {
+                pdf.setPage(page);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(8);
+                pdf.setTextColor(130);
+                pdf.text(`Page ${page} of ${pageCount}`, pageWidth - margin, pageHeight - 7, {align: 'right'});
             }
 
             pdf.save(`${this.state.name || 'AI Insight'}.pdf`);
             this.showActionMessage("Downloaded");
-        });
+        } catch (error) {
+            console.error("Failed to export AI insight PDF:", error);
+            this.showActionMessage("PDF download failed. Please try again.");
+        } finally {
+            this.state.downloading = false;
+        }
     }
 
 

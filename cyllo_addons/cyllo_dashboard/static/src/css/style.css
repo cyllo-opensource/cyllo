@@ -39,6 +39,10 @@
     gap: 12px;
 }
 
+.cy_dashboard_action .cy_dashboard_tab:not(.cy_dashboard_tab_user) .cy_dashboard_profile_qa_grid {
+    grid-template-columns: minmax(0, 3fr) 3fr 3fr;
+}
+
 .cy_dashboard_action .cy_dashboard_tab .cy_dashboard_layout_grid {
     min-height: 0;
     min-width: 0;
@@ -104,8 +108,7 @@
 
 .cy_dashboard_qa_grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 40px 20px;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     padding-top: 12px;
     align-items: start;
     align-content: start;
@@ -1681,6 +1684,126 @@
     height: 100%;
 }
 
+.cy_dashboard_profile_actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 12px;
+    gap: 10px;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+/* Plain chips never shrink — always full text */
+.cy_dashboard_profile_actions>.cy_dashboard_profile_action_chip:not(.cy_dashboard_profile_action_dropdown) {
+    flex: 0 0 auto;
+}
+
+/* Dropdown chips shrink first and truncate with "…" — keeps all 4 on one line */
+.cy_dashboard_profile_actions>.cy_dashboard_profile_action_dropdown {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.cy_dashboard_profile_action_chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border: 1px solid #e4e7ec;
+    border-radius: 999px;
+    background: #fff;
+    color: #344054;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    min-width: 0;
+    flex: 0 1 auto;
+}
+
+.cy_dashboard_profile_action_chip i {
+    font-size: 14px;
+    color: var(--primary, #9EA700);
+    flex: 0 0 auto;
+}
+
+.cy_dashboard_profile_action_chip span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cy_dashboard_profile_action_chip:hover,
+.cy_dashboard_profile_action_chip:focus {
+    outline: none;
+    border-color: var(--primary, #9EA700);
+    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.12);
+}
+
+.cy_dashboard_profile_action_dropdown {
+    padding: 0;
+}
+
+.cy_dashboard_profile_action_dropdown > button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #344054;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    min-width: 0;
+}
+
+.cy_dashboard_profile_action_dropdown > button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cy_dashboard_profile_action_dropdown:hover,
+.cy_dashboard_profile_action_dropdown:focus-within {
+    border-color: var(--primary, #9EA700);
+    color: var(--primary, #9EA700);
+    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.12);
+}
+
+/*.cy_dashboard_profile_action_dropdown:hover > button,*/
+/*.cy_dashboard_profile_action_dropdown:focus-within > button {*/
+/*    color: var(--primary, #9EA700);*/
+/*}*/
+
+.cy_dashboard_profile_action_dropdown.show {
+    border-color: var(--primary, #9EA700);
+    color: var(--primary, #9EA700);
+}
+
+.cy_dashboard_profile_action_dropdown.show > button {
+    color: var(--primary, #9EA700);
+}
+
+.cy_dashboard_profile_action_chevron {
+    font-size: 14px;
+    color: #98a2b3;
+}
+
+.cy_dashboard_profile_action_dropdown:hover .cy_dashboard_profile_action_chevron,
+.cy_dashboard_profile_action_dropdown.show .cy_dashboard_profile_action_chevron {
+    color: var(--primary, #9EA700);
+}
+
+
 .cy_dashboard_profile_card .cy_dashboard_upcoming_grid {
     flex: 1 1 auto;
     min-height: 0;
@@ -2618,6 +2741,36 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
+
+    .cy_dashboard_action .cy_dashboard_tab:not(.cy_dashboard_tab_user) .cy_dashboard_profile_qa_grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+
+    .cy_dashboard_action .cy_dashboard_profile_actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .cy_dashboard_action .cy_dashboard_profile_action_chip {
+        justify-content: center;
+        width: 100%;
+        padding: 5px 12px;
+        font-size: 12.5px;
+    }
+
+    .cy_dashboard_action .cy_dashboard_profile_action_dropdown {
+        padding: 0;
+    }
+
+    .cy_dashboard_action .cy_dashboard_profile_action_dropdown > button {
+        justify-content: center;
+        width: 100%;
+        padding: 5px 12px;
+        font-size: 12.5px;
+    }
+
     .cy_dashboard_qa_page>.cy_dashboard_qa_card {
         min-height: 0;
         height: auto;
@@ -2647,5 +2800,189 @@
         grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
         gap: 16px 12px;
         padding: 12px 6px 4px;
+    }
+}
+
+/* ---- Latest Chats card (Discuss) ---- */
+
+/* Chats card is its own grid column — fill the row height and scroll */
+.cy_dashboard_profile_qa_grid>.cy_dashboard_chat_card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.cy_dashboard_chat_card .cy_dashboard_chat_list {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.cy_dashboard_chat_card .cy_dashboard_chat_list::-webkit-scrollbar {
+    display: none;
+}
+
+.cy_dashboard_chat_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: #f6f6f6;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.cy_dashboard_chat_item:hover,
+.cy_dashboard_chat_item:focus {
+   border-color: #c9cf8f;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.cy_dashboard_chat_avatar {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #eef2f6;
+    color: var(--primary, #9EA700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.cy_dashboard_chat_avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cy_dashboard_chat_body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cy_dashboard_chat_top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.cy_dashboard_chat_author {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cy_dashboard_chat_time {
+    flex: 0 0 auto;
+    font-size: 11.5px;
+    color: #98a2b3;
+}
+
+.cy_dashboard_chat_preview {
+    font-size: 12.5px;
+    color: #667085;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cy_dashboard_chat_empty {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px;
+    color: #98a2b3;
+    text-align: center;
+}
+
+.cy_dashboard_chat_empty i {
+    font-size: 40px;
+    color: #cdd4dd;
+}
+
+.cy_dashboard_chat_empty p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475467;
+}
+
+.cy_dashboard_chat_empty span {
+    font-size: 12px;
+}
+
+/* Mobile: cards stack — keep them compact, content scrolls inside instead
+   of stretching the cards */
+@media (max-width: 1024px) {
+    .cy_dashboard_profile_qa_grid>.cy_dashboard_chat_card {
+        min-height: 0;
+    }
+
+    .cy_dashboard_profile_qa_grid>.cy_dashboard_chat_card .cy_dashboard_chat_list {
+        max-height: 300px;
+    }
+
+    .cy_dashboard_profile_qa_grid>.cy_dashboard_qa_page>.cy_dashboard_qa_card .cy_dashboard_qa_grid {
+        max-height: 360px;
+    }
+}
+
+/* Same trick as qa_page: don't let the chats list force the row height —
+   it stretches to the profile card's height and scrolls internally.
+   Placed AFTER the chat card base styles so min-height wins. */
+@media (min-width: 1025px) {
+    .cy_dashboard_profile_qa_grid>.cy_dashboard_chat_card {
+        height: 0;
+        min-height: 100%;
+    }
+}
+
+/* Narrow desktop (125% zoom, mid-size windows): the 4 chips can't fit on one
+   line with full text — use the same 2x2 equal-size grid as mobile */
+@media (min-width: 1025px) and (max-width: 1560px) {
+    .cy_dashboard_action .cy_dashboard_profile_actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .cy_dashboard_action .cy_dashboard_profile_action_chip {
+        justify-content: center;
+        width: 100%;
+        padding: 5px 12px;
+        font-size: 12.5px;
+    }
+
+    .cy_dashboard_action .cy_dashboard_profile_action_dropdown {
+        padding: 0;
+    }
+
+    .cy_dashboard_action .cy_dashboard_profile_action_dropdown > button {
+        justify-content: center;
+        width: 100%;
+        padding: 5px 12px;
+        font-size: 12.5px;
     }
 }

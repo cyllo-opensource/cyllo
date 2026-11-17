@@ -82,11 +82,14 @@ export class UserDashboard extends Component {
             inkWidth: 0,
             mobileMenuOpen: "",
             shortcutSearch: "",
+            chats: [],
         })
         this.action = useService("action");
         this.getActivities();
         onWillStart(async () => {
             this.renderShortcuts();
+            this.renderChats();
+            this._subscribeChatBus();
             this._syncOverviewMenu();
 
             if (session.is_admin) {
@@ -172,6 +175,7 @@ export class UserDashboard extends Component {
         onWillUnmount(() => {
             this.cleanupIdleTimer();
             this.destroyOverviewCharts();
+            this._unsubscribeChatBus();
         });
     }
 
@@ -666,6 +670,215 @@ export class UserDashboard extends Component {
             this.state.userProfile = result;
             this.userId = result.id;
         });
+    }
+
+    /**
+     * Latest Discuss chats ("Chats" tab): one row per direct-message channel
+     * the user is a member of, showing that channel's most recent message.
+     * Everything is fetched client-side from standard mail models.
+     */
+    /**
+     * Live chat updates over the Odoo bus (websocket).
+     * The mail module auto-subscribes every logged-in user to all their
+     * discuss channels (see ir_websocket._build_bus_channel_list), so we
+     * only need to listen for new messages.
+     */
+    _subscribeChatBus() {
+        const busService = this.env.services && this.env.services["bus_service"];
+        if (!busService || this._chatBusBound) {
+            return;
+        }
+        this._chatBusBound = true;
+        this._chatRefreshTimer = null;
+        this._chatRefreshing = false;
+        this._chatBusHandler = () => {
+            if (this._chatBusDead) {
+                return;
+            }
+            // Debounce: bursts of messages (e.g. several chats) trigger one refresh
+            if (this._chatRefreshTimer) {
+                clearTimeout(this._chatRefreshTimer);
+            }
+            this._chatRefreshTimer = setTimeout(() => {
+                this._chatRefreshTimer = null;
+                if (this._chatRefreshing) {
+                    return;
+                }
+                this._chatRefreshing = true;
+                Promise.resolve(this.renderChats())
+                    .catch(() => {})
+                    .then(() => {
+                        this._chatRefreshing = false;
+                    });
+            }, 500);
+        };
+        busService.subscribe("discuss.channel/new_message", this._chatBusHandler);
+    }
+
+    _unsubscribeChatBus() {
+        const busService = this.env.services && this.env.services["bus_service"];
+        if (this._chatBusBound) {
+            // bus_service has no per-type unsubscribe; the dead flag stops the handler
+            this._chatBusDead = true;
+            if (this._chatRefreshTimer) {
+                clearTimeout(this._chatRefreshTimer);
+                this._chatRefreshTimer = null;
+            }
+            this._chatBusBound = false;
+        }
+    }
+
+    async renderChats() {
+        try {
+            // Resolve the current user's partner
+            let partnerId = this.session && this.session.partner_id;
+            if (!partnerId) {
+                const me = await this.orm.searchRead(
+                    'res.users', [['id', '=', this.session.uid]], ['partner_id']);
+                partnerId = me && me[0] && me[0].partner_id && me[0].partner_id[0];
+            }
+            if (!partnerId) {
+                this.state.chats = [];
+                return;
+            }
+
+            // Channels the user is a member of (like Discuss's left panel).
+            // NOTE: this Odoo build uses the renamed Discuss models
+            // (discuss.channel / discuss.channel.member), not mail.channel.
+            const members = await this.orm.searchRead(
+                'discuss.channel.member',
+                [['partner_id', '=', partnerId]],
+                ['channel_id']);
+            const channelIds = [...new Set((members || [])
+                .map((m) => m.channel_id && m.channel_id[0])
+                .filter(Boolean))];
+            if (!channelIds.length) {
+                this.state.chats = [];
+                return;
+            }
+
+            // Only direct-message "Chats" (not group Channels)
+            const channels = await this.orm.searchRead(
+                'discuss.channel',
+                [['id', 'in', channelIds], ['channel_type', '=', 'chat']],
+                ['name']);
+            if (!channels.length) {
+                this.state.chats = [];
+                return;
+            }
+
+            // The OTHER member of each chat — provides Discuss's name + avatar
+            const otherByChannel = new Map();
+            const others = await this.orm.searchRead(
+                'discuss.channel.member',
+                [['channel_id', 'in', channels.map((c) => c.id)], ['is_self', '=', false]],
+                ['partner_id', 'channel_id']);
+            for (const m of (others || [])) {
+                const chId = m.channel_id && m.channel_id[0];
+                const partner = m.partner_id && m.partner_id[0];
+                if (chId && partner && !otherByChannel.has(chId)) {
+                    otherByChannel.set(chId, { id: partner, name: (m.partner_id && m.partner_id[1]) || '' });
+                }
+            }
+            // Plain partner names (searchRead returns display_name, which can carry a company prefix)
+            const otherPartnerIds = [...new Set([...otherByChannel.values()].map((o) => o.id))];
+            if (otherPartnerIds.length) {
+                const partnerNames = await this.orm.searchRead(
+                    'res.partner', [['id', 'in', otherPartnerIds]], ['name']);
+                const nameById = new Map((partnerNames || []).map((p) => [p.id, p.name]));
+                for (const o of otherByChannel.values()) {
+                    if (nameById.has(o.id)) {
+                        o.name = nameById.get(o.id);
+                    }
+                }
+            }
+
+            // Latest message per chat channel
+            const messages = await this.orm.searchRead(
+                'mail.message',
+                [['model', '=', 'discuss.channel'],
+                 ['res_id', 'in', channels.map((c) => c.id)],
+                 ['message_type', '=', 'comment']],
+                ['author_id', 'body', 'date', 'res_id'],
+                { order: 'date desc', limit: 200 });
+            const latestByChannel = new Map();
+            for (const m of (messages || [])) {
+                if (!latestByChannel.has(m.res_id)) {
+                    latestByChannel.set(m.res_id, m);
+                }
+            }
+
+            this.state.chats = [...latestByChannel.values()]
+                .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+                .slice(0, 8)
+                .map((m) => {
+                    const channel = channels.find((c) => c.id === m.res_id);
+                    const other = otherByChannel.get(m.res_id);
+                    const partner = m.author_id && m.author_id[0];
+                    const isSelf = partner === partnerId;
+                    // Chat channels store both member names joined ("Me, Other") —
+                    // Discuss displays only the other member's name.
+                    const displayName = (other && other.name) || (channel && channel.name) || 'Unknown';
+                    return {
+                        id: m.id,
+                        author: displayName,
+                        initial: (displayName[0] || '?').toUpperCase(),
+                        // Discuss's own avatar route (profile picture, falls back to a
+                        // generated initial avatar server-side)
+                        avatarUrl: (other && m.res_id)
+                            ? `/discuss/channel/${m.res_id}/partner/${other.id}/avatar_128`
+                            : (partnerId ? `/web/image/res.partner/${partnerId}/avatar_128` : null),
+                        preview: (isSelf ? 'You: ' : '') + this.stripHtmlPreview(m.body),
+                        timeLabel: this.formatChatTime(m.date),
+                        model: 'discuss.channel',
+                        resId: m.res_id,
+                        // used to open the floating chat window on click
+                        partnerId: other ? other.id : partnerId,
+                    };
+                });
+        } catch (error) {
+            // Discuss (mail) module not available, RPC failure, or access issue.
+            console.error('renderChats failed:', error);
+            this.state.chats = [];
+        }
+    }
+
+    stripHtmlPreview(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html || '';
+        const text = (div.textContent || '').replace(/\s+/g, ' ').trim();
+        return text.length > 80 ? text.slice(0, 80) + '…' : text;
+    }
+
+    formatChatTime(value) {
+        if (!value) return '';
+        const date = new Date(String(value).replace(' ', 'T') + 'Z');
+        if (isNaN(date)) return value;
+        const now = new Date();
+        if (date.toDateString() === now.toDateString()) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        return date.toLocaleDateString([], { day: 'numeric', month: 'short' });
+    }
+
+    openDiscuss() {
+        try {
+            this.env.services.action.doAction('mail.action_discuss');
+        } catch (error) {
+            console.error('Unable to open Discuss:', error);
+        }
+    }
+
+    openChat(chat) {
+        if (!chat) return;
+        // Open the floating chat window, exactly like Discuss
+        if (chat.partnerId && this.env.services["mail.thread"]) {
+            this.env.services["mail.thread"]
+                .openChat({ partnerId: chat.partnerId })
+                .catch(() => this.openDiscuss());
+            return;
+        }
+        this.openDiscuss();
     }
 
     async renderShortcuts() {

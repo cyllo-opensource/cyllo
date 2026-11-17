@@ -652,7 +652,7 @@ export class GraphTile extends Component {
         try {
             imgSrc = this.eChart.getDataURL({
                 type: 'png',
-                pixelRatio: 1,
+                pixelRatio: 2,
                 backgroundColor: '#fff',
             });
         } catch (e) {

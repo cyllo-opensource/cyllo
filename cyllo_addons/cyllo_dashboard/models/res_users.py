@@ -261,7 +261,7 @@ class ResUsers(models.Model):
                 for lang in
                 self.env['res.lang'].search([('active', '=', True)])],
             'work_email': current_user.email,
-            'phone': current_user.partner_id.phone or '',
+            'phone': current_user.partner_id.phone or current_user.partner_id.mobile or '',
             'company': company.name or '',
             'company_id': company.id,
             'has_company_logo': bool(company.logo),
@@ -272,6 +272,45 @@ class ResUsers(models.Model):
                 current_user.tz] if current_user.tz in _tz_mapping() else current_user.tz,
             'notif_type': current_user.notification_type,
         }
+
+    @api.model
+    def get_latest_chats(self, limit=8):
+        """
+        Latest direct-message chats for the current user — mirrors the
+        Discuss "Chats" tab: one record per 1:1 chat channel, with that
+        channel's most recent message.
+        """
+        try:
+            partner = self.env.user.partner_id
+            Member = self.env['discuss.channel.member']
+            Message = self.env['mail.message']
+            members = Member.search([('partner_id', '=', partner.id)])
+            channels = members.mapped('channel_id').filtered(
+                lambda c: c.channel_type == 'chat')
+            rows = []
+            for channel in channels:
+                msg = Message.search(
+                    [('model', '=', 'discuss.channel'),
+                     ('res_id', '=', channel.id),
+                     ('message_type', '=', 'comment')],
+                    limit=1, order='date desc')
+                if not msg:
+                    continue
+                author_id = msg.author_id.id if msg.author_id else 0
+                rows.append({
+                    'id': msg.id,
+                    'channel_id': channel.id,
+                    'channel_name': channel.name or '',
+                    'author': msg.author_id.name or '',
+                    'partner_id': author_id,
+                    'is_self': bool(msg.author_id) and msg.author_id.id == partner.id,
+                    'body': msg.body or '',
+                    'date': msg.date,
+                })
+            rows.sort(key=lambda r: r['date'] or '', reverse=True)
+            return rows[:limit]
+        except Exception:
+            return []
 
     @api.model
     def get_non_admin_user_details(self, user_id):
