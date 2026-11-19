@@ -2,169 +2,209 @@
 <templates xml:space="preserve">
     <t t-name="CustomerChurnDetails" owl="1">
         <div t-ref="root"
-             class="cy_prediction_container customer-data-churn-main cyllo-background">
-            <div class="col-md-9 ms-sm-auto col-lg-10 w-100">
-                <div class="row px-3 pt-3">
-                    <div class="pb-3">
-                        <h2 class="cy-sale-analysis_head prediction-heading">
-                            <i class="ri-arrow-left-s-line customer-go-back"
-                               t-on-click="() => this.goBack()"
-                               title="Go Back"/>
-                            <t t-esc="state.custDetails.custName"/></h2>
-                        <div class="d-flex flex-wrap gap-2 pt-2 ps-2">
-                            <div class="col cy-sales-analysis__tile card-border-shadow background-white py-4 d-flex justify-content-center
-                                flex-column tile-fix mt-2">
-                                <div class="cy-sales-cust_head">Likely to be Churn:
-                                    <span t-attf-class="{{ state.custDetails?.Churn === 'No' ? 'churn-success': 'churn-danger' }}"
-                                          t-esc="churnLabel(state.custDetails.Churn)"/>
-                                </div>
-                            </div>
-                            <div class="col cy-sales-analysis__tile card-border-shadow background-white py-4 tile-fix mt-2">
-                                <div class="cy-sales-cust_head">Probability of Churn:
-                                    <span class="churn-danger"><t t-esc="state.custDetails.prob_yes"/>
-                                        %</span>
-                                </div>
-                            </div>
-                            <div class="col cy-sales-analysis__tile card-border-shadow background-white py-4 tile-fix mt-2">
-                                <div class="cy-sales-cust_head">Probability of Not Churn:
-                                    <span class="churn-success"><t t-esc="state.custDetails.prob_no"/>
-                                        %</span>
-                                </div>
-                            </div>
+             class="cy_prediction_container customer-data-churn-main cyllo-background cy-cust-v2">
+            <div class="cy-cust-shell">
+
+                <!-- page header -->
+                <div class="cy-cust-head">
+                    <button type="button"
+                            class="cy-cust-back"
+                            title="Go Back"
+                            t-on-click="() => this.goBack()">
+                        <i class="ri-arrow-left-s-line"/>
+                    </button>
+                    <div class="cy-cust-head-text">
+                        <h1 class="cy-cust-title"><t t-esc="state.custDetails.custName"/></h1>
+                        <p class="cy-cust-sub"
+                           t-if="state.dateRange and state.dateRange.length">
+                            <t t-esc="periodLabel()"/> ·
+                            <t t-esc="state.dateRange[0][0]"/> –
+                            <t t-esc="state.dateRange[state.dateRange.length - 1][1]"/>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- churn summary cards -->
+                <div class="cy-cust-stats">
+                    <div class="cy-cust-stat">
+                        <div class="cy-cust-stat-top">
+                            <span class="cy-cust-stat-label">Likely to be Churn</span>
+                            <span class="cy-cust-stat-icon"><i class="ri-alert-line"/></span>
+                        </div>
+                        <div t-attf-class="cy-cust-stat-value {{this.churnTone(state.custDetails.Churn)}}"
+                             t-esc="churnLabel(state.custDetails.Churn)"/>
+                        <span t-attf-class="cy-cust-pill {{this.churnTone(state.custDetails.Churn)}}"
+                              t-esc="this.churnNote(state.custDetails.Churn)"/>
+                    </div>
+                    <div class="cy-cust-stat">
+                        <div class="cy-cust-stat-top">
+                            <span class="cy-cust-stat-label">Probability of Churn</span>
+                            <span class="cy-cust-stat-icon"><i class="ri-pie-chart-line"/></span>
+                        </div>
+                        <div class="cy-cust-stat-value is-bad">
+                            <t t-esc="state.custDetails.prob_yes"/><span class="cy-cust-unit">%</span>
+                        </div>
+                        <span class="cy-cust-meter">
+                            <span class="is-bad"
+                                  t-attf-style="width: {{state.custDetails.prob_yes}}%"/>
+                        </span>
+                    </div>
+                    <div class="cy-cust-stat">
+                        <div class="cy-cust-stat-top">
+                            <span class="cy-cust-stat-label">Probability of Not Churn</span>
+                            <span class="cy-cust-stat-icon"><i class="ri-shield-check-line"/></span>
+                        </div>
+                        <div class="cy-cust-stat-value is-ok">
+                            <t t-esc="state.custDetails.prob_no"/><span class="cy-cust-unit">%</span>
+                        </div>
+                        <span class="cy-cust-meter">
+                            <span class="is-ok"
+                                  t-attf-style="width: {{state.custDetails.prob_no}}%"/>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- charts + period table -->
+                <div t-if="state.custDetails.total_sales" class="cy-cust-grid">
+                    <div class="cy-cust-card">
+                        <div class="cy-cust-card-head">
+                            <h3 class="cy-cust-card-title">
+                                <t t-esc="state.labels.total_sale_orders || 'Total Sale Orders'"/>
+                            </h3>
+                            <span class="cy-cust-chip"><t t-esc="periodLabel()"/></span>
+                        </div>
+                        <div class="cy-cust-plot">
+                            <canvas id="freq_chart"/>
                         </div>
                     </div>
-                    <div t-if="state.custDetails.total_sales"
-                         class="d-flex flex-wrap pb-2">
-                        <div class="col-4 ps-2">
-                            <div class="cy-sale_cust--img-container card-border-shadow overflow-hidden">
-                                <canvas class="w-100 mt-3"
-                                        id="freq_chart"/>
-                            </div>
+                    <div class="cy-cust-card">
+                        <div class="cy-cust-card-head">
+                            <h3 class="cy-cust-card-title">
+                                <t t-esc="state.labels.total_sale_amount || 'Total Sale Amount'"/>
+                            </h3>
+                            <span class="cy-cust-chip"><t t-esc="periodLabel()"/></span>
                         </div>
-                        <div class="col-4 ps-2">
-                            <div class="cy-sale_cust--img-container card-border-shadow overflow-hidden">
-                                <canvas class="w-100 mt-3" id="mon_chart"/>
-                            </div>
+                        <div class="cy-cust-plot">
+                            <canvas id="mon_chart"/>
                         </div>
-                        <div class="col-4 ps-2">
-                            <div class="cy-sale_cust--img-container card_3 card-border-shadow w-100">
-                                <div class="cy-responsive-content-wrapper">
-                                    <div class="cy-dashboard_header d-flex justify-content-around align-items-start cy-sales-analysis_customer-header">
-                                        <div class="cy-sales-analysis_custom-headline"><t t-esc="state.labels.period || 'Period'"/></div>
-                                        <div class="cy-sales-analysis_custom-headline">Start date</div>
-                                        <div class="cy-sales-analysis_custom-headline">End date</div>
-                                    </div>
+                    </div>
+                    <div class="cy-cust-card">
+                        <div class="cy-cust-card-head">
+                            <h3 class="cy-cust-card-title">
+                                <t t-esc="state.labels.period || 'Period'"/>
+                            </h3>
+                        </div>
+                        <div class="cy-cust-periods">
+                            <table class="cy-cust-table">
+                                <thead>
+                                    <tr>
+                                        <th><t t-esc="state.labels.period || 'Period'"/></th>
+                                        <th class="text-end">Start date</th>
+                                        <th class="text-end">End date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     <t t-set="index" t-value="1"/>
-                                    <t t-if="state.dateRange === undefined"
-                                       t-set="dateRange"
-                                       t-value="[]"/>
-                                    <t t-elif="state.dateRange !== undefined"
-                                       t-set="dateRange"
-                                       t-value="state.dateRange"/>
-                                    <t t-foreach="dateRange"
+                                    <t t-foreach="state.dateRange or []"
                                        t-as="date"
                                        t-key="date_index">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="cy-dashboard_cell">
-                                                <p><span>
-                                                    <t t-esc="periodLabel()"/>
-                                                    -
-                                                    <t t-esc="index"/></span></p>
-                                                <t t-set="index"
-                                                   t-value="index+1"/>
-                                            </div>
-                                            <div class="cy-dashboard_cell">
-                                                <p><span><t t-esc="date[0]"/></span></p>
-                                            </div>
-                                            <div class="cy-dashboard_cell">
-                                                <p><span><t t-esc="date[1]"/></span></p>
-                                            </div>
-                                        </div>
+                                        <tr>
+                                            <td class="cy-cust-period-name">
+                                                <t t-esc="periodLabel()"/>-<t t-esc="index"/>
+                                            </td>
+                                            <td class="text-end cy-cust-date"><t t-esc="date[0]"/></td>
+                                            <td class="text-end cy-cust-date"><t t-esc="date[1]"/></td>
+                                        </tr>
+                                        <t t-set="index" t-value="index + 1"/>
                                     </t>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div t-if="state.custDetails.total_sales"
-                         class="mt8 mb-4 ps-4">
-                        <div class="accordion accordion-flush customer-sale-data-churn"
-                             id="accordionSaleOrder">
-                            <t t-foreach="Object.keys(state.saleOrders)"
-                               t-as="item" t-key="item_index">
-                                <div t-if="state.saleOrders[item].length"
-                                     class="accordion-item">
-                                    <h2 class="accordion-header"
-                                        t-attf-id="flush-heading{{item}}">
-                                        <button class="accordion-button collapsed"
-                                                type="button"
-                                                t-attf-data-bs-toggle="collapse"
-                                                t-attf-data-bs-target="#flush-collapse{{item}}"
-                                                t-attf-aria-expanded="false"
-                                                t-attf-aria-controls="flush-collapse{{item}}">
-                                            <h4>
-                                                <t t-esc="periodLabel()"/>-
-                                                <t t-esc="item"/>
-                                                (
-                                                <t t-esc="state.saleOrders[item].length"/>
-                                                )</h4>
-                                            <i class="ri-arrow-down-s-line accordion-arrow"/>
-                                        </button>
-                                    </h2>
-                                    <div t-attf-id="flush-collapse{{item}}"
-                                         class="accordion-collapse collapse"
-                                         t-attf-aria-labelledby="flush-heading{{item}}">
-                                        <div class="accordion-body">
-                                            <div>
-                                                <table class="cy-listView-table ch-churn_predict--table">
-                                                    <thead class="cy-listview-head cy-churn-prdt_thead">
-                                                        <tr class="table100-head">
-                                                            <th>Order Number</th>
-                                                            <th>Date</th>
-                                                            <th>Salesperson</th>
-                                                            <th>Untaxed Amount</th>
-                                                            <th>Total</th>
-                                                            <th class="cy-order-status">Status</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <t t-foreach="state.saleOrders[item]"
-                                                           t-as="order"
-                                                           t-key="order_index">
-                                                            <tr t-on-click="() => this.onClickSaleOrder(order.id)">
-                                                                <td><t t-esc="order.name"/></td>
-                                                                <td><t t-esc="order.date_order"/></td>
-                                                                <td><img class="cy-ps_profile"
-                                                                         t-attf-src="/web/image/res.users/{{order.user_id[0]}}/avatar_128"
-                                                                         alt="Card image cap"/>
-                                                                    <t t-esc="order.user_id[1]"/></td>
-                                                                <td><t t-esc="order.amount_untaxed"/></td>
-                                                                <td><t t-esc="order.amount_total"/></td>
-                                                                <td class="cy-order-status">
-                                                                    <t t-esc="order.state"/></td>
-                                                            </tr>
-                                                        </t>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </t>
-                        </div>
-                    </div>
-                    <div t-else=""
-                         class="row m-auto p-5 text-center align-items-center justify-content-center h-100">
-                        <div class="d-flex align-items-center justify-content-center flex-column">
-                            <h1 class="cy-demand-predit_head">No Sale Orders</h1>
-                            <p class="cy-empty_text">There is no sale orders for <t
-                                    t-esc="state.custDetails.custName"/>
-                                from
-                                <t t-esc="state.dateRange[0][0]"/>
-                                to
-                                <t t-esc="state.dateRange[state.dateRange.length-1][1]"/></p>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+
+                <!-- sale orders: one always-open card per period -->
+                <div t-if="state.custDetails.total_sales" class="cy-cust-period-cards">
+                    <t t-foreach="Object.keys(state.saleOrders)"
+                       t-as="item" t-key="item_index">
+                        <div t-if="state.saleOrders[item].length"
+                             class="cy-cust-card cy-cust-orders">
+                            <div class="cy-cust-orders-head">
+                                <h3 class="cy-cust-orders-title">
+                                    <t t-esc="periodLabel()"/>-<t t-esc="item"/>
+                                    <span class="cy-cust-orders-count">
+                                        <t t-esc="state.saleOrders[item].length"/>
+                                    </span>
+                                </h3>
+                                <button type="button"
+                                        class="cy-cust-viewall"
+                                        t-on-click="() => this.openAllOrders(item)">
+                                    View All
+                                </button>
+                            </div>
+                            <div class="cy-cust-orders-body">
+                                <table class="cy-cust-table cy-cust-orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order Number</th>
+                                            <th>Date</th>
+                                            <th>Salesperson</th>
+                                            <th class="text-end">Untaxed Amount</th>
+                                            <th class="text-end">Total</th>
+                                            <th class="text-end">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.saleOrders[item]"
+                                           t-as="order"
+                                           t-key="order_index">
+                                            <tr t-on-click="() => this.onClickSaleOrder(order.id)">
+                                                <td class="cy-cust-order-name">
+                                                    <t t-esc="order.name"/>
+                                                </td>
+                                                <td class="cy-cust-date">
+                                                    <t t-esc="order.date_order"/>
+                                                </td>
+                                                <td class="cy-cust-salesperson">
+                                                    <span class="cy-cust-sales">
+                                                        <img t-attf-src="/web/image/res.users/{{order.user_id[0]}}/avatar_128"
+                                                             t-att-alt="order.user_id[1]"
+                                                             loading="lazy"/>
+                                                        <t t-esc="order.user_id[1]"/>
+                                                    </span>
+                                                </td>
+                                                <td class="text-end cy-cust-amount">
+                                                    <t t-esc="order.amount_untaxed"/>
+                                                </td>
+                                                <td class="text-end cy-cust-amount">
+                                                    <t t-esc="order.amount_total"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span t-attf-class="cy-cust-status {{this.orderStateTone(order.state)}}"
+                                                          t-esc="order.state"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- empty state -->
+                <div t-else="" class="cy-cust-empty">
+                    <span class="cy-cust-empty-icon"><i class="ri-file-list-3-line"/></span>
+                    <h3 class="cy-cust-empty-title">No Sale Orders</h3>
+                    <p class="cy-cust-empty-text">
+                        There are no sale orders for <t t-esc="state.custDetails.custName"/>
+                        <t t-if="state.dateRange and state.dateRange.length">
+                            from <t t-esc="state.dateRange[0][0]"/>
+                            to <t t-esc="state.dateRange[state.dateRange.length - 1][1]"/>
+                        </t>
+                    </p>
+                </div>
+
             </div>
         </div>
     </t>

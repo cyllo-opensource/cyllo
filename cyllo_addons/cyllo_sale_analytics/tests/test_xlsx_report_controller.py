@@ -19,9 +19,13 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-import json
-import zipfile
 import io
+import json
+import threading
+import time
+import zipfile
+
+import odoo.tools.misc
 from odoo.tests import HttpCase, tagged
 
 
@@ -107,3 +111,50 @@ class TestXlsxReportController(HttpCase):
         )
         self.assertEqual(response_invalid.status_code, 200)
         self.assertIn(b"Odoo Server Error", response_invalid.content)
+
+    def tearDown(self):
+        if getattr(self, 'session', None):
+            try:
+                self.logout()
+            except Exception:
+                pass
+        super().tearDown()
+
+    def _wait_remaining_requests(self, timeout=10):
+        """Override to avoid waiting on persistent /websocket connections
+        which run indefinitely and trigger thread dumpstacks during cleanup."""
+        try:
+            from odoo.addons.bus.websocket import _kick_all
+            _kick_all()
+        except Exception:
+            pass
+
+        def get_http_request_threads():
+            return [
+                t for t in threading.enumerate()
+                if t.name.startswith('odoo.service.http.request.')
+                and not ('/websocket' in getattr(t, 'url', ''))
+            ]
+
+        start_time = time.time()
+        request_threads = get_http_request_threads()
+        if not request_threads:
+            return
+
+        self._logger.info('waiting for threads: %s', request_threads)
+
+        for thread in request_threads:
+            remaining = timeout - (time.time() - start_time)
+            if remaining > 0:
+                thread.join(remaining)
+
+        request_threads = get_http_request_threads()
+        for thread in request_threads:
+            self._logger.info(
+                "Stop waiting for thread %s handling request for url %s",
+                thread.name, getattr(thread, 'url', '<UNKNOWN>')
+            )
+
+        if request_threads:
+            self._logger.info('remaining requests')
+            odoo.tools.misc.dumpstacks()

@@ -21,11 +21,36 @@
                                     </div>
                                     <span class="badge rounded-pill cy-churn-daterange-pill"
                                           t-att-title="'Prediction based on the data from ' + state.churnData.start_date + ' to ' + state.churnData.end_date">
+                                        <i class="ri-calendar-2-line me-1"/>
                                         <t t-esc="state.churnData.start_date"/> – <t t-esc="state.churnData.end_date"/>
                                     </span>
                                 </div>
                 </div>
                 <div class="cy-churn-actions d-flex align-items-center flex-wrap gap-2">
+                    <button class="btn btn-primary cy-export-dropdown d-flex align-items-center gap-1"
+                            type="button"
+                            t-on-click="() => this.loadChurn(true)">
+                        <span class="ri-refresh-line"/> Recompute
+                    </button>
+                    <div class="position-relative">
+                        <Dropdown
+                                class="'btn-group flex-grow-1 flex-md-grow-0 dropdown-fit-content'"
+                                togglerClass="'btn btn-primary cy-export-dropdown'"
+                                showCaret="true">
+                            <t t-set-slot="toggler">
+                                <span class="ri-upload-line"/>
+                                Export
+                            </t>
+                            <DropdownItem onSelected.bind="exportPDF">
+                                <span class="ri-file-pdf-line"/>
+                                <span class="ms-2">PDF</span>
+                            </DropdownItem>
+                            <DropdownItem onSelected.bind="exportXLSX">
+                                <span class="ri-file-excel-line"/>
+                                <span class="ms-2">XLSX</span>
+                            </DropdownItem>
+                        </Dropdown>
+                    </div>
                     <FilterDropdown mainClass="'dropdown-filters-sale'"
                                     class="'btn btn-primary cy-export-dropdown'"
                                     onClick.bind="onChangePeriod"
@@ -79,30 +104,6 @@
                             </div>
                         </t>
                     </FilterDropdown>
-                    <button class="btn btn-primary cy-export-dropdown d-flex align-items-center gap-1"
-                            type="button"
-                            t-on-click="() => this.loadChurn(true)">
-                        <span class="ri-refresh-line"/> Recompute
-                    </button>
-                    <div class="position-relative">
-                        <Dropdown
-                                class="'btn-group flex-grow-1 flex-md-grow-0 dropdown-fit-content'"
-                                togglerClass="'btn btn-primary cy-export-dropdown'"
-                                showCaret="true">
-                            <t t-set-slot="toggler">
-                                <span class="ri-upload-line"/>
-                                Export
-                            </t>
-                            <DropdownItem onSelected.bind="exportPDF">
-                                <span class="ri-file-pdf-line"/>
-                                <span class="ms-2">PDF</span>
-                            </DropdownItem>
-                            <DropdownItem onSelected.bind="exportXLSX">
-                                <span class="ri-file-excel-line"/>
-                                <span class="ms-2">XLSX</span>
-                            </DropdownItem>
-                        </Dropdown>
-                    </div>
                     <div class="position-relative">
                         <div class="dropdown">
                             <button class="btn btn-primary cy-export-dropdown dropdown-toggle d-flex align-items-center gap-1" type="button" id="configDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
@@ -155,15 +156,23 @@
                 <div>
                     <div t-if="state.restoring" class="cy-churn-training-overlay">
                         <div class="d-flex flex-column align-items-center gap-2 text-center px-3">
-                            <span class="spinner-border text-success" role="status"/>
-                            <span class="text-muted">Loading saved churn results…</span>
+                            <div class="cy-grid-loading-spinner">
+                                <span class="cy-grid-loading-dot"/>
+                                <span class="cy-grid-loading-dot"/>
+                                <span class="cy-grid-loading-dot"/>
+                            </div>
+                            <span class="cy-sheet-loading-label">Loading…</span>
                         </div>
                     </div>
                     <div t-elif="state.loading" class="cy-churn-training-overlay">
                         <div class="d-flex flex-column align-items-center gap-2 text-center px-3">
-                            <span class="spinner-border text-success" role="status"/>
-                            <span class="text-muted">Computing churn prediction…</span>
-                            <span class="text-muted small">This may take a few minutes — consider running it during non-working hours.</span>
+                            <div class="cy-grid-loading-spinner">
+                                <span class="cy-grid-loading-dot"/>
+                                <span class="cy-grid-loading-dot"/>
+                                <span class="cy-grid-loading-dot"/>
+                            </div>
+                            <span class="cy-sheet-loading-label">Loading…</span>
+                            <span class="text-muted small">Computing churn prediction — this may take a few minutes, consider running it during non-working hours.</span>
                             <button type="button" class="btn btn-outline-danger btn-sm mt-2 d-inline-flex align-items-center gap-1" t-on-click="cancelTraining">
                                 <i class="ri-close-line"/> Cancel Training
                             </button>
@@ -184,224 +193,153 @@
                         <div class="col-lg-12 d-flex flex-wrap tile-div justify-content-center">
                             <div class="col-lg-8 cy-churn-kpi-row">
                                 <div class="cy-churn-kpi-group">
-                                    <div class="col-lg-6 cy-churn_tile card-border-shadow gap-2 p-2 d-flex justify-content-center flex-column position-relative">
-                                    <button class="cy_kpi_icon cy_churn_total_cust_info cy_churn_info">
-                                        <i class="ri-question-line"/>
-                                    </button>
-                                        <div class="cy_churn_info_content total_cust_explanation churn_explain">
-                                        <p class="mb-0">Total number of customers in the company.</p>
+                                    <!-- ── Total Customers ── -->
+                                    <div class="cy-churn-kpi">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div class="cy-churn-kpi__main">
+                                                <p class="cy-churn-kpi__label">Total Customers</p>
+                                                <div class="cy-churn-kpi__value">
+                                                    <t t-esc="formatNumber(state.churnData.total_cust)"/>
+                                                    <span class="cy-churn-kpi__unit">Customers</span>
+                                                </div>
+                                            </div>
+                                            <span class="cy-churn-kpi__icon"><i class="ri-group-line"/></span>
+                                        </div>
+                                        <t t-set="status" t-value="kpiStatus('total')"/>
+                                        <span t-attf-class="cy-churn-kpi__pill cy-churn-kpi__pill--{{status.muted ? 'muted' : status.tone}}">
+                                            <i t-if="status.arrow" t-att-class="status.arrow"/>
+                                            <i t-elif="status.muted" class="ri-subtract-line"/>
+                                            <i t-else="" class="ri-arrow-right-up-line"/>
+                                            <t t-esc="status.text"/>
+                                        </span>
                                     </div>
-                                        <div class="position-relative d-flex justify-content-between h-100 align-items-center overflow-hidden">
-                                        <div class="churn-card-inner-container make-z-index">
-                                            <div class="d-flex gap-2 align-items-center">
-                                                <div class="cy-churn_tile--icon">
-                                                    <i class="churn-app-icon ri-group-line"/>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    <p class="cy-churn_tile-text responsive-18px-font mb-0">Total Customers</p>
-                                                    <h2 class="cy-churn_tile--perc mb-0">
-                                                <t t-esc="formatNumber(state.churnData.total_cust)"/>
-                                                    </h2>
+                                    <!-- ── Customers Analyzed ── -->
+                                    <div class="cy-churn-kpi">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div class="cy-churn-kpi__main">
+                                                <p class="cy-churn-kpi__label">Customers Analyzed</p>
+                                                <div class="cy-churn-kpi__value">
+                                                    <t t-esc="formatNumber(state.churnData.active_cust)"/>
+                                                    <span class="cy-churn-kpi__unit">Analyzed</span>
                                                 </div>
                                             </div>
-                                            <div class="cy-churn-tile__footer">
-                                                <t t-set="status" t-value="kpiStatus('total')"/>
-                                                <span t-attf-class="cy-churn-tile__status cy-churn-tile__status--{{status.tone}}">
-                                                    <i t-if="status.arrow" t-att-class="status.arrow"/>
-                                                    <span t-else="" class="cy-churn-tile__dot"/>
-                                                    <t t-esc="status.text"/>
-                                                </span>
-                                            </div>
+                                            <span class="cy-churn-kpi__icon"><i class="ri-user-follow-line"/></span>
                                         </div>
-                                            <div class="churn-total-customer-container">
-                                            <div/>
-                                                <img src="cyllo_sale_analytics/static/src/img/assets/total-customer_1.png"
-                                                     class="churn-total-customer"/>
-                                        </div>
+                                        <t t-set="status" t-value="kpiStatus('analyzed')"/>
+                                        <span t-attf-class="cy-churn-kpi__pill cy-churn-kpi__pill--{{status.muted ? 'muted' : status.tone}}">
+                                            <i t-if="status.arrow" t-att-class="status.arrow"/>
+                                            <i t-elif="status.muted" class="ri-subtract-line"/>
+                                            <i t-else="" class="ri-arrow-right-up-line"/>
+                                            <t t-esc="status.text"/>
+                                        </span>
                                     </div>
-                                </div>
-                                    <div class="col-lg-6 cy-churn_tile card-border-shadow bot-churn-tile gap-2 d-flex justify-content-center position-relative flex-column">
-                                    <button class="cy_kpi_icon cy_churn_active_info cy_churn_info">
-                                        <i class="ri-question-line"/>
-                                    </button>
-                                        <div class="cy_churn_info_content active_cust_explanation churn_explain">
-                                        <p class="mb-0">Customers with at least one confirmed sale order - the set scored by the churn model.</p>
+                                    <!-- ── At-Risk Customers ── -->
+                                    <div class="cy-churn-kpi">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div class="cy-churn-kpi__main">
+                                                <p class="cy-churn-kpi__label">At-Risk Customers</p>
+                                                <div class="cy-churn-kpi__value">
+                                                    <t t-esc="state.churnData.churn_perc"/>%
+                                                </div>
+                                            </div>
+                                            <span class="cy-churn-kpi__icon"><i class="ri-user-unfollow-line"/></span>
+                                        </div>
+                                        <t t-set="status" t-value="kpiStatus('at_risk')"/>
+                                        <span t-attf-class="cy-churn-kpi__pill cy-churn-kpi__pill--{{status.muted ? 'muted' : status.tone}}">
+                                            <i t-if="status.arrow" t-att-class="status.arrow"/>
+                                            <i t-elif="status.muted" class="ri-subtract-line"/>
+                                            <i t-else="" class="ri-arrow-right-up-line"/>
+                                            <t t-esc="status.text"/>
+                                        </span>
                                     </div>
-                                        <div class="position-relative d-flex justify-content-between h-100 align-items-center overflow-hidden">
-                                        <div class="churn-card-inner-container make-z-index">
-                                            <div class="d-flex gap-2 align-items-center">
-                                                <div class="cy-churn_tile--icon cy-churn_tile-activeChurn">
-                                                    <i class="churn-app-icon ri-user-follow-line"/>
-                                                </div>
-                                                <div class="d-flex flex-column">    
-                                                    <p class="cy-churn_tile-text responsive-18px-font mb-0">Customers Analyzed</p>
-                                                    <h2 class="cy-churn_tile--perc mb-0">
-                                                <t t-esc="formatNumber(state.churnData.active_cust)"/>
-                                                    </h2>
+                                    <!-- ── Loyal Customers ── -->
+                                    <div class="cy-churn-kpi">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div class="cy-churn-kpi__main">
+                                                <p class="cy-churn-kpi__label">Loyal Customers</p>
+                                                <div class="cy-churn-kpi__value">
+                                                    <t t-esc="state.churnData.not_churn_perc"/>%
                                                 </div>
                                             </div>
-                                            <div class="cy-churn-tile__footer">
-                                                <t t-set="status" t-value="kpiStatus('analyzed')"/>
-                                                <span t-attf-class="cy-churn-tile__status cy-churn-tile__status--{{status.tone}}">
-                                                    <i t-if="status.arrow" t-att-class="status.arrow"/>
-                                                    <span t-else="" class="cy-churn-tile__dot"/>
-                                                    <t t-esc="status.text"/>
-                                                </span>
-                                            </div>
+                                            <span class="cy-churn-kpi__icon"><i class="ri-shake-hands-line"/></span>
                                         </div>
-                                            <div class="churn-total-customer-container">
-                                            <div/>
-                                                <img src="cyllo_sale_analytics/static/src/img/assets/active-customer-vector_1.png"
-                                                     class="churn-total-customer"/>
-                                        </div>
+                                        <t t-set="status" t-value="kpiStatus('loyal')"/>
+                                        <span t-attf-class="cy-churn-kpi__pill cy-churn-kpi__pill--{{status.muted ? 'muted' : status.tone}}">
+                                            <i t-if="status.arrow" t-att-class="status.arrow"/>
+                                            <i t-elif="status.muted" class="ri-subtract-line"/>
+                                            <i t-else="" class="ri-arrow-right-up-line"/>
+                                            <t t-esc="status.text"/>
+                                        </span>
                                     </div>
-                                </div>
-                                    <div class=" col-lg-6 cy-churn_tile card-border-shadow gap-2 d-flex justify-content-center flex-column position-relative">
-                                    <button class="cy_kpi_icon cy_churn_perc_info cy_churn_info">
-                                        <i class="ri-question-line"/>
-                                    </button>
-                                        <div class="cy_churn_info_content churn_perc_explanation churn_explain">
-                                        <p class="mb-0">Estimated percentage of total customers that is predicted to discontinue or stop using your services or products based on the data within selected period.</p>
+                                    <!-- ── Waiting Customers ── -->
+                                    <div class="cy-churn-kpi">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div class="cy-churn-kpi__main">
+                                                <p class="cy-churn-kpi__label">Waiting Customers</p>
+                                                <div class="cy-churn-kpi__value">
+                                                    <t t-esc="state.churnData.waiting_perc"/>%
+                                                </div>
+                                            </div>
+                                            <span class="cy-churn-kpi__icon"><i class="ri-hourglass-2-line"/></span>
+                                        </div>
+                                        <span class="cy-churn-kpi__pill cy-churn-kpi__pill--muted">
+                                            <i class="ri-subtract-line"/>
+                                            <t t-esc="waitingCount"/> awaiting history
+                                        </span>
                                     </div>
-                                        <div class="position-relative d-flex justify-content-between h-100 align-items-center overflow-hidden">
-                                        <div class="churn-card-inner-container make-z-index">
-                                            <div class="d-flex gap-2 align-items-center">
-                                                <div class="cy-churn_tile--icon cy-churn_tile-notChurn">
-                                                    <i class="churn-app-icon ri-user-unfollow-line"/>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    <p class="cy-churn_tile-text responsive-18px-font mb-0">At-Risk Customers</p>
-                                                    <h2 class="cy-churn_tile--perc mb-0">
-                                                <t t-esc="state.churnData.churn_perc"/>
-                                                %
-                                                    </h2>
+                                    <!-- ── Total Sale Orders ── -->
+                                    <div class="cy-churn-kpi">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div class="cy-churn-kpi__main">
+                                                <p class="cy-churn-kpi__label">Total Sale Orders</p>
+                                                <div class="cy-churn-kpi__value">
+                                                    <t t-esc="formatNumber(totalOrders)"/>
+                                                    <span class="cy-churn-kpi__unit">Orders</span>
                                                 </div>
                                             </div>
-                                            <div class="cy-churn-tile__footer">
-                                                <t t-set="status" t-value="kpiStatus('at_risk')"/>
-                                                <span t-attf-class="cy-churn-tile__status cy-churn-tile__status--{{status.tone}}">
-                                                    <i t-if="status.arrow" t-att-class="status.arrow"/>
-                                                    <span t-else="" class="cy-churn-tile__dot"/>
-                                                    <t t-esc="status.text"/>
-                                                </span>
-                                            </div>
+                                            <span class="cy-churn-kpi__icon"><i class="ri-shopping-bag-3-line"/></span>
                                         </div>
-                                            <div class="churn-total-customer-container">
-                                            <div/>
-                                                <img src="cyllo_sale_analytics/static/src/img/assets/churn-customer_1.png"
-                                                     class="churn-at-risk-customer"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                    <div class="col-lg-6 col cy-churn_tile card-border-shadow bot-churn-tile gap-2 d-flex justify-content-center flex-column position-relative">
-                                    <button class="cy_kpi_icon cy_not_churn_perc_info cy_churn_info">
-                                        <i class="ri-question-line"/>
-                                    </button>
-                                        <div class="cy_churn_info_content not_churn_perc_explanation churn_explain">
-                                        <p class="mb-0">Estimated percentage of total customers that is predicted or expected to continue using your services or products without discontinuing based on the data within selected period.</p>
-                                    </div>
-
-                                        <div class="position-relative d-flex justify-content-between h-100 align-items-center overflow-hidden">
-                                        <div class="churn-card-inner-container make-z-index">
-                                            <div class="d-flex gap-2 align-items-center">
-                                                <div class="cy-churn_tile--icon cy-churn_tile-toChurn">
-                                                    <i class="churn-app-icon ri-shake-hands-line"/>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    <p class="cy-churn_tile-text responsive-18px-font mb-0">Loyal Customers</p>
-                                                    <h2 class="cy-churn_tile--perc mb-0">
-                                                <t t-esc="state.churnData.not_churn_perc"/>
-                                                %
-                                                    </h2>
-                                                </div>
-                                            </div>
-                                            <div class="cy-churn-tile__footer">
-                                                <t t-set="status" t-value="kpiStatus('loyal')"/>
-                                                <span t-attf-class="cy-churn-tile__status cy-churn-tile__status--{{status.tone}}">
-                                                    <i t-if="status.arrow" t-att-class="status.arrow"/>
-                                                    <span t-else="" class="cy-churn-tile__dot"/>
-                                                    <t t-esc="status.text"/>
-                                                </span>
-                                            </div>
-                                        </div>
-                                            <div class="churn-total-customer-container">
-                                            <div/>
-                                                <img src="cyllo_sale_analytics/static/src/img/assets/rel_1.png"
-                                                     class="churn-total-customer"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                    <div class="col-lg-6 cy-churn_tile card-border-shadow gap-2 d-flex justify-content-center flex-column position-relative">
-                                        <button class="cy_kpi_icon cy_churn_waiting_info cy_churn_info">
-                                            <i class="ri-question-line"/>
-                                        </button>
-                                        <div class="cy_churn_info_content waiting_perc_explanation churn_explain">
-                                            <p class="mb-0">Share of customers the model cannot classify yet, usually because they have too little order history to judge.</p>
-                                        </div>
-                                        <div class="position-relative d-flex justify-content-between h-100 align-items-center overflow-hidden">
-                                            <div class="churn-card-inner-container make-z-index">
-                                                <div class="d-flex gap-2 align-items-center">
-                                                    <div class="cy-churn_tile--icon cy-churn_tile-waiting">
-                                                        <i class="churn-app-icon ri-hourglass-2-line"/>
-                                                    </div>
-                                                    <div class="d-flex flex-column">
-                                                        <p class="cy-churn_tile-text responsive-18px-font mb-0">Waiting Customers</p>
-                                                        <h2 class="cy-churn_tile--perc mb-0">
-                                                            <t t-esc="state.churnData.waiting_perc"/>
-                                                            %
-                                                        </h2>
-                                                    </div>
-                                                </div>
-                                                <div class="cy-churn-tile__footer">
-                                                    <span class="cy-churn-tile__status cy-churn-tile__status--warn">
-                                                        <span class="cy-churn-tile__dot"/>
-                                                        <t t-esc="waitingCount"/> awaiting history
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 cy-churn_tile card-border-shadow gap-2 d-flex justify-content-center flex-column position-relative">
-                                        <button class="cy_kpi_icon cy_churn_orders_info cy_churn_info">
-                                            <i class="ri-question-line"/>
-                                        </button>
-                                        <div class="cy_churn_info_content orders_explanation churn_explain">
-                                            <p class="mb-0">Confirmed sale orders placed by the analysed customers over the selected period.</p>
-                                        </div>
-                                        <div class="position-relative d-flex justify-content-between h-100 align-items-center overflow-hidden">
-                                            <div class="churn-card-inner-container make-z-index">
-                                                <div class="d-flex gap-2 align-items-center">
-                                                    <div class="cy-churn_tile--icon cy-churn_tile-orders">
-                                                        <i class="churn-app-icon ri-shopping-bag-3-line"/>
-                                                    </div>
-                                                    <div class="d-flex flex-column">
-                                                        <p class="cy-churn_tile-text responsive-18px-font mb-0">Total Sale Orders</p>
-                                                        <h2 class="cy-churn_tile--perc mb-0">
-                                                            <t t-esc="formatNumber(totalOrders)"/>
-                                                        </h2>
-                                                    </div>
-                                                </div>
-                                                <div class="cy-churn-tile__footer">
-                                                    <span class="cy-churn-tile__status cy-churn-tile__status--ok">
-                                                        <span class="cy-churn-tile__dot"/>
-                                                        across <t t-esc="state.churnData.active_cust"/> customers
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <span class="cy-churn-kpi__pill cy-churn-kpi__pill--ok">
+                                            <i class="ri-arrow-right-up-line"/>
+                                            across <t t-esc="state.churnData.active_cust"/> customers
+                                        </span>
                                     </div>
                                 </div>
                             </div>
+                            <!-- ── Overall Churn donut card ── -->
                             <div class="col-lg-4 cy-churn-chart-col cy-churn-chart-col--main">
-                                <div class="churn-chart cy-button-stroke cy-churn-hover card-border-shadow mb-3 flex-column overflow-hidden">
-                                    <div class="cy-border-btm p-3">
-                                        <h2 class="cy-churn_tile-text responsive-18px-font">Overall Churn v/s Not Churn</h2>
+                                <div class="cy-churn-overall card-border-shadow">
+                                    <div class="cy-churn-overall__head d-flex justify-content-between align-items-start">
+                                        <h2 class="cy-churn-overall__title">Overall Churn v/s Not Churn</h2>
+                                        <button type="button" class="cy-churn-overall__download" t-on-click="exportPDF" title="Download PDF">
+                                            <i class="ri-download-2-line"/>
+                                        </button>
                                     </div>
-                                    <div class="d-flex align-items-center justify-content-center p-3">
-                                        <div class="cy-churn_graph churn_prediction-graph_img">
-                                            <GraphTile t-if="state.generate"
-                                                       value="state.churnChart"
-                                                       style="chartStyle"/>
+                                    <div t-if="state.generate" class="cy-churn-overall__panel">
+                                        <div class="cy-churn-donut-wrap position-relative">
+                                            <div class="cy-churn-donut" t-ref="donutChart"/>
+                                            <div class="cy-churn-donut-center">
+                                                <span class="cy-churn-donut-center__label">Analyzed</span>
+                                                <span class="cy-churn-donut-center__value"><t t-esc="formatNumber(state.churnData.active_cust)"/></span>
+                                            </div>
+                                        </div>
+                                        <div class="cy-churn-donut-legend">
+                                            <div class="row g-0">
+                                                <t t-foreach="churnSegments" t-as="seg" t-key="seg.key">
+                                                    <div class="col-4 cy-churn-legend-cell">
+                                                        <div class="cy-churn-legend-label">
+                                                            <span class="cy-churn-legend-dot" t-attf-style="background: {{seg.color}};"/>
+                                                            <span t-esc="seg.label"/>
+                                                        </div>
+                                                        <div class="cy-churn-legend-perc"><t t-esc="seg.perc"/>%</div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                            <div class="row g-0 cy-churn-legend-counts">
+                                                <t t-foreach="churnSegments" t-as="seg" t-key="seg.key">
+                                                    <div class="col-4"><t t-esc="seg.count"/> customers</div>
+                                                </t>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -411,130 +349,127 @@
                         <div class="col-lg-12 d-flex flex-wrap mb-4 tile-div justify-content-center">
                             <div class="col-lg-12 cy-churn-table-col">
                                 <div class="cy-churn_table--container h-100 card-border-shadow">
-                                <div class="cy-churn_tabl-header__section d-flex justify-content-between align-items-center p-3 cy-border-btm">
-                                    <h2 class="cy-churn_tile-text responsive-18px-font">
-                                        Churn Table
-                                    </h2>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <form class="d-flex">
-                                            <div class="partner-search-container d-flex align-items-center px-2 cy-churn-cust-panel">
-                                                <i class="ri-search-line cy-icons"/>
-                                                <input class="form-control cy-churn_cust-search-bar"
-                                                       type="text"
-                                                       placeholder="Search customers..."
-                                                       aria-label="Search"
-                                                       t-on-input="(event) => this.onInputCustomer(event.target.value)"/>
+                                    <div class="cy-churn_tabl-header__section d-flex justify-content-between align-items-center p-3 cy-border-btm">
+                                        <h2 class="cy-churn_tile-text responsive-18px-font">
+                                            Churn Table
+                                        </h2>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <form class="d-flex">
+                                                <div class="partner-search-container d-flex align-items-center px-3 cy-churn-cust-panel">
+                                                    <i class="ri-search-line cy-icons"/>
+                                                    <input class="form-control cy-churn_cust-search-bar"
+                                                           type="text"
+                                                           placeholder="Search customers..."
+                                                           aria-label="Search"
+                                                           t-on-input="(event) => this.onInputCustomer(event.target.value)"/>
+                                                </div>
+                                            </form>
+                                            <span class="cy-churn-page-label"><t t-esc="pageLabel"/></span>
+                                            <div class="d-flex gap-2">
+                                                <button class="cy-churn-nav_btn cy-churn-pager"
+                                                        t-att-disabled="!hasPrev"
+                                                        t-att-class="{'cy-churn-pager--disabled': !hasPrev}"
+                                                        t-on-click="() => this.onClick(-1)">
+                                                    <i class="ri-arrow-left-line"/>
+                                                </button>
+                                                <button class="cy-churn-nav_btn cy-churn-pager"
+                                                        t-att-disabled="!hasNext"
+                                                        t-att-class="{'cy-churn-pager--disabled': !hasNext}"
+                                                        t-on-click="() => this.onClick(1)">
+                                                    <i class="ri-arrow-right-line cy-icon"/>
+                                                </button>
                                             </div>
-                                        </form>
-                                        <div class="d-flex">
-                                            <button class="cy-churn-nav_btn cy-churn-pager"
-                                                    t-att-disabled="!hasPrev"
-                                                    t-att-class="{'cy-churn-pager--disabled': !hasPrev}"
-                                                    t-on-click="() => this.onClick(-1)">
-                                                <i class="ri-arrow-left-line"/>
-                                            </button>
-
-                                            <button class="cy-churn-nav_btn cy-churn-pager"
-                                                    t-att-disabled="!hasNext"
-                                                    t-att-class="{'cy-churn-pager--disabled': !hasNext}"
-                                                    t-on-click="() => this.onClick(1)">
-                                                <i class="ri-arrow-right-line cy-icon"/>
-                                            </button>
                                         </div>
                                     </div>
-                                </div>
                                     <div class="cy-churn_table" t-on-pointerdown="onTablePointerDown">
-                                    <table class="cy-listView-table ch-churn_predict--table">
-                                        <thead class="text-center cy-listview-head cy-churn-prdt_thead">
-                                            <tr>
-                                                <th class="w-100px">Sl.No</th>
-                                                <th>Customer </th>
-                                                <th>Last Purchase Date</th>
-                                                <th><t t-esc="churnLabel('total_sale_orders')"/></th>
-                                                <th>Total Amount</th>
-                                                <th>Description</th>
-                                                <th class="text-start">Churn</th>
-                                                <th class="text-start cy-col-risk">Risk Percentage</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-if="state.churnData.cust_wise_details">
-                                                <t t-foreach="state.arr"
-                                                   t-as="cust"
-                                                   t-key="cust_index">
-                                                    <tr t-on-click="() => this.onClickCustomerDetails(cust)"
-                                                        t-if="cust?.custName"
-                                                        t-att-class="state.selectedCustomerId === cust.custId
-                                                                         ? 'churn-selected-customer'
-                                                                         : 'cursor-pointer'">
-                                                        <td class="text-center">
-                                                            <t t-esc="cust.index"/>
-                                                        </td>
-                                                        <td class="d-flex align-items-center gap-2">
-                                                            <img class="cy-ps_profile"
-                                                                 t-attf-src="/web/image/res.partner/{{cust.custId}}/image_1920"
-                                                                 alt="Card image cap"/>
-                                                            <span class="d-inline-block text-truncate cy-churn-name-cell"
-                                                                  t-att-title="cust.custName">
-                                                                <t t-esc="cust.custName"/>
-                                                            </span>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <t t-esc="cust.last_purchase_date"/>
-                                                        </td>
-                                                        <td class="text-center align-middle">
-                                                            <div class="d-flex align-items-center justify-content-center gap-2">
-                                                                <span><t t-esc="cust.total_sales"/></span>
-                                                                <div class="cy_sale_redirect">
-                                                                    <a href="#"
-                                                                       t-on-click.stop.prevent="() => this.onClickFrequency(cust)">
-                                                                        <i class="ri-arrow-right-circle-fill cy-icons"/>
-                                                                    </a>
+                                        <table class="cy-listView-table ch-churn_predict--table">
+                                            <thead class="cy-listview-head cy-churn-prdt_thead">
+                                                <tr>
+                                                    <th class="w-100px text-center">Sl.No</th>
+                                                    <th>Customer</th>
+                                                    <th>Last Purchase</th>
+                                                    <th><t t-esc="churnLabel('total_sale_orders')"/></th>
+                                                    <th>Total Amount</th>
+                                                    <th>Description</th>
+                                                    <th class="text-start">Churn</th>
+                                                    <th class="text-start cy-col-risk">Risk</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-if="state.churnData.cust_wise_details">
+                                                    <t t-foreach="state.arr"
+                                                       t-as="cust"
+                                                       t-key="cust_index">
+                                                        <tr t-on-click="() => this.onClickCustomerDetails(cust)"
+                                                            t-if="cust?.custName"
+                                                            t-att-class="state.selectedCustomerId === cust.custId
+                                                                             ? 'churn-selected-customer'
+                                                                             : 'cursor-pointer'">
+                                                            <td class="text-center">
+                                                                <t t-esc="cust.index"/>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <span t-attf-class="cy-churn-avatar cy-churn-avatar--{{cust_index % 3}}">
+                                                                        <t t-esc="custInitials(cust)"/>
+                                                                        <!-- Photo from the partner record; the initials above show
+                                                                             through if the image cannot be loaded. -->
+                                                                        <img class="cy-churn-avatar-img"
+                                                                             t-att-src="'/web/image/res.partner/' + cust.custId + '/image_128'"
+                                                                             t-att-alt="cust.custName"
+                                                                             t-on-error="(ev) => ev.target.classList.add('cy-churn-avatar-img--broken')"/>
+                                                                    </span>
+                                                                    <span class="d-inline-block text-truncate cy-churn-name-cell"
+                                                                          t-att-title="cust.custName">
+                                                                        <t t-esc="cust.custName"/>
+                                                                    </span>
                                                                 </div>
-                                                            </div>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <t t-esc="cust.total_amount"/>
-                                                        </td>
-                                                        <!-- SHAP Description -->
-                                                        <td class="text-start">
-                                                            <span t-esc="cust.shap_explanation" class="text-muted d-inline-block text-truncate cy-churn-desc-cell" t-att-title="cust.shap_explanation"/>
-                                                        </td>
-                                                        <!-- Churn Status -->
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                    <span t-if="cust.Churn == 'No'"
-                                                                          class="cy-churn__success me-1"/>
-                                                                    <span t-if="cust.Churn == 'Yes'"
-                                                                          class="cy-churn__success cy-churn__failed me-1"/>
-                                                                    <span t-if="cust.Churn == 'Waiting'"
-                                                                          class="cy-churn__success cy-churn__waiting me-1"/>
-                                                            <span><t t-esc="churnLabel(cust.Churn)"/></span>
-                                                            </div>
-                                                        </td>
-                                                        <!-- Risk Percentage -->
-                                                        <td class="cy-col-risk">
-                                                            <div class="d-flex align-items-center gap-2">
-                                                                <div class="progress cy-risk-progress"
-                                                                     role="progressbar"
-                                                                     t-att-aria-valuenow="riskPercent(cust)"
-                                                                     aria-valuemin="0" aria-valuemax="100">
-                                                                    <div class="progress-bar"
-                                                                         t-attf-style="width: {{riskPercent(cust)}}%"/>
+                                                            </td>
+                                                            <td>
+                                                                <t t-esc="cust.last_purchase_date"/>
+                                                            </td>
+                                                            <td>
+                                                                <a href="#" class="cy-churn-orders-chip"
+                                                                   t-on-click.stop.prevent="() => this.onClickFrequency(cust)"
+                                                                   t-att-title="churnLabel('total_sale_orders') + ': ' + cust.total_sales">
+                                                                    <t t-esc="cust.total_sales"/>
+                                                                    <i class="ri-arrow-right-s-line"/>
+                                                                </a>
+                                                            </td>
+                                                            <td class="cy-churn-amount">
+                                                                <t t-esc="formatMoney(cust.total_amount)"/>
+                                                            </td>
+                                                            <!-- SHAP Description -->
+                                                            <td class="text-start">
+                                                                <span t-esc="cust.shap_explanation" class="text-muted d-inline-block text-truncate cy-churn-desc-cell" t-att-title="cust.shap_explanation"/>
+                                                            </td>
+                                                            <!-- Churn Status -->
+                                                            <td class="text-start">
+                                                                <span t-attf-class="cy-churn-status-pill cy-churn-status-pill--{{cust.Churn === 'Yes' ? 'risk' : (cust.Churn === 'Waiting' ? 'waiting' : 'ok')}}"
+                                                                      t-att-title="cust.Churn === 'Yes' ? 'Predicted to churn' : (cust.Churn === 'Waiting' ? 'Not enough history yet' : 'Predicted to stay')">
+                                                                    <t t-esc="churnLabel(cust.Churn)"/>
+                                                                </span>
+                                                            </td>
+                                                            <!-- Risk Percentage -->
+                                                            <td class="cy-col-risk">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <div class="progress cy-risk-progress"
+                                                                         role="progressbar"
+                                                                         t-att-aria-valuenow="riskPercent(cust)"
+                                                                         aria-valuemin="0" aria-valuemax="100">
+                                                                        <div class="progress-bar"
+                                                                             t-attf-style="width: {{riskPercent(cust)}}%"/>
+                                                                    </div>
+                                                                    <span class="cy-risk-value fw-semibold"><t t-esc="riskPercent(cust)"/>%</span>
                                                                 </div>
-                                                                <span class="cy-risk-value fw-semibold"><t t-esc="riskPercent(cust)"/> %</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
                                                 </t>
-                                            </t>
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                                <div class="cy-churn-table__footer d-flex justify-content-between align-items-center">
-                                    <span class="cy-churn-table__count"><t t-esc="showingLabel"/></span>
-                                </div>
-                            </div>
                             </div>
                         </div>
                     </div>

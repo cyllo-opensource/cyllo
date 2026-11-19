@@ -1,8 +1,7 @@
 /** @odoo-module **/
 import { registry } from "@web/core/registry";
-import { Component, useState, onWillStart, onMounted, useRef } from '@odoo/owl';
+import { Component, useState, onWillStart, onMounted, onWillUnmount, useRef, useEffect } from '@odoo/owl';
 import { useService } from "@web/core/utils/hooks";
-import { GraphTile } from "@cyllo_analytics/js/presentation/components/graph_tile";
 import { _t } from "@web/core/l10n/translation";
 import { useSaveContext } from "@cyllo_analytics/js/useSaveContext";
 import { download } from "@web/core/network/download";
@@ -30,6 +29,7 @@ export class ChurnPredictionDashboard extends Component {
         this.period = useRef("period")
         this.periodType = useRef("period_type")
         this.input = useRef("input")
+        this.donutRef = useRef("donutChart")
         this.actionService = useService("action")
 
         // Monotonic token used to cancel/supersede an in-flight training run.
@@ -108,8 +108,32 @@ export class ChurnPredictionDashboard extends Component {
         // Heavy work runs AFTER the first paint: the shell + a loading spinner show
         // instantly, then the churn data streams in.
         onMounted(async () => {
+            this._donutResizeHandler = () => {
+                if (this._donutChart && !this._donutChart.isDisposed()) {
+                    this._donutChart.resize();
+                }
+            };
+            window.addEventListener('resize', this._donutResizeHandler);
             await this.restoreOrTrain();
         })
+
+        onWillUnmount(() => {
+            clearTimeout(this._donutRetry);
+            if (this._donutResizeHandler) {
+                window.removeEventListener('resize', this._donutResizeHandler);
+            }
+            if (this._donutChart && !this._donutChart.isDisposed()) {
+                this._donutChart.dispose();
+            }
+            this._donutChart = null;
+        })
+
+        // (Re)draw the overall-churn donut whenever new churn data is applied.
+        useEffect(() => {
+            if (this.state.generate) {
+                this._renderChurnDonut();
+            }
+        }, () => [this.state.generate, this.state.churnData]);
     }
 
     // Open behaviour, mirroring Sales Forecasting: first try to restore a
@@ -163,7 +187,7 @@ export class ChurnPredictionDashboard extends Component {
             await this.renderChurnData(force, token);
         } catch (e) {
             // A user-initiated Cancel aborts the request on purpose — that is not
-            // an error, so don't log it or let it bubble to Odoo's error handler.
+            // an error, so don't log it or let it bubble to Cyllo's error handler.
             if (!(e instanceof ConnectionAbortedError)) {
                 console.error(e);
             }
@@ -354,7 +378,7 @@ export class ChurnPredictionDashboard extends Component {
     }
 
     async exportPDF() {
-        var head = this.root.el?.querySelector('.churn_prediction-graph_img')
+        var head = this.root.el?.querySelector('.cy-churn-overall__panel')
         if (head) {
             var canvas = await html2canvas(head)
             head = canvas.toDataURL('image/png');
@@ -410,6 +434,91 @@ export class ChurnPredictionDashboard extends Component {
     get totalOrders() {
         const rows = this.state.churnData?.cust_wise_details || [];
         return rows.reduce((sum, c) => sum + (parseFloat(c.total_sales) || 0), 0);
+    }
+
+    // ---------------------------------------------------------------------
+    // Overall-churn donut. Rendered directly with the global echarts (the
+    // same global GraphTile uses) so the ring, the centred "Analyzed" label
+    // and the custom legend below can be styled freely — the shared
+    // GraphTile always paints its own built-in legend, which this design
+    // replaces with one that also shows customer counts.
+    // ---------------------------------------------------------------------
+
+    /** Donut segments: translated label, percentage and per-group row counts. */
+    get churnSegments() {
+        const rows = this.state.churnData?.cust_wise_details || [];
+        const countOf = (ch) => rows.filter((r) => r.Churn === ch).length;
+        return [
+            { key: 'at_risk', color: '#e2574c', label: this.churnLabel('at_risk'),
+              perc: Math.round(parseFloat(this.state.churnData?.churn_perc) || 0), count: countOf('Yes') },
+            { key: 'waiting', color: '#d9b901', label: this.churnLabel('waiting'),
+              perc: Math.round(parseFloat(this.state.churnData?.waiting_perc) || 0), count: countOf('Waiting') },
+            { key: 'loyal', color: '#8a9a00', label: this.churnLabel('loyal'),
+              perc: Math.round(parseFloat(this.state.churnData?.not_churn_perc) || 0), count: countOf('No') },
+        ];
+    }
+
+    /** "1 / 3" page indicator shown next to the table pager. */
+    get pageLabel() {
+        const size = this.state.min || 6;
+        const pages = Math.max(1, Math.ceil((this.state.count || 0) / size));
+        const page = Math.min(pages, Math.floor(this.state.offset / size) + 1);
+        return `${page} / ${pages}`;
+    }
+
+    /** Round initials avatar (e.g. "Phoenix Innovations" -> "PI"). */
+    custInitials(cust) {
+        const words = String(cust?.custName || '').trim().split(/\s+/).filter(Boolean);
+        if (!words.length) return '?';
+        const first = words[0][0] || '';
+        const second = words.length > 1 ? (words[words.length - 1][0] || '') : (words[0][1] || '');
+        return (first + second).toUpperCase();
+    }
+
+    /** "$ 36,828" — thousand separators, decimals only when they exist. */
+    formatMoney(value) {
+        const n = parseFloat(value) || 0;
+        return '$ ' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    _renderChurnDonut() {
+        if (!this.state.generate) return;
+        const el = this.donutRef.el;
+        if (!el || !el.isConnected) return;
+        if (!window.echarts) {
+            // The CDN chart script may not have finished loading yet.
+            clearTimeout(this._donutRetry);
+            this._donutRetry = setTimeout(() => this._renderChurnDonut(), 400);
+            return;
+        }
+        if (!this._donutChart || this._donutChart.isDisposed() || this._donutChart.getDom() !== el) {
+            if (this._donutChart && !this._donutChart.isDisposed()) {
+                this._donutChart.dispose();
+            }
+            // Odoo's bundled echarts registers only the SVG renderer — a
+            // canvas init succeeds but renders nothing.
+            this._donutChart = window.echarts.init(el, null, { renderer: 'svg' });
+        }
+        const segs = this.churnSegments.filter((s) => s.perc > 0);
+        this._donutChart.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: (p) => `${p.name}: <b>${p.value}%</b>`,
+            },
+            series: [{
+                // NOTE: echarts has no 'doughnut' series type — a donut is a
+                // pie with a two-value radius [inner, outer].
+                type: 'pie',
+                radius: ['62%', '88%'],
+                center: ['50%', '50%'],
+                avoidLabelOverlap: false,
+                label: { show: false },
+                labelLine: { show: false },
+                emphasis: { scaleSize: 4 },
+                data: segs.map((s) => ({ name: s.label, value: s.perc, itemStyle: { color: s.color } })),
+            }],
+        }, true);
+        this._donutChart.resize();
     }
 
     /** Churn probability of a customer, 0-100, as shown by the risk bar. */
@@ -490,10 +599,10 @@ export class ChurnPredictionDashboard extends Component {
             if (perc < 20) return { text: _t("Healthy"), tone: "ok" };
             return { text: _t("Needs attention"), tone: "warn" };
         }
-        if (!values) return { text: _t("No change"), tone: "ok" };
+        if (!values) return { text: _t("No change"), tone: "ok", muted: true };
         const last = values[values.length - 1], prev = values[values.length - 2];
         const diff = last - prev;
-        if (!diff) return { text: _t("No change"), tone: "ok" };
+        if (!diff) return { text: _t("No change"), tone: "ok", muted: true };
         const pct = prev ? Math.abs((diff / prev) * 100).toFixed(2) : 100;
         return {
             text: diff > 0 ? _t("%s% up on last period", pct)
@@ -503,17 +612,6 @@ export class ChurnPredictionDashboard extends Component {
         };
     }
 
-    get chartStyle() {
-        // ECharts sizes a pie off min(width, height), so the height is what
-        // decides how big this one is drawn. It is the card's whole height
-        // budget less the header and wrapper padding that churn_dashboard.css
-        // trims — see --cy-chart-h there before changing it, or the card
-        // overflows .churn-chart and is clipped by its overflow:hidden.
-        return {
-            height: `348px`,
-            width: `420px`,
-        }
-    }
     onClickCustomerDetails(cust) {
         return this.actionService.doAction({
             target: "current",
@@ -607,5 +705,5 @@ export class ChurnPredictionDashboard extends Component {
 }
 
 ChurnPredictionDashboard.template = "ChurnPredictionDashboard";
-ChurnPredictionDashboard.components = { GraphTile, FilterDropdown, Dropdown, DropdownItem }
+ChurnPredictionDashboard.components = { FilterDropdown, Dropdown, DropdownItem }
 registry.category("actions").add("churn_prediction", ChurnPredictionDashboard);

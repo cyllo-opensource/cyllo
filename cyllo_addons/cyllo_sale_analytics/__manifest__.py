@@ -52,6 +52,13 @@
     'assets': {
         'web.assets_backend': [
             'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
+            # Local Lottie player (lottie-web light) — used by the owl animation
+            # on the Sales Forecasting guidelines screen (no external lottie.host
+            # request: its /embed/ endpoint returns an empty page).
+            'cyllo_sale_analytics/static/lib/lottie/lottie_light.min.js',
+            # Animation data module — must be defined BEFORE sales_prediction.js
+            # imports it (@cyllo_sale_analytics/lottie/owl_forecast).
+            'cyllo_sale_analytics/static/src/lottie/owl_forecast.js',
             'cyllo_sale_analytics/static/src/css/style.css',
             'cyllo_sale_analytics/static/src/css/sales_forecast_news.css',
             # loaded after style.css so the churn overrides win on equal specificity
@@ -69,6 +76,7 @@
         ],
     },
     'images': [],
+    'pre_init_hook': 'pre_init_hook',
     'license': 'LGPL-3',
     'installable': True,
     'application': True,

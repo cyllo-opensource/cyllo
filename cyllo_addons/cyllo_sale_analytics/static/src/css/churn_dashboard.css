@@ -1,18 +1,14 @@
 /* =========================================================================
- * Churn Prediction dashboard styling.
+ * Churn Prediction dashboard styling — "soft cards" design.
  *
  * Every rule is scoped under .cy-churn-v2, a class that exists only on the
  * root of ChurnPredictionDashboard. The churn dashboard shares class names
- * (cy-churn_tile-text, cy-churn-main_head, card-border-shadow, ...) with
- * Demand Prediction, Sales Forecasting and Customer Details, so scoping is
- * what keeps this restyle from leaking into those screens.
+ * with Demand Prediction, Sales Forecasting and Customer Details, so scoping
+ * is what keeps this restyle from leaking into those screens.
  * ========================================================================= */
 
 /* ---------- palette ---------- */
 .cy-churn-v2 {
-    /* Fixed KPI tile height. The overall-churn card is sized from it with
-       calc(), so the two columns line up by construction instead of relying on
-       flex stretching (which is circular: the taller column wins). */
     /* One KPI grid row. The chart card is derived from it so the two columns
        line up: 3 rows + the 2 gaps between them. */
     --cy-tile-h: 124px;
@@ -26,6 +22,7 @@
     --cy-text-muted: #667085;
     --cy-row-border: #f1f3f5;
     --cy-head-bg: #f9fafb;
+    --cy-olive: #9ea700;
 }
 
 /* Title + "Based on ..." on the left, actions on the right. The header wraps,
@@ -61,13 +58,13 @@
     margin-left: 2px;
 }
 
-
 .cy-churn-v2 .cy-churn-actions .dropdown-filters-sale .filter_button {
     font-size: 14px;
 }
 
 /* =========================================================================
- * KPI row - four tiles across
+ * KPI cards — label top-left, big value + unit, neutral icon square
+ * top-right, and a small status pill underneath.
  * ========================================================================= */
 .cy-churn-v2 .cy-churn-kpi-row {
     padding: 0;
@@ -82,135 +79,104 @@
     margin: 0 0 var(--cy-grid-gap) 0;
 }
 
-.cy-churn-v2 .cy-churn_tile {
-    /* overrides the 50% two-up sizing from style.css */
-    width: 100% !important;
-    min-width: 0;
-    /* no fixed height: the card hugs its content */
-    height: auto !important;
-    min-height: 0 !important;
-    /* icon sits at the top-left rather than vertically centred */
-    justify-content: flex-start !important;
-    margin: 0 !important;
-    padding: 16px !important;
+.cy-churn-v2 .cy-churn-kpi {
     background: var(--cy-card-bg);
-    border: 1px solid var(--cy-card-border) !important;
-    border-radius: var(--cy-card-radius) !important;
+    border: 1px solid var(--cy-card-border);
+    border-radius: var(--cy-card-radius);
+    box-shadow: var(--cy-card-shadow);
+    height: var(--cy-tile-h);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    overflow: hidden;
     transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-/* the decorative illustrations are replaced by the icon tile */
-.cy-churn-v2 .churn-total-customer-container {
-    display: none !important;
+.cy-churn-v2 .cy-churn-kpi:hover {
+    box-shadow: 0 4px 14px rgba(16, 24, 40, 0.08);
 }
 
-.cy-churn-v2 .churn-card-inner-container {
-    width: 100%;
-    margin-bottom: 0 !important;
+.cy-churn-v2 .cy-churn-kpi__main {
+    min-width: 0;
 }
 
-/* ---------- icon tile ---------- */
-.cy-churn-v2 .cy-churn_tile--icon {
-    width: 58px;
-    height: 58px;
-    border-radius: 14px;
-    flex: 0 0 58px;
-    background-color: #e7f4ea !important;
-}
-
-.cy-churn-v2 .cy-churn_tile-activeChurn { background-color: #ebe9fe !important; }
-.cy-churn-v2 .cy-churn_tile-notChurn    { background-color: #fdeceb !important; }
-.cy-churn-v2 .cy-churn_tile-toChurn     { background-color: #e7f6ec !important; }
-.cy-churn-v2 .cy-churn_tile-waiting     { background-color: #fef3e2 !important; }
-.cy-churn-v2 .cy-churn_tile-orders      { background-color: #e6f1fd !important; }
-
-/* Remix icon glyphs, tinted per card (they inherit colour, unlike the old
-   solid-white SVG images they replaced) */
-.cy-churn-v2 .cy-churn_tile--icon .churn-app-icon {
-    width: auto;
-    font-size: 28px;
-    line-height: 1;
-    color: #3f9142;
-}
-
-.cy-churn-v2 .cy-churn_tile-activeChurn .churn-app-icon { color: #6b5cd6; }
-.cy-churn-v2 .cy-churn_tile-notChurn .churn-app-icon    { color: #e04a3f; }
-.cy-churn-v2 .cy-churn_tile-toChurn .churn-app-icon     { color: #3f9142; }
-.cy-churn-v2 .cy-churn_tile-waiting .churn-app-icon    { color: #d98324; }
-.cy-churn-v2 .cy-churn_tile-orders .churn-app-icon     { color: #2f6fd0; }
-
-/* ---------- tile typography ---------- */
-.cy-churn-v2 .cy-churn_tile .cy-churn_tile-text {
-    padding-left: 0 !important;
-    margin-bottom: 0;
+.cy-churn-v2 .cy-churn-kpi__label {
+    margin: 0 0 2px;
     color: var(--cy-text-muted);
-    font-size: 15px !important;
+    font-size: 13.5px;
     font-weight: 500;
     line-height: 1.3;
-}
-
-/* the value sits under the label inside the icon/label row */
-.cy-churn-v2 .cy-churn_tile--perc {
-    padding-left: 0 !important;
-    margin-top: 4px !important;
-    color: var(--cy-text-strong);
-    font-size: 30px;
-    font-weight: 700;
-    line-height: 1.1;
-}
-
-/* ---------- status caption + sparkline ---------- */
-.cy-churn-v2 .cy-churn-tile__footer {
-    margin-top: 10px;
-}
-
-.cy-churn-v2 .cy-churn-tile__status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--cy-text-muted);
-    font-size: 13px;
-    font-weight: 500;
     white-space: nowrap;
 }
 
-.cy-churn-v2 .cy-churn-tile__dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #12b76a;
+.cy-churn-v2 .cy-churn-kpi__value {
+    color: var(--cy-text-strong);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.cy-churn-v2 .cy-churn-tile__status--warn .cy-churn-tile__dot {
-    background: #f79009;
+.cy-churn-v2 .cy-churn-kpi__unit {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cy-text-muted);
+    margin-left: 6px;
 }
 
-.cy-churn-v2 .cy-churn-tile__status--ok i {
-    color: #12b76a;
+/* neutral icon square in the top-right corner of every card */
+.cy-churn-v2 .cy-churn-kpi__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #f4f5f4;
+    color: #4b5563;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    flex: 0 0 44px;
 }
 
-.cy-churn-v2 .cy-churn-tile__status--warn i {
-    color: #f79009;
+/* status pill under the value */
+.cy-churn-v2 .cy-churn-kpi__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    align-self: flex-start;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* the help bubble sits in the corner instead of overlapping the value */
-.cy-churn-v2 .cy-churn_tile .cy_kpi_icon {
-    top: 12px;
-    right: 12px;
-    color: #98a2b3;
+.cy-churn-v2 .cy-churn-kpi__pill--ok {
+    background: #eef2d8;
+    color: #5f6900;
+}
+
+.cy-churn-v2 .cy-churn-kpi__pill--muted {
+    background: #f2f4f7;
+    color: #667085;
+}
+
+.cy-churn-v2 .cy-churn-kpi__pill--warn {
+    background: #fef3e2;
+    color: #b25e09;
 }
 
 /* =========================================================================
- * Cards shared by the table and the two charts
+ * Overall churn card — beige panel with a donut ring, centred "Analyzed"
+ * label and a custom legend with counts.
  * ========================================================================= */
-.cy-churn-v2 .cy-churn_table--container,
-.cy-churn-v2 .churn-chart {
-    background: var(--cy-card-bg);
-    border: 1px solid var(--cy-card-border) !important;
-    border-radius: var(--cy-card-radius) !important;
-    box-shadow: var(--cy-card-shadow) !important;
-}
-
 .cy-churn-v2 .cy-churn-table-col {
     padding: 0;
     margin-bottom: 16px;
@@ -225,50 +191,170 @@
     min-width: 0;
 }
 
-.cy-churn-v2 .cy-churn-chart-col .churn-chart {
-    height: 100%;
-    margin-bottom: 0 !important;
-}
-
-/* The KPI cards now hug their content, so the chart keeps its own definite
-   height (header 52 + wrapper padding 28 + GraphTile card 380). It must fit
-   inside the column, or .churn-chart's overflow:hidden clips it out of sight. */
 .cy-churn-v2 .cy-churn-chart-col--main {
     padding-left: var(--cy-grid-gap);
     margin-bottom: var(--cy-grid-gap);
 }
 
-.cy-churn-v2 .cy-churn-chart-col--main .churn-chart {
+.cy-churn-v2 .cy-churn-overall {
+    background: var(--cy-card-bg);
+    border: 1px solid var(--cy-card-border) !important;
+    border-radius: var(--cy-card-radius) !important;
+    box-shadow: var(--cy-card-shadow) !important;
     height: var(--cy-chart-h);
-    width: 100%;
-    margin-bottom: 0 !important;
-}
-
-.cy-churn-v2 .cy-churn-chart-col--main .churn-chart > .d-flex.align-items-center.justify-content-center {
-    padding: 4px 12px 8px !important;
-}
-.cy-churn-v2 .cy-churn-chart-col--main .churn-chart > .cy-border-btm {
-    padding: 10px 16px !important;
-}
-
-.cy-churn-v2 .cy-churn-chart-col--main .cy-churn_graph {
-    width: 100%;
-    max-width: 100%;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
 }
 
-.cy-churn-v2 .cy-churn-chart-col--main .cy_dashboard_chart {
-    max-width: 100%;
-    margin: 0 auto !important;
-    border: 0 !important;
-    box-shadow: none !important;
-}
-.cy-churn-v2 .churn-chart .cy-border-btm,
-.cy-churn-v2 .cy-churn_tabl-header__section {
-    border-bottom: 1px solid var(--cy-row-border) !important;
+.cy-churn-v2 .cy-churn-overall__title {
+    margin: 0;
+    color: var(--cy-text-strong);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
 }
 
-.cy-churn-v2 .churn-chart .cy-churn_tile-text,
+.cy-churn-v2 .cy-churn-overall__download {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--cy-card-border);
+    background: var(--cy-card-bg);
+    color: #667085;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.cy-churn-v2 .cy-churn-overall__download:hover {
+    background: var(--cy-head-bg);
+    color: var(--cy-text-strong);
+}
+
+.cy-churn-v2 .cy-churn-overall__panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    background: #f6f7ef;
+    border-radius: 12px;
+    padding: 6px 12px 10px;
+}
+
+.cy-churn-v2 .cy-churn-donut-wrap {
+    flex: 1;
+    min-height: 0;
+}
+
+.cy-churn-v2 .cy-churn-donut {
+    width: 100%;
+    height: 100%;
+    min-height: 170px;
+}
+
+.cy-churn-v2 .cy-churn-donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.cy-churn-v2 .cy-churn-donut-center__label {
+    color: #98a2b3;
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+.cy-churn-v2 .cy-churn-donut-center__value {
+    color: var(--cy-text-strong);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+/* custom legend under the donut */
+.cy-churn-v2 .cy-churn-donut-legend {
+    border-top: 1px solid #e7e8df;
+    padding-top: 8px;
+    flex: 0 0 auto;
+}
+
+.cy-churn-v2 .cy-churn-legend-cell {
+    padding: 0 6px;
+    text-align: center;
+}
+
+.cy-churn-v2 .cy-churn-legend-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #344054;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cy-churn-v2 .cy-churn-legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    flex: 0 0 9px;
+}
+
+.cy-churn-v2 .cy-churn-legend-perc {
+    color: var(--cy-text-strong);
+    font-size: 14px;
+    font-weight: 700;
+    margin: 2px 0 0;
+    text-align: center;
+}
+
+.cy-churn-v2 .cy-churn-legend-counts {
+    border-top: 1px solid #e7e8df;
+    margin-top: 8px;
+    padding-top: 8px;
+    color: var(--cy-text-muted);
+    font-size: 12.5px;
+    text-align: center;
+}
+
+.cy-churn-v2 .cy-churn-legend-counts > div {
+    padding: 0 6px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* =========================================================================
+ * Churn table — plain muted header + rows rendered as separate rounded
+ * cards on a very light background.
+ * ========================================================================= */
+.cy-churn-v2 .cy-churn_table--container {
+    background: var(--cy-card-bg);
+    border: 1px solid var(--cy-card-border) !important;
+    border-radius: var(--cy-card-radius) !important;
+    box-shadow: var(--cy-card-shadow) !important;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.cy-churn-v2 .cy-churn_tabl-header__section {
+    background: transparent;
+    border-bottom: 0 !important;
+    border-radius: var(--cy-card-radius) var(--cy-card-radius) 0 0;
+    padding: 18px 20px 14px !important;
+}
+
 .cy-churn-v2 .cy-churn_tabl-header__section .cy-churn_tile-text {
     margin-bottom: 0;
     color: var(--cy-text-strong);
@@ -276,16 +362,18 @@
     font-weight: 600;
 }
 
-.cy-churn-v2 .cy-churn_tabl-header__section {
-    background: transparent;
-    border-radius: var(--cy-card-radius) var(--cy-card-radius) 0 0;
-    padding: 18px 20px !important;
+/* page indicator "1 / 3" between the search and the arrows */
+.cy-churn-v2 .cy-churn-page-label {
+    color: var(--cy-text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .cy-churn-v2 .partner-search-container {
     background: var(--cy-card-bg);
     border: 1px solid var(--cy-card-border);
-    border-radius: 8px;
+    border-radius: 999px;
     height: 38px;
     min-width: 260px;
 }
@@ -312,11 +400,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-left: 8px;
     padding: 0;
     background: var(--cy-card-bg);
     border: 1px solid var(--cy-card-border);
-    border-radius: 8px;
+    border-radius: 50%;
     color: var(--cy-text-strong);
 }
 
@@ -329,24 +416,43 @@
     opacity: 0.4;
 }
 
-.cy-churn-v2 .cy-churn_table--container {
-    overflow: hidden;
-    min-width: 0;
-}
-
 .cy-churn-v2 .cy-churn_table {
+    /* inset light panel that holds the flat rows (Time-Off list style) */
     overflow-x: auto;
     overflow-y: visible;
     min-height: 300px;
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* legacy Edge */
-    cursor: grab;
+    background: #f8f8f2;
+    border-radius: 10px;
+    margin: 0 16px 16px;
+    /* global style.css forces width:100% on .cy-churn_table, which with the
+       side margins would overflow the card by 32px */
+    width: auto !important;
+    /* no left padding: the sticky column pins at left:0, and any padding there
+       would leave a strip where the scrolled columns remain visible */
+    padding: 0 14px 8px 0;
+    /* a real, always-visible horizontal scrollbar (drag-to-pan still works) */
+    scrollbar-width: thin;                     /* Firefox */
+    scrollbar-color: #b4b87a #ececdf;          /* Firefox: thumb, track */
+    cursor: default;
 }
 
 .cy-churn-v2 .cy-churn_table::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
+    height: 8px;
+    display: block;
+}
+
+.cy-churn-v2 .cy-churn_table::-webkit-scrollbar-track {
+    background: #ececdf;
+    border-radius: 999px;
+}
+
+.cy-churn-v2 .cy-churn_table::-webkit-scrollbar-thumb {
+    background: #b4b87a;
+    border-radius: 999px;
+}
+
+.cy-churn-v2 .cy-churn_table::-webkit-scrollbar-thumb:hover {
+    background: var(--cy-olive);
 }
 
 .cy-churn-v2 .cy-churn_table--dragging {
@@ -354,95 +460,25 @@
     user-select: none;
 }
 
-/* --- frozen columns: Sl.No + Customer on the left, Risk on the right ------ */
-.cy-churn-v2 .ch-churn_predict--table th:nth-child(1),
-.cy-churn-v2 .ch-churn_predict--table td:nth-child(1) {
-    position: sticky;
-    left: 0;
-    z-index: 3;
-    background: inherit;
-}
-
-.cy-churn-v2 .ch-churn_predict--table th:nth-child(2),
-.cy-churn-v2 .ch-churn_predict--table td:nth-child(2) {
-    position: sticky;
-    left: 90px;
-    z-index: 3;
-    background: inherit;
-    box-shadow: 1px 0 0 var(--cy-row-border);
-}
-
-.cy-churn-v2 .ch-churn_predict--table th.cy-col-risk,
-.cy-churn-v2 .ch-churn_predict--table td.cy-col-risk {
-    position: sticky;
-    right: 0;
-    z-index: 3;
-    background: inherit;
-    box-shadow: -1px 0 0 var(--cy-row-border);
-}
-
-/* sticky cells inherit `background: inherit`, so the row must carry a colour
-   or the scrolling columns would show through */
-.cy-churn-v2 .ch-churn_predict--table tbody tr {
-    background: var(--cy-card-bg);
-}
-
-.cy-churn-v2 .ch-churn_predict--table tbody tr:hover {
-    background: #fafbfc;
-}
-
-.cy-churn-v2 .ch-churn_predict--table thead tr {
-    background: var(--cy-head-bg);
-}
-
-.cy-churn-v2 .ch-churn_predict--table th:nth-child(1),
-.cy-churn-v2 .ch-churn_predict--table th:nth-child(2),
-.cy-churn-v2 .ch-churn_predict--table th.cy-col-risk {
-    z-index: 4;
-}
-
-/* --- risk percentage: Bootstrap .progress, resized ----------------------- */
-.cy-churn-v2 .cy-risk-progress {
-    width: 96px;
-    height: 6px;
-    background-color: #eceef1;
-}
-
-.cy-churn-v2 .cy-risk-progress .progress-bar {
-    background-color: #ef4444;
-}
-
-.cy-churn-v2 .cy-risk-value {
-    min-width: 44px;
-    color: var(--cy-text-strong);
-    font-size: 13px;
-    text-align: right;
-}
-
-/* --- table footer --------------------------------------------------------- */
-.cy-churn-v2 .cy-churn-table__footer {
-    padding: 16px 20px;
-    border-top: 1px solid var(--cy-row-border);
-}
-
-.cy-churn-v2 .cy-churn-table__count {
-    color: var(--cy-text-muted);
-    font-size: 13px;
-}
 .cy-churn-v2 .ch-churn_predict--table {
     width: 100%;
     /* Without a min-width the table shrinks to the container and the columns
        just squeeze, so the horizontal scroll never engages. This makes the
        middle columns overflow and become pannable instead. */
     min-width: 1080px;
-    border-collapse: collapse;
+    /* flat rows, but NOT border-collapse: collapse — Chrome paints collapsed
+       borders/backgrounds at table level, which makes the sticky columns lose
+       their background and lets the scrolled columns show through them. */
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
-/* the frozen left columns need known widths for the sticky offsets to line up */
+/* --- column widths --------------------------------------------------------- */
+/* No frozen columns: Sl.No / Customer scroll with the rest of the table. */
 .cy-churn-v2 .ch-churn_predict--table th:nth-child(1),
 .cy-churn-v2 .ch-churn_predict--table td:nth-child(1) {
-    width: 90px;
-    min-width: 90px;
+    width: 80px;
+    min-width: 80px;
 }
 
 .cy-churn-v2 .ch-churn_predict--table th:nth-child(2),
@@ -453,40 +489,61 @@
 
 .cy-churn-v2 .ch-churn_predict--table th.cy-col-risk,
 .cy-churn-v2 .ch-churn_predict--table td.cy-col-risk {
-    width: 180px;
-    min-width: 180px;
+    /* 110px bar + 8px gap + value + 20px right padding must fit inside */
+    width: 190px;
+    min-width: 190px;
 }
 
-/* the scrolling middle columns keep their content on one line */
-.cy-churn-v2 .ch-churn_predict--table td:nth-child(n+3):not(.cy-col-risk),
-.cy-churn-v2 .ch-churn_predict--table th:nth-child(n+3):not(.cy-col-risk) {
-    white-space: nowrap;
+/* the risk value is the last thing in the table — never let it overflow the
+   cell (it used to spill past the scrollable edge and get cut) */
+.cy-churn-v2 .ch-churn_predict--table td.cy-col-risk {
+    padding-right: 20px !important;
+}
+
+/* --- header row: muted labels with a thin divider underneath -------------- */
+.cy-churn-v2 .ch-churn_predict--table thead tr {
+    background: #f8f8f2;
 }
 
 .cy-churn-v2 .cy-churn-prdt_thead th {
-    padding: 12px 16px;
-    background: var(--cy-head-bg);
-    border-bottom: 1px solid var(--cy-row-border);
-    color: var(--cy-text-muted);
+    padding: 12px 16px !important;
+    background: transparent !important;
+    border-bottom: 1px solid #e5e5df !important;
+    color: #6b7280;
     font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
 }
 
-.cy-churn-v2 .ch-churn_predict--table tbody td {
-    padding: 20px 16px;
-    border-bottom: 1px solid var(--cy-row-border);
-    color: #344054;
-    font-size: 14px;
-    vertical-align: middle;
+/* --- rows: flat, separated by thin lines ---------------------------------- */
+.cy-churn-v2 .ch-churn_predict--table tbody tr {
+    background: transparent;
 }
 
+.cy-churn-v2 .ch-churn_predict--table tbody td {
+    padding: 13px 16px !important;
+    border: 0;
+    border-bottom: 1px solid #ecece6 !important;
+    color: #344054;
+    font-size: 13.5px;
+    vertical-align: middle;
+    background: transparent;
+    white-space: nowrap;
+}
+
+/* the last row closes the list */
 .cy-churn-v2 .ch-churn_predict--table tbody tr:last-child td {
-    border-bottom: 0;
+    border-bottom: 0 !important;
+}
+
+/* global style.css forces text-align:left !important; the serial column
+   should still read centred */
+.cy-churn-v2 .ch-churn_predict--table td.text-center {
+    text-align: center !important;
 }
 
 .cy-churn-v2 .ch-churn_predict--table tbody tr:hover td {
-    background-color: #fafbfc;
+    background-color: #f1f1e8;
 }
 
 /* The Customer cell carries Bootstrap's d-flex, which takes the <td> out of
@@ -496,54 +553,144 @@
     white-space: nowrap;
 }
 
-.cy-churn-v2 .cy-ps_profile {
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-/* names and descriptions were clipped at 160px / 220px */
 .cy-churn-v2 .cy-churn-name-cell {
     max-width: none;
     overflow: visible;
     vertical-align: middle;
+    font-weight: 600;
+    color: var(--cy-text-strong);
 }
 
 .cy-churn-v2 .cy-churn-desc-cell {
     max-width: 320px;
 }
 
-/* the selected row used a strong blue wash; keep it neutral */
-.cy-churn-v2 .churn-selected-customer td {
-    background-color: #fbfbfa !important;
+/* --- avatar: partner photo over the initials fallback --------------------- */
+.cy-churn-v2 .cy-churn-avatar {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex: 0 0 34px;
+    overflow: hidden;
 }
 
-/* =========================================================================
- * Charts
- * ========================================================================= */
-.cy-churn-v2 .cy-churn_graph,
-.cy-churn-v2 .churn_prediction-graph_img {
+.cy-churn-v2 .cy-churn-avatar-img {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    max-width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
 }
 
-.cy-churn-v2 .churn-chart > .d-flex.align-items-center.justify-content-center {
-    padding: 8px 16px 20px !important;
+.cy-churn-v2 .cy-churn-avatar-img--broken {
+    display: none;
 }
 
-/* the chart card is sized in px by chartStyle; never let it overflow a narrow
-   card, and drop the stray card border so it reads as one panel */
-.cy-churn-v2 .cy-churn_graph .cy_dashboard_chart {
-    max-width: 100%;
-    margin: 0 auto !important;
-    border: 0 !important;
-    box-shadow: none !important;
+.cy-churn-v2 .cy-churn-avatar--0 { background: #d9c400; color: #3f3a00; }
+.cy-churn-v2 .cy-churn-avatar--1 { background: #e4edcf; color: #5f6900; }
+.cy-churn-v2 .cy-churn-avatar--2 { background: #f1e792; color: #6b5d00; }
+
+/* --- sale orders: plain olive count with a chevron ------------------------- */
+.cy-churn-v2 .cy-churn-orders-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--cy-olive);
+    background: transparent;
+    text-decoration: none;
+}
+
+.cy-churn-v2 .cy-churn-orders-chip i {
+    font-size: 15px;
+    color: var(--cy-olive);
+}
+
+.cy-churn-v2 .cy-churn-orders-chip:hover {
+    border: 0;
+    background: transparent;
+    color: #7a8300;
+    text-decoration: underline;
+}
+
+.cy-churn-v2 .cy-churn-orders-chip:hover i {
+    color: #7a8300;
+}
+
+.cy-churn-v2 .cy-churn-amount {
+    font-weight: 600;
+    color: var(--cy-text-strong);
+}
+
+/* --- churn status: plain coloured text (Time-Off list style) --------------- */
+.cy-churn-v2 .cy-churn-status-pill {
+    display: inline-flex;
+    align-items: center;
+    background: transparent !important;
+    border-radius: 0;
+    padding: 0 !important;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cy-churn-v2 .cy-churn-status-pill::before {
+    display: none;
+}
+
+.cy-churn-v2 .cy-churn-status-pill--ok      { background: transparent !important; color: var(--cy-olive); }
+.cy-churn-v2 .cy-churn-status-pill--waiting { background: transparent !important; color: #b7791f; }
+.cy-churn-v2 .cy-churn-status-pill--risk    { background: transparent !important; color: #d64545; }
+
+/* --- risk percentage: olive bar on a light track --------------------------- */
+.cy-churn-v2 .cy-risk-progress {
+    /* !important: cyllo_analytics' global style.css paints every .progress
+       track with the olive dashboard colour (background-color ... !important,
+       width: 0), which would make the whole capsule solid olive. */
+    width: 110px !important;
+    height: 8px !important;
+    flex: 0 0 110px;
+    background-color: #e9eaec !important;
+    border-radius: 999px !important;
+    margin-bottom: 0 !important;
+}
+
+.cy-churn-v2 .cy-risk-progress .progress-bar {
+    background-color: var(--cy-olive);
+    border-radius: 999px;
+}
+
+.cy-churn-v2 .cy-risk-value {
+    min-width: 34px;
+    flex: 0 0 auto;
+    color: var(--cy-text-strong);
+    font-size: 13px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* the selected row keeps a soft olive wash */
+.cy-churn-v2 .churn-selected-customer td {
+    background-color: #f3f4e6 !important;
 }
 
 /* =========================================================================
  * Responsive
- *   wide            : 2x2 KPI grid  |  pie beside it
- *   < 1400px        : KPI cards in one column  |  pie still beside
- *   < 992px (Odoo's lg): everything in a single column
+ *   wide            : 2x3 KPI grid  |  donut beside it
+ *   < 1400px        : KPI cards in one column  |  donut still beside
+ *   < 992px (Cyllo's lg): everything in a single column
  * ========================================================================= */
 @media (max-width: 1399.98px) {
     /* one column: cards then the chart, each the width of a single card */
@@ -559,8 +706,9 @@
         width: 100%;
     }
 
-    .cy-churn-v2 .cy-churn_tile {
-        min-height: 118px !important;
+    .cy-churn-v2 .cy-churn-kpi {
+        min-height: 110px;
+        height: auto;
     }
 
     .cy-churn-v2 .cy-churn-chart-col--main {
@@ -575,7 +723,7 @@
         padding-left: 0;
     }
 
-    .cy-churn-v2 .cy-churn-chart-col--main .churn-chart {
+    .cy-churn-v2 .cy-churn-overall {
         height: var(--cy-chart-h);
     }
 
@@ -583,11 +731,6 @@
        than clipping content that cannot shrink any further */
     .cy-churn-v2 .cy_kpi-sale-card-container {
         overflow-x: auto;
-    }
-
-    .cy-churn-v2 .cy-churn-chart-col--main .churn-chart,
-    .cy-churn-v2 .cy-churn-chart-col--main .cy_dashboard_chart {
-        max-width: 100%;
     }
 
     .cy-churn-v2 .cy-churn_tabl-header__section {
@@ -598,5 +741,555 @@
     .cy-churn-v2 .partner-search-container {
         min-width: 0;
         flex: 1 1 200px;
+    }
+}
+
+/* =========================================================================
+ * Customer churn detail — "HR dashboard" card styling.
+ *
+ * Scoped under .cy-cust-v2, the class that only exists on the root of the
+ * CustomerChurnDetails action. It reuses the churn dashboard palette (olive
+ * accents, soft white cards) with the flatter KPI-card look of the HR
+ * overview: label + big value + icon chip, tinted pills, light plot wells.
+ * ========================================================================= */
+.cy-cust-v2 {
+    --cust-bg: #f7f8f4;
+    --cust-card: #ffffff;
+    --cust-border: #e9ebe3;
+    --cust-radius: 14px;
+    --cust-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    --cust-text: #1c2119;
+    --cust-muted: #6f7568;
+    --cust-olive: #9ea700;
+    --cust-olive-dark: #7f8800;
+    --cust-olive-soft: #eef3d6;
+    --cust-ok: #4d6b00;
+    --cust-ok-soft: #eaf3d6;
+    --cust-warn: #b54708;
+    --cust-warn-soft: #fdf0e3;
+    --cust-bad: #c0261b;
+    --cust-bad-soft: #fdecea;
+
+    background: var(--cust-bg);
+    padding: 16px 22px 36px;
+    height: 94vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.cy-cust-v2 .cy-cust-shell {
+    max-width: 100%;
+    min-width: 0;
+}
+
+/* ---------------------------------------------------------------- header */
+.cy-cust-v2 .cy-cust-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 2px 0 18px;
+}
+
+.cy-cust-v2 .cy-cust-back {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--cust-border);
+    background: var(--cust-card);
+    color: #4b5245;
+    font-size: 20px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--cust-shadow);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cy-cust-v2 .cy-cust-back:hover {
+    background: #f4f6ea;
+    color: var(--cust-olive-dark);
+}
+
+.cy-cust-v2 .cy-cust-head-text {
+    min-width: 0;
+}
+
+.cy-cust-v2 .cy-cust-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--cust-text);
+    font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.cy-cust-v2 .cy-cust-sub {
+    margin: 3px 0 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--cust-muted);
+}
+
+/* ------------------------------------------------------------ stat cards */
+.cy-cust-v2 .cy-cust-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.cy-cust-v2 .cy-cust-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    min-height: 138px;
+    padding: 16px 18px 16px;
+    background: var(--cust-card);
+    border: 1px solid var(--cust-border);
+    border-radius: var(--cust-radius);
+    box-shadow: var(--cust-shadow);
+}
+
+.cy-cust-v2 .cy-cust-stat-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cy-cust-v2 .cy-cust-stat-label {
+    padding-top: 3px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #545b4d;
+}
+
+.cy-cust-v2 .cy-cust-stat-icon {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--cust-olive-soft);
+    color: var(--cust-olive);
+    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -2px;
+}
+
+.cy-cust-v2 .cy-cust-stat-value {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--cust-text);
+    overflow-wrap: break-word;
+}
+
+.cy-cust-v2 .cy-cust-stat-value.is-ok { color: #3f6b16; }
+.cy-cust-v2 .cy-cust-stat-value.is-warn { color: #b45309; }
+.cy-cust-v2 .cy-cust-stat-value.is-bad { color: #d92d20; }
+
+.cy-cust-v2 .cy-cust-unit {
+    margin-left: 2px;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.cy-cust-v2 .cy-cust-pill {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-pill.is-ok { background: var(--cust-ok-soft); color: var(--cust-ok); }
+.cy-cust-v2 .cy-cust-pill.is-warn { background: var(--cust-warn-soft); color: var(--cust-warn); }
+.cy-cust-v2 .cy-cust-pill.is-bad { background: var(--cust-bad-soft); color: var(--cust-bad); }
+
+.cy-cust-v2 .cy-cust-meter {
+    position: relative;
+    display: block;
+    height: 6px;
+    margin-top: 8px;
+    border-radius: 999px;
+    background: #eef0e6;
+    overflow: hidden;
+}
+
+.cy-cust-v2 .cy-cust-meter > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--cust-olive);
+    transition: width 0.4s ease;
+}
+
+.cy-cust-v2 .cy-cust-meter > span.is-ok { background: #a3b315; }
+.cy-cust-v2 .cy-cust-meter > span.is-bad { background: #e2675c; }
+
+/* ----------------------------------------------------------- card shells */
+.cy-cust-v2 .cy-cust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.cy-cust-v2 .cy-cust-card {
+    min-width: 0;
+    padding: 16px 18px 18px;
+    background: var(--cust-card);
+    border: 1px solid var(--cust-border);
+    border-radius: var(--cust-radius);
+    box-shadow: var(--cust-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.cy-cust-v2 .cy-cust-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    min-height: 22px;
+}
+
+.cy-cust-v2 .cy-cust-card-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cust-text);
+    line-height: 1.3;
+}
+
+.cy-cust-v2 .cy-cust-chip {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--cust-olive-soft);
+    color: #5f6900;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- charts */
+.cy-cust-v2 .cy-cust-plot {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    height: 236px;
+    min-height: 236px;
+    padding: 8px;
+    background: #fafbf6;
+    border: 1px solid #f1f2ea;
+    border-radius: 10px;
+}
+
+.cy-cust-v2 .cy-cust-plot canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* --------------------------------------------------------------- tables */
+.cy-cust-v2 .cy-cust-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    color: #3d4338;
+}
+
+.cy-cust-v2 .cy-cust-table thead th {
+    padding: 10px 14px;
+    background: #f5f6ef;
+    border-bottom: 0;
+    color: #6b7280;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-table thead th:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.cy-cust-v2 .cy-cust-table thead th:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.cy-cust-v2 .cy-cust-table tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f4f5ef;
+    vertical-align: middle;
+    color: #4b5563;
+}
+
+.cy-cust-v2 .cy-cust-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.cy-cust-v2 .cy-cust-table tbody tr {
+    transition: background 0.12s ease;
+}
+
+.cy-cust-v2 .cy-cust-table tbody tr:hover td {
+    background: #fbfcf6;
+}
+
+.cy-cust-v2 .cy-cust-periods {
+    flex: 1 1 auto;
+}
+
+.cy-cust-v2 .cy-cust-period-name {
+    font-weight: 700;
+    color: #22271f;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-date {
+    color: var(--cust-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-amount {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------- sale order lists */
+.cy-cust-v2 .cy-cust-period-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.cy-cust-v2 .cy-cust-orders {
+    padding: 16px 18px 12px;
+}
+
+.cy-cust-v2 .cy-cust-orders-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.cy-cust-v2 .cy-cust-orders-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cust-text);
+}
+
+.cy-cust-v2 .cy-cust-orders-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--cust-olive-soft);
+    color: #5f6900;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.cy-cust-v2 .cy-cust-viewall {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--cust-olive);
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+    transition: background 0.15s ease;
+}
+
+.cy-cust-v2 .cy-cust-viewall:hover {
+    background: var(--cust-olive-dark);
+    color: #ffffff;
+}
+
+.cy-cust-v2 .cy-cust-orders-body {
+    overflow-x: auto;
+    border-radius: 10px;
+}
+
+.cy-cust-v2 .cy-cust-orders-table tbody tr {
+    cursor: pointer;
+}
+
+.cy-cust-v2 .cy-cust-orders-table tbody tr:hover td {
+    background: #f7f8ee;
+}
+
+.cy-cust-v2 .cy-cust-order-name {
+    font-weight: 700;
+    color: #1f241b;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-salesperson {
+    color: #6b7280;
+}
+
+.cy-cust-v2 .cy-cust-sales {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-sales img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #eef0e6;
+}
+
+.cy-cust-v2 .cy-cust-orders-table .cy-cust-amount {
+    font-weight: 600;
+    color: #1f241b;
+}
+
+/* status is plain coloured text, like the HR list */
+.cy-cust-v2 .cy-cust-status {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-status.is-ok { color: #7f8800; }
+.cy-cust-v2 .cy-cust-status.is-warn { color: var(--cust-warn); }
+.cy-cust-v2 .cy-cust-status.is-bad { color: var(--cust-bad); }
+
+/* ------------------------------------------------------------ empty state */
+.cy-cust-v2 .cy-cust-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 56px 24px;
+    background: var(--cust-card);
+    border: 1px solid var(--cust-border);
+    border-radius: var(--cust-radius);
+    box-shadow: var(--cust-shadow);
+}
+
+.cy-cust-v2 .cy-cust-empty-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 12px;
+    border-radius: 50%;
+    background: var(--cust-olive-soft);
+    color: var(--cust-olive);
+    font-size: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cy-cust-v2 .cy-cust-empty-title {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cust-text);
+}
+
+.cy-cust-v2 .cy-cust-empty-text {
+    max-width: 440px;
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--cust-muted);
+}
+
+/* ---------------------------------------------------------- responsiveness */
+@media (max-width: 1180px) {
+    .cy-cust-v2 .cy-cust-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* the period table keeps the full width under the two charts */
+    .cy-cust-v2 .cy-cust-grid > .cy-cust-card:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 900px) {
+    .cy-cust-v2 {
+        padding: 14px 14px 28px;
+    }
+
+    .cy-cust-v2 .cy-cust-stats,
+    .cy-cust-v2 .cy-cust-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cy-cust-v2 .cy-cust-grid > .cy-cust-card:last-child {
+        grid-column: auto;
+    }
+
+    .cy-cust-v2 .cy-cust-stat {
+        min-height: 0;
+    }
+
+    .cy-cust-v2 .cy-cust-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 720px) {
+    .cy-cust-v2 .cy-cust-orders {
+        padding: 14px 12px 10px;
+    }
+
+    .cy-cust-v2 .cy-cust-orders-head {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .cy-cust-v2 .cy-cust-table {
+        font-size: 12.5px;
+    }
+
+    .cy-cust-v2 .cy-cust-table thead th,
+    .cy-cust-v2 .cy-cust-table tbody td {
+        padding: 9px 10px;
     }
 }
