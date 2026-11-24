@@ -31,7 +31,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['cyllo_repair', 'repair'],
+    'depends': ['cyllo_repair', 'repair', 'cyllo_web'],
     'icon': '/cyllo_shopfloor_repair/static/description/cyllo_shopfloor_repair.svg',
     'data': [
         'security/shopfloor_repair_security.xml',

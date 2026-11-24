@@ -8,13 +8,17 @@
                         <span class="cy-navbar-app-name">Shop floor</span>
                     </t>
                     <t t-else="">
-                        <span class="text-primary" style="cursor: pointer;" t-on-click="clearSelection" title="Back to Workcenters">
+                        <span t-attf-class="text-primary cy-sf-breadcrumb-root #{state.selectedProduction ? 'cy-sf-breadcrumb-root-collapsed' : ''}" style="cursor: pointer;" t-on-click="clearSelection" title="Back to Workcenters">
                             Workcenters
                         </span>
                     </t>
 
                     <t t-if="state.selectedWorkcenter">
-                        <i class="fa fa-angle-right text-muted mx-2"/>
+                        <i t-attf-class="fa fa-angle-right text-muted mx-2 cy-sf-breadcrumb-root-separator #{state.selectedProduction ? 'cy-sf-breadcrumb-root-collapsed' : ''}"/>
+                        <t t-if="state.selectedProduction">
+                            <span class="cy-sf-breadcrumb-ellipsis">...</span>
+                            <i class="fa fa-angle-right text-muted mx-2 cy-sf-breadcrumb-ellipsis-separator"/>
+                        </t>
                         <t t-if="!state.selectedProduction">
                             <span><t t-esc="state.selectedWorkcenter.name"/></span>
                     </t>
@@ -29,7 +33,7 @@
                         <i class="fa fa-angle-right text-muted mx-2"/>
                         <t t-set="activeGroup"
                            t-value="state.groupedWorkOrders.find(g => g.production_id === state.selectedProduction)"/>
-                        <span><t t-esc="activeGroup?.production_name || ''"/></span>
+                        <span class="cy-sf-breadcrumb-workorder"><t t-esc="activeGroup?.production_name || ''"/></span>
 
                         <button t-if="activeGroup?.production_state == 'to_close' and state.isManager"
                                 class="btn btn-success btn-sm fw-bold ms-4 shadow-sm"
@@ -44,16 +48,16 @@
 
                     <div class="dropdown">
                         <!-- Manager: can open and change operator -->
-                        <div t-if="state.isManager" class="dropdown-toggle fw-bold d-flex align-items-center px-3"
+                        <div t-if="state.isManager" class="dropdown-toggle fw-bold d-flex align-items-center px-3 cy-floor-operator-toggle"
                              type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <t t-if="state.selectedEmployee and state.selectedEmployee.image_128">
                                 <img t-attf-src="data:image/png;base64,#{state.selectedEmployee.image_128}"
-                                     class="cy-sf-operator-avatar me-1"
+                                     class="cy-floor-operator-avatar me-1"
                                      onerror="this.src='/web/static/img/user_placeholder.jpg';"
                                      t-att-alt="state.selectedEmployee.name"/>
                             </t>
                             <t t-else="">
-                                <i class="fa fa-user-circle me-1 fs-5 text-primary cy-sf-operator-icon"/>
+                                <i class="fa fa-user-circle me-1 fs-5 text-primary cy-floor-operator-icon"/>
                             </t>
                             <t t-if="state.selectedEmployee">
                                 <span>
@@ -68,12 +72,12 @@
                         <div t-else="" class="fw-bold d-flex align-items-center px-3">
                             <t t-if="state.selectedEmployee and state.selectedEmployee.image_128">
                                 <img t-attf-src="data:image/png;base64,#{state.selectedEmployee.image_128}"
-                                     class="cy-sf-operator-avatar me-1"
+                                     class="cy-floor-operator-avatar me-1"
                                      onerror="this.src='/web/static/img/user_placeholder.jpg';"
                                      t-att-alt="state.selectedEmployee.name"/>
                             </t>
                             <t t-else="">
-                                <i class="fa fa-user-circle me-1 fs-5 text-primary cy-sf-operator-icon"/>
+                                <i class="fa fa-user-circle me-1 fs-5 text-primary cy-floor-operator-icon"/>
                             </t>
 
                             <t t-if="state.selectedEmployee">
@@ -93,7 +97,7 @@
                             <li>
                                 <button class="dropdown-item py-2 fw-bold text-danger d-flex align-items-center"
                                         t-on-click="() => this.selectEmployee(null)">
-                                    <i class="fa fa-user-times me-2 cy-sf-operator-icon"/>
+                                    <i class="fa fa-user-times me-2 cy-floor-operator-icon"/>
                                     Clear Operator
                                 </button>
                             </li>
@@ -104,12 +108,12 @@
                                             t-on-click="() => this.selectEmployee(employee)">
                                         <t t-if="employee.image_128">
                                             <img t-attf-src="data:image/png;base64,#{employee.image_128}"
-                                                 class="cy-sf-operator-avatar me-2"
+                                                 class="cy-floor-operator-avatar me-2"
                                                  onerror="this.src='/web/static/img/user_placeholder.jpg';"
                                                  t-att-alt="employee.name"/>
                                         </t>
                                         <t t-else="">
-                                            <i class="fa fa-user text-muted me-2 cy-sf-operator-icon"/>
+                                            <i class="fa fa-user text-muted me-2 cy-floor-operator-icon"/>
                                         </t>
                                         <span class="fw-semibold">
                                             <t t-esc="employee.name"/>
@@ -121,10 +125,10 @@
                     </div>
 
                     <button t-if="!state.selectedWorkcenter"
-                            class="btn btn-danger border shadow-sm fw-bold d-flex align-items-center" t-on-click="goHome"
+                            class="btn btn-danger border shadow-sm fw-bold d-flex align-items-center cy-floor-nav-button" t-on-click="goHome"
                             title="Exit to Dashboard">
                         <i class="fa fa-sign-out me-2"/>
-                        Exit
+                        <span>Exit</span>
                     </button>
 
                     <div t-if="state.selectedWorkcenter" class="dropdown">
@@ -133,14 +137,14 @@
                                 style="font-size: 0.85rem; background-color: #f1f3f5; color: #495057;">
                             <i class="fa fa-filter me-2 text-muted"/>
                             <span class="me-1">
-                                <t t-if="state.currentFilter == 'ready'">Active</t>
+                                <t t-if="state.currentFilter == 'active'">Active</t>
                                 <t t-elif="state.currentFilter == 'done'">Done</t>
                                 <t t-elif="state.currentFilter == 'cancel'">Cancelled</t>
                                 <t t-else="">All Orders</t>
                         </span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-1" style="min-width: 140px; z-index: 1050;">
-                            <li><button class="dropdown-item py-2" t-on-click="() => this.setFilter('ready')">Active</button></li>
+                            <li><button class="dropdown-item py-2" t-on-click="() => this.setFilter('active')">Active</button></li>
                             <li><button class="dropdown-item py-2" t-on-click="() => this.setFilter('done')">Done</button></li>
                             <li><button class="dropdown-item py-2" t-on-click="() => this.setFilter('cancel')">Cancelled</button></li>
                             <li><button class="dropdown-item py-2" t-on-click="() => this.setFilter('all')">All Orders</button></li>
@@ -157,7 +161,7 @@
                         <t t-foreach="state.workcenters" t-as="workcenter" t-key="workcenter.id">
                             <div class="col-md-4 col-lg-3 col-xl-3">
                                 <div t-attf-class="card h-100 shadow-sm border #{workcenter.working_state == 'blocked' ? 'border-danger border-2 bg-danger bg-opacity-10' : 'border-0'}"
-                                     t-on-click="() => this.selectWorkcenter(workcenter)"
+                                     t-on-click="() => this.openWorkcenter(workcenter)"
                                      style="cursor: pointer; transition: transform 0.2s; hover:transform: translateY(-2px);">
                                     <div class="card-body d-flex flex-column p-3">
                                         <div class="d-flex justify-content-between align-items-start mb-1">
@@ -208,20 +212,24 @@
                                             </t>
                                             <div class="row text-center g-2">
                                             <div class="col-6">
-                                                <div class="p-2 rounded bg-secondary w-100 h-100 d-flex flex-column justify-content-center">
+                                                <button type="button" class="p-2 rounded bg-secondary w-100 h-100 d-flex flex-column justify-content-center border-0"
+                                                        style="cursor: pointer;"
+                                                        t-on-click="(ev) => this.openWorkcenterFilter(workcenter, 'active', ev)">
                                                     <div class="fw-bold text-black fs-4"
                                                          style="line-height: 1;"><t t-esc="workcenter.metrics.in_progress"/></div>
                                                     <div class="text-black  fw-semibold mt-1"
                                                          style="font-size: 0.65rem; text-transform: uppercase;">Active</div>
-                                                </div>
+                                                </button>
                                             </div>
                                             <div class="col-6">
-                                                <div class="p-2 rounded bg-primary w-100 h-100 d-flex flex-column justify-content-center">
+                                                <button type="button" class="p-2 rounded bg-primary w-100 h-100 d-flex flex-column justify-content-center border-0"
+                                                        style="cursor: pointer;"
+                                                        t-on-click="(ev) => this.openWorkcenterFilter(workcenter, 'done', ev)">
                                                     <div class="fw-bold text-white fs-4"
                                                          style="line-height: 1;"><t t-esc="workcenter.metrics.completed"/></div>
                                                     <div class="text-white fw-semibold mt-1"
                                                          style="font-size: 0.65rem; text-transform: uppercase;">Done</div>
-                                                </div>
+                                                </button>
                                             </div>
                                         </div>
                                             </div>
@@ -272,6 +280,7 @@
                                                               style="font-size: 0.75rem; text-transform: capitalize;"
                                                               t-attf-class="#{group.production_state == 'cancel' ? 'text-bg-danger' : (['confirmed', 'progress'].includes(group.production_state || '') ? 'text-bg-info' : 'text-bg-success')}">
                                                             <t t-if="group.production_state == 'cancel'">Cancelled</t>
+                                                            <t t-elif="group.production_state == 'confirmed'">Confirmed</t>
                                                             <t t-else=""><t t-esc="group.production_state ? group.production_state : 'Draft'"/></t>
                                                         </span>
                                                         <div class="dropdown" t-on-click.stop="">
@@ -335,7 +344,7 @@
                                                             </span>
                                                             <i class="fa fa-circle flex-shrink-0 shadow-sm"
                                                                style="font-size: 0.65rem;"
-                                                               t-att-title="workOrder.state"
+                                                               t-att-title="this.getWorkOrderStateLabel(workOrder)"
                                                                t-attf-class="#{workOrder.state == 'done' ? 'text-success' : (workOrder.state == 'progress' ? 'text-warning' : (workOrder.state == 'ready' ? 'text-primary' : 'text-secondary'))}">
                                                             </i>
                                                         </li>
@@ -394,10 +403,7 @@
                                                             <t t-esc="workOrder.name"/>
                                                         </h6>
                                                     <span t-attf-class="text-capitalize badge py-1 rounded-pill flex-shrink-0 #{state.selectedWorkcenter.working_state == 'blocked' ? 'text-bg-danger' : (workOrder.state == 'progress' ? 'text-bg-info' : (workOrder.state == 'done' ? 'text-bg-success' : (workOrder.state == 'pending' ? 'text-bg-warning' : 'text-bg-primary')))}">
-                                                        <t t-if="state.selectedWorkcenter.working_state == 'blocked'">Blocked</t>
-                                                        <t t-elif="workOrder.state == 'pending'">Waiting Wo</t>
-                                                        <t t-elif="workOrder.state == 'waiting'">Waiting Parts</t>
-                                                        <t t-else=""><t t-esc="workOrder.state ? workOrder.state : 'Ready'"/></t>
+                                                        <t t-esc="this.getWorkOrderStateLabel(workOrder)"/>
                                                     </span>
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center mt-1">
@@ -415,7 +421,7 @@
                                                         </span>
                                                     </div>
                                                 <div class="flex-grow-1"/>
-                                                <div class="btn-group mt-3 d-flex align-items-center gap-3"
+                                                <div class="btn-group d-flex mt-3 align-items-center gap-3"
                                                      role="group">
                                                     <t t-if="state.selectedWorkcenter.working_state == 'blocked'">
                                                         <button class="btn btn-outline-danger fw-bold disabled py-2"

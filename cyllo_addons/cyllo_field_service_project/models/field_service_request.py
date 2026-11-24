@@ -42,7 +42,7 @@ class FieldServiceRequest(models.Model):
     timesheet_ids = fields.One2many(related='task_id.timesheet_ids',
                                     readonly=False)
     workers_ids = fields.Many2many('hr.employee',
-                                   compute='compute_workers_ids')
+                                   compute='_compute_workers_ids')
     is_invoiced = fields.Boolean(default=False)
     available_task_ids = fields.Many2many(
         'project.task',
@@ -51,7 +51,7 @@ class FieldServiceRequest(models.Model):
     )
 
     @api.depends('field_service_worker_ids.employee_id')
-    def compute_workers_ids(self):
+    def _compute_workers_ids(self):
         """Get employee id's from workers record"""
         self.workers_ids = False
         for rec in self:
@@ -213,7 +213,7 @@ class FieldServiceRequest(models.Model):
             })
             if invoice_wizard:
                 return {
-                    'name': 'Invoice Method',
+                    'name': _('Invoice Method'),
                     'type': 'ir.actions.act_window',
                     'view_mode': 'form',
                     'res_model': 'field.service.invoice',
@@ -224,7 +224,7 @@ class FieldServiceRequest(models.Model):
             invoice = self.action_create_invoices('service')
             if invoice:
                 return {
-                    'name': 'create_invoice',
+                    'name': _('Create Invoice'),
                     'type': 'ir.actions.act_window',
                     'view_mode': 'form',
                     'res_id': invoice.id,

@@ -25,6 +25,7 @@ from odoo.exceptions import ValidationError
 
 class OdometerReading(models.Model):
     _name = "odometer.reading"
+    _description = "Odometer Reading"
 
     fleet_id = fields.Many2one('fleet.vehicle', readonly=True)
     last_odometer = fields.Float('Last Odometer', readonly=True)

@@ -79,12 +79,18 @@ class TestFieldServiceRequestPrint(TransactionCase):
         move_2.amount_residual = 50.0
 
     def test_get_report_values_print(self):
-        """Test _get_report_values() returns correct calculations"""
-        report_model = self.env['report.cyllo_field_service.report_field_service_request_form']
+        """Test _get_report_values() returns correct calculations."""
+        report_model = self.env[
+            'report.cyllo_field_service.report_field_service_request_form'
+        ]
+        invoices = self.fs_request.move_ids.filtered(
+            lambda move: move.move_type == 'out_invoice'
+                         and move.state == 'posted'
+        )
+        total_amount = sum(invoices.mapped('amount_total'))
+        balance = sum(invoices.mapped('amount_residual'))
+        paid_amount = total_amount - balance
         result = report_model._get_report_values([self.fs_request.id])
-        total_amount = 300.0
-        paid_amount = 250.0
-        balance = 50.0
         self.assertEqual(result['amount'], total_amount)
         self.assertEqual(result['paid_amount'], paid_amount)
         self.assertEqual(result['balance_amount'], balance)

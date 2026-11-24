@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
@@ -45,7 +45,7 @@ class FieldServiceInvoice(models.TransientModel):
         :return: Action to open the created invoice in the current window.
         """
         if not self.invoice_timesheet and not self.invoice_service:
-            raise ValidationError("At least one should be selected to create invoice!")
+            raise ValidationError(_("At least one should be selected to create invoice!"))
         invoice_action = {
             'name': 'create_invoice',
             'type': 'ir.actions.act_window',

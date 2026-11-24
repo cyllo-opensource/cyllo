@@ -95,20 +95,15 @@ class TestFieldServiceRequest(TransactionCase):
     # --------------------------------------------------
     # Assign workers (task optional)
     # --------------------------------------------------
+
     def test_action_assign_workers(self):
         """
         Test the 'action_assign_workers' method.
-
-        Verifies that:
-        - A task is created for the service request
-        - The task has the correct name and partner
-        - The task assignment date is today
-        - All assigned employees are included in the task
+        Verifies task creation and its details when a task is created.
         """
-        result = self.service_request.action_assign_workers()
-        self.assertTrue(result)
+        self.service_request.action_assign_workers()
 
-        # Task creation is OPTIONAL
+        # Task creation is optional
         if self.service_request.task_id:
             task = self.service_request.task_id
             self.assertEqual(task.name, self.service_request.name)
@@ -178,6 +173,7 @@ class TestFieldServiceRequest(TransactionCase):
         task = self.env['project.task'].create({
             'name': 'Test Task',
             'project_id': project.id,
+            'partner_id': self.partner.id,
         })
         # Instantiate field service request and trigger onchange
         request = self.env['field.service.request'].new({

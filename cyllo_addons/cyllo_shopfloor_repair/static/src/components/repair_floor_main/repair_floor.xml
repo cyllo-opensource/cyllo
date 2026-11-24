@@ -11,25 +11,19 @@
                 </h1>
 
                 <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-light border fw-bold hover-primary cy-rf-icon-btn"
-                            t-on-click="fetchRepairOrders"
-                            title="Refresh">
-                        <i class="fa fa-refresh"/>
-                        <span class="cy-rf-btn-label">Refresh</span>
-                    </button>
                     <div class="dropdown" t-att-class="state.isManager ? '' : 'opacity-75'">
-                        <div class="dropdown-toggle fw-bold d-flex align-items-center px-3"
+                        <div class="dropdown-toggle fw-bold d-flex align-items-center px-3 cy-floor-operator-toggle"
                                     type="button" data-bs-toggle="dropdown" aria-expanded="false"
                                     t-att-disabled="!state.isManager"
                                 t-att-aria-disabled="state.isManager ? 'false' : 'true'">
                             <t t-if="state.selectedEmployee and state.selectedEmployee.image_128 and state.selectedEmployee.image_128 != 'false'">
                                 <img t-attf-src="data:image/png;base64,#{state.selectedEmployee.image_128}"
-                                     class="cy-rf-operator-avatar me-1"
+                                     class="cy-floor-operator-avatar me-1"
                                      onerror="this.src='/web/static/img/user_placeholder.jpg';"
                                      t-att-alt="state.selectedEmployee.name"/>
                             </t>
                             <t t-else="">
-                                <i class="fa fa-user-circle me-1 fs-5 text-primary cy-rf-operator-icon"/>
+                                <i class="fa fa-user-circle me-1 fs-5 text-primary cy-floor-operator-icon"/>
                             </t>
                             <t t-if="state.selectedEmployee">
                                 <span><t t-esc="state.selectedEmployee.name"/></span>
@@ -43,7 +37,7 @@
                             <li>
                                 <button class="dropdown-item py-2 fw-bold text-danger d-flex align-items-center"
                                         t-on-click="() => this.selectEmployee(null)">
-                                    <i class="fa fa-user-times me-2 cy-rf-operator-icon"/>
+                                    <i class="fa fa-user-times me-2 cy-floor-operator-icon"/>
                                     Clear Operator
                                 </button>
                             </li>
@@ -54,12 +48,12 @@
                                             t-on-click="() => this.selectEmployee(employee)">
                                         <t t-if="employee.image_128 and employee.image_128 != 'false'">
                                             <img t-attf-src="data:image/png;base64,#{employee.image_128}"
-                                                 class="cy-rf-operator-avatar me-2"
+                                                 class="cy-floor-operator-avatar me-2"
                                                  onerror="this.src='/web/static/img/user_placeholder.jpg';"
                                                  t-att-alt="employee.name"/>
                                         </t>
                                         <t t-else="">
-                                            <i class="fa fa-user text-muted me-2 cy-rf-operator-icon"/>
+                                            <i class="fa fa-user text-muted me-2 cy-floor-operator-icon"/>
                                         </t>
                                         <span><t t-esc="employee.name"/></span>
                                     </button>
@@ -67,11 +61,17 @@
                             </t>
                         </ul>
                     </div>
-                    <button class="btn btn-danger border shadow-sm fw-bold cy-rf-icon-btn"
+                    <button class="btn btn-light border shadow-sm fw-bold d-flex align-items-center hover-primary cy-floor-nav-button"
+                            t-on-click="fetchRepairOrders"
+                            title="Refresh">
+                        <i class="fa fa-refresh me-2"/>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="btn btn-danger border shadow-sm fw-bold d-flex align-items-center cy-floor-nav-button"
                             t-on-click="goHome"
                             title="Exit to Dashboard">
-                        <i class="fa fa-sign-out"/>
-                        <span class="cy-rf-btn-label">Exit</span>
+                        <i class="fa fa-sign-out me-2"/>
+                        <span>Exit</span>
                     </button>
                 </div>
             </div>

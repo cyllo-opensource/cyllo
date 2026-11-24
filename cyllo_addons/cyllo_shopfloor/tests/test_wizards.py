@@ -21,7 +21,7 @@
 #############################################################################
 from odoo.exceptions import ValidationError
 from odoo.tests.common import tagged
-from .common import ShopfloorCommon
+from .test_common import ShopfloorCommon
 
 
 @tagged('post_install', '-at_install')
@@ -398,15 +398,15 @@ class TestAddWorkorderWizard(ShopfloorCommon):
         )
         self.assertTrue(new_wo, "New WO should be on workcenter_2.")
 
-    def test_action_add_workorder_ready_state_on_confirmed_mo(self):
-        """Workorder added to a confirmed MO should be set to 'ready' state."""
+    def test_action_add_workorder_waits_for_components_on_confirmed_mo(self):
+        """Added workorders wait until the confirmed MO has component stock."""
         mo = self._make_mo(confirm=True)
         wiz = self._make_wo_wizard(mo=mo, name='Ready Op')
         wiz.action_add_workorder()
         new_wo = mo.workorder_ids.filtered(lambda w: w.name == 'Ready Op')
         self.assertTrue(new_wo)
-        self.assertEqual(new_wo.state, 'ready',
-                         "New WO on confirmed MO should be in ready state.")
+        self.assertEqual(new_wo.state, 'waiting',
+                         "New WO should wait while its MO has unreserved components.")
 
     def test_action_add_workorder_with_date_start(self):
         """Wizard with date_start must set that date on the new workorder."""

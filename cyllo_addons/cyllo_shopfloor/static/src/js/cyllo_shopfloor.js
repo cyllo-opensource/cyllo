@@ -2,6 +2,7 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, useState, onWillStart, onWillDestroy, onMounted } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 
 class ShopFloorScreen extends Component {
     setup() {
@@ -15,7 +16,7 @@ class ShopFloorScreen extends Component {
             selectedWorkcenter: null,
             selectedProduction: null,
             groupedWorkOrders: [],
-            currentFilter: "ready",
+            currentFilter: "active",
             employees: [],
             selectedEmployee: null,
             isManager: false,
@@ -147,6 +148,11 @@ class ShopFloorScreen extends Component {
         await this.loadWorkOrders();
     }
 
+    async openWorkcenter(workcenter) {
+        this.state.currentFilter = "all";
+        await this.selectWorkcenter(workcenter);
+    }
+
     async loadWorkOrders() {
         if (!this.state.selectedWorkcenter) return;
 
@@ -158,12 +164,10 @@ class ShopFloorScreen extends Component {
         if (this.state.currentFilter === "cancel") {
             domain.push(["production_state", "=", "cancel"]);
         } else {
-            if (this.state.currentFilter === "ready") {
-            domain.push(["state", "!=", "cancel"]);
-                domain.push(["production_state", "in", ["confirmed", "progress"]]);
+            if (this.state.currentFilter === "active") {
+                domain.push(["state", "in", ["ready", "progress", "pending", "waiting"]]);
             } else if (this.state.currentFilter === "done") {
-                domain.push(["state", "!=", "cancel"]);
-                domain.push(["production_state", "in", ["to_close", "done"]]);
+                domain.push(["state", "=", "done"]);
             }
         }
 
@@ -287,6 +291,22 @@ class ShopFloorScreen extends Component {
         }
     }
 
+    getWorkOrderStateLabel(workOrder) {
+        if (this.state.selectedWorkcenter?.working_state === "blocked") {
+            return _t("Blocked");
+        }
+
+        const labels = {
+            pending: _t("Waiting Wo"),
+            waiting: _t("Waiting Parts"),
+            ready: _t("Ready"),
+            progress: _t("In Progress"),
+            done: _t("Done"),
+            cancel: _t("Cancelled"),
+        };
+        return labels[workOrder.state] || workOrder.state || _t("Ready");
+    }
+
     selectProduction(productionId) {
         this.state.selectedProduction = productionId;
     }
@@ -299,7 +319,7 @@ class ShopFloorScreen extends Component {
         if (ev) ev.stopPropagation();
         const targetWorkcenter = this.state.workcenters.find((wc) => wc.id === workcenterId);
         if (targetWorkcenter) {
-            this.state.currentFilter = "ready";
+            this.state.currentFilter = "active";
             await this.selectWorkcenter(targetWorkcenter);
             this.selectProduction(productionId);
         } else {
@@ -316,6 +336,12 @@ class ShopFloorScreen extends Component {
     setFilter(filterValue) {
         this.state.currentFilter = filterValue;
         this.loadWorkOrders();
+    }
+
+    async openWorkcenterFilter(workcenter, filterValue, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.currentFilter = filterValue;
+        await this.selectWorkcenter(workcenter);
     }
 
     async blockWorkcenter(workcenterId, ev) {
@@ -405,7 +431,7 @@ class ShopFloorScreen extends Component {
             const targetWorkcenter = this.state.workcenters.find((wc) => wc.id === targetWcId);
 
             if (targetWorkcenter) {
-                this.state.currentFilter = "ready";
+                this.state.currentFilter = "active";
                 await this.selectWorkcenter(targetWorkcenter);
                 this.selectProduction(targetMoId);
             } else {
@@ -479,7 +505,7 @@ class ShopFloorScreen extends Component {
         if (!productionId) return;
         this.action.doAction(
             {
-                name: "Add Work Order",
+                name: _t("Add Work Order"),
                 type: "ir.actions.act_window",
                 res_model: "mrp.add.workorder.wizard",
                 views: [[false, "form"]],
@@ -514,7 +540,7 @@ class ShopFloorScreen extends Component {
 
         this.action.doAction(
             {
-                name: "Reroute Work Order",
+                name: _t("Reroute Work Order"),
                 type: "ir.actions.act_window",
                 res_model: "mrp.reroute.wizard",
                 views: [[false, "form"]],

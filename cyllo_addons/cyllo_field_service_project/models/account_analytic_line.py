@@ -26,13 +26,13 @@ class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
     service_id = fields.Many2one('field.service.request',
-                                 compute='compute_service_id',
+                                 compute='_compute_service_id',
                                  store=True)
     workers_ids = fields.Many2many(related="service_id.workers_ids")
     employee_ids = fields.Many2many(related="task_id.employee_ids")
 
     @api.depends('date')
-    def compute_service_id(self):
+    def _compute_service_id(self):
         """
             This method computes the service ID for each record in the current
             recordset.

@@ -8,7 +8,7 @@
             <kanban class="oe_background_grey o_kanban_dashboard">
                 <field name="id"/>
                 <field name="name"/>
-                <field name="responsible_ids"/>
+                <field name="employee_ids"/>
                 <field name="visitor_count"/>
                 <field name="has_emergency_alert"/>
                 <templates>
@@ -27,8 +27,8 @@
                             </div>
                             <div class="o_kanban_card_content mt-3">
                                 <div class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
-                                    <strong>Responsibles:</strong>
-                                    <field name="responsible_ids" widget="many2many_tags"/>
+                                    <strong>Employees:</strong>
+                                    <field name="employee_ids" widget="many2many_tags"/>
                                 </div>
                             </div>
                             <div class="o_kanban_card_manage_pane mt-3" style="display: flex; flex-direction: column; gap: 8px;">
@@ -93,7 +93,8 @@
                     <group>
                         <group string="Configuration">
                             <field name="company_id"/>
-                            <field name="responsible_ids" widget="many2many_tags" options="{'no_create': True}" invisible="not is_host"/>
+                            <field name="employee_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="responsible_user_ids" widget="many2many_tags" options="{'no_create': True}"/>
                         </group>
                     </group>
                     <notebook>
@@ -111,7 +112,8 @@
                                 <setting help="Allow visitor to select a drink during registration">
                                     <field name="is_drink"/>
                                     <div invisible="not is_drink">
-                                        <field name="drink_selection_ids" widget="many2many_tags" nolabel="1"/>
+                                        <field name="drink_selection_ids" widget="many2many_tags"
+                                               placeholder="Select allowed drinks..." nolabel="1"/>
                                         <div class="mt8">
                                             <button name="%(cyllo_front_desk.action_frontdesk_drink)d" icon="oi-arrow-right" type="action" string="Configure Drinks" class="btn-link"/>
                                         </div>

@@ -36,6 +36,17 @@ def relaxng(view_type):
         with tools.file_open(os.path.join(path, 'rng', '%s_view.rng' % view_type)) as frng:
             try:
                 relaxng_doc = etree.parse(frng)
+                if view_type in ("graph", "pivot"):
+                    # These custom schemas extend the base schema. Resolve the
+                    # include through Odoo's addon paths; a relative
+                    # ``common.rng`` points to cyllo_web/rng/common.rng, which
+                    # is not part of this addon.
+                    common_rng = tools.file_path('base/rng/common.rng')
+                    for include in relaxng_doc.xpath(
+                        '//rng:include[@href="common.rng"]',
+                        namespaces={'rng': 'http://relaxng.org/ns/structure/1.0'},
+                    ):
+                        include.set('href', common_rng)
                 _relaxng_cache[view_type] = etree.RelaxNG(relaxng_doc)
             except Exception:
                 _logger.exception('Failed to load RelaxNG XML schema for views validation')

@@ -74,9 +74,6 @@ class MrpAddWorkorderWizard(models.TransientModel):
 
         new_workorder = self.env['mrp.workorder'].create(workorder_values)
 
-        if self.production_id.state in ('confirmed', 'progress'):
-            new_workorder.state = 'ready'
-
         new_workorder._update_shopfloor_view()
         return {'type': 'ir.actions.act_window_close'}
 

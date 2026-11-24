@@ -103,24 +103,13 @@ class FieldServiceRequest(models.Model):
     is_mark_as_done = fields.Boolean(compute="_compute_is_mark_as_done")
     is_manager = fields.Boolean(compute="_compute_is_manager")
     is_invoiced = fields.Boolean(default=False)
-    is_overdue = fields.Boolean(string="Is Overdue")
-    is_assigned = fields.Boolean(string="Is Assigned")
+    is_overdue = fields.Boolean(string="Is Overdue", copy=False)
+    is_assigned = fields.Boolean(string="Is Assigned", copy=False)
 
     _sql_constraints = [
         ('check_date_assigned', 'CHECK(date_deadline >= date_assigned)',
          'The Deadline date cannot be earlier than the Assigning date.')
     ]
-
-    @api.onchange('skill_category_id', 'hr_skill_ids')
-    def _onchange_hr_skill_ids(self):
-        """Keep selected workers aligned with the current required skills."""
-        for request in self:
-            if not request.hr_skill_ids:
-                continue
-            request.field_service_worker_ids = request.field_service_worker_ids.filtered(
-                lambda worker: worker.employee_id
-                and worker.employee_id.skill_ids & request.hr_skill_ids
-            )
 
     def _compute_ready_to_invoice(self):
         """Function to compute the visibility of invoice button"""
@@ -159,6 +148,17 @@ class FieldServiceRequest(models.Model):
         super()._compute_access_url()
         for request in self:
             request.access_url = f'/field_service_request/{request.id}'
+
+    @api.onchange('skill_category_id', 'hr_skill_ids')
+    def _onchange_hr_skill_ids(self):
+        """Keep selected workers aligned with the current required skills."""
+        for request in self:
+            if not request.hr_skill_ids:
+                continue
+            request.field_service_worker_ids = request.field_service_worker_ids.filtered(
+                lambda worker: worker.employee_id
+                and worker.employee_id.skill_ids & request.hr_skill_ids
+            )
 
     @api.onchange('skill_category_id')
     def _onchange_skill_category_id(self):
@@ -383,7 +383,7 @@ class FieldServiceRequest(models.Model):
 
     def action_cancel(self):
         """Function to cancel the field service request"""
-        self.state = 'cancel'
+        self.write({'state' : 'cancel'})
 
     def action_service_start(self):
         """

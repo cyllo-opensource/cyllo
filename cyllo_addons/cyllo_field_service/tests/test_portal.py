@@ -43,20 +43,19 @@ class TestFieldServiceRequestCount(HttpCase):
         })
 
         # Create 2 field service requests for this partner
-        cls.env['field.service.request'].create([
-            {
-                'name': 'Service Request 1',
-                'partner_id': cls.portal_user.partner_id.id,
-                'skill_category_id': cls.skill_category.id,
-                'state': 'draft',
-            },
-            {
-                'name': 'Service Request 2',
-                'partner_id': cls.portal_user.partner_id.id,
-                'skill_category_id': cls.skill_category.id,
-                'state': 'completed',
-            },
-        ])
+        cls.request_1 = cls.env['field.service.request'].create({
+            'name': 'Service Request 1',
+            'partner_id': cls.portal_user.partner_id.id,
+            'skill_category_id': cls.skill_category.id,
+            'state': 'draft',
+        })
+
+        cls.request_2 = cls.env['field.service.request'].create({
+            'name': 'Service Request 2',
+            'partner_id': cls.portal_user.partner_id.id,
+            'skill_category_id': cls.skill_category.id,
+            'state': 'completed',
+        })
 
     def test_fs_req_count(self):
         """
@@ -72,5 +71,5 @@ class TestFieldServiceRequestCount(HttpCase):
         self.authenticate('portal@test.com', 'portal')
         response = self.url_open('/my/field_service_request', timeout=30)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Service Request 1', response.content)
+        self.assertIn(b'Service Request 1',  response.content)
         self.assertIn(b'Service Request 2', response.content)

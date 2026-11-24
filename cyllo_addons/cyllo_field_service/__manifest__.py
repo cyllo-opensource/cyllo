@@ -47,7 +47,7 @@
         'views/res_config_settings_views.xml',
         'wizards/field_service_report_views.xml',
         'wizards/field_service_employee_suggestion.xml',
-        'reports/field_service_reports_templates.xml',
+        'reports/report_field_service_request.xml',
         'reports/field_service_reports.xml',
         'data/mail_template_data.xml',
         'views/res_partner_views.xml',

@@ -105,5 +105,6 @@ class MrpProduction(models.Model):
             'type': 'ir.actions.client',
             'tag': 'shopfloor_screen',
             'name': 'Shopfloor',
+            'target': "fullscreen",
             'context': {'default_production_id': self.id},
         }

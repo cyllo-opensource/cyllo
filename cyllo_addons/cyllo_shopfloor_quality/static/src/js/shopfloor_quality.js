@@ -11,6 +11,7 @@
 import { patch } from "@web/core/utils/patch";
 import { useState, onWillDestroy } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { _t } from "@web/core/l10n/translation";
 import { QualityCheck } from "@cyllo_quality/js/components/quality_check/qualityCheck";
 
 const ShopFloorScreen = registry.category("actions").get("shopfloor_screen");
@@ -131,7 +132,7 @@ patch(ShopFloorScreen.prototype, {
         }
 
         this.action.doAction({
-            name: "Quality Alert",
+            name: _t("Quality Alert"),
             type: "ir.actions.act_window",
             res_model: "quality.alert",
             views: [[false, "form"]],

@@ -85,6 +85,23 @@ export class UserDashboard extends Component {
             chats: [],
         })
         this.action = useService("action");
+        this.commandService = useService("command");
+        this._onDashboardKeydown = (ev) => {
+            // Leave normal typing alone in fields and editable dashboard content.
+            const target = ev.target;
+            if (
+                ev.defaultPrevented ||
+                ev.ctrlKey || ev.metaKey || ev.altKey ||
+                ev.key.length !== 1 ||
+                target?.isContentEditable ||
+                target?.closest?.("input, textarea, select, [contenteditable='true'], .o_command_palette")
+            ) {
+                return;
+            }
+            ev.preventDefault();
+            this.commandService.openMainPalette({ searchValue: `/${ev.key}` });
+        };
+        document.addEventListener("keydown", this._onDashboardKeydown);
         this.getActivities();
         onWillStart(async () => {
             this.renderShortcuts();
@@ -173,6 +190,7 @@ export class UserDashboard extends Component {
             return () => observer.disconnect();
         }, () => []);
         onWillUnmount(() => {
+            document.removeEventListener("keydown", this._onDashboardKeydown);
             this.cleanupIdleTimer();
             this.destroyOverviewCharts();
             this._unsubscribeChatBus();

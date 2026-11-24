@@ -30,7 +30,19 @@ class FrontdeskFrontdesk(models.Model):
 
     name = fields.Char(string='Station Name', required=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
-    responsible_ids = fields.Many2many('hr.employee', string='Responsible Employees', help='Employees responsible for this station who will receive notifications')
+    employee_ids = fields.Many2many(
+        'hr.employee',
+        relation='frontdesk_frontdesk_hr_employee_rel',
+        column1='frontdesk_frontdesk_id',
+        column2='hr_employee_id',
+        string='Employees in Station',
+        help='Employees who can host visitors and receive station notifications.',
+    )
+    responsible_user_ids = fields.Many2many(
+        'res.users',
+        string='Responsible Users',
+        help='Users allowed to access this station.',
+    )
     is_host = fields.Boolean(string='Host Selection', default=True, help='Allows the visitor to pick the host of the meeting from the list')
     is_drink = fields.Boolean(string='Offer Drinks', default=True, help='Allow visitor to select a drink during registration')
     notify_by_email = fields.Boolean(string='Notify by Email', default=True)
@@ -65,7 +77,11 @@ class FrontdeskFrontdesk(models.Model):
             'res_model': 'frontdesk.visitor',
             'view_mode': 'tree,form,calendar',
             'domain': [('station_id', '=', self.id)],
-            'context': {'default_station_id': self.id},
+            'context': {
+                'default_station_id': self.id,
+                'search_default_planned': 1,
+                'search_default_checked_in': 1,
+            },
         }
 
     def action_quick_register_visitor(self):

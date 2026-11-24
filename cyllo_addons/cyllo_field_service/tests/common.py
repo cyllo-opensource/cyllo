@@ -43,7 +43,7 @@ class TestCylloFieldService(common.TransactionCase):
         })
         cls.user = cls.env['res.users'].create({
             'name': 'User',
-            'login': 33,
+            'login': 'test_user_field_service',
         })
         cls.company = cls.env['res.company'].create({
             'name': 'Test Company'
@@ -68,13 +68,26 @@ class TestCylloFieldService(common.TransactionCase):
             'company_id': cls.company.id,
             'hr_skill_ids': cls.hr_skill.ids,
         })
+        cls.skill_level = cls.env['hr.skill.level'].create({
+            'name': 'Level 1',
+            'skill_type_id': cls.skill_type.id,
+            'level_progress': 25,
+        })
         cls.employee = cls.env['hr.employee'].create({
             'name': 'Employee 1',
-            'skill_ids': cls.hr_skill.ids,
+            'employee_skill_ids': [(0, 0, {
+                'skill_id': cls.hr_skill.id,
+                'skill_type_id': cls.skill_type.id,
+                'skill_level_id': cls.skill_level.id,
+            })],
         })
         cls.employee_2 = cls.env['hr.employee'].create({
             'name': 'Employee 2',
-            'skill_ids': [(4, cls.hr_skill_2.id)]
+            'employee_skill_ids': [(0, 0, {
+                'skill_id': cls.hr_skill_2.id,
+                'skill_type_id': cls.skill_type.id,
+                'skill_level_id': cls.skill_level.id,
+            })],
         })
         cls.service_request = cls.env['field.service.request'].create({
             'name': 'FS00001',
@@ -83,7 +96,6 @@ class TestCylloFieldService(common.TransactionCase):
             'skill_category_id': cls.skill_category.id,
             'state': 'draft',
             'submit_date': '2023-11-30',
-            'hr_skill_ids': cls.skill_category.ids,
         })
         cls.field_service_worker = cls.env['field.service.worker'].create({
             'field_service_request_id': cls.service_request.id,
@@ -96,7 +108,6 @@ class TestCylloFieldService(common.TransactionCase):
             'skill_category_id': cls.skill_category.id,
             'state': 'draft',
             'submit_date': '2023-11-30',
-            'hr_skill_ids': [(4, cls.hr_skill.id)]
         })
         cls.product = cls.env['product.product'].create({
             'name': 'Test product',
@@ -121,8 +132,14 @@ class TestCylloFieldService(common.TransactionCase):
             'skill_category_id': cls.skill_category.id,
             'state': 'submit',
             'submit_date': '2023-11-30',
-            'hr_skill_ids': cls.skill_category.ids,
-            'service_checklist_ids': cls.checklist.ids
+        })
+        cls.checklist_for_req2 = cls.env['field.service.checklist'].create({
+            'status': 'pending',
+            'required': True,
+            'service_cost': 100,
+            'time_required': 2.0,
+            'field_service_request_id': cls.service_request2.id,
+            'product_id': cls.product.id
         })
         cls.checklist2 = cls.env['field.service.checklist'].create({
             'status': 'completed',
@@ -148,10 +165,7 @@ class TestCylloFieldService(common.TransactionCase):
             'skill_category_id': cls.skill_category.id,
             'state': 'submit',
             'submit_date': '2023-11-30',
-            'hr_skill_ids': cls.skill_category.ids,
-            'service_checklist_ids': cls.checklist2.ids,
-            'move_ids': cls.account_move.ids,
-            'ready_to_invoice': False,
+            'move_ids': [(4, cls.account_move.id)],
         })
         cls.service_request4 = cls.env['field.service.request'].create({
             'name': 'FS00004',
@@ -160,8 +174,5 @@ class TestCylloFieldService(common.TransactionCase):
             'skill_category_id': cls.skill_category.id,
             'state': 'in_progress',
             'submit_date': '2023-11-30',
-            'hr_skill_ids': cls.skill_category.ids,
-            'service_checklist_ids': cls.checklist2.ids,
-            'move_ids': cls.account_move.ids,
-            'ready_to_invoice': False,
+            'move_ids': [(4, cls.account_move.id)],
         })

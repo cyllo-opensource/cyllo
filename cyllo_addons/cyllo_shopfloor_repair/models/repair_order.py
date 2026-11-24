@@ -20,7 +20,7 @@
 #
 #############################################################################
 
-from odoo import models, fields, api
+from odoo import models,_, fields, api
 from datetime import datetime
 from odoo.exceptions import UserError
 
@@ -41,7 +41,7 @@ class RepairOrder(models.Model):
         self.ensure_one()
         notes_view_id = self.env.ref('cyllo_shopfloor_repair.view_repair_floor_notes_popup').id
         return {
-            'name': f'Repair Notes: {self.name}',
+            'name':  _('Repair Notes: %s') % self.name,
             'type': 'ir.actions.act_window',
             'res_model': 'repair.order',
             'res_id': self.id,

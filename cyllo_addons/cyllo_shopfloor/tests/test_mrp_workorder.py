@@ -21,7 +21,7 @@
 #############################################################################
 from odoo import fields
 from odoo.tests.common import tagged
-from .common import ShopfloorCommon
+from .test_common import ShopfloorCommon
 
 
 @tagged('post_install', '-at_install')
@@ -187,6 +187,11 @@ class TestMrpWorkorder(ShopfloorCommon):
         pending_wo = mo.workorder_ids.filtered(lambda w: w.state == 'pending')[:1]
         if not pending_wo:
             self.skipTest("No pending workorders found — need sequential ops to test unblock.")
+        self.env['mrp.workcenter.productivity'].create({
+            'workcenter_id': pending_wo.workcenter_id.id,
+            'workorder_id': pending_wo.id,
+            'loss_id': self.env.ref('mrp.block_reason0').id,
+        })
         try:
             pending_wo.button_unblock()
         except Exception as exc:

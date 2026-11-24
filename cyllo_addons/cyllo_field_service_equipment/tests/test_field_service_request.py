@@ -20,7 +20,7 @@
 #
 #############################################################################
 from odoo.tests.common import TransactionCase
-from datetime import datetime, date
+from datetime import datetime
 
 
 class TestFieldServiceRequest(TransactionCase):

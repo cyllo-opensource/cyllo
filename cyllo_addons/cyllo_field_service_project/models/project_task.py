@@ -30,9 +30,9 @@ class ProjectTask(models.Model):
     employee_ids = fields.Many2many('hr.employee', string="Employees",
                                     help="Employees assigned to the task")
     service_id = fields.Many2one('field.service.request',
-                                 compute='compute_service_id')
+                                 compute='_compute_service_id')
 
-    def compute_service_id(self):
+    def _compute_service_id(self):
         """
             This method computes the service ID for each record in the current
             recordset based on the linked task.
@@ -78,7 +78,6 @@ class ProjectTask(models.Model):
                 'task_id': task.id,
                 'project_id': task.project_id.id,
                 'partner_id': partner.id if partner else False,
-                # 'skill_category_id': category.id,
                 'company_id': self.env.company.id,
                 'state': 'draft',
             })

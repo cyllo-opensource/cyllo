@@ -37,14 +37,16 @@ class FieldServiceRequestReport(models.AbstractModel):
         query_params = {}
         fs_request_report = self.env['field.service.report'].browse(
             data['context']['active_id'])
+        company_ids = self.env.companies.ids
         query = """select field_service_request.name,res_partner.name as partner_name,field_service_skill_category.name 
         as category_name,field_service_request.priority,field_service_request.skill_category_id,
         field_service_request.company_id,field_service_request.create_date,date_deadline,sale_order.name as 
-        sale_order_name, field_service_request.state from field_service_request inner join field_service_skill_category 
+        sale_order_name, field_service_request.state from field_service_request left join field_service_skill_category 
         on field_service_skill_category.id=field_service_request.skill_category_id inner join res_partner on 
         res_partner.id=field_service_request.partner_id left join sale_order on 
         sale_order.id=field_service_request.sale_order_id """
-        query += f"""where field_service_request.company_id = '{self.env.company.id}' """
+        query += f"""where field_service_request.company_id IN %(company_ids)s """
+        query_params['company_ids'] = tuple(company_ids)
         request = self.env['field.service.request'].search([])
         if fs_request_report.filter == "customer_wise":
             if fs_request_report.partner_ids:

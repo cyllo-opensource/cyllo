@@ -97,12 +97,12 @@ class FrontdeskVisitor(models.Model):
     rejected_by_id = fields.Many2one('hr.employee', string='Rejected By', readonly=True, tracking=True)
     rejected_datetime = fields.Datetime(string='Rejection Date/Time', readonly=True, tracking=True)
 
-    @api.depends('station_id', 'station_id.responsible_ids')
+    @api.depends('station_id', 'station_id.employee_ids')
     def _compute_host_domain_ids(self):
         """Compute the available hosts based on the selected front desk station."""
         for visitor in self:
             if visitor.station_id:
-                visitor.host_domain_ids = visitor.station_id.responsible_ids
+                visitor.host_domain_ids = visitor.station_id.employee_ids
             else:
                 visitor.host_domain_ids = self.env['hr.employee']
 
@@ -385,20 +385,20 @@ class FrontdeskVisitor(models.Model):
                         subtype_xmlid='mail.mt_comment'
                     )
 
-            # 2. Notify Station Responsibles
-            for responsible in station.responsible_ids:
-                if station.notify_by_email and responsible.work_email:
+            # 2. Notify Station Employees
+            for employee in station.employee_ids:
+                if station.notify_by_email and employee.work_email:
                     self.env['mail.mail'].sudo().create({
                         'subject': _("Visitor Check-In at %(station_name)s: %(visitor_name)s") % {
                             'station_name': station.name,
                             'visitor_name': visitor.name
                         },
                         'body_html': f"<p>{msg_body}</p>",
-                        'email_to': responsible.work_email,
+                        'email_to': employee.work_email,
                     }).send()
 
-                if station.notify_by_discuss and responsible.user_id:
-                    responsible.user_id.partner_id.message_post(
+                if station.notify_by_discuss and employee.user_id:
+                    employee.user_id.partner_id.message_post(
                         body=msg_body,
                         message_type='notification',
                         subtype_xmlid='mail.mt_comment'

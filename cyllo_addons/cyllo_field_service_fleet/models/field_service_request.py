@@ -108,7 +108,7 @@ class FieldServiceRequest(models.Model):
                 }}
         if self.fleet_id:
             return {
-                'name': 'Odometer Reading',
+                'name': _('Odometer Reading'),
                 'type': 'ir.actions.act_window',
                 'view_mode': 'form',
                 'res_model': 'odometer.reading',

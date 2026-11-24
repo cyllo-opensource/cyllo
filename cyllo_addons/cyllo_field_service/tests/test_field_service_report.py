@@ -65,14 +65,21 @@ class TestFieldServiceReport(TransactionCase):
             1. Create a mock report object with `report_action` returning
                a fixed dictionary.
             2. Patch `self.wizard.env.ref` to return the mock report.
-            3. Call `action_print` and verify:
+            3. Also patch `_get_report_values` to return mock data.
+            4. Call `action_print` and verify:
                 - The report action is called exactly once.
                 - The returned dictionary matches the expected type.
         """
         mock_report = MagicMock()
         mock_report.report_action.return_value = {'type': 'ir.actions.report'}
-
-        with patch.object(self.wizard.env, 'ref', return_value=mock_report):
+        mock_report_values = {
+            'datas': [],
+            'group_option': [],
+        }
+        report_model = self.env['report.cyllo_field_service.report_field_service_request_xlsx']
+        with patch.object(report_model.__class__, '_get_report_values',
+                          return_value=mock_report_values), \
+             patch.object(self.wizard.env, 'ref', return_value=mock_report):
             result = self.wizard.action_print()
             mock_report.report_action.assert_called_once()
             self.assertEqual(result, {'type': 'ir.actions.report'})
@@ -83,8 +90,7 @@ class TestFieldServiceReport(TransactionCase):
 
         Steps:
             1. Create a mock report object that returns expected report values.
-            2. Patch `self.wizard.env['report.cyllo_field_service.report_field_service_request_xlsx']`
-               to return the mock report.
+            2. Patch `_get_report_values` on the report model class.
             3. Call `action_xlsx_print` and verify:
                 - Returned type is `ir.actions.report`.
                 - Report type is `xlsx`.
@@ -92,18 +98,21 @@ class TestFieldServiceReport(TransactionCase):
                 - JSON options include active_id, start_date, end_date,
                   'datas', and 'group_option'.
         """
-        mock_report = MagicMock()
-        mock_report._get_report_values.return_value = {
+        mock_values = {
+            'context': {'active_id': self.wizard.id},
             'datas': [],
             'group_option': [],
             'from_date': '2025-01-01',
             'to_date': '2025-12-31',
             'filter': 'customer_wise',
             'state': 'draft',
-            'group_by': 'state'
+            'group_by': 'state',
+            'start_date': str(self.wizard.from_date),
+            'end_date': str(self.wizard.to_date),
         }
-
-        with patch.object(self.wizard.env, '__getitem__', return_value=mock_report):
+        report_model = self.env['report.cyllo_field_service.report_field_service_request_xlsx']
+        with patch.object(report_model.__class__, '_get_report_values',
+                          return_value=mock_values):
             result = self.wizard.action_xlsx_print()
 
             self.assertEqual(result['type'], 'ir.actions.report')
@@ -114,8 +123,8 @@ class TestFieldServiceReport(TransactionCase):
             self.assertEqual(options['context']['active_id'], self.wizard.id)
             self.assertEqual(options['start_date'], str(self.wizard.from_date))
             self.assertEqual(options['end_date'], str(self.wizard.to_date))
-            self.assertTrue('datas' in options)
-            self.assertTrue('group_option' in options)
+            self.assertIn('datas', options)
+            self.assertIn('group_option', options)
 
     def test_get_xlsx_report(self):
         """

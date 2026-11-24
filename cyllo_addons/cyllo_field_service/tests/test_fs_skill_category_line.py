@@ -29,7 +29,7 @@ class TestFsSkillCategoryLine(TestCylloFieldService):
         category_line = self.env['field.service.skill.category.line'].create({
             'required': True,
             'time_required': 2.0,
-            'service_cost': '',
+            'service_cost': 0.0,
             'currency_id': self.currency.id,
             'product_id': self.product.id
         })

@@ -32,7 +32,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['mrp', 'bus', 'web', 'hr'],
+    'depends': ['mrp', 'bus', 'web', 'hr', 'cyllo_web'],
     'icon': '/cyllo_shopfloor/static/description/cyllo_shopfloor.svg',
     'data': [
         'security/cyllo_shopfloor_security.xml',

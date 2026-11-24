@@ -47,6 +47,9 @@ class MrpRerouteWizard(models.TransientModel):
 
             if original_state == 'progress':
                 wo.button_pending()
+                # button_pending closes the timer but leaves the computed state
+                # as progress, which prevents the core workcenter write.
+                wo.write({'state': 'ready'})
 
             wo.write({'workcenter_id': self.workcenter_id.id})
             if original_state == 'progress':

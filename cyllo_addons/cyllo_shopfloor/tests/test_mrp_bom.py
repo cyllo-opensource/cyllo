@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from .common import ShopfloorCommon
+from .test_common import ShopfloorCommon
 
 
 class TestMrpBom(ShopfloorCommon):

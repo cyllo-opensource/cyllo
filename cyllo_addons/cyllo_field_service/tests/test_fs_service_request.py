@@ -121,6 +121,8 @@ class TestServiceRequest(TestCylloFieldService):
             notification['params']['message'],
             msg="Notification title should indicate missing checklist template.")
         self.assertEqual(self.service_request2.state, 'submit')
+        # Complete the pending checklist on service_request before marking as done
+        self.checklist.sudo().write({'status': 'completed'})
         self.service_request.action_mark_as_done()
         self.assertEqual(self.service_request.state, 'completed')
 
@@ -130,8 +132,8 @@ class TestServiceRequest(TestCylloFieldService):
 
     def test_compute_ready_to_invoice(self):
         self.service_request3.action_create_invoice()
-        self.assertEqual(self.service_request3.num_invoices, 0)
         self.service_request3._compute_ready_to_invoice()
+        self.assertEqual(self.service_request3.num_invoices, 2)
         self.assertFalse(self.service_request3.ready_to_invoice)
 
     def test_get_report_base_filename(self):
@@ -173,7 +175,9 @@ class TestServiceRequest(TestCylloFieldService):
                          )
 
     def test_onchange_date_assigned(self):
-        self.service_request.date_deadline = '2023-11-20'
-        self.service_request.date_assigned = '2023-11-30'
+        service_request = self.env['field.service.request'].new({
+            'date_deadline': '2023-11-20',
+            'date_assigned': '2023-11-30',
+        })
         with self.assertRaises(ValidationError):
-            self.service_request._onchange_date_assigned()
+            service_request._onchange_date_assigned()

@@ -20,7 +20,7 @@
 #
 #############################################################################
 from odoo.tests.common import tagged
-from .common import ShopfloorCommon
+from .test_common import ShopfloorCommon
 
 
 @tagged('post_install', '-at_install')
