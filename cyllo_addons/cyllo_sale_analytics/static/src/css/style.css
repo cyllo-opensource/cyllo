@@ -70,7 +70,6 @@
 .cy-gd-features {
     border: none;
     border-radius: 16px;
-    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
 }
 
 .cy-gd-features .cy-gd-icon {
@@ -91,18 +90,90 @@
     border-radius: 12px;
     background: #f8fafc;
     height: 100%;
+    border: 1px solid var(--border-color)
+}
+
+/* Feature-card descriptions: tighter leading than the page body. */
+.cy-gd-features .cy-gd-item p {
+    line-height: 1.2;
+}
+
+/* Desktop: keep the original 50%-wide column (the markup now carries
+   w-100 so phones stay full width even with a stale CSS bundle). */
+@media (min-width: 992px) {
+    .cy-gd-wrap .cy-fc-guidelines,
+    .cy-gd-wrap .cy-gd-features {
+        width: 50% !important;
+    }
+}
+
+/* Tablet / phone: the 50%-width card squeezes the copy into a narrow
+   column, so the guidelines block goes full width below lg. */
+@media (max-width: 991.98px) {
+    .cy-fc-guidelines,
+    .cy-gd-features {
+        width: 100% !important;
+        max-width: 640px;
+    }
 }
 
 @media (max-width: 767.98px) {
+    /* Let the page scroll instead of clipping the owl at the top and the
+       feature cards at the bottom (the wrapper used to centre a h-100 box). */
+    .cy-gd-wrap {
+        height: auto !important;
+        min-height: 100%;
+        justify-content: flex-start !important;
+        padding: 8px 0 32px;
+    }
+
+    .cy-fc-guidelines {
+        max-width: 100%;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+    }
+
+    .cy-fc-guidelines h1 {
+        font-size: 24px;
+        line-height: 1.25;
+    }
+
+    /* Mobile: drop the intro paragraph entirely — the title and the CTA
+       carry the screen, and the feature cards stay above the fold. */
+    .cy-fc-guidelines h3.fs-5 {
+        display: none;
+    }
+
+    .cy-fc-guidelines .cy-btn-green {
+        width: 100%;
+        padding: 12px 18px !important;
+        font-size: 16px !important;
+    }
+
     .cy-gd-features {
-        width: 100% !important;
+        max-width: 100%;
+        margin-top: 20px !important;
+    }
+
+    .cy-gd-features .row {
+        --bs-gutter-y: 12px;
+        padding: 14px 12px !important;
+    }
+
+    .cy-gd-features .cy-gd-item {
+        padding: 12px;
     }
 }
 
 /* Owl animation rendered by the bundled lottie player (local asset) */
 .cy-lottie-owl {
-    width: 260px;
-    height: 200px;
+    width: 300px;
+    height: 150px;
+}
+.cy-start-heading{
+    font-size: 22px;
+    color: #111418;
+    font-weight: 700;
 }
 
 /* Opaque overlay shown while the owl (Lottie) is still loading:
@@ -475,45 +546,102 @@
     box-shadow: none !important;
 }
 
-/* KPI stat cards */
+/* KPI stat cards — mirrors the HR dashboard KPI card */
 .cy-tr-kpi {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 16px;
+    padding: 16px 20px 14px;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cy-tr-kpi-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cy-tr-kpi-lead {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.cy-tr-kpi-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #3f3f46;
+    letter-spacing: 0.1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .cy-tr-kpi-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: #f1f5f9;
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: rgba(158, 167, 0, 0.1);
     color: #9ea700;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 24px;
     flex-shrink: 0;
 }
 
 .cy-tr-kpi-value {
-    font-size: 26px;
-    font-weight: 800;
-    color: #1f2937;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    min-width: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #111110;
     line-height: 1.1;
+    letter-spacing: -0.8px;
+}
+
+.cy-tr-kpi-unit {
+    font-size: 13px;
+    font-weight: 500;
+    color: #71717a;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.cy-tr-kpi-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
 }
 
 .cy-tr-kpi-pill {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    background: #f1f5f9;
-    color: #64748b;
+    gap: 4px;
+    background: rgba(92, 138, 22, 0.12);
+    color: #5c8a16;
     font-size: 11.5px;
     font-weight: 600;
+    line-height: 1;
     border-radius: 999px;
-    padding: 3px 10px;
+    padding: 5px 10px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cy-tr-kpi-pill i {
+    font-size: 12px;
 }
 
 /* Main chart/table card — fixed height so the inner table scrolls */
@@ -524,6 +652,37 @@
     padding: 20px;
     height: 640px;
     flex: 0 0 auto;
+}
+.forecast-heading {
+    font-size: 26px;
+    font-weight: 600;
+}
+.cy-forecast-subheading {
+
+}
+
+/* Mobile: stack the header actions below the title so the title stays on
+   one line, and drop the description that would otherwise push the KPI
+   cards below the fold. */
+@media (max-width: 767.98px) {
+    .cy-forecast-subheading {
+        display: none;
+    }
+
+    .cy-forecast-header {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 12px;
+    }
+
+    .cy-forecast-actions {
+        width: 100%;
+    }
+
+    .cy-forecast-actions .btn {
+        flex: 1 1 0;
+        white-space: nowrap;
+    }
 }
 
 @media (max-height: 760px) {
@@ -1791,11 +1950,11 @@ button[aria-expanded="true"] .accordion-arrow {
     word-break: break-word;
 }
 
-/* Full-viewport blocking overlay shown while churn training runs.
-   Covers the navbar, sidebar and all controls so nothing can be clicked
-   until training finishes or is cancelled. */
+/* Blocking overlay shown while churn training runs. It is positioned inside
+   the dashboard root (.cy-churn-v2 is position: relative), so it covers only
+   the dashboard content and leaves the app navbar and sidebar usable. */
 .cy-churn-training-overlay {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 3000;
     display: flex;
@@ -2575,5 +2734,54 @@ button[aria-expanded="true"] .accordion-arrow {
 
     .cy-demand-v2 .cy-demand-chartwrap {
         height: 280px;
+    }
+}
+
+/* ── "Processing Data" screen ───────────────────────────────────
+   Mirrors the guidelines screen (owl + olive heading + muted copy)
+   without the card or the call to action. */
+.cy-proc-inner {
+    max-width: 760px;
+    padding: 0 16px;
+}
+
+/* Same heading scale as the guidelines screen (theme h1) so both
+   screens read as one design. */
+.cy-proc-inner .fs-5 {
+    line-height: 1.5;
+}
+
+/* Animated ellipsis on the "Processing Data" heading: three olive dots
+   that light up in sequence (no extra markup in the copy itself). */
+.cy-proc-dots span {
+    display: inline-block;
+    opacity: 0.25;
+    animation: cy-proc-dot 1.35s infinite ease-in-out;
+}
+
+.cy-proc-dots span:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+.cy-proc-dots span:nth-child(3) {
+    animation-delay: 0.36s;
+}
+
+@keyframes cy-proc-dot {
+    0%, 70%, 100% {
+        opacity: 0.25;
+        transform: translateY(0);
+    }
+
+    35% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .cy-lottie-owl {
+        width: 300px;
+        height: 150px;
     }
 }

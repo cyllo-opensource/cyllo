@@ -20,6 +20,7 @@
 #
 #############################################################################
 from odoo import fields, models
+from odoo.exceptions import UserError
 
 
 class StockPicking(models.Model):
@@ -34,6 +35,9 @@ class StockPicking(models.Model):
         """
         Open the record in the client view with predefined context and parameters.
         """
+        self.ensure_one()
+        if self.state != 'assigned':
+            raise UserError("Only ready transfers can be opened from this kanban.")
         return {
             "type": "ir.actions.client",
             "name": self.name,
@@ -50,6 +54,9 @@ class StockPicking(models.Model):
         """
         Open the related stock picking in form view.
         """
+        self.ensure_one()
+        if self.state != 'assigned':
+            raise UserError("Only ready transfers can be opened from this kanban.")
         return {
             'name': self.name,
             'type': 'ir.actions.act_window',

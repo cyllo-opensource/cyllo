@@ -184,22 +184,34 @@ export class SalesPredictionDashboard extends Component {
         });
     }
 
-    // Same local owl animation, shown on the "Processing Dynamic Query" screen.
+    // Same local owl animation, shown on the "Processing Data" screen.
+    // The screen is rendered by the same status flip that calls this, so the
+    // ref can be one tick behind (or still point at the previous render) —
+    // keep retrying until a LIVE container holds the animation.
     async _startProcessingAnimation() {
-        // Let OWL render the processing screen (and its ref) first.
         try {
             await this._loadLottiePlayer();
         } catch (e) {
             console.warn("[sales_forecasting] processing animation skipped:", e.message);
             return;
         }
-        setTimeout(() => {
+        this._procLottieRetries = 0;
+        const start = () => {
             const el = this.procLottieRef.el;
-            if (!el) {
-                console.warn("[sales_forecasting] processing animation container missing.");
+            if (!el || !el.isConnected) {
+                // Ref not mounted yet, or left over from the previous screen.
+                if (this._procLottieRetries++ < 100) {
+                    setTimeout(start, 100);
+                } else {
+                    console.warn("[sales_forecasting] processing animation container missing.");
+                }
                 return;
             }
-            if (this._procAnim) this._procAnim.destroy();
+            if (this._procAnim) {
+                this._procAnim.destroy();
+                this._procAnim = null;
+            }
+            el.innerHTML = "";
             this._procAnim = window.lottie.loadAnimation({
                 container: el,
                 renderer: 'svg',
@@ -207,7 +219,17 @@ export class SalesPredictionDashboard extends Component {
                 autoplay: true,
                 animationData: JSON.parse(JSON.stringify(owlForecastAnimation)),
             });
-        }, 50);
+            // If the screen re-rendered while the player was booting, the SVG
+            // lands in a detached node — move on to the live one.
+            this._procAnim.addEventListener('DOMLoaded', () => {
+                const node = this.procLottieRef.el;
+                if ((!node || !node.isConnected || !node.querySelector('svg'))
+                    && this._procLottieRetries++ < 100) {
+                    setTimeout(start, 100);
+                }
+            });
+        };
+        setTimeout(start, 30);
     }
 
     // KPI stats for the "Generated training dataset" screen.

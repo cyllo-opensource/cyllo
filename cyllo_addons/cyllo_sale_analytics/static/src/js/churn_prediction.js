@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { registry } from "@web/core/registry";
-import { Component, useState, onWillStart, onMounted, onWillUnmount, useRef, useEffect } from '@odoo/owl';
+import { Component, useState, onWillStart, onMounted, onWillUnmount, useRef, useEffect, useExternalListener } from '@odoo/owl';
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { useSaveContext } from "@cyllo_analytics/js/useSaveContext";
@@ -9,6 +9,34 @@ import { FilterDropdown } from "@cyllo_analytics/js/filterDropdown"
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { ConnectionAbortedError } from "@web/core/network/rpc_service";
+
+// ---------------------------------------------------------------------------
+// Third-party console noise filter
+// web-vitals (injected by browser tooling, an analytics extension or a tag
+// manager) can throw
+//   TypeError: Cannot read properties of undefined (reading 'startTime')
+// from its reportAllChanges() when its PerformanceObserver receives an empty
+// entry. It is not Cyllo code and does not affect the dashboard, but it floods
+// the console and Odoo's error reporting. Suppress exactly that signature.
+// ---------------------------------------------------------------------------
+if (!window.__cylloWebVitalsGuard) {
+    window.__cylloWebVitalsGuard = true;
+    const isWebVitalsError = (error, message = "") => {
+        const text = `${message} ${(error && error.message) || ""}`;
+        const stack = (error && error.stack) || "";
+        return text.includes("reading 'startTime'") && stack.includes("reportAllChanges");
+    };
+    window.addEventListener("error", (ev) => {
+        if (isWebVitalsError(ev.error, ev.message)) {
+            ev.preventDefault();
+        }
+    }, true);
+    window.addEventListener("unhandledrejection", (ev) => {
+        if (isWebVitalsError(ev.reason)) {
+            ev.preventDefault();
+        }
+    });
+}
 
 const PERIODS = {
     quarter: 'Quarter',
@@ -24,7 +52,10 @@ export class ChurnPredictionDashboard extends Component {
         super.setup(...arguments);
         this.orm = useService('orm')
         this.notification = useService("notification");
+        this.ui = useService("ui");
         this.root = useRef("root")
+        this.actions = useRef("actions")
+        this.exportDropdown = useRef("exportDropdown")
         this.savedContext = useSaveContext()
         this.period = useRef("period")
         this.periodType = useRef("period_type")
@@ -38,6 +69,12 @@ export class ChurnPredictionDashboard extends Component {
         // Snapshot of the selection (period/quarters/config) that produced the
         // currently-displayed result. Used to revert the UI when a run is cancelled.
         this._committedSelection = null;
+
+        // FilterDropdown stops the click from bubbling, so Bootstrap never sees
+        // it and its "Configuration" menu would stay open on top of the Filters
+        // panel. Listening in the capture phase lets us close any stray menu
+        // before the click reaches the button that swallows it.
+        useExternalListener(window, 'click', this.onOutsideClick, { capture: true });
 
         let defaultConfig = {
             algorithm: 'xgboost',
@@ -72,6 +109,7 @@ export class ChurnPredictionDashboard extends Component {
             // `loading` on and shows the cancellable training overlay.
             restoring: true,
             loading: false,              // true while the (heavy) churn TRAINING runs
+            exportingPDF: false,
             cancelled: false,            // training was cancelled and no result is shown
             availableFields: [],
             config: JSON.parse(JSON.stringify(defaultConfig)), // current dynamic config
@@ -119,6 +157,7 @@ export class ChurnPredictionDashboard extends Component {
 
         onWillUnmount(() => {
             clearTimeout(this._donutRetry);
+            clearTimeout(this._filterCloseTimer);
             if (this._donutResizeHandler) {
                 window.removeEventListener('resize', this._donutResizeHandler);
             }
@@ -378,23 +417,46 @@ export class ChurnPredictionDashboard extends Component {
     }
 
     async exportPDF() {
-        var head = this.root.el?.querySelector('.cy-churn-overall__panel')
-        if (head) {
-            var canvas = await html2canvas(head)
-            head = canvas.toDataURL('image/png');
+        if (this.state.exportingPDF) {
+            return;
         }
-        return this.actionService.doAction({
-            type: "ir.actions.report",
-            report_type: "qweb-pdf",
-            report_name: 'cyllo_sale_analytics.report_churn_prediction',
-            report_file: "cyllo_sale_analytics.report_churn_prediction",
-            data: {
-                head,
-                'churnData': this.state.churnData,
-                'period': this.state.period,
-                'numberOfPeriods': this.state.numberOfPeriods
+        this.state.exportingPDF = true;
+        this.ui.block({message: _t("Preparing PDF...")});
+        try {
+            // Give Owl and the browser a paint opportunity before chart capture.
+            await new Promise((resolve) => {
+                window.requestAnimationFrame(() => {
+                    window.requestAnimationFrame(resolve);
+                });
+            });
+
+            let head = this.root.el?.querySelector('.cy-churn-overall__panel');
+            if (head) {
+                const canvas = await html2canvas(head);
+                head = canvas.toDataURL('image/png');
             }
-        });
+            await this.actionService.doAction({
+                type: "ir.actions.report",
+                report_type: "qweb-pdf",
+                report_name: 'cyllo_sale_analytics.report_churn_prediction',
+                report_file: "cyllo_sale_analytics.report_churn_prediction",
+                data: {
+                    head,
+                    'churnData': this.state.churnData,
+                    'period': this.state.period,
+                    'numberOfPeriods': this.state.numberOfPeriods
+                }
+            });
+        } catch (error) {
+            console.error("Churn prediction PDF export failed:", error);
+            this.notification.add(
+                _t("Could not prepare the PDF export. Please try again."),
+                {type: "danger"}
+            );
+        } finally {
+            this.state.exportingPDF = false;
+            this.ui.unblock();
+        }
     }
     async exportXLSX() {
         try {
@@ -479,6 +541,75 @@ export class ChurnPredictionDashboard extends Component {
     formatMoney(value) {
         const n = parseFloat(value) || 0;
         return '$ ' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    /** Close whichever header widget is not the one being opened. */
+    onOutsideClick(ev) {
+        const actionsEl = this.actions.el;
+        if (!actionsEl || !actionsEl.contains(ev.target)) {
+            return;
+        }
+        const exportEl = this.exportDropdown.el;
+        const clickedExport = !!(exportEl && exportEl.contains(ev.target));
+
+        if (ev.target.closest('.filter_button')) {
+            // The user is opening Filters; cancel a pending deferred close so
+            // the panel isn't shut a moment after they open it.
+            clearTimeout(this._filterCloseTimer);
+            // The Filters button stops propagation, so Bootstrap never gets the
+            // outside click that would dismiss the Configuration menu. Do it here.
+            this.closeConfigMenu();
+        } else if (ev.target.closest('#configDropdownButton') || clickedExport) {
+            this.closeFilterPanel();
+        }
+    }
+
+    closeFilterPanel() {
+        const panel = this.actions.el?.querySelector('.cy-marketing-auto_add-parent-container');
+        if (!panel) {
+            return;
+        }
+        // Bootstrap can't interrupt the opening animation, so closing the panel
+        // mid-transition does nothing; the panel then finishes opening and both
+        // header widgets stay visible. Retry once the transition has settled.
+        if (panel.classList.contains('collapsing')) {
+            clearTimeout(this._filterCloseTimer);
+            this._filterCloseTimer = setTimeout(() => this.closeFilterPanel(), 400);
+            return;
+        }
+        if (!panel.classList.contains('show')) {
+            return;
+        }
+        // Drop any height left by an in-progress collapse transition.
+        panel.classList.remove('collapsing');
+        panel.classList.remove('show');
+        panel.style.height = '';
+        const button = this.actions.el.querySelector('.filter_button');
+        if (button) {
+            button.classList.add('collapsed');
+            button.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    closeConfigMenu() {
+        const button = this.actions.el?.querySelector('#configDropdownButton');
+        const menu = button?.parentElement?.querySelector('.dropdown-menu');
+        if (!menu || !menu.classList.contains('show')) {
+            return;
+        }
+        // Use Bootstrap's own hide(): it also removes the `show` class from the
+        // toggle button and destroys the Popper instance. Removing only the
+        // menu's class left the button marked as open, so the next click ran
+        // hide() instead of show() and the menu appeared not to open.
+        const instance = window.Dropdown?.getInstance?.(button);
+        if (instance) {
+            instance.hide();
+            return;
+        }
+        menu.classList.remove('show');
+        menu.removeAttribute('data-bs-popper');
+        button.classList.remove('show');
+        button.setAttribute('aria-expanded', 'false');
     }
 
     _renderChurnDonut() {

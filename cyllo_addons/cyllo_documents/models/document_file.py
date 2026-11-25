@@ -93,6 +93,20 @@ class DocumentFile(models.Model):
         for rec in self:
             rec.size = str(rec.attachment_id.file_size / 1000) + ' Kb'
 
+    def action_open_document_form(self):
+        """Open this document in its form view."""
+        self.ensure_one()
+        form_view = self.env.ref('cyllo_documents.view_document_file_form')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Edit Document'),
+            'res_model': 'document.file',
+            'res_id': self.id,
+            'view_mode': 'form',
+            'views': [(form_view.id, 'form')],
+            'target': 'current',
+        }
+
     @api.depends('preview')
     def _compute_url_preview_image(self):
         """Function is used to display the preview image"""

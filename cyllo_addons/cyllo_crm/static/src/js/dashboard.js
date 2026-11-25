@@ -28,6 +28,7 @@ export class CRMDashboard extends Component {
         this.action = useService("action");
         this.company = useService("company");
         this.notification = useService("notification");
+        this.ui = useService("ui");
 
         // Refs for charts
         this.revenueChartRef = useRef("revenueChart");
@@ -53,6 +54,7 @@ export class CRMDashboard extends Component {
             activities: [],
             topPerformers: [],
             isLoading: true,
+            exporting: null,
             isSampleData: false,
             leadNotifications: [],
             unreadVisibleCount: 0,
@@ -1074,47 +1076,63 @@ export class CRMDashboard extends Component {
 
     // Chart export
     async exportData(format) {
-        const {jsPDF} = window.jspdf;
-        let leads = this.revenueChartRef.el;
-        let sales = this.pipelineChartRef.el;
+        if (this.state.exporting) {
+            return;
+        }
+        this.state.exporting = format;
+        this.ui.block({message: "Preparing PDF..."});
+        try {
+            // Let Owl render and the browser paint the loading UI before
+            // html2canvas starts doing the expensive capture work.
+            await new Promise((resolve) => {
+                window.requestAnimationFrame(() => {
+                    window.requestAnimationFrame(resolve);
+                });
+            });
 
-        const pdf = new jsPDF(); // Create a new PDF
+            const {jsPDF} = window.jspdf;
+            const leads = this.revenueChartRef.el;
+            const sales = this.pipelineChartRef.el;
+            const pdf = new jsPDF();
 
-        if (format === "sale") {
-            let salesWrapper = sales.closest(".cy-pipeline-track");
-            const salesCanvas = await html2canvas(salesWrapper);
-            const salesImage = salesCanvas.toDataURL("image/png");
+            if (format === "sale") {
+                const salesCanvas = await html2canvas(
+                    sales.closest(".cy-pipeline-track")
+                );
+                pdf.addImage(salesCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 100);
+                pdf.save("sales_chart.pdf");
+            } else if (format === "lead") {
+                const leadsCanvas = await html2canvas(leads.closest(".cy-trend-card"));
+                pdf.addImage(leadsCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 100);
+                pdf.save("leads_chart.pdf");
+            } else if (format === "report") {
+                const revCanvas = await html2canvas(leads.closest(".cy-trend-card"));
+                pdf.addImage(revCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 90);
 
-            pdf.addImage(salesImage, "PNG", 10, 10, 190, 100); // x, y, width, height
-            pdf.save("sales_chart.pdf");
-        } else if (format === "lead") {
-            const leadsCanvas = await html2canvas(leads.closest(".cy-trend-card"));
-            const leadsImage = leadsCanvas.toDataURL("image/png");
-
-            pdf.addImage(leadsImage, "PNG", 10, 10, 190, 100); // x, y, width, height
-            pdf.save("leads_chart.pdf");
-        } else if (format === "report") {
-            // Full dashboard report: both charts in one PDF
-            const revCanvas = await html2canvas(leads.closest(".cy-trend-card"));
-            pdf.addImage(revCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 90);
-
-            const salesCanvas = await html2canvas(sales.closest(".cy-pipeline-track"));
-            pdf.addImage(salesCanvas.toDataURL("image/png"), "PNG", 15, 105, 90, 80);
-            pdf.save("crm_dashboard_report.pdf");
-        } else if (format === "activity") {
-            const activitiesCanvas = await html2canvas(
-                this.activitiesChartRef.el.closest(".activities-card")
-            );
-            pdf.addImage(activitiesCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 100);
-            pdf.save("activities_chart.pdf");
-        } else if (format === "performers") {
-            const performersCanvas = await html2canvas(
-                this.state.topPerformers?.length
-                    ? document.querySelector(".cy_crm_dashboard .performers-card")
-                    : this.pipelineChartRef.el
-            );
-            pdf.addImage(performersCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 100);
-            pdf.save("top_performers.pdf");
+                const salesCanvas = await html2canvas(sales.closest(".cy-pipeline-track"));
+                pdf.addImage(salesCanvas.toDataURL("image/png"), "PNG", 15, 105, 90, 80);
+                pdf.save("crm_dashboard_report.pdf");
+            } else if (format === "activity") {
+                const activitiesCanvas = await html2canvas(
+                    this.activitiesChartRef.el.closest(".activities-card")
+                );
+                pdf.addImage(activitiesCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 100);
+                pdf.save("activities_chart.pdf");
+            } else if (format === "performers") {
+                const performersCanvas = await html2canvas(
+                    this.state.topPerformers?.length
+                        ? document.querySelector(".cy_crm_dashboard .performers-card")
+                        : sales
+                );
+                pdf.addImage(performersCanvas.toDataURL("image/png"), "PNG", 10, 10, 190, 100);
+                pdf.save("top_performers.pdf");
+            }
+        } catch (error) {
+            console.error("CRM dashboard export failed:", error);
+            this.notification.add("Could not prepare the PDF export.", {type: "danger"});
+        } finally {
+            this.state.exporting = null;
+            this.ui.unblock();
         }
     }
 

@@ -26,13 +26,13 @@
                                     </span>
                                 </div>
                 </div>
-                <div class="cy-churn-actions d-flex align-items-center flex-wrap gap-2">
+                <div class="cy-churn-actions d-flex align-items-center flex-wrap gap-2" t-ref="actions">
                     <button class="btn btn-primary cy-export-dropdown d-flex align-items-center gap-1"
                             type="button"
                             t-on-click="() => this.loadChurn(true)">
                         <span class="ri-refresh-line"/> Recompute
                     </button>
-                    <div class="position-relative">
+                    <div class="position-relative" t-ref="exportDropdown">
                         <Dropdown
                                 class="'btn-group flex-grow-1 flex-md-grow-0 dropdown-fit-content'"
                                 togglerClass="'btn btn-primary cy-export-dropdown'"
@@ -42,8 +42,12 @@
                                 Export
                             </t>
                             <DropdownItem onSelected.bind="exportPDF">
-                                <span class="ri-file-pdf-line"/>
-                                <span class="ms-2">PDF</span>
+                                <span t-if="state.exportingPDF" class="fa fa-spinner fa-spin"/>
+                                <span t-else="" class="ri-file-pdf-line"/>
+                                <span class="ms-2">
+                                    <t t-if="state.exportingPDF">Preparing PDF…</t>
+                                    <t t-else="">PDF</t>
+                                </span>
                             </DropdownItem>
                             <DropdownItem onSelected.bind="exportXLSX">
                                 <span class="ri-file-excel-line"/>
@@ -311,8 +315,9 @@
                                 <div class="cy-churn-overall card-border-shadow">
                                     <div class="cy-churn-overall__head d-flex justify-content-between align-items-start">
                                         <h2 class="cy-churn-overall__title">Overall Churn v/s Not Churn</h2>
-                                        <button type="button" class="cy-churn-overall__download" t-on-click="exportPDF" title="Download PDF">
-                                            <i class="ri-download-2-line"/>
+                                        <button type="button" class="cy-churn-overall__download" t-on-click="exportPDF" title="Download PDF" t-att-disabled="state.exportingPDF" t-att-aria-busy="state.exportingPDF">
+                                            <i t-if="state.exportingPDF" class="fa fa-spinner fa-spin"/>
+                                            <i t-else="" class="ri-download-2-line"/>
                                         </button>
                                     </div>
                                     <div t-if="state.generate" class="cy-churn-overall__panel">

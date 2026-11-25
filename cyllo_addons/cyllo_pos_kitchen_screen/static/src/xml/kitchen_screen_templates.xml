@@ -34,8 +34,8 @@
                             <button class="btn btn-danger border shadow-sm fw-bold d-flex align-items-center cy-ks-exit-btn"
                                     type="button"
                                     t-on-click="close_kitchen_screen">
-                                <i class="fa fa-sign-out me-2"/>
-                                Exit
+                                <i class="fa fa-sign-out mx-2"/>
+
                             </button>
                         </div>
                     </div>
@@ -132,25 +132,32 @@
                                                 <t t-foreach="order.lines" t-as="line_id" t-key="line_id">
                                                     <t t-set="line" t-value="state.lines.find(l => l.id == line_id)"/>
                                                     <t t-if="line">
-                                                        <button t-attf-class="list-group-item d-flex align-items-center py-3 {{state.is_kitchen_cook and order.order_status == 'waiting' ? 'accept_order_line' : ''}}"
-                                                                t-on-click="(e) => this.on_line_click(e, order.order_status)"
-                                                                t-attf-id="lines_id_{{line.id}}"
-                                                                t-att-value="line.id"
-                                                                t-att-disabled="!state.is_kitchen_cook"
-                                                                t-attf-style="{{order.order_status=='waiting' and line.order_status=='ready' ? 'text-decoration: line-through !important;color: #bfbfbf !important;' : ''}} {{!state.is_kitchen_cook ? 'cursor: default; pointer-events: none;' : ''}}">
+    <div class="cy-order-line">
+        <button t-attf-class="list-group-item d-flex align-items-center py-3 {{state.is_kitchen_cook and order.order_status == 'waiting' ? 'accept_order_line' : ''}}"
+                t-on-click="(e) => this.on_line_click(e, order.order_status)"
+                t-attf-id="lines_id_{{line.id}}"
+                t-att-value="line.id"
+                t-att-disabled="!state.is_kitchen_cook"
+                t-attf-style="{{order.order_status=='waiting' and line.order_status=='ready' ? 'text-decoration: line-through !important;color: #bfbfbf !important;' : ''}} {{!state.is_kitchen_cook ? 'cursor: default; pointer-events: none;' : ''}}">
+            <img class="cy-product-img me-3"
+                 t-attf-src="/web/image?model=product.product&amp;id={{line.product_id[0]}}&amp;field=image_128"
+                 onerror="this.src='/web/static/img/placeholder.png';"
+                 alt="Product"/>
+            <div class="fw-bold text-dark fs-6 text-start flex-grow-1">
+                <t t-esc="line.full_product_name"/>
+            </div>
+            <div class="cy-qty-badge ms-3">x <t t-esc="line.qty"/></div>
+        </button>
 
-                                                            <img class="cy-product-img me-3" t-attf-src="/web/image?model=product.product&amp;id={{line.product_id[0]}}&amp;field=image_128" onerror="this.src='/web/static/img/placeholder.png';" alt="Product"/>
-                                                            <div class="fw-bold text-dark fs-6 text-start flex-grow-1"><t t-esc="line.full_product_name"/></div>
-                                                            <div class="cy-qty-badge ms-3">x <t t-esc="line.qty"/></div>
+        <t t-if="line.note">
+            <div class="cy-order-line-note">
+                <i class="ri-price-tag-3-line me-1"/>
+                <span><t t-esc="line.note"/></span>
+            </div>
+        </t>
+    </div>
+</t>
 
-                                                            <t t-if="line.note">
-                                                                <div class="w-100 mt-2 text-start">
-                                                                    <i class="ri-price-tag-3-line text-muted me-1"/>
-                                                                    <span style="font-size:14px" class="text-muted"><t t-esc="line.note"/></span>
-                                                                </div>
-                                                            </t>
-                                                        </button>
-                                                    </t>
                                                 </t>
                                             </ul>
                                         </div>

@@ -19,8 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api, fields, models
 from lxml import etree
+from odoo import api, fields, models
 
 class IrModelTabs(models.Model):
     _name = 'ir.tabs'

@@ -5,14 +5,19 @@
              class="cy_prediction_container customer-data-churn-main cyllo-background cy-cust-v2">
             <div class="cy-cust-shell">
 
+                <!-- breadcrumb trail -->
+                <nav class="cy-cust-crumbs" aria-label="Breadcrumb">
+                    <span class="cy-cust-crumb-link"
+                          role="button"
+                          t-on-click="() => this.goBack()">Churn Prediction Dashboard</span>
+                    <i class="ri-arrow-right-s-line" aria-hidden="true"/>
+                    <span class="cy-cust-crumb-current" aria-current="page">
+                        <t t-esc="state.custDetails.custName"/>
+                    </span>
+                </nav>
+
                 <!-- page header -->
                 <div class="cy-cust-head">
-                    <button type="button"
-                            class="cy-cust-back"
-                            title="Go Back"
-                            t-on-click="() => this.goBack()">
-                        <i class="ri-arrow-left-s-line"/>
-                    </button>
                     <div class="cy-cust-head-text">
                         <h1 class="cy-cust-title"><t t-esc="state.custDetails.custName"/></h1>
                         <p class="cy-cust-sub"
@@ -170,14 +175,14 @@
                                                         <img t-attf-src="/web/image/res.users/{{order.user_id[0]}}/avatar_128"
                                                              t-att-alt="order.user_id[1]"
                                                              loading="lazy"/>
-                                                        <t t-esc="order.user_id[1]"/>
+                                                        <span class="cy-cust-sales-name"><t t-esc="order.user_id[1]"/></span>
                                                     </span>
                                                 </td>
                                                 <td class="text-end cy-cust-amount">
-                                                    <t t-esc="order.amount_untaxed"/>
+                                                    <t t-esc="this.formatMoney(order.amount_untaxed)"/>
                                                 </td>
                                                 <td class="text-end cy-cust-amount">
-                                                    <t t-esc="order.amount_total"/>
+                                                    <t t-esc="this.formatMoney(order.amount_total)"/>
                                                 </td>
                                                 <td class="text-end">
                                                     <span t-attf-class="cy-cust-status {{this.orderStateTone(order.state)}}"

@@ -9,6 +9,12 @@
 
 /* ---------- palette ---------- */
 .cy-churn-v2 {
+    /* Containing block for the training overlay, so it covers only the
+       dashboard content area (not the app navbar or the sidebar). Isolation
+       keeps the overlay's z-index local, so navbar menus still paint above
+       the dashboard while a recompute is running. */
+    position: relative;
+    isolation: isolate;
     /* One KPI grid row. The chart card is derived from it so the two columns
        line up: 3 rows + the 2 gaps between them. */
     --cy-tile-h: 124px;
@@ -33,7 +39,38 @@
 }
 
 .cy-churn-v2 .cy-churn-actions {
+    position: relative;
+    /* Keep the action bar's layering local. The value sits above the dashboard
+       content (KPI cards, tables) but below the app navbar (z-index 100), so
+       the navbar's open menus (the More "Configuration" menu, user menu, etc.)
+       are never covered by the action buttons. */
+    z-index: 10;
     margin-left: auto;
+}
+
+/* The Filters panel is absolutely positioned inside the Filters wrapper. On
+   narrow screens the actions wrap and a panel anchored under the Filters
+   button covered the Configuration button below it, swallowing its clicks.
+   Anchor the panel to the whole action bar instead, and keep every button
+   above it as a second line of defence. These values are local to the action
+   bar's stacking context, so they never rise above the navbar. */
+.cy-churn-v2 .cy-churn-actions > * {
+    position: relative;
+    z-index: 2;
+}
+
+.cy-churn-v2 .cy-churn-actions > .dropdown-filters-sale {
+    z-index: 1;
+}
+
+.cy-churn-v2 .cy-churn-actions .dropdown-filters-sale {
+    position: static !important;
+}
+
+.cy-churn-v2 .cy-churn-actions .cy-marketing-auto_add-parent-container {
+    top: 100% !important;
+    right: 0 !important;
+    margin-top: 8px !important;
 }
 
 @media (max-width: 991.98px) {
@@ -92,10 +129,6 @@
     min-width: 0;
     overflow: hidden;
     transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.cy-churn-v2 .cy-churn-kpi:hover {
-    box-shadow: 0 4px 14px rgba(16, 24, 40, 0.08);
 }
 
 .cy-churn-v2 .cy-churn-kpi__main {
@@ -782,6 +815,43 @@
     min-width: 0;
 }
 
+/* ------------------------------------------------------------ breadcrumbs */
+.cy-cust-v2 .cy-cust-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 0 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--cust-muted);
+    min-width: 0;
+}
+
+.cy-cust-v2 .cy-cust-crumb-link {
+    color: var(--cust-olive-dark);
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-crumb-link:hover {
+    text-decoration: underline;
+}
+
+.cy-cust-v2 .cy-cust-crumbs i {
+    font-size: 14px;
+    color: #b3b8a8;
+}
+
+.cy-cust-v2 .cy-cust-crumb-current {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: #4b5245;
+}
+
 /* ---------------------------------------------------------------- header */
 .cy-cust-v2 .cy-cust-head {
     display: flex;
@@ -1084,7 +1154,7 @@
 }
 
 .cy-cust-v2 .cy-cust-orders {
-    padding: 16px 18px 12px;
+    padding: 20px 20px 0;
 }
 
 .cy-cust-v2 .cy-cust-orders-head {
@@ -1092,7 +1162,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .cy-cust-v2 .cy-cust-orders-title {
@@ -1100,9 +1170,10 @@
     align-items: center;
     gap: 8px;
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
-    color: var(--cust-text);
+    letter-spacing: -0.4px;
+    color: #111110;
 }
 
 .cy-cust-v2 .cy-cust-orders-count {
@@ -1123,78 +1194,158 @@
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
-    height: 28px;
-    padding: 0 12px;
+    box-sizing: border-box;
+    height: 26px;
+    padding: 7px 13px;
     border: 0;
     border-radius: 6px;
-    background: var(--cust-olive);
+    background: #9ea700;
     color: #ffffff;
-    font-size: 11.5px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
     line-height: 1;
+    white-space: nowrap;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
-    transition: background 0.15s ease;
+    transition: background-color 0.15s ease;
 }
 
 .cy-cust-v2 .cy-cust-viewall:hover {
-    background: var(--cust-olive-dark);
+    background: #8f9700;
     color: #ffffff;
 }
 
 .cy-cust-v2 .cy-cust-orders-body {
-    overflow-x: auto;
-    border-radius: 10px;
+    overflow: auto;
+    max-height: 344px;
+    margin-bottom: 20px;
+    /* No top padding: the sticky header pins to the scrollport top, so any
+       top padding becomes a strip above it where scrolled rows show through. */
+    padding: 0 12px 12px;
+    background: #fafaf8;
+    border-radius: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #d6dbc4 transparent;
+    /* keep the card from growing with long order lists */
+}
+
+.cy-cust-v2 .cy-cust-orders-body::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.cy-cust-v2 .cy-cust-orders-body::-webkit-scrollbar-thumb {
+    background: #d6dbc4;
+    border-radius: 999px;
+}
+
+.cy-cust-v2 .cy-cust-orders-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Order list mirrors the HR dashboard list: soft grey panel, flat muted
+   header, no cell borders and thin row dividers. */
+.cy-cust-v2 .cy-cust-orders-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cy-cust-v2 .cy-cust-orders-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    /* top padding lives here (not on the scroller) so the header's own
+       background always covers the area it sticks over. */
+    padding: 14px 12px 10px;
+    background: #fafaf8;
+    border: 0;
+    border-bottom: 1px solid rgba(82, 82, 91, 0.14);
+    border-radius: 0;
+    color: #71717a;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-orders-table thead th:first-child,
+.cy-cust-v2 .cy-cust-orders-table thead th:last-child {
+    border-radius: 0;
+}
+
+.cy-cust-v2 .cy-cust-orders-table tbody td {
+    padding: 8px 12px;
+    border: 0;
+    border-bottom: 1px solid rgba(82, 82, 91, 0.09);
+    color: #71717a;
+    font-size: 13px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.cy-cust-v2 .cy-cust-orders-table tbody tr:last-child td {
+    border-bottom: 0;
 }
 
 .cy-cust-v2 .cy-cust-orders-table tbody tr {
     cursor: pointer;
+    transition: background-color 0.15s ease;
 }
 
 .cy-cust-v2 .cy-cust-orders-table tbody tr:hover td {
-    background: #f7f8ee;
+    background: rgba(158, 167, 0, 0.05);
 }
 
 .cy-cust-v2 .cy-cust-order-name {
-    font-weight: 700;
-    color: #1f241b;
+    font-size: 14px;
+    font-weight: 600;
+    color: #18181b;
     white-space: nowrap;
 }
 
 .cy-cust-v2 .cy-cust-salesperson {
-    color: #6b7280;
+    color: #71717a;
 }
 
 .cy-cust-v2 .cy-cust-sales {
     display: inline-flex;
     align-items: center;
-    gap: 9px;
+    gap: 12px;
     white-space: nowrap;
 }
 
 .cy-cust-v2 .cy-cust-sales img {
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;
     background: #eef0e6;
 }
 
-.cy-cust-v2 .cy-cust-orders-table .cy-cust-amount {
+.cy-cust-v2 .cy-cust-sales-name {
+    font-size: 14px;
     font-weight: 600;
-    color: #1f241b;
+    color: #18181b;
+}
+
+.cy-cust-v2 .cy-cust-orders-table .cy-cust-amount {
+    font-size: 13px;
+    font-weight: 600;
+    color: #18181b;
 }
 
 /* status is plain coloured text, like the HR list */
 .cy-cust-v2 .cy-cust-status {
     display: inline-block;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 600;
+    color: #9ea700;
     text-transform: capitalize;
     white-space: nowrap;
 }
 
-.cy-cust-v2 .cy-cust-status.is-ok { color: #7f8800; }
+.cy-cust-v2 .cy-cust-status.is-ok { color: #9ea700; }
 .cy-cust-v2 .cy-cust-status.is-warn { color: var(--cust-warn); }
 .cy-cust-v2 .cy-cust-status.is-bad { color: var(--cust-bad); }
 
@@ -1277,6 +1428,14 @@
 @media (max-width: 720px) {
     .cy-cust-v2 .cy-cust-orders {
         padding: 14px 12px 10px;
+    }
+
+    .cy-cust-v2 .cy-cust-orders-body {
+        max-height: 300px;
+    }
+
+    .cy-cust-v2 .cy-cust-crumbs {
+        font-size: 12px;
     }
 
     .cy-cust-v2 .cy-cust-orders-head {

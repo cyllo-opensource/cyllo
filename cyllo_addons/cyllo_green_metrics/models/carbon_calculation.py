@@ -29,8 +29,9 @@ class CarbonCalculation(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = 'date desc, name'
 
-    name = fields.Char(required=True, help="Name of the carbon emission calculation.")
-    date = fields.Date(required=True, default=fields.Date.context_today, help="Date of the carbon emission calculation.")
+    name = fields.Char(required=True, tracking=True, help="Name of the carbon emission calculation.")
+    date = fields.Date(required=True, default=fields.Date.context_today, tracking=True,
+                       help="Date of the carbon emission calculation.")
     carbon_activity_ids = fields.One2many('carbon.activity', 'calculation_id', string='Activities')
     total_emissions = fields.Float(compute='_compute_totals', string='Total Emissions', store=True,
                                    help="Total emissions from all associated activities.")
@@ -45,9 +46,10 @@ class CarbonCalculation(models.Model):
         ('submitted', 'Submitted'),
         ('approved', 'Approved'),
         ('done', 'Done'),
-    ], default='draft', required=True)
+    ], default='draft', required=True, tracking=True)
     note = fields.Text(help="Additional notes or remarks for this calculation.")
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company', required=True,
+                                 default=lambda self: self.env.company, tracking=True)
     highest_source_id = fields.Many2one('carbon.source', string='Highest Emitting Source',
         compute='_compute_highest_source', store=True, help="Emission source with the highest calculated emissions.")
 

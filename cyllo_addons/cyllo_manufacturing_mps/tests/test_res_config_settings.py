@@ -50,8 +50,8 @@ class TestManufacturingMpsConfigSettings(common.TransactionCase):
         self.assertEqual(cron.interval_type, 'weeks')
         self.assertEqual(cron.interval_number, 1)
 
-    def test_03_set_values_syncs_mrp_managers_to_mps_group(self):
-        manager_group = self.env.ref('mrp.group_mrp_manager')
+    def test_03_mps_administrator_role_implies_mps_group_independently_of_scheduler(self):
+        manager_group = self.env.ref('cyllo_manufacturing_mps.group_mrp_manager_mps')
         mps_group = self.env.ref('cyllo_manufacturing_mps.group_mps_enabled')
         manager_user = self.env['res.users'].create({
             'name': 'MPS Manager User',
@@ -59,6 +59,8 @@ class TestManufacturingMpsConfigSettings(common.TransactionCase):
             'email': 'mps_manager_user@example.com',
             'groups_id': [(6, 0, [manager_group.id])],
         })
+
+        self.assertIn(manager_user, mps_group.users)
 
         self.env['res.config.settings'].create({
             'is_mps': True,
@@ -72,5 +74,5 @@ class TestManufacturingMpsConfigSettings(common.TransactionCase):
             'mps_default_timerange': 'month',
         }).set_values()
 
-        self.assertNotIn(manager_user, mps_group.users)
+        self.assertIn(manager_user, mps_group.users)
 

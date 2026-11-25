@@ -58,26 +58,23 @@ export class CylloBarcode extends Component {
         );
         const operationData = [];
         for (let i = 0; i < StockOperation.length; i++) {
-            var PickingDraft = await this.orm.searchCount(
-                "stock.picking", [
-                    ["picking_type_id", "=", StockOperation[i].id],
-                    ["state", "=", 'draft']
-                ])
+            const pickingDomain = [
+                ["picking_type_id", "=", StockOperation[i].id],
+                "|",
+                ["user_id", "=", this.user.userId],
+                ["user_id", "=", false]
+            ];
             var PickingReady = await this.orm.searchCount(
-                "stock.picking", [
-                    ["picking_type_id", "=", StockOperation[i].id],
-                    ["state", "=", 'assigned']
-                ])
+                "stock.picking", [...pickingDomain, ["state", "=", 'assigned']])
+            var PickingWaiting = await this.orm.searchCount(
+                "stock.picking", [...pickingDomain, ["state", "in", ['waiting', 'confirmed']]])
             var PickingDone = await this.orm.searchCount(
-                "stock.picking", [
-                    ["picking_type_id", "=", StockOperation[i].id],
-                    ["state", "=", 'done']
-                ])
+                "stock.picking", [...pickingDomain, ["state", "=", 'done']])
             operationData.push({
                 'id': StockOperation[i].id,
                 'name': StockOperation[i].name,
-                PickingDraft,
                 PickingReady,
+                PickingWaiting,
                 PickingDone
             })
         }
@@ -198,7 +195,7 @@ export class CylloBarcode extends Component {
             res_model: 'stock.picking',
             domain: [
                 ["picking_type_id", "=", Number(operation_id)],
-                ["state", "=", "assigned"],
+                ["state", "not in", ["draft", "cancel"]],
                 "|",
                 ["user_id", "=", this.user.userId],
                 ["user_id", "=", false]
@@ -210,7 +207,8 @@ export class CylloBarcode extends Component {
             ],
             target: 'main',
             context: {
-                'kanban_view_ref': 'cyllo_barcode.view_stock_picking_kanban'
+                'kanban_view_ref': 'cyllo_barcode.view_stock_picking_kanban',
+                'search_default_available': 1
             }
         })
     }

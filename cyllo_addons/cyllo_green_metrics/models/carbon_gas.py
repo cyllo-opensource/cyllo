@@ -29,14 +29,18 @@ class CarbonGas(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = 'name'
 
-    name = fields.Char(required=True)
-    code = fields.Char(required=True, help="Unique short code used to identify the gas (e.g., CO2, CH4, N2O).")
-    formula = fields.Char(help="Chemical formula of the gas (e.g., CO₂, CH₄, N₂O).")
+    name = fields.Char(required=True, tracking=True)
+    code = fields.Char(required=True, tracking=True,
+                       help="Unique short code used to identify the gas (e.g., CO2, CH4, N2O).")
+    formula = fields.Char(tracking=True,
+                          help="Chemical formula of the gas (e.g., CO₂, CH₄, N₂O).")
     gwp = fields.Float(string='GWP', help="Global Warming Potential (GWP) indicates how much more heat this gas traps "
-                                          "in the atmosphere compared to CO₂ (GWP = 1) over a specified time period.")
+                                          "in the atmosphere compared to CO₂ (GWP = 1) over a specified time period.",
+                       tracking=True)
     unit_name = fields.Many2one('carbon.unit', string='Unit',
+                                tracking=True,
                                 help="Select the unit used to measure the gas or its emission factor.")
-    active = fields.Boolean(default=True)
+    active = fields.Boolean(default=True, tracking=True)
     note = fields.Text()
 
     _sql_constraints = [

@@ -28,12 +28,14 @@ class CarbonScope(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = 'sequence, name'
 
-    name = fields.Char(required=True, help="Enter the name of the emission scope (e.g., Scope 1, Scope 2, Scope 3).")
-    code = fields.Char(required=True, help="Enter a unique code to identify the emission scope.")
-    sequence = fields.Integer(default=10)
-    active = fields.Boolean(default=True)
+    name = fields.Char(required=True, tracking=True,
+                       help="Enter the name of the emission scope (e.g., Scope 1, Scope 2, Scope 3).")
+    code = fields.Char(required=True, tracking=True,
+                       help="Enter a unique code to identify the emission scope.")
+    sequence = fields.Integer(default=10, tracking=True)
+    active = fields.Boolean(default=True, tracking=True)
     company_id = fields.Many2one('res.company', string='Company',
-                                 required=True, default=lambda self: self.env.company,
+                                 required=True, default=lambda self: self.env.company, tracking=True,
                                     help="Select the company to which this emission scope belongs.")
     description = fields.Text( help="Provide additional details or notes about this emission scope.")
 

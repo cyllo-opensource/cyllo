@@ -4,6 +4,12 @@ import { registry } from "@web/core/registry";
 const { Component, useState, onMounted, onWillUnmount } = owl;
 import { useService } from "@web/core/utils/hooks";
 
+const KS_EDGE_ZONE_PX = 70;
+const KS_EDGE_MARGIN_PX = 24;
+const KS_SCROLL_MIN_PX_MS = 0.35;
+const KS_SCROLL_MAX_PX_MS = 1.10;
+const KS_DRAG_THRESHOLD_PX = 10;
+const KS_GHOST_MARGIN_PX = 8;
 
 class kitchen_screen_dashboard extends Component {
 
@@ -13,6 +19,17 @@ class kitchen_screen_dashboard extends Component {
         this._dragOrderId = null;
         this._isDragging = false;
         this._onPosOrderCreationBound = this.onPosOrderCreation.bind(this);
+        this._ks_board_el = null;
+        this._ks_scroll_raf = null;
+        this._ks_scroll_dir = 0;
+        this._ks_edge_depth = 0;
+        this._ks_last_time = null;
+        this._ks_last_x = 0;
+        this._ks_last_y = 0;
+        this._ks_last_col = null;
+        this._ks_prev_snap = "";
+        this._ks_prev_behavior = "";
+        this._ks_remove_ghost = null;
         onMounted(() => {
             // Setup a timer to refresh the time-ago badges every minute
             this._timer = setInterval(() => {
@@ -66,7 +83,6 @@ class kitchen_screen_dashboard extends Component {
         this.busService = this.env.services.bus_service;
         this.busService.addChannel("pos_order_created");
         this.busService.addEventListener("notification", this._onPosOrderCreationBound);
-
         this.action = useService("action");
         this.rpc = this.env.services.rpc;
         this.action = useService("action");
@@ -124,9 +140,7 @@ class kitchen_screen_dashboard extends Component {
 
     async close_kitchen_screen(e) {
         e?.stopPropagation?.();
-        // NOTE: Do NOT call e.preventDefault() here — it would block the button click itself.
 
-        // 1. Try action.restore() — works when opened as a client_action overlay/fullscreen.
         if (this.action?.restore) {
             try {
                 await this.action.restore();
@@ -179,13 +193,126 @@ class kitchen_screen_dashboard extends Component {
         this._isDragging = false;
         document.querySelectorAll(".kitchen_drag_over").forEach((el) => el.classList.remove("kitchen_drag_over"));
     }
+       /**
+     * Single source of truth for the "kitchen_drag_over" drop highlight.
+     * Used both by onTouchMove and by the auto-scroll RAF loop so that the
+     * highlighted column always matches what is actually under the finger,
+     * even while the board slides underneath a stationary finger.
+     */
+    _ks_set_highlight(col) {
+        if (col === this._ks_last_col) return;
+        document.querySelectorAll(".kitchen_drag_over")
+            .forEach((el) => el.classList.remove("kitchen_drag_over"));
+        if (col) {
+            col.classList.add("kitchen_drag_over");
+        }
+        this._ks_last_col = col;
+    }
+
+    /**
+     * Remember which board element is being auto-scrolled for this drag and
+     * neutralize scroll-snap / smooth-behavior while dragging (they fight the
+     * manual scrollLeft updates). Prior inline values are restored on release.
+     */
+    _ks_set_board(board) {
+        if (this._ks_board_el === board) return;
+        this._ks_release_board();
+        this._ks_board_el = board || null;
+        if (this._ks_board_el) {
+            this._ks_prev_snap = this._ks_board_el.style.scrollSnapType;
+            this._ks_prev_behavior = this._ks_board_el.style.scrollBehavior;
+            this._ks_board_el.style.scrollSnapType = "none";
+            this._ks_board_el.style.scrollBehavior = "auto";
+        }
+    }
+
+    /**
+     * Stop auto-scroll and restore the board's original scroll-snap /
+     * scroll-behavior. Called on touchend / touchcancel / unmount.
+     */
+    _ks_release_board() {
+        this._ks_stop_autoscroll();
+        if (this._ks_board_el) {
+            this._ks_board_el.style.scrollSnapType = this._ks_prev_snap || "";
+            this._ks_board_el.style.scrollBehavior = this._ks_prev_behavior || "";
+            this._ks_board_el = null;
+        }
+    }
+
+    /** Stop the RAF loop and reset the scroll direction / edge depth. */
+    _ks_stop_autoscroll() {
+        if (this._ks_scroll_raf) {
+            cancelAnimationFrame(this._ks_scroll_raf);
+            this._ks_scroll_raf = null;
+        }
+        this._ks_scroll_dir = 0;
+        this._ks_edge_depth = 0;
+        this._ks_last_time = null;
+    }
+
+    /**
+     * Start (or keep) the requestAnimationFrame loop that slowly moves the
+     * board in the direction held by the finger. Speed ramps with
+     * _ks_edge_depth (0..1) so the default drift stays "slow".
+     */
+    _ks_start_autoscroll() {
+        if (this._ks_scroll_raf) return;
+        this._ks_last_time = performance.now();
+        const step = (now) => {
+            const dt = this._ks_last_time ? Math.max(0, now - this._ks_last_time) : 16.7;
+            this._ks_last_time = now;
+            if (this._ks_board_el && this._ks_scroll_dir) {
+                const speed = KS_SCROLL_MIN_PX_MS +
+                    (KS_SCROLL_MAX_PX_MS - KS_SCROLL_MIN_PX_MS) * this._ks_edge_depth;
+                this._ks_board_el.scrollLeft += this._ks_scroll_dir * speed * dt;
+                // Re-highlight the drop column while the board slides under the finger
+                const el = document.elementFromPoint(this._ks_last_x, this._ks_last_y);
+                const col = el?.closest?.(".kitchen_column");
+                if (col !== this._ks_last_col) {
+                    this._ks_set_highlight(col);
+                }
+            }
+            this._ks_scroll_raf = requestAnimationFrame(step);
+        };
+        this._ks_scroll_raf = requestAnimationFrame(step);
+    }
+
+    /**
+     * Edge detection: called with the finger's client X on every touchmove.
+     * Holding the finger near the RIGHT edge reveals the stages on the right
+     * (board scrolls left), near the LEFT edge reveals the stages on the left.
+     */
+    _ks_update_edge_scroll(client_x) {
+        const board = this._ks_board_el;
+        if (!board) return;
+        const rect = board.getBoundingClientRect();
+        if (client_x > rect.right - KS_EDGE_ZONE_PX) {
+            this._ks_edge_depth = Math.min(1,
+                (client_x - (rect.right - KS_EDGE_ZONE_PX)) /
+                Math.max(1, KS_EDGE_ZONE_PX - KS_EDGE_MARGIN_PX));
+            this._ks_scroll_dir = 1;
+            this._ks_start_autoscroll();
+        } else if (client_x < rect.left + KS_EDGE_ZONE_PX) {
+            this._ks_edge_depth = Math.min(1,
+                ((rect.left + KS_EDGE_ZONE_PX) - client_x) /
+                Math.max(1, KS_EDGE_ZONE_PX - KS_EDGE_MARGIN_PX));
+            this._ks_scroll_dir = -1;
+            this._ks_start_autoscroll();
+        } else if (this._ks_scroll_dir) {
+            this._ks_stop_autoscroll();
+        }
+    }
+
 
     _setupTouchDrag() {
-        // Self-contained touch drag support for tablets/mobiles.
-        // Mirrors the dragstart / dragover / drop sequence using touch events.
+
         let touchDragOrderId = null;
         let ghost = null;
-        let lastOverColumn = null;
+        let ghostWrap = null;
+        let dragArmed = false;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let dragSourceCard = null;
 
         const getCardEl = (target) => target?.closest?.(".kitchen_card");
         const getColumnEl = (x, y) => {
@@ -193,14 +320,15 @@ class kitchen_screen_dashboard extends Component {
             return el?.closest?.(".kitchen_column");
         };
         const removeGhost = () => {
+
+            if (ghostWrap) {
+                ghostWrap.remove();
+                ghostWrap = null;
+            }
             if (ghost) {
                 ghost.remove();
                 ghost = null;
             }
-        };
-        const clearHighlight = () => {
-            document.querySelectorAll(".kitchen_drag_over").forEach((el) => el.classList.remove("kitchen_drag_over"));
-            lastOverColumn = null;
         };
 
         const onTouchStart = (e) => {
@@ -210,54 +338,119 @@ class kitchen_screen_dashboard extends Component {
             const orderId = Number(card.dataset?.orderId);
             if (!orderId) return;
 
+            const touch = e.touches[0];
             touchDragOrderId = orderId;
             this._dragOrderId = orderId;
-            this._isDragging = true;
+            // No ghost here and _isDragging stays false. The drag (and its
+            // overlay) only arms after real finger travel — a tap must remain
+            // a tap so its click reaches advance_order().
+            dragArmed = false;
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            dragSourceCard = card;
 
-            // Create a visual ghost clone
+            // Keep: prepare edge auto-scroll for the potential drag.
+            // (Board is released again instantly in the tap branch of onTouchEnd.)
+            this._ks_last_x = 0;
+            this._ks_last_y = 0;
+            this._ks_set_highlight(null);
+            this._ks_set_board(card.closest(".kitchen_board"));
+        };
+
+
+        const createGhost = () => {
+            const card = dragSourceCard;
             const rect = card.getBoundingClientRect();
+            ghostWrap = document.createElement("div");
+            ghostWrap.className =
+                "kitchen body_wrapper screen_info wrapper kitchen_column kitchen_column_body";
+            ghostWrap.style.cssText = "display: contents;";
             ghost = card.cloneNode(true);
             ghost.style.cssText = `
                 position: fixed;
                 left: ${rect.left}px;
                 top: ${rect.top}px;
                 width: ${rect.width}px;
+                height: ${rect.height}px;
+                overflow: hidden;
                 opacity: 0.75;
                 pointer-events: none;
                 z-index: 9999;
                 border-radius: 8px;
                 box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-                transform: scale(1.02);
+                transform: none;
+                margin: 0 !important;
                 transition: none;
             `;
-            document.body.appendChild(ghost);
+            ghostWrap.appendChild(ghost);
+            document.body.appendChild(ghostWrap);
         };
 
         const onTouchMove = (e) => {
-            if (!touchDragOrderId || !ghost) return;
+            if (!touchDragOrderId) return;
             e.preventDefault();
 
             const touch = e.touches[0];
+
+            // Arm the drag only after real finger travel. Before that, nothing
+            // visual happens on the card.
+            if (!dragArmed) {
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                if ((dx * dx + dy * dy) < (KS_DRAG_THRESHOLD_PX * KS_DRAG_THRESHOLD_PX)) {
+                    return;
+                }
+                dragArmed = true;
+                this._isDragging = true;
+                createGhost();
+            }
+            if (!ghost) return;
+
+            // Keep: finger coords for the auto-scroll highlight sync.
+            this._ks_last_x = touch.clientX;
+            this._ks_last_y = touch.clientY;
+
             const rect = ghost.getBoundingClientRect();
-            ghost.style.left = `${touch.clientX - rect.width / 2}px`;
-            ghost.style.top = `${touch.clientY - rect.height / 2}px`;
+
+            // Clamp the ghost inside the viewport — it can never overflow the
+            // mobile screen. Column detection below still uses the RAW finger
+            // coordinates, so drag machinery is unaffected.
+            const maxX = Math.max(KS_GHOST_MARGIN_PX,
+                window.innerWidth - rect.width - KS_GHOST_MARGIN_PX);
+            const maxY = Math.max(KS_GHOST_MARGIN_PX,
+                window.innerHeight - rect.height - KS_GHOST_MARGIN_PX);
+            ghost.style.left = `${Math.min(Math.max(touch.clientX - rect.width / 2,
+                KS_GHOST_MARGIN_PX), maxX)}px`;
+            ghost.style.top = `${Math.min(Math.max(touch.clientY - rect.height / 2,
+                KS_GHOST_MARGIN_PX), maxY)}px`;
 
             // Highlight the column below the finger
             ghost.style.display = "none";
             const col = getColumnEl(touch.clientX, touch.clientY);
             ghost.style.display = "";
 
-            if (col !== lastOverColumn) {
-                clearHighlight();
-                if (col) {
-                    col.classList.add("kitchen_drag_over");
-                    lastOverColumn = col;
-                }
-            }
+            // Shared highlight helper (kept in sync with the auto-scroll loop)
+            this._ks_set_highlight(col);
+
+            // Start/stop edge auto-scroll depending on finger position
+            this._ks_update_edge_scroll(touch.clientX);
         };
 
         const onTouchEnd = async (e) => {
             if (!touchDragOrderId) return;
+
+            // It was a tap, never a drag. Reset state immediately so the
+            // browser's click reaches advance_order() (fixes the _isDragging
+            // race that could swallow taps), and restore the board since no
+            // drop will happen.
+            if (!dragArmed) {
+                this._ks_release_board();
+                this._ks_set_highlight(null);
+                touchDragOrderId = null;
+                this._dragOrderId = null;
+                this._isDragging = false;
+                return;
+            }
 
             const touch = e.changedTouches[0];
 
@@ -267,7 +460,11 @@ class kitchen_screen_dashboard extends Component {
             ghost && (ghost.style.display = "");
 
             removeGhost();
-            clearHighlight();
+
+            // Stop auto-scroll, restore the board, clear highlight
+            // (done BEFORE the async stage move so scrolling halts instantly)
+            this._ks_release_board();
+            this._ks_set_highlight(null);
 
             if (col) {
                 const stageId = Number(col.dataset?.stageId);
@@ -276,6 +473,21 @@ class kitchen_screen_dashboard extends Component {
                 }
             }
 
+            dragArmed = false;
+            dragSourceCard = null;
+            touchDragOrderId = null;
+            this._dragOrderId = null;
+            this._isDragging = false;
+        };
+
+        // Browsers cancel touches for system gestures; without this the ghost
+        // would stay on screen and the auto-scroll loop would keep running
+        const onTouchCancel = () => {
+            removeGhost();
+            this._ks_release_board();
+            this._ks_set_highlight(null);
+            dragArmed = false;
+            dragSourceCard = null;
             touchDragOrderId = null;
             this._dragOrderId = null;
             this._isDragging = false;
@@ -285,19 +497,27 @@ class kitchen_screen_dashboard extends Component {
         this._touchDragStart = onTouchStart;
         this._touchDragMove = onTouchMove;
         this._touchDragEnd = onTouchEnd;
+        this._touchDragCancel = onTouchCancel;
+        this._ks_remove_ghost = removeGhost;   // NEW — used by teardown cleanup
 
         document.addEventListener("touchstart", onTouchStart, { passive: true });
         document.addEventListener("touchmove", onTouchMove, { passive: false });
         document.addEventListener("touchend", onTouchEnd, { passive: true });
+        document.addEventListener("touchcancel", onTouchCancel, { passive: true });
     }
 
     _teardownTouchDrag() {
         if (this._touchDragStart) document.removeEventListener("touchstart", this._touchDragStart);
         if (this._touchDragMove) document.removeEventListener("touchmove", this._touchDragMove);
         if (this._touchDragEnd) document.removeEventListener("touchend", this._touchDragEnd);
+        if (this._touchDragCancel) document.removeEventListener("touchcancel", this._touchDragCancel);
         this._touchDragStart = null;
         this._touchDragMove = null;
         this._touchDragEnd = null;
+        this._touchDragCancel = null;
+        this._ks_remove_ghost?.();      // NEW — remove ghost + wrapper if unmounting mid-drag
+        this._ks_remove_ghost = null;   // NEW
+        this._ks_release_board();       // cancels the RAF loop + restores scroll-snap
     }
 
     on_stage_drag_over(e) {
@@ -551,8 +771,7 @@ class kitchen_screen_dashboard extends Component {
         }
     }
 
-    // change stage
-    // change stage
+
     select_stage(stage_id) {
         this.state.active_stage_id = stage_id;
         let selected_stage = this.state.stages.find(s => s.id == stage_id);

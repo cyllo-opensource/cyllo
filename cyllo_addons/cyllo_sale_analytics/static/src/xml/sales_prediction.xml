@@ -14,14 +14,14 @@
             <!-- ══════════════════════════════════════════════════════ -->
             <div t-if="state.status === 'guidelines' or state.status === 'loading'"
                  class="cy-gd-wrap position-relative d-flex flex-column align-items-center justify-content-center h-100">
-                <div class="text-center p-3 card w-50 cy-fc-guidelines">
+                <div class="text-center p-3 card w-100 cy-fc-guidelines">
                     <div class="mb-4 text-center mx-auto d-flex justify-content-center">
                         <!-- Local owl animation, rendered by the bundled lottie
                              player (see _initOwlAnimation in the JS) -->
                         <div class="cy-lottie-owl" t-ref="owlLottie"></div>
                     </div>
-                    <h1 class="mb-4 text-primary fw-bold">Sales Forecasting Data Preparation</h1>
-                    <h3 class="mb-5 text-muted fs-5">
+                    <h1 class="cy-start-heading">Sales Forecasting Data Preparation</h1>
+                    <h3 class="mb-5 text-muted fs-5 d-none d-md-block">
                         Welcome to the advanced predictive forecasting module.
                         Please select a date range and the necessary data fields you wish to include
                         to train your models securely and generate a dynamic analysis table.
@@ -34,7 +34,7 @@
                 <!-- ══════════════════════════════════════════════════════ -->
                 <!-- FEATURE CARDS STRIP (below the guidelines card)         -->
                 <!-- ══════════════════════════════════════════════════════ -->
-                <div class="cy-gd-features w-50 mt-4">
+                <div class="cy-gd-features w-100 mt-4">
                     <div class="row g-4 px-4 py-3">
                         <div class="col-md-6">
                             <div class="cy-gd-item d-flex align-items-center gap-3">
@@ -107,11 +107,8 @@
                                 <i class="ri-question-line"/>
                             </a>
                         </div>
-                        <p class="text-muted small mb-0">Configure what to predict, how far ahead, and which signals the model should use.</p>
+                        <p class="text-muted small mb-0 d-none d-md-block">Configure what to predict, how far ahead, and which signals the model should use.</p>
                     </div>
-<!--                    <span class="cy-wz-badge-draft small fw-semibold">-->
-<!--                        <span class="cy-wz-badge-dot"></span> Draft · not generated yet-->
-<!--                    </span>-->
                 </div>
 
                 <div class="row g-3">
@@ -429,7 +426,7 @@
                     <div class="col-lg-4 ps-lg-1 cy-wz-side">
                         <div class="cy-wz-summary mb-3">
                             <div class="cy-wz-summary-head">
-                                <i class="ri-magic-line me-1"></i> FORECAST SUMMARY
+                                FORECAST SUMMARY
                             </div>
                             <div class="cy-wz-summary-body">
                                 <t t-if="wizardSummary.days > 0">
@@ -482,14 +479,22 @@
             <!-- ══════════════════════════════════════════════════════ -->
             <!-- PROCESSING STATUS                                       -->
             <!-- ══════════════════════════════════════════════════════ -->
-            <div t-if="state.status === 'processing'" class="d-flex flex-column align-items-center justify-content-center h-100">
-                <div class="text-center p-5 card shadow-sm border-0 rounded">
+            <!-- Same composition as the guidelines screen: owl, olive
+                 heading, muted copy — but no card and no button. -->
+            <div t-if="state.status === 'processing'"
+                 class="cy-proc-wrap d-flex flex-column align-items-center justify-content-center h-100">
+                <div class="text-center cy-proc-inner">
                     <div class="mb-4 text-center mx-auto d-flex justify-content-center">
                         <!-- Local owl animation, rendered by the bundled lottie player -->
                         <div class="cy-lottie-owl" t-ref="procLottie"></div>
                     </div>
-                    <h3 class="text-success mb-2">Processing Dynamic Query...</h3>
-                    <p class="text-muted">Fetching and organizing the dataset based on your selections. This may take a moment.</p>
+                    <h1 class="mb-4 text-primary fw-bold">
+                        Processing Data<span class="cy-proc-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
+                    </h1>
+                    <p class="mb-0 text-muted fs-5">
+                        Fetching and organizing the dataset based on your selections.
+                        This may take a moment.
+                    </p>
                 </div>
             </div>
 
@@ -499,16 +504,16 @@
             <div t-if="state.status === 'table'" class="cy-tr-root">
 
                 <!-- ── Page header ── -->
-                <div class="d-flex justify-content-between align-items-start mb-3 flex-shrink-0">
+                <div class="cy-forecast-header d-flex justify-content-between align-items-start mb-3 flex-shrink-0">
                     <div>
                         <div class="d-flex align-items-center gap-2">
-                            <h3 class="fw-bold mb-0">Forecast results</h3>
+                            <span class="forecast-heading">Forecast results</span>
                         </div>
-                        <p class="text-muted small mb-0">
+                        <p class="cy-forecast-subheading">
                             <t t-esc="state.totalRows"/> records generated. The preview shows up to 100 rows — download the file to get the full dataset.
                         </p>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="cy-forecast-actions d-flex gap-2">
                         <button class="btn btn-primary" t-on-click="cancelWizard">
                             <i class="ri-refresh-line me-1"></i> New forecast
                         </button>
@@ -528,53 +533,58 @@
                 <div class="row g-3 mb-3 flex-shrink-0">
                     <div class="col-xl-3 col-md-6">
                         <div class="cy-tr-kpi">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small">Records</span>
+                            <div class="cy-tr-kpi-top">
+                                <div class="cy-tr-kpi-lead">
+                                    <span class="cy-tr-kpi-title">Records</span>
+                                    <span class="cy-tr-kpi-value"><t t-esc="datasetStats.records"/><span class="cy-tr-kpi-unit"><t t-esc="datasetStats.aggregate"/></span></span>
+                                </div>
                                 <span class="cy-tr-kpi-icon"><i class="ri-file-list-3-line"></i></span>
                             </div>
-                            <div class="d-flex align-items-baseline gap-1 mb-2">
-                                <span class="cy-tr-kpi-value"><t t-esc="datasetStats.records"/></span>
-                                <span class="text-muted small"><t t-esc="datasetStats.aggregate"/></span>
+                            <div class="cy-tr-kpi-foot">
+                                <span class="cy-tr-kpi-pill"><i class="ri-arrow-right-up-line"></i><t t-esc="datasetStats.aggregateLabel"/></span>
                             </div>
-                            <span class="cy-tr-kpi-pill"><i class="ri-arrow-right-up-line me-1"></i><t t-esc="datasetStats.aggregateLabel"/></span>
                         </div>
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <div class="cy-tr-kpi">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small">Sale orders</span>
+                            <div class="cy-tr-kpi-top">
+                                <div class="cy-tr-kpi-lead">
+                                    <span class="cy-tr-kpi-title">Sale orders</span>
+                                    <span class="cy-tr-kpi-value"><t t-esc="datasetStats.saleOrders"/><span class="cy-tr-kpi-unit">Orders</span></span>
+                                </div>
                                 <span class="cy-tr-kpi-icon"><i class="ri-shopping-cart-2-line"></i></span>
                             </div>
-                            <div class="d-flex align-items-baseline gap-1 mb-2">
-                                <span class="cy-tr-kpi-value"><t t-esc="datasetStats.saleOrders"/></span>
-                                <span class="text-muted small">Orders</span>
+                            <div class="cy-tr-kpi-foot">
+                                <span class="cy-tr-kpi-pill"><i class="ri-arrow-right-up-line"></i>Linked across records</span>
                             </div>
-                            <span class="cy-tr-kpi-pill"><i class="ri-arrow-right-up-line me-1"></i>Linked across records</span>
                         </div>
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <div class="cy-tr-kpi">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small">Order lines</span>
+                            <div class="cy-tr-kpi-top">
+                                <div class="cy-tr-kpi-lead">
+                                    <span class="cy-tr-kpi-title">Order lines</span>
+                                    <span class="cy-tr-kpi-value"><t t-esc="datasetStats.orderLines"/><span class="cy-tr-kpi-unit">Lines</span></span>
+                                </div>
                                 <span class="cy-tr-kpi-icon"><i class="ri-stack-line"></i></span>
                             </div>
-                            <div class="d-flex align-items-baseline gap-1 mb-2">
-                                <span class="cy-tr-kpi-value"><t t-esc="datasetStats.orderLines"/></span>
-                                <span class="text-muted small">Lines</span>
+                            <div class="cy-tr-kpi-foot">
+                                <span class="cy-tr-kpi-pill"><i class="ri-arrow-right-up-line"></i>Line-level detail</span>
                             </div>
-                            <span class="cy-tr-kpi-pill"><i class="ri-arrow-right-up-line me-1"></i>Line-level detail</span>
                         </div>
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <div class="cy-tr-kpi">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small">Total amount</span>
+                            <div class="cy-tr-kpi-top">
+                                <div class="cy-tr-kpi-lead">
+                                    <span class="cy-tr-kpi-title">Total amount</span>
+                                    <span class="cy-tr-kpi-value"><t t-esc="datasetStats.totalAmount"/></span>
+                                </div>
                                 <span class="cy-tr-kpi-icon"><i class="ri-money-dollar-circle-line"></i></span>
                             </div>
-                            <div class="mb-2">
-                                <span class="cy-tr-kpi-value"><t t-esc="datasetStats.totalAmount"/></span>
+                            <div class="cy-tr-kpi-foot">
+                                <span class="cy-tr-kpi-pill"><i class="ri-arrow-right-up-line"></i>Avg. trend score <t t-esc="datasetStats.trendScore"/></span>
                             </div>
-                            <span class="cy-tr-kpi-pill"><i class="ri-arrow-right-up-line me-1"></i>Avg. trend score <t t-esc="datasetStats.trendScore"/></span>
                         </div>
                     </div>
                 </div>
@@ -588,7 +598,7 @@
                                 <t t-else="">Dataset preview</t>
                             </h4>
                             <span t-if="state.activeTab === 'chart'" class="cy-tr-mode-pill small fw-semibold">
-                                <i class="ri-magic-line me-1"></i><t t-esc="state.mode === 'ai' ? 'AI prediction' : 'Algorithm prediction'"/>
+                               <t t-esc="state.mode === 'ai' ? 'AI prediction' : 'Algorithm prediction'"/>
                             </span>
                         </div>
                         <div class="cy-tr-toggle d-flex" role="group">
@@ -604,9 +614,8 @@
                             </button>
                         </div>
                     </div>
-                        <t t-if="state.hasForecast">
+                        <t t-if="state.hasForecast and state.activeTab === 'chart'">
                             <div class="flex-grow-1 d-flex flex-column overflow-hidden">
-                                <span class="fw-bold small mb-2 flex-shrink-0">Sales so far</span>
                                 <div class="cy-tr-chart-box flex-grow-1">
                                     <div class="cy-fcnews-stage position-relative h-100">
                                         <div id="sale_forecast_wizard_chart" class="cy-forecast-wizard-chart"></div>
@@ -659,7 +668,7 @@
                                 </div>
                             </div>
                         </t>
-                        <t t-else="">
+                        <t t-elif="state.activeTab === 'chart'">
                             <div class="cy-tr-warn d-flex align-items-start gap-2 mb-3 flex-shrink-0">
                                 <i class="ri-error-warning-line fs-5 mt-1"></i>
                                 <div>
@@ -669,12 +678,12 @@
                             </div>
                         </t>
 
-                        <!-- ── Footer stats ── -->
-                        <div class="d-flex justify-content-between align-items-center small pt-2 mt-2 flex-shrink-0">
+                        <!-- ── Footer stats (chart view) ── -->
+                        <div t-if="state.activeTab === 'chart'" class="d-flex justify-content-between align-items-center small pt-2 mt-2 flex-shrink-0">
                             <span t-if="!state.hasForecast">
                                 <span class="fw-bold"><t t-esc="state.totalRows"/></span> of <span class="fw-bold">5</span> periods needed for a forecast
                             </span>
-                            <span t-else="" class="fw-semibold text-success">
+                            <span t-else="" class="fw-semibold text-primary">
                                 Forecast generated
                             </span>
                             <span class="text-muted">Preview limited to 100 rows</span>
@@ -798,6 +807,17 @@
                             </tbody>
                         </table>
                         <div t-if="filteredOrderLineRows.length === 0" class="p-4 text-center text-muted">No rows match your search.</div>
+                    </div>
+
+                    <!-- ── Footer stats (table view) ── -->
+                    <div class="d-flex justify-content-between align-items-center small pt-2 mt-2 flex-shrink-0">
+                        <span t-if="!state.hasForecast">
+                            <span class="fw-bold"><t t-esc="state.totalRows"/></span> of <span class="fw-bold">5</span> periods needed for a forecast
+                        </span>
+                        <span t-else="" class="fw-semibold text-primary">
+                            Forecast generated
+                        </span>
+                        <span class="text-muted">Preview limited to 100 rows</span>
                     </div>
 
                 </div>

@@ -28,11 +28,14 @@ class CarbonUnit(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = 'name'
 
-    name = fields.Char(required=True, help="Name of the measurement unit.")
-    full_name = fields.Char(help="Full name or description of the measurement unit.")
-    symbol = fields.Char(help="Symbol or abbreviation of the measurement unit (for example, kg, L, or tCO₂e).")
-    active = fields.Boolean(default=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    name = fields.Char(required=True, tracking=True, help="Name of the measurement unit.")
+    full_name = fields.Char(tracking=True,
+                            help="Full name or description of the measurement unit.")
+    symbol = fields.Char(tracking=True,
+                         help="Symbol or abbreviation of the measurement unit (for example, kg, L, or tCO₂e).")
+    active = fields.Boolean(default=True, tracking=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True,
+                                 default=lambda self: self.env.company, tracking=True)
 
     _sql_constraints = [
         ('carbon_unit_name_uniq', 'unique(name, company_id)', 'Unit name must be unique per company.'),

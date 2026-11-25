@@ -29,17 +29,22 @@ class CarbonActivity(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = 'date, name'
 
-    name = fields.Char(required=True)
-    date = fields.Date(required=True, default=fields.Date.context_today, help="Date on which the emission activity occurred.")
-    calculation_id = fields.Many2one('carbon.calc', ondelete='set null', help="Calculation record this emission belongs to.")
-    source_id = fields.Many2one('carbon.source', ondelete='restrict',  help="Emission source used for this record.")
+    name = fields.Char(required=True, tracking=True)
+    date = fields.Date(required=True, default=fields.Date.context_today, tracking=True,
+                       help="Date on which the emission activity occurred.")
+    calculation_id = fields.Many2one('carbon.calc', ondelete='set null', tracking=True,
+                                     help="Calculation record this emission belongs to.")
+    source_id = fields.Many2one('carbon.source', ondelete='restrict', tracking=True,
+                                help="Emission source used for this record.")
     scope_id = fields.Many2one('carbon.scope', related='source_id.scope_id', store=True, readonly=False,
                                help="Emission scope derived from the selected source.")
-    quantity = fields.Float(required=True, help="Measured quantity of the emission activity.")
+    quantity = fields.Float(required=True, tracking=True,
+                            help="Measured quantity of the emission activity.")
     uom_id = fields.Many2one('carbon.unit', related="source_id.activity_unit", string='Unit', help="Unit of measure for the entered quantity.")
     factor_id = fields.Many2one(
         'carbon.factor',
         ondelete='restrict',
+        tracking=True,
         domain="[('source_id', '=', source_id), "
                "'|', ('valid_from', '=', False), ('valid_from', '<=', date), "
                "'|', ('valid_to', '=', False), ('valid_to', '>=', date)]",
@@ -53,6 +58,7 @@ class CarbonActivity(models.Model):
         store=True,
         readonly=False,
         precompute=True,
+        tracking=True,
         help="Greenhouse gas associated with this emission. Taken from the emission "
              "factor, and can be overridden manually."
     )
@@ -70,12 +76,13 @@ class CarbonActivity(models.Model):
     state = fields.Selection([
         ('draft', 'Draft'),
         ('done', 'Done'),
-    ], default='draft', required=True)
+    ], default='draft', required=True, tracking=True)
     note = fields.Text(help="Additional notes or comments about this emission.")
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
-    account_move_id = fields.Many2one("account.move", string="Related Journal Entry")
+    company_id = fields.Many2one('res.company', string='Company', required=True,
+                                 default=lambda self: self.env.company, tracking=True)
+    account_move_id = fields.Many2one("account.move", string="Related Journal Entry", tracking=True)
     account_move_line_id = fields.Many2one("account.move.line", string="Related Journal Item",
-                                           copy=False)
+                                           copy=False, tracking=True)
     partner_id = fields.Many2one("res.partner", related="account_move_id.partner_id", store=True)
 
     def init(self):

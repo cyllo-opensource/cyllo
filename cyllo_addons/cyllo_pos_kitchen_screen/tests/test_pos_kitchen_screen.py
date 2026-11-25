@@ -20,6 +20,7 @@
 #
 #############################################################################
 
+from odoo import fields
 from odoo.tests import tagged, TransactionCase
 from odoo.exceptions import ValidationError
 
@@ -57,8 +58,14 @@ class TestPosKitchenScreen(TransactionCase):
                 'name': 'POS Default Pricelist',
             })
 
-        # Find or create POS Configuration
-        cls.pos_config = cls.env['pos.config'].search([('module_pos_restaurant', '=', True)], limit=1)
+        # Find or create a restaurant POS configuration without a kitchen screen.
+        # Existing databases may already contain a screen for their default POS,
+        # and this test creates its own screen in setUp for each test method.
+        existing_config_ids = cls.env['kitchen.screen'].search([]).mapped('pos_config_id').ids
+        cls.pos_config = cls.env['pos.config'].search([
+            ('module_pos_restaurant', '=', True),
+            ('id', 'not in', existing_config_ids),
+        ], limit=1)
         if not cls.pos_config:
             journal = cls.env['account.journal'].search([('type', '=', 'sale')], limit=1)
             cls.pos_config = cls.env['pos.config'].create({
@@ -219,16 +226,20 @@ class TestPosKitchenScreen(TransactionCase):
         # to be the only place hour/minutes/floor got populated), the computed
         # fields must already report real values derived from date_order.
         self.assertTrue(pos_order.date_order)
-        self.assertEqual(pos_order.hour, "%02d" % pos_order.date_order.hour)
-        self.assertEqual(pos_order.minutes, "%02d" % pos_order.date_order.minute)
+        local_order_time = fields.Datetime.context_timestamp(
+            pos_order, pos_order.date_order)
+        self.assertEqual(pos_order.hour, local_order_time.strftime("%H"))
+        self.assertEqual(pos_order.minutes, local_order_time.strftime("%M"))
         # No table assigned -> floor should be an empty string, never False.
         self.assertEqual(pos_order.floor, "")
         self.assertNotEqual(pos_order.floor, False)
 
         # Simulate payment-triggered entry into the kitchen workflow.
         pos_order.action_pos_order_paid()
-        self.assertEqual(pos_order.hour, "%02d" % pos_order.date_order.hour)
-        self.assertEqual(pos_order.minutes, "%02d" % pos_order.date_order.minute)
+        local_order_time = fields.Datetime.context_timestamp(
+            pos_order, pos_order.date_order)
+        self.assertEqual(pos_order.hour, local_order_time.strftime("%H"))
+        self.assertEqual(pos_order.minutes, local_order_time.strftime("%M"))
 
     def test_payment_does_not_resend_completed_kitchen_order(self):
         """Regression test for the reported bug: sending an order to the kitchen,

@@ -48,7 +48,9 @@ class OutGoingCallList(models.Model):
         help="To get the time and date, when the call is started")
     end_time = fields.Datetime(
         help="To get the time and date, when the call is ended")
-    duration = fields.Char(help="Duration of the call",compute='_compute_duration')
+    duration = fields.Char(help="Duration of the call",
+                           compute='_compute_duration', store=True,
+                           readonly=False)
     status = fields.Char(help="Status of the call")
     record_sid = fields.Char(string="Record Details",
                              help="Record Sid of the call")
@@ -68,17 +70,18 @@ class OutGoingCallList(models.Model):
     @api.depends('start_time', 'end_time')
     def _compute_duration(self):
         for record in self:
-            if record.end_time and record.start_time:
-                duration = record.end_time - record.start_time
-                total_seconds = int(duration.total_seconds())
-                hours, remainder = divmod(total_seconds, 3600)
-                minutes, seconds = divmod(remainder, 60)
-                if hours:
-                    record.duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            if not record.duration:
+                if record.end_time and record.start_time:
+                    duration = record.end_time - record.start_time
+                    total_seconds = int(duration.total_seconds())
+                    hours, remainder = divmod(total_seconds, 3600)
+                    minutes, seconds = divmod(remainder, 60)
+                    if hours:
+                        record.duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                    else:
+                        record.duration = f"{minutes:02d}:{seconds:02d}"
                 else:
-                    record.duration = f"{minutes:02d}:{seconds:02d}"
-            else:
-                record.duration = False
+                    record.duration = False
 
     def action_call(self, num, Sid, id):
         """To create an outgoing call list when we're making a call """

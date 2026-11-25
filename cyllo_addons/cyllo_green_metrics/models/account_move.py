@@ -25,7 +25,7 @@ from odoo.exceptions import UserError
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    is_credit_transfer = fields.Boolean(string="Is Credit Transfer", default=False)
+    is_credit_transfer = fields.Boolean(string="Is Credit Transfer", default=False, tracking=True)
     credit_product_id = fields.Many2one('product.product', compute='_compute_credit_product_id')
 
     def _compute_credit_product_id(self):

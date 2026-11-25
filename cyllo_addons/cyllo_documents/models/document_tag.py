@@ -27,7 +27,7 @@ class DocumentTag(models.Model):
     _name = "document.tag"
     _description = 'Document Tag'
 
-    name = fields.Char()
+    name = fields.Char(required=True)
     company_id = fields.Many2one('res.company', help='choose company',
                                  default=lambda self: self.env.company)
 

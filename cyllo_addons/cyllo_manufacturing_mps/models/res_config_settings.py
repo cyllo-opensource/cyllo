@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import Command, fields, models
+from odoo import fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -47,7 +47,6 @@ class ResConfigSettings(models.TransientModel):
         super().set_values()
 
         self._update_cron()
-        self._update_user_group()
 
     def _update_cron(self):
         cron = self.env.ref('cyllo_manufacturing_mps.ir_cron_mps_automate_orders', raise_if_not_found=False)
@@ -69,12 +68,3 @@ class ResConfigSettings(models.TransientModel):
                 'interval_type': interval_type,
                 'interval_number': interval_number,
             })
-
-    def _update_user_group(self):
-        group = self.env.ref('cyllo_manufacturing_mps.group_mps_enabled')
-        manager_group = self.env.ref('mrp.group_mrp_manager', raise_if_not_found=False)
-        if not manager_group:
-            return
-        group.users = (
-            [Command.set(manager_group.users.ids)] if self.is_mps else [Command.clear()]
-        )

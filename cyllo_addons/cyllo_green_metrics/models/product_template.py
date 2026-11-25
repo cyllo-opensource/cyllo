@@ -24,4 +24,4 @@ from odoo import fields, models
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    is_credit_product = fields.Boolean(string="Is Credit Product", default=False)
+    is_credit_product = fields.Boolean(string="Is Credit Product", default=False, tracking=True)

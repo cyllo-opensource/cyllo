@@ -15,14 +15,22 @@
                     <t t-name="kanban-box">
                         <div class="card">
                             <div class="card-body">
-                                <div class="badge-stock-picking">Ready</div>
                                 <div class="row d-flex justify-content-between">
-                                    <h4 class="card-title d-flex col-sm-9"
-                                        t-esc="record.name.value"/>
-                                    <button class="btn btn-secondary btn-sm w-auto mx-3 mb-1"
-                                            name="open_batch_picking" type="object">
-                                        <i class="ri-arrow-right-s-line"/>
-                                    </button>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <h4 class="card-title mb-0 flex-grow-1"
+                                            t-esc="record.name.value"/>
+                                        <div t-att-class="{
+                                                'badge-stock-picking': true,
+                                                'cy-barcode__ready': record.state.raw_value === 'in_progress',
+                                                'cy-barcode__waiting': record.state.raw_value === 'draft',
+                                                'cy-barcode__done': record.state.raw_value === 'done'
+                                             }"
+                                             t-esc="record.state.value"/>
+                                        <button class="btn btn-secondary btn-sm w-auto ms-1"
+                                                name="open_batch_picking" type="object">
+                                            <i class="ri-arrow-right-s-line"/>
+                                        </button>
+                                    </div>
                                     <p class="text-muted col-sm-6 text-truncate"
                                        t-esc="record.picking_type_id.value"/>
                                     <p class="text-muted col-sm-6 d-flex justify-content-end"

@@ -275,89 +275,55 @@ registry.category("command_provider").add(
                 });
             };
 
-            result.push({
-                action() {
-                    env.services.action.doAction({
-                        res_model: "ir.model",
-                        name: _t("Models"),
-                        target: "current",
-                        type: "ir.actions.act_window",
-                        view_mode: "tree,form",
-                        views: [[false, "list"], [false, "form"]],
-                    });
-                },
-                category: "master_search_results",
-                name: _t("Add a model to master search"),
-            });
-
-            if (options.searchValue) {
-                // Something typed: hit the same paginated search-as-you-type
-                // RPC the Master Search dialog itself uses (no eager
-                // full-table fetch — only what matches the query).
-                const groups = await env.services.rpc("/cy/master/search", {
-                    query: options.searchValue,
-                    page: 1,
-                    company_ids: env.services.company.activeCompanyIds,
-                }).then(([data]) => data);
-
-                for (const group of groups) {
-                    for (const item of group) {
-                        if (!item.isChild) {
-                            continue;
-                        }
-                        result.push({
-                            action: () => openRecord(item),
-                            category: "master_search_results",
-                            name: masterSearchItemName(item),
-                        });
-                    }
-                }
-            } else {
-                // Nothing typed yet: browse instead of searching — the 3
-                // most recently master-search-enabled models, 5 most
-                // recent records each (15 max), so opening ">" isn't a
-                // dead end before you've typed anything.
-                const models = await env.services.orm.searchRead(
-                    "ir.model",
-                    [["master_search", "=", true]],
-                    ["name", "model"],
-                    { limit: 3, order: "id desc" }
-                );
-
-                const perModelRecords = await Promise.all(
-                    models.map((model) =>
-                        env.services.orm
-                            .searchRead(model.model, [], ["display_name"], {
-                                limit: 5,
-                                order: "id desc",
-                            })
-                            .catch(() => [])
-                    )
-                );
-
-                models.forEach((model, index) => {
-                    const records = perModelRecords[index];
-                    if (!records.length) {
-                        return;
-                    }
-                    // A model-name title row (grey background, see
-                    // command_palette.xml/.scss for the isModelHeader
-                    // styling) instead of prefixing every record's name —
-                    // no-op action since it's a label, not a real result.
-                    result.push({
-                        action: () => {},
-                        category: "master_search_results",
-                        name: model.name,
-                        isModelHeader: true,
-                    });
-                    for (const record of records) {
-                        result.push({
-                            action: () => openRecord({ model: model.model, id: record.id }),
-                            category: "master_search_results",
-                            name: record.display_name,
-                        });
-                    }
+            const searchValue = options.searchValue || "";
+            const modelsToAdd = searchValue
+                ? await env.services.rpc("/cy/master/models", { query: searchValue })
+                : [];
+            if (!searchValue) {
+                result.push({
+                    action() {},
+                    category: "master_search_results",
+                    name: _t("Type a model name to add it to master search"),
                 });
+            }
+            for (const model of modelsToAdd) {
+                result.push({
+                    async action() {
+                        const added = await env.services.rpc("/cy/master/add_model", {
+                            model: model.model,
+                        });
+                        if (added) {
+                            env.services.notification.add(
+                                `${model.name} ${_t("added to master search")}`,
+                                { type: "success" }
+                            );
+                        }
+                    },
+                    category: "master_search_results",
+                    name: `${model.name} — ${_t("Add to master search")}`,
+                });
+            }
+
+            // The endpoint uses ORM searches in the current user's environment,
+            // including ACLs and record rules. With an empty query it returns
+            // a small recent-record browse list.
+            const groups = await env.services.rpc("/cy/master/search", {
+                query: searchValue,
+                page: 1,
+                company_ids: env.services.company.activeCompanyIds,
+            }).then(([data]) => data);
+
+            for (const group of groups) {
+                for (const item of group) {
+                    if (!item.isChild) {
+                        continue;
+                    }
+                    result.push({
+                        action: () => openRecord(item),
+                        category: "master_search_results",
+                        name: masterSearchItemName(item),
+                    });
+                }
             }
 
             return result;

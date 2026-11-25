@@ -19,9 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-import psycopg2
-
 from odoo import http
+from odoo.exceptions import AccessError
 from odoo.http import request
 
 SIZE = 5
@@ -29,6 +28,58 @@ SIZE = 5
 
 class MasterSearch(http.Controller):
     """Controller for the master search functionality."""
+
+    @staticmethod
+    def _user_can_read_model(model_name):
+        """Return whether the current user has read ACL on an installed model."""
+        if model_name not in request.env.registry.models:
+            return False
+        return request.env[model_name].check_access_rights(
+            'read', raise_exception=False)
+
+    @staticmethod
+    def _searchable_name_field(model_name):
+        model = request.env[model_name]
+        field = model._fields.get(model._rec_name or 'name')
+        return field if field and field.store and field.type in (
+            'char', 'text', 'html') else False
+
+    @http.route("/cy/master/models", methods=["POST"], type="json",
+                auth="user")
+    def cy_master_models(self, query=""):
+        """Return enabled model candidates the current user can read."""
+        query = (query or '').strip()
+        if not query:
+            return []
+        model_records = request.env['ir.model'].sudo().search(
+            [('master_search', '=', False),
+             '|', ('name', 'ilike', query), ('model', 'ilike', query)],
+            order='name, id')
+        candidates = []
+        for record in model_records:
+            model_name = record.model
+            if model_name not in request.env.registry.models:
+                continue
+            if not self._user_can_read_model(model_name):
+                continue
+            if not self._searchable_name_field(model_name):
+                continue
+            candidates.append({'model': model_name, 'name': record.name})
+        return candidates
+
+    @http.route("/cy/master/add_model", methods=["POST"], type="json",
+                auth="user")
+    def cy_master_add_model(self, model):
+        """Enable a readable model after validating the client request."""
+        model_record = request.env['ir.model'].sudo().search(
+            [('model', '=', model)], limit=1)
+        if not model_record or model not in request.env.registry.models:
+            return False
+        if not self._user_can_read_model(model) \
+                or not self._searchable_name_field(model):
+            return False
+        model_record.write({'master_search': True})
+        return True
 
     @http.route("/cy/master/search", methods=["POST"], type="json",
                 auth="user")
@@ -39,90 +90,43 @@ class MasterSearch(http.Controller):
         data = []
         ttl_records = request.env['ir.model'].sudo().search(
             [('master_search', '=', True)]).sorted('id')
-        ttl_records = ttl_records.filtered(
-            lambda r: 'name' in r.field_id.filtered(lambda f: f.store).mapped(
-                'name'))
+        ttl_records = ttl_records.filtered(lambda r:
+            r.model in request.env.registry.models
+            and self._user_can_read_model(r.model)
+            and self._searchable_name_field(r.model))
         total_records = len(ttl_records)
         offset = max((page - 1) * SIZE, 0)
         limit = SIZE + offset
-        if query != '':
-            models = ttl_records[offset: limit]
-            for rec in models:
-                stored_fields = rec.field_id.filtered(lambda f: f.store)
-                fields = stored_fields.mapped('name')
-                if rec._rec_name in fields:
-                    st_filed = stored_fields.filtered(
-                        lambda x: x.name == rec._rec_name)
-                    column = "name->> 'en_US'" if st_filed.translate else "name"
-                    temp_data = []
-                    operator = "IN" if len(company_ids) > 1 else "="
-                    company = tuple(company_ids) if len(company_ids) > 1 else \
-                    company_ids[0]
-                    has_company_column = 'company_id' in fields
-                    try:
-                        if has_company_column:
-                            sql_query = (
-                                f"SELECT * FROM {rec.model.replace('.', '_')} WHERE {column} "
-                                f"ILIKE %s AND company_id {operator} %s LIMIT 10")
-                            params = ('%' + query + '%', company)
-                        else:
-                            sql_query = f"SELECT * FROM {rec.model.replace('.', '_')} WHERE {column} ILIKE %s LIMIT 10"
-                            params = ('%' + query + '%',)
-                        request.env.cr.execute(sql_query, params)
-                        records = request.env.cr.dictfetchall()
-                        if len(records) >= 1:
-                            temp_data.append({
-                                'title': rec.name,
-                                'name': None,
-                                'id': None,
-                                'isChild': False,
-                                'isParent': True,
-                                'model': rec.model
-                            })
-                            for val in records:
-                                temp_data.append({
-                                    'title': None,
-                                    'name': val['name'],
-                                    'id': val['id'],
-                                    'isChild': True,
-                                    'isParent': False,
-                                    'model': rec.model,
-                                    'isJson': st_filed.translate
-                                })
-                        if records:
-                            data.append(temp_data)
-                        request.env.cr.commit()
-                    except psycopg2.Error:
-                        request.env.cr.rollback()
-                        try:
-                            domain = [('name', 'ilike', query)]
-                            if has_company_column:
-                                domain.append(
-                                    ('company_id', 'in', company_ids))
-                            records = request.env[rec.model].search(
-                                domain, limit=10)
-                            temp_data = []
-                            if records:
-                                temp_data.append({
-                                    'title': rec.name,
-                                    'name': None,
-                                    'id': None,
-                                    'isChild': False,
-                                    'isParent': True,
-                                    'model': rec.model
-                                })
-                                for val in records:
-                                    temp_data.append({
-                                        'title': None,
-                                        'name': val['name'],
-                                        'id': val['id'],
-                                        'isChild': True,
-                                        'isParent': False,
-                                        'model': rec.model,
-                                        'isJson': st_filed.translate
-                                    })
-                                data.append(temp_data)
-                            request.env.cr.commit()
-                        except Exception:
-                            request.env.cr.rollback()
+        models = ttl_records[offset: limit] if query else ttl_records[:3]
+        for rec in models:
+            field = self._searchable_name_field(rec.model)
+            try:
+                if query:
+                    records = request.env[rec.model].search(
+                        [(field.name, 'ilike', query)], limit=10)
+                else:
+                    records = request.env[rec.model].search(
+                        [], limit=5, order='id desc')
+                if records:
+                    group = [{
+                        'title': rec.name,
+                        'name': None,
+                        'id': None,
+                        'isChild': False,
+                        'isParent': True,
+                        'model': rec.model,
+                    }]
+                    group.extend({
+                        'title': None,
+                        'name': record.display_name,
+                        'id': record.id,
+                        'isChild': True,
+                        'isParent': False,
+                        'model': rec.model,
+                    } for record in records)
+                    data.append(group)
+            except (AccessError, ValueError):
+                # A model can have custom search behavior or field access
+                # restrictions; skip it without exposing records.
+                continue
         return data, not (limit + offset >= total_records)

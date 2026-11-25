@@ -30,25 +30,30 @@ class CarbonAssignationRule(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = 'priority, name'
 
-    name = fields.Char(required=True, help="Enter a descriptive name for the assignment rule.")
+    name = fields.Char(required=True, tracking=True,
+                       help="Enter a descriptive name for the assignment rule.")
     model_id = fields.Many2one('ir.model', required=True, ondelete='cascade', readonly=True,
                 default=lambda self: self.env['ir.model'].search([('model', '=', 'carbon.activity')], limit=1))
-    domain = fields.Char(help='Domain string applied to target records.')
-    source_id = fields.Many2one('carbon.source', required=True, ondelete='restrict',
+    domain = fields.Char(tracking=True, help='Domain string applied to target records.')
+    source_id = fields.Many2one('carbon.source', required=True, ondelete='restrict', tracking=True,
                                 help="Select the emission source to assign when this rule matches.")
-    factor_id = fields.Many2one('carbon.factor', ondelete='restrict', domain="[('source_id', '=', source_id)]",
+    factor_id = fields.Many2one('carbon.factor', ondelete='restrict', tracking=True,
+                                domain="[('source_id', '=', source_id)]",
                                 help="Select the emission factor to apply when the method is 'Factor'.")
-    gas_id = fields.Many2one('carbon.gas', ondelete='restrict',
+    gas_id = fields.Many2one('carbon.gas', ondelete='restrict', tracking=True,
                              help="Greenhouse gas assigned to matching activities. Leave empty to "
                                   "use the gas of the selected factor; set it to attribute a gas on "
                                   "rules that carry no factor.")
     method = fields.Selection([
         ('factor', 'Factor'),
         ('direct', 'Direct'),
-    ], default='factor', required=True, help="Choose how emissions are calculated")
-    priority = fields.Integer(default=10, help="Set the priority of this rule. Rules with lower priority values are evaluated first.")
-    active = fields.Boolean(default=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    ], default='factor', required=True, tracking=True,
+       help="Choose how emissions are calculated")
+    priority = fields.Integer(default=10, tracking=True,
+                              help="Set the priority of this rule. Rules with lower priority values are evaluated first.")
+    active = fields.Boolean(default=True, tracking=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True,
+                                 default=lambda self: self.env.company, tracking=True)
     note = fields.Text(help="Add any additional information or remarks about this assignment rule.")
 
     @api.onchange('factor_id')

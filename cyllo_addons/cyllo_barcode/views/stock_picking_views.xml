@@ -21,11 +21,19 @@
                                     <div class="d-flex align-items-center mb-2">
                                         <h4 class="card-title mb-0 flex-grow-1"
                                         t-esc="record.name.value"/>
-                                        <div class="badge-stock-picking">Ready</div>
-                                        <button class="btn btn-secondary btn-sm w-auto ms-3"
-                                                name="open_picking" type="object">
-                                            <i class="ri-arrow-right-s-line"/>
-                                        </button>
+                                        <div t-att-class="{
+                                                'badge-stock-picking': true,
+                                                'cy-barcode__ready': record.state.raw_value === 'assigned',
+                                                'cy-barcode__waiting': record.state.raw_value === 'waiting' || record.state.raw_value === 'confirmed',
+                                                'cy-barcode__done': record.state.raw_value === 'done'
+                                             }"
+                                             t-esc="record.state.value"/>
+                                        <t t-if="record.state.raw_value === 'assigned'">
+                                            <button class="btn btn-secondary btn-sm w-auto ms-1"
+                                                    name="open_picking" type="object">
+                                                <i class="ri-arrow-right-s-line"/>
+                                            </button>
+                                        </t>
                                     </div>
 
                                     <p class="text-muted col-sm-6 text-truncate"

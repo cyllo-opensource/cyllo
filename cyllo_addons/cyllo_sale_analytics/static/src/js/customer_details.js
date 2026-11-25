@@ -77,6 +77,12 @@ export class CustomerChurnDetails extends Component {
         return 'is-warn';
     }
 
+    /** Money like the churn dashboard list: "$ 1,990" / "$ 2,947.5". */
+    formatMoney(value) {
+        const n = parseFloat(value) || 0;
+        return '$ ' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
     // Translated period word (Quarter/Half Year/Year/Month), for chart x-axis.
     periodLabel() {
         const p = this.state.period || '';

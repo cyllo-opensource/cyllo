@@ -28,7 +28,8 @@ class CarbonEmissionSource(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = 'name'
 
-    name = fields.Char(required=True, help="Enter the name of the emission source (e.g., Electricity, Company Vehicle, Diesel Generator).")
+    name = fields.Char(required=True, tracking=True,
+                       help="Enter the name of the emission source (e.g., Electricity, Company Vehicle, Diesel Generator).")
     category = fields.Selection([
         ('energy', 'Energy'),
         ('transport', 'Transport'),
@@ -36,11 +37,15 @@ class CarbonEmissionSource(models.Model):
         ('waste', 'Waste'),
         ('services', 'Services'),
         ('other', 'Other'),
-    ], default='other', required=True, help="Select the category that best describes the source of the emission.")
-    activity_unit = fields.Many2one('carbon.unit', string='Activity Unit', help="Select the unit used to measure the activity for this source.")
-    scope_id = fields.Many2one('carbon.scope', ondelete='restrict', help="Select the emission scope to which this source belongs")
-    active = fields.Boolean(default=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    ], default='other', required=True, tracking=True,
+       help="Select the category that best describes the source of the emission.")
+    activity_unit = fields.Many2one('carbon.unit', string='Activity Unit', tracking=True,
+                                    help="Select the unit used to measure the activity for this source.")
+    scope_id = fields.Many2one('carbon.scope', ondelete='restrict', tracking=True,
+                               help="Select the emission scope to which this source belongs")
+    active = fields.Boolean(default=True, tracking=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True,
+                                 default=lambda self: self.env.company, tracking=True)
     description = fields.Text(help="Provide additional details or notes about this emission source.")
     air_factor_ids = fields.One2many('carbon.factor', 'source_id',domain=[('type', '=', 'air')], context={'default_type': 'air'}, string="Air Factors")
     sound_factor_ids = fields.One2many('carbon.factor', 'source_id', domain=[('type', '=', 'sound')], context={'default_type': 'sound'}, string="Sound Factors")
