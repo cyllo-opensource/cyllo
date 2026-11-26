@@ -6,8 +6,8 @@ const recentTabsKey = 'recentTabs';
 const numberOfPinnedTabsKey = 'numberOfPinnedTabs'
 
 export const recentTabsService = {
-    dependencies: ["router", "orm"],
-    async start(env, { router, orm }) {
+    dependencies: ["router", "orm", "company"],
+    async start(env, { router, orm, company }) {
         const getCurrentUserRecentTab = () => {
             const user = orm.user;
             const userKey = user.db.name + user.userId;
@@ -37,12 +37,12 @@ export const recentTabsService = {
                 // Case 1: Both are Form views (have item_id)
                 if (tab.item_id && data.item_id) {
                     // Duplicate only if it's the exact same record under the same action
-                    return tab.item_id === data.item_id && tab.action_id === data.action_id;
+                    return tab.item_id == data.item_id && tab.action_id == data.action_id;
                 }
                 // Case 2: Both are List/Kanban views (neither has item_id)
                 if (!tab.item_id && !data.item_id) {
-                    const matchesAction = tab.action_id && data.action_id && tab.action_id === data.action_id;
-                    const matchesMenu = tab.menu_id && data.menu_id && tab.menu_id === data.menu_id;
+                    const matchesAction = tab.action_id && data.action_id && tab.action_id == data.action_id;
+                    const matchesMenu = tab.menu_id && data.menu_id && tab.menu_id == data.menu_id;
                     return matchesAction || matchesMenu;
                 }
                 return false;
@@ -82,13 +82,25 @@ export const recentTabsService = {
                     minute: '2-digit',
                     hour12: true
                 };
+                let companyId = false;
+                if (currentRoute.hash.cids) {
+                    const parsed = parseInt(currentRoute.hash.cids.toString().split("-")[0], 10);
+                    if (!isNaN(parsed)) {
+                        companyId = parsed;
+                    }
+                }
+                if (!companyId && company?.currentCompany?.id) {
+                    companyId = company.currentCompany.id;
+                } else if (!companyId && env.services.company?.currentCompany?.id) {
+                    companyId = env.services.company.currentCompany.id;
+                }
                 let data = {
                     name: document.title,
                     tab_url: document.URL,
                     item_id: currentRoute.hash.id,
                     last_visited: now.toLocaleString('en-US', options).replace(',', ''),
                     action_id: currentRoute.hash.action,
-                    company_id: parseInt(currentRoute.hash.cids.toString().split("-")[0]),
+                    company_id: companyId,
                     menu_id: currentRoute.hash.menu_id,
                     res_model: currentRoute.hash.model,
                     view_type: currentRoute.hash.view_type,

@@ -176,6 +176,12 @@
     font-weight: 700;
 }
 
+/* Page wrapper of the forecast dashboard. Scoped positioning context for
+   the loading overlay so the global .cy-main class is not altered. */
+.cy-forecast-page {
+    position: relative;
+}
+
 /* Opaque overlay shown while the owl (Lottie) is still loading:
    the guidelines page renders behind it, so the animation is
    already loaded and visible the moment the overlay is removed. */
@@ -184,7 +190,7 @@
     inset: 0;
     background: #f8fafc;
     z-index: 10;
-    border-radius: inherit;
+    border-radius: 0;
 }
 
 /* ── Forecast Setup wizard ───────────────────────────────────── */
@@ -2079,7 +2085,7 @@ button[aria-expanded="true"] .accordion-arrow {
     display: grid;
     grid-template-columns: 288px minmax(0, 1fr);
     gap: 16px;
-    align-items: start;
+    align-items: stretch;
 }
 
 .cy-demand-v2 .cy-demand-main {
@@ -2665,12 +2671,9 @@ button[aria-expanded="true"] .accordion-arrow {
     text-align: center;
 }
 
-.cy-demand-v2 .cy-demand-empty-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--d-text);
-    margin-bottom: 6px;
+.cy-demand-v2 .cy-demand-main > .cy-demand-empty,
+.cy-demand-v2 .cy-demand-main > .cy-demand-loading {
+    flex: 1;
 }
 
 .cy-demand-v2 .cy-demand-empty-icon {
@@ -2716,6 +2719,13 @@ button[aria-expanded="true"] .accordion-arrow {
 
     .cy-demand-v2 .cy-demand-actions {
         margin-left: 0;
+    }
+
+    .cy-demand-v2 .cy-demand-actions .dropdown-filters-sale .cy-marketing-auto_add-parent-container {
+        inset: 0 auto auto 0 !important;
+        min-width: 0 !important;
+        width: min(320px, calc(100vw - 88px)) !important;
+        max-width: calc(100vw - 88px);
     }
 }
 

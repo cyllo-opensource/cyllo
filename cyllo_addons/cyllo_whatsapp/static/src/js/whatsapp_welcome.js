@@ -1,15 +1,16 @@
 /** @odoo-module **/
 import {Component, useState} from "@odoo/owl";
-import {useService} from "@web/core/utils/hooks";
+import {useService, useBus} from "@web/core/utils/hooks";
 
 /* Create new WhatsappWelcome by extending Component */
 export class WhatsappWelcome extends Component {
     setup() {
         this.orm = useService('orm')
-        this.checkWhatsappConfiguration()
+        useBus(this.env.bus, 'WA_CONFIG_UPDATED', () => this.refreshConfiguration())
         this.state = useState({
-            checkWhatsappConfiguration : true
+            checkWhatsappConfiguration: true
         })
+        this.checkWhatsappConfiguration()
 
     }
 
@@ -19,6 +20,12 @@ export class WhatsappWelcome extends Component {
             'get_whatsapp_configuration'
         )
         this.state.checkWhatsappConfiguration = result
+    }
+
+    /* Re-check the configuration once the account configuration wizard
+    has been closed. */
+    refreshConfiguration() {
+        this.checkWhatsappConfiguration()
     }
 
     onClickConfiguration(){

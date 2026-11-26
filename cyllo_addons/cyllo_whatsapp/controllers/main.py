@@ -41,8 +41,8 @@ class Webhook(http.Controller):
             [('model', '=', 'whatsapp.channel')]))
         return model
 
-    @http.route('/whatsapp/message/', methods=['POST'], type="json",
-                auth="public")
+    @http.route(['/whatsapp/message', '/whatsapp/message/'],
+                methods=['POST'], type="json", auth="public")
     def webhook_receive_message(self):
         """
         Handle incoming messages in a WhatsApp webhook.

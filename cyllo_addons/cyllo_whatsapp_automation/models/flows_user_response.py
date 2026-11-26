@@ -124,6 +124,7 @@ class FlowUserResponse(models.Model):
             'source_id': self.env.ref(
                 'cyllo_whatsapp_automation.utm_source_whatsapp').id,
             'name': f"Lead created from WhatsApp flow: {self.flows_id.name}",
+            'response_id': self.id,
         })
         if self.template_id.action == 'create_sale_order':
             sale_order_lines = self.flows_user_response_line_ids.mapped(

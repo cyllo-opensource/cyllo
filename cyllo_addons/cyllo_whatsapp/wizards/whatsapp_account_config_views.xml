@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form view of the 'whatsapp.account.config' transient model.
+         It replaces the hand-made modal of the Whatsapp client action. -->
+    <record id="view_whatsapp_account_config_form" model="ir.ui.view">
+        <field name="name">view.whatsapp.account.config.form</field>
+        <field name="model">whatsapp.account.config</field>
+        <field name="arch" type="xml">
+            <form string="Whatsapp Account Configuration">
+                <group>
+                    <field name="user_id" invisible="1"/>
+                    <field name="app_uid" required="1" placeholder="App ID"/>
+                    <field name="phone_uid" required="1" placeholder="Phone Number ID"/>
+                    <field name="account_uid" required="1" placeholder="Business Account ID"/>
+                    <field name="token" required="1" placeholder="Access Token"/>
+                </group>
+                <footer>
+                    <button string="Continue" name="action_update_data" type="object"
+                            class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"
+                            data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Opening action used by the client side to open the wizard -->
+    <record id="action_whatsapp_account_config" model="ir.actions.act_window">
+        <field name="name">Whatsapp Account Configuration</field>
+        <field name="res_model">whatsapp.account.config</field>
+        <field name="view_mode">form</field>
+        <field name="views" eval="[(ref('view_whatsapp_account_config_form'), 'form')]"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

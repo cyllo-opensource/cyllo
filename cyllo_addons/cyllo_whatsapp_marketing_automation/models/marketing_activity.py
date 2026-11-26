@@ -86,7 +86,7 @@ class MarketingActivity(models.Model):
             test (bool): If True, indicates a test execution.
 
         Returns:
-            bool: True if the execution is successful.
+            recordset: an empty ``mailing.trace`` recordset.
         """
         try:
             cloud_token = self.env.user.token
@@ -110,4 +110,8 @@ class MarketingActivity(models.Model):
                 'state': 'error',
                 'mail_failure_message': _(e),
             })
-        return True
+        # The campaign engine expects either a mail trace or a falsy value
+        # here.  WhatsApp messages have no mail trace, so an empty recordset
+        # is returned (it is falsy), instead of ``True`` which made the
+        # engine fail on ``mail.id`` for activities that have child activities.
+        return self.env['mailing.trace']

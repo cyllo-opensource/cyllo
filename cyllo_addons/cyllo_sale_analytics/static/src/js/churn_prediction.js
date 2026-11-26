@@ -6,8 +6,6 @@ import { _t } from "@web/core/l10n/translation";
 import { useSaveContext } from "@cyllo_analytics/js/useSaveContext";
 import { download } from "@web/core/network/download";
 import { FilterDropdown } from "@cyllo_analytics/js/filterDropdown"
-import { Dropdown } from "@web/core/dropdown/dropdown";
-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { ConnectionAbortedError } from "@web/core/network/rpc_service";
 
 // ---------------------------------------------------------------------------
@@ -52,8 +50,6 @@ export class ChurnPredictionDashboard extends Component {
         super.setup(...arguments);
         this.orm = useService('orm')
         this.notification = useService("notification");
-        this.ui = useService("ui");
-        this.root = useRef("root")
         this.actions = useRef("actions")
         this.exportDropdown = useRef("exportDropdown")
         this.savedContext = useSaveContext()
@@ -62,6 +58,7 @@ export class ChurnPredictionDashboard extends Component {
         this.input = useRef("input")
         this.donutRef = useRef("donutChart")
         this.actionService = useService("action")
+        this.ui = useService("ui")
 
         // Monotonic token used to cancel/supersede an in-flight training run.
         // cancelTraining() bumps it so a still-pending result is ignored.
@@ -109,7 +106,6 @@ export class ChurnPredictionDashboard extends Component {
             // `loading` on and shows the cancellable training overlay.
             restoring: true,
             loading: false,              // true while the (heavy) churn TRAINING runs
-            exportingPDF: false,
             cancelled: false,            // training was cancelled and no result is shown
             availableFields: [],
             config: JSON.parse(JSON.stringify(defaultConfig)), // current dynamic config
@@ -416,50 +412,10 @@ export class ChurnPredictionDashboard extends Component {
         this.state.selectedCustomerId = cust.custId
     }
 
-    async exportPDF() {
-        if (this.state.exportingPDF) {
-            return;
-        }
-        this.state.exportingPDF = true;
-        this.ui.block({message: _t("Preparing PDF...")});
-        try {
-            // Give Owl and the browser a paint opportunity before chart capture.
-            await new Promise((resolve) => {
-                window.requestAnimationFrame(() => {
-                    window.requestAnimationFrame(resolve);
-                });
-            });
-
-            let head = this.root.el?.querySelector('.cy-churn-overall__panel');
-            if (head) {
-                const canvas = await html2canvas(head);
-                head = canvas.toDataURL('image/png');
-            }
-            await this.actionService.doAction({
-                type: "ir.actions.report",
-                report_type: "qweb-pdf",
-                report_name: 'cyllo_sale_analytics.report_churn_prediction',
-                report_file: "cyllo_sale_analytics.report_churn_prediction",
-                data: {
-                    head,
-                    'churnData': this.state.churnData,
-                    'period': this.state.period,
-                    'numberOfPeriods': this.state.numberOfPeriods
-                }
-            });
-        } catch (error) {
-            console.error("Churn prediction PDF export failed:", error);
-            this.notification.add(
-                _t("Could not prepare the PDF export. Please try again."),
-                {type: "danger"}
-            );
-        } finally {
-            this.state.exportingPDF = false;
-            this.ui.unblock();
-        }
-    }
     async exportXLSX() {
+        this.ui.block({ message: _t("Preparing your XLSX export…") });
         try {
+            await new Promise((resolve) => setTimeout(resolve, 0));
             await download({
                 url: '/smartd_xlsx_reports',
                 data: {
@@ -473,6 +429,8 @@ export class ChurnPredictionDashboard extends Component {
             this.notification.add(
                 _t("Could not download the report. Please try again."),
                 { type: "danger" });
+        } finally {
+            this.ui.unblock();
         }
     }
 
@@ -836,5 +794,5 @@ export class ChurnPredictionDashboard extends Component {
 }
 
 ChurnPredictionDashboard.template = "ChurnPredictionDashboard";
-ChurnPredictionDashboard.components = { FilterDropdown, Dropdown, DropdownItem }
+ChurnPredictionDashboard.components = { FilterDropdown }
 registry.category("actions").add("churn_prediction", ChurnPredictionDashboard);

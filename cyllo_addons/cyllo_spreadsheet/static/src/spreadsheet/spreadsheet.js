@@ -41,6 +41,7 @@ export class SpreadsheetApp extends Component {
         });
         this.spreadsheetData = false
         this.shareAdded = false
+        this.savePromise = Promise.resolve()
     }
 
     async updateName(name) {
@@ -121,9 +122,9 @@ export class SpreadsheetApp extends Component {
         await this.saveSheet()
     }
 
-    async saveSheet() {
+    async saveSheet(withThumbnail = true) {
         const data = this.spreadsheetData.exportData()
-        await this.updateSheet(data)
+        await this.updateSheet(data, withThumbnail)
     }
 
     async download() {
@@ -142,12 +143,21 @@ export class SpreadsheetApp extends Component {
         })
     }
 
-    async updateSheet(sheet_json) {
-        if (this.recordMode !== 'readonly') {
-            const image_1920 = await this.snapshot()
-            status(this) !== "destroyed" && this.resId && await this.orm.call("spreadsheet.sheet", "update_sheet", [this.resId], {
-                sheet_json, image_1920
-            })
+    async updateSheet(sheet_json, withThumbnail = true) {
+        if (this.recordMode === 'readonly') {
+            return
         }
+        const save = async () => {
+            const values = {sheet_json}
+            if (withThumbnail) {
+                values.image_1920 = await this.snapshot()
+            }
+            if (status(this) !== "destroyed" && this.resId) {
+                await this.orm.call("spreadsheet.sheet", "update_sheet", [this.resId], values)
+            }
+        }
+        const pendingSave = this.savePromise.then(save, save)
+        this.savePromise = pendingSave.catch(() => {})
+        return pendingSave
     }
 }

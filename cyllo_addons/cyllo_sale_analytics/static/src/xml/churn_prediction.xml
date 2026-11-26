@@ -32,29 +32,13 @@
                             t-on-click="() => this.loadChurn(true)">
                         <span class="ri-refresh-line"/> Recompute
                     </button>
-                    <div class="position-relative" t-ref="exportDropdown">
-                        <Dropdown
-                                class="'btn-group flex-grow-1 flex-md-grow-0 dropdown-fit-content'"
-                                togglerClass="'btn btn-primary cy-export-dropdown'"
-                                showCaret="true">
-                            <t t-set-slot="toggler">
-                                <span class="ri-upload-line"/>
-                                Export
-                            </t>
-                            <DropdownItem onSelected.bind="exportPDF">
-                                <span t-if="state.exportingPDF" class="fa fa-spinner fa-spin"/>
-                                <span t-else="" class="ri-file-pdf-line"/>
-                                <span class="ms-2">
-                                    <t t-if="state.exportingPDF">Preparing PDF…</t>
-                                    <t t-else="">PDF</t>
-                                </span>
-                            </DropdownItem>
-                            <DropdownItem onSelected.bind="exportXLSX">
-                                <span class="ri-file-excel-line"/>
-                                <span class="ms-2">XLSX</span>
-                            </DropdownItem>
-                        </Dropdown>
-                    </div>
+                    <button class="btn btn-primary cy-export-dropdown d-flex align-items-center gap-1"
+                            type="button"
+                            t-ref="exportDropdown"
+                            t-on-click="exportXLSX">
+                        <span class="ri-upload-line"/>
+                        Export
+                    </button>
                     <FilterDropdown mainClass="'dropdown-filters-sale'"
                                     class="'btn btn-primary cy-export-dropdown'"
                                     onClick.bind="onChangePeriod"
@@ -156,7 +140,7 @@
                     </div>
                 </div>
             </div>
-            <div t-ref="root" class="row cy_prediction_container">
+            <div class="row cy_prediction_container">
                 <div>
                     <div t-if="state.restoring" class="cy-churn-training-overlay">
                         <div class="d-flex flex-column align-items-center gap-2 text-center px-3">
@@ -315,10 +299,6 @@
                                 <div class="cy-churn-overall card-border-shadow">
                                     <div class="cy-churn-overall__head d-flex justify-content-between align-items-start">
                                         <h2 class="cy-churn-overall__title">Overall Churn v/s Not Churn</h2>
-                                        <button type="button" class="cy-churn-overall__download" t-on-click="exportPDF" title="Download PDF" t-att-disabled="state.exportingPDF" t-att-aria-busy="state.exportingPDF">
-                                            <i t-if="state.exportingPDF" class="fa fa-spinner fa-spin"/>
-                                            <i t-else="" class="ri-download-2-line"/>
-                                        </button>
                                     </div>
                                     <div t-if="state.generate" class="cy-churn-overall__panel">
                                         <div class="cy-churn-donut-wrap position-relative">

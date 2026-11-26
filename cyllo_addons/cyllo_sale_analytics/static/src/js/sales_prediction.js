@@ -2,6 +2,7 @@
 import { registry } from "@web/core/registry"
 import { onMounted, onWillUnmount, useState, Component, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { _t } from "@web/core/l10n/translation";
 import owlForecastAnimation from "../lottie/owl_forecast.js";
 
 
@@ -17,7 +18,7 @@ export class SalesPredictionDashboard extends Component {
             endDate: '',
             startDateInvalid: false,   // red highlight when Start Date missing/invalid
             endDateInvalid: false,     // red highlight when End Date missing/invalid
-            downloading: false,        // XLSX download in progress (shows a spinner)
+            downloading: false,        // XLSX download in progress (blocks the UI)
             aggregate: 'M',
             mode: 'algorithm',
             keywords: '',            // AI mode: comma-separated news search keywords
@@ -61,6 +62,7 @@ export class SalesPredictionDashboard extends Component {
         this.dataset = [];
 
         this.orm = useService('orm');
+        this.ui = useService('ui');
 
         // Readiness flags for the loading screen: the guidelines screen is only
         // revealed once both the data checks and the Lottie (owl) are loaded.
@@ -589,13 +591,15 @@ export class SalesPredictionDashboard extends Component {
     }
 
     // Download every generated table as one XLSX (one sheet per table).
-    // Fetched as a blob so we can show a loading state until it is fully ready.
+    // Fetched as a blob so we can keep the UI blocked until it is fully ready.
     async downloadAllXlsx() {
         if (this.state.downloading) {
             return;
         }
         this.state.downloading = true;
+        this.ui.block({ message: _t("Preparing your XLSX export…") });
         try {
+            await new Promise((resolve) => setTimeout(resolve, 0));
             const response = await fetch('/cyllo_sale_analytics/forecast_xlsx');
             if (!response.ok) {
                 throw new Error("Download failed (" + response.status + ")");
@@ -614,6 +618,7 @@ export class SalesPredictionDashboard extends Component {
             alert("Could not download the report. Please try again.");
         } finally {
             this.state.downloading = false;
+            this.ui.unblock();
         }
     }
 

@@ -44,6 +44,7 @@
         'data/whatsapp_template_preview_data.xml',
         'views/res_users_views.xml',
         'wizards/whatsapp_template_message.xml',
+        'wizards/whatsapp_account_config_views.xml',
         'wizards/whatsapp_template_preview_views.xml',
         'wizards/portal_share_views.xml',
         'views/whatsapp_template_views.xml',

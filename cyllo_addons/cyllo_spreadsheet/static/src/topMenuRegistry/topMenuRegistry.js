@@ -8,7 +8,7 @@ const {topbarMenuRegistry, topbarComponentRegistry} = spreadsheet.registries;
 
 topbarMenuRegistry.addChild("Save", ["file"], {
     name: _t("Save"),
-    execute: (env) => env.saveSheet(),
+    execute: (env) => env.saveSheet(false),
     icon: "cyllo_spreadsheet.Save",
     sequence: 1,
 });

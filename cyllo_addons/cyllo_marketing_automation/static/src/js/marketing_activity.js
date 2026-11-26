@@ -56,7 +56,7 @@ class MarketingActivity extends Component{
          */
         onWillStart(async() => {
             await this.getActivities()
-            let recordName = await this.orm.searchRead("marketing.campaign",[["id","=",this.context.active_id]],["name","model_name","model_id"]);
+            let recordName = await this.orm.searchRead("marketing.campaign",[["id","=",this.context.active_id]],["name","model_name","model_id","state"]);
             this.state.recordName = recordName[0]
             let participantData = await this.orm.searchRead("marketing.participant",[['campaign_id','=',this.context.active_id],['is_test_participant','=',false]],[])
             this.state.total_count = participantData.length

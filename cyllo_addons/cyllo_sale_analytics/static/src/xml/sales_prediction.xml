@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="SalesPredictionDashboard" owl="1">
-        <div class="cy-main cyllo-background h-100 p-4">
+        <div class="cy-main cyllo-background h-100 p-4 cy-forecast-page">
 
             <!-- ══════════════════════════════════════════════════════ -->
             <!-- ══════════════════════════════════════════════════════ -->
@@ -73,18 +73,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Opaque loading overlay: hides the guidelines page (and the
-                     owl while it is still animating in) until everything is ready -->
-                <div t-if="state.status === 'loading'"
-                     class="cy-gd-loading-overlay d-flex flex-column align-items-center justify-content-center gap-2">
-                    <div class="cy-grid-loading-spinner">
-                        <span class="cy-grid-loading-dot"/>
-                        <span class="cy-grid-loading-dot"/>
-                        <span class="cy-grid-loading-dot"/>
-                    </div>
-                    <span class="cy-sheet-loading-label">Loading…</span>
                 </div>
             </div>
 
@@ -517,14 +505,8 @@
                         <button class="btn btn-primary" t-on-click="cancelWizard">
                             <i class="ri-refresh-line me-1"></i> New forecast
                         </button>
-                        <button class="btn btn-primary" t-on-click="downloadAllXlsx"
-                                t-att-disabled="state.downloading">
-                            <t t-if="state.downloading">
-                                <span class="spinner-border spinner-border-sm me-1" role="status"/> Downloading…
-                            </t>
-                            <t t-else="">
-                                <i class="ri-download-2-line me-1"></i> Download XLSX
-                            </t>
+                        <button class="btn btn-primary" t-on-click="downloadAllXlsx">
+                            <i class="ri-download-2-line me-1"></i> Download XLSX
                         </button>
                     </div>
                 </div>
@@ -827,6 +809,20 @@
 
             </div>
             <!-- /TABLE STATUS -->
+
+            <!-- Opaque loading overlay: hides the guidelines page (and the
+                 owl while it is still animating in) until everything is ready.
+                 Kept as a direct child of .cy-main so it covers the page
+                 padding as well. -->
+            <div t-if="state.status === 'loading'"
+                 class="cy-gd-loading-overlay d-flex flex-column align-items-center justify-content-center gap-2">
+                <div class="cy-grid-loading-spinner">
+                    <span class="cy-grid-loading-dot"/>
+                    <span class="cy-grid-loading-dot"/>
+                    <span class="cy-grid-loading-dot"/>
+                </div>
+                <span class="cy-sheet-loading-label">Loading…</span>
+            </div>
 
         </div>
     </t>

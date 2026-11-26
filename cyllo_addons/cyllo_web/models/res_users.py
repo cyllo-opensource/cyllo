@@ -19,11 +19,15 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import logging
+
 from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools.safe_eval import pytz
+
+_logger = logging.getLogger(__name__)
 
 
 def _is_first_time_greater(time_str1, time_str2):
@@ -400,3 +404,76 @@ class ResUsers(models.Model):
     def pin_systray_icons(self, pins):
         """Writes the pinned systray for user"""
         self.sudo().write({"systray_pins": pins})
+
+
+class Users(models.Model):
+    """
+    Customization of 'res.users' model to add additional functionality.
+    """
+    _inherit = 'res.users'
+
+    first_time = fields.Boolean(default=False, help="A field to determine first time login")
+
+    @api.model
+    def custom_user_data(self, user_id):
+        """
+        Retrieve custom user data for the specified user.
+        :param user_id: ID of the user to fetch data for.
+        :return: Dictionary containing user-related data.
+        """
+        user = self.browse(user_id)
+        if user:
+            log = len(self.env['res.users.log'].search([('create_uid', '=', user_id)]))
+            if log > 2:
+                user.first_time = True
+            company_id = user.company_id.id
+            country_id = user.company_id.country_id.id
+            user_data = user.read()[0]
+            users = self.search_read([])
+            company_data = self.env['res.company'].search_read([('id', '=', company_id)])
+            country_state_data = self.env['res.country.state'].search_read([('country_id', '=', country_id)])
+            all_companies_data = self.env['res.company'].search_read([])
+            res_lang = self.env['res.lang'].search_read([])
+            countries = self.env['res.country'].search_read([])
+            industries = self.env['res.partner.industry'].search_read([], ['id', 'name'])
+            industry_verticals = self.env['onboarding.industry'].sudo().get_industry_verticals()
+            details = {
+                'first_time': user.first_time,
+                'users': users,
+                'user_data': user_data,
+                'company_data': company_data,
+                'country_state_data': country_state_data,
+                'all_companies_data': all_companies_data,
+                'res_lang': res_lang,
+                "countries": countries,
+                "industries": industries,
+                "industry_verticals": industry_verticals,
+            }
+            return details
+
+    @api.model
+    def update_company(self, **kwargs):
+        """
+        Update the company data.
+        :param kwargs: Keyword arguments representing the data to be updated.
+        """
+        comp = self.env['res.company'].browse(kwargs.get('id'))
+        comp.write(kwargs)
+
+    @api.model
+    def clean_up_menus(self, user_id):
+        """
+        Clean up menus and set the 'first_time' flag for the specified user.
+        :param user_id: ID of the user to perform cleanup for.
+        """
+        try:
+            users = self.env['res.users'].sudo().search([])
+            for user in users:
+                user.write({'first_time': True})
+            onboarding_menu = self.env.ref("cyllo_web.menu_action_first_time")
+            if onboarding_menu:
+                onboarding_menu.sudo().write({'active': False})
+            return {'status': 'success'}
+        except Exception as e:
+            _logger.info("An error occurred while cleaning up menus: %s", str(e))
+            return {'status': 'error', 'message': str(e)}

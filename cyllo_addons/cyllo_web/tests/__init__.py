@@ -19,4 +19,6 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from . import test_ir_module_module
 from . import test_res_users
+from . import test_res_users_onboarding

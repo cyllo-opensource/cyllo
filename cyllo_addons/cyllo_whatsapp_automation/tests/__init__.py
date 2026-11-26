@@ -18,6 +18,11 @@
 #    (LGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#############################################################################
+from . import common
 from . import test_whatsapp_flows
+from . import test_screen_contents
+from . import test_flow_response
 from . import test_whatsapp_template
+from . import test_sale_order_template
+from . import test_sale_order
+from . import test_webhook

@@ -37,7 +37,7 @@
     <record id="view_employee_salary_rule_tree" model="ir.ui.view">
         <field name="name">view.employee.salary.rule.tree</field>
         <field name="model">employee.salary.rule</field>
-        <field name="priority" eval="20" />
+        <field name="priority" eval="20"/>
         <field name="arch" type="xml">
             <tree string="Salary Rules">
                 <field name="name" placeholder="e.g. Basic Salary"/>
@@ -74,7 +74,9 @@
                         </group>
                         <group>
                             <field name="appears_on_payslip"/>
-                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            <field name="parent_rule_id" invisible="1"/>
+                            <field name="company_id" options="{'no_create': True}"
+                                   groups="base.group_multi_company"/>
                         </group>
                     </group>
                     <notebook>
@@ -83,19 +85,28 @@
                             <group>
                                 <group>
                                     <field name="condition_select"/>
-                                    <field name="condition_python" invisible="condition_select != 'python'" required="condition_select == 'python'"/>
-                                    <field name="condition_range" invisible="condition_select != 'range'" required="condition_select == 'range'"/>
+                                    <field name="condition_python"
+                                           invisible="condition_select != 'python'"
+                                           required="condition_select == 'python'"/>
+                                    <field name="condition_range"
+                                           invisible="condition_select != 'range'"
+                                           required="condition_select == 'range'"/>
                                 </group>
                                 <group>
-                                    <field name="condition_range_min" colspan="2" invisible="condition_select != 'range'" required="condition_select == 'range'"/>
-                                    <field name="condition_range_max" colspan="2" invisible="condition_select != 'range'" required="condition_select == 'range'"/>
+                                    <field name="condition_range_min" colspan="2"
+                                           invisible="condition_select != 'range'"
+                                           required="condition_select == 'range'"/>
+                                    <field name="condition_range_max" colspan="2"
+                                           invisible="condition_select != 'range'"
+                                           required="condition_select == 'range'"/>
                                 </group>
                             </group>
                             <separator string="Computation"/>
                             <group>
                                 <group>
                                     <field name="amount_select"/>
-                                    <field name="amount_percentage_base" invisible="amount_select != 'percentage'"
+                                    <field name="amount_percentage_base"
+                                           invisible="amount_select != 'percentage'"
                                            required="amount_select == 'percentage'"/>
                                     <field name="quantity" invisible="amount_select == 'code'"
                                            required="amount_select != 'code'"/>
@@ -117,11 +128,16 @@
                             </group>
                         </page>
                         <page name="rules" string="Child Rules">
-                            <group>
-                                <field name="parent_rule_id"/>
-                                <separator string="Children Definition"/>
-                                <field name="child_ids"/>
-                            </group>
+                            <field name="child_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="category_id"/>
+                                    <field name="appears_on_payslip"/>
+                                    <field name="account_debit_id" optional="1"/>
+                                    <field name="account_credit_id" optional="1"/>
+                                </tree>
+                            </field>
                         </page>
                         <page string="Description">
                             <group>
@@ -148,19 +164,27 @@
         <field name="model">employee.salary.rule</field>
         <field name="arch" type="xml">
             <search string="Search Salary Rule">
-                <field name="name" string="Salary Rules" filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
+                <field name="name" string="Salary Rules"
+                       filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
                 <field name="category_id"/>
                 <field name="condition_range_min"/>
                 <field name="parent_rule_id"/>
-                <filter name="appears_on_payslip" string="Appears on payslip" domain="[('appears_on_payslip','=',True)]"/>
+                <filter name="appears_on_payslip" string="Appears on payslip"
+                        domain="[('appears_on_payslip','=',True)]"/>
                 <separator name="condition"/>
-                <filter name="condition_based_true" string="Always true" domain="[('condition_select','=','none')]"/>
-                <filter name="condition_based_range" string="Range" domain="[('condition_select','=','range')]"/>
-                <filter name="condition_based_python" string="Python" domain="[('condition_select','=','python')]"/>
+                <filter name="condition_based_true" string="Always true"
+                        domain="[('condition_select','=','none')]"/>
+                <filter name="condition_based_range" string="Range"
+                        domain="[('condition_select','=','range')]"/>
+                <filter name="condition_based_python" string="Python"
+                        domain="[('condition_select','=','python')]"/>
                 <separator name="computation"/>
-                <filter name="computation_based_percentage" string="Percentage" domain="[('amount_select','=','percentage')]"/>
-                <filter name="computation_based_fix" string="Fixed" domain="[('amount_select','=','fix')]"/>
-                <filter name="computation_based_code" string="Python Code" domain="[('amount_select','=','code')]"/>
+                <filter name="computation_based_percentage" string="Percentage"
+                        domain="[('amount_select','=','percentage')]"/>
+                <filter name="computation_based_fix" string="Fixed"
+                        domain="[('amount_select','=','fix')]"/>
+                <filter name="computation_based_code" string="Python Code"
+                        domain="[('amount_select','=','code')]"/>
                 <separator/>
                 <group col="8" colspan="4" expand="0" string="Group By">
                     <filter string="Category" name="head" context="{'group_by':'category_id'}"/>

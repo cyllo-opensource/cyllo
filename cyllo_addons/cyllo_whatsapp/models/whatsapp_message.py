@@ -46,6 +46,31 @@ class WhatsappMessage(models.Model):
         'video': ('video/mp4', 'video/3gpp'),
     }
 
+    # Hints appended to the raw Graph API error messages of well known
+    # error codes, so the user knows how to fix the problem instead of
+    # only seeing Meta's cryptic message (e.g '(#133010) Account
+    # not registered').
+    _WHATSAPP_ERROR_HINTS = {
+        133010: "The phone number is not registered on the Whatsapp "
+                "Business Platform (Cloud API). Register it first by "
+                "calling the Graph API "
+                "POST https://graph.facebook.com/v17.0/{phone_number_id}"
+                "/register with your access token and the 6-digit "
+                "Two-Factor Authentication PIN.",
+        133016: "The phone number is temporarily locked because of too "
+                "many registration attempts. Wait 72 hours before "
+                "trying to register it again.",
+        131026: "The destination phone number is not a valid Whatsapp "
+                "user (check the country code of the contact).",
+        131030: "The recipient phone number does not have a Whatsapp "
+                "account.",
+        131047: "The last message of the conversation is older than 24 "
+                "hours: only pre-approved Whatsapp templates can be "
+                "sent outside the 24-hours session window.",
+        130429: "The Cloud API message throughput limit was reached: "
+                "too many messages were sent too quickly.",
+    }
+
     message = fields.Text(help='Whatsapp message')
     image = fields.Image(help='Choose image here')
     sticker = fields.Image(help='Choose image here')
@@ -179,6 +204,34 @@ class WhatsappMessage(models.Model):
         }
         return payload
 
+    def _get_whatsapp_error_message(self, response):
+        """Build an explicit error message from a Graph API error
+        response.
+
+        Meta's raw error message is kept as is, but the well known error
+        codes are enriched with an hint explaining how to fix the
+        problem.
+
+        Parameters:
+            - response (requests.Response): the Graph API response.
+
+        Returns:
+            str: The message to raise in a ValidationError."""
+        try:
+            error = response.json().get('error') or {}
+        except ValueError:
+            error = {}
+        message = error.get('message')
+        if not message:
+            message = _("Unknown error (HTTP %s)") % response.status_code
+        code = error.get('code')
+        if isinstance(code, str) and code.isdigit():
+            code = int(code)
+        hint = self._WHATSAPP_ERROR_HINTS.get(code)
+        if hint:
+            message = '%s\nHint: %s' % (message, _(hint))
+        return message
+
     @property
     def get_whatsapp_account_details(self):
         """
@@ -232,10 +285,9 @@ class WhatsappMessage(models.Model):
         files = {"file": (file_name, open(file_path, "rb"), file_type, {})}
         url = f"https://graph.facebook.com/v18.0/{whatsapp_no}/media"
         response = requests.post(url, data=payload, files=files, headers=token)
-        whatsapp_media = response.json()
         if response.status_code != 200:
-            raise ValidationError(_(whatsapp_media['error']['message']))
-        media_id = whatsapp_media.get('id')
+            raise ValidationError(self._get_whatsapp_error_message(response))
+        media_id = response.json().get('id')
         return media_id
 
     @api.model
@@ -390,8 +442,9 @@ class WhatsappMessage(models.Model):
                         "message": current_message.read(),
                     }
                 else:
-                    raise ValidationError(
-                        _(f"Message sending is Failed.\n {whatsapp_response.json()['error']['message']}"))
+                    raise ValidationError(_(
+                        "Message sending is Failed.\n %s") %
+                        self._get_whatsapp_error_message(whatsapp_response))
                 return current_message.read()
         except requests.exceptions.ConnectionError:
             return {

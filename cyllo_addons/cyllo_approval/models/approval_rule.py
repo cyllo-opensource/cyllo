@@ -793,15 +793,12 @@ class ApprovalRuleLine(models.Model):
             'cyllo_approval.group_approval_manager'
         )
 
-        users = self.env['res.users'].search([
-            '|',
-            ('groups_id', 'in', approval_user_group.id),
-            ('groups_id', 'in', approval_manager_group.id),
-            ('id', '!=', self.env.user.id),
-        ])
+        group_ids = [g.id for g in (approval_user_group, approval_manager_group) if g]
 
-        for wizard in self:
-            wizard.approval_user_ids = users
+        users = self.env['res.users'].search([('groups_id', 'in', group_ids)])
+
+        for record in self:
+            record.approval_user_ids = users
 
     @api.constrains('user_id', 'group_id')
     def _constraint_approver(self):

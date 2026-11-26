@@ -200,8 +200,22 @@ export class Whatsapp extends Component {
             preview: this.state.imagePreview,
             image: this.state.imageLoaded,
             document: this.state.inputFile,
-            attachment: this.state.attachment
+            attachment: this.state.attachment,
+            goBack: () => this.onBackToChatList(),
         }
+    }
+
+    /**
+     * Back button of the chat top bar: returns to the conversation
+     * list on small screens.
+     */
+    async onBackToChatList() {
+        await this.closePreview();
+        this.state.attachment = 0;
+        this.state.id = false;
+        this.state.activeChannel = false;
+        this.state.chatHistory = [];
+        this.removeManually();
     }
 
     get whatsappChatHistory() {

@@ -42,6 +42,7 @@ export class DemandPredictionDashboard extends Component {
         this.tableScroll = useRef('table-scroll')
         this.actionService = useService('action')
         this.notification = useService('notification')
+        this.ui = useService('ui')
         useResize("root", (width) => {
             this.state.width = width / 12
         });
@@ -637,24 +638,30 @@ export class DemandPredictionDashboard extends Component {
                 { type: "warning" }
             );
         }
-        var canvas = await html2canvas(chart)
-        var chartImg = canvas.toDataURL('image/png');
-        return this.actionService.doAction({
-            type: "ir.actions.report",
-            report_type: "qweb-pdf",
-            report_name: 'cyllo_sale_analytics.report_demand_prediction',
-            report_file: "cyllo_sale_analytics.report_demand_prediction",
-            data: {
-                chartImg,
-                'start_date': moment(this.demandState.actStartDate).format('YYYY/MM/DD'),
-                'end_date': moment(this.demandState.actEndDate).format('YYYY/MM/DD'),
-                'current_prod': this.demandState.defaultProduct[1],
-                'actual_data': this.analyticsTable.analysisTableActual,
-                'forecast_data': this.analyticsTable.analysisTableForecast,
-                'period': this.demandState.periodDemand,
-                'frequency': this.demandState.frequencyDemand,
-            }
-        });
+        this.ui.block({ message: _t("Preparing your PDF export…") });
+        try {
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            var canvas = await html2canvas(chart)
+            var chartImg = canvas.toDataURL('image/png');
+            return await this.actionService.doAction({
+                type: "ir.actions.report",
+                report_type: "qweb-pdf",
+                report_name: 'cyllo_sale_analytics.report_demand_prediction',
+                report_file: "cyllo_sale_analytics.report_demand_prediction",
+                data: {
+                    chartImg,
+                    'start_date': moment(this.demandState.actStartDate).format('YYYY/MM/DD'),
+                    'end_date': moment(this.demandState.actEndDate).format('YYYY/MM/DD'),
+                    'current_prod': this.demandState.defaultProduct[1],
+                    'actual_data': this.analyticsTable.analysisTableActual,
+                    'forecast_data': this.analyticsTable.analysisTableForecast,
+                    'period': this.demandState.periodDemand,
+                    'frequency': this.demandState.frequencyDemand,
+                }
+            });
+        } finally {
+            this.ui.unblock();
+        }
     }
 
     async exportDemandPNG(){
@@ -666,12 +673,18 @@ export class DemandPredictionDashboard extends Component {
                 { type: "warning" }
             );
         }
-        var canvas = await html2canvas(content);
-        var image = canvas.toDataURL('image/png');
-        var link = document.createElement('a');
-        link.download = 'Demand_Prediction_Dashboard.png';
-        link.href = image;
-        link.click();
+        this.ui.block({ message: _t("Preparing your PNG export…") });
+        try {
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            var canvas = await html2canvas(content);
+            var image = canvas.toDataURL('image/png');
+            var link = document.createElement('a');
+            link.download = 'Demand_Prediction_Dashboard.png';
+            link.href = image;
+            link.click();
+        } finally {
+            this.ui.unblock();
+        }
     }
 
     async exportDemandXLSX(){
@@ -692,7 +705,9 @@ export class DemandPredictionDashboard extends Component {
                     'report_name': 'Demand Prediction Report',
                },
            };
+        this.ui.block({ message: _t("Preparing your XLSX export…") });
         try {
+            await new Promise((resolve) => setTimeout(resolve, 0));
             await download({
                 url: '/smartd_xlsx_reports',
                 data: action.data,
@@ -701,6 +716,8 @@ export class DemandPredictionDashboard extends Component {
             this.notification.add(
                 _t("Could not download the report. Please try again."),
                 { type: "danger" });
+        } finally {
+            this.ui.unblock();
         }
     }
 

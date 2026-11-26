@@ -37,6 +37,7 @@
         'data/ir_cron_dark_mode_data.xml',
         'data/res_lang_data.xml',
         'data/ir_module_module.xml',
+        'data/onboarding_industry_data.xml',
         'views/auth_signup_fields.xml',
         'views/login_templates.xml',
         'views/auth_signup_login_templates.xml',
@@ -45,6 +46,7 @@
         'views/report_templates.xml',
         'views/res_users_views.xml',
         'views/ir_model_views.xml',
+        'views/onboarding_templates.xml',
     ],
     'assets': {
         'web._assets_primary_variables': [

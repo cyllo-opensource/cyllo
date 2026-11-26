@@ -63,6 +63,10 @@
     align-items: center;
     font-size: xx-large;
     background-image: url("/cyllo_whatsapp/static/images/chat-bg21.svg");
+    /* Fill exactly the chat pane: never the viewport (children with
+       height:100vh made the action overflow the Cyllo layout). */
+    width: 100%;
+    height: 100%;
 }
 
 .whatsapp_left_container .o-dropdown .dropdown-toggle {
@@ -1035,15 +1039,353 @@ input.form-control.chatbox-inputbox::placeholder {
     margin-bottom: 1rem;
 }
 
+/* ------------------------------------------------------------------
+   Responsive layout
+   - >= 993px  : desktop two-pane layout (unchanged)
+   - 769–992px : two-pane layout with a narrower chat list
+   - <= 768px  : one pane at a time, WhatsApp app behaviour:
+                 the list shows when no conversation is open, the
+                 conversation (with a back button) takes over otherwise
+------------------------------------------------------------------ */
+
+/* Left panel: flex column so the lists fill the remaining height
+   instead of relying on fixed viewport heights. */
+.chatbox-main-container {
+    /* The action host may not always propagate its height, so keep the
+       panes from making the page scroll or painting over each other. */
+    overflow: hidden;
+    min-height: 0;
+}
+
+.chatbox-left {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    /* Sidebar always paints above any overflowing sibling/pane */
+    position: relative;
+    z-index: 2;
+}
+
+.chatbox-left.cy-wa-profile-modal-open {
+    z-index: 1060;
+}
+
+.chatbox-right {
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+}
+
+.chatbox-left-content {
+    flex: 0 0 auto;
+}
+
+.cy-wa-sidebar-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: column;
+}
+
+.cy-wa-sidebar-list {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Keep long entries inside the row (ellipsis) instead of pushing it */
+.whatsapp-partner-profile .flex-grow-1 {
+    min-width: 0;
+}
+
+.cy-whatsapp-top-container .flex-grow-1 {
+    min-width: 0;
+}
+
+/* Chat / Contacts tabs */
+.wa-tab-icon {
+    font-size: 18px;
+    vertical-align: -3px;
+    margin-right: 6px;
+}
+
+.nav-pills .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+}
+
+/* Right panel: the conversation scrolls inside the pane instead of
+   overflowing the page. */
+.chat_whatsapp {
+    min-height: 0;
+}
+
+.cy-whatsapp-top-container {
+    flex: 0 0 auto;
+}
+
+.chatbox-right .chatting-container {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* The welcome pane fills the chat area (not the whole viewport) */
+.whatsapp_welcome {
+    height: 100% !important;
+}
+
+/* Back button of the chat top bar: hidden on wide screens */
+.wa-back-btn {
+    display: none;
+}
+
+/* When a file is previewed the preview area must size itself in the
+   pane, not from the viewport minus a magic number. */
+.whatsapp_image_preview_container {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+}
+
+.whatsapp_image_preview_container .h-100 {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+}
+
+/* ------------------ Smaller tablets ------------------- */
 @media (max-width: 992px) {
     .chatbox-main-container {
-        -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+    }
+
+    .chatbox-left {
+        -webkit-box-flex: 0;
+        -ms-flex: 0 0 280px;
+        flex: 0 0 280px;
+        width: 280px;
+        min-width: 0;
+    }
+
+    .chatbox-right {
+        min-width: 0;
+    }
+
+    .sidebar-message {
+        width: auto;
+        max-width: 180px;
+    }
+}
+
+/* ------------------- Phones --------------------------- */
+@media (max-width: 768px) {
+    .chatbox-main-container {
+        display: block;
+        position: relative;
     }
 
     .chatbox-left {
         width: 100%;
-        min-width: unset;
+        height: 100%;
+        min-width: 0;
+        border-right: none;
+    }
+
+    /* The conversation slides over the list when a chat is open */
+    .chatbox-right {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 5;
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        background-color: #fff;
+    }
+
+    .chatbox-main-container.cy-wa-mobile-open .chatbox-left {
+        display: none;
+    }
+
+    .chatbox-main-container.cy-wa-mobile-open .chatbox-right {
+        display: block;
+    }
+
+    /* Back button only visible on phones while a chat is open */
+    .chatbox-main-container.cy-wa-mobile-open .wa-back-btn {
+        display: -webkit-inline-box;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 34px;
+        height: 34px;
+        margin-right: 8px;
+        border-radius: 50%;
+        font-size: 20px;
+        color: #313533;
+        cursor: pointer;
+    }
+
+    .chatbox-main-container.cy-wa-mobile-open .wa-back-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Chat list rows adapt to small widths */
+    .sidebar-message {
+        width: auto;
+        max-width: 55vw;
+    }
+
+    .dropdown-search-chat {
+        width: min(240px, calc(100vw - 2rem));
+    }
+
+    /* Message bubbles */
+    .mg-wrapper-content {
+        max-width: min(400px, 76vw);
+        margin-right: 12px;
+        margin-left: 10px;
+        min-width: 0;
+    }
+
+    .chat-list-container .chat-reply .msg-lists .text-mg-wrapper .mg-wrapper-content {
+        margin-right: 10px;
+    }
+
+    .cy_whatsapp_message {
+        max-width: 100% !important;
+    }
+
+    .msg-lists img {
+        max-width: 76vw;
+    }
+
+    .image-attachment {
+        min-width: 0;
+        width: min(360px, 72vw);
+        max-height: 320px;
+    }
+
+    .sticker-attachment {
+        max-width: 45vw;
+        padding: 12px;
+    }
+
+    .video-thumbnail {
+        height: 45vw;
+    }
+
+    .doc-name {
+        max-width: 52vw;
+    }
+
+    .audio-player {
+        width: min(320px, 74vw);
+    }
+
+    /* Keep the message options menu inside the viewport */
+    .msg-lists .dropdown {
+        right: 4px;
+    }
+
+    .chat-reply .msg-lists .dropdown {
+        left: 4px;
+        right: unset;
+    }
+
+    /* Floating search inside the history */
+    .cy-whatsapp-chat-search {
+        top: 8px;
+        margin-left: 1rem;
+        width: min(320px, calc(100% - 2rem)) !important;
+    }
+
+    /* Composer */
+    .chat-input {
+        height: 64px;
+    }
+
+    .chatbox-right .chatting-container {
+        padding-bottom: 84px;
+    }
+
+    .cy-whatsapp-chat-input-box .form-control.chatbox-inputbox {
+        font-size: 16px; /* avoids the iOS auto-zoom on focus */
+    }
+
+    /* Welcome screen */
+    .whatsapp_welcome .cy-welcome-whatsapp {
+        font-size: 1.5rem;
+    }
+
+    /* Attachment preview */
+    .whatsapp_image_preview {
+        max-height: 60vh;
+    }
+
+    .whatsapp_image_preview_container .text-truncate {
+        width: 130px !important;
+    }
+
+    /************ Side panel modals ************/
+    .cy-whatsapp-modal {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem;
+    }
+
+    .cy-whatsapp-modal .modal-dialog {
+        width: 100%;
+        max-width: 500px;
+        margin: 0;
+        height: auto;
+    }
+
+    .cy-whatsapp-modal .modal-dialog.whatsapp_profile_modal {
+        max-width: min(390px, 100%) !important;
+    }
+
+    .cy-whatsapp-modal .modal-content {
+        max-height: calc(100vh - 2rem);
+        max-height: calc(100dvh - 2rem);
+        overflow-y: auto;
+    }
+
+    .cy-whatsapp-modal .cy-whatsapp-modal-input {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+
+    .cy-whatsapp-modal .cy-whatsapp-modal-input .cy-input-container.w-75 {
+        width: 100% !important;
+        max-width: 100%;
+    }
+
+    .cy-whatsapp-modal .modal-body {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .mg-wrapper-content {
+        max-width: 82vw;
     }
 }
 

@@ -14,45 +14,41 @@ export class WhatsappSidebar extends Component {
     /* This function appears to initialize various properties and set up
     event listeners. */
     async setup() {
-        useBus(this.env.bus, "on_Click_Configuration", () => this.showConfiguration())
+        useBus(this.env.bus, "on_Click_Configuration", () => this.openConfig())
         this.orm = useService('orm')
-        this.actionService = useService("action");
+        this.actionService = useService("action")
+        this.dialog = useService("dialog")
         this.searchBox = useRef('search')
         this.userConfigModal = useRef('userConfigModal')
-        this.configModal = useRef('configModal')
-        this.account_uid = useRef('account_uid')
         this.user_email = useRef('user_email')
         this.user_name = useRef('user_name')
-        this.app_uid = useRef('app_uid')
-        this.phone_uid = useRef('phone_uid')
-        this.token = useRef('token')
-        this.dialog = useService("dialog");
-        this.contact = useRef("contact");
-        this.chat = useRef("chat");
+        this.contact = useRef("contact")
+        this.chat = useRef("chat")
         this.profileimagepicker = useRef('profileImagePicker')
-        this.contactconatainer = useRef("contact-container");
-        this.configurationcontainer = useRef("configuration-container");
         this.state = useState({
             partnerHistory: {},
             dropdown: false,
             user: {},
-            configuration: false,
-            appid: false,
-            phone_number: false,
-            business_account: false,
-            access_token: false,
         })
         this.state.user = await this.orm.call("res.users", "get_user_data", [{}, session.uid])
     }
 
-    showConfiguration() {
-        this.contactconatainer.el.classList.add('d-none')
-        this.configurationcontainer.el.classList.remove('d-none')
-    }
-
-    onClickCancel() {
-        this.contactconatainer.el.classList.remove('d-none')
-        this.configurationcontainer.el.classList.add('d-none')
+    /**
+     * Opens the 'whatsapp.account.config' wizard. When the dialog is
+     * closed, the user data is refreshed (and the other components are
+     * notified) in case the user saved the configuration.
+     */
+    async openConfig() {
+        await this.actionService.doAction({
+            name: _t('Whatsapp Account Configuration'),
+            res_model: 'whatsapp.account.config',
+            type: 'ir.actions.act_window',
+            views: [[false, 'form']],
+            target: 'new',
+        })
+        this.state.user = await this.orm.call(
+            "res.users", "get_user_data", [{}, session.uid])
+        this.env.bus.trigger('WA_CONFIG_UPDATED')
     }
 
     onClickProfilePicture() {
@@ -71,23 +67,6 @@ export class WhatsappSidebar extends Component {
             reader.readAsDataURL(file);
         }
     }
-
-    onClickSave() {
-        this.dialog.add(ConfirmationDialog, {
-            body: _t("Do you want to save the changes?"),
-            confirmLabel: _t("Yes"),
-            confirm: async () => {
-                await this.orm.call("res.users", "action_update_data", [session.uid,
-                    this.state.business_account, this.state.appid,
-                    this.state.phone_number, this.state.access_token])
-                window.location.reload();
-            },
-            cancel: () => {
-
-            },
-        });
-    }
-
 
     /* Quick search button function to visible global search area */
 
@@ -131,10 +110,14 @@ export class WhatsappSidebar extends Component {
     }
 
     async getUserProfile() {
-        if (this.userConfigModal.el.classList.contains("d-none")) {
+        const isOpening = this.userConfigModal.el.classList.contains("d-none");
+        const sidebar = this.userConfigModal.el.closest(".chatbox-left");
+        if (isOpening) {
             this.userConfigModal.el.classList.remove("d-none")
+            sidebar?.classList.add("cy-wa-profile-modal-open");
         } else {
             this.userConfigModal.el.classList.add("d-none")
+            sidebar?.classList.remove("cy-wa-profile-modal-open");
         }
     }
 
@@ -147,41 +130,6 @@ export class WhatsappSidebar extends Component {
             view_mode: "tree",
             target: "current",
         });
-    }
-
-    async openConfig() {
-        if (this.configModal.el.classList.contains("d-none")) {
-            this.configModal.el.classList.remove("d-none")
-        } else {
-            this.configModal.el.classList.add("d-none")
-        }
-    }
-
-    async updateConfig() {
-        if (this.state.configuration) {
-            if (this.account_uid.el.value === this.state.user['account_uid'] &&
-                this.app_uid.el.value === this.state.user['app_uid'] &&
-                this.phone_uid.el.value === this.state.user['phone_uid'] &&
-                this.token.el.value === this.state.user['token']) {
-                this.state.configuration = false
-            } else {
-                this.dialog.add(ConfirmationDialog, {
-                    body: _t("Do you want to save the changes?"),
-                    confirmLabel: _t("Yes"),
-                    confirm: async () => {
-                        await this.orm.call("res.users", "action_update_data", [session.uid,
-                            this.account_uid.el.value, this.app_uid.el.value,
-                            this.phone_uid.el.value, this.token.el.value])
-                        window.location.reload();
-                    },
-                    cancel: () => {
-                        window.location.reload();
-                    },
-                });
-            }
-        } else {
-            this.state.configuration = true
-        }
     }
 
     async updateUserConfig() {

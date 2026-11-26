@@ -65,8 +65,12 @@ class WebhookMarketing(main.Webhook):
                         [('whatsapp_number', '=', profile['wa_id'])]
                     )
                     flow_response = json.loads(message['interactive']['nfm_reply']['response_json'])
-                    flow_token = eval(flow_response['flow_token'])['flow_uid']
-                    template_id = eval(flow_response['flow_token'])['template_uid']
+                    try:
+                        token_data = json.loads(flow_response['flow_token'])
+                        flow_token = token_data['flow_uid']
+                        template_id = token_data['template_uid']
+                    except (ValueError, KeyError, TypeError):
+                        continue
                     flow = request.env['whatsapp.flows'].sudo().search([('flow_id', '=', flow_token)])
                     if flow:
                         user_responses = [

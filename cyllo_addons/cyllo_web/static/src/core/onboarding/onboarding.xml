@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <!-- Template for the main container of the application -->
+    <t t-name="cyllo_web.onboarding" owl="1">
+        <link rel="stylesheet" type="text/css"
+            href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;600&amp;display=swap"/>
+        <main class="cy_onboarding_main" t-ref="root">
+            <div t-if="this.state.loading">
+                <div class="cy_onboarding_loading_indicator flex-column">
+                    <div class="cy_onboarding_spinner_container">
+                        <dotlottie-player
+                            src="https://lottie.host/a67f0b6e-2baa-4912-9609-68750eb652ca/oDZqiBaV7g.json"
+                            background="transparent"
+                            speed="1"
+                            style="width: 200px; height: 200px"
+                            loop=""
+                            autoplay=""></dotlottie-player>
+                    </div>
+                    <div class="cy_onboarding_loading_message">
+                        <div id="cy_onboarding_cyllo_info"
+                            class="cy_onboarding_info_container">
+                            <t t-esc="this.updateLoadingContent()"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="welcomeMessage" class="cy_onboarding_loading_indicator"
+                style="display:none;">
+                <div class="cy_onboarding_welcome_message">
+                    <img src="/cyllo_base/static/src/img/Logo.svg"
+                        style="width:200px;"/>
+                </div>
+            </div>
+            <t t-if="state.template"
+                t-call="cyllo_web.{{state.template}}"/>
+        </main>
+    </t>
+    <!-- Shared logo/stepper/actions header, reused by all 4 onboarding steps -->
+    <t t-name="cyllo_web.stepper_header">
+        <div class="cy_onboarding_demo_card_header">
+            <img src="/cyllo_web/static/src/img/cyllo_logo.svg"
+                style="width: auto; height: 2.5rem;"
+                alt="Cyllo" class="cy_onboarding_logo"/>
+
+            <nav class="cy_onboarding_stepper" aria-label="Progress">
+
+                <!-- Step 1: Company Details -->
+                <div class="cy_onboarding_stepper_step"
+                    t-att-class="active_step > 1 ? 'cy_onboarding_stepper_step_completed' : (active_step === 1 ? 'cy_onboarding_stepper_step_active' : 'cy_onboarding_stepper_step_pending')">
+                    <div class="cy_onboarding_stepper_track">
+                        <span class="cy_onboarding_stepper_indicator">
+                            <t t-if="active_step > 1">
+                                <i class="ri-check-line"/>
+                            </t>
+                            <t t-else="">1</t>
+                        </span>
+                        <span class="cy_onboarding_stepper_connector"/>
+                    </div>
+                    <div class="cy_onboarding_stepper_content">
+                        <span class="cy_onboarding_stepper_step_num">STEP 1</span>
+                        <span class="cy_onboarding_stepper_title">Company Details</span>
+                    </div>
+                </div>
+
+                <!-- Step 2: User Details -->
+                <div class="cy_onboarding_stepper_step"
+                    t-att-class="active_step > 2 ? 'cy_onboarding_stepper_step_completed' : (active_step === 2 ? 'cy_onboarding_stepper_step_active' : 'cy_onboarding_stepper_step_pending')">
+                    <div class="cy_onboarding_stepper_track">
+                        <span class="cy_onboarding_stepper_indicator">
+                            <t t-if="active_step > 2">
+                                <i class="ri-check-line"/>
+                            </t>
+                            <t t-else="">2</t>
+                        </span>
+                        <span class="cy_onboarding_stepper_connector"/>
+                    </div>
+                    <div class="cy_onboarding_stepper_content">
+                        <span class="cy_onboarding_stepper_step_num">STEP 2</span>
+                        <span class="cy_onboarding_stepper_title">User Details</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Industry & Business Vertical -->
+                <div class="cy_onboarding_stepper_step"
+                    t-att-class="active_step > 3 ? 'cy_onboarding_stepper_step_completed' : (active_step === 3 ? 'cy_onboarding_stepper_step_active' : 'cy_onboarding_stepper_step_pending')">
+                    <div class="cy_onboarding_stepper_track">
+                        <span class="cy_onboarding_stepper_indicator">
+                            <t t-if="active_step > 3">
+                                <i class="ri-check-line"/>
+                            </t>
+                            <t t-else="">3</t>
+                        </span>
+                        <span class="cy_onboarding_stepper_connector"/>
+                    </div>
+                    <div class="cy_onboarding_stepper_content">
+                        <span class="cy_onboarding_stepper_step_num">STEP 3</span>
+                        <span class="cy_onboarding_stepper_title">Industry</span>
+                    </div>
+                </div>
+
+                <!-- Step 4: Install Apps (no connector — last step) -->
+                <div class="cy_onboarding_stepper_step"
+                    t-att-class="active_step > 4 ? 'cy_onboarding_stepper_step_completed' : (active_step === 4 ? 'cy_onboarding_stepper_step_active' : 'cy_onboarding_stepper_step_pending')">
+                    <div class="cy_onboarding_stepper_track">
+                        <span class="cy_onboarding_stepper_indicator">
+                            <t t-if="active_step > 4">
+                                <i class="ri-check-line"/>
+                            </t>
+                            <t t-else="">4</t>
+                        </span>
+                    </div>
+                    <div class="cy_onboarding_stepper_content">
+                        <span class="cy_onboarding_stepper_step_num">STEP 4</span>
+                        <span class="cy_onboarding_stepper_title">Install Apps</span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </t>
+    <!-- Shared bottom action bar (Back/Continue), reused by all 4 onboarding steps -->
+    <t t-name="cyllo_web.footer_bar">
+        <div class="cy_onboarding_appbar_bar">
+            <div class="cy_onboarding_appbar_header" t-if="this.footerConfig.showReadyHeader">
+                <span class="cy_onboarding_appbar_eyebrow">Ready to Install</span>
+                <span class="cy_onboarding_appbar_count">
+                    <t
+                        t-esc="`${this.state.apps_to_install.length} ${this.state.apps_to_install.length === 1 ? 'App' : 'Apps'} selected`"/>
+                    <div class="cy_onboarding_app_search_quick_actions"
+                        t-att-class="{'cy_onboarding_quick_actions_hidden': this.state.apps_to_install.length === 0}">
+                        <i class="ri-circle-fill cy_onboarding_appbar_toggle_icon"></i>
+                        <button type="button"
+                            class="cy_onboarding_app_search_quick_btn"
+                            t-on-click.stop="toggleSelectedPanel">
+                            <t
+                                t-esc="(this.state.selectedPanelOpen and this.state.apps_to_install.length > 0) ? 'Hide' : 'Show'"/>
+                        </button>
+                    </div>
+                </span>
+            </div>
+            <div class="cy_onboarding_appbar_footer">
+                <button t-if="this.footerConfig.showBack"
+                    type="button"
+                    class="btn btn-secondary"
+                    t-on-click="onFooterBack">
+                    <i class="ri-arrow-left-s-line me-2"/>
+                    <span>Back</span>
+                </button>
+                <button type="button"
+                    id="continueBtn"
+                    class="btn btn-primary"
+                    t-on-click="onFooterContinue">
+                    <span t-esc="this.footerConfig.continueLabel"/>
+                    <i class="ri-arrow-right-s-line ms-2"/>
+                </button>
+            </div>
+        </div>
+    </t>
+    <!-- Shared page shell (outer container/card + footer bar), reused by all 4 onboarding steps -->
+    <t t-name="cyllo_web.step_shell">
+        <div t-attf-class="cy_onboarding_demo_container cy_onboarding_view {{view_class}}">
+            <div class="cy_onboarding_demo_card cy_onboarding_company_card">
+                <div class="cy_onboarding_container">
+                    <t t-out="0"/>
+                </div>
+            </div>
+        </div>
+    </t>
+    <!-- Template for the main content during app installation -->
+    <t t-name="cyllo_web.main_content">
+        <t t-call="cyllo_web.step_shell">
+            <t t-set="view_class" t-value="'cy_onboarding_apps'"/>
+            <t t-set="include_footer" t-value="false"/>
+            <div class="cy_onboarding_sticky">
+                <t t-call="cyllo_web.stepper_header">
+                    <t t-set="active_step" t-value="4"/>
+                </t>
+            </div>
+            <div class="cy_onboarding_apps_main">
+                <div class="cy_onboarding_demo_card_hero cy_onboarding_app_search">
+                    <div class="cy_onboarding_app_search_title_row">
+                        <div>
+                            <h1 class="cy_onboarding_demo_card_title">
+                                Choose Your Apps
+                            </h1>
+                        </div>
+                        <div class="cy_onboarding_app_search_search_group">
+                            <div
+                                class="cy_onboarding_demo_card_search_container cy_onboarding_odoo_search">
+                                <AppSearchBar
+                                    categories="this.category_with_all_apps.filter((categ) => categ.child_apps.length > 0)"
+                                    onDomainChange="(domain) => this.onAppSearchDomainChange(domain)"/>
+                            </div>
+                            <div class="cy_onboarding_apps_toggle" role="tablist">
+                                <button type="button"
+                                    class="cy_onboarding_apps_toggle_btn"
+                                    t-att-class="{'cy_onboarding_apps_toggle_btn_active': !this.state.all_modules}"
+                                    t-on-click="() => this.setAppsFilter(false)">
+                                    Apps
+                                </button>
+                                <button type="button"
+                                    class="cy_onboarding_apps_toggle_btn"
+                                    t-att-class="{'cy_onboarding_apps_toggle_btn_active': this.state.all_modules}"
+                                    t-on-click="() => this.setAppsFilter(true)">
+                                    All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cy_onboarding_scrollable">
+                    <div class="cy_onboarding_demo_apps">
+                        <div class="cy_onboarding_demo_apps_cat_main">
+                            <t class="kanban-category"
+                                t-if="this.state.category"
+                                t-foreach="this.displayCategories"
+                                t-as="categ" t-key="categ.id">
+                                <t t-if="categ.child_apps.length>0">
+                                    <div class="cy_onboarding_demo_apps_cat">
+                                        <div class="cy_onboarding_demo_apps_cat_header">
+                                            <h2 class="cy_onboarding_demo_apps_cat_title mb-0">
+                                                <t t-esc="categ.name"/>
+                                            </h2>
+                                            <span class="cy_onboarding_demo_apps_cat_count">
+                                                <t t-esc="categ.child_apps.length"/> apps </span>
+                                        </div>
+                                        <div class="cy_onboarding_demo_apps_cat_body">
+                                            <ul class="cy_onboarding_demo_apps_items">
+                                                <t t-if="categ.child_apps"
+                                                    t-foreach="categ.child_apps"
+                                                    t-as="app"
+                                                    t-key="app.id">
+                                                    <li class="cy_onboarding_demo_apps_item">
+                                                        <Apps app_data="app"
+                                                            selected_apps="this.state.apps_to_install"
+                                                            t-if="app"/>
+                                                        <input type="checkbox"
+                                                            id="crm"
+                                                            name="module"
+                                                            class="cy_onboarding_demo_apps_checkbox"
+                                                            aria-hidden="true"/>
+                                                    </li>
+                                                </t>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </t>
+                            </t>
+                            <div t-if="this.state.category and this.displayCategories.length == 0">
+                                <center class="cy_onboarding_nothing_to_display">
+                                    No Apps Found To Display
+                                </center>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cy_onboarding_appbar">
+                    <div class="cy_onboarding_appbar_body"
+                        t-att-class="{'cy-hidden': !(this.state.selectedPanelOpen and this.state.apps_to_install.length > 0)}">
+                        <div class="cy_onboarding_appbar_body_header">
+                            <span class="cy_onboarding_appbar_body_title">Selected Apps</span>
+                            <button type="button"
+                                class="cy_onboarding_app_search_quick_btn"
+                                t-on-click.stop="clearSelectedApps">
+                                Clear All
+                            </button>
+                        </div>
+                        <div class="cy_onboarding_appbar_body_scroll">
+                            <ul class="cy_onboarding_appbar_items">
+                                <t t-foreach="this.state.app_details"
+                                    t-as="app"
+                                    t-key="app.id">
+                                    <li class="cy_onboarding_appbar_item">
+                                        <img class="cy_onboarding_appbar_item_icon"
+                                            t-att-src="app.icon"/>
+                                        <span class="cy_onboarding_appbar_item_label"
+                                            t-esc="app.shortdesc"/>
+                                        <span class="cy_onboarding_appbar_item_remove"
+                                            title="Remove app"
+                                            t-on-click="() => this.delete_apps_from_list(app)">
+                                            <i class="ri-close-line"/>
+                                        </span>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <t t-call="cyllo_web.footer_bar"/>
+            </div>
+        </t>
+    </t>
+    <!-- Template for collecting company details -->
+    <t t-name="cyllo_web.company">
+        <t t-call="cyllo_web.step_shell">
+            <t t-set="view_class" t-value="'cy_onboarding_company'"/>
+            <div class="cy_onboarding_sticky">
+                <t t-call="cyllo_web.stepper_header">
+                    <t t-set="active_step" t-value="1"/>
+                </t>
+            </div>
+            <div class="cy_onboarding_apps_main">
+                <div class="cy_onboarding_demo_card_hero cy_onboarding_app_search">
+                    <div class="cy_onboarding_app_search_title_row">
+                        <div>
+                            <h1 class="cy_onboarding_demo_card_title">
+                                Company Details
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="cy_onboarding_scrollable">
+                    <div class="cy_onboarding_sections_container">
+
+                        <!-- SECTION 1: Company Identity & Branding -->
+                        <div class="cy_onboarding_section_card">
+                            <div class="cy_onboarding_identity_grid">
+                                <!-- Left: Logo upload box -->
+                                <div class="cy_onboarding_logo_upload_box"
+                                    t-on-click="triggerImageInput">
+                                    <div
+                                        class="cy_onboarding_logo_preview_wrap cy_onboarding_demo_card_hero_profile">
+                                        <t t-if="!state.image">
+                                            <div class="cy_onboarding_logo_placeholder">
+                                                <i class="ri-add-line"/>
+                                            </div>
+
+                                        </t>
+                                        <t t-else="">
+                                            <img
+                                                t-attf-src="{{'data:' + (this.state.imageMimeType or 'image/jpeg') + ';base64,' + this.state.image}}"
+                                                alt="Brand Logo"
+                                                id="previewImage"
+                                                class="cy_onboarding_uploaded_logo"/>
+                                            <button type="button"
+                                                class="cy_onboarding_logo_trash_btn"
+                                                t-on-click.stop="clearImage" title="Remove logo">
+                                                <i class="ri-delete-bin-line"/>
+                                            </button>
+
+                                        </t>
+                                    </div>
+                                    <input type="file" id="imageInput"
+                                        accept="image/jpeg,image/png,image/gif,image/webp"
+                                        class="d-none"
+                                        t-on-change="handleImageUpload"/>
+                                    <span class="cy_onboarding_logo_upload_title">
+                                        <t
+                                            t-esc="state.image ? 'Change Brand Logo' : 'Upload Brand Logo'"/>
+                                    </span>
+                                </div>
+
+                                <!-- Right: Identity fields -->
+                                <div class="cy_onboarding_identity_fields">
+                                    <div class="cy_onboarding_field_group">
+                                        <div class="cy_onboarding_field_header">
+                                            <label class="cy_onboarding_field_label"
+                                                for="companyName">
+                                                Company Name
+                                            </label>
+                                        </div>
+                                        <div class="cy_onboarding_input_wrap">
+                                            <input type="text"
+                                                id="companyName"
+                                                name="name"
+                                                class="cy_onboarding_input"
+                                                placeholder="Acme Dynamics Corp."
+                                                t-att-value="this.state.name"
+                                                t-model="state.name"
+                                                required="required"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="cy_onboarding_fields_row">
+                                        <div class="cy_onboarding_field_group">
+                                            <div class="cy_onboarding_field_header">
+                                                <label class="cy_onboarding_field_label"
+                                                    for="company_registry">
+                                                    Company ID
+                                                </label>
+                                            </div>
+                                            <div class="cy_onboarding_input_wrap">
+                                                <input type="text"
+                                                    id="company_registry"
+                                                    name="company_registry"
+                                                    class="cy_onboarding_input"
+                                                    placeholder="CY-89421"
+                                                    t-att-value="this.state.company_registry"
+                                                    t-model="state.company_registry"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="cy_onboarding_field_group">
+                                            <div class="cy_onboarding_field_header">
+                                                <label class="cy_onboarding_field_label" for="vat">
+                                                    Tax / VAT ID
+                                                </label>
+                                            </div>
+                                            <div class="cy_onboarding_input_wrap">
+                                                <input type="text"
+                                                    id="vat"
+                                                    name="vat"
+                                                    class="cy_onboarding_input"
+                                                    placeholder="US12345671"
+                                                    t-att-value="this.state.vat"
+                                                    t-model="state.vat"/>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cy_onboarding_accent_color_row">
+                                <div class="cy_onboarding_accent_color_info">
+                                    <span class="cy_onboarding_accent_color_title">Color</span>
+                                </div>
+                                <div class="cy_onboarding_color_picker_group">
+                                    <ColorList
+                                        canToggle="false"
+                                        colors="this.colorListColors"
+                                        forceExpanded="true"
+                                        onColorSelected="(colorId) => this.onColorSelected(colorId)"
+                                        selectedColor="this.state.color or 0"/>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="cy_onboarding_section_card">
+                            <div class="cy_onboarding_fields_row cy_onboarding_contacts_row">
+                                <!-- Corporate Email -->
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="email">
+                                            Email
+                                        </label>
+                                    </div>
+                                    <div class="cy_onboarding_input_with_prefix">
+                                        <span class="cy_onboarding_input_prefix">@</span>
+                                        <input type="email"
+                                            id="email"
+                                            name="email"
+                                            class="cy_onboarding_input"
+                                            placeholder="hello@acmedynamics.com"
+                                            t-att-value="this.state.email"
+                                            t-model="state.email"/>
+                                    </div>
+
+                                </div>
+
+                                <!-- Official Website -->
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="website">
+                                            Website
+                                        </label>
+                                    </div>
+                                    <div class="cy_onboarding_input_with_prefix">
+                                        <span class="cy_onboarding_input_prefix">
+                                            <i class="ri-global-line"/>
+                                        </span>
+                                        <input type="url"
+                                            id="website"
+                                            name="website"
+                                            class="cy_onboarding_input"
+                                            placeholder="https://mycompany.com"
+                                            t-att-value="this.state.website"
+                                            t-model="state.website"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cy_onboarding_fields_row cy_onboarding_contacts_row mt-3">
+                                <!-- Office Phone Number -->
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="phone">
+                                            Phone
+                                        </label>
+                                    </div>
+                                    <div class="cy_onboarding_input_wrap">
+                                        <input type="tel"
+                                            id="phone"
+                                            name="phone"
+                                            class="cy_onboarding_input"
+                                            placeholder="(650) 555-0111"
+                                            t-att-value="this.state.phone"
+                                            t-model="state.phone"/>
+                                    </div>
+                                </div>
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="mobile">
+                                            Mobile
+                                        </label>
+                                    </div>
+                                    <div class="cy_onboarding_input_wrap">
+
+                                        <input type="tel"
+                                            id="mobile"
+                                            name="mobile"
+                                            class="cy_onboarding_input"
+                                            placeholder="(650) 555-0199"
+                                            t-att-value="this.state.mobile"
+                                            t-model="state.mobile"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cy_onboarding_section_card">
+                            <div class="cy_onboarding_fields_row">
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="address1">
+                                            Address Line 1
+                                        </label>
+                                    </div>
+                                    <div class="cy_onboarding_input_wrap">
+                                        <input type="text"
+                                            id="address1"
+                                            name="street"
+                                            class="cy_onboarding_input"
+                                            placeholder="1234 Main St"
+                                            t-att-value="this.state.street"
+                                            t-model="state.street"
+                                            required="required"/>
+                                    </div>
+                                </div>
+
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="address2">
+                                            Address Line 2
+                                        </label>
+                                    </div>
+                                    <div class="cy_onboarding_input_wrap">
+                                        <input type="text"
+                                            id="address2"
+                                            name="street2"
+                                            class="cy_onboarding_input"
+                                            placeholder="Suite, Floor, Building (Optional)"
+                                            t-att-value="this.state.street2"
+                                            t-model="state.street2"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cy_onboarding_fields_row mt-3">
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="country">
+                                            Country
+                                        </label>
+                                    </div>
+                                    <SelectMenu
+                                        value="this.state.country"
+                                        choices="this.countryChoices"
+                                        onSelect="(value) => this.onCountrySelect(value)"
+                                        required="true"
+                                        class="'cy_onboarding_select_menu'"/>
+                                </div>
+
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="state">
+                                            State / Province
+                                        </label>
+                                    </div>
+                                    <SelectMenu
+                                        value="this.state.country_state"
+                                        choices="this.stateChoices"
+                                        onSelect="(value) => this.onStateSelect(value)"
+                                        required="true"
+                                        class="'cy_onboarding_select_menu'"/>
+                                </div>
+                            </div>
+
+                            <div class="cy_onboarding_fields_row mt-3">
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="city">
+                                            City
+                                        </label>
+                                    </div>
+                                    <div class="cy_onboarding_input_wrap">
+                                        <input type="text"
+                                            id="city"
+                                            name="city"
+                                            class="cy_onboarding_input"
+                                            placeholder="San Francisco"
+                                            t-att-value="this.state.city"
+                                            t-model="state.city"
+                                            required="required"/>
+                                    </div>
+                                </div>
+
+                                <div class="cy_onboarding_field_group">
+                                    <div class="cy_onboarding_field_header">
+                                        <label class="cy_onboarding_field_label" for="pin">
+                                            Postal / ZIP Code
+                                        </label>
+                                    </div>
+                                    <div class="cy_onboarding_input_wrap">
+                                        <input type="text"
+                                            id="pin"
+                                            name="zip"
+                                            class="cy_onboarding_input"
+                                            placeholder="94105"
+                                            t-att-value="this.state.pin"
+                                            t-model="state.pin"
+                                            required="required"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <input type="hidden" name="id"
+                            t-att-value="this.state.id"
+                            t-model="state.id"/>
+
+                    </div>
+                </div>
+                <t t-call="cyllo_web.footer_bar"/>
+            </div>
+
+        </t>
+    </t>
+    <!-- Template for the Cyllo app user details -->
+    <t t-name="cyllo_web.user">
+        <t t-call="cyllo_web.step_shell">
+            <t t-set="view_class" t-value="'cy_onboarding_user'"/>
+            <div class="cy_onboarding_sticky">
+                <t t-call="cyllo_web.stepper_header">
+                    <t t-set="active_step" t-value="2"/>
+                </t>
+
+            </div>
+            <div class="cy_onboarding_apps_main">
+                <div class="cy_onboarding_demo_card_hero cy_onboarding_app_search">
+                    <div class="cy_onboarding_app_search_title_row">
+                        <div>
+                            <h1 class="cy_onboarding_demo_card_title">
+                                Users
+                            </h1>
+                        </div>
+                        <div class="cy_onboarding_app_search_search_group">
+                            <button class="btn btn-primary btn-sm"
+                                t-on-click="openAddUserPopup">
+                                <i class="ri-add-large-line me-1"/> Add User </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="cy_onboarding_scrollable">
+                    <div class="cy_onboarding_demo_apps cy-app-install_user_table">
+                        <div class="cy_onboarding_demo_usertable_container">
+                            <div class="cy_onboarding_user_cards_grid">
+                                <t t-foreach="state.user_data.users"
+                                    t-as="user" t-key="user.id">
+                                    <div class="cy_onboarding_user_card"
+                                        t-on-click="() => this.redirectToUserDetails(user.id)">
+                                        <div class="cy_onboarding_user_card_header">
+                                            <div class="cy_onboarding_userlist_avatar">
+                                                <img class="cy_onboarding_user_avatar"
+                                                    t-attf-src="/web/image/res.users/{{user.id}}/avatar_128"
+                                                    alt="User Avatar"/>
+                                            </div>
+                                            <div class="cy_onboarding_user_card_title">
+                                                <span class="cy_onboarding_user_name"
+                                                    t-esc="user.name"/>
+                                                <div class="cy_onboarding_user_card_row"
+                                                    title="Login">
+                                                    <i class="ri-user-line"/>
+                                                    <span class="cy_onboarding_text_truncate"
+                                                        t-esc="user.login"/>
+                                                </div>
+                                            </div>
+                                            <div class="cy_onboarding_user_card_badge_container">
+                                                <span
+                                                    class="badge rounded-pill cy_onboarding_user_badge"
+                                                    t-att-class="user.share ? 'text-bg-info' : 'text-bg-success'"
+                                                    t-esc="user.share ? 'Portal' : 'Internal'"/>
+                                            </div>
+                                        </div>
+                                        <div class="cy_onboarding_user_card_body">
+                                            <div class="cy_onboarding_user_card_row" title="Email">
+                                                <i class="ri-mail-line"/>
+                                                <span class="cy_onboarding_text_truncate"
+                                                    t-esc="user.email || '-'"/>
+                                            </div>
+                                            <div class="cy_onboarding_user_card_row"
+                                                title="Language">
+                                                <i class="ri-global-line"/>
+                                                <span class="cy_onboarding_text_truncate"
+                                                    t-esc="this.getLanguageName(user.lang)"/>
+                                            </div>
+                                            <div class="cy_onboarding_user_card_row"
+                                                title="Last Authenticated">
+                                                <i class="ri-time-line"/>
+                                                <span class="cy_onboarding_text_truncate"
+                                                    t-esc="user.login_date ? user.login_date : 'Never authenticated'"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <t t-call="cyllo_web.footer_bar"/>
+
+            </div>
+
+        </t>
+    </t>
+    <!-- Step 3: Industry & Business Vertical -->
+    <t t-name="cyllo_web.industry">
+        <t t-call="cyllo_web.step_shell">
+            <t t-set="view_class" t-value="'cy_onboarding_industry'"/>
+            <div class="cy_onboarding_sticky">
+                <t t-call="cyllo_web.stepper_header">
+                    <t t-set="active_step" t-value="3"/>
+                </t>
+            </div>
+            <div class="cy_onboarding_apps_main">
+                <div class="cy_onboarding_demo_card_hero cy_onboarding_app_search">
+                    <div class="cy_onboarding_app_search_title_row">
+                        <div>
+                            <h1 class="cy_onboarding_demo_card_title">
+                                Industry &amp; Business Vertical
+                            </h1>
+                            <p class="cy_onboarding_section_subtitle">Select your primary
+                                vertical package to pre-configure matching apps and
+                                workflows</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="cy_onboarding_scrollable">
+                    <div class="cy_onboarding_sections_container">
+                        <div class="cy_onboarding_section_card">
+                            <div class="cy_onboarding_industry_grid">
+                                <t t-foreach="this.industryVerticals"
+                                    t-as="vertical" t-key="vertical.id">
+                                    <div class="cy_onboarding_industry_card"
+                                        t-att-class="{'cy_onboarding_industry_card_selected': this.state.selected_industry_vertical === vertical.id}"
+                                        t-on-click="() => this.onIndustrySelect(vertical.id)">
+                                        <div class="cy_onboarding_industry_icon_container">
+                                            <i t-att-class="vertical.icon"/>
+                                        </div>
+                                        <div class="cy_onboarding_industry_content">
+                                            <span class="cy_onboarding_industry_name"
+                                                t-esc="vertical.name"/>
+                                        </div>
+                                        <span
+                                            t-if="this.state.selected_industry_vertical === vertical.id"
+                                            class="cy_onboarding_industry_checkbox_indicator">
+                                            <i class="ri-check-line"/>
+                                        </span>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <t t-call="cyllo_web.footer_bar"/>
+            </div>
+
+        </t>
+    </t>
+</templates>

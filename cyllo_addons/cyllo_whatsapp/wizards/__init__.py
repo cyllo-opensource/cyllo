@@ -20,5 +20,6 @@
 #
 #############################################################################
 from . import portal_share
+from . import whatsapp_account_config
 from . import whatsapp_template_message
 from . import whatsapp_template_preview
